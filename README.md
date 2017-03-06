@@ -1,2 +1,2 @@
-# ligilo
-Main Ligiloj Application
+# ligoj
+Main ligoj Application
