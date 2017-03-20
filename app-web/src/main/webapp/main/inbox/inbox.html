@@ -1,0 +1,48 @@
+<div>
+      <h3 class="popover-title">
+            <a class='message-back' role='button'><i class='fa fa-angle-left'></i> {{back}}</a>
+            <span class='message-title'>{{notifications.title}}
+                  <div class='form-group has-feedback pull-right'>
+                        <input type='text' class='form-control' placeholder='{{notifications.filter}}'>
+                        <span class='fa fa-search form-control-feedback'></span>
+                  </div>
+                  <button type="button" class='btn btn-success pull-right new-message btn-raised'><i data-container="body" data-toggle='tooltip' title='{{new}}' class='fa fa-envelope-o'></i>
+                        <span>+</span>
+                  </button>
+            </span>
+      </h3>
+      <div class="popover-content">
+            <form class="message-new form-horizontal">
+                  <div class="alert alert-info"><i class="fa fa-info" aria-hidden="true"></i> {{notifications.no-update-deletion}}</div>
+                  <div class="message-to">
+                        <div class="form-group label-floating">
+                              <label class="control-label" for="_message-to-type">{{notifications.to-choice}}</label>
+                              <select id="_message-to-type" class="form-control target-type col-md-12" required>
+                                     <option value="company">{{notifications.new-to-company}}</option>
+                                     <option value="group" selected>{{notifications.new-to-group}}</option>
+                                     <option value="project">{{notifications.new-to-project}}</option>
+                                     <option value="node">{{notifications.new-to-node}}</option>
+                                     <option value="user">{{notifications.new-to-user}}</option>
+                               </select>
+                               <p class="help-block details">{{notifications.new-to-group-details}}</p>
+                        </div>
+                        <div class="form-group label-floating">
+                              <label class="control-label" for="_message-to">{{notifications.to-target}}</label>
+                              <input id="_message-to" type="text" class="form-control target col-md-12" class="form-control" required>
+                              <p class="help-block audience hidden">{{{notifications.audience}}}</p>
+                        </div>
+                  </div>
+                  <div class="form-group label-floating">
+                        <label for="_message" class="control-label">{{notifications.message}}</label>
+                        <textarea rows="5" id="_message" class="form-control" required></textarea>
+                  </div>
+                  <div class="form-actions">
+                        <button type="submit" class='btn btn-success btn-raised'><i class='fa fa-paper-plane-o'></i></button>
+                  </div>
+            </form>
+            <div class="message-main">
+                  <div class="messages nav-pills"></div>
+                  <div class="more"><a class="btn btn-link" role="button"> {{notifications.more}}</a></div>
+            </div>
+      </div>
+</div>

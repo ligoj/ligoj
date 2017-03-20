@@ -1,0 +1,218 @@
+<div class="row table-tools">
+	<div class="col-sm-10">
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="form-group">
+					<div class="btn-group">
+						<button type="button" id="create" class="btn btn-success btn-raised">{{new}}</button>
+						<button type="button" id="upload-new" class="btn btn-default">{{upload-new}}</button>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-3">
+				<div class="form-group label-floating">
+					<label class="control-label" for="search-company">{{company}}</label>
+					<input type="text" id="search-company" class="form-control">
+				</div>
+			</div>
+			<div class="col-sm-3">
+				<div class="form-group label-floating">
+					<label class="control-label" for="search-group">{{group}}</label>
+					<input type="text" id="search-group" class="form-control">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-2">
+		<div class="form-group has-feedback label-floating">
+			<label class="control-label" for="search">{{firstName}},{{lastName}},...</label>
+			<input type="text" class="form-control" id="search" aria-controls="table" />
+			<span class="fa fa-search form-control-feedback"></span>
+		</div>
+	</div>
+</div>
+<table id="table" class="table table-striped table-bordered justified">
+	<thead>
+		<tr>
+			<th>{{login}}</th>
+			<th>{{firstName}}</th>
+			<th>{{lastName}}</th>
+			<th class="hidden-xs truncate">{{company}}</th>
+			<th class="hidden-md hidden-sm hidden-xs truncate">{{mail}}</th>
+			<th class="hidden-sm hidden-xs truncate">{{groups}}</th>
+			<th>{{actions}}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td class="dataTables_empty" colspan="7">{{loading}}</td>
+		</tr>
+	</tbody>
+</table>
+<form id="popup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-title">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="{{cancel}}">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="modal-title">{{user}}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="alert alert-info">
+					{{user-clean-message}}
+				</div>
+				<div class="form-horizontal">
+					<div class="form-group required">
+						<label class="control-label col-sm-3" for="id">{{login}}</label>
+						<div class="col-sm-8">
+							<input type="text" id="id" class="form-control" required maxlength="50" />
+						</div>
+					</div>
+					<div class="form-group required">
+						<label class="control-label col-sm-3" for="firstName">{{firstName}}</label>
+						<div class="col-sm-8">
+							<input type="text" id="firstName" class="form-control" required maxlength="50" />
+						</div>
+					</div>
+					<div class="form-group required">
+						<label class="control-label col-sm-3" for="lastName">{{lastName}}</label>
+						<div class="col-sm-8">
+							<input type="text" id="lastName" class="form-control" required maxlength="50" />
+						</div>
+					</div>
+					<div class="form-group required">
+						<label class="control-label col-sm-3" for="mail">{{mail}}</label>
+						<div class="col-sm-8">
+							<input type="text" id="mail" class="form-control" required maxlength="50" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-3" for="localId">{{localid}}</label>
+						<div class="col-sm-8">
+							<input type="text" id="localId" class="form-control" maxlength="50" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-3" for="department">{{department}}</label>
+						<div class="col-sm-8">
+							<input type="text" id="department" class="form-control" maxlength="50" />
+						</div>
+					</div>
+					<div class="form-group required">
+						<label class="control-label col-sm-3" for="company">{{company}}</label>
+						<div class="col-sm-8">
+							<input type="text" id="company" class="form-control" required maxlength="100" />
+							<span class="input-help"><i class="mode-edition fa fa-question-circle-o" data-container="#_ucDiv" data-toggle="tooltip" title="{{company-help}}"></i></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-3" for="groups">{{groups}}</label>
+						<div class="col-sm-8">
+							<input type="text" id="groups" class="form-control" />
+							<span class="input-help"><i class="mode-edition fa fa-question-circle-o" data-container="#_ucDiv" data-toggle="tooltip" title="{{group-help}}"></i></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<div class="checkbox pull-left">
+					<label for="create-another">
+						<input type="checkbox" id="create-another">
+						<span>{{create-another}}</span>
+					</label>
+				</div>
+				<input type="submit" class="btn btn-primary btn-raised" id="confirmCreate" value="{{save}}" data-loading-text="{{save}} ..." data-complete-text="{{save}}">
+				<button type="button" class="btn btn-link" data-dismiss="modal" aria-hidden="true">
+					{{cancel}}
+				</button>
+			</div>
+		</div>
+	</div>
+</form>
+<form id="importPopup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="import-modal-title" enctype="multipart/form-data" method="post">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="{{cancel}}">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="import-modal-title">{{upload-new}}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="form-horizontal">
+					<div class="btn-group import-options" data-toggle="buttons">
+						<label class="btn btn-default active">
+							<input type="radio" name="import-options" class="import-options-full" autocomplete="off" checked>{{user-import-full}}
+						</label>
+						<label class="btn btn-default">
+							<input type="radio" name="import-options" class="import-options-atomic" autocomplete="off">{{user-import-atomic}}
+						</label>
+					</div>
+					<div class="alert alert-info import-options-details import-options-full">
+						{{user-import-full-message}} <a data-toggle="collapse" href="#more-import-options-full" aria-controls="more-import-options-full"><i class="fa fa-question-circle faa-wrench animated-hover"></i></a>
+						<div id="more-import-options-full" class="collapse">
+							<br/>Implicit CSV headers
+							<code>lastName;firstName;id;mail;company;groups;department;localId
+								<br>
+								<strong>id</strong> User name
+								<br>
+								<strong>groups</strong> Comma separated group names
+							</code>
+							<br/>{{sample}}
+							<code>John;Doe;jdoe897654;given.name897654@fbi.com;fbi;protected,anonymous</code>
+						</div>
+					</div>
+					<div class="alert alert-info import-options-details import-options-atomic hidden">
+						{{user-import-atomic-message}} <a data-toggle="collapse" href="#more-import-options-atomic" aria-controls="more-import-options-atomic"><i class="fa fa-question-circle faa-wrench animated-hover"></i></a>
+						<div id="more-import-options-atomic" class="collapse">
+							<br/>Implicit CSV headers
+							<code>user;operation;value
+								<br>
+								<strong>user</strong> User name
+								<br>
+								<strong>operation</strong> firstname, lastname, mail, lock, delete, isolate, restore, department, localid
+								<br>
+								<strong>value</strong> Optional value, only for attribute update
+							</code>
+							<br/>{{sample}}
+							<code>nminaj;mail;nicki@viveo.com
+								<br>jdaniels;department;Finance
+								<br>jbieber;delete
+							</code>
+						</div>
+					</div>
+					<div class="form-group required">
+						<label class="control-label" for="csv-file">CSV File</label>
+						<div>
+							<div class="input-group">
+								<input type="text" class="form-control" readonly>
+								<span class="input-group-btn">
+									<a class="btn btn-default btn-file" role="button">&hellip;
+										<input type="file" name="csv-file" id="csv-file" required>
+									</a>
+								</span>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label" for="csv-upload-encoding">{{encoding}}</label>
+						<div>
+							<input type="text" id="csv-upload-encoding" maxlength="10" value="UTF-8" class="form-control" placeholder="UTF-8">
+						</div>
+					</div>
+					<div class="progress">
+						<div class="import-progress progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+					</div>
+					<div class="alert alert-info hide import-summary"></div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" class="btn btn-primary btn-raised" id="csv-upload" data-loading-text="{{upload-new}}..." value="{{upload-new}}" data-complete-text="{{upload-new}}">
+				<button type="button" class="btn btn-link" data-dismiss="modal" aria-hidden="true">
+					{{cancel}}
+				</button>
+			</div>
+		</div>
+	</div>
+</form>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fileset-config file-format-version="1.2.0" simple-config="true" sync-formatter="false">
+  <local-check-config name="Maven Local" location=".settings/.checkstyle-rules" type="project" description="Checkstyle configuration from GFI">
+    <additional-data name="protect-config-file" value="false"/>
+  </local-check-config>
+  <fileset name="all" enabled="true" check-config-name="Maven Local" local="true">
+    <file-match-pattern match-pattern="src/main/java/.*" include-pattern="true"/>
+  </fileset>
+  <filter name="DerivedFiles" enabled="true"/>
+  <filter name="FilesFromPackage" enabled="true">
+    <filter-data value="src/test/java"/>
+    <filter-data value="src/test/resources"/>
+  </filter>
+</fileset-config>

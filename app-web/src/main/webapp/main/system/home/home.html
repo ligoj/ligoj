@@ -1,0 +1,129 @@
+<form class="form-horizontal">
+	<fieldset>
+		<legend>
+			{{system}}
+		</legend>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="control-label col-md-4" for="memory">{{memory}}</label>
+					<div class="col-md-8">
+						<div class="progress" id="memory">
+							<div class="progress-bar progress-bar-danger" id="memory-committed-used">
+								<span class="sr-only">35% Complete (success)</span>
+							</div>
+							<div class="progress-bar progress-bar-warning" id="memory-committed-free">
+								<span class="sr-only">20% Complete (warning)</span>
+							</div>
+							<div class="progress-bar progress-bar-success progress-bar-striped" id="memory-free">
+								<span class="sr-only">10% Complete (danger)</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="cpu">{{cpu}}</label>
+					<div class="col-md-8">
+						<input type="text" id="cpu" class="form-control" readonly>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="date">{{date}}</label>
+					<div class="col-md-8">
+						<input type="text" id="date" class="form-control" readonly>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label class="control-label col-md-4" for="timeZone">{{timeZone}}</label>
+					<div class="col-md-8">
+						<input type="text" id="timeZone" class="form-control">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="defaultTimeZone">{{defaultTimeZone}}</label>
+					<div class="col-md-8">
+						<input type="text" id="defaultTimeZone" class="form-control">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="originalDefaultTimeZone">{{originalDefaultTimeZone}}</label>
+					<div class="col-md-8">
+						<input type="text" id="originalDefaultTimeZone" class="form-control" readonly>
+					</div>
+				</div>
+			</div>
+		</div>
+	</fieldset>
+</form>
+<div class="row">
+	<form class="form-horizontal col-md-4">
+		<fieldset>
+			<legend>
+				{{session}}
+			</legend>
+			<div class="form-group">
+				<label class="control-label col-md-4" for="session">{{identifier}}</label>
+				<div class="col-md-8">
+					<input type="text" id="session" class="form-control" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-md-4" for="server-id">Server ID</label>
+				<div class="col-md-8">
+					<input type="text" id="server-id" class="form-control" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-md-4" for="userName">{{user}}</label>
+				<div class="col-md-8">
+					<input type="text" id="userName" class="form-control" readonly>
+				</div>
+			</div>
+		</fieldset>
+	</form>
+	<form class="form-horizontal col-md-4">
+		<fieldset>
+			<legend>
+				{{build}}
+			</legend>
+			<div class="form-group">
+				<label class="control-label col-md-4" for="buildNumber">{{buildNumber}}</label>
+				<div class="col-md-8">
+					<input type="text" id="buildNumber" class="form-control" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-md-4" for="buildTimestamp">{{buildTimestamp}}</label>
+				<div class="col-md-8">
+					<input type="text" id="buildTimestamp" class="form-control" readonly>
+					<input type="text" id="buildDate" class="form-control" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-md-4" for="buildVersion">{{buildVersion}}</label>
+				<div class="col-md-8">
+					<input type="text" id="buildVersion" class="form-control" readonly>
+				</div>
+			</div>
+		</fieldset>
+	</form>
+	<form class="form-horizontal col-md-4" id="cryptography" autocomplete="off">
+		<fieldset>
+			<legend>
+				{{cryptography}}
+			</legend>
+			<div class="form-group required">
+				<label class="control-label col-md-4" for="to-encrypt">{{encrypt}}</label>
+				<div class="input-group col-md-8">
+					<input type="text" id="to-encrypt" class="form-control" required>
+					<span class="input-group-btn">
+						<input type="submit" class="btn btn-default" value="{{encrypt}}">
+					</span>
+				</div>
+				<span id="encrypted" class="help-block"></span>
+			</div>
+		</fieldset>
+	</form>
+</div>

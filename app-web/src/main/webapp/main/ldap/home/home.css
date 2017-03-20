@@ -1,0 +1,10 @@
+#importPopup code {
+	width: 100%;
+	display: block;
+}
+.import-progress {
+	min-width: 2em;
+}
+.import-options-details {
+	margin-top: 5px;
+}

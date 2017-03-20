@@ -1,0 +1,31 @@
+define({
+	root: {
+		'title': 'LDAP user management',
+		'user-clean-message': 'Spaces around inputs will be removed and names will be fully capitalized',
+		'user-import-full-message': 'Import will update existing users, and create the others.',
+		'user-import-atomic-message': 'Import will execute one alter or operation per record.',
+		'user-import-dry-run': 'Dry run',
+		'user-import-full': 'Full',
+		'user-import-atomic': 'Atomic',
+		'sample': 'Sample',
+		'create-another': 'Create another user',
+		'warn-mail-perso': 'Account mail must be a professional mail; this excludes yahoo.fr, gmail.com, etc.',
+		'created-account': 'Account {{id}} has been created and an email has been sent.</br><i class="fa fa-envelope"></i> <a href="mailto:{{mail}}?subject=New account {{id}}">{{mail}}</a>',
+		'employer': 'Employer',
+		'member': 'Membre',
+		'company-help': 'Only companies you manage are available there',
+		'group-help': 'Only groups you manage are available there',
+		'unlock': 'Unlock',
+		'unlocked-confirm': '{{this}} as been unlocked. This user must recover a new password.',
+		'lock': 'Lock',
+		'lock-confirm': 'Are you sure to lock {{this}}?<br>This user will not be able to authenticate anymore or request a new password but still be visible by the tools and will continue to receive some mails from them.<br>In addition the password will be cleared, when unlocking the user, this password will not be restored.',
+		'locked-confirm': '{{this}} as been locked. Password has been cleared',
+		'restore': 'Restore',
+		'restored-confirm': '{{this}} as been restored. This user must recover a new password.',
+		'isolate': 'Isolate',
+		'isolated': 'Isolated',
+		'isolate-confirm': 'Are you sure to isolate {{this}}?<br>This account will be locked and will not be more visible by the tools.<br>This user will not be able to authenticate anymore or request a new password or receive mails from the tools.<br>In addition the password will be cleared, when unlocking the user, this password will not be restored.',
+		'isolated-confirm': '{{this}} as been isolated. Password has been cleared'
+	},
+	fr: true
+});

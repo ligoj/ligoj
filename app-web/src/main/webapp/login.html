@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>  <html class="ie6 ie-old"> <![endif]-->
+<!--[if IE 7]>     <html class="ie7 ie-old"> <![endif]-->
+<!--[if IE 8]>     <html class="ie8 ie-old"> <![endif]-->
+<!--[if (gt IE 8)|!(IE)]><!--> <html>    <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<meta name="description" content="">
+		<meta name="author" content="Gfi Informatique">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="themes/bootstrap-material-design/ico/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Gfi - SaaS Login</title>
+
+		<link rel="apple-touch-icon" sizes="57x57" href="themes/bootstrap-material-design/ico/apple-icon-57x57.png">
+		<link rel="apple-touch-icon-precomposed" href="themes/bootstrap-material-design/ico/apple-icon-57x57.png" />
+		<link rel="apple-touch-icon" sizes="60x60" href="themes/bootstrap-material-design/ico/apple-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="themes/bootstrap-material-design/ico/apple-icon-72x72.png">
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="themes/bootstrap-material-design/ico/apple-icon-72x72.png" />
+		<link rel="apple-touch-icon" sizes="76x76" href="themes/bootstrap-material-design/ico/apple-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="themes/bootstrap-material-design/ico/apple-icon-114x114.png">
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="themes/bootstrap-material-design/ico/apple-icon-114x114.png" />
+		<link rel="apple-touch-icon" sizes="120x120" href="themes/bootstrap-material-design/ico/apple-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="themes/bootstrap-material-design/ico/apple-icon-144x144.png">
+		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="themes/bootstrap-material-design/ico/apple-icon-144x144.png" />
+		<link rel="apple-touch-icon" sizes="152x152" href="themes/bootstrap-material-design/ico/apple-icon-152x152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="themes/bootstrap-material-design/ico/apple-icon-180x180.png">
+		<link rel="icon" type="image/png" sizes="192x192"  href="themes/bootstrap-material-design/ico/android-icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="themes/bootstrap-material-design/ico/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="themes/bootstrap-material-design/ico/favicon-96x96.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="themes/bootstrap-material-design/ico/favicon-16x16.png">
+		<link rel="shortcut icon" href="themes/bootstrap-material-design/ico/favicon-16x16.png" id="favicon" />
+		<link rel="manifest" href="themes/bootstrap-material-design/ico/manifest.json">
+		<link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/google-roboto.css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+		<link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/font-awesome.css" />
+		<link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/bootstrap-material-design-short.css" />
+		<link rel="stylesheet" type="text/css" href="main/public/login/login.css?${project.version}" />
+	</head>
+	<body class="login-page">
+		<!--[if lt IE 9]><p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
+		<!--[if gte IE 9]><!-->
+		<div class="page-header header-filter login" style="background-image: url('themes/bootstrap-material-design/img/bg1.jpg'); background-size: cover; background-position: top center;">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
+						<div class="card card-signup">
+							<form id="login" class="form" action="#" method="post" autocomplete="on" >
+								<div class="header text-center">
+									<h4 class="card-title"><i class="fa fa-cog fa-spin"></i></h4>
+								</div>
+								<p id="info-message" class="alert alert-info hidden status"></p>
+								<p id="error-message" class="alert alert-warning hidden status"></p>
+								<p id="success-message" class="alert alert-success hidden status"></p>
+								<fieldset class="content" id="inputs">
+									<div class="input-group show-login show-recovery show-reset">
+										<label class="input-group-addon"  for="username">
+											<i class="fa fa-user"></i>
+										</label>
+										<input type="text" name="username" id="username" autocomplete="on" autofocus="autofocus" required="required" class="form-control user" maxlength="50"/>
+										<span class="input-group-addon"><i class="fa fa-question-circle" alt="?" ></i></span>
+									</div>
+
+									<div class="input-group show-login show-reset ">
+										<label class="input-group-addon" for="password">
+											<i class="fa fa-lock"></i>
+										</label>
+										<input type="password" class="form-control password" name="password" id="password" autocomplete="on" required="required" maxlength="50"/>
+										<span class="input-group-addon"><i class="fa fa-question-circle" alt="?" ></i></span>
+									</div>
+
+									<div class="input-group show-reset">
+										<label class="input-group-addon" for="password-confirm">
+											<i class="fa fa-lock"></i>
+										</label>
+										<span class="input-group-addon"><i class="fa fa-question-circle" alt="?"></i></span>
+									</div>
+
+									<div class="input-group show-recovery">
+										<label class="input-group-addon" for="mail">
+											<i class="fa fa-envelope-o"></i>
+										</label>
+										<input type="text" class="form-control mail" name="mail" id="mail" required="required" autocomplete="on" maxlength="100" />
+										<span class="input-group-addon"><i class="fa fa-question-circle" alt="?" ></i></span>
+									</div>
+
+									<div class="input-group show-recovery show-reset">
+										<label class="input-group-addon" for="captcha">
+											<i class="fa fa-eye"></i>
+										</label>
+										<img id="captcha_img" class="" alt="captcha"/>
+										<input type="text" class="form-control empty" name="captcha" id="captcha" required="required" autocomplete="off" maxlength="10" />
+										<span class="input-group-addon"><i class="fa fa-question-circle" alt="?" ></i></span>
+									</div>
+									<!--
+									<div class="checkbox">
+										<label>
+											<input type="checkbox" name="remember-me" checked>
+											Remember me
+										</label>
+									</div>
+									 -->
+								</fieldset>
+								<fieldset class="footer text-center" id="actions">
+									<div class="btn-group">
+									<a href="" class="show-recovery show-reset btn btn-default btn-simple btn-lg" id="link-back">&nbsp;</a>
+									<button type="submit" class="btn btn-primary btn-lg btn-simple" id="submit"><i class="fa fa-cog fa-spin"></i><span></span></button>
+									</div>
+									<a href="#recovery" class="show-login  btn-default btn btn-simple btn-xs" id="link-recover">&nbsp;</a>
+								</fieldset>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<footer class="footer">
+		        <div class="container">
+		            <div class="copyright pull-right">
+		                &copy; <script>document.write(new Date().getFullYear())</script>, made with <i class="fa fa-heart heart"></i> by <a href="http://www.gfi.fr" class="brand" target="_blank">Gfi</a>
+		            </div>
+		        </div>
+		    </footer>
+			<!--<![endif]-->
+		</div>
+		<noscript><p>Please enable JavaScript to use this site.</p></noscript>
+		<!--[if IE 9]><script src="lib/es6-shim.js"></script><![endif]-->
+		<!--[if gte IE 9]><!-->
+		<script>var requirejs = { urlArgs: 'bust=${project.version}' };</script>
+		<script data-main="lib/application-login.js" src="lib/requirejs/require-jquery-2.x.js?2.2.0"></script>
+		<!--<![endif]-->
+	</body>
+</html>

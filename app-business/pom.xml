@@ -1,0 +1,93 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.ligoj.bootstrap</groupId>
+		<artifactId>bootstrap-business-parent</artifactId>
+		<version>1.6.0</version>
+		<relativePath />
+	</parent>
+
+	<groupId>org.ligoj.app</groupId>
+	<artifactId>app-business</artifactId>
+	<packaging>war</packaging>
+	<version>1.4.21-SNAPSHOT</version>
+	<name>Ligoj - Business</name>
+
+	<scm>
+		<connection>scm:git:https://github.com/ligoj/ligoj.git</connection>
+		<developerConnection>scm:git:https://github.com/ligoj/ligoj.git</developerConnection>
+		<url>https://github.com/ligoj/ligoj</url>
+	</scm>
+	<properties>
+		<api.version>1.0.1-SNAPSHOT</api.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.ligoj.api</groupId>
+			<artifactId>plugin-core</artifactId>
+			<version>${api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.api</groupId>
+			<artifactId>plugin-api-test</artifactId>
+			<version>${api.version}</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.ligoj.api</groupId>
+					<artifactId>plugin-iam-public</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-id-ldap</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Dependency used to provide static resources from jars in classpath -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.webjars</groupId> -->
+		<!-- <artifactId>webjars-servlet-2.x</artifactId> -->
+		<!-- <version>1.5</version> -->
+		<!-- <scope>runtime</scope> -->
+		<!-- </dependency> -->
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>javadoc</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>generate-service-docs</id>
+								<phase>generate-resources</phase>
+								<configuration>
+									<doclet>com.tenxerconsulting.swagger.doclet.ServiceDoclet</doclet>
+									<docletArtifact>
+										<groupId>com.tenxerconsulting</groupId>
+										<artifactId>swagger-doclet</artifactId>
+										<version>1.1.3</version>
+									</docletArtifact>
+									<reportOutputDirectory>${project.build.outputDirectory}</reportOutputDirectory>
+									<useStandardDocletOptions>false</useStandardDocletOptions>
+									<additionalparam>-apiVersion 1 -docBasePath http://myapi
+										-apiBasePath http://myapi</additionalparam>
+								</configuration>
+								<goals>
+									<goal>javadoc</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

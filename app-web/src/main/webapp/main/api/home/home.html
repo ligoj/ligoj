@@ -1,0 +1,188 @@
+<div class="alert alert-warning">
+	{{wip}}
+</div>
+<table id="apiTable" class="table table-striped table-bordered">
+	<thead>
+		<tr>
+			<th>{{method}}</th>
+			<th>{{path}}</th>
+			<th>{{parameters}}</th>
+			<th>{{result}}</th>
+			<th>{{note}}</th>
+		</tr>
+	</thead>
+	<tr>
+		<td>GET</td>
+		<td>/api/token</td>
+		<td>&nbsp;</td>
+		<td>Nom des clés associées à l'utilisateur actuel. Pas paginé, trié par ordre alphabétique.</td>
+		<td>
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>{{request}}</th>
+					<th>{{result}}</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>GET /api/token</td>
+				<td>["Client externe A", "Server BI Cube Z", "server1"]</td>
+			</tr>
+		</table></td>
+	</tr>
+	<tr>
+		<td>GET</td>
+		<td>/api/token/<code>{name}</code></td>
+		<td><code>{name}</code> : Nom de la clé à récupérer du serveur</td>
+		<td>Valeur de la clé correspondant au nom demandé.</td>
+		<td>
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>{{request}}</th>
+					<th>{{result}}</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>GET /api/token/<code>server1</code></td>
+				<td>200 BWo9iEky2tpPX7RPhovNy5SywYI2fmacfRnL... (128+)</td>
+			</tr>
+			<tr>
+				<td>GET /api/token/<code>not-exist</code></td>
+				<td>404</td>
+			</tr>
+		</table></td>
+	</tr>
+	<tr>
+		<td>PUT</td>
+		<td>/api/token/<code>{name}</code></td>
+		<td><code>{name}</code> : Nom de la clé à regénérer</td>
+		<td>Nouvelle clé associée au nom spécifié.</td>
+		<td>
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>{{request}}</th>
+					<th>{{result}}</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>PUT /api/token/<code>server1</code></td>
+				<td>200 G51xg2we70Ffd2YikudjpfvQszt63hXgjOMRqR71... (128+)</td>
+			</tr>
+			<tr>
+				<td>PUT /api/token/<code>not-exist</code></td>
+				<td>404</td>
+			</tr>
+		</table></td>
+	</tr>
+	<tr>
+		<td>POST</td>
+		<td>/api/token/<code>{name}</code></td>
+		<td><code>{name}</code> : Nom de la clé à créer</td>
+		<td>Clé créée et associée au nom spécifié.</td>
+		<td>
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>{{request}}</th>
+					<th>{{result}}</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>POST /api/token/<code>server2</code></td>
+				<td>200 G51xg2we70Ffd2YikudjpfvQszt63hXgjOMRqR71... (128+)</td>
+			</tr>
+			<tr>
+				<td>POST /api/token/<code>cle-exist</code></td>
+				<td>400</td>
+			</tr>
+		</table></td>
+	</tr>
+	<tr>
+		<td>DELETE</td>
+		<td>/api/token/<code>{name}</code></td>
+		<td><code>{name}</code> : Nom de la clé à supprimer</td>
+		<td>&nbsp;</td>
+		<td>
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>{{request}}</th>
+					<th>{{result}}</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>POST /api/token/<code>server1</code></td>
+				<td>200</td>
+			</tr>
+			<tr>
+				<td>POST /api/token/<code>not-exist</code></td>
+				<td>200</td>
+			</tr>
+		</table></td>
+	</tr>
+	<tr>
+		<td>GET</td>
+		<td>/service/bt/jira/export/sla/<code>{souscription}</code>/<code>{file:.*-short.csv}</code></td>
+		<td><code>{souscription}</code> : Identifiant de la souscription.<br>
+			<code>{file}</code> : Nom du fichier. N'est pas vérifié, mais doit se terminer par <code>-short.csv</code>
+		</td>
+		<td>Export au format CSV (séparateur ;) de tous les tickets JIRA du projet associé sans les champs personnalisés.</td>
+		<td>
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>{{request}}</th>
+					<th>{{result}}</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>GET /service/bt/jira/export/sla/<code>14781</code>/<code>SIOP-2015-09-20-short.csv</code></td>
+				<td>200 (fichier CSV)</td>
+			</tr>
+		</table></td>
+	</tr>
+	<tr>
+		<td>GET</td>
+		<td>/service/bt/jira/export/sla/<code>{souscription}</code>/<code>{file:.*.xml}</code></td>
+		<td><code>{souscription}</code> : Identifiant de la souscription.<br>
+			<code>{file}</code> : Nom du fichier. N'est pas vérifié, mais doit se terminer par <code>.xml</code>
+		</td>
+		<td>Export au format Excel 2003+ (xml) de tous les tickets JIRA du projet associé sans les champs personnalisés.</td>
+		<td>
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>{{request}}</th>
+					<th>{{result}}</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>GET /service/bt/jira/export/sla/<code>14781</code>/<code>SIOP-2015-09-20.xml</code></td>
+				<td>200 (fichier Excel)</td>
+			</tr>
+		</table></td>
+	</tr>
+	<tr>
+		<td>GET</td>
+		<td>/service/bt/jira/export/sla/<code>{souscription}</code>/<code>{file:.*-full.csv}</code></td>
+		<td><code>{souscription}</code> : Identifiant de la souscription.<br>
+			<code>{file}</code> : Nom du fichier. N'est pas vérifié, mais doit se terminer par <code>-full.csv</code>
+		</td>
+		<td>Export au format CSV (séparateur ;) de tous les tickets JIRA du projet associé avec les champs personnalisés et les compteurs.</td>
+		<td>
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>{{request}}</th>
+					<th>{{result}}</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>GET /service/bt/jira/export/sla/<code>14781</code>/<code>SIOP-2015-09-20-full.csv</code></td>
+				<td>200 (fichier CSV)</td>
+			</tr>
+		</table></td>
+	</tr>
+</table>

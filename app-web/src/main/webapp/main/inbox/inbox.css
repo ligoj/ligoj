@@ -1,0 +1,182 @@
+.bs-inbox .popover-content {
+	min-height: 50px;
+	padding-bottom: 0;
+	background-color: white;
+	color: #333;
+}
+.bs-inbox .popover-title a, .bs-inbox .popover-title input {
+	color: inherit;
+}
+.bs-inbox.inbox-detail .message-type-company .label.avatar i, .bs-inbox.inbox-detail .message-type-group .label.avatar i, .bs-inbox.inbox-detail .message-type-project .label.avatar i {
+	margin-top: -11px;
+}
+.bs-inbox.inbox-detail .label.avatar .tool-detail {
+	display: inline-block;
+	margin-top: -24px;
+	position: relative;
+	left: -14px;
+	top: 8px;
+}
+.bs-inbox .form-actions {
+	margin-bottom: 0;
+}
+.bs-inbox.inbox-main .label.avatar {
+	top: -3px;
+}
+.bs-inbox.inbox-detail .label.avatar {
+	width: 70px;
+	height: 70px;
+	top: 58px;
+	padding-top: 17px;
+	padding-left: 15px;
+	padding-bottom: 6px;
+	font-size: 32px;
+	left: 5px;
+	position: absolute;
+}
+.bs-inbox.inbox-detail .message-body {
+	white-space: inherit;
+	margin-top: 20px;
+	margin-bottom: 15px;
+}
+.bs-inbox .message {
+	margin-left: 5px;
+	display: inline-block;
+	width: 322px;
+}
+.bs-inbox.inbox-detail .message {
+	width: 366px;
+	border-left: solid 2px #eee;
+	padding-top: 8px;
+	padding-left: 2px;
+	margin-left: 79px;
+	padding-bottom: 4px;
+}
+.bs-inbox .message-body {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 16px;
+}
+.bs-inbox .message-goto {
+	float: right;
+	right: 7px;
+	color: #aaa;
+	position: relative;
+}
+.bs-inbox.inbox-detail .message-header {
+	display: inline-block;
+}
+.bs-inbox .message-main {
+	margin-left: -15px;
+	margin-right: -15px;
+	max-height: 500px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	width: 498px;
+}
+.bs-inbox.inbox-detail .message-title, .bs-inbox.inbox-new .message-title, .bs-inbox.inbox-main .message-back, .bs-inbox.inbox-detail .message-w:not(.message-detail), .bs-inbox.inbox-detail .message-goto, .bs-inbox.inbox-detail .tool-mini, .bs-inbox .tool-detail, .bs-inbox .message-header, .bs-inbox:not(.inbox-new) .message-new, .bs-inbox.inbox-new .message-main, .bs-inbox:not(.inbox-main) .more {
+	display: none;
+}
+.bs-inbox .popover-title>a, .bs-inbox .message-title {
+	line-height: 34px;
+	font-size: 22px;
+}
+.bs-inbox.inbox-detail .message-ago {
+	right: 5px;
+	top: 75px;
+	position: absolute;
+}
+.bs-inbox.inbox-detail .message-w.message-detail {
+	min-height: 78px;
+	max-height: 500px;
+}
+.bs-inbox .message-back {
+	display: inline-block;
+	width: 100%;
+}
+.bs-inbox .popover-title>.fa-refresh {
+	margin-top: 17px;
+}
+.bs-inbox .new-message {
+	margin-right: 10px;
+	margin-top: 0;
+	position: relative;
+	padding: 6px 12px;
+}
+.bs-inbox .new-message span {
+	position: absolute;
+	top: -4px;
+}
+.bs-inbox:not(.inbox-new) .popover-title .form-group {
+	margin-bottom: 0;
+	font-size: 14px;
+	margin-right: -8px;
+	margin-top: 0;
+}
+.bs-inbox .message-ago {
+	width: 116px;
+	display: inline-block;
+	text-align: right;
+	text-overflow: ellipsis;
+	color: #ccc;
+	margin-top: -15px;
+	height: 22px;
+	white-space: nowrap;
+	top: 3px;
+	overflow-x: hidden;
+	position: relative;
+}
+.bs-inbox.inbox-main .message-w {
+	text-overflow: ellipsis;
+	overflow-x: hidden;
+	margin-right: -15px;
+	padding-bottom: 5px;
+	padding-top: 8px;
+	width: 100%;
+	border-left-style: solid;
+	border-left-color: transparent;
+}
+.bs-inbox.inbox-main .message-w.unread {
+	background-color: #fff9e7;
+	border-left-color: #4c8adc;
+}
+.bs-inbox .message-w:hover .message-goto {
+	color: #000;
+}
+.bs-inbox:not(.inbox-detail) .message-w:hover {
+	cursor: pointer;
+}
+.bs-inbox.inbox-detail .message-w:hover {
+	background-color: #fff;
+	color: black;
+}
+.bs-inbox .message-to .select2-container.target-type, .bs-inbox .message-to .select2-container.target {
+	width: 100%;
+}
+.bs-inbox .message-to .input-group {
+	width: 100%;
+}
+.bs-inbox .message-to .audience span {
+	display: inline-block;
+}
+.bs-inbox .message-to .help-block {
+	margin: 0;
+	line-height: 19px;
+}
+.bs-inbox .more {
+	text-align: center;
+}
+.bs-inbox .more .btn {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+.bs-inbox .no-messages {
+	text-align: center;
+	color: #bbb;
+	pointer-events: none;
+}
+.bs-inbox .message-new {
+	padding-left: 15px;
+	padding-right: 15px;
+}

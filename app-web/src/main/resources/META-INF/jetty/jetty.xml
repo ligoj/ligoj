@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
+
+<!-- =============================================================== -->
+<!-- Configure the Jetty Server -->
+<!-- =============================================================== -->
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+
+	<!-- =========================================================== -->
+	<!-- Http Configuration. -->
+	<!-- This is a common configuration instance used by all -->
+	<!-- connectors that can carry HTTP semantics (HTTP, HTTPS, SPDY) -->
+	<!-- It configures the non wire protocol aspects of the HTTP -->
+	<!-- semantic. -->
+	<!-- -->
+	<!-- This configuration is only defined here and is used by -->
+	<!-- reference from the jetty-http.xml, jetty-https.xml and -->
+	<!-- jetty-spdy.xml configuration files which instantiate the -->
+	<!-- connectors. -->
+	<!-- -->
+	<!-- Consult the javadoc of o.e.j.server.HttpConfiguration -->
+	<!-- for all configuration that may be set here. -->
+	<!-- =========================================================== -->
+	<New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+		<Set name="secureScheme">https</Set>
+		<Set name="securePort">
+			<Property name="jetty.secure.port" default="8443" />
+		</Set>
+		<Set name="outputBufferSize">32768</Set>
+		<Set name="requestHeaderSize">8192</Set>
+		<Set name="responseHeaderSize">8192</Set>
+		<Set name="sendServerVersion">false</Set>
+		<Set name="sendDateHeader">false</Set>
+		<Set name="headerCacheSize">512</Set>
+
+		<!-- Uncomment to enable handling of X-Forwarded- style headers <Call name="addCustomizer"> <Arg><New class="org.eclipse.jetty.server.ForwardedRequestCustomizer"/></Arg> 
+			</Call> -->
+	</New>
+
+	<!-- =========================================================== -->
+	<!-- Add a HTTP Connector. -->
+	<!-- Configure an o.e.j.server.ServerConnector with a single -->
+	<!-- HttpConnectionFactory instance using the common httpConfig -->
+	<!-- instance defined in jetty.xml -->
+	<!-- -->
+	<!-- Consult the javadoc of o.e.j.server.ServerConnector and -->
+	<!-- o.e.j.server.HttpConnectionFactory for all configuration -->
+	<!-- that may be set here. -->
+	<!-- =========================================================== -->
+	<Call name="addConnector">
+		<Arg>
+			<New class="org.eclipse.jetty.server.ServerConnector">
+				<Arg name="server">
+					<Ref refid="Server" />
+				</Arg>
+				<Arg name="factories">
+					<Array type="org.eclipse.jetty.server.ConnectionFactory">
+						<Item>
+							<New class="org.eclipse.jetty.server.HttpConnectionFactory">
+								<Arg name="config">
+									<Ref refid="httpConfig" />
+								</Arg>
+							</New>
+						</Item>
+					</Array>
+				</Arg>
+				<Set name="host">
+					<Property name="jetty.host" />
+				</Set>
+				<Set name="port">
+					<SystemProperty name="jetty.port" default="80" />
+				</Set>
+				<Set name="idleTimeout">
+					<Property name="http.timeout" default="30000" />
+				</Set>
+			</New>
+		</Arg>
+	</Call>
+
+	<!-- =========================================================== -->
+	<!-- Set handler Collection Structure -->
+	<!-- =========================================================== -->
+	<Set name="handler">
+		<New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection">
+			<Set name="handlers">
+				<Array type="org.eclipse.jetty.server.Handler">
+					<Item>
+						<New id="WebApp" class="org.eclipse.jetty.webapp.WebAppContext">
+							<Set name="defaultsDescriptor">
+								<SystemProperty name="jetty.defautDescriptor" default="org/eclipse/jetty/webapp/webdefault.xml" />
+							</Set>
+							<Set name="contextPath">
+								<SystemProperty name="jetty.contextPath" default="/saas" />
+							</Set>
+							<Set name="baseResource">
+								<New class="org.eclipse.jetty.util.resource.ResourceCollection">
+									<Arg>
+										<Array type="java.lang.String">
+											<Item>
+												<SystemProperty name="jetty.webapp" default="." />
+											</Item>
+											<Item>
+												<SystemProperty name="jetty.target" default="./WEB-INF/classes" />
+											</Item>
+										</Array>
+									</Arg>
+								</New>
+							</Set>
+						</New>
+					</Item>
+				</Array>
+			</Set>
+		</New>
+	</Set>
+
+    <Get name="ThreadPool">
+        <Set name="minThreads" type="int">10</Set>
+        <Set name="maxThreads" type="int">200</Set>
+        <Set name="idleTimeout" type="int">60000</Set>
+        <Set name="detailedDump">false</Set>
+    </Get>
+
+	<!-- =========================================================== -->
+	<!-- extra options -->
+	<!-- =========================================================== -->
+	<Set name="stopAtShutdown">true</Set>
+
+</Configure>

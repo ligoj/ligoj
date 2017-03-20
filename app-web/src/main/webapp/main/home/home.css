@@ -1,0 +1,137 @@
+img.tool {
+	vertical-align: top;
+	margin-right: 2px;
+	margin-top: 2px;
+	-webkit-filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
+	filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
+}
+
+.table>thead>tr>th.status, .table>tbody>tr>td.status {
+	width: 10px;
+	border-right-width: 1px;
+	border-right-style: solid;
+	vertical-align: middle;
+	font-size: xx-small;
+	box-sizing: border-box;
+	padding-left: 2px;
+	padding-right: 0;
+}
+
+.table>thead>tr>th.status>i {
+	margin-left: -1px;
+}
+
+.table>tbody>tr>td.status>i {
+	margin-left: -2px;
+}
+
+table thead>tr>th.status.refresh, table tbody>tr>td.status.refresh {
+	background-size: 40px 40px;
+	-moz-animation: progress-bar-stripes 2s linear infinite;
+	-webkit-animation: progress-bar-stripes 2s linear infinite;
+	-o-animation: progress-bar-stripes 2s linear infinite;
+	animation: progress-bar-stripes 2s linear infinite;
+}
+
+table tr>td.status.status-up {
+	background-color: #5cb85c;
+}
+
+table tr>td.status.status-down {
+	background: #d9534f;
+}
+
+table tr>td.status.status-unknown {
+	background-color: #337ab7;
+}
+
+table thead>tr>th.status.status-down.refresh, table tbody>tr>td.status.status-down.refresh {
+	background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, .15)), to(rgba(255, 255, 255, .15)));
+	background-image: -ms-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+}
+
+table thead>tr>th.status.status-up.refresh, table tbody>tr>td.status.status-up.refresh {
+	background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, .15)), to(rgba(255, 255, 255, .15)));
+	background-image: -ms-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+}
+
+table thead>tr>th.status.status-unknown.refresh, table tbody>tr>td.status.status-unknown.refresh {
+	background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, .15)), to(rgba(255, 255, 255, .15)));
+	background-image: -ms-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+	background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+}
+
+.subscriptions .btn-link {
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+	border: 0;
+}
+
+.subscriptions .features .btn-group {
+	padding-top: 1px;
+}
+
+.subscriptions .carousel-control {
+	background-image: none;
+	width: 15px;
+}
+
+.subscriptions .carousel-indicators {
+	bottom: -22px;
+}
+
+.subscriptions .carousel-indicators .active {
+	background-color: #ccc;
+	width: 8px;
+	height: 8px;
+}
+
+.subscriptions .carousel-indicators>li {
+	border-color: #ddd;
+	width: 6px;
+	height: 6px;
+}
+
+.subscriptions .carousel-control.left>span, .subscriptions .carousel-control.right>span {
+	font-size: 15px;
+	color: #ddd;
+	margin-top: -15px;
+	padding-top: 8px;
+}
+
+.subscriptions .features.rendered.detailed {
+	white-space: inherit;
+}
+
+.subscriptions .carousel-control.right>span {
+	margin-right: -24px;
+}
+
+.subscriptions .carousel-control.left>span {
+	margin-left: -24px;
+}
+
+.subscriptions td.features .details {
+	float: right;
+	overflow: hidden;
+}
+
+.subscriptions tr.service-kpi-sonar td.features .details {
+	font-weight: bold;
+}
+
+.subscriptions .key>.fa, .subscriptions .key .item>.fa {
+	font-size: xx-small;
+}

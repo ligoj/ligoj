@@ -1,0 +1,62 @@
+<form id="main" class="form-horizontal">
+	<div class="form-group">
+		<label class="control-label" for="login">{{user}}</label>
+		<div >
+			<input type="text" class="form-control" id="login" readonly>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="control-label" for="firstName">{{firstName}}</label>
+		<div >
+			<input type="text" class="form-control" id="firstName" readonly>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="control-label" for="lastName">{{lastName}}</label>
+		<div >
+			<input type="text" class="form-control" id="lastName" readonly>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="control-label" for="company">{{company}}</label>
+		<div >
+			<input type="text" class="form-control" id="company" readonly>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="control-label" for="mail">{{mail}}</label>
+		<div >
+			<input type="text" class="form-control" id="mail" readonly>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="control-label" for="mail">{{localid}}</label>
+		<div >
+			<input type="text" class="form-control" id="localid" readonly>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="control-label" for="mail">{{department}}</label>
+		<div >
+			<input type="text" class="form-control" id="department" readonly>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="control-label" for="groups">{{groups}}</label>
+		<div >
+			<textarea id="groups" class="form-control" readonly></textarea>
+		</div>
+	</div>
+	<div id="locked" class="form-group hidden">
+		<label class="control-label" for="groups">{{locked}}</label>
+		<div >
+			<input type="text" class="form-control date" id="locked-since" readonly>
+			<span class="input-help"><i class="mode-edition fa fa-question-circle-o" data-container="#_ucDiv" data-toggle="tooltip" title="{{locked-details}}"></i></span>
+		</div>
+	</div>
+
+	<div class="form-actions">
+		<input class="btn" id="change-password" type="button" value="{{change-password}}" />
+	</div>
+</form>
+<div id="_password-popup-container"></div>

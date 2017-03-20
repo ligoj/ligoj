@@ -1,0 +1,41 @@
+/*!
+ * Bootstrap v2.7.1-1 + FDA
+ *
+ * Copyright 2012 Twitter, Inc
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Designed and built with all the love in the world @twitter by @mdo and @fat.
+ */
+.input-group .input-spinner {
+	width: 43px;
+	padding-right: 6px;
+}
+
+.spinner-buttons .btn {
+	padding: 0 0 0 1px;
+}
+
+.spinner-buttons .btn.spinner-up {
+	height: 18px;
+}
+
+.spinner-buttons .btn.spinner-down {
+	height: 17px;
+}
+.spinner-buttons {
+	display: table-cell;
+	white-space: nowrap;
+}
+.btn-group-vertical.spinner-buttons:not(:last-child) .btn {
+	border-radius: 0 0 0 0;
+	border-left: none;
+}
+.btn-group-vertical.spinner-buttons:last-child .spinner-up {
+	border-left: 0;
+	border-radius: 0px 4px 0px 0px;
+}
+.btn-group-vertical.spinner-buttons:last-child .spinner-down {
+	border-left: 0;
+	border-radius: 0px 0px 4px 0px;
+}

@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.ligoj.bootstrap</groupId>
+		<artifactId>bootstrap-web-parent</artifactId>
+		<version>1.6.0</version>
+		<relativePath />
+	</parent>
+
+	<groupId>org.ligoj.app</groupId>
+	<artifactId>app-web</artifactId>
+	<packaging>war</packaging>
+	<version>1.4.21-SNAPSHOT</version>
+	<name>Ligoj - Web</name>
+
+	<scm> 
+		<connection>scm:git:https://github.com/ligoj/ligoj.git</connection>
+		<developerConnection>scm:git:https://github.com/ligoj/ligoj.git</developerConnection>
+		<url>https://github.com/ligoj/ligoj</url>
+	</scm>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.clojars.smallrivers</groupId>
+			<artifactId>simplecaptcha</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+</project>

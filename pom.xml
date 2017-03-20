@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ligoj.parent</groupId>
+		<artifactId>project</artifactId>
+		<version>4.5.0</version>
+		<relativePath />
+	</parent>
+
+	<scm> 
+		<connection>scm:git:https://github.com/ligoj/ligoj.git</connection>
+		<developerConnection>scm:git:https://github.com/ligoj/ligoj.git</developerConnection>
+		<url>https://github.com/ligoj/ligoj</url>
+	</scm>
+	
+	<groupId>org.ligoj.app</groupId>
+	<artifactId>root</artifactId>
+	<version>1.4.21-SNAPSHOT</version>
+	<name>Ligoj - Root</name>
+	<description>Ligoj - Root pom aggregator</description>
+	<packaging>pom</packaging>
+	<modules>
+		<module>app-business</module>
+		<module>app-web</module>
+	</modules>
+</project>

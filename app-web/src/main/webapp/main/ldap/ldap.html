@@ -1,0 +1,54 @@
+<div class="container-fluid">
+	<div class="row">
+		<aside class="col-md-2 retractable">
+			<ul class="nav nav-pills nav-stacked">
+				<li><a href="{{$current.$url}}"><i class="fa fa-user nav-icon" title="{{user}}" data-toggle="tooltip" data-container="body"></i> {{user}}</a></li>
+				<li><a href="{{$current.$url}}/container/group"><i class="fa fa-users nav-icon" title="{{group}}" data-toggle="tooltip" data-container="body"></i> {{group}}</a></li>
+				<li><a href="{{$current.$url}}/container/company"><i class="fa fa-building-o nav-icon" title="{{company}}" data-toggle="tooltip" data-container="body"></i> {{company}}</a></li>
+				<li><a href="{{$current.$url}}/container-type"><i class="fa fa-tags nav-icon" title="{{container-type}}" data-toggle="tooltip" data-container="body"></i> {{container-type}}</a></li>
+				<li><a href="{{$current.$url}}/delegate"><i class="fa fa-key nav-icon" title="{{delegate}}" data-toggle="tooltip" data-container="body"></i> {{delegate}}</a></li>
+				<li><a href="//confluence/pages/viewpage.action?pageId=3211386" target="_blank">
+					<img class="nav-icon" src="main/plugin/km/confluence/img/confluence.png" alt="confluence" title="Confluence" data-toggle="tooltip" data-container="body"></img> {{menu.manual}}</a></li>
+			</ul>
+			<div class="badge retract hidden-xs hidden-sm"><i class="fa fa-arrow-left retract-close"></i><i class="fa fa-arrow-right retract-open"></i></div>
+		</aside>
+		<div class="col-md-10 col-md-offset-2">
+			<div class="alert alert-info">
+				{{delay-message}}
+				<span id="acceptedAgreement" class="hide">{{{agreement-accepted}}}</span>
+			</div>
+			<div id="_ucDiv" data-cascade-hierarchy="3"></div>
+		</div>
+	</div>
+</div>
+<form id="agreementPopup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-title">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="{{cancel}}">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="modal-title">{{agreement}}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="form-horizontal">
+					{{{agreement-details}}}
+					<div class="form-group required">
+						<div class="col-sm-offset-0 col-sm-12">
+							<div class="checkbox">
+								<label class="checkbox" for="agree">
+									<input type="checkbox" id="agree" required="required">
+									<span>{{agree}}</span>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" class="btn btn-primary btn-raised" value="{{save}}" data-loading-text="{{save}} ..." data-complete-text="{{save}}" />
+				<button type="button" class="btn btn-link" data-dismiss="modal" aria-hidden="true">{{cancel}}</button>
+			</div>
+		</div>
+	</div>
+</form>

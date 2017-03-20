@@ -1,0 +1,18 @@
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
+
+<!-- =============================================================== -->
+<!-- Configure the Jetty Server -->
+<!-- =============================================================== -->
+<Configure id="WebApp" class="org.eclipse.jetty.webapp.WebAppContext">
+	<Set name="classLoader">
+		<New class="org.eclipse.jetty.webapp.WebAppClassLoader">
+			<Arg>
+				<New class="org.ligoj.app.loader.PluginsClassLoader" />
+			</Arg>
+			<Arg ref="WebApp"></Arg>
+		</New>
+	</Set>
+	<Set name="contextPath">
+		<SystemProperty name="jetty.contextPath" default="/app-business" />
+	</Set>
+</Configure>

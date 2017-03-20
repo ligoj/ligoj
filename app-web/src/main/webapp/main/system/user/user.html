@@ -1,0 +1,50 @@
+<table id="table" class="table table-striped table-bordered">
+	<thead>
+		<tr>
+			<th>{{login}}</th>
+			<th>{{role}}</th>
+			<th>&nbsp;</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td colspan="3">{{loading}}</td>
+		</tr>
+	</tbody>
+</table>
+
+<form id="popup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-title">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="{{cancel}}">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="modal-title"></h4>
+			</div>
+			<div class="modal-body">
+				<div class="form-horizontal">
+					<div class="form-group required">
+						<label class="control-label" for="login">{{login}}</label>
+						<div>
+							<input class="form-control" type="text" id="login" placeholder="{{login}}" required>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label" for="roles">{{role}}</label>
+						<div>
+							<select id="roles" multiple class="form-control"></select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" class="btn btn-primary btn-raised" id="save" value="{{save}}">
+				<input type="submit" class="btn btn-success btn-raised" id="create" value="{{create}}">
+				<button class="btn btn-link" data-dismiss="modal">
+					{{cancel}}
+				</button>
+			</div>
+		</div>
+	</div>
+</form>

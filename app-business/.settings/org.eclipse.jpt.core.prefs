@@ -1,0 +1,5 @@
+#Mon Feb 27 11:04:49 CET 2012
+eclipse.preferences.version=1
+org.eclipse.jpt.core.platform=hibernate2_0
+org.eclipse.jpt.jpa.core.discoverAnnotatedClasses=false
+org.eclipse.jpt.jpa.core.metamodelSourceFolderName=src/main/java

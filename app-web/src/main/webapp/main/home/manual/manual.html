@@ -1,0 +1,432 @@
+<div class="page-header">
+	<h1>SAAS guide</h1>
+</div>
+<ol>
+	<li>
+		<a href="#overview">Vue d'ensemble</a>
+	</li>
+	<li>
+		<a href="#subscription">Souscription</a>
+	</li>
+	<li>
+		<a href="#service">Service</a>
+		<ol>
+			<li>
+				<a href="#service-bug-tracking">Bug Tracking</a>
+				<ol>
+					<li>
+						<a href="#subscription-jira">JIRA</a>
+					</li>
+				</ol>
+			</li>
+		</ol>
+	</li>
+</ol>
+
+<ol>
+	<li id="overview">
+		<h2>Vue d'ensemble</h2><span>Ce portail centralise la création d'un projet et la souscription à des services.
+			Une souscription est l'activation d'un service matérialisé par un outil validé. Par exemple la souscription au
+			service "Bug tracking" permet de créer automatiquement le projet dans l'outil choisi (Mantis, JIRA,...). Pour chaque
+			service un ou plusieurs outils peuvent être proposés. Il ne peut il y avoir qu'une seule souscription par projet et
+			par service. Chaque souscription apporte un certain nombre de fonctionnalités inhérentes au service, plus certaines
+			fonctionnalités spécifiques à l'outil choisi. </span><span>En plus de ces fonctionnalités, ces souscriptions
+			permettent d'avoir une base de <abbr title="Key Performance Indicator">KPI</abbr> homogène peu importe l'outil
+			utilisé. </span>
+	</li>
+	<li id="subscription">
+		<h2>Souscription</h2><span>Chaque responsable de projet peut souscrire à un nouveau service. Les souscriptions
+			ne peuvent être supprimées par la suite; il sagit d'une limitation technique temporaire, les souscriptions doivent
+			donc se faire de manière réfléchie.</span><span>Une souscription à un service peut requérir une autre souscription
+			dans le cas d'une dépendance de services. Par exemple JIRA 6 nécessite LDAP, donc le projet doit souscrire à ce
+			service avant de pouvoir bénéficier de JIRA 6.</span><span>Il existe 2 à 3 niveaux de raffinement des service : le
+			service (ex. "Bug Tracking"), l'outil (ex. JIRA) et l'instance (ex. JIRA 6). Les niveaux inférieurs peuvent fixer des
+			propriétés exigées par les niveaux supérieurs. À chaque niveau, de nouvelles propriétés peuvent être ajoutées. Lors
+			d'une souscription, l'utilisateur sera invité à renseigner toutes propriétés définies non fixées. Ce système permet
+			de rendre évolutif ce portail comme ajouter par exemple une nouvelle instance JIRA en renseignant les paramètres
+			demandés par le niveau outil "JIRA" : driver, user, password,...</span>
+	</li>
+	<li id="service">
+		<h2>Service</h2>
+		<ul>
+			<li id="service-bug-tracking">
+				<h3>Bug Tracking</h3>
+				<ul>
+					<li id="subscription-jira">
+						<h4>JIRA</h4><span>Fonctionnalités</span>
+						<ul>
+							<li>
+								Import CSV
+								<div>
+									Ce service permet d'importer un historique de workflow de plusieurs tickets. Le fichier de utiliser
+									est de type CSV dont les spécifications sont décrites dans le tableau ci-dessous. L'encodage du fichier
+									(UTF-8,..) peut être configuré.
+								</div>
+								<h5>Règles de gestion par champ</h5>
+								<table class="table table-striped table-bordered">
+									<thead>
+										<tr>
+											<th rowspan="2">Champ</th>
+											<th rowspan="2">Description</th>
+											<th rowspan="2">Requis</th>
+											<th rowspan="2" title="Pattern de validation">Pattern</th>
+											<th colspan="3">Exemples</th>
+										</tr>
+										<tr>
+											<th>Exemple 1</th>
+											<th>Exemple 2</th>
+											<th>Exemple 3</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>id</td>
+											<td>Identifiant de la transaction, permet de garder une trace d'exécution, optionnel</td>
+											<td>Non</td>
+											<td>.*</td>
+											<td>5</td>
+											<td>MANTIS-585</td>
+											<td>gJTR468</td>
+										</tr>
+										<tr>
+											<td>issue</td>
+											<td>identifiant du nouveau. La clé du projet est ignorée mais si présente doit être constante.
+											<br>
+											Le mode mise à jour n'est pas encore supporté. </td>
+											<td>Oui</td>
+											<td>([\w]-)?[1-9]\d*</td>
+											<td>SIOP-52</td>
+											<td>1254</td>
+											<td>1</td>
+										</tr>
+										<tr>
+											<td>status</td>
+											<td>Libellé du statut dans le workflow. La casse doit être exacte, et ne doit pas être traduit et doit correspondre à un des statuts du projet.</td>
+											<td>Oui</td>
+											<td>.{2,}</td>
+											<td>Open</td>
+											<td>A compléter</td>
+											<td>&nbsp;</td>
+										</tr>
+										<tr>
+											<td>summary</td>
+											<td>Résumé du ticket</td>
+											<td>Oui</td>
+											<td>.{2,200}</td>
+											<td colspan="3">[TEA] 023 : tarif KO si cot. calculée au C.A. = cot. Minimum</td>
+										</tr>
+										<tr>
+											<td>type</td>
+											<td>Type du ticket. La casse doit être exacte, et ne doit pas être traduit</td>
+											<td>Oui</td>
+											<td>.{2,}</td>
+											<td>Bug</td>
+											<td>Improvement</td>
+											<td>Analyse</td>
+										</tr>
+										<tr>
+											<td>priority</td>
+											<td>Priorité du ticket, peut être en français ou en anglais, la casse n'est pas importante</td>
+											<td>Oui</td>
+											<td>.{2,}</td>
+											<td>Simple</td>
+											<td>Critique</td>
+											<td>Critical</td>
+										</tr>
+										<tr>
+											<td>components</td>
+											<td>Liste des composants, "," en séparateur. La casse doit être exacte, et ne doit pas être traduit</td>
+											<td>Non</td>
+											<td>[^,]+(,[^,]+)*</td>
+											<td>Contrat/Produit</td>
+											<td colspan="2">Mon Comp1,Interface</td>
+										</tr>
+										<tr>
+											<td>description</td>
+											<td>Description du ticket. Texte éventuellement riche. Attention à bien utiliser les "…" pour gérer les
+											; dans le texte</td>
+											<td>Non</td>
+											<td>.{2,}</td>
+											<td colspan="3">Contenu d'un texte riche!</td>
+										</tr>
+										<tr>
+											<td>labels</td>
+											<td>Liste des étiquettes "," en séparateur. La casse doit être exacte, et ne doit pas être traduit.
+											Seules les étiquettes du dernier changement sont prises en compte car ce n'est pas une donnée historisées.</td>
+											<td>Non</td>
+											<td>[^,]+(,[^,]+)*</td>
+											<td>Urgence,TGC3,MI0A</td>
+											<td colspan="2">Ma Label, Et l'autre</td>
+										</tr>
+										<tr>
+											<td>fixedVersion</td>
+											<td>Liste des versions de correction, "," en séparateur. La casse doit être exacte et doit correspondre
+											à des versions existantes</td>
+											<td>Non</td>
+											<td>[^,]+(,[^,]+)*</td>
+											<td>1.0</td>
+											<td>V390,1.3, A-B C</td>
+											<td>V2.A</td>
+										</tr>
+										<tr>
+											<td>version</td>
+											<td>Liste des versions de détection, "," en séparateur. La casse doit être exacte et doit correspondre à
+											des versions existantes</td>
+											<td>Non</td>
+											<td>[^,]+(,[^,]+)*</td>
+											<td>1.0</td>
+											<td>V390,1.3, A-B C</td>
+											<td>V2.A</td>
+										</tr>
+										<tr>
+											<td>date</td>
+											<td>Doit avancer dans le temps avec les lignes d'enregistrement. Il s'agit d'une vérification
+											supplémentaire pour être certain de la chronologie des événements.
+											<br>
+											La date de la première ligne
+											d'un ticket correspondra à la date de création et la dernière à la date de mise à jour. </td>
+											<td>Oui</td>
+											<td>DD/MM/YYYY HH:mm(:ss)?
+											<br>
+											YYYY-MM-DD HH:mm(:ss)?
+											<br>
+											D.M.YYYY HH:mm(:ss)?
+											<br>
+											\d+([,\.]\d+ </td>
+											<td>4235,758</td>
+											<td>2014-03-21 18:05:13</td>
+											<td>21/03/2014 08:15:02</td>
+										</tr>
+										<tr>
+											<td>resolution</td>
+											<td>Etat de résolution. La casse doit être exacte, et ne doit pas être traduit. Si non renseignée et si
+											la "<strong>resolutionDate</strong>" est renseignée, alors la valeur par défaut est "Fixed". Ne doit pas être
+											renseignée sans avoir rencontré le "<strong>status</strong>" "Resolved" ou "Closed". A l'inverse lorsque ce statuts
+											sont rencontré la résolution "Fixed" ou celle définie sera positionnée. </td>
+											<td>Non</td>
+											<td>.{2,}</td>
+											<td>Fixed</td>
+											<td>Won't Fix</td>
+											<td>&nbsp;</td>
+										</tr>
+										<tr>
+											<td>resolutionDate</td>
+											<td>Date de résolution du ticket. Doit être supérieure ou égale à la date de création du changement. Si
+											non renseignée et si "<strong>resolution</strong>" est renseignée alors la valeur pas défaut est la date du champ "<strong>date</strong>".
+											Ne doit pas être renseignée sans avoir rencontré le "<strong>status</strong>" "Resolved" ou "Closed". </td>
+											<td>Non</td>
+											<td>(voir "<strong>date</strong>") </td>
+											<td>4235,758</td>
+											<td>2014-03-21 18:05:13</td>
+											<td>21/03/2014 08:15:02</td>
+										</tr>
+										<tr>
+											<td>dueDate</td>
+											<td>Date de livraison prévue pour ce ticket. Une date antérieure à la date du changement est acceptée
+											mais doit être supérieure ou égale à la date de création du ticket.</td>
+											<td>Non</td>
+											<td>(voir "<strong>date</strong>") </td>
+											<td>4235,758</td>
+											<td>2014-03-21 18:05:13</td>
+											<td>21/03/2014 08:15:02</td>
+										</tr>
+										<tr>
+											<td>assignee</td>
+											<td>Identifiant JIRA de l'utilisateur affecté. La casse doit être exacte, l'utilisateur doit exister</td>
+											<td>Oui</td>
+											<td>[^\s]{3,20}</td>
+											<td>fdaugan</td>
+											<td>X79841</td>
+											<td>&nbsp;</td>
+										</tr>
+										<tr>
+											<td>author</td>
+											<td>Identifiant JIRA de l'utilisateur à l'origine du changement. La casse doit être exacte,
+											l'utilisateur doit exister</td>
+											<td>Oui</td>
+											<td>[^\s]{3,20}</td>
+											<td>fdaugan</td>
+											<td>X79841</td>
+											<td>&nbsp;</td>
+										</tr>
+										<tr>
+											<td>reporter</td>
+											<td>Identifiant JIRA de l'utilisateur ayant créé le ticket La casse doit être exacte, l'utilisateur doit
+											exister</td>
+											<td>Oui</td>
+											<td>[^\s]{3,20}</td>
+											<td>freybillet</td>
+											<td>X79841</td>
+											<td>&nbsp;</td>
+										</tr>
+										<tr>
+											<td>cf$ABC</td>
+											<td>Désigne un champ personnalisé, ici "ABC", correspondant à la casse près à un champ personnalisé
+											existant, éventuellement traduit.
+											<br>
+											Pour les valeurs multiples, utiliser "," comme séparateur. Les
+											dates doivent être au format du champ <strong>"date"</strong>.
+											<br>
+											Le préfixe "cf$" est requis pour distinguer
+											les champs personnalisés.
+											<br>
+											L'association du champ personnalisé avec le projet n'est pas vérifiée,
+											seule son existence l'est.
+											<br>
+											Les valeurs par défaut ne sont pas gérées pour les champs personnalisés,
+											donc attention aux champs obligatoires avec valeur par défaut et non renseignés.
+											<br>
+											Les espaces
+											externes dans JIRA sont ignorés lors du rapprochement des noms et des valeurs. </td>
+											<td>Non</td>
+											<td>.*</td>
+											<td>Référence Cliente</td>
+											<td>Motif d'attente</td>
+											<td>&nbsp;</td>
+										</tr>
+									</tbody>
+								</table>
+
+								<h5>Règles générales</h5>
+								<ul>
+									<li>
+										Tous les caractères blancs (ESPACE, TAB,…) sont supprimés en début et en fin de toutes les cellules et
+										des éléments des listes
+									</li>
+									<li>
+										Une cellule vide(espaces, tabulations) est un champ non renseigné (null)
+									</li>
+									<li>
+										Pour accéder aux noms de champ anglais, changer la langue préférée dans le profil JIRA
+									</li>
+									<li>
+										La première ligne doit correspondre aux noms des champs
+									</li>
+									<li>
+										Pour les valeurs décimales (date et numérique) la VRGULE est remplacée par un POINT
+									</li>
+									<li>
+										L'ordre des colonnes n'a pas d'importance puisque ce sont les entêtes qui définissent le contenue de
+										la colonne
+									</li>
+									<li>
+										Pour les champs personnalisés de type datePicker (date seulement), les hueres, minutes et secondes
+										sont ignorées et mises à 0
+									</li>
+									<li>
+										Les dates sont soit au format ISO 8601, Français, décimal Excel, ou anglais, l'heure est au format
+										24h.
+									</li>
+									<li>
+										Plus d'information sur le format décimal <a href="https://www.fourmilab.ch/documents/calendar/">Excel</a>
+									</li>
+									<li>
+										La version minimale du JIRA cible est 6.0.0
+									</li>
+									<li>
+										La casse des entêtes doit correspondre exactement à celle décrite dans le tableau ci-dessus. Exemple : <strong>Type</strong> pour <strong>type</strong> n'est pas accepté.
+									</li>
+								</ul>
+							</li>
+							<li>
+								Export SLA
+								<p>
+									La calcul de SLA s'appuie sur :
+									<ul>
+										<li>
+											Un calendrier, composé de jours fériés à définir pour chaque année. Le week-end n'est pas travaillé.
+										</li>
+										<li>
+											Des plages de services : une liste de créneaux d'heures ouvrés
+										</li>
+										<li>
+											Un statut de début de chronomètres. Si le nom du statut est modifié dans JIRA, l'outil gardera sa
+											trace. Un rapprochement de nom est également effectué pour faciliter les projet multi-workflow.
+										</li>
+										<li>
+											Un statut de fin de chronomètres
+										</li>
+										<li>
+											Une liste de statuts dont le temps passé doit être exclu du temps chronométré
+										</li>
+									</ul>
+									<span>Le calcul s'effectue sur tous les tickets et tous leurs changements sans distinction, en
+										restituant à la seconde près les temps, le tout dans un format <a
+										href="main/saas/manual/MANTMA-16003-2014-06-20.csv">CSV</a> ou <a
+										href="main/saas/manual/MANTMA-16003-2014-06-20.xml">XLS</a> (Open XML) </span><span>Le temps de génération de ces rapport est entre 1 et 5 secondes pour quelques milliers de
+										changements</span>
+								</p>
+								<p>
+									Les exports CSV respectent la norme RFC CSV (<a
+									href="https://tools.ietf.org/html/rfc4180">rfc4180</a>) également plus lisible ici : <a
+									href="https://en.wikipedia.org/wiki/Comma-separated_values">wikipedia/ Comma-separated_values</a>
+								</p>
+								<p>
+									Les colonnes de SLA sont toutes doublées : 
+									<ul>
+										<li>Une valeur à lecture humaine :
+										<ul>
+										<li>Pour une durée "h:m:s" ex. 45h05m03s</li>
+										<li>Pour une date 2016/09/15</li>
+										</ul></li>
+										<li>Une valeur de calcul numérique et donc comparable
+										<ul><li>Pour une duré, exprimée en millisecondes </li>
+										<li>Pour une date  "timestamp", exprimée selon la norme unix (epoc millisecondes) Voir : https://currentmillis.com/</li>
+										</ul></li>
+									</ul>
+									Exemple pour un SLA nommé "MONSLA"
+									<table class="table table-striped table-bordered">
+										<thead><tr><th>Colonne</th><th>Explication</th></tr></thead>
+										<tbody>
+											<tr><td>
+											[SLA] MONSLA(h:m:s)
+											</td><td>
+											La durée d'exécution complète du SLA "MONSLA" selon les déclencheurs début et fin avec considération des pauses. Au format lisible heure, minute et secondes.
+											</td></tr><tr><td>
+											[SLA] MONSLA(ms)
+											</td><td>
+											La durée d'exécution complète du SLA "MONSLA" selon les déclencheurs début et fin avec considération des pauses. Au format numérique, exprimée en millisecondes.
+											</td></tr><tr><td>
+											[SLA] MONSLA(Start)
+											</td><td>
+											La date à laquelle le chronomètre a été déclenché la première fois. Au format année, mois jour, heure, minute seconde, sur 24h. Affichage suivant la langue et la version Excel.
+											</td></tr><tr><td>
+											[SLA] MONSLA(Start timestamp)
+											</td><td>
+											La date à laquelle le chronomètre a été déclenché la première fois. Au format Epoch millisecondes
+											</td></tr><tr><td>
+											[SLA] MONSLA(Stop)
+											</td><td>
+											La date à laquelle le chronomètre a été arrêté. Au format année, mois jour, heure, minute seconde, sur 24h. Affichage suivant la langue et la version Excel.
+											</td></tr><tr><td>
+											[SLA] MONSLA(Stop timestamp)
+											</td><td>
+											La date à laquelle le chronomètre a été arrêté. Au format Epoch millisecondes
+											</td></tr><tr><td>
+											[SLA] KP01 - Bloquant(Revised Due Date)
+											</td><td>
+											Date due originale (champ due date) à laquelle ont été ajouté tous les temps de pause. Au format année, mois jour, heure, minute seconde, sur 24h. Affichage suivant la langue et la version Excel.
+											</td></tr><tr><td>
+											[SLA] KP01 - Bloquant(Revised Due Date timestamp)
+											</td><td>
+											Date due originale (champ due date) à laquelle ont été ajouté tous les temps de pause. Au format numérique, exprimée en millisecondes.
+											</td></tr><tr><td>
+											[SLA] KP01 - Bloquant(Revised Due Date distance h:m:s)
+											</td><td>
+											Distance entre la date due révisée et la date à laquelle le chronomètre a été arrêté. Au format lisible heure, minute et secondes.
+											</td></tr><tr><td>
+											[SLA] KP01 - Bloquant(Revised Due Date distance ms)
+											</td><td>
+											Distance entre la date due révisée et la date à laquelle le chronomètre a été arrêté. Au format numérique, exprimée en millisecondes.
+											</td></tr>
+										</tbody>
+									</table>
+								</p>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</li>
+</ol>

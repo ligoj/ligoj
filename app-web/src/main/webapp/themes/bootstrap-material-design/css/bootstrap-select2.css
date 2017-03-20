@@ -1,0 +1,73 @@
+/**
+ * Input group for Select2
+ */
+
+.form-horizontal .has-feedback .select2-container+.form-control-feedback {
+	right: 30px;
+}
+.input-group>.select2-container.input-group-addon:first-child .select2-arrow {
+	display: none;
+}
+.input-group>.select2-container:not(:first-child) .select2-choice {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+.input-group>.select2-container.has-addon .select2-choice {
+	border-right: none;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+.form-group.label-floating label.control-label.select2-label, .form-group.label-placeholder label.control-label.select2-label {
+	text-align: left;
+}
+
+.form-group.label-static label.control-label.select2-label, .form-group.label-floating.is-focused label.control-label.select2-label, .form-group.label-floating:not(.is-empty) label.control-label.select2-label, .form-group.label-static label.control-label.select2-label, .form-group.label-floating.is-focused label.control-label.select2-label, .form-group.label-floating:not(.is-empty) label.control-label.select2-label {
+	left: 0;
+	top: -30px;
+	text-align: left;
+}
+.select2-results .select2-result-label {
+	padding: 9px 10px;
+	font-size: 16px;
+}
+
+.select2-dropdown-open .select2-choice {
+	background-color: transparent;
+}
+.select2-container.form-control {
+	min-height: 38px;
+}
+.select2-results .select2-highlighted {
+	background: #337ab7;
+}
+.select2-results {
+	margin: 4px 0;
+	padding: 0;
+}
+.select2-drop-active {
+	border-style: none;
+}
+
+.select2-search {
+	margin-left: -1px;
+	margin-right: -1px;
+	padding-left: 0;
+	padding-right: 0;
+	display: block;
+	width: initial;
+}
+.select2-container .select2-choice>.select2-chosen {
+	margin-left: 1px;
+}
+.select2-choice {
+	border-left: none;
+}
+.select2-container .select2-choice {
+	color: #555;
+}
+.select2-results .select2-ajax-error {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	background-color: #f44336;
+	color: #FFFFFF;
+}

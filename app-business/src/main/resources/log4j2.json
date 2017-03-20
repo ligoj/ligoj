@@ -1,0 +1,132 @@
+{
+	"configuration": {
+		"status": "warn",
+		"name": "Main",
+		"monitorInterval": 60,
+		"properties": {
+			"property": {
+				"name": "filename",
+				"value": "target/rolling-$${sd:type}.log"
+			}
+		},
+		"ThresholdFilter": {
+			"level": "debug"
+		},
+		"appenders": {
+			"appender": [
+				{
+					"type": "Console",
+					"name": "STDOUT",
+					"PatternLayout": {
+						"pattern": "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%xEx{filters(com.sun.proxy,org.springframework.data.projection,org.springframework.dao.support,org.springframework.transaction,java.lang.Thread,org.apache.cxf,org.eclipse.jetty,org.springframework.web,javax.servlet,org.springframework.aop,org.junit,org.apache.maven,sun.reflect,java.lang.reflect,org.springframework.cglib,org.springframework.security)}%n"
+					}
+				}, {
+					"type": "Console",
+					"name": "STDOUT_VERBOSE",
+					"PatternLayout": {
+						"pattern": "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+					}
+				}, {
+					"type": "RollingFile",
+					"name": "RollingFile",
+					"fileName": "${filename}",
+					"filePattern": "target/rolling-${sd:type}.%i.log.gz",
+					"PatternLayout": {
+						"pattern": "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+					},
+					"SizeBasedTriggeringPolicy": {
+						"size": "500"
+					}
+				}
+			]
+		},
+		"loggers": {
+			"logger": [
+				{
+					"name": "org.springframework.security.web.FilterChainProxy",
+					"level": "info",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.hibernate.SQL",
+					"level": "debug",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.apache.cxf.phase.PhaseInterceptorChain",
+					"level": "error",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.hibernate.ejb.HibernatePersistence",
+					"level": "error",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.apache.directory.server.schema.registries.DefaultAttributeTypeRegistry",
+					"level": "fatal",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.apache.directory.server.core.DefaultDirectoryService",
+					"level": "error",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.apache.directory.server.protocol.shared.store.LdifFileLoader",
+					"level": "warn",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.springframework.security.web.FilterChainProxy",
+					"level": "info",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.springframework.ldap.core.LdapTemplate",
+					"level": "warn",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.eclipse.jetty.server.Server",
+					"level": "debug",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.eclipse.jetty.webapp.StandardDescriptorProcessor",
+					"level": "warn",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}				
+			],
+			"root": {
+				"level": "info",
+				"AppenderRef": {
+					"ref": "STDOUT"
+				}
+			}
+		}
+	}
+}

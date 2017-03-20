@@ -1,0 +1,100 @@
+.navbar-brand {
+	background: url("home/img/gfi.png");
+	background-size: cover;
+	width: 80px;
+}
+.locked {
+	opacity: .6;
+	text-decoration: line-through;
+}
+
+/*
+ * Console in square
+ */
+
+.fa-square+.fa-terminal {
+	font-size: .5em;
+	margin-top: -.3em;
+}
+.fa-stack {
+	width: 1em;
+	height: 1em;
+	line-height: 1em;
+}
+
+/* Dropdown menu in table */
+
+td>.btn-group {
+	padding-top: 0;
+	margin-bottom: -1px;
+	vertical-align: inherit;
+	font-size: inherit;
+	cursor: pointer;
+	margin-top: 0;
+}
+
+html {
+	width: 100%;
+}
+.icon-info {
+	font-size: 18px;
+}
+.bs-inbox {
+	position: relative;
+}
+.bs-inbox .count {
+	vertical-align: middle;
+	position: relative;
+	top: 2px;
+	font-weight: 700;
+}
+.bs-inbox .popover {
+	max-width: 500px;
+	width: 500px;
+}
+.bs-inbox .inbox-trigger .label {
+	border: 2px solid #fff;
+	font-weight: 500;
+	padding: 0;
+	text-align: center;
+	border-radius: 50%;
+	left: 22px;
+	position: absolute;
+	top: 6px;
+	width: 19px;
+	height: 19px;
+	padding-top: 0;
+	margin-top: 0;
+	line-height: 8px;
+}
+.label.avatar {
+	border: 2px solid #fff;
+	font-weight: 500;
+	text-align: center;
+	border-radius: 50%;
+	position: relative;
+	width: 32px;
+	height: 32px;
+	padding-top: 9px;
+	text-transform: uppercase;
+	display: inline-block;
+}
+.label.avatar img.tool {
+	vertical-align: top;
+	margin-right: 2px;
+	margin-top: -2px;
+}
+.select2-chosen img.tool {
+	vertical-align: middle;
+	margin-top: -3px;
+}
+[data-group] .input-group .input-group-btn .btn {
+	padding-left: 0;
+	padding-right: 0;
+}
+[data-group] .input-group .input-group-btn {
+	padding-left: 0;
+}
+i.resource {
+	min-width: 12px;
+}

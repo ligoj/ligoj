@@ -1,0 +1,286 @@
+/**
+ * Manager used to populate and manage global application features.
+ */
+define(['cascade'], function ($cascade) {
+	var current = {
+		/**
+		 * Update the message counter.
+		 */
+		initialize: function () {
+			current.updateMessageCounter();
+		},
+		/**
+		 * Update the message counter.
+		 */
+		updateMessageCounter: function () {
+			// Display unread messages counter
+			var count = $cascade.session.userSettings.unreadMessages || 0;
+			if (count) {
+				var text = count > 99 ? '&#8734;' : count;
+				current.$view.find('.bs-inbox .count').html(text).closest('.label').removeClass('hidden');
+			} else {
+				current.$view.find('.bs-inbox .count').empty().closest('.label').addClass('hidden');
+			}
+		},
+
+		/**
+		 * Icon of corresponding tool.
+		 */
+		toIcon: function (node, suffix, dataSrc, recursive) {
+			var fragments = (node.id || node || '::').split(':');
+			var title = (node.name || node.label || fragments[2] || fragments[1]);
+			if (fragments.length < 3) {
+				// Simple service
+				return '<i title="' + title + '" class="' + (node.uiClasses || 'fa fa-wrench') + '"></i>';
+			}
+			var url = 'main/plugin/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';
+			var result = '<img src="' + url + '" title="' + title + '" alt="' + title + '"' + (dataSrc ? ' data-src="' + url + '"' : '') + ' class="tool"/>';
+			if (recursive) {
+				var parent = null;
+				if (node.refined) {
+					parent = node.refined;
+				} else if (fragments.length > 2) {
+					parent = fragments.slice(0, fragments.length - 1);
+				}
+				result = current.toIcon(parent, suffix, null, true) + ' <i class="fa fa-angle-right"></i> ' + result;
+			}
+			return result;
+		},
+
+		/**
+		 * Return a link targeting to the user page. Display the full name.
+		 * @param user The user data : login, fullname, etc...
+		 */
+		getUserLink: function (user, text) {
+			if (user) {
+				// Popover content
+				var content = user.firstName ? current.$messages.firstName + ' : ' + user.firstName + '<br>' : '';
+				content += user.lastName ? current.$messages.lastName + ' : ' + user.lastName + '<br>' : '';
+				content += user.company ? current.$messages.company + ' : ' + user.company + '<br>' : '';
+				content += current.$messages.identifier + ' : ' + user.id;
+				content += user.locked ? '<br>' + Handlebars.compile(current.$messages['locked-details'])([
+					moment(user.locked).format(formatManager.messages.shortdateMomentJs),
+					user.lockedBy
+				]) : '';
+				content += user.isolated ? '<br>' + Handlebars.compile(current.$messages['isolated-details'])(user.previousCompany) : '';
+				content = content.replace(/'/g, '&apos;');
+
+				// Popover title
+				var fullName = current.getFullName(user);
+
+				// Link text
+				text = text || fullName;
+				return '<a' + (user.locked ? ' class="locked"' : '') + ' href="#/ldap/user/' + user.id + '" rel="popover" data-toggle="popover" data-placement="left" data-title="' + fullName + '" data-trigger="hover" data-html="true" data-content=\'' + content + '\'>' + text + '</a>';
+			}
+			return current.$messages.unknown;
+		},
+
+		/**
+		 * Return a link targeting to the user page. Display only user name.
+		 * @param user The user data : login, fullname, etc...
+		 */
+		getUserLoginLink: function (user) {
+			return current.getUserLink(user, user && user.id);
+		},
+
+		/**
+		 * Return the full name of given user. May be built from the provided information.
+		 * @param user The user data : login, fullname, etc...
+		 */
+		getFullName: function (user) {
+			if (user.fullName) {
+				return user.fullName;
+			}
+			if (user.firstName && user.lastName) {
+				return user.firstName + ' ' + user.lastName;
+			}
+			if (user.firstName) {
+				return user.firstName + ' <italic>' + user.id.substring(1) + '</italic>';
+			}
+			if (user.lastName) {
+				return '<italic>' + user.id.substring(0, 1).capitalize() + '</italic>. ' + user.lastName;
+			}
+
+			// Fail safe rendering based on login
+			var id = user.id || user || '??';
+			return '<italic>' + id.substring(0, 1).capitalize() + '</italic>. <italic>' + id.substring(1).capitalize() + '</italic>';
+		},
+
+		/**
+		 * Fill audit data in the UI
+		 */
+		fillAuditData: function (data) {
+			if (data && (data.createdBy || data.lastModifiedDate || data.lastModifiedBy || data.createdDate)) {
+				_('detail-audit').html(Handlebars.compile(current.$messages.audit)([
+					current.getUserLink(data.createdBy),
+					moment(data.createdDate).format(formatManager.messages.shortdateMomentJs),
+					current.getUserLink(data.lastModifiedBy),
+					moment(data.lastModifiedDate).format(formatManager.messages.shortdateMomentJs)
+				])).removeClass('hide');
+			} else {
+				_('detail-audit').addClass('hide');
+			}
+		},
+
+		/**
+		 * Diacritics mapping
+		 */
+		defaultDiacriticsRemovalMap: [
+			{
+				base: 'A',
+				letters: /[\u0041\u24B6\uFF21\u00C0\u00C1\u00C2\u1EA6\u1EA4\u1EAA\u1EA8\u00C3\u0100\u0102\u1EB0\u1EAE\u1EB4\u1EB2\u0226\u01E0\u00C4\u01DE\u1EA2\u00C5\u01FA\u01CD\u0200\u0202\u1EA0\u1EAC\u1EB6\u1E00\u0104\u023A\u2C6F]/g
+			}, {
+				base: 'C',
+				letters: /[\u0043\u24B8\uFF23\u0106\u0108\u010A\u010C\u00C7\u1E08\u0187\u023B\uA73E]/g
+			}, {
+				base: 'E',
+				letters: /[\u0045\u24BA\uFF25\u00C8\u00C9\u00CA\u1EC0\u1EBE\u1EC4\u1EC2\u1EBC\u0112\u1E14\u1E16\u0114\u0116\u00CB\u1EBA\u011A\u0204\u0206\u1EB8\u1EC6\u0228\u1E1C\u0118\u1E18\u1E1A\u0190\u018E]/g
+			}, {
+				base: 'I',
+				letters: /[\u0049\u24BE\uFF29\u00CC\u00CD\u00CE\u0128\u012A\u012C\u0130\u00CF\u1E2E\u1EC8\u01CF\u0208\u020A\u1ECA\u012E\u1E2C\u0197]/g
+			}, {
+				base: 'N',
+				letters: /[\u004E\u24C3\uFF2E\u01F8\u0143\u00D1\u1E44\u0147\u1E46\u0145\u1E4A\u1E48\u0220\u019D\uA790\uA7A4]/g
+			}, {
+				base: 'O',
+				letters: /[\u004F\u24C4\uFF2F\u00D2\u00D3\u00D4\u1ED2\u1ED0\u1ED6\u1ED4\u00D5\u1E4C\u022C\u1E4E\u014C\u1E50\u1E52\u014E\u022E\u0230\u00D6\u022A\u1ECE\u0150\u01D1\u020C\u020E\u01A0\u1EDC\u1EDA\u1EE0\u1EDE\u1EE2\u1ECC\u1ED8\u01EA\u01EC\u00D8\u01FE\u0186\u019F\uA74A\uA74C]/g
+			}, {
+				base: 'U',
+				letters: /[\u0055\u24CA\uFF35\u00D9\u00DA\u00DB\u0168\u1E78\u016A\u1E7A\u016C\u00DC\u01DB\u01D7\u01D5\u01D9\u1EE6\u016E\u0170\u01D3\u0214\u0216\u01AF\u1EEA\u1EE8\u1EEE\u1EEC\u1EF0\u1EE4\u1E72\u0172\u1E76\u1E74\u0244]/g
+			}, {
+				base: 'a',
+				letters: /[\u0061\u24D0\uFF41\u1E9A\u00E0\u00E1\u00E2\u1EA7\u1EA5\u1EAB\u1EA9\u00E3\u0101\u0103\u1EB1\u1EAF\u1EB5\u1EB3\u0227\u01E1\u00E4\u01DF\u1EA3\u00E5\u01FB\u01CE\u0201\u0203\u1EA1\u1EAD\u1EB7\u1E01\u0105\u2C65\u0250]/g
+			}, {
+				base: 'c',
+				letters: /[\u0063\u24D2\uFF43\u0107\u0109\u010B\u010D\u00E7\u1E09\u0188\u023C\uA73F\u2184]/g
+			}, {
+				base: 'e',
+				letters: /[\u0065\u24D4\uFF45\u00E8\u00E9\u00EA\u1EC1\u1EBF\u1EC5\u1EC3\u1EBD\u0113\u1E15\u1E17\u0115\u0117\u00EB\u1EBB\u011B\u0205\u0207\u1EB9\u1EC7\u0229\u1E1D\u0119\u1E19\u1E1B\u0247\u025B\u01DD]/g
+			}, {
+				base: 'i',
+				letters: /[\u0069\u24D8\uFF49\u00EC\u00ED\u00EE\u0129\u012B\u012D\u00EF\u1E2F\u1EC9\u01D0\u0209\u020B\u1ECB\u012F\u1E2D\u0268\u0131]/g
+			}, {
+				base: 'n',
+				letters: /[\u006E\u24DD\uFF4E\u01F9\u0144\u00F1\u1E45\u0148\u1E47\u0146\u1E4B\u1E49\u019E\u0272\u0149\uA791\uA7A5]/g
+			}, {
+				base: 'o',
+				letters: /[\u006F\u24DE\uFF4F\u00F2\u00F3\u00F4\u1ED3\u1ED1\u1ED7\u1ED5\u00F5\u1E4D\u022D\u1E4F\u014D\u1E51\u1E53\u014F\u022F\u0231\u00F6\u022B\u1ECF\u0151\u01D2\u020D\u020F\u01A1\u1EDD\u1EDB\u1EE1\u1EDF\u1EE3\u1ECD\u1ED9\u01EB\u01ED\u00F8\u01FF\u0254\uA74B\uA74D\u0275]/g
+			}, {
+				base: 'u',
+				letters: /[\u0075\u24E4\uFF55\u00F9\u00FA\u00FB\u0169\u1E79\u016B\u1E7B\u016D\u00FC\u01DC\u01D8\u01D6\u01DA\u1EE7\u016F\u0171\u01D4\u0215\u0217\u01B0\u1EEB\u1EE9\u1EEF\u1EED\u1EF1\u1EE5\u1E73\u0173\u1E77\u1E75\u0289]/g
+			}
+		],
+
+		newSelect2User: function (selector, filter, placeholder) {
+			return current.newSelect2(selector, REST_PATH + 'ldap/user' + (filter || ''), placeholder || current.$messages.user, function (object) {
+				return object.id + ' [<small>' + current.$main.getFullName(object) + '</small>]';
+			});
+		},
+		newSelect2Node: function (selector, filter, placeholder, suffix, dataSrc, recursive) {
+			return current.newSelect2(selector, REST_PATH + 'node' + (filter || ''), placeholder || current.$messages.node, function (object) {
+				return current.toIcon(object, suffix, dataSrc, recursive) + ' ' + object.name;
+			});
+		},
+		newSelect2Project: function (selector, filter, placeholder, textFunction, idProperty, textProperty) {
+			return current.newSelect2(selector, REST_PATH + 'project' + (filter || ''), placeholder || current.$messages.project, textFunction, idProperty || 'id', textProperty || 'name');
+		},
+		newSelect2Company: function (selector, filter, placeholder) {
+			return current.newSelect2(selector, REST_PATH + 'ldap/company/filter' + (filter || '/read'), placeholder || current.$messages.company);
+		},
+		newSelect2Group: function (selector, filter, placeholder) {
+			return current.newSelect2(selector, REST_PATH + 'ldap/group/filter' + (filter || '/read'), placeholder || current.$messages.group);
+		},
+		newSelect2: function (selector, url, placeholder, textFunction, idProperty, textProperty) {
+			var toText = function (object) {
+				return object && (textFunction ? textFunction(object) : ((textProperty && object[textProperty]) || object.text || object));
+			};
+
+			// Decorate the Select2 label
+			$(selector).closest('.form-group').find('.control-label').addClass('select2-label');
+			return $(selector).select2({
+				placeholder: $(selector).closest('.label-floating').length ? '&nbsp;' : placeholder,
+				allowClear: true,
+				minimumInputLength: 0,
+				initSelection: function (element, callback) {
+					callback(element.val() && {
+						id: element.val(),
+						text: toText(element.val())
+					});
+				},
+				formatSelection: function (object) {
+					return toText(object.data || object);
+				},
+				formatResult: function (object) {
+					return toText(object.data || object);
+				},
+				escapeMarkup: function (m) {
+					return m;
+				},
+				formatSearching: function () {
+					return current.$messages.loading;
+				},
+				ajax: {
+					url: url,
+					dataType: 'json',
+					data: function (term, page) {
+						return {
+							'search[value]': term, // search term
+							'q': term, // search term
+							'rows': 15,
+							'page': page,
+							'start': (page - 1) * 15,
+							'filters': '{}',
+							'sidx': 'name',
+							'length': 15,
+							'columns[0][name]': textProperty || 'name',
+							'order[0][column]': 0,
+							'order[0][dir]': 'asc',
+							'sord': 'asc'
+						};
+					},
+					results: function (data, page) {
+						var result = [];
+						$(data.data).each(function () {
+							result.push({
+								id: (idProperty && this[idProperty]) || this.id || this,
+								data: this,
+								text: toText(this)
+							});
+						});
+						return {
+							more: data.recordsFiltered > page * 10,
+							results: result
+						};
+					}
+				}
+			});
+		},
+
+		/**
+		 * Remove all diacritics and transform to lower case.
+		 * @param {Object} str the string to normalize.
+		 */
+		normalize: function (str) {
+			var i;
+			var changes = current.defaultDiacriticsRemovalMap;
+			str = str.replace(/[-[()\]${},;_:]/g, ' ').replace(/( (de|du|des|l'|d'|le|la|les|au|aux))+ /gi, ' ').replace(/ {2,}/g, ' ');
+			for (i = 0; i < changes.length; i++) {
+				str = str.replace(changes[i].letters, changes[i].base);
+			}
+			return str.toLowerCase();
+		},
+
+		/**
+		 * Object type to class mapping.
+		 */
+		messageTypeClass: {
+			company: 'resource fa fa-building-o',
+			group: 'resource fa fa-users',
+			project: 'resource fa fa-folder',
+			user: 'resource fa fa-user',
+			tree: 'resource fa fa-ellipsis-v',
+			node: 'resource fa fa-wrench'
+		}
+	};
+	return current;
+});

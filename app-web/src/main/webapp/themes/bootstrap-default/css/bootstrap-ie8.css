@@ -1,0 +1,51 @@
+.ie-old body {
+	/* Patch since IE8 does not support @media tags */
+	padding-top: 60px;
+}
+.ie-old .highlighted {
+	height: 33px;
+}
+
+.ie-old .form-horizontal .form-group .control-label {/*.col-sm-2*/
+	float: left;
+	width: 16.66666667%;
+}
+.ie-old .form-horizontal .form-group > div {/*.col-sm-4*/
+	float: left;
+	width: 25%;
+}
+.ie-old .form-horizontal .form-group > div:first-child {/*.col-sm-offset-2 (checkbox, radio)*/
+	margin-left: 16.66666667%;
+}
+
+.ie-old   .modal .form-horizontal .form-group .control-label) {/*.col-sm-4*/
+	float: left;
+	width: 33.33333333%;
+}
+.ie-old   .modal .form-horizontal .form-group > div {/*.col-sm-6*/
+	float: left;
+	width: 50%;
+}
+.ie-old   .modal .form-horizontal .form-group > div.col-sm-2 {
+	width: 16.66666666%;
+}
+.ie-old   .modal .form-horizontal .form-group > div.col-sm-3 {
+	width: 25%;
+}
+.ie-old   .modal .form-horizontal .form-group > div.col-sm-4 {
+	width: 33.33333333%;
+}
+.ie-old   .modal .form-horizontal .form-group > div.col-sm-8 {
+	width: 66.66666666%;
+}
+.ie-old   .modal .form-horizontal .form-group > div.col-sm-12 {
+	width: 100%;
+}
+.ie-old   .auto-col div[class*="col-"] .form-horizontal .form-group .control-label {/*.col-sm-4*/
+	float: left;
+	width: 33.33333333%;
+}
+.ie-old   .auto-col div[class*="col-"] .form-horizontal .form-group > div {/*.col-sm-8*/
+	float: left;
+	width: 66.66666667%;
+}
