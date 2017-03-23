@@ -42,7 +42,7 @@ public class NodeBasedIamProvider implements IamProvider {
 	protected ServicePluginLocator servicePluginLocator;
 
 	@Override
-	public Authentication authenticate(final Authentication authentication) throws Exception {
+	public Authentication authenticate(final Authentication authentication) {
 
 		// Determine the right provider to authenticate among the IAM nodes
 		for (final String nodeId : secondary) {

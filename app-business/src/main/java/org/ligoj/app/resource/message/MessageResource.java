@@ -23,20 +23,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-
-import org.ligoj.bootstrap.core.AuditedBean;
-import org.ligoj.bootstrap.core.INamableBean;
-import org.ligoj.bootstrap.core.json.PaginationJson;
-import org.ligoj.bootstrap.core.json.TableItem;
-import org.ligoj.bootstrap.core.json.datatable.DataTableAttributes;
-import org.ligoj.bootstrap.core.resource.BusinessException;
-import org.ligoj.bootstrap.core.security.SecurityHelper;
-import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.app.dao.MessageReadRepository;
 import org.ligoj.app.dao.MessageRepository;
 import org.ligoj.app.iam.IUserRepository;
@@ -50,6 +36,20 @@ import org.ligoj.app.model.MessageTargetType;
 import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.app.resource.project.BasicProjectVo;
 import org.ligoj.app.resource.project.ProjectResource;
+import org.ligoj.bootstrap.core.AuditedBean;
+import org.ligoj.bootstrap.core.INamableBean;
+import org.ligoj.bootstrap.core.json.PaginationJson;
+import org.ligoj.bootstrap.core.json.TableItem;
+import org.ligoj.bootstrap.core.json.datatable.DataTableAttributes;
+import org.ligoj.bootstrap.core.resource.BusinessException;
+import org.ligoj.bootstrap.core.security.SecurityHelper;
+import org.ligoj.bootstrap.core.validation.ValidationJsonException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -100,7 +100,7 @@ public class MessageResource implements InitializingBean {
 	/**
 	 * Ordered columns.
 	 */
-	public static final Map<String, String> ORM_MAPPING = new HashMap<>();
+	protected static final Map<String, String> ORM_MAPPING = new HashMap<>();
 
 	static {
 		ORM_MAPPING.put("createdDate", "createdDate");
@@ -250,7 +250,8 @@ public class MessageResource implements InitializingBean {
 	 *
 	 * @param uriInfo
 	 *            filter data.
-	 * @param function Function providing the messages from a request and a user.
+	 * @param function
+	 *            Function providing the messages from a request and a user.
 	 * @return Related messages, already read or not. Also there is an indicator on the message specifying the "new"
 	 *         state.
 	 */
@@ -270,26 +271,10 @@ public class MessageResource implements InitializingBean {
 					vo.setTarget(m.getTarget());
 
 					// Get the details of the target
-					switch (m.getTargetType()) {
-					case PROJECT:
-						vo.setProject(projectResource.findByPKey(m.getTarget()));
-						break;
-					case COMPANY:
-						vo.setCompany(companyLdapResource.findByName(m.getTarget()));
-						break;
-					case GROUP:
-						vo.setGroup(groupLdapResource.findByName(m.getTarget()));
-						break;
-					case NODE:
-						vo.setNode(nodeResource.findById(m.getTarget()));
-						break;
-					case USER:
-					default:
-						vo.setUser(UserLdapResource.TO_LDAP_CONVERTER.apply(m.getTarget()));
-					}
+					fillTarget(m, vo);
 
 					// Attach user information of the source of the message
-					vo.setFrom(UserLdapResource.TO_LDAP_CONVERTER.apply(m.getCreatedBy()));
+					vo.setFrom(getUser().toUser(m.getCreatedBy()));
 					return vo;
 				});
 
@@ -309,6 +294,29 @@ public class MessageResource implements InitializingBean {
 		// Persist the state even if the user might has not read/seen the message
 		messageReadRepository.save(messageRead);
 		return messages;
+	}
+
+	/**
+	 * Complete the target object depending on the target type of the given message.
+	 */
+	private void fillTarget(final Message message, final MessageVo vo) {
+		switch (message.getTargetType()) {
+		case PROJECT:
+			vo.setProject(projectResource.findByPKey(message.getTarget()));
+			break;
+		case COMPANY:
+			vo.setCompany(companyLdapResource.findByName(message.getTarget()));
+			break;
+		case GROUP:
+			vo.setGroup(groupLdapResource.findByName(message.getTarget()));
+			break;
+		case NODE:
+			vo.setNode(nodeResource.findByIdInternal(message.getTarget()));
+			break;
+		case USER:
+		default:
+			vo.setUser(getUser().toUser(message.getTarget()));
+		}
 	}
 
 	/**

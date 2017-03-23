@@ -1,13 +1,12 @@
 package org.ligoj.app.dao;
 
+import org.ligoj.app.iam.dao.DelegateOrgRepository;
+import org.ligoj.app.model.Message;
+import org.ligoj.bootstrap.core.dao.RestRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-
-import org.ligoj.bootstrap.core.dao.RestRepository;
-import org.ligoj.app.dao.ldap.DelegateLdapRepository;
-import org.ligoj.app.model.Message;
 
 /**
  * {@link Message} repository
@@ -36,14 +35,14 @@ public interface MessageRepository extends RestRepository<Message, Integer> {
 			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.USER    AND createdBy = :user)"
 			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.GROUP   AND EXISTS(SELECT 1 FROM CacheGroup c WHERE c.id = m.target"
 			+ "       AND EXISTS(SELECT 1 FROM DelegateLdap d WHERE (d.type=org.ligoj.app.model.ldap.DelegateLdapType.TREE OR d.type=org.ligoj.app.model.ldap.DelegateLdapType.GROUP)"
-			+ "           AND c.description LIKE CONCAT('%,', d.dn) AND " + DelegateLdapRepository.ASSIGNED_DELEGATE + ")))"
+			+ "           AND c.description LIKE CONCAT('%,', d.dn) AND " + DelegateOrgRepository.ASSIGNED_DELEGATE + ")))"
 			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.COMPANY AND EXISTS(SELECT 1 FROM CacheCompany c WHERE c.id = m.target"
 			+ "       AND EXISTS(SELECT 1 FROM DelegateLdap d WHERE (d.type=org.ligoj.app.model.ldap.DelegateLdapType.TREE OR d.type=org.ligoj.app.model.ldap.DelegateLdapType.COMPANY)"
-			+ "           AND c.description LIKE CONCAT('%,', d.dn) AND " + DelegateLdapRepository.ASSIGNED_DELEGATE + ")))"
+			+ "           AND c.description LIKE CONCAT('%,', d.dn) AND " + DelegateOrgRepository.ASSIGNED_DELEGATE + ")))"
 			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.PROJECT AND EXISTS(SELECT 1 FROM Project p   WHERE p.pkey = m.target AND "
 			+ ProjectRepository.VISIBLE_PROJECTS + "))"
 			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.NODE AND EXISTS(SELECT 1    FROM Node n WHERE n.id = m.target"
-			+ "       AND EXISTS(SELECT 1 FROM DelegateNode d WHERE " + DelegateLdapRepository.ASSIGNED_DELEGATE
+			+ "       AND EXISTS(SELECT 1 FROM DelegateNode d WHERE " + DelegateOrgRepository.ASSIGNED_DELEGATE
 			+ " AND (n.id LIKE CONCAT(d.name, ':%') OR n.id = d.id)))))";
 
 	/**

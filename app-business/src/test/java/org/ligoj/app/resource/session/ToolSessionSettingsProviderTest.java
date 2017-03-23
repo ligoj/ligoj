@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.ligoj.bootstrap.core.SpringUtils;
 import org.ligoj.bootstrap.resource.system.session.SessionResource;
 import org.ligoj.bootstrap.resource.system.session.SessionSettings;
-import org.ligoj.app.AbstractJpaTest;
+import org.ligoj.app.AbstractAppTest;
 import org.ligoj.app.api.NodeVo;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Parameter;
@@ -41,7 +41,7 @@ import net.sf.ehcache.CacheManager;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Transactional
 @Rollback
-public class ToolSessionSettingsProviderTest extends AbstractJpaTest {
+public class ToolSessionSettingsProviderTest extends AbstractAppTest {
 
 	@Before
 	public void prepareData() throws IOException {

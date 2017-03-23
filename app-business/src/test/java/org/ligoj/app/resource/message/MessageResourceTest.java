@@ -14,16 +14,8 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import org.ligoj.bootstrap.AbstractJpaTest;
-import org.ligoj.bootstrap.core.json.datatable.DataTableAttributes;
-import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.app.dao.MessageRepository;
-import org.ligoj.app.model.DelegateLdap;
+import org.ligoj.app.iam.model.DelegateOrg;
 import org.ligoj.app.model.DelegateNode;
 import org.ligoj.app.model.Event;
 import org.ligoj.app.model.Message;
@@ -34,6 +26,13 @@ import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
+import org.ligoj.bootstrap.AbstractJpaTest;
+import org.ligoj.bootstrap.core.json.datatable.DataTableAttributes;
+import org.ligoj.bootstrap.core.validation.ValidationJsonException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import net.sf.ehcache.CacheManager;
 
@@ -55,7 +54,7 @@ public class MessageResourceTest extends AbstractJpaTest {
 	@Before
 	public void prepare() throws IOException {
 		persistEntities("csv/app-test", new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class,
-				Event.class, Message.class, DelegateNode.class, DelegateLdap.class }, StandardCharsets.UTF_8.name());
+				Event.class, Message.class, DelegateNode.class, DelegateOrg.class }, StandardCharsets.UTF_8.name());
 		CacheManager.getInstance().getCache("ldap").removeAll();
 	}
 

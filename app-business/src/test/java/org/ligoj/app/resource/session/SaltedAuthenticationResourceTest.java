@@ -21,7 +21,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import org.ligoj.app.AbstractJpaTest;
+import org.ligoj.app.AbstractAppTest;
 import org.ligoj.app.ldap.dao.UserLdapRepository;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Parameter;
@@ -37,7 +37,7 @@ import net.sf.ehcache.CacheManager;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Transactional
 @Rollback
-public class SaltedAuthenticationResourceTest extends AbstractJpaTest {
+public class SaltedAuthenticationResourceTest extends AbstractAppTest {
 
 	@Before
 	public void prepareData() throws IOException {
