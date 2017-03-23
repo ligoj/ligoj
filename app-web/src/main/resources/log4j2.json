@@ -6,7 +6,7 @@
 		"properties": {
 			"property": {
 				"name": "filename",
-				"value": "target/rolling-$${sd:type}.log"
+				"value": "target/rolling.log"
 			}
 		},
 		"ThresholdFilter": {
