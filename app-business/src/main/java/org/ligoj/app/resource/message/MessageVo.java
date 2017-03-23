@@ -2,9 +2,10 @@ package org.ligoj.app.resource.message;
 
 import org.ligoj.app.api.NodeVo;
 import org.ligoj.app.api.SimpleUser;
-import org.ligoj.app.ldap.resource.ContainerLdapWithTypeVo;
 import org.ligoj.app.model.Message;
+import org.ligoj.app.plugin.id.resource.ContainerWithTypeVo;
 import org.ligoj.app.resource.project.ProjectLightVo;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -43,12 +44,12 @@ public class MessageVo extends Message {
 	/**
 	 * Optional group details targeted by this message.
 	 */
-	private ContainerLdapWithTypeVo group;
+	private ContainerWithTypeVo group;
 
 	/**
 	 * Optional company details targeted by this message.
 	 */
-	private ContainerLdapWithTypeVo company;
+	private ContainerWithTypeVo company;
 
 	/**
 	 * Message state. When <code>true</code> this message is new for a specific message.

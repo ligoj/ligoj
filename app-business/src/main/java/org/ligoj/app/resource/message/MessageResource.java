@@ -27,12 +27,12 @@ import org.ligoj.app.dao.MessageReadRepository;
 import org.ligoj.app.dao.MessageRepository;
 import org.ligoj.app.iam.IUserRepository;
 import org.ligoj.app.iam.IamProvider;
-import org.ligoj.app.ldap.resource.CompanyLdapResource;
-import org.ligoj.app.ldap.resource.GroupLdapResource;
-import org.ligoj.app.ldap.resource.UserLdapResource;
 import org.ligoj.app.model.Message;
 import org.ligoj.app.model.MessageRead;
 import org.ligoj.app.model.MessageTargetType;
+import org.ligoj.app.plugin.id.resource.CompanyResource;
+import org.ligoj.app.plugin.id.resource.GroupLdapResource;
+import org.ligoj.app.plugin.id.resource.UserLdapResource;
 import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.app.resource.project.BasicProjectVo;
 import org.ligoj.app.resource.project.ProjectResource;
@@ -78,7 +78,7 @@ public class MessageResource implements InitializingBean {
 	private UserLdapResource userLdapResource;
 
 	@Autowired
-	private CompanyLdapResource companyLdapResource;
+	private CompanyResource companyLdapResource;
 
 	@Autowired
 	private ProjectResource projectResource;

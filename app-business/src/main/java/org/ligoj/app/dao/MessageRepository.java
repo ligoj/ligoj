@@ -45,6 +45,29 @@ public interface MessageRepository extends RestRepository<Message, Integer> {
 			+ "       AND EXISTS(SELECT 1 FROM DelegateNode d WHERE " + DelegateOrgRepository.ASSIGNED_DELEGATE
 			+ " AND (n.id LIKE CONCAT(d.name, ':%') OR n.id = d.id)))))";
 
+
+	/**
+	 * Base query to find related project to a user "u.id".
+	 */
+	String HIS_PROJECTS = "(p.teamLeader = u.id"
+			+ " OR EXISTS(SELECT 1 FROM ParameterValue AS pv, CacheGroup g WHERE pv.parameter.id = 'service:id:group' AND pv.subscription.project = p AND g.id = pv.data"
+			+ "     AND EXISTS(SELECT 1 FROM CacheMembership AS cm WHERE cm.user.id = u.id AND cm.group = g)))";
+
+
+	/**
+	 * Base query to find related messages of a user.
+	 */
+	String AUDIENCE_MESSAGES = "FROM Message m WHERE (targetType IS NULL                           "
+			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.USER    AND target = :user)"
+			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.GROUP   AND EXISTS(SELECT 1 FROM CacheMembership c WHERE c.user.id = :user AND (c.group.id = m.target"
+			+ "       OR EXISTS(SELECT 1 FROM CacheGroup cg WHERE cg.id=m.target AND c.group.description LIKE CONCAT('%,', cg.description)))))"
+			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.COMPANY AND EXISTS(SELECT 1 FROM CacheUser c WHERE c.id = :user AND (c.company.id = m.target"
+			+ "       OR EXISTS(SELECT 1 FROM CacheCompany cc WHERE cc.id=m.target AND c.company.description LIKE CONCAT('%,', cc.description)))))"
+			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.PROJECT AND EXISTS(SELECT 1 FROM Project p   WHERE p.pkey = m.target AND "
+			+ ProjectRepository.MY_PROJECTS + "))"
+			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.NODE AND EXISTS(SELECT 1    FROM Subscription s INNER JOIN s.project p INNER JOIN s.node n000 WHERE"
+			+ "     (n000.id = m.target OR n000.id LIKE CONCAT(m.target, ':%')) AND " + ProjectRepository.MY_PROJECTS + ")))";
+
 	/**
 	 * Return all messages where the given user is involved and by criteria.
 	 * 
@@ -52,6 +75,8 @@ public interface MessageRepository extends RestRepository<Message, Integer> {
 	 *            The user requesting the messages.
 	 * @param criteria
 	 *            Optional text to filter the messages.
+	 * @param pageable
+	 *            The ordering and page data.
 	 * @return The related messages
 	 */
 	@Query(MY_MESSAGES + " AND (:criteria IS NULL OR targetType LIKE(CONCAT(CONCAT('%',:criteria),'%'))"
@@ -71,6 +96,8 @@ public interface MessageRepository extends RestRepository<Message, Integer> {
 	 *            The user requesting the messages.
 	 * @param criteria
 	 *            Optional text to filter the messages.
+	 * @param pageable
+	 *            The ordering and page data.
 	 * @return The related messages
 	 */
 	@Query(VISIBLE_MESSAGES + " AND (:criteria IS NULL OR targetType LIKE(CONCAT(CONCAT('%',:criteria),'%'))"
@@ -87,13 +114,6 @@ public interface MessageRepository extends RestRepository<Message, Integer> {
 	@Query("SELECT COUNT(m.id) " + MY_MESSAGES
 			+ " AND m.id > (SELECT CASE mr.messageId WHEN NULL THEN 0 ELSE mr.messageId END FROM MessageRead  mr WHERE mr.id = :user)")
 	int countUnread(String user);
-
-	/**
-	 * Base query to find related project to a user "u.id".
-	 */
-	String HIS_PROJECTS = "(p.teamLeader = u.id"
-			+ " OR EXISTS(SELECT 1 FROM ParameterValue AS pv, CacheGroup g WHERE pv.parameter.id = 'service:id:group' AND pv.subscription.project = p AND g.id = pv.data"
-			+ "     AND EXISTS(SELECT 1 FROM CacheMembership AS cm WHERE cm.user.id = u.id AND cm.group = g)))";
 
 	/**
 	 * Return the amount of users targeted by the given configuration.
@@ -114,20 +134,6 @@ public interface MessageRepository extends RestRepository<Message, Integer> {
 			+ "  OR (:targetType = 'NODE'     AND EXISTS(SELECT 1 FROM Subscription s INNER JOIN s.project p INNER JOIN s.node n000 WHERE "
 			+ HIS_PROJECTS + "        AND (n000.id = :target OR n000.id LIKE CONCAT(:target, ':%'))))")
 	int audience(String targetType, String target);
-
-	/**
-	 * Base query to find related messages of a user.
-	 */
-	String AUDIENCE_MESSAGES = "FROM Message m WHERE (targetType IS NULL                           "
-			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.USER    AND target = :user)"
-			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.GROUP   AND EXISTS(SELECT 1 FROM CacheMembership c WHERE c.user.id = :user AND (c.group.id = m.target"
-			+ "       OR EXISTS(SELECT 1 FROM CacheGroup cg WHERE cg.id=m.target AND c.group.description LIKE CONCAT('%,', cg.description)))))"
-			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.COMPANY AND EXISTS(SELECT 1 FROM CacheUser c WHERE c.id = :user AND (c.company.id = m.target"
-			+ "       OR EXISTS(SELECT 1 FROM CacheCompany cc WHERE cc.id=m.target AND c.company.description LIKE CONCAT('%,', cc.description)))))"
-			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.PROJECT AND EXISTS(SELECT 1 FROM Project p   WHERE p.pkey = m.target AND "
-			+ ProjectRepository.MY_PROJECTS + "))"
-			+ "  OR (targetType = org.ligoj.app.model.MessageTargetType.NODE AND EXISTS(SELECT 1    FROM Subscription s INNER JOIN s.project p INNER JOIN s.node n000 WHERE"
-			+ "     (n000.id = m.target OR n000.id LIKE CONCAT(m.target, ':%')) AND " + ProjectRepository.MY_PROJECTS + ")))";
 
 	/**
 	 * Delete the message matching to the given identifier if this message is visible to a specified user.

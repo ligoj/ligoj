@@ -9,7 +9,7 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.dao.MessageRepository;
-import org.ligoj.app.ldap.resource.CompanyLdapResource;
+import org.ligoj.app.plugin.id.resource.CompanyResource;
 import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.bootstrap.core.json.ObjectMapperTrim;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
@@ -33,7 +33,7 @@ public class ToolSessionSettingsProvider implements ISessionSettingsProvider {
 	@Autowired
 	private ConfigurationResource configuration;
 	@Autowired
-	private CompanyLdapResource companyLdapResource;
+	private CompanyResource companyLdapResource;
 
 	@Autowired
 	private MessageRepository messageRepository;
