@@ -7,16 +7,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.ligoj.app.api.IAuthenticationContributor;
+import org.ligoj.app.iam.IamProvider;
+import org.ligoj.app.resource.session.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
-import org.ligoj.app.iam.IamProvider;
-import org.ligoj.app.ldap.resource.RedirectResource;
-import org.ligoj.app.resource.session.User;
 
 /**
  * Session resource.
@@ -27,23 +28,11 @@ import org.ligoj.app.resource.session.User;
 @Produces(MediaType.APPLICATION_JSON)
 public class SecurityResource {
 
-	private RedirectResource redirectResource;
-
-	private IamProvider iamProvider;
-
-	/**
-	 * Constructor for test injection
-	 * 
-	 * @param iamProvider
-	 *            The related {@link IamProvider}.
-	 * @param redirectResource
-	 *            The redirection support.
-	 */
 	@Autowired
-	public SecurityResource(final IamProvider iamProvider, final RedirectResource redirectResource) {
-		this.iamProvider = iamProvider;
-		this.redirectResource = redirectResource;
-	}
+	protected ApplicationContext applicationContext;
+
+	@Autowired
+	protected IamProvider iamProvider;
 
 	/**
 	 * Check the user credentials.
@@ -63,8 +52,10 @@ public class SecurityResource {
 		// The authenticate the user
 		final Authentication authentication = authenticate(user.getName(), user.getPassword());
 
-		// Also return the redirect cookie preference
-		return redirectResource.buildCookieResponse(user.getName()).header("X-Real-User", authentication.getName()).build();
+		// Delegate the final response to the authentication contributors
+		final ResponseBuilder response = Response.noContent();
+		applicationContext.getBeansOfType(IAuthenticationContributor.class).values().forEach(l -> l.accept(response, authentication));
+		return response.build();
 	}
 
 	/**
