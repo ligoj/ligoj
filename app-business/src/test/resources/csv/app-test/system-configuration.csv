@@ -1,0 +1,3 @@
+name;value
+global.tools.internal;[{"id": "service:km:confluence:dig", "parameters" : {"query":"rest/spacedirectory/1/search?query=&label=team%3Aportail-dig&pageSize=24&startIndex=0"}}] 
+global.tools.external;[]

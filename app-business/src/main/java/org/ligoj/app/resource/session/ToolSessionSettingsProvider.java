@@ -12,10 +12,10 @@ import org.ligoj.app.dao.MessageRepository;
 import org.ligoj.app.ldap.resource.CompanyLdapResource;
 import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.bootstrap.core.json.ObjectMapperTrim;
+import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.ligoj.bootstrap.resource.system.session.ISessionSettingsProvider;
 import org.ligoj.bootstrap.resource.system.session.SessionSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -30,12 +30,8 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class ToolSessionSettingsProvider implements ISessionSettingsProvider {
 
-	@Value("${global.tools.internal}")
-	protected String globalToolsInternal;
-
-	@Value("${global.tools.external}")
-	protected String globalToolsExternal;
-
+	@Autowired
+	private ConfigurationResource configuration;
 	@Autowired
 	private CompanyLdapResource companyLdapResource;
 
@@ -61,11 +57,11 @@ public class ToolSessionSettingsProvider implements ISessionSettingsProvider {
 		if (companyLdapResource.isUserInternalCommpany()) {
 			// Internal user
 			userSetting.put("internal", Boolean.TRUE);
-			source = globalToolsInternal;
+			source = configuration.get("global.tools.internal");
 		} else {
 			// External user
 			userSetting.put("external", Boolean.TRUE);
-			source = globalToolsExternal;
+			source = configuration.get("global.tools.external");
 		}
 
 		// Fetch the required node data

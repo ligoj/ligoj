@@ -13,6 +13,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ligoj.app.AbstractAppTest;
+import org.ligoj.app.api.NodeVo;
+import org.ligoj.app.model.Node;
+import org.ligoj.app.model.Parameter;
+import org.ligoj.app.model.ParameterValue;
+import org.ligoj.app.model.Project;
+import org.ligoj.app.model.Subscription;
+import org.ligoj.bootstrap.core.SpringUtils;
+import org.ligoj.bootstrap.model.system.SystemConfiguration;
+import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
+import org.ligoj.bootstrap.resource.system.session.SessionSettings;
 import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -22,16 +33,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import org.ligoj.bootstrap.core.SpringUtils;
-import org.ligoj.bootstrap.resource.system.session.SessionResource;
-import org.ligoj.bootstrap.resource.system.session.SessionSettings;
-import org.ligoj.app.AbstractAppTest;
-import org.ligoj.app.api.NodeVo;
-import org.ligoj.app.model.Node;
-import org.ligoj.app.model.Parameter;
-import org.ligoj.app.model.ParameterValue;
-import org.ligoj.app.model.Project;
-import org.ligoj.app.model.Subscription;
 import net.sf.ehcache.CacheManager;
 
 /**
@@ -46,10 +47,12 @@ public class ToolSessionSettingsProviderTest extends AbstractAppTest {
 	@Before
 	public void prepareData() throws IOException {
 		// Only with Spring context
-		persistEntities("csv/app-test", new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
+		persistEntities("csv/app-test",
+				new Class[] { SystemConfiguration.class, Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
 				StandardCharsets.UTF_8.name());
 		CacheManager.getInstance().getCache("ldap").removeAll();
 		CacheManager.getInstance().getCache("ldap-user-repository").removeAll();
+		CacheManager.getInstance().getCache("configuration").removeAll();
 
 		// For the cache to be created
 		getUser().findAll();
@@ -59,7 +62,7 @@ public class ToolSessionSettingsProviderTest extends AbstractAppTest {
 	private ToolSessionSettingsProvider provider;
 
 	@Autowired
-	private SessionResource resource;
+	private ConfigurationResource configuration;
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -78,7 +81,8 @@ public class ToolSessionSettingsProviderTest extends AbstractAppTest {
 	@Test
 	public void decorate() {
 		initSpringSecurityContext("fdaugan");
-		final SessionSettings details = resource.details();
+		final SessionSettings details = new SessionSettings();
+		details.setUserSettings(new HashMap<>());
 		provider.decorate(details);
 		Assert.assertEquals(Boolean.TRUE, details.getUserSettings().get("internal"));
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -86,7 +90,7 @@ public class ToolSessionSettingsProviderTest extends AbstractAppTest {
 		Assert.assertEquals(1, globalTools.size());
 		final NodeVo node = (NodeVo) globalTools.get(0).get("node");
 		Assert.assertEquals("service:km:confluence:dig", node.getId());
-		Assert.assertEquals("Confluence Gfi", node.getName());
+		Assert.assertEquals("Confluence Corporate", node.getName());
 		Assert.assertEquals(3, node.getParameters().size());
 		Assert.assertEquals("http://localhost:8120", node.getParameters().get("service:km:confluence:url"));
 	}
@@ -101,7 +105,7 @@ public class ToolSessionSettingsProviderTest extends AbstractAppTest {
 		details.setUserSettings(new HashMap<>());
 		final ToolSessionSettingsProvider resource = new ToolSessionSettingsProvider();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
-		resource.globalToolsInternal = "{error}";
+		configuration.saveOrUpdate("global.tools.internal", "{error}");
 		resource.decorate(details);
 		Assert.assertNull(details.getUserSettings().get("globalTools"));
 	}
@@ -110,7 +114,8 @@ public class ToolSessionSettingsProviderTest extends AbstractAppTest {
 	@Test
 	public void decorateExternal() {
 		initSpringSecurityContext("wuser");
-		final SessionSettings details = resource.details();
+		final SessionSettings details = new SessionSettings();
+		details.setUserSettings(new HashMap<>());
 		provider.decorate(details);
 		Assert.assertEquals(Boolean.TRUE, details.getUserSettings().get("external"));
 		Assert.assertTrue(((Collection) details.getUserSettings().get("globalTools")).isEmpty());
