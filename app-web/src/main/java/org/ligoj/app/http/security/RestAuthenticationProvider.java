@@ -51,7 +51,7 @@ public class RestAuthenticationProvider extends GfiAuthenticationProvider {
 				// Succeed authentication, save the cookies data inside the authentication
 				return newAuthentication(userName, userpassword, authentication, httpResponse);
 			}
-			log.info("Failed authentication of " + userName + "[" + userpassword.length() + "] : " + httpResponse.getStatusLine().getStatusCode());
+			log.info("Failed authentication of {}[{}] : {}", userName, userpassword.length(), httpResponse.getStatusLine().getStatusCode());
 			httpResponse.getEntity().getContent().close();
 		} catch (final IOException e) {
 			log.warn("Remote SSO server is not available", e);
