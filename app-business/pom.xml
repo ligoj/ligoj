@@ -40,11 +40,12 @@
 			<version>${api.version}</version>
 			<scope>test</scope>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.ligoj.plugin</groupId> -->
-<!-- 			<artifactId>plugin-id-ldap</artifactId> -->
-<!-- 			<version>0.0.1-SNAPSHOT</version> -->
-<!-- 		</dependency> -->
+		<dependency>
+			<groupId>org.ligoj.api</groupId>
+			<artifactId>plugin-iam-public</artifactId>
+			<version>${api.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Dependency used to provide static resources from jars in classpath -->
 		<!-- <dependency> -->
