@@ -31,8 +31,8 @@ import org.ligoj.app.model.Message;
 import org.ligoj.app.model.MessageRead;
 import org.ligoj.app.model.MessageTargetType;
 import org.ligoj.app.plugin.id.resource.CompanyResource;
-import org.ligoj.app.plugin.id.resource.GroupLdapResource;
-import org.ligoj.app.plugin.id.resource.UserLdapResource;
+import org.ligoj.app.plugin.id.resource.GroupResource;
+import org.ligoj.app.plugin.id.resource.UserOrgResource;
 import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.app.resource.project.BasicProjectVo;
 import org.ligoj.app.resource.project.ProjectResource;
@@ -75,10 +75,10 @@ public class MessageResource implements InitializingBean {
 	private IamProvider iamProvider;
 
 	@Autowired
-	private UserLdapResource userLdapResource;
+	private UserOrgResource userResource;
 
 	@Autowired
-	private CompanyResource companyLdapResource;
+	private CompanyResource companyResource;
 
 	@Autowired
 	private ProjectResource projectResource;
@@ -87,7 +87,7 @@ public class MessageResource implements InitializingBean {
 	private NodeResource nodeResource;
 
 	@Autowired
-	private GroupLdapResource groupLdapResource;
+	private GroupResource groupResource;
 
 	@Autowired
 	private MessageReadRepository messageReadRepository;
@@ -305,10 +305,10 @@ public class MessageResource implements InitializingBean {
 			vo.setProject(projectResource.findByPKey(message.getTarget()));
 			break;
 		case COMPANY:
-			vo.setCompany(companyLdapResource.findByName(message.getTarget()));
+			vo.setCompany(companyResource.findByName(message.getTarget()));
 			break;
 		case GROUP:
-			vo.setGroup(groupLdapResource.findByName(message.getTarget()));
+			vo.setGroup(groupResource.findByName(message.getTarget()));
 			break;
 		case NODE:
 			vo.setNode(nodeResource.findByIdInternal(message.getTarget()));
@@ -336,11 +336,11 @@ public class MessageResource implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		checker.put(MessageTargetType.COMPANY, companyLdapResource::findByIdExpected);
-		checker.put(MessageTargetType.GROUP, groupLdapResource::findByIdExpected);
+		checker.put(MessageTargetType.COMPANY, companyResource::findByIdExpected);
+		checker.put(MessageTargetType.GROUP, groupResource::findByIdExpected);
 		checker.put(MessageTargetType.PROJECT, projectResource::findByPKey);
 		checker.put(MessageTargetType.NODE, nodeResource::findByIdExpected);
-		checker.put(MessageTargetType.USER, userLdapResource::findById);
+		checker.put(MessageTargetType.USER, userResource::findById);
 	}
 
 	/**

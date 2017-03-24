@@ -33,7 +33,7 @@ public class ToolSessionSettingsProvider implements ISessionSettingsProvider {
 	@Autowired
 	private ConfigurationResource configuration;
 	@Autowired
-	private CompanyResource companyLdapResource;
+	private CompanyResource companyResource;
 
 	@Autowired
 	private MessageRepository messageRepository;
@@ -54,7 +54,7 @@ public class ToolSessionSettingsProvider implements ISessionSettingsProvider {
 
 		// Add the related one to the type of user
 		final String source;
-		if (companyLdapResource.isUserInternalCommpany()) {
+		if (companyResource.isUserInternalCommpany()) {
 			// Internal user
 			userSetting.put("internal", Boolean.TRUE);
 			source = configuration.get("global.tools.internal");
@@ -75,7 +75,7 @@ public class ToolSessionSettingsProvider implements ISessionSettingsProvider {
 				return globalTool;
 			}).filter(globalTool -> globalTool.containsKey("node")).collect(Collectors.toList()));
 		} catch (final IOException ioe) {
-			log.error(String.format("Unable to write the global tools configuration for user %s", settings.getUserName()), ioe);
+			log.error("Unable to write the global tools configuration for user {}", settings.getUserName(), ioe);
 		}
 
 		// Add the unread messages counter
