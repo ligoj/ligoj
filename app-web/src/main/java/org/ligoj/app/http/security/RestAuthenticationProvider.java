@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.core.HttpHeaders;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -66,7 +68,7 @@ public class RestAuthenticationProvider extends GfiAuthenticationProvider {
 	 */
 	private Authentication newAuthentication(final String userName, final String userpassword, final Authentication authentication,
 			final HttpResponse httpResponse) {
-		final List<String> cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> header.getName().equals("Set-Cookie"))
+		final List<String> cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> header.getName().equals(HttpHeaders.SET_COOKIE))
 				.map(Header::getValue).collect(Collectors.toList());
 
 		// Get the optional real user name if provided
