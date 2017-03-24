@@ -14,7 +14,6 @@ import org.ligoj.app.iam.IamProvider;
 import org.ligoj.app.resource.session.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -40,15 +39,11 @@ public class SecurityResource {
 	 * @param user
 	 *            the user 's credentials.
 	 * @return the custom {@link Response} that may contain additional cross-domain cookies.
-	 * @throws Exception
-	 *             For technical exception.
-	 * @throws BadCredentialsException
-	 *             when login failed.
 	 */
 	@POST
 	@Path("login")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response login(final User user) throws Exception {
+	public Response login(final User user) {
 		// The authenticate the user
 		final Authentication authentication = authenticate(user.getName(), user.getPassword());
 
@@ -61,7 +56,7 @@ public class SecurityResource {
 	/**
 	 * Authenticate the given user
 	 */
-	private Authentication authenticate(final String name, final String credential) throws Exception {
+	private Authentication authenticate(final String name, final String credential) {
 		return iamProvider.authenticate(new UsernamePasswordAuthenticationToken(name, credential));
 	}
 
