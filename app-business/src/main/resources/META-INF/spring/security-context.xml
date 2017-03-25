@@ -49,6 +49,6 @@
 		<property name="preAuthenticatedUserDetailsService" ref="authentication-user-service" />
 	</bean>
 	<bean id="authentication-user-service" class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
-		<property name="userDetailsService" ref="userDetailsService" />
+		<property name="userDetailsService" ref="rbacUserDetailsService" />
 	</bean>
 </beans>
