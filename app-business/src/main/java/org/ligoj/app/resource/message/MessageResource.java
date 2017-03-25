@@ -194,13 +194,13 @@ public class MessageResource implements InitializingBean {
 	}
 
 	/**
-	 * Return all messages the given user could have written, and by criteria. The main difference with the function
-	 * {@link #findMy(String, UriInfo)} is the messages returned includes the one the given user is not
+	 * Return all messages by criteria the given user could have written. The main difference with the function
+	 * {@link #findMy(String, UriInfo)} is that the returned messages includes the one the given user is not
 	 * involved, or targeted.
-	 * For sample, with this function, a user can see all messages from a group because this group is visible by this
+	 * For sample with this function, a user can see all messages from a group because this group is visible by this
 	 * user.
-	 * But with the other function {@link #findMy(String, UriInfo)} these messages will be returned
-	 * because this user is not member of this group.
+	 * But with the other function {@link #findMy(String, UriInfo)} these messages will be returned because this user is
+	 * not member of this group.
 	 *
 	 * @param criteria
 	 *            The optional criteria to match : message content or target type, or target.
