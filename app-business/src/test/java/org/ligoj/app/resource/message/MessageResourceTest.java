@@ -14,7 +14,12 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.ligoj.app.AbstractAppTest;
 import org.ligoj.app.dao.MessageRepository;
+import org.ligoj.app.iam.model.CacheCompany;
+import org.ligoj.app.iam.model.CacheGroup;
+import org.ligoj.app.iam.model.CacheMembership;
+import org.ligoj.app.iam.model.CacheUser;
 import org.ligoj.app.iam.model.DelegateOrg;
 import org.ligoj.app.model.DelegateNode;
 import org.ligoj.app.model.Event;
@@ -26,15 +31,12 @@ import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
-import org.ligoj.bootstrap.AbstractJpaTest;
 import org.ligoj.bootstrap.core.json.datatable.DataTableAttributes;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import net.sf.ehcache.CacheManager;
 
 /**
  * {@link MessageResource} test cases.
@@ -44,7 +46,7 @@ import net.sf.ehcache.CacheManager;
 @Rollback
 @Transactional
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MessageResourceTest extends AbstractJpaTest {
+public class MessageResourceTest extends AbstractAppTest {
 
 	@Autowired
 	private MessageResource resource;
@@ -53,14 +55,14 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Before
 	public void prepare() throws IOException {
-		persistEntities("csv/app-test", new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class,
-				Event.class, Message.class, DelegateNode.class, DelegateOrg.class }, StandardCharsets.UTF_8.name());
-		CacheManager.getInstance().getCache("ldap").removeAll();
+		persistEntities("csv/app-test",
+				new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class, Event.class, Message.class,
+						DelegateNode.class, DelegateOrg.class, CacheCompany.class, CacheUser.class, CacheGroup.class, CacheMembership.class },
+				StandardCharsets.UTF_8.name());
 	}
 
 	@Test
 	public void updateOwnMessageToMe() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final int id = repository.findBy("target", DEFAULT_USER).getId();
 		em.clear();
 
@@ -80,7 +82,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void deleteOwnMessageToMe() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final int id = repository.findBy("target", DEFAULT_USER).getId();
 		resource.delete(id);
 		em.flush();
@@ -90,7 +91,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void deleteOwnMessageToAnother() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final int id = repository.findBy("target", "user1").getId();
 		resource.delete(id);
 		em.flush();
@@ -107,7 +107,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void deleteManagedNodeMessage() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final int id = repository.findBy("target", "service:bt").getId();
 		resource.delete(id);
 		em.flush();
@@ -117,7 +116,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void deleteManagedGroupMessage() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final int id = repository.findBy("targetType", MessageTargetType.GROUP).getId();
 		resource.delete(id);
 		em.flush();
@@ -134,7 +132,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void deleteManagedCompanyMessage() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final int id = repository.findBy("targetType", MessageTargetType.COMPANY).getId();
 		resource.delete(id);
 		em.flush();
@@ -151,7 +148,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void deleteManagedProjectMessage() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final int id = repository.findBy("targetType", MessageTargetType.PROJECT).getId();
 		resource.delete(id);
 		em.flush();
@@ -168,7 +164,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test(expected = ValidationJsonException.class)
 	public void deleteNotExists() {
-		initSpringSecurityContext(DEFAULT_USER);
 		resource.delete(0);
 	}
 
@@ -180,7 +175,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void createCompany() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final Message message = new Message();
 		message.setTarget("gfi");
 		message.setTargetType(MessageTargetType.COMPANY);
@@ -199,7 +193,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test(expected = ForbiddenException.class)
 	public void createXSSScript() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final Message message = new Message();
 		message.setTarget("alongchu");
 		message.setTargetType(MessageTargetType.USER);
@@ -209,7 +202,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test(expected = ForbiddenException.class)
 	public void createXSSScript2() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final Message message = new Message();
 		message.setTarget("alongchu");
 		message.setTargetType(MessageTargetType.USER);
@@ -219,7 +211,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test(expected = ForbiddenException.class)
 	public void createXSSScript3() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final Message message = new Message();
 		message.setTarget("alongchu");
 		message.setTargetType(MessageTargetType.USER);
@@ -229,7 +220,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void createUserMarkup() {
-		initSpringSecurityContext(DEFAULT_USER);
 
 		final MessageRead messageRead = new MessageRead();
 		messageRead.setId("alongchu");
@@ -250,7 +240,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void createUser() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final Message message = new Message();
 		message.setTarget("alongchu");
 		message.setTargetType(MessageTargetType.USER);
@@ -269,7 +258,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void createGroup() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final Message message = new Message();
 		message.setTarget("gfi-gStack");
 		message.setTargetType(MessageTargetType.GROUP);
@@ -306,7 +294,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void createNode() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final Message message = new Message();
 		message.setTarget("service:build:jenkins");
 		message.setTargetType(MessageTargetType.NODE);
@@ -331,7 +318,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void findAll() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final UriInfo uriInfo = newUriInfo();
 		uriInfo.getQueryParameters().putSingle(DataTableAttributes.PAGE_LENGTH, "100");
 		final List<MessageVo> messages = resource.findAll(null, uriInfo).getData();
@@ -349,7 +335,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void findMy() {
-		initSpringSecurityContext(DEFAULT_USER);
 		final UriInfo uriInfo = newUriInfo();
 		uriInfo.getQueryParameters().putSingle(DataTableAttributes.PAGE_LENGTH, "100");
 		final List<MessageVo> messages = resource.findMy(null, uriInfo).getData();
@@ -524,25 +509,21 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test(expected = ValidationJsonException.class)
 	public void audienceUserUnknown() {
-		initSpringSecurityContext(DEFAULT_USER);
 		resource.audience(MessageTargetType.USER, "any");
 	}
 
 	@Test
 	public void audienceUser() {
-		initSpringSecurityContext(DEFAULT_USER);
 		Assert.assertEquals(1, resource.audience(MessageTargetType.USER, "fdaugan"));
 	}
 
 	@Test
 	public void audienceGroup() {
-		initSpringSecurityContext(DEFAULT_USER);
 		Assert.assertEquals(1, resource.audience(MessageTargetType.GROUP, "gfi-gstack"));
 	}
 
 	@Test(expected = ValidationJsonException.class)
 	public void audienceGroupUnknown() {
-		initSpringSecurityContext(DEFAULT_USER);
 		resource.audience(MessageTargetType.GROUP, "any");
 	}
 
@@ -554,7 +535,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void audienceCompany() {
-		initSpringSecurityContext(DEFAULT_USER);
 		Assert.assertEquals(7, resource.audience(MessageTargetType.COMPANY, "gfi"));
 	}
 
@@ -566,13 +546,11 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test(expected = ValidationJsonException.class)
 	public void audienceCompanyUnknown() {
-		initSpringSecurityContext(DEFAULT_USER);
 		resource.audience(MessageTargetType.COMPANY, "any");
 	}
 
 	@Test
 	public void audienceProject() {
-		initSpringSecurityContext(DEFAULT_USER);
 		Assert.assertEquals(2, resource.audience(MessageTargetType.PROJECT, "gfi-gstack"));
 	}
 
@@ -596,7 +574,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test
 	public void audienceNode() {
-		initSpringSecurityContext(DEFAULT_USER);
 		Assert.assertEquals(2, resource.audience(MessageTargetType.NODE, "service:build:jenkins"));
 		Assert.assertEquals(2, resource.audience(MessageTargetType.NODE, "service:build:jenkins:bpr"));
 		Assert.assertEquals(2, resource.audience(MessageTargetType.NODE, "service:scm"));
@@ -610,7 +587,6 @@ public class MessageResourceTest extends AbstractJpaTest {
 
 	@Test(expected = ValidationJsonException.class)
 	public void audienceNodeUnknown() {
-		initSpringSecurityContext(DEFAULT_USER);
 		resource.audience(MessageTargetType.NODE, "service:any");
 	}
 
