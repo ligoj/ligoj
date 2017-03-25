@@ -16,7 +16,7 @@
 	</context-param>
 	<servlet>
 		<servlet-name>RestProxy</servlet-name>
-		<servlet-class>org.ligoj.parent.http.proxy.ProxyServlet</servlet-class>
+		<servlet-class>org.ligoj.bootstrap.http.proxy.BackendProxyServlet</servlet-class>
 		<init-param>
 			<param-name>proxyToKey</param-name>
 			<param-value>saas.endpoint.url</param-value>
@@ -50,7 +50,7 @@
 	</servlet>
 	<servlet>
 		<servlet-name>PluginProxy</servlet-name>
-		<servlet-class>org.ligoj.parent.http.proxy.ProxyServlet</servlet-class>
+		<servlet-class>org.ligoj.bootstrap.http.proxy.BackendProxyServlet</servlet-class>
 		<init-param>
 			<param-name>proxyToKey</param-name>
 			<param-value>saas.plugins.endpoint.url</param-value>
@@ -115,7 +115,7 @@
 	<filter>
 		<display-name>HTML proxy</display-name>
 		<filter-name>htmlProxy</filter-name>
-		<filter-class>org.ligoj.parent.http.proxy.HtmlProxyFilter</filter-class>
+		<filter-class>org.ligoj.bootstrap.http.proxy.HtmlProxyFilter</filter-class>
 		<async-supported>true</async-supported>
 	</filter>
 	<filter>
@@ -131,7 +131,7 @@
 			<param-value>true</param-value>
 		</init-param>
 		<init-param>
-			<param-name>expirationTime</param-name>
+			<param-name>expiration</param-name>
 			<param-value>31556926</param-value>
 		</init-param>
 	</filter>
