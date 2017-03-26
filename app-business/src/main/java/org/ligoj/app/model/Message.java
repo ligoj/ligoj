@@ -1,5 +1,6 @@
 package org.ligoj.app.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -34,6 +35,7 @@ public class Message extends AbstractAudited<Integer> {
 	 */
 	@Enumerated(EnumType.STRING)
 	@NotNull
+	@Column(length = 10)
 	private MessageTargetType targetType;
 
 	/**
