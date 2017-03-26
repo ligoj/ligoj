@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "SAAS_MESSAGE_USER_READ")
+@Table(name = "LIGOJ_MESSAGE_USER_READ")
 public class MessageRead extends AbstractBusinessEntity<String> {
 
 	/**

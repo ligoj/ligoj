@@ -19,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "SAAS_MESSAGE")
+@Table(name = "LIGOJ_MESSAGE")
 public class Message extends AbstractAudited<Integer> {
 
 	/**
