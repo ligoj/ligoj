@@ -46,11 +46,42 @@
 			<version>${api.version}</version>
 			<scope>test</scope>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.ligoj.plugin</groupId> -->
-<!-- 			<artifactId>plugin-id-ldap</artifactId> -->
-<!-- 			<version>0.0.1-SNAPSHOT</version> -->
-<!-- 		</dependency> -->
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-id-ldap</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-iam-node</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-mail-smtp</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-password-management</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-redirect</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-sso-salt</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>runtime</scope>
+		</dependency>
 
 		<!-- Dependency used to provide static resources from jars in classpath -->
 		<!-- <dependency> -->
@@ -60,6 +91,30 @@
 		<!-- <scope>runtime</scope> -->
 		<!-- </dependency> -->
 	</dependencies>
+	<build>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>**/*.jar</exclude>
+					<exclude>**/*.txt</exclude>
+					<exclude>**/*.csv</exclude>
+					<exclude>**/*.xls</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>**/*.jar</include>
+					<include>**/*.txt</include>
+					<include>**/*.csv</include>
+					<include>**/*.xls</include>
+				</includes>
+			</testResource>
+		</testResources>
+	</build>
 
 	<profiles>
 		<profile>
