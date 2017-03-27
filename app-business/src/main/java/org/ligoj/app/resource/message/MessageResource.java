@@ -339,7 +339,7 @@ public class MessageResource implements InitializingBean {
 		checker.put(MessageTargetType.COMPANY, companyResource::findByIdExpected);
 		checker.put(MessageTargetType.GROUP, groupResource::findByIdExpected);
 		checker.put(MessageTargetType.PROJECT, projectResource::findByPKey);
-		checker.put(MessageTargetType.NODE, nodeResource::findByIdExpected);
+		checker.put(MessageTargetType.NODE, nodeResource::findById);
 		checker.put(MessageTargetType.USER, userResource::findById);
 	}
 
