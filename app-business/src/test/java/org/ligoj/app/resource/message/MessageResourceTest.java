@@ -418,7 +418,6 @@ public class MessageResourceTest extends AbstractAppTest {
 		Assert.assertTrue(message.isUnread());
 		Assert.assertEquals("junit", message.getFrom().getId());
 		Assert.assertEquals("service:build:jenkins", message.getNode().getId());
-		Assert.assertEquals("Jenkins CI", message.getNode().getDescription());
 		Assert.assertEquals("Jenkins", message.getNode().getName());
 		Assert.assertEquals("Build", message.getNode().getRefined().getName());
 
