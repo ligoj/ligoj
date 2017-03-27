@@ -57,7 +57,7 @@
 		</init-param>
 		<init-param>
 			<param-name>prefix</param-name>
-			<param-value>/main/plugin</param-value>
+			<param-value>/main</param-value>
 		</init-param>
 		<init-param>
 			<param-name>idleTimeout</param-name>
@@ -101,7 +101,8 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>PluginProxy</servlet-name>
-		<url-pattern>/main/plugin/*</url-pattern>
+		<url-pattern>/main/service/*</url-pattern>
+		<url-pattern>/main/id/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>captcha</servlet-name>
@@ -215,14 +216,14 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>dosFilter</filter-name>
-		<url-pattern>/rest/ldap/password/reset/*</url-pattern>
-		<url-pattern>/rest/ldap/password/recovery/*</url-pattern>
+		<url-pattern>/rest/service/password/reset/*</url-pattern>
+		<url-pattern>/rest/service/password/recovery/*</url-pattern>
 		<url-pattern>/captcha.png</url-pattern>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>captchaFilter</filter-name>
-		<url-pattern>/rest/ldap/password/reset/*</url-pattern>
-		<url-pattern>/rest/ldap/password/recovery/*</url-pattern>
+		<url-pattern>/rest/service/password/reset/*</url-pattern>
+		<url-pattern>/rest/service/password/recovery/*</url-pattern>
 	</filter-mapping>
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
