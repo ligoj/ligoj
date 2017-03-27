@@ -10,13 +10,25 @@
         <dependent-module archiveName="plugin-api-1.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/plugin-api/plugin-api">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="plugin-id-ldap-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/plugin-id-ldap/plugin-id-ldap">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="plugin-id-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/plugin-id/plugin-id">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="plugin-id-ldap-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/plugin-id-ldap/plugin-id-ldap">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="plugin-iam-node-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/plugin-iam-node/plugin-iam-node">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <dependent-module archiveName="plugin-mail-smtp-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/plugin-mail-smtp/plugin-mail-smtp">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="plugin-password-management-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/plugin-password-management/plugin-password-management">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="plugin-redirect-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/plugin-redirect/plugin-redirect">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="plugin-sso-salt-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/plugin-sso-salt/plugin-sso-salt">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/app-business/target/classes"/>

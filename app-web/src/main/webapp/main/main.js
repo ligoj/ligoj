@@ -33,7 +33,7 @@ define(['cascade'], function ($cascade) {
 				// Simple service
 				return '<i title="' + title + '" class="' + (node.uiClasses || 'fa fa-wrench') + '"></i>';
 			}
-			var url = 'main/plugin/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';
+			var url = 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';
 			var result = '<img src="' + url + '" title="' + title + '" alt="' + title + '"' + (dataSrc ? ' data-src="' + url + '"' : '') + ' class="tool"/>';
 			if (recursive) {
 				var parent = null;
@@ -70,7 +70,7 @@ define(['cascade'], function ($cascade) {
 
 				// Link text
 				text = text || fullName;
-				return '<a' + (user.locked ? ' class="locked"' : '') + ' href="#/ldap/user/' + user.id + '" rel="popover" data-toggle="popover" data-placement="left" data-title="' + fullName + '" data-trigger="hover" data-html="true" data-content=\'' + content + '\'>' + text + '</a>';
+				return '<a' + (user.locked ? ' class="locked"' : '') + ' href="#/service/id/user/' + user.id + '" rel="popover" data-toggle="popover" data-placement="left" data-title="' + fullName + '" data-trigger="hover" data-html="true" data-content=\'' + content + '\'>' + text + '</a>';
 			}
 			return current.$messages.unknown;
 		},
@@ -172,7 +172,7 @@ define(['cascade'], function ($cascade) {
 		],
 
 		newSelect2User: function (selector, filter, placeholder) {
-			return current.newSelect2(selector, REST_PATH + 'ldap/user' + (filter || ''), placeholder || current.$messages.user, function (object) {
+			return current.newSelect2(selector, REST_PATH + 'service/id/user' + (filter || ''), placeholder || current.$messages.user, function (object) {
 				return object.id + ' [<small>' + current.$main.getFullName(object) + '</small>]';
 			});
 		},
@@ -185,10 +185,10 @@ define(['cascade'], function ($cascade) {
 			return current.newSelect2(selector, REST_PATH + 'project' + (filter || ''), placeholder || current.$messages.project, textFunction, idProperty || 'id', textProperty || 'name');
 		},
 		newSelect2Company: function (selector, filter, placeholder) {
-			return current.newSelect2(selector, REST_PATH + 'ldap/company/filter' + (filter || '/read'), placeholder || current.$messages.company);
+			return current.newSelect2(selector, REST_PATH + 'service/id/company/filter' + (filter || '/read'), placeholder || current.$messages.company);
 		},
 		newSelect2Group: function (selector, filter, placeholder) {
-			return current.newSelect2(selector, REST_PATH + 'ldap/group/filter' + (filter || '/read'), placeholder || current.$messages.group);
+			return current.newSelect2(selector, REST_PATH + 'service/id/group/filter' + (filter || '/read'), placeholder || current.$messages.group);
 		},
 		newSelect2: function (selector, url, placeholder, textFunction, idProperty, textProperty) {
 			var toText = function (object) {

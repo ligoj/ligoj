@@ -18,8 +18,8 @@
 		<intercept-url pattern="/login" access="permitAll" />
 		<intercept-url pattern="/rest/redirect" access="permitAll" />
 		<intercept-url pattern="/rest/security/login" access="isAnonymous()" />
-		<intercept-url pattern="/rest/ldap/password/reset/**" access="isAnonymous()" />
-		<intercept-url pattern="/rest/ldap/password/recovery/**" access="isAnonymous()" />
+		<intercept-url pattern="/rest/service/password/reset/**" access="isAnonymous()" />
+		<intercept-url pattern="/rest/service/password/recovery/**" access="isAnonymous()" />
 		<intercept-url pattern="/**" access="hasParameter('api-key') or hasHeader('x-api-key') or isFullyAuthenticated()" />
 		<form-login login-page="/login.html?denied" authentication-success-handler-ref="authentication-success-handler" authentication-failure-handler-ref="authentication-failure-handler" />
 		<session-management>

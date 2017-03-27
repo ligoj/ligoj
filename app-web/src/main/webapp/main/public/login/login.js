@@ -96,10 +96,10 @@ define([
 			});
 		},
 		reset: function () {
-			current.ajax('rest/ldap/password/reset/' + $('#username').val().toLowerCase(), JSON.stringify({password: $('#password').val(), token: current.token}), true);
+			current.ajax('rest/service/password/reset/' + $('#username').val().toLowerCase(), JSON.stringify({password: $('#password').val(), token: current.token}), true);
 		},
 		recovery: function () {
-			current.ajax('rest/ldap/password/recovery/' + $('#username').val().toLowerCase() + '/' + $('#mail').val().toLowerCase(), undefined, true);
+			current.ajax('rest/service/password/recovery/' + $('#username').val().toLowerCase() + '/' + $('#mail').val().toLowerCase(), undefined, true);
 		},
 		refreshCaptcha: function () {
 			return $('#captcha_img').attr('src', 'captcha.png?' + new Date().getTime());

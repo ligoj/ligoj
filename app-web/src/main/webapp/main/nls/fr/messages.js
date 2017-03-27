@@ -89,10 +89,7 @@ define({
 	'menu': {
 		home: 'Accueil',
 		api: 'Api',
-		development: 'Développement',
-		developer: 'Développeur',
-		architect: 'Architecte',
-		designer: 'Concepteur',
+		id: 'Identité',
 		administration: 'Administration',
 		logout: 'Déconnexion',
 		manual: 'Manuel',

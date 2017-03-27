@@ -71,7 +71,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		requireService: function (context, node, callback) {
 			var service = current.getServiceNameFromId(node);
-			$cascade.loadFragment(context, context.$transaction, 'main/plugin/' + service + '/', service, {
+			$cascade.loadFragment(context, context.$transaction, 'main/service/' + service + '/', service, {
 				callback: callback,
 				plugins: ['css', 'i18n', 'partial', 'js']
 			});
@@ -97,7 +97,7 @@ define(['cascade'], function ($cascade) {
 				// Then, load tool dependencies
 				var service = current.getServiceNameFromId(node);
 				var tool = current.getToolNameFromId(node);
-				$cascade.loadFragment($current, transaction, 'main/plugin/' + service + '/' + tool, tool, {
+				$cascade.loadFragment($current, transaction, 'main/service/' + service + '/' + tool, tool, {
 					callback: callback,
 					plugins: ['css', 'i18n', 'partial', 'js']
 				});
@@ -162,7 +162,7 @@ define(['cascade'], function ($cascade) {
 
 		toToolBaseIcon: function (node) {
 			var fragments = node.split(':');
-			return 'main/plugin/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2];
+			return 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2];
 		},
 
 		/**

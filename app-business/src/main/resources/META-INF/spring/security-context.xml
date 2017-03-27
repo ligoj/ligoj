@@ -14,8 +14,8 @@
 		<security:intercept-url pattern="/rest/redirect" access="permitAll" />
 		<security:intercept-url pattern="/rest/session" access="isFullyAuthenticated()" />
 		<security:intercept-url pattern="/rest/security/login" access="isAnonymous()" />
-		<security:intercept-url pattern="/rest/ldap/password/reset/**" access="isAnonymous()" />
-		<security:intercept-url pattern="/rest/ldap/password/recovery/**" access="isAnonymous()" />
+		<security:intercept-url pattern="/rest/service/password/reset/**" access="isAnonymous()" />
+		<security:intercept-url pattern="/rest/service/password/recovery/**" access="isAnonymous()" />
 		<security:intercept-url pattern="/**" access="isFullyAuthenticated()" />
 		<security:custom-filter position="PRE_AUTH_FILTER" ref="apiTokenFilter" />
 		<security:custom-filter position="LAST" ref="authorizingFilter" />
