@@ -36,7 +36,7 @@ public class PluginResourceTest extends AbstractAppTest {
 
 	@Before
 	public void prepareData() throws IOException {
-		persistEntities("csv/app-test", new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
+		persistEntities("csv", new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
 				StandardCharsets.UTF_8.name());
 	}
 
@@ -46,6 +46,7 @@ public class PluginResourceTest extends AbstractAppTest {
 		Assert.assertEquals(2, plugins.size());
 		Assert.assertEquals("service:id", plugins.get(0).getId());
 		Assert.assertNull(plugins.get(0).getName());
+		Assert.assertEquals("Id", plugins.get(0).getName());
 		Assert.assertNull(plugins.get(0).getVendor());
 		Assert.assertNull(plugins.get(0).getVersion());
 		Assert.assertEquals(2, plugins.get(0).getNodes());
@@ -53,7 +54,7 @@ public class PluginResourceTest extends AbstractAppTest {
 		Assert.assertFalse(plugins.get(0).isTool());
 
 		Assert.assertEquals("service:id:ldap", plugins.get(1).getId());
-		Assert.assertNull(plugins.get(1).getName());
+		Assert.assertEquals("Id Ldap", plugins.get(1).getName());
 		Assert.assertNull(plugins.get(1).getVendor());
 		Assert.assertNull(plugins.get(1).getVersion());
 		Assert.assertEquals(1, plugins.get(1).getNodes());

@@ -47,11 +47,9 @@ public class ToolSessionSettingsProviderTest extends AbstractAppTest {
 	@Before
 	public void prepareData() throws IOException {
 		// Only with Spring context
-		persistEntities("csv/app-test",
+		persistEntities("csv",
 				new Class[] { SystemConfiguration.class, Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
 				StandardCharsets.UTF_8.name());
-		CacheManager.getInstance().getCache("ldap").removeAll();
-		CacheManager.getInstance().getCache("ldap-user-repository").removeAll();
 		CacheManager.getInstance().getCache("configuration").removeAll();
 
 		// For the cache to be created
