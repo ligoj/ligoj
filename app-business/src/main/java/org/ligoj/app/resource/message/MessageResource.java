@@ -44,6 +44,8 @@ import org.ligoj.bootstrap.core.json.datatable.DataTableAttributes;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.security.SecurityHelper;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
+import org.ligoj.bootstrap.resource.system.session.ISessionSettingsProvider;
+import org.ligoj.bootstrap.resource.system.session.SessionSettings;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -60,7 +62,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional
 @Produces(MediaType.APPLICATION_JSON)
-public class MessageResource implements InitializingBean {
+public class MessageResource implements InitializingBean, ISessionSettingsProvider {
 
 	@Autowired
 	private MessageRepository repository;
@@ -352,4 +354,10 @@ public class MessageResource implements InitializingBean {
 		return iamProvider.getConfiguration().getUserRepository();
 	}
 
+
+	@Override
+	public void decorate(final SessionSettings settings) {
+		// Add the unread messages counter
+		settings.getUserSettings().put("unreadMessages", repository.countUnread(settings.getUserName()));
+	}
 }

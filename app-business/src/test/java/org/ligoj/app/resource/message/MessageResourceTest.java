@@ -55,7 +55,7 @@ public class MessageResourceTest extends AbstractAppTest {
 
 	@Before
 	public void prepare() throws IOException {
-		persistEntities("csv/app-test",
+		persistEntities("csv",
 				new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class, Event.class, Message.class,
 						DelegateNode.class, DelegateOrg.class, CacheCompany.class, CacheUser.class, CacheGroup.class, CacheMembership.class },
 				StandardCharsets.UTF_8.name());

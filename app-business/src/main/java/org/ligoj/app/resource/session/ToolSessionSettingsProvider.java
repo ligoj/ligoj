@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.dao.MessageRepository;
 import org.ligoj.app.plugin.id.resource.CompanyResource;
 import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.bootstrap.core.json.ObjectMapperTrim;
@@ -32,11 +31,9 @@ public class ToolSessionSettingsProvider implements ISessionSettingsProvider {
 
 	@Autowired
 	private ConfigurationResource configuration;
-	@Autowired
-	private CompanyResource companyResource;
 
 	@Autowired
-	private MessageRepository messageRepository;
+	private CompanyResource companyResource;
 
 	@Autowired
 	private ObjectMapperTrim objectMapper;
@@ -77,8 +74,5 @@ public class ToolSessionSettingsProvider implements ISessionSettingsProvider {
 		} catch (final IOException ioe) {
 			log.error("Unable to write the global tools configuration for user {}", settings.getUserName(), ioe);
 		}
-
-		// Add the unread messages counter
-		userSetting.put("unreadMessages", messageRepository.countUnread(settings.getUserName()));
 	}
 }
