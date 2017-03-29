@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.api.NodeVo;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.api.SubscriptionMode;
@@ -90,7 +91,7 @@ public class PluginResource {
 		final Map<String, NodeVo> nodes = nodeResource.findAll();
 
 		// Compare with the available plug-in implementing ServicePlugin
-		event.getApplicationContext().getBeansOfType(ServicePlugin.class).values().stream().filter(s -> !nodes.containsKey(s.getKey())).sorted()
+		event.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().filter(s -> !nodes.containsKey(s.getKey())).sorted()
 				.forEach(s -> {
 					log.info("Configuring the new plugin {} v{}", s.getKey(), s.getVersion());
 					try {
@@ -106,11 +107,21 @@ public class PluginResource {
 				});
 	}
 
-	private void configurePlugin(final ServicePlugin s) throws IOException {
-		final List<Class<?>> installedEntities = s.getInstalledEntities();
-		if (!installedEntities.contains(Node.class)) {
+	/**
+	 * Configure the new plug-in
+	 * 
+	 * @param plugin
+	 *            The newly discovered plug-in.
+	 * @throws IOException
+	 *             When the CSV files import failed.
+	 */
+	private void configurePlugin(final FeaturePlugin plugin) throws IOException {
+		final List<Class<?>> installedEntities = plugin.getInstalledEntities();
+
+		// Special process for service plug-ins
+		if (plugin instanceof ServicePlugin && !installedEntities.contains(Node.class)) {
 			// Persist the partial default node now for the bellow installation process
-			nodeRepository.saveAndFlush(newNode(s));
+			nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
 		}
 
 		// Insert the configuration entities of the plug-in
@@ -119,7 +130,7 @@ public class PluginResource {
 		}
 
 		// Notify the plug-in it is being installed
-		s.install(nodeRepository.findOneExpected(s.getKey()));
+		plugin.install();
 	}
 
 	/**

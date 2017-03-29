@@ -1,7 +1,7 @@
 package org.ligoj.app.resource.message;
 
 import org.ligoj.app.api.NodeVo;
-import org.ligoj.app.api.SimpleUser;
+import org.ligoj.app.iam.SimpleUser;
 import org.ligoj.app.model.Message;
 import org.ligoj.app.plugin.id.resource.ContainerWithScopeVo;
 import org.ligoj.app.resource.project.ProjectLightVo;

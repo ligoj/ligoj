@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.ligoj.app.api.IAuthenticationContributor;
+import org.ligoj.app.iam.IAuthenticationContributor;
 import org.ligoj.app.iam.IamProvider;
 import org.ligoj.app.resource.session.User;
 import org.springframework.beans.factory.annotation.Autowired;
