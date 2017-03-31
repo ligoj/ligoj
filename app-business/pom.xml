@@ -25,14 +25,10 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.ligoj.api</groupId>
-			<artifactId>plugin-core</artifactId>
-			<version>${api.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-id</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ligoj.api</groupId>
@@ -42,54 +38,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ligoj.api</groupId>
-			<artifactId>plugin-iam-public</artifactId>
+			<artifactId>plugin-core</artifactId>
 			<version>${api.version}</version>
-			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-id-ldap</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-iam-node</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-mail-smtp</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-password-management</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-redirect</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-sso-salt</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- Dependency used to provide static resources from jars in classpath -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.webjars</groupId> -->
-		<!-- <artifactId>webjars-servlet-2.x</artifactId> -->
-		<!-- <version>1.5</version> -->
-		<!-- <scope>runtime</scope> -->
-		<!-- </dependency> -->
 	</dependencies>
 	<build>
 		<testResources>
@@ -148,6 +99,47 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+		<profile>
+			<id>eclipse</id>
+			<!-- Put here the plug-ins to be resolved by your IDE  -->
+			<dependencies>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-iam-node</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-id</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-id-ldap</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-password-management</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-redirect</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-sso-salt</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-mail-smtp</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 </project>
