@@ -29,7 +29,7 @@ import org.ligoj.app.model.Subscription;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class PluginResourceTest extends AbstractAppTest {
+public class PlugInResourceTest extends AbstractAppTest {
 
 	@Autowired
 	private PluginResource resource;

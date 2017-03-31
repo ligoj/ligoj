@@ -33,4 +33,9 @@ public class PluginVo extends NamedBean<String> {
 	 * When <code>true</code>, this plug-in provides a tool. An implementation of a service.
 	 */
 	private boolean tool;
+	
+	/**
+	 * Location of this plug-in.
+	 */
+	private String location;
 }
