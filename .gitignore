@@ -7,3 +7,4 @@
 **/.classpath
 /*.exec
 **/org.eclipse.wst.validation.prefs
+**/org.eclipse.wst.common.component
