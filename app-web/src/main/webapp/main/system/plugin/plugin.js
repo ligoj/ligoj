@@ -15,7 +15,7 @@ define(function () {
 						data: null,
 						orderable: false,
 						render: function(data) {
-							return current.$main.toIcon(data);
+							return data.plugin.type === 'feature' ? '<i class="fa fa-wrench"></i>' : current.$main.toIcon(data.node);
 						}
 					}, {
 						data: 'id'
@@ -25,17 +25,19 @@ define(function () {
 						data: 'vendor',
 						className: 'hidden-xs hidden-sm'
 					}, {
-						data: 'version'
+						data: 'plugin.version'
 					}, {
-						data: 'tool',
-						className: 'hidden-xs',
-						render: function(tool) {
-							return tool ? '<i class="fa fa-check"></i>' : '';
+						data: 'plugin.type'
+					}, {
+						data: 'nodes',
+						render: function(nb, _i, plugin) {
+							return plugin.plugin.type === 'feature' ? '' : nb;
 						}
 					}, {
-						data: 'nodes'
-					}, {
-						data: 'subscriptions'
+						data: 'subscriptions',
+						render: function(nb, _i, plugin) {
+							return plugin.plugin.type === 'feature' ? '' : nb;
+						}
 					}
 				]
 			});
