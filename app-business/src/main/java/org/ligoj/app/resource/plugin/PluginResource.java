@@ -110,7 +110,7 @@ public class PluginResource {
 					}
 				});
 
-		// Second pass, handle the plug-in update/downgrade version
+		// Second pass, handle the plug-in up/down-grade version
 		event.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().sorted().forEach(s -> {
 			final Plugin plugin = plugins.get(s.getKey());
 			final String newVersion = getVersion(s);
@@ -130,7 +130,7 @@ public class PluginResource {
 	}
 
 	/**
-	 * Return a failsafe computed version of the given {@link FeaturePlugin}
+	 * Return a fail-safe computed version of the given {@link FeaturePlugin}
 	 * 
 	 * @param plugin
 	 *            The plug-in instance
