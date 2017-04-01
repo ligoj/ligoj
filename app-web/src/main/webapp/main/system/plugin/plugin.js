@@ -25,16 +25,20 @@ define(function () {
 						data: 'vendor',
 						className: 'hidden-xs hidden-sm'
 					}, {
-						data: 'plugin.version'
+						data: 'plugin.version',
+						className: 'truncate'
 					}, {
-						data: 'plugin.type'
+						data: 'plugin.type',
+						className: 'hidden-xs hidden-sm'
 					}, {
 						data: 'nodes',
+						className: 'icon',
 						render: function(nb, _i, plugin) {
 							return plugin.plugin.type === 'feature' ? '' : nb;
 						}
 					}, {
 						data: 'subscriptions',
+						className: 'icon',
 						render: function(nb, _i, plugin) {
 							return plugin.plugin.type === 'feature' ? '' : nb;
 						}
