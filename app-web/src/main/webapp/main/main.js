@@ -29,12 +29,18 @@ define(['cascade'], function ($cascade) {
 		toIcon: function (node, suffix, dataSrc, recursive) {
 			var fragments = (node.id || node || '::').split(':');
 			var title = (node.name || node.label || fragments[2] || fragments[1]);
-			if (fragments.length < 3) {
+			var result;
+			if (node.uiClasses) {
+				// Use classes instead of picture
+				result = node.uiClasses.startsWith('$') ? '<span class="icon-text">' + node.uiClasses.substring(1) + '</span>' : ('<i title="' + title + '" class="' + node.uiClasses + '"></i>');
+			} else if (fragments.length < 3) {
 				// Simple service
-				return '<i title="' + title + '" class="' + (node.uiClasses || 'fa fa-wrench') + '"></i>';
+				result = '<i title="' + title + '" class="' + (node.uiClasses || 'fa fa-wrench') + '"></i>';
+			} else {
+				// Use a provided picture
+				var url = 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';
+				result = '<img src="' + url + '" title="' + title + '" alt="' + title + '"' + (dataSrc ? ' data-src="' + url + '"' : '') + ' class="tool"/>';
 			}
-			var url = 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';
-			var result = '<img src="' + url + '" title="' + title + '" alt="' + title + '"' + (dataSrc ? ' data-src="' + url + '"' : '') + ' class="tool"/>';
 			if (recursive) {
 				var parent = null;
 				if (node.refined) {
