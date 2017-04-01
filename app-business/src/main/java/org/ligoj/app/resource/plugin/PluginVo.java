@@ -1,39 +1,44 @@
 package org.ligoj.app.resource.plugin;
 
+import org.ligoj.app.api.NodeVo;
+import org.ligoj.app.model.Plugin;
 import org.ligoj.bootstrap.core.NamedBean;
+
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Plug-in information.
+ * Plug-in information. The "id" property correspond to the related plug-in's key.
  */
 @Getter
 @Setter
 public class PluginVo extends NamedBean<String> {
 
 	/**
-	 * The plug-in version. Should follow the <a href="http://semver.org/">semantic versioning</a>
+	 * Related plug-in entity.
 	 */
-	private String version;
+	private Plugin plugin;
+
 	/**
 	 * The plug-in vendor. May be <code>null</code>.
 	 */
 	private String vendor;
+
 	/**
-	 * Amount of nodes using this plug-in.
+	 * Amount of nodes using this plug-in. Only relevant of plug-in type of service or tool.
 	 */
 	private int nodes;
 
 	/**
-	 * Amount of subscriptions using this plug-in.
+	 * Associated node configuration. Only relevant of plug-in type of service or tool.
+	 */
+	private NodeVo node;
+
+	/**
+	 * Amount of subscriptions using this plug-in. Only relevant of plug-in type of service or tool.
 	 */
 	private int subscriptions;
 
-	/**
-	 * When <code>true</code>, this plug-in provides a tool. An implementation of a service.
-	 */
-	private boolean tool;
-	
 	/**
 	 * Location of this plug-in.
 	 */

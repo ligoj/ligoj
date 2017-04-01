@@ -19,6 +19,7 @@ import org.ligoj.app.AbstractAppTest;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
+import org.ligoj.app.model.PluginType;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
 
@@ -48,18 +49,18 @@ public class PlugInResourceTest extends AbstractAppTest {
 		Assert.assertNull(plugins.get(0).getName());
 		Assert.assertEquals("Id", plugins.get(0).getName());
 		Assert.assertNull(plugins.get(0).getVendor());
-		Assert.assertNull(plugins.get(0).getVersion());
+		Assert.assertNull(plugins.get(0).getPlugin().getVersion());
 		Assert.assertEquals(2, plugins.get(0).getNodes());
 		Assert.assertEquals(2, plugins.get(0).getSubscriptions());
-		Assert.assertFalse(plugins.get(0).isTool());
+		Assert.assertEquals(PluginType.SERVICE, plugins.get(0).getPlugin().getType());
 
 		Assert.assertEquals("service:id:ldap", plugins.get(1).getId());
 		Assert.assertEquals("Id Ldap", plugins.get(1).getName());
 		Assert.assertNull(plugins.get(1).getVendor());
-		Assert.assertNull(plugins.get(1).getVersion());
+		Assert.assertNull(plugins.get(1).getPlugin().getVersion());
 		Assert.assertEquals(1, plugins.get(1).getNodes());
 		Assert.assertEquals(2, plugins.get(1).getSubscriptions());
-		Assert.assertTrue(plugins.get(1).isTool());
+		Assert.assertEquals(PluginType.TOOL, plugins.get(1).getPlugin().getType());
 	}
 
 	@Test

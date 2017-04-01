@@ -27,6 +27,7 @@ import org.ligoj.app.dao.PluginRepository;
 import org.ligoj.app.dao.SubscriptionRepository;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Plugin;
+import org.ligoj.app.model.PluginType;
 import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.SpringUtils;
@@ -71,15 +72,18 @@ public class PluginResource {
 		// Get the existing plug-in features
 		return SpringUtils.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().map(s -> {
 			final PluginVo vo = new PluginVo();
-			vo.setId(s.getKey());
+			final String key = s.getKey();
+			vo.setId(key);
 			vo.setName(s.getName());
-			vo.setVersion(getVersion(s));
 			vo.setLocation(s.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
 			vo.setVendor(s.getVendor());
-			vo.setTool(StringUtils.countMatches(vo.getId(), ':') == 2);
-			vo.setNodes(nodeRepository.countByRefined(s.getKey()));
-			vo.setSubscriptions(subscriptionRepository.countByNode(s.getKey()));
-			NodeResource.toVo(nodeRepository.findOne(s.getKey()));
+			vo.setPlugin(repository.findByExpected("key", key));
+			if (vo.getPlugin().getType() != PluginType.FEATURE) {
+				// This is a node : service or tool
+				vo.setNodes(nodeRepository.countByRefined(key));
+				vo.setSubscriptions(subscriptionRepository.countByNode(key));
+				vo.setNode(NodeResource.toVo(nodeRepository.findOne(key)));
+			}
 			return vo;
 		}).sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
 	}
@@ -186,15 +190,21 @@ public class PluginResource {
 		log.info("Installing the new plugin {} v{}", plugin.getKey(), newVersion);
 		try {
 			final List<Class<?>> installedEntities = plugin.getInstalledEntities();
+			final Plugin entity = new Plugin();
 
 			// Special process for service plug-ins
-			if (plugin instanceof ServicePlugin && !installedEntities.contains(Node.class)) {
-				// Persist the partial default node now for the bellow installation process
-				nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
+			if (plugin instanceof ServicePlugin) {
+				entity.setType(PluginType.FEATURE);
+				if (!installedEntities.contains(Node.class)) {
+					// Persist the partial default node now for the bellow installation process
+					nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
+				}
+			} else {
+				// Either a service either a tool, depends on the level of refinement
+				entity.setType(PluginType.values()[StringUtils.countMatches(plugin.getKey(), ':')]);
 			}
 			configurePluginEntities(installedEntities);
 
-			final Plugin entity = new Plugin();
 			entity.setKey(plugin.getKey());
 			entity.setVersion(newVersion);
 			repository.saveAndFlush(entity);

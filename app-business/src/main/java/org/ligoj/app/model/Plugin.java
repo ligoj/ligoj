@@ -1,8 +1,12 @@
 package org.ligoj.app.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import org.ligoj.bootstrap.core.model.AbstractAudited;
 
@@ -25,12 +29,23 @@ public class Plugin extends AbstractAudited<Integer> {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Version of the currently installed plug-in.
+	 * The currently installed plug-in version. Should follow the <a href="http://semver.org/">semantic versioning</a>
 	 */
+	@NotNull
 	private String version;
 
 	/**
 	 * The feature key.
 	 */
+	@NotNull
 	private String key;
+
+	/**
+	 * The plug-in type.
+	 */
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	@Column(length = 10)
+	private PluginType type;
+
 }
