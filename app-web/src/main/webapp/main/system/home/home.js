@@ -68,6 +68,7 @@ define(function () {
 					data: _('to-encrypt').val(),
 					success: function (data) {
 						_('encrypted').text(data);
+						_('to-encrypt').trigger('focus');
 					}
 				});
 			});
