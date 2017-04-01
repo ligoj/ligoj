@@ -1,0 +1,5 @@
+role.name;type;method;pattern
+ADMIN;BUSINESS;;.*
+ADMIN;UI;;.*
+USER;BUSINESS;;.*
+USER;UI;;.*
