@@ -4,6 +4,7 @@ define({
 		'vendor': 'Vendor',
 		'nodes': 'Nodes',
 		'version': 'Version',
+		'type' : 'Type',
 		'subscriptions': 'Subscriptions'
 	},
 	fr : true
