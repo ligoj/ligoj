@@ -100,31 +100,25 @@ public class PluginResource {
 		// Compare with the available plug-in implementing ServicePlugin
 		event.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().filter(s -> !plugins.containsKey(s.getKey())).sorted()
 				.forEach(s -> {
-					log.info("plugin the new plugin {} v{} ...", s.getKey(), getVersion(s));
+					log.info("Installing the new plugin {} v{} ...", s.getKey(), getVersion(s));
 					try {
 						plugins.put(s.getKey(), configurePlugin(s));
-
-						// Plug-in is configured
-						log.debug("Installing the new plugin {} v{} succeed", s.getKey(), getVersion(s));
 					} catch (final Exception e) { // NOSONAR - Catch all to notice every time the failure
 						// Something happened
-						log.error("plugin the new plugin {} v{} failed", s.getKey(), getVersion(s), e);
+						log.error("Installing the new plugin {} v{} failed", s.getKey(), getVersion(s), e);
 						throw new TechnicalException("Configuring the new plugin failed", e, s.getKey());
 					}
 				});
 
-		// Second pass, handle the plug-in update/downgrade version
+		// Second pass, handle the plug-in up/down-grade version
 		event.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().sorted().forEach(s -> {
 			final Plugin plugin = plugins.get(s.getKey());
 			final String newVersion = getVersion(s);
 			try {
 				if (!plugins.get(s.getKey()).getVersion().equals(newVersion)) {
 					log.info("Updating the plugin {} v{} -> v{} ...", s.getKey(), plugin.getVersion(), newVersion);
-					updatePlugin(plugin, s);
+					updatePlugin(s);
 					plugin.setVersion(newVersion);
-
-					// Plug-in is configured
-					log.debug("Updating the plugin {} v{} -> v{} succeed", s.getKey(), plugin.getVersion(), newVersion);
 				}
 			} catch (final Exception e) { // NOSONAR - Catch all to notice every time the failure
 				// Something happened
@@ -132,10 +126,11 @@ public class PluginResource {
 				throw new TechnicalException("Configuring the new plugin failed", e, s.getKey());
 			}
 		});
+		log.info("Plugins are now configured");
 	}
 
 	/**
-	 * Return a failsafe computed version of the given {@link FeaturePlugin}
+	 * Return a fail-safe computed version of the given {@link FeaturePlugin}
 	 * 
 	 * @param plugin
 	 *            The plug-in instance
@@ -182,8 +177,6 @@ public class PluginResource {
 	/**
 	 * Update an existing plug-in by calling only {@link FeaturePlugin#update(String)}
 	 * 
-	 * @param entity
-	 *            The previous entity state of the plug-in.
 	 * @param plugin
 	 *            The updated plug-in.
 	 * @throws URISyntaxException
@@ -191,7 +184,7 @@ public class PluginResource {
 	 * @throws IOException
 	 *             When the version resolution from modification date failed.
 	 */
-	private void updatePlugin(final Plugin entity, final FeaturePlugin plugin) throws IOException, URISyntaxException {
+	private void updatePlugin(final FeaturePlugin plugin) throws IOException, URISyntaxException {
 		plugin.update(getVersion(plugin));
 	}
 
