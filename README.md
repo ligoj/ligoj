@@ -1,5 +1,5 @@
 ## :link: Ligoj [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.app/root/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.app/root)
-API plugin used for compatibility check
+A web application to centralize the related tools of your projects, a 21th century links management with security and data collection.
 
 [![Build Status](https://travis-ci.org/ligoj/ligoj.svg?branch=master)](https://travis-ci.org/ligoj/ligoj)
 [![Build Status](https://circleci.com/gh/ligoj/ligoj.svg?style=svg)](https://circleci.com/gh/ligoj/ligoj)
