@@ -1,0 +1,32 @@
+addons: 
+  apt:
+    packages:
+      - graphviz
+  sonarqube: 
+    organization: ligoj-github
+    token: 
+      secure: "f18voBBGiHWfxNLNAevMTc3w1fOoCIUUzuzK5pAym9Wi8OfUENPF4uGxf6fR/p4NazCaoRyFa+rsRkivSMyuvG2HOQJ5J3nmkdS1q2lKk2FQ5pvJmNr7G0lTzUaIR5mzt+u46bQhoYEFCkSCRrt4TD7lBVQofjl5pH2lG+4LKxy41/X3hHhfUL2P6aGcMN73ytbvig6aksDoG3/f2aSAiOQJDOl7IzvYYYCy6D3bUXITR7Tu7WdfdfkCW23GC7g8e1AWO5YB5E+I/gxQE8mJiv/xXL4Aziph0N4c8CsbUYitJKEcQt3SaaBJAVoxG/XJ19spUrHwN3Of3BeoUTwWAycNX5BHNAxYtfI9eqkQbQ2+Qkk+rWzlCRJLXFZNZpUs7Tf1AXwtvpwVQR1gZcqUx5p3yHh+fNbXwelEu+dtb1xHlvVVeT9/xHRsTVytgbpEK+1P/e7Tw+LqpqLGeSNKBzkl2SJwEEmyJBpnJ6cPYg/UrfvxdGA4U/l/sCmn6i7n6fNea+9lDyqzPpsU0QsyLxlhXZ+bS6RmtV5Pgd+TmhTzoyz21xWxGwJY/5yNQ64JVyYrh/Hx+21RuugAi4SpQFYP1125wrhJEMHiQXHeZNkRNScwG+NqfM1YmzN0IY1YHtM6XrlOXV1LaiqloaDb2nBHIV04iYH1Tu9/gjqj8EE="
+before_cache: 
+  - "rm -rf $HOME/.m2/repository/org/ligoj/app"
+  - "find $HOME/.m2 -name resolver-status.properties -exec rm {} \\;"
+before_install: 
+  - "chmod +x ./travis.sh"
+cache: 
+  directories: 
+    - $HOME/.m2/repository
+    - $HOME/.sonar/cache
+    - $HOME/jvm
+    - $HOME/maven
+env: 
+  - TARGET=BUILD
+branches:
+  only:
+    - master
+    - dev
+install: /bin/true 
+jdk: oraclejdk8
+language: java
+notifications: 
+  email: false
+script: "./travis.sh"
+sudo: false
