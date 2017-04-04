@@ -25,12 +25,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-id</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.ligoj.api</groupId>
 			<artifactId>plugin-api-test</artifactId>
 			<version>${api.version}</version>
@@ -101,7 +95,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>eclipse</id>
+			<id>eclipse-plugins</id>
 			<!-- Put here the plug-ins to be resolved by your IDE  -->
 			<dependencies>
 				<dependency>
