@@ -74,7 +74,7 @@ public class PluginResource {
 			final PluginVo vo = new PluginVo();
 			final String key = s.getKey();
 			vo.setId(key);
-			vo.setName(s.getName());
+			vo.setName(StringUtils.removeStart("Ligoj - Plugin ", s.getName()));
 			vo.setLocation(s.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
 			vo.setVendor(s.getVendor());
 			vo.setPlugin(repository.findByExpected("key", key));
