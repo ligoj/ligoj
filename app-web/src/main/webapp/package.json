@@ -12,7 +12,7 @@
 	"license": "TBD",
 	"bugs": "https://github.com/ligoj/ligoj/issues",
 	"repository": {
-		"type": "svn",
+		"type": "git",
 		"url": "https://github.com/ligoj/ligoj"
 	},
 	"happiness": {
