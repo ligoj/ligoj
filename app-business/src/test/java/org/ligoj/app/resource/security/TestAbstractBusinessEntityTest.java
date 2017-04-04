@@ -1,9 +1,8 @@
-package org.ligoj.app.model;
+package org.ligoj.app.resource.security;
 
 import org.junit.Test;
-
+import org.ligoj.app.resource.security.User;
 import org.ligoj.bootstrap.model.AbstractBusinessEntityTest;
-import org.ligoj.app.resource.session.User;
 
 /**
  * Test business keyed entities basic ORM operations : hash code and equals.

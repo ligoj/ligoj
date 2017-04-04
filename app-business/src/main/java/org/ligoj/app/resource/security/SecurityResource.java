@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.ligoj.app.iam.IAuthenticationContributor;
 import org.ligoj.app.iam.IamProvider;
-import org.ligoj.app.resource.session.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

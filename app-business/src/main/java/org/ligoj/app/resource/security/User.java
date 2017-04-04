@@ -1,4 +1,4 @@
-package org.ligoj.app.resource.session;
+package org.ligoj.app.resource.security;
 
 import javax.validation.constraints.NotNull;
 

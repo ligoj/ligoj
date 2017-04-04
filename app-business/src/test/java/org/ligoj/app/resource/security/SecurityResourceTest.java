@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.iam.IamProvider;
-import org.ligoj.app.resource.session.User;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.security.authentication.BadCredentialsException;
