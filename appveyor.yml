@@ -1,0 +1,50 @@
+version: '{build}'
+install:
+  - ps: |
+      Add-Type -AssemblyName System.IO.Compression.FileSystem
+      if ((Test-Path -Path "C:\maven" )) {
+        Remove-Item -Recurse -Force "C:\maven"
+      }
+            
+      (new-object System.Net.WebClient).DownloadFile(
+        'http://www.us.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip',
+        'C:\maven-bin.zip'
+      )
+      [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\maven-bin.zip", "C:\maven")
+  - ps: |
+     $env:JAVA_HOME="c:/Program Files/Java/jdk1.8.0"
+  - cmd: SET    
+  - cmd: SET PATH=C:\maven\apache-maven-3.3.9\bin;%PATH%
+  - cmd: SET M2_HOME=C:\maven\apache-maven-3.3.9
+  - cmd: SET MAVEN_OPTS=-Xmx2g
+  - cmd: SET MAVEN_HOME=C:\maven\apache-maven-3.3.9
+  - cmd: SET
+
+build_script:
+  - mkdir C:\WINDOWS\system32\config\systemprofile\AppData\Local\Temp
+  - dir
+  - mvn -B -V -e clean package -DskipTest
+test_script:
+  - mvn -B -V -e clean install
+cache:
+  - C:\maven\
+  - C:\Users\appveyor\.m2
+artifacts:
+  - path: 'bootstrap-business\target\*.jar'
+  - path: 'bootstrap-core\target\*.jar'
+  - path: 'bootstrap-business-parent\target\*.jar'
+  - path: 'bootstrap-business-test\target\*.jar'
+  - path: 'bootstrap-launcher\target\*.jar'
+  - path: 'bootstrap-web\target\*.jar'
+  - path: 'bootstrap-web-parent\target\*.jar'
+  - path: 'bootstrap-web-test\target\*.jar'
+on_failure:
+  - ps: Get-ChildItem bootstrap-business\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem bootstrap-core\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem bootstrap-business-parent\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem bootstrap-business-test\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem bootstrap-launcher\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem bootstrap-web\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem bootstrap-web-parent\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem bootstrap-web-test\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem *.log | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }

@@ -1,0 +1,12 @@
+machine:
+  java:
+    version: openjdk8
+dependencies:
+ override: 
+  - mvn install -DskipTest=true -DskipITs=true
+test:
+  override:
+    - mvn clean package
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
