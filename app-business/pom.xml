@@ -101,87 +101,70 @@
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-iam-node</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-id</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-id-ldap</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-password-management</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-redirect</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-sso-salt</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-mail-smtp</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-vm-vcloud</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-bt-jira</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-km-confluence</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
-<!-- 				<dependency> -->
-<!-- 					<groupId>org.ligoj.plugin</groupId> -->
-<!-- 					<artifactId>plugin-scm-git</artifactId> -->
-<!-- 					<version>0.0.1-SNAPSHOT</version> -->
-<!-- 				</dependency> -->
-<!-- 				<dependency> -->
-<!-- 					<groupId>org.ligoj.plugin</groupId> -->
-<!-- 					<artifactId>plugin-scm-svn</artifactId> -->
-<!-- 					<version>0.0.1-SNAPSHOT</version> -->
-<!-- 				</dependency> -->
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-scm-git</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-scm-svn</artifactId>
+				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-qa-sonarqube</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-build-jenkins</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-storage-owncloud</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-security-fortify</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-req-squash</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 			</dependencies>
 		</profile>
