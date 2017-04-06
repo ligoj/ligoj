@@ -67,9 +67,11 @@ function installMaven {
 #
 function fixBuildVersion {
   export INITIAL_VERSION=$(maven_expression "project.version")
+  echo "Current version : $INITIAL_VERSION"
 
   # remove suffix -SNAPSHOT or -RC
   without_suffix=$(echo $INITIAL_VERSION | sed "s/-.*//g")
+  echo "Current no suffix version : $without_suffix"
 
   IFS=$'.'
   fields_count=$(echo $without_suffix | wc -w)
@@ -162,7 +164,7 @@ BUILD)
   else
     echo 'Build feature branch or external pull request'
 
-    mvn install $MAVEN_ARGS
+    mvn install $MAVEN_ARGS -Dsource.skip=true
   fi
 
   ;;
