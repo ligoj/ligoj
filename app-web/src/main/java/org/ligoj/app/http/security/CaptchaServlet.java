@@ -11,12 +11,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import nl.captcha.Captcha;
-import nl.captcha.backgrounds.GradiatedBackgroundProducer;
-import nl.captcha.gimpy.FishEyeGimpyRenderer;
-import nl.captcha.noise.StraightLineNoiseProducer;
-import nl.captcha.servlet.CaptchaServletUtil;
-import nl.captcha.text.renderer.ColoredEdgesWordRenderer;
+import cn.apiclub.captcha.Captcha;
+import cn.apiclub.captcha.backgrounds.GradiatedBackgroundProducer;
+import cn.apiclub.captcha.gimpy.FishEyeGimpyRenderer;
+import cn.apiclub.captcha.noise.StraightLineNoiseProducer;
+import cn.apiclub.captcha.servlet.CaptchaServletUtil;
+import cn.apiclub.captcha.text.renderer.ColoredEdgesWordRenderer;
 
 /**
  * Servlet generating CAPTCHA image.
@@ -49,7 +49,7 @@ public class CaptchaServlet extends HttpServlet {
 				.addBackground(new GradiatedBackgroundProducer()).addNoise().addNoise(new StraightLineNoiseProducer(Color.BLUE, 2)).build();
 
 		// Store the expected answer
-		req.getSession().setAttribute(nl.captcha.Captcha.NAME, captcha);
+		req.getSession().setAttribute(Captcha.NAME, captcha);
 
 		// Write the image to output
 		CaptchaServletUtil.writeImage(resp, captcha.getImage());

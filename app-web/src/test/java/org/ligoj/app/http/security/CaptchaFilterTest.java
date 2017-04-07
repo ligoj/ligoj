@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.DelegatingServletOutputStream;
 
-import nl.captcha.Captcha;
+import cn.apiclub.captcha.Captcha;
 
 /**
  * Test class of {@link CaptchaFilter}

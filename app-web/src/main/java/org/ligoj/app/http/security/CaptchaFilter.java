@@ -15,8 +15,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 
+import cn.apiclub.captcha.Captcha;
 import lombok.extern.slf4j.Slf4j;
-import nl.captcha.Captcha;
 
 /**
  * Filter checking the CAPTCHA data provided in the "captcha" parameter.
