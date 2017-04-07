@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.HttpHeaders;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -20,10 +18,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.ligoj.bootstrap.http.security.CookieUsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 
-import org.ligoj.bootstrap.http.security.CookieUsernamePasswordAuthenticationToken;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -68,7 +66,7 @@ public class RestAuthenticationProvider extends GfiAuthenticationProvider {
 	 */
 	private Authentication newAuthentication(final String userName, final String userpassword, final Authentication authentication,
 			final HttpResponse httpResponse) {
-		final List<String> cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> header.getName().equals(HttpHeaders.SET_COOKIE))
+		final List<String> cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> header.getName().equals("set-cookie"))
 				.map(Header::getValue).collect(Collectors.toList());
 
 		// Get the optional real user name if provided
