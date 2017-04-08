@@ -1,0 +1,5 @@
+id;name;refined.id
+service:sample;Sample
+service:sample:tool;Tool;service:sample
+service:sample:tool:node1;Node1;service:sample:tool
+service:sample:tool:node2;Node2;service:sample:tool

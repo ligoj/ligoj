@@ -35,6 +35,13 @@
 			<artifactId>plugin-core</artifactId>
 			<version>${api.version}</version>
 		</dependency>
+
+		<!-- JSR-154 -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<testResources>

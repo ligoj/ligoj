@@ -13,15 +13,32 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.mock.web.DelegatingServletOutputStream;
 
-import org.ligoj.bootstrap.core.resource.TechnicalException;
-
+/**
+ * Test class of {@link WebjarsServlet}
+ */
 public class WebjarsServletTest {
+
+	private ClassLoader classloader;
+
+	@Before
+	public void saveClassloader() {
+		Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/resources/webjars/image.png");
+		classloader = Thread.currentThread().getContextClassLoader();
+	}
+
+	@After
+	public void restoreClassloader() {
+		Thread.currentThread().setContextClassLoader(classloader);
+	}
 
 	@Test
 	public void mustNotBeADirectory() throws Exception {
@@ -73,15 +90,14 @@ public class WebjarsServletTest {
 	public void inputStreamIsClosedAfterException() throws Exception {
 		final HttpServletRequest request = defaultRequest();
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+		final WebjarsServlet servlet = getServlet("false");
 
-		Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/resources/webjars/image.png");
 		final ClassLoader classLoader = Mockito.mock(ClassLoader.class);
 		final InputStream inputStream = Mockito.mock(InputStream.class);
 		Mockito.when(classLoader.getResourceAsStream("META-INF/resources/webjars/image.png")).thenReturn(inputStream);
 		Mockito.when(inputStream.read(ArgumentMatchers.any())).thenThrow(new TechnicalException(""));
 		Thread.currentThread().setContextClassLoader(classLoader);
 
-		final WebjarsServlet servlet = getServlet("false");
 		try {
 			servlet.doGet(request, response);
 		} catch (TechnicalException e) {
@@ -90,14 +106,13 @@ public class WebjarsServletTest {
 	}
 
 	private ByteArrayOutputStream initializeFileAndResponse(final HttpServletResponse response) throws IOException {
-		Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/resources/webjars/image.png");
 		final ClassLoader classLoader = Mockito.mock(ClassLoader.class);
-		Mockito.when(classLoader.getResourceAsStream("META-INF/resources/webjars/image.png"))
-				.thenReturn(new ByteArrayInputStream("image-content".getBytes(StandardCharsets.UTF_8)));
-		Thread.currentThread().setContextClassLoader(classLoader);
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		final ServletOutputStream out = new DelegatingServletOutputStream(baos);
 		Mockito.when(response.getOutputStream()).thenReturn(out);
+		Mockito.when(classLoader.getResourceAsStream("META-INF/resources/webjars/image.png"))
+				.thenReturn(new ByteArrayInputStream("image-content".getBytes(StandardCharsets.UTF_8)));
+		Thread.currentThread().setContextClassLoader(classLoader);
 		return baos;
 	}
 

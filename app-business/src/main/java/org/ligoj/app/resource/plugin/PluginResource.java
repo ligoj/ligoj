@@ -6,8 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.api.SubscriptionMode;
+import org.ligoj.app.api.ToolPlugin;
 import org.ligoj.app.dao.NodeRepository;
 import org.ligoj.app.dao.PluginRepository;
 import org.ligoj.app.dao.SubscriptionRepository;
@@ -36,6 +39,7 @@ import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Persistable;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -70,16 +74,20 @@ public class PluginResource {
 	@GET
 	public List<PluginVo> findAll() {
 		// Get the existing plug-in features
-		return SpringUtils.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().map(s -> {
+		return repository.findAll().stream().map(p -> {
+			final String key = p.getKey();
 			final PluginVo vo = new PluginVo();
-			final String key = s.getKey();
 			vo.setId(key);
-			vo.setName(StringUtils.removeStart("Ligoj - Plugin ", s.getName()));
-			vo.setLocation(s.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
-			vo.setVendor(s.getVendor());
-			vo.setPlugin(repository.findByExpected("key", key));
-			if (vo.getPlugin().getType() != PluginType.FEATURE) {
-				// This is a node : service or tool
+
+			// Find the associated feature class
+			final FeaturePlugin feature = SpringUtils.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream()
+					.filter(f -> key.equals(f.getKey())).findFirst().get();
+			vo.setName(StringUtils.removeStart(feature.getName(), "Ligoj - Plugin "));
+			vo.setLocation(feature.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+			vo.setVendor(feature.getVendor());
+			vo.setPlugin(p);
+			if (p.getType() != PluginType.FEATURE) {
+				// This is a node (service or tool) add statistics and details
 				vo.setNodes(nodeRepository.countByRefined(key));
 				vo.setSubscriptions(subscriptionRepository.countByNode(key));
 				vo.setNode(NodeResource.toVo(nodeRepository.findOne(key)));
@@ -106,6 +114,7 @@ public class PluginResource {
 		// Changes, order by the related feature's key
 		final Map<String, FeaturePlugin> newFeatures = new TreeMap<>();
 		final Map<String, FeaturePlugin> updateFeatures = new TreeMap<>();
+		final Set<Plugin> removedPlugins = new HashSet<>(plugins.values());
 
 		// Compare with the available plug-in implementing ServicePlugin
 		event.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().forEach(s -> {
@@ -117,6 +126,7 @@ public class PluginResource {
 				updateFeatures.put(s.getKey(), s);
 				plugin.setVersion(newVersion);
 			}
+			removedPlugins.remove(plugin);
 		});
 
 		// First install the data of new plug-ins
@@ -127,6 +137,9 @@ public class PluginResource {
 		updateFeatures.forEach((k, s) -> s.update(plugins.get(k).getVersion()));
 		newFeatures.values().forEach(FeaturePlugin::install);
 		log.info("Plugins are now configured");
+
+		// And remove the old plug-in no more installed
+		repository.deleteAll(removedPlugins.stream().map(Persistable::getId).collect(Collectors.toList()));
 	}
 
 	/**
@@ -160,7 +173,7 @@ public class PluginResource {
 	 * @param plugin
 	 *            The newly discovered plug-in.
 	 */
-	private void configurePluginUpdate(final FeaturePlugin plugin, final Plugin entity) {
+	protected void configurePluginUpdate(final FeaturePlugin plugin, final Plugin entity) {
 		final String newVersion = getVersion(plugin);
 		log.info("Updating the plugin {} v{} -> v{}", plugin.getKey(), entity.getVersion(), newVersion);
 		try {
@@ -185,7 +198,7 @@ public class PluginResource {
 	 * @param plugin
 	 *            The newly discovered plug-in.
 	 */
-	private void configurePluginInstall(final FeaturePlugin plugin) {
+	protected void configurePluginInstall(final FeaturePlugin plugin) {
 		final String newVersion = getVersion(plugin);
 		log.info("Installing the new plugin {} v{}", plugin.getKey(), newVersion);
 		try {
@@ -194,14 +207,16 @@ public class PluginResource {
 
 			// Special process for service plug-ins
 			if (plugin instanceof ServicePlugin) {
-				entity.setType(PluginType.FEATURE);
+				// Either a service either a tool, depends on the level of refinement
+				entity.setType(determinePluginType((ServicePlugin) plugin));
+
 				if (!installedEntities.contains(Node.class)) {
 					// Persist the partial default node now for the bellow installation process
 					nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
 				}
 			} else {
-				// Either a service either a tool, depends on the level of refinement
-				entity.setType(PluginType.values()[StringUtils.countMatches(plugin.getKey(), ':')]);
+				// A simple feature
+				entity.setType(PluginType.FEATURE);
 			}
 			configurePluginEntities(installedEntities);
 
@@ -213,6 +228,31 @@ public class PluginResource {
 			log.error("Installing the new plugin {} v{} failed", plugin.getKey(), newVersion, e);
 			throw new TechnicalException("Configuring the new plugin failed", e, plugin.getKey());
 		}
+	}
+
+	/**
+	 * Determine the plug-in type and check it regarding the contact and the convention.
+	 * 
+	 * @param plugin
+	 *            The plug-in resource.
+	 * @return The checked {@link PluginType}
+	 */
+	protected PluginType determinePluginType(final ServicePlugin plugin) {
+		// Determine the type from the key by convention
+		final PluginType result = PluginType.values()[StringUtils.countMatches(plugin.getKey(), ':')];
+
+		// Double check the convention with related interface
+		final PluginType interfaceType;
+		if (plugin instanceof ToolPlugin) {
+			interfaceType = PluginType.TOOL;
+		} else {
+			interfaceType = PluginType.SERVICE;
+		}
+		if (interfaceType != result) {
+			throw new TechnicalException(String.format("Incompatible type from the key (%s -> %s) vs type from the interface (%s)", plugin.getKey(),
+					result, interfaceType));
+		}
+		return result;
 	}
 
 	private void configurePluginEntities(final List<Class<?>> installedEntities) throws IOException {

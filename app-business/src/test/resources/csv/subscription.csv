@@ -1,0 +1,4 @@
+node.id;project.name
+service:sample:tool:node1;MDA
+service:sample:tool:node1;gStack
+service:sample:tool:node2;gStack
