@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -310,19 +311,16 @@ public class PluginResource {
 	 * @return
 	 */
 	protected String getVersion(final FeaturePlugin plugin) {
-		if (plugin.getVersion() == null) {
+		return Optional.ofNullable(plugin.getVersion()).orElseGet(() -> {
 			// Not explicit version
 			try {
 				return getLastModifiedTime(plugin);
 			} catch (final IOException | URISyntaxException e) {
 				log.warn("Unable to determine the version of plug-in {}", plugin.getClass(), e);
 
-				// Default version
+				// Fail-safe version
 				return "?";
 			}
-		}
-
-		// Return the right version
-		return plugin.getVersion();
+		});
 	}
 }
