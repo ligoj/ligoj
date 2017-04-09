@@ -66,7 +66,7 @@ public class RestAuthenticationProvider extends GfiAuthenticationProvider {
 	 */
 	private Authentication newAuthentication(final String userName, final String userpassword, final Authentication authentication,
 			final HttpResponse httpResponse) {
-		final List<String> cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> header.getName().equals("set-cookie"))
+		final List<String> cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> "set-cookie".equals(header.getName()))
 				.map(Header::getValue).collect(Collectors.toList());
 
 		// Get the optional real user name if provided
