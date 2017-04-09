@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  * REST authenticated provider.
  */
 @Slf4j
-public class RestAuthenticationProvider extends GfiAuthenticationProvider {
+public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(final Authentication authentication) {
@@ -81,5 +81,4 @@ public class RestAuthenticationProvider extends GfiAuthenticationProvider {
 		return new CookieUsernamePasswordAuthenticationToken(realUserName, authentication.getCredentials(), authentication.getAuthorities(), cookies);
 
 	}
-
 }

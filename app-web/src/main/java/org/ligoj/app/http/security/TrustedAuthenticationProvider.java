@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 /**
  * Always authenticated provider.
  */
-public class TrustedAuthenticationProvider extends GfiAuthenticationProvider {
+public class TrustedAuthenticationProvider extends AbstractAuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(final Authentication authentication) {
