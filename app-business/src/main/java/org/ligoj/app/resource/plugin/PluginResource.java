@@ -1,26 +1,33 @@
 package org.ligoj.app.resource.plugin;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.api.ServicePlugin;
@@ -66,6 +73,9 @@ public class PluginResource {
 
 	@Autowired
 	private CsvForJpa csvForJpa;
+
+	@Autowired
+	private EntityManager em;
 
 	/**
 	 * Return all plug-ins with details.
@@ -119,13 +129,11 @@ public class PluginResource {
 
 		// Compare with the available plug-in implementing ServicePlugin
 		event.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().forEach(s -> {
-			final String newVersion = getVersion(s);
 			final Plugin plugin = plugins.get(s.getKey());
 			if (plugin == null) {
 				newFeatures.put(s.getKey(), s);
-			} else if (!plugin.getVersion().equals(newVersion)) {
+			} else if (!plugin.getVersion().equals(getVersion(s))) {
 				updateFeatures.put(s.getKey(), s);
-				plugin.setVersion(newVersion);
 			}
 			removedPlugins.remove(plugin);
 		});
@@ -177,14 +185,7 @@ public class PluginResource {
 	protected void configurePluginUpdate(final FeaturePlugin plugin, final Plugin entity) {
 		final String newVersion = getVersion(plugin);
 		log.info("Updating the plugin {} v{} -> v{}", plugin.getKey(), entity.getVersion(), newVersion);
-		try {
-			configurePluginEntities(plugin.getInstalledEntities());
-			entity.setVersion(newVersion);
-		} catch (final Exception e) { // NOSONAR - Catch all to notice every time the failure
-			// Something happened
-			log.error("Updating the plugin {} v{} -> v{} succeed", plugin.getKey(), entity.getVersion(), newVersion);
-			throw new TechnicalException("Configuring the new plugin failed", e, plugin.getKey());
-		}
+		entity.setVersion(newVersion);
 	}
 
 	/**
@@ -219,7 +220,8 @@ public class PluginResource {
 				// A simple feature
 				entity.setType(PluginType.FEATURE);
 			}
-			configurePluginEntities(installedEntities);
+
+			configurePluginEntities(plugin, installedEntities);
 
 			entity.setKey(plugin.getKey());
 			entity.setVersion(newVersion);
@@ -227,7 +229,7 @@ public class PluginResource {
 		} catch (final Exception e) { // NOSONAR - Catch all to notice every time the failure
 			// Something happened
 			log.error("Installing the new plugin {} v{} failed", plugin.getKey(), newVersion, e);
-			throw new TechnicalException("Configuring the new plugin failed", e, plugin.getKey());
+			throw new TechnicalException(String.format("Configuring the new plugin %s failed", plugin.getKey()), e);
 		}
 	}
 
@@ -256,12 +258,47 @@ public class PluginResource {
 		return result;
 	}
 
-	private void configurePluginEntities(final List<Class<?>> installedEntities) throws IOException {
-
-		// Insert the configuration entities of the plug-in
-		for (Class<?> entityClass : installedEntities) {
-			csvForJpa.insert("csv", entityClass, StandardCharsets.UTF_8.name());
+	/**
+	 * Insert the configuration entities of the plug-in.
+	 * 
+	 * @param plugin
+	 *            The related plug-in
+	 * @param installedEntities
+	 *            The managed entities where CSV data need to be persisted with this plug-in.
+	 * @throws IOException
+	 *             When the CSV management failed.
+	 */
+	protected void configurePluginEntities(final FeaturePlugin plugin, final List<Class<?>> csvEntities) throws IOException {
+		//
+		final ClassLoader classLoader = plugin.getClass().getClassLoader();
+		final String jarPlugin = plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
+		for (final Class<?> entityClass : csvEntities) {
+			// Build the required CSV file
+			final String csv = "csv/"
+					+ StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(entityClass.getSimpleName()), '-').toLowerCase(Locale.ENGLISH)
+					+ ".csv";
+			configurePLuginEntity(Collections.list(classLoader.getResources(csv)).stream(), entityClass, jarPlugin);
 		}
+	}
+
+	protected void configurePLuginEntity(final Stream<URL> csv, final Class<?> entityClass, final String container) throws IOException {
+		InputStreamReader input = null; // / No Java7 feature because of coverage issues
+		try {
+			// Accept the CSV file from the JAR where the plug-in is installed from
+			input = new InputStreamReader(csv.filter(u -> {
+				return u.getFile().startsWith(container) || u.toString().startsWith(container);
+			}).findFirst()
+					.orElseThrow(() -> new TechnicalException(String.format("Unable to find CSV file for entity %s", entityClass.getSimpleName())))
+					.openStream(), StandardCharsets.UTF_8);
+
+			// Build and save the entities
+			csvForJpa.toJpa(entityClass, input, true, true);
+			em.flush();
+			em.clear();
+		} finally {
+			IOUtils.closeQuietly(input);
+		}
+
 	}
 
 	/**

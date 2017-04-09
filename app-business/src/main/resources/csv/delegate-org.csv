@@ -1,0 +1,4 @@
+receiver;receiverType;type;name;canWrite;canAdmin;dn
+ligoj-admin;USER;TREE;-;true;true;dc=sample,dc=com
+internal;COMPANY;COMPANY;internal;false;false;ou=internal,ou=people,dc=sample,dc=com
+internal;COMPANY;COMPANY;external;false;false;ou=external,ou=people,dc=sample,dc=com

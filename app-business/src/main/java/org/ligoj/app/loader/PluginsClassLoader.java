@@ -54,6 +54,7 @@ public class PluginsClassLoader extends URLClassLoader {
 		Files.createDirectories(this.pluginDirectory);
 
 		log.info("Load plugins throught Custom Plugins ClassLoader");
+		addURL(this.homeDirectory.toUri().toURL());
 		for (final URI uri : Files.list(this.pluginDirectory).filter(p -> p.toString().endsWith(".jar")).map(Path::toUri).toArray(URI[]::new)) {
 			log.info("Add plugin {}", uri);
 			addURL(uri.toURL());

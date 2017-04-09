@@ -35,6 +35,12 @@
 			<artifactId>plugin-core</artifactId>
 			<version>${api.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
+
 
 		<!-- JSR-154 -->
 		<dependency>
@@ -103,7 +109,7 @@
 		</profile>
 		<profile>
 			<id>eclipse-plugins</id>
-			<!-- Put here the plug-ins to be resolved by your IDE  -->
+			<!-- Put here the plug-ins to be resolved by your IDE -->
 			<dependencies>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>

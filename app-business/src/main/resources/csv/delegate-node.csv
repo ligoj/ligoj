@@ -1,0 +1,2 @@
+receiver;name;canWrite;canAdmin;canSubscribe
+ligoj-admin;service;true;true;true
