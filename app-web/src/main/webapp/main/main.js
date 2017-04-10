@@ -60,7 +60,7 @@ define(['cascade'], function ($cascade) {
 		 * @return A link with icon depending on the target, title and text.
 		 */
 		getResourceLink: function (target, type) {
-			return '<i class="' + current.targetTypeClass[type] + '" title="' + current.$messages[type] + ' : ' + (target.name || target.id || target) + '"></i> ' + current['get' + type.capitalize() + 'Link'](target);
+			return '<i class="' + current.targetTypeClass[type] + '" title="' + current.$messages[type] + ' : ' + (target.name || target.id || target) + '" data-toggle="tooltip"></i> ' + current['get' + type.capitalize() + 'Link'](target);
 		},
 
 		/**
