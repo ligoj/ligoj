@@ -103,6 +103,7 @@
 		<servlet-name>PluginProxy</servlet-name>
 		<url-pattern>/main/service/*</url-pattern>
 		<url-pattern>/main/id/*</url-pattern>
+		<url-pattern>/main/inbox/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>captcha</servlet-name>
