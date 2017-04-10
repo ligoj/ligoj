@@ -52,10 +52,59 @@ define(['cascade'], function ($cascade) {
 			}
 			return result;
 		},
+		
+		/**
+		 * Return a link depending on the target and target type : user, company, tree,...
+		 * @param target The target : user, company, tree or group.
+		 * @param type The target type : "user", "company", "tree", "node", "project" or "group".
+		 * @return A link with icon depending on the target, title and text.
+		 */
+		getResourceLink: function (target, type) {
+			return '<i class="' + current.targetTypeClass[type] + '" title="' + current.$messages[type] + ' : ' + (target.name || target.id || target) + '"></i> ' + current['get' + type.capitalize() + 'Link'](target);
+		},
 
 		/**
-		 * Return a link targeting to the user page. Display the full name.
+		 * Return a link targeting the company page.
+		 * @param company The company data.
+		 * @return The company link markup.
+		 */
+		getCompanyLink: function(company) {
+			return '<a href="#/id/home/company=' + (company.id || company) + '">' + (company.name || company) + '</a>';
+		},
+
+		/**
+		 * Return a link targeting the group page.
+		 * @param group The group data.
+		 * @return The group link markup.
+		 */
+		getGroupLink: function(group) {
+			return '<a href="#/id/home/group=' + (group.id || group) + '">' + (group.name || group) + '</a>';
+		},
+
+		/**
+		 * Return a simple taxt, not a link as the function name may guess.
+		 * The name is required because of the function source #getResourceLink().
+		 * @param tree The organizational tree description.
+		 * @return The tree description.
+		 */
+		getTreeLink: function(tree) {
+			return tree.dn || tree;
+		},
+
+		/**
+		 * Return a link targeting the project page.
 		 * @param user The user data : login, fullname, etc...
+		 * @return The project link markup.
+		 */
+		getProjectLink: function(project) {
+			return '<a href="#/home/project/' + (project.id || project) + '">' + (project.name || project) + '</a>';
+		},
+
+		/**
+		 * Return a link targeting the user page. Display the full name.
+		 * @param user The user data : login, fullname, etc...
+		 * @param text The optional text to display. When empty, full name is used.
+		 * @return The user link markup.
 		 */
 		getUserLink: function (user, text) {
 			if (user) {
@@ -76,7 +125,7 @@ define(['cascade'], function ($cascade) {
 
 				// Link text
 				text = text || fullName;
-				return '<a' + (user.locked ? ' class="locked"' : '') + ' href="#/service/id/user/' + user.id + '" rel="popover" data-toggle="popover" data-placement="left" data-title="' + fullName + '" data-trigger="hover" data-html="true" data-content=\'' + content + '\'>' + text + '</a>';
+				return '<a' + (user.locked ? ' class="locked"' : '') + ' href="#/id/user/' + user.id + '" rel="popover" data-toggle="popover" data-placement="left" data-title="' + fullName + '" data-trigger="hover" data-html="true" data-content=\'' + content + '\'>' + text + '</a>';
 			}
 			return current.$messages.unknown;
 		},
@@ -84,6 +133,7 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Return a link targeting to the user page. Display only user name.
 		 * @param user The user data : login, fullname, etc...
+		 * @return The user link markup with user identifier as text.
 		 */
 		getUserLoginLink: function (user) {
 			return current.getUserLink(user, user && user.id);
@@ -92,6 +142,8 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Return the full name of given user. May be built from the provided information.
 		 * @param user The user data : login, fullname, etc...
+		 * @return The full nae of given user. 
+		 * When there are not enough data to build it, will use the first letter of the login as first name.
 		 */
 		getFullName: function (user) {
 			if (user.fullName) {
@@ -279,7 +331,7 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Object type to class mapping.
 		 */
-		messageTypeClass: {
+		targetTypeClass: {
 			company: 'resource fa fa-building-o',
 			group: 'resource fa fa-users',
 			project: 'resource fa fa-folder',
