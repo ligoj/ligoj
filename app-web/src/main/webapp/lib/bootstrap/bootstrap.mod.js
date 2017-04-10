@@ -13,9 +13,7 @@ define([
 	}).on('mousedown', function (e) {
 		// Auto hide popover on click
 		if ($('.popover.in').length && $(e.target).closest('[data-toggle="popover"],.popover').length === 0) {
-			traceLog('click .popover.in');
 			$('.popover.in').each(function () {
-				traceLog('click .popover.in found');
 				$('[aria-describedby="' + $(this).attr('id') + '"]').popover('hide');
 			});
 		}
