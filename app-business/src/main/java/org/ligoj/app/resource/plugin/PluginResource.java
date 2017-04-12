@@ -285,9 +285,7 @@ public class PluginResource {
 		InputStreamReader input = null; // / No Java7 feature because of coverage issues
 		try {
 			// Accept the CSV file from the JAR where the plug-in is installed from
-			input = new InputStreamReader(csv.filter(u -> {
-				return u.getFile().startsWith(container) || u.toString().startsWith(container);
-			}).findFirst()
+			input = new InputStreamReader(csv.filter(u -> u.getFile().startsWith(container) || u.toString().startsWith(container)).findFirst()
 					.orElseThrow(() -> new TechnicalException(String.format("Unable to find CSV file for entity %s", entityClass.getSimpleName())))
 					.openStream(), StandardCharsets.UTF_8);
 
