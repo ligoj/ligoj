@@ -30,7 +30,7 @@ public class SecurityResource {
 	protected ApplicationContext applicationContext;
 
 	@Autowired
-	protected IamProvider iamProvider;
+	protected IamProvider[] iamProvider;
 
 	/**
 	 * Check the user credentials.
@@ -56,7 +56,7 @@ public class SecurityResource {
 	 * Authenticate the given user
 	 */
 	private Authentication authenticate(final String name, final String credential) {
-		return iamProvider.authenticate(new UsernamePasswordAuthenticationToken(name, credential));
+		return iamProvider[0].authenticate(new UsernamePasswordAuthenticationToken(name, credential));
 	}
 
 }
