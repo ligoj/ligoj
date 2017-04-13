@@ -22,7 +22,7 @@
 	<!--Webjars Servlet -->
 	<servlet>
 		<servlet-name>WebjarsServlet</servlet-name>
-		<servlet-class>org.ligoj.app.loader.WebjarsServlet</servlet-class>
+		<servlet-class>org.ligoj.app.resource.plugin.WebjarsServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 	<filter>

@@ -7,7 +7,7 @@
 	<Set name="classLoader">
 		<New class="org.eclipse.jetty.webapp.WebAppClassLoader">
 			<Arg>
-				<New class="org.ligoj.app.loader.PluginsClassLoader" />
+				<New class="org.ligoj.app.resource.plugin.PluginsClassLoader" />
 			</Arg>
 			<Arg><Ref refid="WebApp"/></Arg>
 		</New>

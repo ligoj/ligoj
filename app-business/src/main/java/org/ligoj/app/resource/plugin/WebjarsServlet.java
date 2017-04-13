@@ -1,4 +1,4 @@
-package org.ligoj.app.loader;
+package org.ligoj.app.resource.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
