@@ -6,7 +6,7 @@ define(function () {
 				ajax: REST_PATH + 'plugin',
 				dataSrc: '',
 				sAjaxDataProp: '',
-				dom: '<"row"<"col-xs-6">>t',
+				dom: '<"row"<"col-sm-6"B><"col-sm-6"f>r>t',
 				pageLength: -1,
 				destroy: true,
 				order: [[1, 'asc']],
@@ -43,7 +43,29 @@ define(function () {
 							return plugin.plugin.type === 'feature' ? '' : nb;
 						}
 					}
+				],
+				buttons: [
+					{
+						extend: 'create',
+						text: 'install',
+						action: function () {
+							bootbox.prompt(current.$messages.name, current.install);
+						}
+					}
 				]
+			});
+		},
+		
+		install : function(name) {
+			name && $.ajax({
+				type: 'POST',
+				url: REST_PATH + 'plugin/' + encodeURIComponent(name),
+				dataType: 'text',
+				contentType: 'application/json',
+				success: function () {
+					notifyManager.notify(Handlebars.compile(current.$messages.downloaded)(name));
+					current.table && current.table.api().ajax.reload();
+				}
 			});
 		}
 	};

@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -17,19 +18,26 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.api.FeaturePlugin;
+import org.ligoj.app.api.PluginException;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.api.SubscriptionMode;
 import org.ligoj.app.api.ToolPlugin;
@@ -44,6 +52,7 @@ import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.SpringUtils;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
+import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -62,6 +71,8 @@ import lombok.extern.slf4j.Slf4j;
 @Produces(MediaType.APPLICATION_JSON)
 public class PluginResource {
 
+	private static final String DEFAULT_PLUGIN_URL = "http://central.maven.org/maven2/org/ligoj/plugin/";
+
 	@Autowired
 	private NodeRepository nodeRepository;
 
@@ -75,7 +86,19 @@ public class PluginResource {
 	private CsvForJpa csvForJpa;
 
 	@Autowired
+	private ConfigurationResource configuration;
+
+	@Autowired
 	private EntityManager em;
+
+	/**
+	 * Return the plug-ins download URL.
+	 * 
+	 * @return The plug-ins download URL. Ends with "/".
+	 */
+	private String getPluginUrl() {
+		return StringUtils.appendIfMissing(ObjectUtils.defaultIfNull(configuration.get("plugins.url"), DEFAULT_PLUGIN_URL), "/");
+	}
 
 	/**
 	 * Return all plug-ins with details.
@@ -105,6 +128,65 @@ public class PluginResource {
 			}
 			return vo;
 		}).sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
+	}
+
+	/**
+	 * Install the last available version of given plug-in from the remote server.
+	 * 
+	 * @param artifact
+	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 */
+	@POST
+	@Path("{artifact}")
+	public void install(@PathParam("artifact") final String artifact) {
+		final String metaData = StringUtils.defaultString(new CurlProcessor().get(getPluginUrl() + artifact + "/maven-metadata.xml"), "");
+		final Matcher matcher = Pattern.compile("<latest>([^<]+)</latest>").matcher(metaData);
+		if (!matcher.find()) {
+			throw new PluginException(artifact, String.format("Versions discovery cannot be performed from from remote server %s", getPluginUrl()));
+		}
+		install(artifact, matcher.group(1));
+	}
+
+	/**
+	 * Remove all versions the specified plug-in.
+	 * 
+	 * @param artifact
+	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 */
+	@DELETE
+	@Path("{artifact}")
+	public void remove(@PathParam("artifact") final String artifact) throws IOException {
+		Files.list(getPluginClassLoader().getPluginDirectory()).filter(p -> p.getFileName().toString().matches("^" + artifact + "(-\\d+)*.jar$"))
+				.forEach(p -> p.toFile().delete());
+		log.info("Plugin {} has been deleted, restart is required", artifact);
+	}
+
+	/**
+	 * Install the specific version of given plug-in from the remote server. The previous version is not deleted. The
+	 * downloaded version will be used only if it is a most recent version than the locally ones.
+	 * 
+	 * @param artifact
+	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 * @param version
+	 *            The vrsion to install.
+	 */
+	@POST
+	@Path("{artifact}/{version}")
+	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version) {
+		final String url = getPluginUrl() + artifact + "/" + version + "/" + artifact + "-" + version + ".jar";
+		final java.nio.file.Path target = getPluginClassLoader().getPluginDirectory().resolve(artifact + "-" + version + ".jar");
+		log.info("Downloading plugin {} v{} from {} to ", artifact, version, url);
+		try {
+			// Download and copy the file, note the previous version is not removed
+			Files.copy(new URL(url).openStream(), target, StandardCopyOption.REPLACE_EXISTING);
+			log.info("Plugin {} v{} has been downloaded, restart is required", artifact, version);
+		} catch (final IOException ioe) {
+			throw new PluginException(artifact, String.format("Cannot be downloaded from remote server %s", artifact), ioe);
+		}
+	}
+
+	protected PluginsClassLoader getPluginClassLoader() {
+		return (PluginsClassLoader) Thread.currentThread().getContextClassLoader().getParent();
 	}
 
 	/**
@@ -282,12 +364,10 @@ public class PluginResource {
 	}
 
 	protected void configurePLuginEntity(final Stream<URL> csv, final Class<?> entityClass, final String container) throws IOException {
-		InputStreamReader input = null; // / No Java7 feature because of coverage issues
-		try {
-			// Accept the CSV file from the JAR where the plug-in is installed from
-			input = new InputStreamReader(csv.filter(u -> {
-				return u.getFile().startsWith(container) || u.toString().startsWith(container);
-			}).findFirst()
+		InputStreamReader input = null;
+		try { // NOSONAR - No Java7 feature because of coverage issues
+				// Accept the CSV file from the JAR where the plug-in is installed from
+			input = new InputStreamReader(csv.filter(u -> u.getFile().startsWith(container) || u.toString().startsWith(container)).findFirst()
 					.orElseThrow(() -> new TechnicalException(String.format("Unable to find CSV file for entity %s", entityClass.getSimpleName())))
 					.openStream(), StandardCharsets.UTF_8);
 
