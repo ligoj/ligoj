@@ -1,4 +1,4 @@
-package org.ligoj.app.loader;
+package org.ligoj.app.resource.plugin;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,6 +17,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.ligoj.app.resource.plugin.WebjarsServlet;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;

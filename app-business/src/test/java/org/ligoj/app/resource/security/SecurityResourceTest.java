@@ -33,7 +33,7 @@ public class SecurityResourceTest extends AbstractServerTest {
 		Mockito.when(iamProvider.authenticate(ArgumentMatchers.any(Authentication.class))).thenThrow(new BadCredentialsException("any"));
 		final SecurityResource resource = new SecurityResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
-		resource.iamProvider = iamProvider;
+		resource.iamProvider = new IamProvider[] { iamProvider };
 		resource.login(user);
 	}
 
@@ -43,7 +43,7 @@ public class SecurityResourceTest extends AbstractServerTest {
 		Mockito.when(iamProvider.authenticate(ArgumentMatchers.any(Authentication.class))).thenAnswer(i -> i.getArguments()[0]);
 		final SecurityResource resource = new SecurityResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
-		resource.iamProvider = iamProvider;
+		resource.iamProvider = new IamProvider[] { iamProvider };
 		final Response login = resource.login(new User("fdauganA", "Azerty01"));
 		Assert.assertNotNull(login);
 		Assert.assertEquals(204, login.getStatus());

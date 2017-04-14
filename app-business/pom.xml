@@ -20,10 +20,16 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>1.0.1</api.version>
+		<api.version>1.0.2</api.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.ligoj.api</groupId>
+			<artifactId>plugin-iam-empty</artifactId>
+			<version>${api.version}</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.ligoj.api</groupId>
 			<artifactId>plugin-api-test</artifactId>
