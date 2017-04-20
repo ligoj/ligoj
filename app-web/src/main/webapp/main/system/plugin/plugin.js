@@ -56,17 +56,48 @@ define(function () {
 			});
 		},
 		
+		/**
+		 * Install the requested plug-ins.
+		 * @param The plug-in identifier or null. When null, a prompt is displayed.
+		 */
 		install : function(name) {
-			name && $.ajax({
-				type: 'POST',
-				url: REST_PATH + 'plugin/' + encodeURIComponent(name),
-				dataType: 'text',
-				contentType: 'application/json',
-				success: function () {
-					notifyManager.notify(Handlebars.compile(current.$messages.downloaded)(name));
-					current.table && current.table.api().ajax.reload();
-				}
-			});
+			if (name) {
+				current.installNext(plugin.split(','), 0);
+			}
+		},
+		
+		/**
+		 * Install a the plug-ins from the one at the specified index, and then the next ones.
+		 * There is one AJAX call by plug-in, and stops at any error.
+		 * @param plugins The plug-in identifiers array to install.
+		 * @param index The starting plug-in index within the given array.
+		 */
+		installNext : function(plugins, index) {
+			if (index >= plugins.length) {
+				// All plug-ins are installed
+				current.table && current.table.api().ajax.reload();
+				return;
+			}
+
+			// Install this plug-in
+			var plugin = plugins[i].trim();
+			if (plugin) {
+				$.ajax({
+					type: 'POST',
+					url: REST_PATH + 'plugin/' + encodeURIComponent(plugin),
+					dataType: 'text',
+					contentType: 'application/json',
+					success: function () {
+						notifyManager.notify(Handlebars.compile(current.$messages.downloaded)({plugin, index, plugins.length}));
+
+						// Install the next plug-in
+						current.installNext(plugins, index + 1);
+					}
+				});
+			} else {
+				// The token was empty, install the next real plug-in
+				current.installNext(plugins, index + 1);
+			}
 		}
 	};
 	return current;
