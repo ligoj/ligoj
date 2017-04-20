@@ -11,6 +11,6 @@ A web application to centralize the related tools of your projects, a 21th centu
 [![Quality Gate](https://sonarqube.com/api/badges/gate?key=org.ligoj.api:root)](https://sonarqube.com/dashboard/index/org.ligoj.api:root)
 [![Sourcegraph Badge](https://sourcegraph.com/github.com/ligoj/ligoj/-/badge.svg)](https://sourcegraph.com/github.com/ligoj/ligoj?badge)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/abf810c094e44c0691f71174c707d6ed)](https://www.codacy.com/app/ligoj/ligoj?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/ligoj&amp;utm_campaign=Badge_Grade)
-[![Code Climate](https://img.shields.io/codeclimate/github/ligoj/ligoj.svg)](https://codeclimate/github/ligoj/ligoj)
+[![Code Climate](https://img.shields.io/codeclimate/github/ligoj/ligoj.svg)](https://codeclimate.com/github/ligoj/ligoj)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/ligoj/badge)](https://www.codefactor.io/repository/github/ligoj/ligoj)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
