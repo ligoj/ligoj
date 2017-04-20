@@ -58,11 +58,11 @@ define(function () {
 		
 		/**
 		 * Install the requested plug-ins.
-		 * @param The plug-in identifier or null. When null, a prompt is displayed.
+		 * @param pluginsAsString The plug-in identifiers (comma separated) or null. When null, a prompt is displayed.
 		 */
-		install : function(name) {
-			if (name) {
-				current.installNext(plugin.split(','), 0);
+		install : function(pluginsAsString) {
+			if (pluginsAsString) {
+				current.installNext(pluginsAsString.split(','), 0);
 			}
 		},
 		
@@ -80,7 +80,7 @@ define(function () {
 			}
 
 			// Install this plug-in
-			var plugin = plugins[i].trim();
+			var plugin = plugins[index].trim();
 			if (plugin) {
 				$.ajax({
 					type: 'POST',
@@ -88,10 +88,11 @@ define(function () {
 					dataType: 'text',
 					contentType: 'application/json',
 					success: function () {
-						notifyManager.notify(Handlebars.compile(current.$messages.downloaded)({plugin, index, plugins.length}));
+						var next = index < plugins.length - 1;
+						notifyManager.notify(Handlebars.compile(current.$messages['downloaded' + (next ? '-continue' : '')])([plugin, (index + 1), plugins.length]));
 
 						// Install the next plug-in
-						current.installNext(plugins, index + 1);
+						next & current.installNext(plugins, index + 1);
 					}
 				});
 			} else {

@@ -1,6 +1,7 @@
 define({
 		'vendor': 'Fournisseur',
 		'nodes': 'Noeuds',
-		'downloaded': 'Plug-in {{this}} téléchargé, un redémarrage est requis',
+		'downloaded-continue': 'Plug-in {{[0]}} téléchargé ({{[1]}}/{{[2]}})',
+		'downloaded': 'Plug-in {{[0]}} téléchargé ({{[1]}}/{{[2]}}), un redémarrage est requis',
 		'subscriptions': 'Souscriptions'
 });
