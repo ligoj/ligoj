@@ -13,7 +13,10 @@
 	<packaging>war</packaging>
 	<version>1.4.21-SNAPSHOT</version>
 	<name>Ligoj - Web</name>
-
+	<properties>
+		<sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria.e1.ruleKey>Web:BoldAndItalicTagsCheck</sonar.issue.ignore.multicriteria.e1.ruleKey>
+	</properties>
 	<scm>
 		<connection>scm:git:https://github.com/ligoj/ligoj.git</connection>
 		<developerConnection>scm:git:https://github.com/ligoj/ligoj.git</developerConnection>
