@@ -19,6 +19,17 @@
 		<url>https://travis-ci.org/ligoj/ligoj</url>
 	</ciManagement>
 
+	<profiles>
+		<profile>
+			<id>bintray</id>
+			<distributionManagement>
+				<repository>
+					<id>bintray-ligoj-maven-repo</id>
+					<url>https://api.bintray.com/maven/ligoj/maven-repo/ligoj/;publish=1</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
 	
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>root</artifactId>
