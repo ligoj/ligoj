@@ -29,4 +29,9 @@ public class InitializeRbacDataResource implements FeaturePlugin {
 				DelegateNode.class);
 	}
 
+	@Override
+	public String getName() {
+		return "Welcome Data RBAC";
+	}
+
 }
