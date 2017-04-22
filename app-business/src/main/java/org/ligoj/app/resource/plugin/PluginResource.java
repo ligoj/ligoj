@@ -51,6 +51,7 @@ import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.SpringUtils;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
+import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,13 +84,13 @@ public class PluginResource {
 	private SubscriptionRepository subscriptionRepository;
 
 	@Autowired
-	private CsvForJpa csvForJpa;
+	protected CsvForJpa csvForJpa;
 
 	@Autowired
 	private ConfigurationResource configuration;
 
 	@Autowired
-	private EntityManager em;
+	protected EntityManager em;
 
 	/**
 	 * Return the plug-ins download URL.
@@ -117,7 +118,7 @@ public class PluginResource {
 			final FeaturePlugin feature = SpringUtils.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream()
 					.filter(f -> key.equals(f.getKey())).findFirst().get();
 			vo.setName(StringUtils.removeStart(feature.getName(), "Ligoj - Plugin "));
-			vo.setLocation(feature.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+			vo.setLocation(getPluginLocation(feature).getPath());
 			vo.setVendor(feature.getVendor());
 			vo.setPlugin(p);
 			if (p.getType() != PluginType.FEATURE) {
@@ -137,12 +138,14 @@ public class PluginResource {
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
 	 */
 	@POST
-	@Path("{artifact}")
+	@Path("{artifact:[\\w-]+}")
 	public void install(@PathParam("artifact") final String artifact) {
 		final String metaData = StringUtils.defaultString(new CurlProcessor().get(getPluginUrl() + artifact + "/maven-metadata.xml"), "");
 		final Matcher matcher = Pattern.compile("<latest>([^<]+)</latest>").matcher(metaData);
 		if (!matcher.find()) {
-			throw new PluginException(artifact, String.format("Versions discovery cannot be performed from from remote server %s", getPluginUrl()));
+			// Plug-in not found
+			throw new BusinessException(
+					String.format("Versions discovery cannot be performed from from remote server %s for plugin %s", getPluginUrl(), artifact));
 		}
 		install(artifact, matcher.group(1));
 	}
@@ -154,7 +157,7 @@ public class PluginResource {
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
 	 */
 	@DELETE
-	@Path("{artifact}")
+	@Path("{artifact:[\\w-]+}")
 	public void remove(@PathParam("artifact") final String artifact) throws IOException {
 		Files.list(getPluginClassLoader().getPluginDirectory()).filter(p -> p.getFileName().toString().matches("^" + artifact + "(-\\d+)*.jar$"))
 				.forEach(p -> p.toFile().delete());
@@ -171,7 +174,7 @@ public class PluginResource {
 	 *            The vrsion to install.
 	 */
 	@POST
-	@Path("{artifact}/{version}")
+	@Path("{artifact:[\\w-]+}/{version:[\\w-]+}")
 	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version) {
 		final String url = getPluginUrl() + artifact + "/" + version + "/" + artifact + "-" + version + ".jar";
 		final java.nio.file.Path target = getPluginClassLoader().getPluginDirectory().resolve(artifact + "-" + version + ".jar");
@@ -353,25 +356,32 @@ public class PluginResource {
 	protected void configurePluginEntities(final FeaturePlugin plugin, final List<Class<?>> csvEntities) throws IOException {
 		//
 		final ClassLoader classLoader = plugin.getClass().getClassLoader();
-		final String jarPlugin = plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
+
+		// Compute the location of this plug-in, ensuring the
+		final String pluginLocation = getPluginLocation(plugin).toString();
 		for (final Class<?> entityClass : csvEntities) {
 			// Build the required CSV file
 			final String csv = "csv/"
 					+ StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(entityClass.getSimpleName()), '-').toLowerCase(Locale.ENGLISH)
 					+ ".csv";
-			configurePLuginEntity(Collections.list(classLoader.getResources(csv)).stream(), entityClass, jarPlugin);
+			configurePluginEntity(Collections.list(classLoader.getResources(csv)).stream(), entityClass, pluginLocation);
 		}
 	}
 
-	protected void configurePLuginEntity(final Stream<URL> csv, final Class<?> entityClass, final String container) throws IOException {
+	protected URL getPluginLocation(final FeaturePlugin plugin) {
+		return plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
+	}
+
+	protected void configurePluginEntity(final Stream<URL> csv, final Class<?> entityClass, final String pluginLocation) throws IOException {
 		InputStreamReader input = null;
 		try { // NOSONAR - No Java7 feature because of coverage issues
-				// Accept the CSV file from the JAR where the plug-in is installed from
-			input = new InputStreamReader(csv.filter(u -> u.getFile().startsWith(container) || u.toString().startsWith(container)).findFirst()
+				// Accept the CSV file only from the JAR/folder where the plug-in is installed from
+			input = new InputStreamReader(csv.filter(u -> u.getPath().startsWith(pluginLocation) || u.toString().startsWith(pluginLocation))
+					.findFirst()
 					.orElseThrow(() -> new TechnicalException(String.format("Unable to find CSV file for entity %s", entityClass.getSimpleName())))
 					.openStream(), StandardCharsets.UTF_8);
 
-			// Build and save the entities
+			// Build and save the entities managed by this plug-in
 			csvForJpa.toJpa(entityClass, input, true, true);
 			em.flush();
 			em.clear();
