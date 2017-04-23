@@ -113,7 +113,7 @@ public class PluginsClassLoader extends URLClassLoader {
 		try {
 			fileSystem = FileSystems.newFileSystem(pluginFile, this);
 			final Path export = fileSystem.getPath("/" + EXPORT_DIR);
-			if (Files.exists(export)) {
+			if (export.toFile().exists()) {
 				final Path targetExport = getHomeDirectory().resolve(EXPORT_DIR);
 				Files.walk(export).forEach(from -> copyExportedResource(plugin, targetExport, export, from));
 			}
@@ -129,7 +129,7 @@ public class PluginsClassLoader extends URLClassLoader {
 	private void copyExportedResource(final String plugin, final Path targetExport, final Path root, final Path from) {
 		final Path dest = targetExport.resolve(root.relativize(from).toString());
 		// Copy without overwrite
-		if (Files.notExists(dest)) {
+		if (dest.toFile().exists()) {
 			try {
 				copy(from, dest);
 			} catch (final IOException e) {
@@ -142,7 +142,7 @@ public class PluginsClassLoader extends URLClassLoader {
 	 * Copy a resource needed to be exported from the JAR plug-in to the home.
 	 */
 	protected void copy(final Path from, final Path dest) throws IOException {
-		if (Files.isDirectory(from)) {
+		if (from.toFile().isDirectory()) {
 			Files.createDirectories(dest);
 		} else {
 			Files.copy(from, dest);
