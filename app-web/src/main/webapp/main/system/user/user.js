@@ -67,10 +67,10 @@ define(function () {
 		initialize: function () {
 			// initialize components
 			_('create').click(function () {
-				current.saveOrUpdate('POST'));
+				current.saveOrUpdate('POST');
 			});
 			_('save').click(function () {
-				current.saveOrUpdate('PUT'));
+				current.saveOrUpdate('PUT');
 			});
 
 			current.initializeDataTable();
