@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,6 +16,8 @@ import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.util.thread.ThreadClassLoaderScope;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,7 +56,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class PlugInResourceTest extends AbstractAppTest {
+public class PluginResourceTest extends AbstractAppTest {
 
 	/**
 	 * File used to be created when a plugin is downloaded from this test class
@@ -395,7 +398,8 @@ public class PlugInResourceTest extends AbstractAppTest {
 
 	private PluginResource newPluginResourceRemove() {
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
-		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
+		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(
+				Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
 		final PluginResource pluginResource = new PluginResource() {
 			@Override
 			protected PluginsClassLoader getPluginClassLoader() {
@@ -433,5 +437,16 @@ public class PlugInResourceTest extends AbstractAppTest {
 		Assert.assertTrue(TEMP_FILE.exists());
 		newPluginResourceRemove().remove("plugin-iam");
 		Assert.assertFalse(TEMP_FILE.exists());
+	}
+
+	@Test
+	public void getPluginClassLoader() {
+		ThreadClassLoaderScope scope = null;
+		try {
+			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], Mockito.mock(PluginsClassLoader.class)));
+			Assert.assertNotNull(new PluginResource().getPluginClassLoader());
+		} finally {
+			IOUtils.closeQuietly(scope);
+		}
 	}
 }
