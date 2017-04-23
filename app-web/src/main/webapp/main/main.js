@@ -28,7 +28,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		toIcon: function (node, suffix, dataSrc, recursive) {
 			var fragments = (node.id || node || '::').split(':');
-			var title = (node.name || node.label || fragments[2] || fragments[1]);
+			var title = current.getNodeName(node) || fragments[2] || fragments[1];
 			var result;
 			if (node.uiClasses) {
 				// Use classes instead of picture
@@ -60,7 +60,21 @@ define(['cascade'], function ($cascade) {
 		 * @return A link with icon depending on the target, title and text.
 		 */
 		getResourceLink: function (target, type) {
-			return '<i class="' + current.targetTypeClass[type] + '" title="' + current.$messages[type] + ' : ' + (target.name || target.id || target) + '" data-toggle="tooltip"></i> ' + current['get' + type.capitalize() + 'Link'](target);
+			return '<i class="' + current.targetTypeClass[type] + '" title="' + current.getResourceName(target, type) + '" data-toggle="tooltip"></i> ' + current['get' + type.capitalize() + 'Link'](target);
+		},
+		
+		/**
+		 * Return the name of the given node from it's localized name or technical name that should be never null
+		 */
+		getResourceName: function (node, type) {
+			return type  === 'NODE' ? getNodeName(node) : node.name || node.label || node.id || node;
+		},
+		
+		/**
+		 * Return the name of the given node from it's localized name or technical name that should be never null
+		 */
+		getNodeName: function (node) {
+			return (node.id && current.$messages[node.id]) || ((typeof node) === 'string' && current.$messages[node]) || node.name || node.label || node.id || node;
 		},
 
 		/**
@@ -236,7 +250,7 @@ define(['cascade'], function ($cascade) {
 		},
 		newSelect2Node: function (selector, filter, placeholder, suffix, dataSrc, recursive) {
 			return current.newSelect2(selector, REST_PATH + 'node' + (filter || ''), placeholder || current.$messages.node, function (object) {
-				return current.toIcon(object, suffix, dataSrc, recursive) + ' ' + object.name;
+				return current.toIcon(object, suffix, dataSrc, recursive) + ' ' + current.getNodeName(object);
 			});
 		},
 		newSelect2Project: function (selector, filter, placeholder, textFunction, idProperty, textProperty) {

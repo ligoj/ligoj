@@ -635,7 +635,7 @@ define(['cascade'], function ($cascade) {
 				// Use a provided picture
 				icon = current.$parent.getToolFromId(node.id) ? current.$parent.toIcon(node, 'x64w') : '<i class="fa fa-cloud"></i>';
 			}
-			$container.append($('<label class="choice btn"><input data-index="' + index + '" type="radio" name="s-choice-' + type + '" value="' + node.id + '" autocomplete="off"><div class="icon img-circle">' + icon + '</div>' + current.$parent.toName(node) + '</label>'));
+			$container.append($('<label class="choice btn"><input data-index="' + index + '" type="radio" name="s-choice-' + type + '" value="' + node.id + '" autocomplete="off"><div class="icon img-circle">' + icon + '</div>' + current.$main.getNodeName(node) + '</label>'));
 		}
 
 		// Description management
@@ -659,7 +659,7 @@ define(['cascade'], function ($cascade) {
 				$name.html(current.$parent.toIconNameTool(node));
 			} else {
 				// Use classes of 'i' node
-				$name.html('<span><i class="' + (node.uiClasses || 'fa fa-cloud') + '"></i></span><span>' + node.name + '</span>');
+				$name.html('<span><i class="' + (node.uiClasses || 'fa fa-cloud') + '"></i></span><span>' + current.$main.getNodeName(node) + '</span>');
 			}
 		});
 		if (type === 'mode') {
