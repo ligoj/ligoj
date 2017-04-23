@@ -47,9 +47,9 @@ define(function () {
 		},
 
 		// create business call
-		createEntity: function () {
+		saveOrUpdate: function (method) {
 			$.ajax({
-				type: 'POST',
+				type: method,
 				url: REST_PATH + 'system/user',
 				dataType: 'json',
 				contentType: 'application/json',
@@ -63,28 +63,15 @@ define(function () {
 			});
 		},
 
-		// update business call
-		updateEntity: function () {
-			$.ajax({
-				type: 'PUT',
-				url: REST_PATH + 'system/user',
-				dataType: 'json',
-				contentType: 'application/json',
-				data: current.formToJSON(),
-				success: function () {
-					notifyManager.notify(Handlebars.compile(current.$messages.updated)(_('login').val()));
-					_('popup').modal('hide');
-					// Refresh the table
-					current.table && current.table.api().ajax.reload();
-				}
-			});
-		},
-
 		// initialize the page
 		initialize: function () {
 			// initialize components
-			_('create').click(current.createEntity);
-			_('save').click(current.updateEntity);
+			_('create').click(function () {
+				current.saveOrUpdate('POST'));
+			});
+			_('save').click(function () {
+				current.saveOrUpdate('PUT'));
+			});
 
 			current.initializeDataTable();
 			current.$parent.populateRole('roles');
