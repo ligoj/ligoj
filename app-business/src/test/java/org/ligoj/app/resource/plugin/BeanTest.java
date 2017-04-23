@@ -1,13 +1,14 @@
-package org.ligoj.app.resource.security;
+package org.ligoj.app.resource.plugin;
 
 import org.junit.Test;
+import org.ligoj.app.model.PluginType;
 import org.ligoj.app.resource.security.User;
 import org.ligoj.bootstrap.model.AbstractBusinessEntityTest;
 
 /**
- * Test business keyed entities basic ORM operations : hash code and equals.
+ * Simple test of API beans.
  */
-public class TestAbstractBusinessEntityTest extends AbstractBusinessEntityTest {
+public class BeanTest extends AbstractBusinessEntityTest {
 
 	/**
 	 * Test equals and hash code operation with all possible combinations with only one identifier.
@@ -17,4 +18,8 @@ public class TestAbstractBusinessEntityTest extends AbstractBusinessEntityTest {
 		testEqualsAndHash(User.class, "name");
 	}
 
+	@Test
+	public void testPluginType() {
+		PluginType.valueOf(PluginType.values()[PluginType.FEATURE.ordinal()].name());
+	}
 }

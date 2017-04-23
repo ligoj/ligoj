@@ -28,7 +28,9 @@ public class SecurityResourceTest extends AbstractServerTest {
 	@Test
 	public void loginUnknownUser() throws Exception {
 		thrown.expect(BadCredentialsException.class);
-		final User user = new User("any", "any");
+		final User user = new User();
+		user.setName("any");
+		user.setPassword("any");
 		final IamProvider iamProvider = Mockito.mock(IamProvider.class);
 		Mockito.when(iamProvider.authenticate(ArgumentMatchers.any(Authentication.class))).thenThrow(new BadCredentialsException("any"));
 		final SecurityResource resource = new SecurityResource();
