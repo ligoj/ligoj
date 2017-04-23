@@ -67,7 +67,7 @@ define(['cascade'], function ($cascade) {
 		 * Return the name of the given node from it's localized name or technical name that should be never null
 		 */
 		getResourceName: function (node, type) {
-			return type  === 'NODE' ? getNodeName(node) : node.name || node.label || node.id || node;
+			return type  === 'NODE' ? current.getNodeName(node) : node.name || node.label || node.id || node;
 		},
 		
 		/**
