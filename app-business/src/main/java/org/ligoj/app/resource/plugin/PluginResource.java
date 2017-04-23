@@ -37,7 +37,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.api.FeaturePlugin;
-import org.ligoj.app.api.PluginException;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.api.SubscriptionMode;
 import org.ligoj.app.api.ToolPlugin;
@@ -159,7 +158,7 @@ public class PluginResource {
 	@DELETE
 	@Path("{artifact:[\\w-]+}")
 	public void remove(@PathParam("artifact") final String artifact) throws IOException {
-		Files.list(getPluginClassLoader().getPluginDirectory()).filter(p -> p.getFileName().toString().matches("^" + artifact + "(-\\d+)*.jar$"))
+		Files.list(getPluginClassLoader().getPluginDirectory()).filter(p -> p.getFileName().toString().matches("^" + artifact + "(-.*)?\\.jar$"))
 				.forEach(p -> p.toFile().delete());
 		log.info("Plugin {} has been deleted, restart is required", artifact);
 	}
@@ -184,7 +183,7 @@ public class PluginResource {
 			Files.copy(new URL(url).openStream(), target, StandardCopyOption.REPLACE_EXISTING);
 			log.info("Plugin {} v{} has been downloaded, restart is required", artifact, version);
 		} catch (final IOException ioe) {
-			throw new PluginException(artifact, String.format("Cannot be downloaded from remote server %s", artifact), ioe);
+			throw new BusinessException(artifact, String.format("Cannot be downloaded from remote server %s", artifact), ioe);
 		}
 	}
 

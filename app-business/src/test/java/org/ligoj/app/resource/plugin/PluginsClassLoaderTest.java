@@ -19,7 +19,7 @@ import org.ligoj.app.api.PluginException;
  */
 public class PluginsClassLoaderTest {
 
-	private static final String USER_HOME_DIRECTORY = "target/test-classes/home-test";
+	protected static final String USER_HOME_DIRECTORY = "target/test-classes/home-test";
 
 	@Before
 	public void cleanHome() throws IOException {

@@ -1,16 +1,21 @@
 package org.ligoj.app.resource.plugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +35,7 @@ import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.model.system.SystemBench;
 import org.ligoj.bootstrap.model.system.SystemUser;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +54,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @Rollback
 @Transactional
 public class PlugInResourceTest extends AbstractAppTest {
+
+	/**
+	 * File used to be created when a plugin is downloaded from this test class
+	 */
+	private static final File TEMP_FILE = Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER,
+			PluginsClassLoader.PLUGINS_DIR, "plugin-iam-node-test.jar").toFile();
 
 	@Autowired
 	private PluginResource resource;
@@ -347,4 +359,79 @@ public class PlugInResourceTest extends AbstractAppTest {
 		pluginResource.configurePluginEntity(Arrays.stream(new URL[] { url }), SystemUser.class, url.toString());
 	}
 
+	@Test(expected = BusinessException.class)
+	public void installNotExists() {
+		newPluginResourceInstall().install("any");
+	}
+
+	@Test(expected = BusinessException.class)
+	public void installNotExistsVersion() {
+		newPluginResourceInstall().install("any", "dummy");
+	}
+
+	@Test
+	public void install() {
+		newPluginResourceInstall().install("plugin-iam-node");
+		Assert.assertTrue(TEMP_FILE.exists());
+	}
+
+	private PluginResource newPluginResourceInstall() {
+		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
+		final Path directory = Mockito.mock(Path.class);
+		Mockito.when(directory.resolve(ArgumentMatchers.anyString()))
+				.thenReturn(Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR)
+						.resolve("plugin-iam-node-test.jar"));
+		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(directory);
+		final PluginResource pluginResource = new PluginResource() {
+			@Override
+			protected PluginsClassLoader getPluginClassLoader() {
+				return pluginsClassLoader;
+			}
+
+		};
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(pluginResource);
+		return pluginResource;
+	}
+
+	private PluginResource newPluginResourceRemove() {
+		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
+		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
+		final PluginResource pluginResource = new PluginResource() {
+			@Override
+			protected PluginsClassLoader getPluginClassLoader() {
+				return pluginsClassLoader;
+			}
+
+		};
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(pluginResource);
+		return pluginResource;
+	}
+
+	@After
+	public void cleanArtifacts() {
+		FileUtils.deleteQuietly(TEMP_FILE);
+	}
+
+	@Test
+	public void removeNotExists() throws IOException {
+		newPluginResourceRemove().remove("any");
+	}
+
+	@Test
+	public void removeWidest() throws IOException {
+		Assert.assertFalse(TEMP_FILE.exists());
+		FileUtils.touch(TEMP_FILE);
+		Assert.assertTrue(TEMP_FILE.exists());
+		newPluginResourceRemove().remove("plugin-iam");
+		Assert.assertFalse(TEMP_FILE.exists());
+	}
+
+	@Test
+	public void removeExact() throws IOException {
+		Assert.assertFalse(TEMP_FILE.exists());
+		FileUtils.touch(TEMP_FILE);
+		Assert.assertTrue(TEMP_FILE.exists());
+		newPluginResourceRemove().remove("plugin-iam");
+		Assert.assertFalse(TEMP_FILE.exists());
+	}
 }
