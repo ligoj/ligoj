@@ -16,10 +16,10 @@
 		"url": "https://github.com/ligoj/ligoj"
 	},
 	"happiness": {
-		"globals": ["jQuery", "DEBUG_ENABLED", "traceDebug", "traceLog", "window", "QRCode", "define", "_", "REST_PATH", "Handlebars", "momentManager", "applicationManager", "notifyManager", "validationManager", "$", "document", "traceLog", "navigator", "requirejs", "location", "bootbox", "errorManager", "formatManager", "moment", "securityManager"]
+		"globals": ["jQuery", "DEBUG_ENABLED", "traceDebug", "traceLog", "window", "define", "_", "REST_PATH", "Handlebars", "momentManager", "applicationManager", "notifyManager", "validationManager", "$", "document", "traceLog", "navigator", "requirejs", "location", "bootbox", "errorManager", "formatManager", "moment", "securityManager"]
 	},
 	"xo": {
-		"globals": ["jQuery", "DEBUG_ENABLED", "traceDebug", "traceLog", "window", "QRCode", "define", "_", "REST_PATH", "Handlebars", "momentManager", "applicationManager", "notifyManager", "validationManager", "$", "document", "traceLog", "navigator", "requirejs", "location", "bootbox", "errorManager", "formatManager", "moment", "securityManager"],
+		"globals": ["jQuery", "DEBUG_ENABLED", "traceDebug", "traceLog", "window", "define", "_", "REST_PATH", "Handlebars", "momentManager", "applicationManager", "notifyManager", "validationManager", "$", "document", "traceLog", "navigator", "requirejs", "location", "bootbox", "errorManager", "formatManager", "moment", "securityManager"],
 		"rule": {
 			"no-unneeded-ternary": 0,
 			"dot-notation": 0,

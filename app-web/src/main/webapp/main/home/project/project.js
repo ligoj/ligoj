@@ -38,16 +38,11 @@ define(['cascade'], function ($cascade) {
 			$('.qrcode-toggle').on('click', function () {
 				$(this).find('.fa-qrcode').toggleClass('hidden').end().find('.qrcode').toggleClass('hidden').filter(':not(.hidden)').each(function () {
 					var $container = $(this).empty();
-					require([
-						'./qrcode/jquery-qrcode', './qrcode/qrcode'
-					], function () {
-						new QRCode($container[0], {
-							text: window.location,
-							width: 128,
-							height: 128,
-							colorDark: '#00000',
-							colorLight: '#ffffff',
-							correctLevel: QRCode.CorrectLevel.H
+					require(['./qrcode/jquery-qrcode'], function () {
+						$($container[0]).qrcode({
+							text: window.location.href,
+							size: 128,
+							background: '#ffffff'
 						});
 					});
 				});
