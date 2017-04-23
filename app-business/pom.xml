@@ -11,7 +11,7 @@
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-business</artifactId>
 	<packaging>war</packaging>
-	<version>1.4.21-SNAPSHOT</version>
+	<version>1.5.0</version>
 	<name>Ligoj - Business</name>
 
 	<scm>
@@ -112,6 +112,15 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+		<profile>
+			<id>bintray</id>
+			<distributionManagement>
+				<repository>
+					<id>bintray-ligoj-maven-repo</id>
+					<url>https://api.bintray.com/maven/ligoj/maven-repo/ligoj/;publish=1</url>
+				</repository>
+			</distributionManagement>
 		</profile>
 	</profiles>
 </project>

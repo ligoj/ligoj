@@ -11,7 +11,7 @@
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-web</artifactId>
 	<packaging>war</packaging>
-	<version>1.4.21-SNAPSHOT</version>
+	<version>1.5.0T</version>
 	<name>Ligoj - Web</name>
 	<properties>
 		<sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
@@ -42,4 +42,15 @@
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
+	<profiles>
+		<profile>
+			<id>bintray</id>
+			<distributionManagement>
+				<repository>
+					<id>bintray-ligoj-maven-repo</id>
+					<url>https://api.bintray.com/maven/ligoj/maven-repo/ligoj/;publish=1</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
 </project>
