@@ -170,7 +170,7 @@ public class PluginResource {
 	 * @param artifact
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
 	 * @param version
-	 *            The vrsion to install.
+	 *            The version to install.
 	 */
 	@POST
 	@Path("{artifact:[\\w-]+}/{version:[\\w-]+}")
@@ -264,7 +264,9 @@ public class PluginResource {
 	 * </ul>
 	 * 
 	 * @param plugin
-	 *            The newly discovered plug-in.
+	 *            The newly updated plug-in.
+	 * @param entity
+	 *            The current plug-in entity to update.
 	 */
 	protected void configurePluginUpdate(final FeaturePlugin plugin, final Plugin entity) {
 		final String newVersion = getVersion(plugin);
@@ -347,7 +349,7 @@ public class PluginResource {
 	 * 
 	 * @param plugin
 	 *            The related plug-in
-	 * @param installedEntities
+	 * @param csvEntities
 	 *            The managed entities where CSV data need to be persisted with this plug-in.
 	 * @throws IOException
 	 *             When the CSV management failed.
@@ -367,6 +369,13 @@ public class PluginResource {
 		}
 	}
 
+	/**
+	 * Return the file system location corresponding to the given plug-in.
+	 * 
+	 * @param plugin
+	 *            The related plug-in
+	 * @return The URL corresponding to the location.
+	 */
 	protected URL getPluginLocation(final FeaturePlugin plugin) {
 		return plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
 	}
@@ -392,6 +401,10 @@ public class PluginResource {
 
 	/**
 	 * Build a new {@link Node} from the given plug-in instance using the naming convention to link the parent.
+	 * 
+	 * @param service
+	 *            The service plug-in to add as a node.
+	 * @return The new {@link Node}
 	 */
 	protected Node newNode(final ServicePlugin service) {
 		final Node node = new Node();
@@ -434,7 +447,7 @@ public class PluginResource {
 	 * 
 	 * @param plugin
 	 *            The plug-in instance
-	 * @return
+	 * @return The version from the MANIFEST or the timestamp. <code>?</code> when an error occurs.
 	 */
 	protected String getVersion(final FeaturePlugin plugin) {
 		return Optional.ofNullable(plugin.getVersion()).orElseGet(() -> {
