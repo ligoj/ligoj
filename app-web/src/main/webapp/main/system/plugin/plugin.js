@@ -49,10 +49,44 @@ define(function () {
 						extend: 'create',
 						text: 'install',
 						action: function () {
-							bootbox.prompt(current.$messages.name, current.install);
+							_('search').select2('val','')
+							_('popup').modal('show');
 						}
 					}
 				]
+			});
+			
+			_('search').select2({
+				placeholder: current.$messages.plugin,
+				allowClear: true,
+				minimumInputLength: 1,
+				multiple:true,
+				ajax: {
+					url: REST_PATH + 'plugin/search',
+					dataType: 'json',
+					quietMillis: 250,
+   					cache: true,
+					data: function (term) {
+						return { 'q': term };
+					},
+					results: function (data) {
+						return {
+							more: false,
+							results: $(data).map(function () {
+								return {
+									id: this,
+									data: this,
+									text: this
+								};
+							})
+						};
+					}
+				}
+			});
+			
+			_('save').click(function(){
+				current.install(_('search').select2('val'));
+				_('popup').modal('hide');
 			});
 		},
 		
@@ -60,9 +94,9 @@ define(function () {
 		 * Install the requested plug-ins.
 		 * @param pluginsAsString The plug-in identifiers (comma separated) or null. When null, a prompt is displayed.
 		 */
-		install : function(pluginsAsString) {
-			if (pluginsAsString) {
-				current.installNext(pluginsAsString.split(','), 0);
+		install : function(plugins) {
+			if (plugins) {
+				current.installNext(plugins, 0);
 			}
 		},
 		
