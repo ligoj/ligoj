@@ -66,10 +66,10 @@ define(function () {
 					dataType: 'json',
 					quietMillis: 250,
    					cache: true,
-					data: function (term, page) {
+					data: function (term) {
 						return { 'q': term };
 					},
-					results: function (data, page) {
+					results: function (data) {
 						return {
 							more: false,
 							results: $(data).map(function () {
