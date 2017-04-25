@@ -1,4 +1,4 @@
 name;value
 global.tools.internal;[{"id": "service:km:confluence:dig", "parameters" : {"query":"rest/spacedirectory/1/search?query=&label=team%3Aportail-dig&pageSize=24&startIndex=0"}}] 
 global.tools.external;[]
-plugins.search.url;http://localhost:8120/solrsearch/select?wt=json&q=org.ligoj.plugin+AND+a:{0}*
+plugins.search.url;http://localhost:8120/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin

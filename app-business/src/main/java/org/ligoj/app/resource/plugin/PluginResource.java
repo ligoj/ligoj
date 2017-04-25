@@ -8,8 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.MessageFormat;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -63,6 +62,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Persistable;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -77,7 +78,7 @@ public class PluginResource {
 
 	private static final String DEFAULT_PLUGIN_URL = "http://central.maven.org/maven2/org/ligoj/plugin/";
 
-	private static final String DEFAULT_PLUGIN_SEARCH_QUERY = "http://search.maven.org/solrsearch/select?wt=json&q=org.ligoj.plugin+AND+a:{0}*";
+	private static final String DEFAULT_PLUGIN_SEARCH_URL = "http://search.maven.org/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin";
 
 	@Autowired
 	private NodeRepository nodeRepository;
@@ -109,10 +110,10 @@ public class PluginResource {
 	/**
 	 * Return the plug-ins search URL.
 	 * 
-	 * @return The plug-ins search URL. 
+	 * @return The plug-ins search URL.
 	 */
 	private String getPluginSearchUrl() {
-		return ObjectUtils.defaultIfNull(configuration.get("plugins.search.url"), DEFAULT_PLUGIN_SEARCH_QUERY);
+		return ObjectUtils.defaultIfNull(configuration.get("plugins.search.url"), DEFAULT_PLUGIN_SEARCH_URL);
 	}
 
 	/**
@@ -152,17 +153,15 @@ public class PluginResource {
 	 */
 	@GET
 	@Path("search")
-	public List<String> search(@Context final UriInfo uriInfo) {
-		final String queryUrl = MessageFormat.format(getPluginSearchUrl(), uriInfo.getQueryParameters().getFirst("q"));
-		final String searchResult = new CurlProcessor().get(queryUrl);
-
+	public List<String> search(@Context final UriInfo uriInfo) throws IOException {
+		final String query = uriInfo.getQueryParameters().getFirst("q");
+		final String searchResult = new CurlProcessor().get(getPluginSearchUrl());
 		// extract artifacts
-		final Matcher matcher = Pattern.compile("\"a\":\"(.*?)\"").matcher(searchResult);
-		final List<String> result = new ArrayList<>();
-		while (matcher.find()) {
-			result.add(matcher.group(1));
-		}
-		return result;
+		final ObjectMapper jsonMapper = new ObjectMapper();
+		final List<String> res = Arrays
+				.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), MavenSearchResultItem[].class))
+				.map(result -> result.getA()).filter(artifact -> artifact.contains(query)).collect(Collectors.toList());
+		return res;
 	}
 
 	/**
@@ -402,7 +401,7 @@ public class PluginResource {
 					+ ".csv";
 			configurePluginEntity(Collections.list(classLoader.getResources(csv)).stream(), entityClass, pluginLocation);
 		}
-		}
+	}
 
 	/**
 	 * Return the file system location corresponding to the given plug-in.
