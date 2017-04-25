@@ -1,5 +1,9 @@
 package org.ligoj.app.resource.plugin;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -14,16 +18,19 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
 import org.eclipse.jetty.util.thread.ThreadClassLoaderScope;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ligoj.app.AbstractAppTest;
+import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.dao.NodeRepository;
@@ -37,6 +44,7 @@ import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.model.system.SystemBench;
+import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.model.system.SystemUser;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -45,9 +53,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Test class of {@link PluginResource}
@@ -56,7 +67,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class PluginResourceTest extends AbstractAppTest {
+public class PluginResourceTest extends AbstractServerTest {
 
 	/**
 	 * File used to be created when a plugin is downloaded from this test class
@@ -75,7 +86,8 @@ public class PluginResourceTest extends AbstractAppTest {
 
 	@Before
 	public void prepareData() throws IOException {
-		persistEntities("csv", new Class[] { Node.class, Project.class, Subscription.class }, StandardCharsets.UTF_8.name());
+		persistEntities("csv", new Class[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class },
+				StandardCharsets.UTF_8.name());
 	}
 
 	@Test
@@ -449,4 +461,29 @@ public class PluginResourceTest extends AbstractAppTest {
 			IOUtils.closeQuietly(scope);
 		}
 	}
+
+	@Test
+	public void searchPluginsInMavenRepoNoResult() throws IOException {
+		final List<String> result = searchPluginsInMavenRepo("no-result");
+		Assert.assertTrue("Search result should be empty.", result.isEmpty());
+	}
+
+	@Test
+	public void searchPluginsOnMavenRepoOneResult() throws IOException {
+		final List<String> result = searchPluginsInMavenRepo("one-result");
+		Assert.assertEquals("There should be 1 result.", 1, result.size());
+		Assert.assertTrue("Bad result",result.contains("plugin-build"));
+	}
+
+	private List<String> searchPluginsInMavenRepo(final String query) throws IOException {
+		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&q=org.ligoj.plugin+AND+a:" + query + "*"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/" + query +".json").getInputStream(), StandardCharsets.UTF_8))));
+		final UriInfo uriInfo = Mockito.mock(UriInfo.class);
+		Mockito.when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>(ImmutableMap.of("q", query)));
+		httpServer.start();
+
+		return resource.search(uriInfo);
+	}
+
 }

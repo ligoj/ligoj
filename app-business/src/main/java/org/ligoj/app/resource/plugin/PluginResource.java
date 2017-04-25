@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -31,7 +33,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -73,6 +77,8 @@ public class PluginResource {
 
 	private static final String DEFAULT_PLUGIN_URL = "http://central.maven.org/maven2/org/ligoj/plugin/";
 
+	private static final String DEFAULT_PLUGIN_SEARCH_QUERY = "http://search.maven.org/solrsearch/select?wt=json&q=org.ligoj.plugin+AND+a:{0}*";
+
 	@Autowired
 	private NodeRepository nodeRepository;
 
@@ -98,6 +104,15 @@ public class PluginResource {
 	 */
 	private String getPluginUrl() {
 		return StringUtils.appendIfMissing(ObjectUtils.defaultIfNull(configuration.get("plugins.url"), DEFAULT_PLUGIN_URL), "/");
+	}
+
+	/**
+	 * Return the plug-ins search URL.
+	 * 
+	 * @return The plug-ins search URL. 
+	 */
+	private String getPluginSearchUrl() {
+		return ObjectUtils.defaultIfNull(configuration.get("plugins.search.url"), DEFAULT_PLUGIN_SEARCH_QUERY);
 	}
 
 	/**
@@ -128,6 +143,26 @@ public class PluginResource {
 			}
 			return vo;
 		}).sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
+	}
+
+	/**
+	 * Search plug-ins in repo which can be installed.
+	 *
+	 * @return All plug-ins artifacts name.
+	 */
+	@GET
+	@Path("search")
+	public List<String> search(@Context final UriInfo uriInfo) {
+		final String queryUrl = MessageFormat.format(getPluginSearchUrl(), uriInfo.getQueryParameters().getFirst("q"));
+		final String searchResult = new CurlProcessor().get(queryUrl);
+
+		// extract artifacts
+		final Matcher matcher = Pattern.compile("\"a\":\"(.*?)\"").matcher(searchResult);
+		final List<String> result = new ArrayList<>();
+		while (matcher.find()) {
+			result.add(matcher.group(1));
+		}
+		return result;
 	}
 
 	/**
@@ -367,7 +402,7 @@ public class PluginResource {
 					+ ".csv";
 			configurePluginEntity(Collections.list(classLoader.getResources(csv)).stream(), entityClass, pluginLocation);
 		}
-	}
+		}
 
 	/**
 	 * Return the file system location corresponding to the given plug-in.
