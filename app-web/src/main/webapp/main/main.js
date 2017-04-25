@@ -22,6 +22,15 @@ define(['cascade'], function ($cascade) {
 				current.$view.find('.bs-inbox .count').empty().closest('.label').addClass('hidden');
 			}
 		},
+		
+		/**
+		 * Return the closest UI classes defined for the given node. Parent node are visited.
+		 * @param node The node to inspect.
+		 * @return UI classes string when found.
+		 */
+		getUiClasses: function (node) {
+			return node && (node.uiClasses || current.getUiClasses(node.refined));
+		},
 
 		/**
 		 * Icon of corresponding tool.
@@ -30,12 +39,13 @@ define(['cascade'], function ($cascade) {
 			var fragments = (node.id || node || '::').split(':');
 			var title = current.getNodeName(node) || fragments[2] || fragments[1];
 			var result;
-			if (node.uiClasses) {
+			var uiClasses = current.getUiClasses(node);
+			if (uiClasses) {
 				// Use classes instead of picture
-				result = node.uiClasses.startsWith('$') ? '<span class="icon-text">' + node.uiClasses.substring(1) + '</span>' : ('<i title="' + title + '" class="' + node.uiClasses + '"></i>');
+				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i title="' + title + '" class="' + uiClasses + '"></i>');
 			} else if (fragments.length < 3) {
 				// Simple service
-				result = '<i title="' + title + '" class="' + (node.uiClasses || 'fa fa-wrench') + '"></i>';
+				result = '<i title="' + title + '" class="fa fa-wrench"></i>';
 			} else {
 				// Use a provided picture
 				var url = 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';

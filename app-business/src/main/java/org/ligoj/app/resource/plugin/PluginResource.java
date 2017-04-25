@@ -178,7 +178,7 @@ public class PluginResource {
 		if (!matcher.find()) {
 			// Plug-in not found
 			throw new BusinessException(
-					String.format("Versions discovery cannot be performed from from remote server %s for plugin %s", getPluginUrl(), artifact));
+					String.format("Versions discovery cannot be performed from the remote server %s for plugin %s", getPluginUrl(), artifact));
 		}
 		install(artifact, matcher.group(1));
 	}

@@ -651,7 +651,6 @@ define([
 		fillPies: function (data, nodes) {
 			var idx;
 			var nodeEvent;
-			var id;
 			var $node;
 			var up;
 			var down;
@@ -680,7 +679,7 @@ define([
 						fillColor: 'black',
 						tooltipFormatter: current._sparkPieTooltipFormatter
 					});
-					nodes.splice($.inArray(id, nodes), 1);
+					nodes.splice($.inArray(nodeEvent.node, nodes), 1);
 				}
 			}
 			for (idx = 0; idx < nodes.length; idx++) {
