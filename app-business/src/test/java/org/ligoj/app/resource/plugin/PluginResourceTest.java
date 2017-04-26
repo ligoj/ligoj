@@ -461,7 +461,7 @@ public class PluginResourceTest extends AbstractServerTest {
 			IOUtils.closeQuietly(scope);
 		}
 	}
-
+	
 	@Test
 	public void searchPluginsInMavenRepoNoResult() throws IOException {
 		final List<String> result = searchPluginsInMavenRepo("no-result");
@@ -470,15 +470,15 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void searchPluginsOnMavenRepoOneResult() throws IOException {
-		final List<String> result = searchPluginsInMavenRepo("one-result");
+		final List<String> result = searchPluginsInMavenRepo("buil");
 		Assert.assertEquals("There should be 1 result.", 1, result.size());
-		Assert.assertTrue("Bad result",result.contains("plugin-build"));
+		Assert.assertEquals("Bad result", "plugin-build", result.get(0));
 	}
 
 	private List<String> searchPluginsInMavenRepo(final String query) throws IOException {
-		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&q=org.ligoj.plugin+AND+a:" + query + "*"))
+		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
-						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/" + query +".json").getInputStream(), StandardCharsets.UTF_8))));
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
 		final UriInfo uriInfo = Mockito.mock(UriInfo.class);
 		Mockito.when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>(ImmutableMap.of("q", query)));
 		httpServer.start();
