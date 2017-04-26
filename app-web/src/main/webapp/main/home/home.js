@@ -157,7 +157,7 @@ define(['cascade'], function ($cascade) {
 		 * Icon of corresponding tool, and entity's "name".
 		 */
 		toIconNameTool: function (node) {
-			return current.toIcon(node) + '<span class="hidden-xs"' + (node.description ? ' title="' + node.description + '"' : '') + '>' + current.$main.getNodeName(node) + '</span>';
+			return current.toIcon(node) + '<span class="hidden-xs"' + (node.description ? ' title="' + node.description + '"' : '') + '> ' + current.$main.getNodeName(node) + '</span>';
 		},
 
 		toToolBaseIcon: function (node) {
