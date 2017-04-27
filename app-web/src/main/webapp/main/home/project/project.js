@@ -610,7 +610,7 @@ define(['cascade'], function ($cascade) {
 				$container.empty();
 				$description.addClass('hide').empty();
 				renderData && current.renderChoicesData(type, nodes);
-				nodes.length && callback && callback(nodes);
+				(!renderData || nodes.length) && callback && callback(nodes);
 			}
 		});
 	},
@@ -834,8 +834,8 @@ define(['cascade'], function ($cascade) {
 	configureSubscriptionParameters: function (node, parameters, callback) {
 		current.$parent.requireTool(current, node, function ($tool) {
 			/*
-				 * Parameter configuration of new subscription wizard : validators, type of parameters, renderer,...
-				 */
+			 * Parameter configuration of new subscription wizard : validators, type of parameters, renderer,...
+			 */
 			var c = _('subscribe-parameters-container');
 			var configuration = current.newSubscriptionParameterConfiguration();
 			$tool.configureSubscriptionParameters && $tool.configureSubscriptionParameters(configuration);

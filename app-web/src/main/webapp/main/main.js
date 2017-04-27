@@ -22,15 +22,6 @@ define(['cascade'], function ($cascade) {
 				current.$view.find('.bs-inbox .count').empty().closest('.label').addClass('hidden');
 			}
 		},
-		
-		/**
-		 * Return the closest UI classes defined for the given node. Parent node are visited.
-		 * @param node The node to inspect.
-		 * @return UI classes string when found.
-		 */
-		getUiClasses: function (node) {
-			return node && (node.uiClasses || current.getUiClasses(node.refined));
-		},
 
 		/**
 		 * Icon of corresponding tool.
@@ -39,7 +30,7 @@ define(['cascade'], function ($cascade) {
 			var fragments = (node.id || node || '::').split(':');
 			var title = current.getNodeName(node) || fragments[2] || fragments[1];
 			var result;
-			var uiClasses = current.getUiClasses(node);
+			var uiClasses = node && node.uiClasses;
 			if (uiClasses) {
 				// Use classes instead of picture
 				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i title="' + title + '" class="' + uiClasses + '"></i>');
