@@ -3,6 +3,8 @@ package org.ligoj.app.resource.plugin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.activation.FileTypeMap;
 import javax.servlet.ServletException;
@@ -10,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +33,21 @@ public class WebjarsServlet extends HttpServlet {
 	 * serial version uid
 	 */
 	private static final long serialVersionUID = 2461047578940577569L;
+
+	/**
+	 * Additional mime types
+	 */
+	private final Map<String, String> mimeTypes = new HashMap<>();
+
+	public WebjarsServlet() {
+		// Register additional MIME types
+		mimeTypes.put("woff", "application/font-woff");
+		mimeTypes.put("woff2", "font/woff2");
+		mimeTypes.put("ttf", "application/x-font-truetype");
+		mimeTypes.put("eot", "application/vnd.ms-fontobject");
+		mimeTypes.put("svg", "image/svg+xml");
+		mimeTypes.put("otf", "application/x-font-opentype");
+	}
 
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
@@ -72,6 +90,10 @@ public class WebjarsServlet extends HttpServlet {
 	protected String guessMimeType(final String filename) {
 		// First, get the mime type provided by the Servlet container
 		String mimeType = this.getServletContext().getMimeType(filename);
+		if (mimeType == null) {
+			// Use the static extension based extension
+			mimeType = mimeTypes.get(FilenameUtils.getExtension(filename));
+		}
 		if (mimeType == null) {
 			// Use the mime type guess by JSE
 			mimeType = FileTypeMap.getDefaultFileTypeMap().getContentType(filename);
