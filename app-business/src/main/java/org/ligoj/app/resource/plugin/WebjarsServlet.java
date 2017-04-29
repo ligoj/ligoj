@@ -2,7 +2,9 @@ package org.ligoj.app.resource.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 
+import javax.activation.FileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -21,7 +23,7 @@ import lombok.extern.java.Log;
  * Classloader and not only in web-inf/lib. We also removed cache management.
  * </p>
  */
-@Log
+@Slf4j
 public class WebjarsServlet extends HttpServlet {
 
 	/**
@@ -32,55 +34,71 @@ public class WebjarsServlet extends HttpServlet {
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 		final String webjarsResourceURI = "META-INF/resources" + request.getRequestURI().replaceFirst(request.getContextPath(), "");
-		log.fine("Webjars resource requested: " + webjarsResourceURI);
+		log.debug("Webjars resource requested: {}", webjarsResourceURI);
 
 		if (isDirectoryRequest(webjarsResourceURI)) {
-			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			// Directory listing is forbidden, but act as a 404 for security purpose.
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
+		// Regular file
 		final InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(webjarsResourceURI);
 		if (inputStream == null) {
-			// return HTTP error
+			// File not found --> 404
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		} else {
-			try {
-				final String filename = getFileName(webjarsResourceURI);
-				final String mimeType = this.getServletContext().getMimeType(filename);
-				if (mimeType == null) {
-					response.setContentType("application/octet-stream");
-				} else {
-					response.setContentType(mimeType);
-				}
-
-				IOUtils.copy(inputStream, response.getOutputStream());
-			} finally {
-				inputStream.close();
-			}
+			serveFile(response, webjarsResourceURI, inputStream);
 		}
 	}
 
 	/**
-	 * is it a directory request ?
+	 * Copy the file stream to the response using the right mime type
+	 */
+	private void serveFile(final HttpServletResponse response, final String webjarsResourceURI, final InputStream inputStream) throws IOException {
+		try {
+			final String filename = getFileName(webjarsResourceURI);
+			response.setContentType(guessMimeType(filename));
+			IOUtils.copy(inputStream, response.getOutputStream());
+			response.flushBuffer();
+		} finally {
+			inputStream.close();
+		}
+	}
+
+	/**
+	 * Guess the MIME type from the file name
+	 */
+	protected String guessMimeType(final String filename) {
+		// First, get the mime type provided by the Servlet container
+		String mimeType = this.getServletContext().getMimeType(filename);
+		if (mimeType == null) {
+			// Use the mime type guess by JSE
+			mimeType = FileTypeMap.getDefaultFileTypeMap().getContentType(filename);
+		}
+		return mimeType;
+	}
+
+	/**
+	 * Is it a directory request ?
 	 * 
 	 * @param uri
-	 *            uri
-	 * @return true if it is a directory request
+	 *            Requested resource's URI.
+	 * @return <code>true</code> when URI is a directory request
 	 */
 	private static boolean isDirectoryRequest(final String uri) {
 		return uri.endsWith("/");
 	}
 
 	/**
-	 * retrieve file name from uri
+	 * Retrieve file name from given URI.
 	 * 
 	 * @param webjarsResourceURI
-	 *            uri
+	 *            Requested resource's URI.
 	 * @return file name
 	 */
 	private String getFileName(final String webjarsResourceURI) {
-		final String[] tokens = webjarsResourceURI.split("/");
-		return tokens[tokens.length - 1];
+		return Paths.get(webjarsResourceURI).toFile().getName();
 	}
 
 }

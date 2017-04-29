@@ -17,7 +17,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.ligoj.app.resource.plugin.WebjarsServlet;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -48,7 +47,9 @@ public class WebjarsServletTest {
 		Mockito.when(request.getContextPath()).thenReturn("/context-path");
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 		getServlet("false").doGet(request, response);
-		Mockito.verify(response).sendError(HttpServletResponse.SC_FORBIDDEN);
+		
+		// 404 error, even for a directory listing
+		Mockito.verify(response).sendError(404);
 	}
 
 	@Test
