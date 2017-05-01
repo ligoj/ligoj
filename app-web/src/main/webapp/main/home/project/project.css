@@ -142,7 +142,7 @@
 }
 
 #subscribe-definition .nav-pills li.active a::after {
-	border-left: 30px solid #337ab7;
+	border-left: 30px solid #9c27b0;
 }
 
 #subscribe-definition .nav-pills li.disabled a::after {
