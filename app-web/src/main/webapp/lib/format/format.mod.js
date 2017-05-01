@@ -11,7 +11,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		},
 
 		/**
-		 * Bytes to human readable string.
+		 * Bytes to human readable string. Trailing decimal '0' are removed
 		 * @param {number} bytes    The amount of bytes.
 		 * @param {number} digits   Amount of digit. Default is 3 : When value is 3, you can get "6.23MB",  "62.2MB" or  "623MB".
 		 *                          When value is 2 (minimal value), you can get "6.2MB", "62MB" or "0.6MB".
@@ -37,7 +37,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 				} else {
 					decimals = digits - 1;
 				}
-				return value.toFixed(decimals) + ' ' + s[e];
+				return value.toFixed(decimals).replace(/\.00/, '') + ' ' + s[e];
 			}
 			return '';
 		}
