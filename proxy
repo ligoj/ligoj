@@ -1,0 +1,55 @@
+#!/bin/bash
+PROXY_GFI=webdefence.global.blackspider.com:80
+# Tests
+function isProxyEnabled { 
+    if [ "$http_proxy" == "" ]; then return 1; else return 0; fi
+}
+function isGFINetwork {
+    nmcli device show | grep annuaire.groupe.local
+    if [ "$?" -eq "0" ]; then return 0; else return 1; fi
+}
+# Actions
+function updateEnv {
+    if [ "$1" -eq "0" ]
+    then
+        # Activate
+        su alocquet -c "gsettings set org.gnome.system.proxy mode 'manual'"
+        sed -i "s/.*proxy.*//;/^$/d" /etc/environment
+        echo "http_proxy=\"http://webdefence.global.blackspider.com:80\"" >> /etc/environment
+        echo "https_proxy=\"http://webdefence.global.blackspider.com:80\"" >> /etc/environment
+    else
+        # Desactivate
+        rm /etc/systemd/system/docker.service.d/proxy.conf
+        su alocquet -c "gsettings set org.gnome.system.proxy mode 'none'"
+        sed -i "s/.*proxy.*//;/^$/d" /etc/environment
+    fi
+}
+function updateDocker {
+    if [ "$1" -eq "0" ]
+    then
+        # Activate
+        echo "[Service]" > /etc/systemd/system/docker.service.d/proxy.conf
+        echo "Environment=\"HTTP_PROXY=http://webdefence.global.blackspider.com:80/\" \"HTTPS_PROXY=http://webdefence.global.blackspider.com:80/\" \"NO_PROXY=localhost,127.0.0.1\"" >> /etc/systemd/system/docker.service.d/proxy.conf
+    else
+        # Desactivate
+        rm /etc/systemd/system/docker.service.d/proxy.conf
+    fi
+    service docker restart
+}
+
+#exporting Xauthority
+export DISPLAY=:0 && export XAUTHORITY=/home/alocquet/.Xauthority
+if isGFINetwork && ! isProxyEnabled 
+then
+    echo 'You are inside GFI network, start configuring proxy'
+    notify-send -u low -i /usr/share/notify-osd/icons/gnome/scalable/status/proxy.ico 'SetProxy Status' 'You are inside GFI network, start configuring proxy'
+    updateEnv 0
+    updateDocker 0
+fi
+if ! isGFINetwork && isProxyEnabled 
+then
+    echo 'You are outside GFI network, start removing proxy'
+    notify-send -u low -i /usr/share/notify-osd/icons/gnome/scalable/status/proxy.ico 'SetProxy Status' 'You are outside GFI network, start removing proxy'
+    updateEnv 1
+    updateDocker 1
+fi
