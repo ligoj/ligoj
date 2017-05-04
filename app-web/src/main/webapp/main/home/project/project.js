@@ -582,7 +582,7 @@ define(['cascade'], function ($cascade) {
 						current.configureSubscriptionParameters(current.getSelectedNode(), data, function (configuration) {
 							// Configuration and validators are available
 							current.parameterConfiguration = configuration;
-							_('subscription-create').removeClass('hide');
+							_('subscription-create').removeClass('hide').trigger('focus');
 						});
 					});
 					break;
