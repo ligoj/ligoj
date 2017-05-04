@@ -6,11 +6,12 @@ RUN set -xe \
   apt-get update --fix-missing && \
   apt-get install -y \
    curl \
-   unzip
-   
+   unzip \
+   mysql-client
+
 ARG GROUP_ID="org.ligoj.app"
-ARG APP="app"
-ARG ARTIFACT_ID="${APP}-business"
+ARG APP="ligoj"
+ARG ARTIFACT_ID="app-business"
 ARG NEXUS_HOST="oss.sonatype.org"
 ARG NEXUS_URL="https://${NEXUS_HOST}"
 ENV CONTEXT "${APP}-business"
@@ -29,12 +30,15 @@ RUN set -xe \
         rm -f "tmp.war" && \
         apt-get purge -y --auto-remove curl unzip
 
-ENV ENVIRONMENT="-prod" JAVA_MEMORY="-Xms712M -Xmx1024M" CUSTOM_OPTS="-Ddatabase.${APP}.hbm2ddl=update"
+COPY wait-for-mysql.sh ./wait-for-mysql.sh
+RUN chmod +x ./wait-for-mysql.sh
+
+ENV ENVIRONMENT="-prod" JAVA_MEMORY="-Xms712M -Xmx1024M" CUSTOM_OPTS="-Ddatabase.app.hbm2ddl=update"
 ENV LIGOJ_HOME="$JETTY_BASE"
+
+ENV DATABASE="db"
+ENV jdbc.url="jdbc:mysql://$DATABASE:3306/ligoj?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC"
+ENV jdbc.username="ligoj" jdbc.password="ligoj"
 ENV JAVA_OPTIONS="-Dapp.crypto.password=public -Dapp-env=$ENVIRONMENT -Duser.timezone=UTC $JAVA_MEMORY -Djetty.contextPath=${CONTEXT_URL} -Dligoj.home=${LIGOJ_HOME} $CUSTOM_OPTS"
 
-# COPY security.key $JETTY_HOME
-# COPY admin.confidential.properties $JETTY_HOME/resources/admin.confidential.properties
-# ENV JAVA_OPTIONS "-Dapp.crypto.file=$JETTY_HOME/security.key -Dapp-env=$ENVIRONMENT $JAVA_MEMORY $CUSTOM_OPTS"
-# HEALTHCHECK --interval=10s --retries=4 --timeout=5s \
-#  CMD curl -f http://localhost:8080$CONTEXT_URL || exit 1
+CMD ./wait-for-mysql.sh $DATABASE java $JAVA_OPTIONS -jar /usr/local/jetty/start.jar

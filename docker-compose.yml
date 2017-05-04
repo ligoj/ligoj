@@ -1,4 +1,4 @@
-version: '2.1'
+version: '3'
 services:
   db:
     image: mysql:5.7
@@ -7,25 +7,17 @@ services:
       MYSQL_DATABASE: ligoj
       MYSQL_USER: ligoj
       MYSQL_PASSWORD: ligoj
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
   rest:
     image: ligoj-app-business:1.5.0
     links:
       - db
     depends_on: 
-      db:
-        condition: service_healthy
-    environment:
-      - jdbc.url=jdbc:mysql://db:3306/ligoj?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC
-      - jdbc.username=ligoj
-      - jdbc.password=ligoj
+      - db
   web:
     image: ligoj-app-web:1.5.0
     links:
-      - rest:ligoj-rest
+      - rest:ligoj-business
     ports: 
       - "8080:8080"
-    command: "-Dligoj.endpoint.url=http://ligoj-rest:8080/app-business/rest -Dligoj.plugins.endpoint.url=http://ligoj-rest:8080/app-business/webjars -Dsecurity=Trusted -Djetty.contextPath=ligoj"
+    environment: 
+      - CUSTOM_OPTS=-Dsecurity=Trusted

@@ -158,10 +158,9 @@ public class PluginResource {
 		final String searchResult = new CurlProcessor().get(getPluginSearchUrl());
 		// extract artifacts
 		final ObjectMapper jsonMapper = new ObjectMapper();
-		final List<String> res = Arrays
+		return Arrays
 				.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), MavenSearchResultItem[].class))
-				.map(result -> result.getA()).filter(artifact -> artifact.contains(query)).collect(Collectors.toList());
-		return res;
+				.map(MavenSearchResultItem::getA).filter(artifact -> artifact.contains(query)).collect(Collectors.toList());
 	}
 
 	/**
