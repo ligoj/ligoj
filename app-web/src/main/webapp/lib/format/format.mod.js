@@ -22,7 +22,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 			digits = Math.max(digits || 3, 2);
 			if (bytes) {
 				var s = sizes;
-				var e = Math.floor(Math.log(bytes) / Math.log(pow));
+				var e = Math.max(0, Math.floor(Math.log(bytes) / Math.log(pow)));
 				var value = bytes / Math.pow(pow, e);
 				var decimals;
 				if (value >= 100 && digits < 3) {
