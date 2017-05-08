@@ -848,6 +848,9 @@ img.nav-icon {
 .form-horizontal .form-group.label-floating, .modal .form-group.label-floating {
 	margin-top: 28px;
 }
+.modal .form-group .btn-group {
+	margin-top: 0;
+}
 .form-horizontal .form-group:not(.label-floating) label.control-label {
 	font-size: 16px;
 	line-height: 1.42857143;
