@@ -19,6 +19,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		 * @return {string}         Human readable string
 		 */
 		formatUnit: function (bytes, digits, sizes, unit, pow, format) {
+			bytes = (Math.round(bytes * 1000) / 1000) || 0;
 			digits = Math.max(digits || 3, 2);
 			if (bytes) {
 				var s = sizes;
