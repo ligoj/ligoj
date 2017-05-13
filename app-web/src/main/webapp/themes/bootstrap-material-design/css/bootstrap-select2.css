@@ -1,4 +1,19 @@
 /**
+ * Table for Select2
+ */
+.table .select2-container {
+	margin-top: -8px;
+    margin-bottom: -8px;
+}
+
+/**
+ * Fix clipping option of background images
+ */
+.select2-search input, .select2-search-choice-close, .select2-container .select2-choice abbr, .select2-container .select2-choice .select2-arrow b {
+    background-image: initial !important;
+}
+
+/**
  * Input group for Select2
  */
 
