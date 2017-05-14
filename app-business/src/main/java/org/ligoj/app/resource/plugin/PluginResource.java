@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -158,8 +159,7 @@ public class PluginResource {
 		final String searchResult = new CurlProcessor().get(getPluginSearchUrl());
 		// extract artifacts
 		final ObjectMapper jsonMapper = new ObjectMapper();
-		return Arrays
-				.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), MavenSearchResultItem[].class))
+		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), MavenSearchResultItem[].class))
 				.map(MavenSearchResultItem::getA).filter(artifact -> artifact.contains(query)).collect(Collectors.toList());
 	}
 
@@ -235,7 +235,7 @@ public class PluginResource {
 	 *            The Spring event.
 	 */
 	@EventListener
-	public void refreshPlugins(final ContextRefreshedEvent event) {
+	public void refreshPlugins(final ContextRefreshedEvent event) throws Exception {
 		// Get the existing plug-in features
 		final Map<String, Plugin> plugins = repository.findAll().stream().collect(Collectors.toMap(Plugin::getKey, Function.identity()));
 
@@ -260,12 +260,30 @@ public class PluginResource {
 		newFeatures.values().stream().forEach(this::configurePluginInstall);
 
 		// Then install/update the plug-in
-		updateFeatures.forEach((k, s) -> s.update(plugins.get(k).getVersion()));
-		newFeatures.values().forEach(FeaturePlugin::install);
+		update(updateFeatures, plugins);
+		install(newFeatures);
 		log.info("Plugins are now configured");
 
 		// And remove the old plug-in no more installed
 		repository.deleteAll(removedPlugins.stream().map(Persistable::getId).collect(Collectors.toList()));
+	}
+
+	/**
+	 * Install all ordered plug-ins.
+	 */
+	private void install(final Map<String, FeaturePlugin> newFeatures) throws Exception {
+		for (final FeaturePlugin feature : newFeatures.values()) {
+			feature.install();
+		}
+	}
+
+	/**
+	 * Update all ordered plug-ins.
+	 */
+	private void update(final Map<String, FeaturePlugin> updateFeatures, final Map<String, Plugin> plugins) throws Exception {
+		for (Entry<String, FeaturePlugin> feature : updateFeatures.entrySet()) {
+			feature.getValue().update(plugins.get(feature.getValue()).getVersion());
+		}
 	}
 
 	/**

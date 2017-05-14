@@ -287,14 +287,14 @@ public class PluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void refreshPlugins() {
+	public void refreshPlugins() throws Exception {
 		final ContextRefreshedEvent event = Mockito.mock(ContextRefreshedEvent.class);
 		Mockito.when(event.getApplicationContext()).thenReturn(applicationContext);
 		resource.refreshPlugins(event);
 	}
 
 	@Test
-	public void refreshPluginsUpdate() {
+	public void refreshPluginsUpdate() throws Exception {
 		final SampleService service1 = new SampleService() {
 			@Override
 			public String getVersion() {
