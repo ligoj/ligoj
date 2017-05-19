@@ -449,6 +449,9 @@ body {
 .form-control.input-mini+.input-group-addon, .form-control.input-small+.input-group-addon, .form-control.input-medium+.input-group-addon, .form-control.input-large+.input-group-addon, .form-control.input-xlarge+.input-group-addon, .form-control.input-xxlarge+.input-group-addon, .month+.input-group-addon, .year+.input-group-addon, .date .input-group-addon, .date .input-group-btn {
 	width: auto;
 }
+.input-group .input-group-btn {
+	padding: 0;
+}
 .input-group-addon:not(:first-child):not(:last-child) {
 	border-right: none;
 }
@@ -713,7 +716,7 @@ img.nav-icon {
 }
 .input-help {
 	position: relative;
-	top: -26px;
+	top: -33px;
 	float: right;
 	height: 0;
 	left: 20px;
