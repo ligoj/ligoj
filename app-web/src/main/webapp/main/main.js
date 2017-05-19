@@ -49,7 +49,7 @@ define(['cascade'], function ($cascade) {
 				} else if (fragments.length > 2) {
 					parent = fragments.slice(0, fragments.length - 1);
 				}
-				result = current.toIcon(parent, suffix, null, true) + ' <i class="fa fa-angle-right"></i> ' + result;
+				result = (parent ? current.toIcon(parent, suffix, null, true) + ' <i class="fa fa-angle-right"></i> ' : '') + result;
 			}
 			return result;
 		},
