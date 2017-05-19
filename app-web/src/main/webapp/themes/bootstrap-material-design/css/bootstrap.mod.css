@@ -446,7 +446,7 @@ body {
 .form-control.input-mini.time {
 	padding-right: 10px;
 }
-.form-control.input-mini+.input-group-addon, .form-control.input-small+.input-group-addon, .form-control.input-medium+.input-group-addon, .form-control.input-large+.input-group-addon, .form-control.input-xlarge+.input-group-addon, .form-control.input-xxlarge+.input-group-addon, .month+.input-group-addon, .year+.input-group-addon, .date .input-group-addon, .date .input-group-btn {
+.form-control.input-mini+.input-group-addon, .form-control.input-small+.input-group-addon, .form-control.input-medium+.input-group-addon, .form-control.input-large+.input-group-addon, .form-control.input-xlarge+.input-group-addon, .form-control.input-xxlarge+.input-group-addon, .month+.input-group-addon, .year+.input-group-addon, .date .input-group-addon, .date .input-group-btn, .form-control.input-small+.input-group-btn, .form-control.input-mini+.input-group-btn, .form-control.input-medium+.input-group-btn {
 	width: auto;
 }
 .input-group .input-group-btn {
