@@ -93,8 +93,7 @@ define({
 		administration: 'Administration',
 		logout: 'Déconnexion',
 		manual: 'Manuel',
-		profile: 'Profil',
-		preferences: 'Préférences'
+		profile: 'Profil'
 	},
 	'error': {
 		'Overlap': 'Superposition d\'intervalles',

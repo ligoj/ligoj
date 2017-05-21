@@ -96,8 +96,7 @@ define({
 			administration: 'Administration',
 			logout: 'Logout',
 			manual: 'Manual',
-			profile: 'Profile',
-			preferences: 'Preferences'
+			profile: 'Profile'
 		},
 		'error': {
 			'Overlap': 'Date ranges overlap',
