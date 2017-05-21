@@ -282,7 +282,7 @@ public class PluginResource {
 	 */
 	private void update(final Map<String, FeaturePlugin> updateFeatures, final Map<String, Plugin> plugins) throws Exception {
 		for (Entry<String, FeaturePlugin> feature : updateFeatures.entrySet()) {
-			feature.getValue().update(plugins.get(feature.getValue()).getVersion());
+			feature.getValue().update(plugins.get(feature.getKey()).getVersion());
 		}
 	}
 
