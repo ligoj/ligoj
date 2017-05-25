@@ -181,7 +181,7 @@ public class PluginResource {
 		}
 		install(artifact, matcher.group(1));
 	}
-
+	
 	/**
 	 * Remove all versions the specified plug-in.
 	 * 
@@ -191,8 +191,8 @@ public class PluginResource {
 	@DELETE
 	@Path("{artifact:[\\w-]+}")
 	public void remove(@PathParam("artifact") final String artifact) throws IOException {
-		Files.list(getPluginClassLoader().getPluginDirectory()).filter(p -> p.getFileName().toString().matches("^" + artifact + "(-.*)?\\.jar$"))
-				.forEach(p -> p.toFile().delete());
+		Files.list(PluginsClassLoader.getInstance().getPluginDirectory())
+				.filter(p -> p.getFileName().toString().matches("^" + artifact + "(-.*)?\\.jar$")).forEach(p -> p.toFile().delete());
 		log.info("Plugin {} has been deleted, restart is required", artifact);
 	}
 
@@ -209,7 +209,7 @@ public class PluginResource {
 	@Path("{artifact:[\\w-]+}/{version:[\\w-]+}")
 	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version) {
 		final String url = getPluginUrl() + artifact + "/" + version + "/" + artifact + "-" + version + ".jar";
-		final java.nio.file.Path target = getPluginClassLoader().getPluginDirectory().resolve(artifact + "-" + version + ".jar");
+		final java.nio.file.Path target = PluginsClassLoader.getInstance().getPluginDirectory().resolve(artifact + "-" + version + ".jar");
 		log.info("Downloading plugin {} v{} from {} to ", artifact, version, url);
 		try {
 			// Download and copy the file, note the previous version is not removed
@@ -218,10 +218,6 @@ public class PluginResource {
 		} catch (final IOException ioe) {
 			throw new BusinessException(artifact, String.format("Cannot be downloaded from remote server %s", artifact), ioe);
 		}
-	}
-
-	protected PluginsClassLoader getPluginClassLoader() {
-		return (PluginsClassLoader) Thread.currentThread().getContextClassLoader().getParent();
 	}
 
 	/**

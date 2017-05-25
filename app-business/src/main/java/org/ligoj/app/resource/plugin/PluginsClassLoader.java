@@ -102,7 +102,40 @@ public class PluginsClassLoader extends URLClassLoader {
 		}
 		log.info("Plugins ClassLoader has added {} plug-ins and ignored {} old plug-ins", mostRecentPlugins.size(),
 				versionFiles.size() - mostRecentPlugins.size());
+	}
 
+	/**
+	 * Return the plug-in class loader from the current class loader.
+	 * 
+	 * @return the closest {@link PluginsClassLoader} instance from the current thread's {@link ClassLoader}. May be
+	 *         <code>null</code>.
+	 */
+	public static PluginsClassLoader getInstance() {
+		return getInstance(Thread.currentThread().getContextClassLoader());
+	}
+
+	/**
+	 * Return the plug-in class loader from the given class loader's hierarchy.
+	 * 
+	 * @param cl
+	 *            The {@link ClassLoader} to inspect.
+	 * @return the closest {@link PluginsClassLoader} instance from the current thread's {@link ClassLoader}. May be
+	 *         <code>null</code>.
+	 */
+	public static PluginsClassLoader getInstance(final ClassLoader cl) {
+		if (cl == null) {
+			// A separate class loader ?
+			log.warn("PluginsClassLoader requested but not found in the current classloader hierarchy {}",
+					Thread.currentThread().getContextClassLoader().toString());
+			return null;
+		}
+		if (cl instanceof PluginsClassLoader) {
+			// Class loader has been found
+			return (PluginsClassLoader) cl;
+		}
+
+		// Try the parent
+		return getInstance(cl.getParent());
 	}
 
 	/**

@@ -8,6 +8,7 @@ define({
 		'downloaded-continue': 'Plug-in {{[0]}} downloaded ({{[1]}}/{{[2]}}),',
 		'downloaded': 'Plug-in {{[0]}} downloaded ({{[1]}}/{{[2]}}), a restart is required',
 		'subscriptions': 'Subscriptions'
+		'restart-requested': 'Restart has been requested'
 	},
 	fr : true
 });

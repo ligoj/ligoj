@@ -68,7 +68,7 @@
 					<SystemProperty name="jetty.host" />
 				</Set>
 				<Set name="port">
-					<SystemProperty name="jetty.port" default="8080" />
+					<SystemProperty name="jetty.port" default="8081" />
 				</Set>
 				<Set name="idleTimeout">
 					<SystemProperty name="http.timeout" default="30000" />
@@ -107,7 +107,7 @@
 											</Set>
 											<Set name="contextPath">
 												<SystemProperty name="jetty.contextPath"
-													default="/app-business" />
+													default="/ligoj-api" />
 											</Set>
 											<Set name="baseResource">
 												<New class="org.eclipse.jetty.util.resource.ResourceCollection">

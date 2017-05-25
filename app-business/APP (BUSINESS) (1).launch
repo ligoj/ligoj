@@ -26,5 +26,4 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.ligoj.bootstrap.http.server.Main"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="app-business"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djetty.properties=META-INF/jetty/jetty-dev.properties -Dhibernate.new_sequence_naming=true"/>
 </launchConfiguration>

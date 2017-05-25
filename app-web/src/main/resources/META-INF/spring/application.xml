@@ -5,8 +5,6 @@
 	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
 
 	<context:spring-configured />
-	<context:property-placeholder location="classpath:sso.properties"/>
-
 	<context:annotation-config />
 	<context:component-scan base-package="org.ligoj.app.hhtp" />
 	<import resource="classpath:/META-INF/spring/security.xml" />

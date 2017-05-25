@@ -31,7 +31,7 @@
 		<expression-handler ref="extendedSecurityExpressionHandler"/>
 		<csrf disabled="true" />
 	</http>
-	<beans:bean name="digestAuthenticationFilter" class="org.ligoj.app.http.security.DigestAuthenticationFilter" p:ssoPostUrl="${ligoj.endpoint.url}/security/sso">
+	<beans:bean name="digestAuthenticationFilter" class="org.ligoj.app.http.security.DigestAuthenticationFilter" p:ssoPostUrl="${ligoj.endpoint.api.url}/security/sso">
 		<beans:property name="authenticationFailureHandler">
 			<beans:bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
 				<beans:property name="defaultFailureUrl" value="/login.html" />

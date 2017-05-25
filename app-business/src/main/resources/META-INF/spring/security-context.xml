@@ -12,7 +12,6 @@
 		<security:access-denied-handler />
 		<security:intercept-url pattern="/rest" access="isAuthenticated()" /><!-- WADL access -->
 		<security:intercept-url pattern="/rest/redirect" access="permitAll" />
-		<security:intercept-url pattern="/rest/session" access="isFullyAuthenticated()" />
 		<security:intercept-url pattern="/rest/security/login" access="isAnonymous()" />
 		<security:intercept-url pattern="/rest/service/password/reset/**" access="isAnonymous()" />
 		<security:intercept-url pattern="/rest/service/password/recovery/**" access="isAnonymous()" />
@@ -40,7 +39,7 @@
 		<property name="continueFilterChainOnUnsuccessfulAuthentication" value="false" />
 	</bean>
 
-	<bean id="authorizingFilter" class="org.ligoj.bootstrap.core.security.AuthorizingFilter">
+	<bean id="authorizingFilter" class="org.ligoj.app.resource.security.AuthorizingFilter">
 		<property name="prefix" value="/rest" />
 	</bean>
 
