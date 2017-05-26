@@ -7,7 +7,6 @@
 			http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd"
 	default-autowire="byName">
 
-	<context:component-scan base-package="org.ligoj.bootstrap.core.security" />
 	<security:http auto-config="true" entry-point-ref="http403ForbiddenEntryPoint" create-session="stateless">
 		<security:access-denied-handler />
 		<security:intercept-url pattern="/rest" access="isAuthenticated()" /><!-- WADL access -->
