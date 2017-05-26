@@ -188,18 +188,18 @@ public class PluginResource {
 	}
 
 	/**
-	 * Request a restart of the current application context.
+	 * Request a restart of the current application context in a separated thread.
 	 */
 	@PUT
 	@Path("restart")
 	public void restart() {
-		Thread restartThread = new Thread(() -> restartEndpoint.restart());
+		final Thread restartThread = new Thread(() -> restartEndpoint.restart(), "Restart");
 		restartThread.setDaemon(false);
 		restartThread.start();
 	}
 
 	/**
-	 * Remove all versions the specified plug-in.
+	 * Remove all versions the specified plug-in and the related (by name) plug-ins.
 	 * 
 	 * @param artifact
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
@@ -207,8 +207,8 @@ public class PluginResource {
 	@DELETE
 	@Path("{artifact:[\\w-]+}")
 	public void remove(@PathParam("artifact") final String artifact) throws IOException {
-		Files.list(PluginsClassLoader.getInstance().getPluginDirectory())
-				.filter(p -> p.getFileName().toString().matches("^" + artifact + "(-.*)?\\.jar$")).forEach(p -> p.toFile().delete());
+		Files.list(getPluginClassLoader().getPluginDirectory()).filter(p -> p.getFileName().toString().matches("^" + artifact + "(-.*)?\\.jar$"))
+				.forEach(p -> p.toFile().delete());
 		log.info("Plugin {} has been deleted, restart is required", artifact);
 	}
 
@@ -225,7 +225,7 @@ public class PluginResource {
 	@Path("{artifact:[\\w-]+}/{version:[\\w-]+}")
 	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version) {
 		final String url = getPluginUrl() + artifact + "/" + version + "/" + artifact + "-" + version + ".jar";
-		final PluginsClassLoader classLoader = PluginsClassLoader.getInstance();
+		final PluginsClassLoader classLoader = getPluginClassLoader();
 		final java.nio.file.Path target = classLoader.getPluginDirectory().resolve(artifact + "-" + version + ".jar");
 		log.info("Downloading plugin {} v{} from {} to ", artifact, version, url);
 		try {
@@ -235,6 +235,13 @@ public class PluginResource {
 		} catch (final IOException ioe) {
 			throw new BusinessException(artifact, String.format("Cannot be downloaded from remote server %s", artifact), ioe);
 		}
+	}
+
+	/**
+	 * Return the current plug-in class loader.
+	 */
+	protected PluginsClassLoader getPluginClassLoader() {
+		return PluginsClassLoader.getInstance();
 	}
 
 	/**

@@ -48,22 +48,24 @@ import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.model.system.SystemUser;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
+import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.google.common.collect.ImmutableMap;
 
 /**
  * Test class of {@link PluginResource}
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
@@ -83,6 +85,9 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Autowired
 	private NodeRepository nodeRepository;
+	
+	@Autowired
+	private RestartEndpoint restartEndpoint;
 
 	@Before
 	public void prepareData() throws IOException {
@@ -390,6 +395,31 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assert.assertTrue(TEMP_FILE.exists());
 	}
 
+	@Test
+	public void getPluginClassLoaderOutOfClassLoader() {
+		Assert.assertNull(resource.getPluginClassLoader());
+	}
+
+	@Test
+	public void restart() throws InterruptedException {
+		// Difficult to test...
+		resource.restart();
+		Thread.sleep(100);
+		Mockito.verify(restartEndpoint).restart();
+	}
+
+	@Test
+	public void getPluginClassLoader() {
+		ThreadClassLoaderScope scope = null;
+		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
+		try {
+			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader));
+			Assert.assertNotNull(resource.getPluginClassLoader());
+		} finally {
+			IOUtils.closeQuietly(scope);
+		}
+	}
+
 	private PluginResource newPluginResourceInstall() {
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
 		final Path directory = Mockito.mock(Path.class);
@@ -408,19 +438,27 @@ public class PluginResourceTest extends AbstractServerTest {
 		return pluginResource;
 	}
 
-	private PluginResource newPluginResourceRemove() {
+	private PluginResource newPluginResourceRemove(final String artifact) throws IOException {
+		ThreadClassLoaderScope scope = null;
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
-		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(
-				Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
-		final PluginResource pluginResource = new PluginResource() {
-			@Override
-			protected PluginsClassLoader getPluginClassLoader() {
-				return pluginsClassLoader;
-			}
+		try {
+			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader));
+			Assert.assertNotNull(PluginsClassLoader.getInstance());
+			Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(
+					Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
+			final PluginResource pluginResource = new PluginResource() {
+				@Override
+				protected PluginsClassLoader getPluginClassLoader() {
+					return pluginsClassLoader;
+				}
 
-		};
-		applicationContext.getAutowireCapableBeanFactory().autowireBean(pluginResource);
-		return pluginResource;
+			};
+			applicationContext.getAutowireCapableBeanFactory().autowireBean(pluginResource);
+			pluginResource.remove(artifact);
+			return pluginResource;
+		} finally {
+			IOUtils.closeQuietly(scope);
+		}
 	}
 
 	@After
@@ -428,40 +466,39 @@ public class PluginResourceTest extends AbstractServerTest {
 		FileUtils.deleteQuietly(TEMP_FILE);
 	}
 
+	/**
+	 * Remove a non existing plugin : no error
+	 */
 	@Test
 	public void removeNotExists() throws IOException {
-		newPluginResourceRemove().remove("any");
+		newPluginResourceRemove("any");
 	}
 
+	/**
+	 * Remove a plug-in having explicit depending (by name) plug-ins : all related plug-ins are deleted. Note this
+	 * feature works only for plug-ins that are not loaded in the classloader. Need an {@link URLClassLoader#close()}
+	 */
 	@Test
 	public void removeWidest() throws IOException {
 		Assert.assertFalse(TEMP_FILE.exists());
 		FileUtils.touch(TEMP_FILE);
 		Assert.assertTrue(TEMP_FILE.exists());
-		newPluginResourceRemove().remove("plugin-iam");
+		newPluginResourceRemove("plugin-iam");
 		Assert.assertFalse(TEMP_FILE.exists());
 	}
 
+	/**
+	 * Remove the exact plug-in, and only it.
+	 */
 	@Test
 	public void removeExact() throws IOException {
 		Assert.assertFalse(TEMP_FILE.exists());
 		FileUtils.touch(TEMP_FILE);
 		Assert.assertTrue(TEMP_FILE.exists());
-		newPluginResourceRemove().remove("plugin-iam");
+		newPluginResourceRemove("plugin-iam");
 		Assert.assertFalse(TEMP_FILE.exists());
 	}
 
-	@Test
-	public void getPluginClassLoader() {
-		ThreadClassLoaderScope scope = null;
-		try {
-			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], Mockito.mock(PluginsClassLoader.class)));
-			Assert.assertNotNull(new PluginResource().getPluginClassLoader());
-		} finally {
-			IOUtils.closeQuietly(scope);
-		}
-	}
-	
 	@Test
 	public void searchPluginsInMavenRepoNoResult() throws IOException {
 		final List<String> result = searchPluginsInMavenRepo("no-result");
@@ -484,6 +521,15 @@ public class PluginResourceTest extends AbstractServerTest {
 		httpServer.start();
 
 		return resource.search(uriInfo);
+	}
+
+	/**
+	 * Initialize mocks of this class.
+	 */
+	@Before
+	public void injectMock() {
+		// TODO Remove with ligoj/bootstrap-1.6.3
+		MockitoAnnotations.initMocks(this);
 	}
 
 }

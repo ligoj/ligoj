@@ -4,15 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.util.thread.ThreadClassLoaderScope;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.ligoj.app.api.PluginException;
+import org.mockito.Mockito;
 
 /**
  * Test class of {@link PluginsClassLoader}
@@ -48,6 +51,22 @@ public class PluginsClassLoaderTest {
 		} finally {
 			System.clearProperty("ligoj.home");
 			IOUtils.closeQuietly(classLoader);
+		}
+	}
+
+	@Test
+	public void getInstanceNull() {
+		Assert.assertNull(PluginsClassLoader.getInstance());
+	}
+
+	@Test
+	public void getInstance() {
+		ThreadClassLoaderScope scope = null;
+		try {
+			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], Mockito.mock(PluginsClassLoader.class)));
+			Assert.assertNotNull(PluginsClassLoader.getInstance());
+		} finally {
+			IOUtils.closeQuietly(scope);
 		}
 	}
 
@@ -114,5 +133,4 @@ public class PluginsClassLoaderTest {
 		Assert.assertEquals("EXPORT", FileUtils.readFileToString(new File(export, "export.txt"), StandardCharsets.UTF_8.name()));
 		return classLoader;
 	}
-
 }
