@@ -3,7 +3,6 @@ package org.ligoj.app;
 import java.util.Collections;
 
 import org.apache.cxf.transport.servlet.CXFServlet;
-import org.ligoj.app.resource.plugin.PluginsClassLoader;
 import org.ligoj.app.resource.plugin.WebjarsServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,6 +21,9 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
+/**
+ * Spring boot application entry point.
+ */
 @SpringBootApplication
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
 public class Application extends SpringBootServletInitializer {
@@ -31,8 +33,13 @@ public class Application extends SpringBootServletInitializer {
 		return application.sources(Application.class);
 	}
 
+	/**
+	 * Require main either invoked from IDE, either from the CLI
+	 * 
+	 * @param args
+	 *            Application arguments.
+	 */
 	public static void main(String[] args) throws Exception {
-		Thread.currentThread().setContextClassLoader(new PluginsClassLoader());
 		SpringApplication.run(Application.class, args);
 	}
 
@@ -81,4 +88,5 @@ public class Application extends SpringBootServletInitializer {
 			}
 		};
 	}
+
 }

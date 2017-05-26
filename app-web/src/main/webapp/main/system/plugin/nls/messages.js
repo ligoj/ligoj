@@ -7,7 +7,8 @@ define({
 		'type' : 'Type',
 		'downloaded-continue': 'Plug-in {{[0]}} downloaded ({{[1]}}/{{[2]}}),',
 		'downloaded': 'Plug-in {{[0]}} downloaded ({{[1]}}/{{[2]}}), a restart is required',
-		'subscriptions': 'Subscriptions'
+		'subscriptions': 'Subscriptions',
+		'restart' : 'Restart',
 		'restart-requested': 'Restart has been requested'
 	},
 	fr : true

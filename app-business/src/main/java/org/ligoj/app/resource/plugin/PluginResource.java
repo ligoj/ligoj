@@ -30,6 +30,7 @@ import javax.transaction.Transactional;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -58,6 +59,7 @@ import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Persistable;
@@ -98,6 +100,9 @@ public class PluginResource {
 
 	@Autowired
 	protected EntityManager em;
+
+	@Autowired
+	private RestartEndpoint restartEndpoint;
 
 	/**
 	 * Return the plug-ins download URL.
@@ -181,7 +186,18 @@ public class PluginResource {
 		}
 		install(artifact, matcher.group(1));
 	}
-	
+
+	/**
+	 * Request a restart of the current application context.
+	 */
+	@PUT
+	@Path("restart")
+	public void restart() {
+		Thread restartThread = new Thread(() -> restartEndpoint.restart());
+		restartThread.setDaemon(false);
+		restartThread.start();
+	}
+
 	/**
 	 * Remove all versions the specified plug-in.
 	 * 
@@ -209,7 +225,8 @@ public class PluginResource {
 	@Path("{artifact:[\\w-]+}/{version:[\\w-]+}")
 	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version) {
 		final String url = getPluginUrl() + artifact + "/" + version + "/" + artifact + "-" + version + ".jar";
-		final java.nio.file.Path target = PluginsClassLoader.getInstance().getPluginDirectory().resolve(artifact + "-" + version + ".jar");
+		final PluginsClassLoader classLoader = PluginsClassLoader.getInstance();
+		final java.nio.file.Path target = classLoader.getPluginDirectory().resolve(artifact + "-" + version + ".jar");
 		log.info("Downloading plugin {} v{} from {} to ", artifact, version, url);
 		try {
 			// Download and copy the file, note the previous version is not removed

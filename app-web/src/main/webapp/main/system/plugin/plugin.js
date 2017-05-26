@@ -52,6 +52,12 @@ define(function () {
 							_('search').select2('val','')
 							_('popup').modal('show');
 						}
+					}, {
+						text: current.$messages.restart,
+						className : 'btn-danger',
+						action: function () {
+							current.restart();
+						}
 					}
 				]
 			});
@@ -133,6 +139,21 @@ define(function () {
 				// The token was empty, install the next real plug-in
 				current.installNext(plugins, index + 1);
 			}
+		},
+		
+		/**
+		 * Request a restart of the API container.
+		 */
+		restart : function() {
+			$.ajax({
+				type: 'PUT',
+				url: REST_PATH + 'plugin/restart',
+				dataType: 'text',
+				contentType: 'application/json',
+				success: function () {
+					notifyManager.notify(current.$messages['restart-requested']);
+				}
+			});
 		}
 	};
 	return current;
