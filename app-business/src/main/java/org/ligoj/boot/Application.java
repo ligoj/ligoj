@@ -1,4 +1,4 @@
-package org.ligoj.app;
+package org.ligoj.boot;
 
 import java.util.Collections;
 
