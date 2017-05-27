@@ -16,10 +16,17 @@
 		"url": "https://github.com/ligoj/ligoj"
 	},
 	"happiness": {
-		"globals": ["jQuery", "DEBUG_ENABLED", "traceDebug", "traceLog", "window", "define", "_", "REST_PATH", "Handlebars", "momentManager", "applicationManager", "notifyManager", "validationManager", "$", "document", "traceLog", "navigator", "requirejs", "location", "bootbox", "errorManager", "formatManager", "moment", "securityManager"]
+		"globals": ["jQuery", "DEBUG_ENABLED", "traceDebug", "traceLog", "window", "define", "_", "REST_PATH", "Handlebars", "momentManager", "applicationManager", "notifyManager", "validationManager", "$", "document", "navigator", "requirejs", "location", "bootbox", "errorManager", "formatManager", "moment", "securityManager"]
+	},
+	"eslintConfig": {
+		"globals": {
+			"jQuery" :true, "DEBUG_ENABLED" :true, "traceDebug" :true, "traceLog" :true, "window" :true, "define" :true, "_" :true, "REST_PATH" :true, "Handlebars" :true,
+			"momentManager" :true, "applicationManager" :true, "notifyManager" :true, "validationManager" :true, "$" :true, "document" :true, "navigator" :true, 
+			"requirejs" :true, "location" :true, "bootbox" :true, "errorManager" :true, "formatManager" :true, "moment" :true, "securityManager" :true
+		}
 	},
 	"xo": {
-		"globals": ["jQuery", "DEBUG_ENABLED", "traceDebug", "traceLog", "window", "define", "_", "REST_PATH", "Handlebars", "momentManager", "applicationManager", "notifyManager", "validationManager", "$", "document", "traceLog", "navigator", "requirejs", "location", "bootbox", "errorManager", "formatManager", "moment", "securityManager"],
+		"globals": ["jQuery", "DEBUG_ENABLED", "traceDebug", "traceLog", "window", "define", "_", "REST_PATH", "Handlebars", "momentManager", "applicationManager", "notifyManager", "validationManager", "$", "document", "navigator", "requirejs", "location", "bootbox", "errorManager", "formatManager", "moment", "securityManager"],
 		"rule": {
 			"no-unneeded-ternary": 0,
 			"dot-notation": 0,

@@ -49,7 +49,7 @@ define(function () {
 						extend: 'create',
 						text: 'install',
 						action: function () {
-							_('search').select2('val','')
+							_('search').select2('val','');
 							_('popup').modal('show');
 						}
 					}, {
@@ -71,7 +71,7 @@ define(function () {
 					url: REST_PATH + 'plugin/search',
 					dataType: 'json',
 					quietMillis: 250,
-   					cache: true,
+					cache: true,
 					data: function (term) {
 						return { 'q': term };
 					},
@@ -109,8 +109,8 @@ define(function () {
 		/**
 		 * Install a the plug-ins from the one at the specified index, and then the next ones.
 		 * There is one AJAX call by plug-in, and stops at any error.
-		 * @param plugins The plug-in identifiers array to install.
-		 * @param index The starting plug-in index within the given array.
+		 * @param {string[]} plugins The plug-in identifiers array to install.
+		 * @param {number} index The starting plug-in index within the given array.
 		 */
 		installNext : function(plugins, index) {
 			if (index >= plugins.length) {

@@ -20,13 +20,13 @@
 }
 
 #subscribe-definition .choices .choice input {
-	text-align: center;
 	cursor: pointer;
+	text-align: center;
 }
 
 #subscribe-definition .choices .choice.active .icon {
-	border-color: #2e6da4;
 	background-color: #337ab7;
+	border-color: #2e6da4;
 }
 
 #subscribe-definition .choices .choice.btn:hover .icon {

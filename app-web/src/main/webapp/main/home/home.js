@@ -46,10 +46,10 @@ define(['cascade'], function ($cascade) {
 				return node.tool;
 			}
 			if (node.refined) {
-				if (node.refined.refined === undefined || node.refined.refined === null) {
-					node.tool = node;
-				} else {
+				if (node.refined.refined) {
 					node.tool = this.getTool(node.refined);
+				} else {
+					node.tool = node;
 				}
 			} else {
 				return null;

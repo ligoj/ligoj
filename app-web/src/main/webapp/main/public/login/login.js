@@ -6,7 +6,6 @@ define([
 	var current = {
 		locked: false,
 		target: null,
-		token: undefined,
 		resetMatcher: '#reset=([a-zA-Z0-9\\-]+)/([a-zA-Z0-9\\-]+)',
 		recoveryMatcher: '#recovery(=([a-zA-Z0-9\\-]+))?',
 		ajax: function (url, data, captcha) {
