@@ -17,6 +17,7 @@
 		<sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>Web:BoldAndItalicTagsCheck</sonar.issue.ignore.multicriteria.e1.ruleKey>
 		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/*.html</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		<spring-boot.version>1.5.3.RELEASE</spring-boot.version>
 	</properties>
 	<scm>
 		<connection>scm:git:https://github.com/ligoj/ligoj.git</connection>
@@ -41,11 +42,16 @@
 			<artifactId>httpcore</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.samaxes.filter</groupId>
+			<artifactId>cachefilter</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<version>1.5.3.RELEASE</version>
+			<version>${spring-boot.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -60,7 +66,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jetty</artifactId>
-			<version>1.5.3.RELEASE</version>
+			<version>${spring-boot.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -69,7 +75,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>1.5.3.RELEASE</version>
+				<version>${spring-boot.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -78,7 +84,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>org.ligoj.app.Application</mainClass>
+					<mainClass>org.ligoj.boot.Application</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
