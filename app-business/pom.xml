@@ -128,7 +128,6 @@
 				<configuration>
 					<mainClass>org.ligoj.boot.Application</mainClass>
 					<excludeGroupIds>org.projectlombok,org.eclipse.jetty.websocket</excludeGroupIds>
-					<excludeDevtools>false</excludeDevtools>
 				</configuration>
 			</plugin>
 		</plugins>
