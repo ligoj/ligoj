@@ -38,6 +38,7 @@
 	color: #fff;
 }
 .masonry-container>.node>.thumbnail .details th>i {
+	color: rgb(255, 255, 255);
 	color: rgba(255, 255, 255, .48);
 }
 .masonry-container>.node>.thumbnail>.main>img {
@@ -60,6 +61,7 @@
 	border-top-style: solid;
 }
 .masonry-container table>tbody>tr>td, .masonry-container table>thead>tr>th {
+	border-color: rgb(255, 255, 255);
 	border-color: rgba(255, 255, 255, .21);
 }
 .masonry-container>.node:not(.mode-th-list) table>thead>tr>th.zoomable {
@@ -76,6 +78,7 @@
 	display: none;
 }
 .subscriptions .group-carousel .carousel-indicators .active {
+	background-color: rgba(204, 204, 204);
 	background-color: rgba(204, 204, 204, .54);
 	width: 12px;
 	height: 12px;
@@ -218,6 +221,7 @@
 /* Tags */
 
 .masonry-container>.node .tag {
+	color: rgba(255, 255, 255);
 	color: rgba(255, 255, 255, .33);
 	font-size: x-small;
 	float: left;
@@ -226,6 +230,7 @@
 }
 .masonry-container>.node .tag:hover {
 	cursor: pointer;
+	color: rgba(255, 255, 255);
 	color: rgba(255, 255, 255, .8);
 }
 
@@ -233,11 +238,13 @@
 
 .masonry-container>.node .badge.nb-filtered {
 	color: #42341d;
+	background-color: rgba(169, 128, 66);
 	background-color: rgba(169, 128, 66, .48);
 	border-color: #faebcc;
 }
 .masonry-container>.node .badge.nb-total {
 	color: #31708f;
+	background-color: rgba(217, 237, 247);
 	background-color: rgba(217, 237, 247, .46);
 	border-color: #bce8f1;
 }
