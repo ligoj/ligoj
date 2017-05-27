@@ -1,14 +1,17 @@
+---
 engines:
   duplication:
     enabled: true
     checks:
       Similar code:
-      enabled: false
+        enabled: false
   csslint:
     enabled: true
     checks:
       box-sizing:
         enabled: false
+  markdownlint:
+    enabled: true
   eslint:
     enabled: true
     no-unused-expressions:
@@ -18,8 +21,10 @@ engines:
         enabled: false
 ratings:
   paths:
-    - "**.js"
-    - "**.css"
+  - "**.js"
+  - "**.css"
 exclude_paths:
-  - "**/lib/"
-  - "**/themes/"
+- "**/dist/"
+- "**/build/"
+- "**/lib/"
+- "**/themes/"
