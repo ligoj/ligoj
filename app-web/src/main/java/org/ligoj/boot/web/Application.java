@@ -1,4 +1,4 @@
-package org.ligoj.boot;
+package org.ligoj.boot.web;
 
 import java.util.HashMap;
 import java.util.Map;
