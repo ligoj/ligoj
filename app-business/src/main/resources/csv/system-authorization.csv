@@ -1,26 +1,27 @@
 method;pattern;type;role.name
-;^session;BUSINESS;USER
+   ;.*;BUSINESS;ADMIN
+   ;^rest$;BUSINESS;USER
+   ;^rest/api.*;BUSINESS;USER
+   ;^rest/session;BUSINESS;USER
+   ;^rest/service/[^/]+/[^/]+/validate/.*;BUSINESS;USER
+   ;^rest/service.*;BUSINESS;USER
+   ;^rest/id/user.*;BUSINESS;USER
+   ;^rest/id/group.*;BUSINESS;USER
+   ;^rest/id/company.*;BUSINESS;USER
+   ;^rest/id/delegate.*;BUSINESS;USER
+   ;^rest/id/password;BUSINESS;USER
+   ;^rest/system/setting;BUSINESS;USER
+   ;^rest/message.*;BUSINESS;USER
+GET;^rest/project.*;BUSINESS;USER
+GET;^rest/subscription.*;BUSINESS;USER
+
+;.*;UI;ADMIN
+;^api.*;UI;USER
+;^message.*;UI;USER
 ;^home.*;UI;USER
-GET;^subscription.*;BUSINESS;USER
-;^service/[^/]+/[^/]+/validate/.*;BUSINESS;USER
-;^service.*;BUSINESS;USER
-;^$;BUSINESS;USER
 ;^id$;UI;USER
 ;^id/home.*;UI;USER
 ;^id/user.*;UI;USER
-;^id/user.*;BUSINESS;USER
-;^id/group.*;BUSINESS;USER
-;^id/company.*;BUSINESS;USER
 ;^id/delegate.*;UI;USER
-;^id/delegate.*;BUSINESS;USER
 ;^id/container/group.*;UI;USER
 ;^id/container/company.*;UI;USER
-;^id/password;BUSINESS;USER
-GET;^project.*;BUSINESS;USER
-;^api.*;BUSINESS;USER
-;^api.*;UI;USER
-;^system/setting;BUSINESS;USER
-;^message.*;BUSINESS;USER
-;^message.*;UI;USER
-;.*;BUSINESS;ADMIN
-;.*;UI;ADMIN
