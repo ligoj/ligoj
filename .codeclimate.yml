@@ -16,6 +16,8 @@ engines:
     checks:
       complexity:
         enabled: false
+      max-statements:
+        enabled: false
 ratings:
   paths:
   - "**.js"
