@@ -17,6 +17,30 @@ A web application to centralize the related tools of your projects, a 21th centu
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
 
 # Dev section
+## Pre-requisite for the bellow samples
+Maven
+Java 8: Open JDK or Oracle
+A MySQL database 'ligoj' with all rights for user 'ligoj@localhost' and password 'ligoj'
+
+### With your own database :
+```sql
+mysql --user=root
+CREATE DATABASE `ligoj` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_bin;
+GRANT ALL PRIVILEGES ON `ligoj`.*  TO 'ligoj'@'localhost' IDENTIFIED BY 'ligoj';
+FLUSH PRIVILEGES;
+quit
+```
+### With a fresh new database 
+docker run --name ligoj-db -d -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=ligoj -e MYSQL_USER=ligoj -e MYSQL_PASSWORD=ligoj -d mysql:5.7
+
+## With Maven
+From your IDE with Maven, or from Maven CLI :
+```
+git clone https://github.com/ligoj/ligoj
+mvn spring-boot:run -f app-api/pom.xml & 
+mvn spring-boot:run -f app-web/pom.xml &
+```
+## With your IDE
 From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
 ```
 org.ligoj.boot.api.Application
@@ -26,4 +50,12 @@ org.ligoj.boot.web.Application
 ```
 Notes these launchers (*.launch) are already configured for Eclipse.
 
-From your IDE with Maven, or from Maven CLI simply use goal "spring-boot:run"
+# Ops section
+## With Docker
+Build the images and run the containers
+```
+docker build -t ligoj-api:1.5.1 --build-arg VERSION=1.5.1 app-api
+docker run -d --name ligoj-api --link ligoj-db:ligoj-db ligoj-api:1.5.1
+docker build -t ligoj-web:1.5.1 --build-arg VERSION=1.5.1 app-web
+docker run -d --name ligoj-web --link ligoj-api:ligoj-api -p 8080:8080 ligoj-web:1.5.1 
+```
