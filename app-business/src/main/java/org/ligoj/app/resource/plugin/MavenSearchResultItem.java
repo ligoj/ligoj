@@ -1,6 +1,7 @@
 package org.ligoj.app.resource.plugin;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
@@ -11,7 +12,8 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MavenSearchResultItem {
 	/**
-	 * artifact name (maven central reprentation)
+	 * Artifact name (Maven central representation)
 	 */
-	private String a;
+	@JsonProperty("a")
+	private String artifact;
 }

@@ -18,8 +18,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -58,8 +56,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Test class of {@link PluginResource}
@@ -515,10 +511,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
 						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
-		final UriInfo uriInfo = Mockito.mock(UriInfo.class);
-		Mockito.when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>(ImmutableMap.of("q", query)));
 		httpServer.start();
-
-		return resource.search(uriInfo);
+		return resource.search(query);
 	}
 }

@@ -34,9 +34,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -159,13 +158,12 @@ public class PluginResource {
 	 */
 	@GET
 	@Path("search")
-	public List<String> search(@Context final UriInfo uriInfo) throws IOException {
-		final String query = uriInfo.getQueryParameters().getFirst("q");
+	public List<String> search(@QueryParam("q") final String query) throws IOException {
 		final String searchResult = new CurlProcessor().get(getPluginSearchUrl());
-		// extract artifacts
+		// Extract artifacts
 		final ObjectMapper jsonMapper = new ObjectMapper();
 		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), MavenSearchResultItem[].class))
-				.map(MavenSearchResultItem::getA).filter(artifact -> artifact.contains(query)).collect(Collectors.toList());
+				.map(MavenSearchResultItem::getArtifact).filter(a -> a.contains(query)).collect(Collectors.toList());
 	}
 
 	/**
