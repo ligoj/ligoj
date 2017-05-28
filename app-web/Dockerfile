@@ -1,4 +1,4 @@
-FROM jetty:9.4.2
+FROM jetty:9.4.5
 LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
 
 RUN set -xe \
