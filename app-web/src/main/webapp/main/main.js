@@ -25,15 +25,14 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Icon of corresponding tool with optional recursive display.
-		 * @param {Object|string} node The node : tool, service ... The priorit is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifer
+		 * @param {Object|string} node The node : tool, service ... The priority is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
 		 * @param {string} suffix For URL icon, the suffix to add to the path.
 		 * @param {boolean} dataSrc When defined, the resolved "img" source ("src") is also stored to "data-src". It permits a reset to the original src image after alter.
 		 * @param {boolean} recursive When defined, the parent icon is prepended to this icon.
 		 */
 		toIcon: function (node, suffix, dataSrc, recursive) {
 			var fragments = (node.id || node || '::').split(':');
-			var title = current.getNodeName(node) || fragments[2] || fragments[1];
-			var result = current.toIconBase(node, suffix, dataSrc);
+			var result = current.toIconBase(node, suffix, dataSrc, fragments);
 			if (recursive) {
 				var parent = null;
 				if (node.refined) {
@@ -48,12 +47,14 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Icon of corresponding tool.
-		 * @param {Object|string} node The node : tool, service ... The priorit is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifer
+		 * @param {Object|string} node The node : tool, service ... The priorit is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
 		 * @param {string} suffix For URL icon, the suffix to add to the path.
 		 * @param {boolean} dataSrc When defined, the resolved "img" source ("src") is also stored to "data-src". It permits a reset to the original src image after alter.
+		 * @param {array} fragments Identifier fragments built from the node.
 		 */
-		toIconBase(node, suffix, dataSrc) {
+		toIconBase: function (node, suffix, dataSrc, fragments) {
 			var uiClasses = node && node.uiClasses;
+			var title = current.getNodeName(node) || fragments[2] || fragments[1];
 			if (uiClasses) {
 				// Use classes instead of picture
 				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i title="' + title + '" class="' + uiClasses + '"></i>');
@@ -79,14 +80,21 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Return the name of the given node from it's localized name or technical name that should be never null
+		 * Return the name of the given resource from it's localized name or technical name that should be never null.
+		 * Try the localized value, then the 'name' attribute, then the 'name' attribute, then the 'id' attribute, then the resource itself.
+		 * @param {Object|string} resource The resource object or plain string value.
+		 * @param {type} The resource type : NODE, USER,... or undefined
+		 * @return {string} The resource human readable name built from the available resource data. 
 		 */
-		getResourceName: function (node, type) {
-			return type === 'NODE' ? current.getNodeName(node) : node.name || node.label || node.id || node;
+		getResourceName: function (resource, type) {
+			return type === 'NODE' ? current.getNodeName(resource) : resource.name || resource.label || resource.id || resource;
 		},
 
 		/**
-		 * Return the name of the given node from it's localized name or technical name that should be never null
+		 * Return the name of the given node from it's localized name or technical name that should be never null.
+		 * Try the localized name of its identifier (id'), then the localized name of the node itself when 'string', then the 'name' attribute, then the 'name' attribute, then the 'id' attribute, then the node itself.
+		 * @param {Object|string} node The node object or plain string value.
+		 * @return {string} The node human readable name built from the available resource data. 
 		 */
 		getNodeName: function (node) {
 			return (node.id && current.$messages[node.id]) || ((typeof node) === 'string' && current.$messages[node]) || node.name || node.label || node.id || node;
@@ -111,29 +119,31 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Return a simple taxt, not a link as the function name may guess.
+		 * Return a simple text, not a link as the function name may guess.
 		 * The name is required because of the function source #getResourceLink().
-		 * @param tree The organizational tree description.
-		 * @return The tree description.
+		 * @param {Object|string} tree The organizational tree description.
+		 * @return {string} The tree description string.
 		 */
 		getTreeLink: function (tree) {
 			return tree.dn || tree;
 		},
 
 		/**
-		 * Return a link targeting the project page.
-		 * @param user The user data : login, fullname, etc...
-		 * @return The project link markup.
+		 * Return a link targeting the project page. 
+		 * @param {Object|string|number} project The project data : id, name,... The identifier is required, either in 'id' attribute, either as a string, either as a number value.
+		 * @return {string} The project link markup.
 		 */
 		getProjectLink: function (project) {
 			return '<a href="#/home/project/' + (project.id || project) + '">' + (project.name || project) + '</a>';
 		},
 
 		/**
-		 * Return a link targeting the user page. Display the full name.
-		 * @param user The user data : login, fullname, etc...
-		 * @param text The optional text to display. When empty, full name is used.
-		 * @return The user link markup.
+		 * Return a link targeting the user page. Display the full name in the link.
+		 * When there are not enough data to build it, no first name or no last name, then the first later of the login and the the remaining are used to build the full name.
+		 * For sample 'aeinstein' will be display as fail-safe value : 'A. Einstein'.
+		 * @param {Object|string} user The user data : login, fullname, etc... The identifier is required, either in 'id' attribute, either as a string.
+		 * @param {string} text The optional text to display. When empty, full name is used.
+		 * @return {string} The user link markup.
 		 */
 		getUserLink: function (user, text) {
 			if (user) {
@@ -160,9 +170,9 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Return a link targeting to the user page. Display only user name.
-		 * @param user The user data : login, fullname, etc...
-		 * @return The user link markup with user identifier as text.
+		 * Return a link targeting to the user page. Display only user name in the link.
+		 * @param {Object|string} user The user data : login, fullname, etc... The identifier is required, either in 'id' attribute, either as a string.
+		 * @return {string} The user link markup with user identifier as text.
 		 */
 		getUserLoginLink: function (user) {
 			return current.getUserLink(user, user && user.id);
@@ -170,9 +180,9 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Return the full name of given user. May be built from the provided information.
-		 * @param user The user data : login, fullname, etc...
-		 * @return The full nae of given user. 
-		 * When there are not enough data to build it, will use the first letter of the login as first name.
+		 * When there are not enough data to build it, no first name or no last name, then the first later of the login and the the remaining are used to build the full name.
+		 * @param {Object|string} user The user data : login, fullname, etc... The identifier is required, either in 'id' attribute, either as a string.
+		 * @return {string} The full name of given user. 
 		 */
 		getFullName: function (user) {
 			if (user.fullName) {
@@ -343,7 +353,8 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Remove all diacritics and transform to lower case.
-		 * @param {Object} str the string to normalize.
+		 * @param {string} str the string to normalize.
+		 * @return {string} The normalized value.
 		 */
 		normalize: function (str) {
 			var i;
