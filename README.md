@@ -15,3 +15,15 @@ A web application to centralize the related tools of your projects, a 21th centu
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/ligoj/badge)](https://www.codefactor.io/repository/github/ligoj/ligoj)
 [![codebeat badge](https://codebeat.co/badges/c8c372da-c0f2-4ba1-8fb4-5d5713aeb53f)](https://codebeat.co/projects/github-com-ligoj-ligoj-api-master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
+
+# Dev section
+From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
+```
+org.ligoj.boot.api.Application
+```
+```
+org.ligoj.boot.web.Application
+```
+Notes these launchers (*.launch) are already configured for Eclipse.
+
+From your IDE with Maven, or from Maven CLI simply use goal "spring-boot:run"

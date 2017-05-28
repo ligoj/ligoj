@@ -23,10 +23,10 @@
 	<artifactId>root</artifactId>
 	<version>1.5.1-SNAPSHOT</version>
 	<name>Ligoj - Application</name>
-	<description>Ligoj - Modular Application</description>
+	<description>Ligoj - One page for your yeam</description>
 	<packaging>pom</packaging>
 	<modules>
-		<module>app-business</module>
+		<module>app-api</module>
 		<module>app-web</module>
 	</modules>
 
