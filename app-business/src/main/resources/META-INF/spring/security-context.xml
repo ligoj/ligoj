@@ -38,10 +38,7 @@
 		<property name="continueFilterChainOnUnsuccessfulAuthentication" value="false" />
 	</bean>
 
-	<bean id="authorizingFilter" class="org.ligoj.app.resource.security.AuthorizingFilter">
-		<property name="prefix" value="/rest" />
-	</bean>
-
+	<bean id="authorizingFilter" class="org.ligoj.bootstrap.core.security.AuthorizingFilter" />
 	<bean name="http403ForbiddenEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
 	<bean name="authenticationProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
 		<property name="preAuthenticatedUserDetailsService" ref="authentication-user-service" />

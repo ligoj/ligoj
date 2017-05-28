@@ -48,7 +48,6 @@ import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.model.system.SystemUser;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
@@ -522,14 +521,4 @@ public class PluginResourceTest extends AbstractServerTest {
 
 		return resource.search(uriInfo);
 	}
-
-	/**
-	 * Initialize mocks of this class.
-	 */
-	@Before
-	public void injectMock() {
-		// TODO Remove with ligoj/bootstrap-1.6.3
-		MockitoAnnotations.initMocks(this);
-	}
-
 }
