@@ -7,7 +7,7 @@ A web application to centralize the related tools of your projects, a 21th centu
 [![Build Status](https://semaphoreci.com/api/v1/ligoj/ligoj/branches/master/shields_badge.svg)](https://semaphoreci.com/ligoj/ligoj)
 [![Build Status](https://ci.appveyor.com/api/projects/status/5926fmf0p5qp9j16/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/ligoj/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/ligoj/ligoj/badge.svg?branch=master)](https://coveralls.io/github/ligoj/ligoj?branch=master)
-[![Dependency Status](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978)
+[![Dependency Status](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978/badge.svg?style=flat)](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978)
 [![Quality Gate](https://sonarqube.com/api/badges/gate?key=org.ligoj.api:root)](https://sonarqube.com/dashboard/index/org.ligoj.api:root)
 [![Sourcegraph Badge](https://sourcegraph.com/github.com/ligoj/ligoj/-/badge.svg)](https://sourcegraph.com/github.com/ligoj/ligoj?badge)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/abf810c094e44c0691f71174c707d6ed)](https://www.codacy.com/app/ligoj/ligoj?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/ligoj&amp;utm_campaign=Badge_Grade)
