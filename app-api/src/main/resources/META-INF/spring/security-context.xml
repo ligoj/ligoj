@@ -14,6 +14,7 @@
 		<security:intercept-url pattern="/rest/security/login" access="isAnonymous()" />
 		<security:intercept-url pattern="/rest/service/password/reset/**" access="isAnonymous()" />
 		<security:intercept-url pattern="/rest/service/password/recovery/**" access="isAnonymous()" />
+		<security:intercept-url pattern="/manage/health" access="permitAll" />
 		<security:intercept-url pattern="/**" access="isFullyAuthenticated()" />
 		<security:custom-filter position="PRE_AUTH_FILTER" ref="apiTokenFilter" />
 		<security:custom-filter position="LAST" ref="authorizingFilter" />
