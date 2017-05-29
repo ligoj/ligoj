@@ -273,14 +273,15 @@ define(['cascade'], function ($cascade) {
 
 		save: function () {
 			_('confirmCreate').button('loading');
+			var data = current.formToJSON();
 			$.ajax({
 				type: current.currentId ? 'PUT' : 'POST',
 				url: REST_PATH + 'project',
 				dataType: 'json',
 				contentType: 'application/json',
-				data: current.formToJSON(),
+				data: data,
 				success: function (id) {
-					notifyManager.notify(Handlebars.compile(current.$messages[current.currentId ? 'updated' : 'created'])(current.currentId || id));
+					notifyManager.notify(Handlebars.compile(current.$messages[current.currentId ? 'updated' : 'created'])(data.name + '(' + (current.currentId || id) + ')'));
 					_('popup').modal('hide');
 					current.table && current.table.api().ajax.reload();
 					if (id) {
