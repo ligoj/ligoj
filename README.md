@@ -16,6 +16,17 @@ A web application to centralize the related tools of your projects, a 21th centu
 [![codebeat badge](https://codebeat.co/badges/c8c372da-c0f2-4ba1-8fb4-5d5713aeb53f)](https://codebeat.co/projects/github-com-ligoj-ligoj-api-master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
 
+# User section
+```
+docker build -t ligoj-api:1.5.1 --build-arg VERSION=1.5.1 app-api
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.5.1
+docker build -t ligoj-web:1.5.1 --build-arg VERSION=1.5.1 app-web
+docker run -d --name ligoj-web --link ligoj-api:api -p 8080:8080 ligoj-web:1.5.1 
+```
+Open your browser at : http://localhost:8080/ligoj  
+User/password for administrator role : ligoj-admin
+
+You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin-id-ldap-embedded
 # Dev section
 ## Pre-requisite for the bellow samples
 Maven
@@ -33,12 +44,12 @@ quit
 ### With a fresh new database 
 docker run --name ligoj-db -d -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=ligoj -e MYSQL_USER=ligoj -e MYSQL_PASSWORD=ligoj -d mysql:5.7
 
-## With Maven
+## With Maven CLI
 From your IDE with Maven, or from Maven CLI :
 ```
 git clone https://github.com/ligoj/ligoj
-mvn spring-boot:run -f app-api/pom.xml & 
-mvn spring-boot:run -f app-web/pom.xml &
+mvn spring-boot:run -f app-api/pom.xml& 
+mvn spring-boot:run -f app-web/pom.xml&
 ```
 ## With your IDE
 From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
@@ -58,4 +69,45 @@ docker build -t ligoj-api:1.5.1 --build-arg VERSION=1.5.1 app-api
 docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.5.1
 docker build -t ligoj-web:1.5.1 --build-arg VERSION=1.5.1 app-web
 docker run -d --name ligoj-web --link ligoj-api:api -p 8080:8080 ligoj-web:1.5.1 
+```
+Docker build (ARG) variables:
+```
+NEXUS_URL : Repository base host used to download the WAR files
+VERSION   : Ligoj version, used to build the WAR_URL
+WAR_URL   : Full WAR URL, built from NEXUS_URL and VERSION
+```
+
+Docker environment variables:
+```
+CONTEXT      : Context, without starting '/'
+SERVER_HOST  : 0.0.0.0
+SERVER_PORT  : 8081
+JAVA_MEMORY  : JVM Memory
+CUSTOM_OPTS  : Additional JVM options, like -D...
+JAVA_OPTIONS : Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties
+jdbc.url     : DB URL
+jdbc.username: DB user
+jdbc.password: DB password
+```
+
+Spring-Boot properties (injected in CUSTOM_OPTS):
+```
+server.port               = ${SERVER_PORT}
+server.address            = ${SERVER_HOST}
+server.context-path       = /${CONTEXT}
+management.context-path   = /manage
+management.security.roles = USER
+database.app.hbm2ddl      = [update]/none/validate. With "update", the server takes up to 30s to start
+database.app              = Database name
+database.app.user         = ${jdbc.username}
+database.app.password     = ${jdbc.password}
+jpa.dialect               = JPA Dialect : org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect,  org.hibernate.dialect.PostgreSQL95Dialect, ...
+jdbc.driverClassName      = JDBC Driver : com.mysql.cj.jdbc.Driver, org.postgresql.Driver,...
+jdbc.url                  = JDBC URL : jdbc:postgresql:database, jdbc:mysql://localhost:3306/ligoj?useColumnNamesInFindColumn=true&useUnicode=yes ...
+jdbc.validationQuery      = select 1;
+jdbc.maxIdleTime          = 180000
+jdbc.maxPoolSize          = 150
+health.node               = 0 0 0/1 1/1 * ?
+health.subscription       = 0 0 2 1/1 * ?
+app.crypto.file           = Secret file location
 ```
