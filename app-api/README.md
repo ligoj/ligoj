@@ -8,5 +8,5 @@ docker build -t ligoj-api:1.5.1 --build-arg VERSION=1.5.1 .
 ```
 # Run Docker image
 ```
-docker run -d --name ligoj-api --link ligoj-db:ligoj-db ligoj-api:1.5.1
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.5.1
 ```

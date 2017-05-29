@@ -34,6 +34,6 @@ RUN set -xe \
         apt-get purge -y --auto-remove curl
 
 ENV ENVIRONMENT="JAVA_MEMORY="-Xms128M -Xmx128M" CUSTOM_OPTS=""
-ENV API="http://${APP}-api:8081/${APP}-api"
+ENV API="http://api:8081/${APP}-api"
 ENV JAVA_OPTIONS="-Dsecurity=Rest -Dsso.${APP}.url=${API}/rest/security/login -D${APP}.endpoint.manage.url=${API}/manage -D${APP}.endpoint.api.url=${API}/rest -D${APP}.endpoint.plugins.url=${API}/webjars -Dapp.crypto.password=public $JAVA_MEMORY -Dserver.context-path=${CONTEXT_URL} $CUSTOM_OPTS"
 CMD dockerize -wait ${API} -timeout 300s java $JAVA_OPTIONS -jar $LIGOJ_HOME/ligoj-web.war

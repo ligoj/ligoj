@@ -32,9 +32,9 @@ COPY wait-for-mysql.sh ./wait-for-mysql.sh
 RUN chmod +x ./wait-for-mysql.sh
 
 ENV ENVIRONMENT="JAVA_MEMORY="-Xms712M -Xmx1024M" CUSTOM_OPTS="-Ddatabase.app.hbm2ddl=update"
-ENV DATABASE="ligoj-db"
+ENV DATABASE="db"
 ENV jdbc.url="jdbc:mysql://$DATABASE:3306/ligoj?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC"
 ENV jdbc.username="ligoj" jdbc.password="ligoj"
-ENV JAVA_OPTIONS="-Dapp.crypto.password=public -Duser.timezone=UTC $JAVA_MEMORY -Dserver.context-path=${CONTEXT_URL} -Dligoj.home=${LIGOJ_HOME} $CUSTOM_OPTS"
+ENV JAVA_OPTIONS="-Dapp.crypto.password=public -Duser.timezone=UTC $JAVA_MEMORY -Dserver.address=0.0.0.0 -Dserver.context-path=${CONTEXT_URL} -Dligoj.home=${LIGOJ_HOME} $CUSTOM_OPTS"
 
 CMD ./wait-for-mysql.sh $DATABASE java $JAVA_OPTIONS -jar $LIGOJ_HOME/ligoj-api.war

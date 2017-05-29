@@ -55,7 +55,7 @@ Notes these launchers (*.launch) are already configured for Eclipse.
 Build the images and run the containers
 ```
 docker build -t ligoj-api:1.5.1 --build-arg VERSION=1.5.1 app-api
-docker run -d --name ligoj-api --link ligoj-db:ligoj-db ligoj-api:1.5.1
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.5.1
 docker build -t ligoj-web:1.5.1 --build-arg VERSION=1.5.1 app-web
-docker run -d --name ligoj-web --link ligoj-api:ligoj-api -p 8080:8080 ligoj-web:1.5.1 
+docker run -d --name ligoj-web --link ligoj-api:api -p 8080:8080 ligoj-web:1.5.1 
 ```
