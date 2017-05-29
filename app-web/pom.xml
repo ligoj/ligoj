@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-web-parent</artifactId>
-		<version>1.6.2</version>
+		<version>1.6.3</version>
 		<relativePath />
 	</parent>
 
@@ -109,6 +109,13 @@
 		</resources>
 	</build>
 	<profiles>
+		<profile>
+			<id>minify</id>
+			<properties>
+				<!--  Remove with LB-1.6.4+ -->
+				<reference-html>${basedir}/src/main/webapp/index.html</reference-html>
+			</properties>
+		</profile>
 		<profile>
 			<id>bintray</id>
 			<distributionManagement>
