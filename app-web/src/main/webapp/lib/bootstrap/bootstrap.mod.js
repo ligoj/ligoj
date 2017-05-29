@@ -40,7 +40,7 @@ define([
 		// Some browser (like Chrome) the first submit is used (hidden or not) and receive a click
 		if ((e.which === 13 || e.keyCode === 13) && !$(e.target).is('textarea')) {
 			// Determines the right input
-			var $button = $(this).find('input:visible[type=submit]:not(.disabled):not(.hide):not([disabled]),button:visible[type=submit]:not(.disabled):not(.hide):not([disabled])').first();
+			var $button = $(this).find('input:visible[type=submit]:not(.disabled):not(.hide):not(.hidden):not([disabled]),button:visible[type=submit]:not(.disabled):not(.hide):not(.hidden):not([disabled])').first();
 			if ($button.length) {
 				$button.trigger('click');
 				e.preventDefault();
@@ -64,11 +64,11 @@ define([
 	$cascade.loadPartial);
 
 	$.fn.hideGroup = function () {
-		$(this).closest('.form-group').addClass('hide');
+		$(this).closest('.form-group').addClass('hidden');
 		return this;
 	};
 	$.fn.showGroup = function () {
-		$(this).closest('.form-group').removeClass('hide');
+		$(this).closest('.form-group').removeClass('hidden');
 		return this;
 	};
 	$.fn.rawText = function (rawText) {

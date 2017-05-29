@@ -210,7 +210,7 @@ define([
 			});
 
 			$('#captcha_img').on('load', function () {
-				$('#captcha_img').removeClass('hide');
+				$('#captcha_img').removeClass('hidden');
 			});
 
 			// AJAX submit
