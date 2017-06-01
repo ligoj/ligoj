@@ -569,6 +569,7 @@ define(['cascade'], function ($cascade) {
 					break;
 				case 3:
 					// Show modes
+					_('subscribe-mode').find('.choices').empty();
 					current.renderChoicesData('mode', [
 						current.newMode('create', 'plus'),
 						current.newMode('link', 'link')
