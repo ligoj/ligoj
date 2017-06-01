@@ -91,11 +91,11 @@ define(function () {
 				})) : []);
 				$('.modal-title').text(current.$messages[uc ? 'updateUser' : 'newUser']);
 				if (uc) {
-					_('create').addClass('hide');
-					_('save').removeClass('hide');
+					_('create').addClass('hidden');
+					_('save').removeClass('hidden');
 				} else {
-					_('create').removeClass('hide');
-					_('save').addClass('hide');
+					_('create').removeClass('hidden');
+					_('save').addClass('hidden');
 				}
 				validationManager.reset($(this));
 			});

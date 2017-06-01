@@ -213,9 +213,9 @@ define(['cascade'], function ($cascade) {
 					moment(data.createdDate).format(formatManager.messages.shortdateMomentJs),
 					current.getUserLink(data.lastModifiedBy),
 					moment(data.lastModifiedDate).format(formatManager.messages.shortdateMomentJs)
-				])).removeClass('hide');
+				])).removeClass('hidden');
 			} else {
-				_('detail-audit').addClass('hide');
+				_('detail-audit').addClass('hidden');
 			}
 		},
 

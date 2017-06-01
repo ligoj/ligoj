@@ -26,11 +26,11 @@ define(['cascade'], function ($cascade) {
 			var $selector = _(id);
 			current.spinOff();
 			$selector.val('').showGroup();
-			$selector.closest('.form-group').find('.fa-spin').removeClass('hide');
+			$selector.closest('.form-group').find('.fa-spin').removeClass('hidden');
 		},
 
 		spinOff: function () {
-			current.$view.find('.fa-spin').addClass('hide');
+			current.$view.find('.fa-spin').addClass('hidden');
 		},
 
 		/**
@@ -52,14 +52,14 @@ define(['cascade'], function ($cascade) {
 						if (_('blob').val().match('\\.(png|jpeg|jpg|gif)$')) {
 							$picture.attr({
 								src: REST_PATH + 'system/bench/picture.png?' + (current.idBenchUpload++)
-							}).removeClass('hide');
+							}).removeClass('hidden');
 						}
 						_('download').attr({
 							href: REST_PATH + 'system/bench/picture.png?' + (current.idBenchUpload++)
 						}).showGroup();
 					} else {
-						$picture.addClass('hide');
-						_('download').addClass('hide');
+						$picture.addClass('hidden');
+						_('download').addClass('hidden');
 					}
 					current.select();
 				},
