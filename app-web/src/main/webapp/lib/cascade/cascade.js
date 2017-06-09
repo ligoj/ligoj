@@ -444,7 +444,7 @@ define([
 				}
 				if (context) {
 					// Parent context has been found, use it for this partial
-					var $parent = $('<div class="hidden"></div>');
+					var $parent = $('<div></div>');
 					context.$view.append($parent);
 				} else {
 					// Stop the navigation there, invalid context reference
