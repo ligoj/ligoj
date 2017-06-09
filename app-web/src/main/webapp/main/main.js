@@ -38,7 +38,7 @@ define(['cascade'], function ($cascade) {
 				if (node.refined) {
 					parent = node.refined;
 				} else if (fragments.length > 2) {
-					parent = fragments.slice(0, fragments.length - 1);
+					parent = fragments.slice(0, fragments.length - 1).join(':');
 				}
 				result = (parent ? current.toIcon(parent, suffix, null, true) + ' <i class="fa fa-angle-right"></i> ' : '') + result;
 			}
