@@ -60,7 +60,7 @@ define({
 		'upload-new': 'Import',
 		'upload-change': 'Reimport',
 		'upload-remove': 'Remove',
-		'uploadsending': 'Sending content ...',
+		'upload-sending': 'Sending content ...',
 		'upload-success': 'Import succeed',
 		'upload-fail': 'Import failed',
 		'upload-fail-details': 'Please try again and upload a .xsl File <i>(97-2003 Version)</i>',

@@ -493,6 +493,26 @@ define(['cascade'], function ($cascade) {
 			_('subscription-previous').on('click', function () {
 				_('subscribe-definition').find('.nav-pills li.active').prev().find('a').tab('show');
 			});
+			
+			// Node edition event
+			$(document).on('node:saved', '#node-popup', function(event, nodeComponent, relatedTarget) {
+				// Check the popup event corresponds to the 'new node' button
+				if ($(relatedTarget).is('#subscription-new-node')) {
+					// Reload the available nodes
+					current.renderChoicesNodes();
+				}
+			}).on('node:show', '#node-popup', function(event, nodeComponent, relatedTarget) {
+				// Preselect the tool
+				if ($(relatedTarget).is('#subscription-new-node')) {
+					// Reload the available nodes
+					for(const index in current.tools) {
+						if (current.tools[index].id  === current.getSelectedTool()) {
+							nodeComponent.setModel({refined: current.tools[index]});
+							break;
+						} 
+					}
+				}
+			});
 			current.subscribe = true;
 		},
 
@@ -559,21 +579,19 @@ define(['cascade'], function ($cascade) {
 			switch (step) {
 				case 0:
 					// Show services
-					current.renderChoices('service', 'node/children', true, current.availableNextStep);
+					current.renderChoices('service', 'node?refined=service', true, current.availableNextStep);
 					break;
 				case 1:
 					// Show tools
-					parent = _('subscribe-service').find('input:checked').val();
-					current.renderChoices('tool', 'node/' + parent + '/children/link', true, current.availableNextStep, parent);
+					current.renderChoicesTools();
 					break;
 				case 2:
 					// Show nodes
-					parent = _('subscribe-tool').find('input:checked').val();
-					current.renderChoices('node', 'node/' + parent + '/children/link', true, current.availableNextStep, parent);
+					current.renderChoicesNodes();
 					break;
 				case 3:
 					// Show modes
-					parent = _('subscribe-tool').find('input:checked').val();
+					parent = current.getSelectedTool();
 					_('subscribe-mode').find('.choices').empty();
 					current.renderChoicesData('mode', [
 						current.newMode('create', 'plus'),
@@ -600,6 +618,26 @@ define(['cascade'], function ($cascade) {
 				default :
 		}
 	},
+	
+	/**
+	 * Render the choices of tools.
+	 */
+	renderChoicesTools : function() {
+		var parent = _('subscribe-service').find('input:checked').val();
+		current.renderChoices('tool', 'node?refined=' + parent + '&mode=link', true, function(nodes) {
+			// Save the nodes for new-node component
+			current.tools = nodes;
+			current.availableNextStep()
+		}, parent);
+	},
+	
+	/**
+	 * Render the choices of nodes.
+	 */
+	renderChoicesNodes : function() {
+		var parent = current.getSelectedTool();
+		current.renderChoices('node', 'node?refined=' + parent + '&mode=link', true, current.availableNextStep, parent);
+	},
 
 	/**
 	 * Render choices
@@ -614,6 +652,7 @@ define(['cascade'], function ($cascade) {
 			url: REST_PATH + url,
 			type: 'GET',
 			success: function (nodes) {
+				nodes = nodes.data;
 				$container.empty();
 				$description.addClass('hidden').empty();
 				renderData && current.renderChoicesData(type, nodes, parent);
@@ -952,6 +991,13 @@ define(['cascade'], function ($cascade) {
 	 */
 	getSelectedNode: function () {
 		return _('subscribe-node').find('input:checked').val();
+	},
+
+	/**
+	 * Return selected tool identifier of current subscription form.
+	 */
+	getSelectedTool: function () {
+		return _('subscribe-tool').find('input:checked').val();
 	},
 
 	/**

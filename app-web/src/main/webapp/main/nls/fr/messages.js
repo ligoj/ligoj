@@ -58,7 +58,7 @@ define({
 	'upload-new': 'Importer',
 	'upload-change': 'Re-Importer',
 	'upload-remove': 'Retirer',
-	'uploadsending': 'Envoi du contenu ...',
+	'upload-sending': 'Envoi du contenu ...',
 	'upload-success': 'L\'import a été effectué',
 	'upload-fail': 'L\'import à échoué',
 	'upload-fail-details': 'Veuillez importer un document excel .xsl <i>(Version 97-2003)</i>',
