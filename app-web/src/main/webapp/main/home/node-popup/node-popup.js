@@ -37,6 +37,10 @@ define(['cascade'], function ($cascade) {
 				current.setModel(null);
 				$popup.trigger('node:show', [current, current.relatedTarget]);
 			}).on('submit', current.saveOrUpdate);
+
+			_('node-mode').find('button').on('click', function () {
+				$(this).addClass('active').siblings().removeClass('active');
+			});
 		},
 		
 		/**
