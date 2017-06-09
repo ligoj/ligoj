@@ -1,5 +1,5 @@
 /*!
- * Cascade v0.0.1 (https://github.com/fabdouglas/cascadejs)
+ * Cascade v0.0.2 (https://github.com/fabdouglas/cascadejs)
  * Copyright 2016 Fabrice Daugan.
  * Licensed under the MIT license
  */
