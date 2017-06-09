@@ -271,10 +271,10 @@ define(['cascade'], function ($cascade) {
 				return object.id + ' [<small>' + current.$main.getFullName(object) + '</small>]';
 			});
 		},
-		newSelect2Node: function (selector, filter, placeholder, suffix, dataSrc, recursive) {
+		newSelect2Node: function (selector, filter, placeholder, suffix, dataSrc, recursive, toItem) {
 			return current.newSelect2(selector, REST_PATH + 'node' + (filter || ''), placeholder || current.$messages.node, function (object) {
 				return current.toIcon(object, suffix, dataSrc, recursive) + ' ' + current.getNodeName(object);
-			});
+			}, null, null, toItem);
 		},
 		newSelect2Project: function (selector, filter, placeholder, textFunction, idProperty, textProperty) {
 			return current.newSelect2(selector, REST_PATH + 'project' + (filter || ''), placeholder || current.$messages.project, textFunction, idProperty || 'id', textProperty || 'name');
@@ -285,7 +285,7 @@ define(['cascade'], function ($cascade) {
 		newSelect2Group: function (selector, filter, placeholder) {
 			return current.newSelect2(selector, REST_PATH + 'service/id/group/filter' + (filter || '/read'), placeholder || current.$messages.group);
 		},
-		newSelect2: function (selector, url, placeholder, textFunction, idProperty, textProperty) {
+		newSelect2: function (selector, url, placeholder, textFunction, idProperty, textProperty, toItem) {
 			var toText = function (object) {
 				return object && (textFunction ? textFunction(object) : ((textProperty && object[textProperty]) || object.text || object));
 			};
@@ -336,11 +336,12 @@ define(['cascade'], function ($cascade) {
 					results: function (data, page) {
 						var result = [];
 						$(data.data).each(function () {
-							result.push({
+							var item = {
 								id: (idProperty && this[idProperty]) || this.id || this,
 								data: this,
 								text: toText(this)
-							});
+							};
+							result.push(toItem ? toItem(item) : item);
 						});
 						return {
 							more: data.recordsFiltered > page * 10,
