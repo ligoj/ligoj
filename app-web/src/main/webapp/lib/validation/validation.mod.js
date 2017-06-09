@@ -27,7 +27,7 @@ define([
 		 */
 		validate: function (errors, selector, ui) {
 			var $that = validationManager;
-			var $form = selector || _('_ucDiv');
+			var $form = selector || $that.closestForm($that.mapping) || _('_ucDiv');
 			var hasError = false;
 			var key;
 			$that.reset($form);
@@ -54,9 +54,26 @@ define([
 			}
 			return messages;
 		},
+		
+		/**
+		 * Guess the closest form from the mapping and looking for unique selector based on identifier.
+		 * @param {Object} The mappings : key to selector.
+		 * @return {jQuery} A non empty jQuery object when a form containing at least one target unique element has been found.
+		 */
+		closestForm: function(mapping) {
+			for (key in mapping) {
+				if ({}.hasOwnProperty.call(mapping, key) && mapping[key].indexOf('#') !== -1) {
+					var $form =  $(mapping[key]).closest('form');
+					if ($form.length) {
+						// This form seems to be a good candidate
+						return $form;
+					}
+				}
+			}
+		},
 
-		_isQualifiedSelector: function (key) {
-			return key.indexOf('#') !== -1 || key.indexOf('.') !== -1 || key.indexOf(' ') !== -1;
+		_isQualifiedSelector: function (target) {
+			return target.indexOf('#') !== -1 || target.indexOf('.') !== -1 || target.indexOf(' ') !== -1;
 		},
 
 		/**
