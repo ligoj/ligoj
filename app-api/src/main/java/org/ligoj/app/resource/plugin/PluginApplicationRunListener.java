@@ -44,22 +44,22 @@ public class PluginApplicationRunListener implements SpringApplicationRunListene
 	}
 
 	@Override
-	public void environmentPrepared(ConfigurableEnvironment environment) {
+	public void environmentPrepared(final ConfigurableEnvironment environment) {
 		// Nothing to do
 	}
 
 	@Override
-	public void contextPrepared(ConfigurableApplicationContext context) {
+	public void contextPrepared(final ConfigurableApplicationContext context) {
 		// Nothing to do
 	}
 
 	@Override
-	public void contextLoaded(ConfigurableApplicationContext context) {
+	public void contextLoaded(final ConfigurableApplicationContext context) {
 		// Nothing to do
 	}
 
 	@Override
-	public void finished(ConfigurableApplicationContext context, Throwable exception) {
+	public void finished(final ConfigurableApplicationContext context,final Throwable exception) {
 		// Nothing to do
 	}
 

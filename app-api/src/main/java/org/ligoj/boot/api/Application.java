@@ -43,6 +43,10 @@ public class Application extends SpringBootServletInitializer {
 		SpringApplication.run(Application.class, args);
 	}
 
+	/**
+	 * Plug-in resource servlet.
+	 * @return ServletRegistrationBean
+	 */
 	@Bean
 	public ServletRegistrationBean webjarsServlet() {
 		final ServletRegistrationBean registrationBean = new ServletRegistrationBean(new WebjarsServlet(), "/webjars/*");
@@ -50,6 +54,10 @@ public class Application extends SpringBootServletInitializer {
 		return registrationBean;
 	}
 
+	/**
+	 * CXF servlet.
+	 * @return ServletRegistrationBean
+	 */
 	@Bean
 	public ServletRegistrationBean cxfServlet() {
 		final ServletRegistrationBean registrationBean = new ServletRegistrationBean(new CXFServlet(), "/rest/*");
@@ -59,31 +67,46 @@ public class Application extends SpringBootServletInitializer {
 		return registrationBean;
 	}
 
+	/**
+	 * Spring-Security filter
+	 * @return FilterRegistrationBean
+	 */
 	@Bean
 	public FilterRegistrationBean securityFilterChainRegistration() {
-		DelegatingFilterProxy delegatingFilterProxy = new DelegatingFilterProxy();
+		final DelegatingFilterProxy delegatingFilterProxy = new DelegatingFilterProxy();
 		delegatingFilterProxy.setTargetBeanName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
-		FilterRegistrationBean registrationBean = new FilterRegistrationBean(delegatingFilterProxy);
+		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(delegatingFilterProxy);
 		registrationBean.setName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
 		registrationBean.addUrlPatterns("/rest/*", "/manage/*");
 		return registrationBean;
 	}
 
+	/**
+	 * Request Context holder.
+	 * @return RequestContextListener
+	 */
 	@Bean
 	public RequestContextListener requestContextListener() {
 		return new RequestContextListener();
 	}
 
+	/**
+	 * @return HttpSessionEventPublisher
+	 */
 	@Bean
 	public HttpSessionEventPublisher httpSessionEventPublisher() {
 		return new HttpSessionEventPublisher();
 	}
 
+	/**
+	 * Error management
+	 * @return EmbeddedServletContainerCustomizer
+	 */
 	@Bean
 	public EmbeddedServletContainerCustomizer containerCustomizer() {
 		return new EmbeddedServletContainerCustomizer() {
 			@Override
-			public void customize(ConfigurableEmbeddedServletContainer container) {
+			public void customize(final ConfigurableEmbeddedServletContainer container) {
 				container.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"));
 			}
 		};
