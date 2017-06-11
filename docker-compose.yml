@@ -7,17 +7,15 @@ services:
       MYSQL_DATABASE: ligoj
       MYSQL_USER: ligoj
       MYSQL_PASSWORD: ligoj
-  rest:
-    image: ligoj-app-business:1.5.0
+  api:
+    image: ligoj-api:1.5.1
     links:
       - db
     depends_on: 
       - db
   web:
-    image: ligoj-app-web:1.5.0
+    image: ligoj-web:1.5.1
     links:
-      - rest:ligoj-business
+      - api:ligoj-api
     ports: 
       - "8080:8080"
-    environment: 
-      - CUSTOM_OPTS=-Dsecurity=Trusted
