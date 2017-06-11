@@ -29,7 +29,7 @@ import org.springframework.web.filter.DelegatingFilterProxy;
 public class Application extends SpringBootServletInitializer {
 
 	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+	protected SpringApplicationBuilder configure(final SpringApplicationBuilder application) {
 		return application.sources(Application.class);
 	}
 

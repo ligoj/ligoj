@@ -12,10 +12,18 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import lombok.Setter;
+
 /**
  * Filter able to mask the HTML extension from the URL, and forward to the master HTML file as necessary.
  */
 public class HtmlProxyFilter extends OncePerRequestFilter {
+
+	/**
+	 * HTML suffix.
+	 */
+	@Setter
+	private String suffix = "";
 
 	@Override
 	protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
@@ -55,7 +63,7 @@ public class HtmlProxyFilter extends OncePerRequestFilter {
 	private String getOptimizedSuffix(final String baseName) {
 		if ("index".equals(baseName) || "login".equals(baseName)) {
 			// Use environment code suffix
-			return System.getProperty("app-env");
+			return suffix;
 		}
 		// No suffix
 		return "";

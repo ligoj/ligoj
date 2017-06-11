@@ -46,7 +46,7 @@ public class Application extends SpringBootServletInitializer {
 	private String endpointPlugin;
 
 	@Value("${app-env:auto}")
-	private String environmentCode;
+	protected String environmentCode;
 
 	@Override
 	protected SpringApplicationBuilder configure(final SpringApplicationBuilder application) {
@@ -135,10 +135,9 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public FilterRegistrationBean htmlProxyFilter() {
-		// Fix the environment
-		fixEnvironment();
-
-		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(new HtmlProxyFilter());
+		final HtmlProxyFilter proxyFilter = new HtmlProxyFilter();
+		proxyFilter.setSuffix(getEnvironment());
+		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(proxyFilter);
 		registrationBean.addUrlPatterns("/index.html", "/", "/login.html");
 		registrationBean.setOrder(10);
 		return registrationBean;
@@ -186,18 +185,16 @@ public class Application extends SpringBootServletInitializer {
 	/**
 	 * Fix the system environment from "auto" to the guess value.
 	 */
-	private void fixEnvironment() {
+	protected String getEnvironment() {
 		// Auto detect environment variable
 		if (environmentCode.equals("auto")) {
 			if (System.getProperty("java.class.path", "").contains(".war")) {
-				System.setProperty("app-env", "-prod");
-			} else {
-				System.setProperty("app-env", "");
+				return "-prod";
 			}
-		} else {
-			// Export to system property
-			System.setProperty("app-env", environmentCode);
+			return "";
 		}
+		// Export to same property
+		return environmentCode;
 	}
 
 	@Bean
