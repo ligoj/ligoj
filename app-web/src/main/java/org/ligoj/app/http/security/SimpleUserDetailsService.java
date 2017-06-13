@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
  * @author Fabrice Daugan
  * 
  */
-public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
+public class SimpleUserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(final String username) {
