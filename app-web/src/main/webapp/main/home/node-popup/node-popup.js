@@ -32,7 +32,6 @@ define(['cascade'], function ($cascade) {
 				}
 			}).on('show.bs.modal', function (event) {
 				current.relatedTarget = event.relatedTarget;
-				debugger;
 				
 				// Reset the UI
 				current.setModel(null);

@@ -285,8 +285,13 @@ define(['cascade'], function ($cascade) {
 			_('subscription-next').removeAttr('disabled');
 		}
 		if (type === 'node') {
-			// Add the button to create a new instance
-			$('.node-popup-trigger').removeClass('hidden').data('parent', parent);
+			// Add the button to create/update a node
+			$('#subscription-new-node').removeClass('hidden').data('parent', parent);
+			if (current.getSelectedNode()) {
+				$('#subscription-update-node').removeClass('hidden');
+			} else {
+				$('#subscription-update-node').addClass('hidden');
+			}
 		} else {
 			$('.node-popup-trigger').addClass('hidden');
 		}

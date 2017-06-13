@@ -1,6 +1,6 @@
 define({
 	'root' : {
-		'mode-all' : 'None',
+		'mode-none' : 'None',
 		'mode-all-tooltip' : 'No subscription will be available. Configuration node only',
 		'mode-create' : 'Create',
 		'mode-create-tooltip' : 'Subscription in create mode ony will be available',
