@@ -4,6 +4,8 @@ define({
 	"pkey" : "Clé",
 	"internal-key" : "Clé interne",
 	"manager" : "Gestionnaire",
+	"node-new" : "Nouveau noeud",
+	"node-update" : "Modifier noeud",
 	"subscribe" : "Souscrire",
 	"unsubscribe" : "Supprime cette souscription du portail, pas de l'outil. C'est l'exacte opération inverse d'une souscription en mode lier.",
 	"confirm-unsubscribe" : "Supprimer cette souscription ne fera que retirer le lien entre le projet et l'outil dans ce portail. Ce lien peut être reconstruit après.",

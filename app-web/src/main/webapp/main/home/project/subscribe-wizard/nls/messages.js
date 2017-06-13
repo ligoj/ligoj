@@ -5,6 +5,8 @@ define({
 		"pkey" : "Key",
 		"internal-key" : "Internal key",
 		"manager" : "Manager",
+		"node-new" : "New node",
+		"node-update" : "Update node",
 		"subscribe" : "Subscribe",
 		"unsubscribe" : "Delete this subscription from the portal, not from the tool. This is the exact reverse operation a subscription in link mode.",
 		"confirm-unsubscribe" : "Deleting this subscription will only remove the link between the tool and this project. This link can be rebuilt later.",

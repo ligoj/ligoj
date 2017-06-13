@@ -40,7 +40,7 @@ define(['cascade'], function ($cascade) {
 			// Node edition event
 			$(document).off('node:saved').on('node:saved', '#node-popup', function(event, nodeComponent, relatedTarget) {
 				// Check the popup event corresponds to the 'new node' button
-				if ($(relatedTarget).is('#subscription-new-node')) {
+				if ($(relatedTarget).is('.node-popup-trigger')) {
 					// Reload the available nodes
 					current.renderChoicesNodes();
 				}
@@ -51,6 +51,14 @@ define(['cascade'], function ($cascade) {
 					for(const index in current.tools) {
 						if (current.tools[index].id  === current.getSelectedTool()) {
 							nodeComponent.setModel({refined: current.tools[index]});
+							break;
+						} 
+					}
+				} else if ($(relatedTarget).is('#subscription-update-node')) {
+					// Reload the available nodes
+					for(const index in current.nodes) {
+						if (current.nodes[index].id  === current.getSelectedNode()) {
+							nodeComponent.setModel(current.nodes[index]);
 							break;
 						} 
 					}
@@ -181,11 +189,7 @@ define(['cascade'], function ($cascade) {
 	 */
 	renderChoicesTools : function() {
 		var parent = _('subscribe-service').find('input:checked').val();
-		current.renderChoices('tool', 'node?refined=' + parent + '&mode=link', true, function(nodes) {
-			// Save the nodes for new-node component
-			current.tools = nodes;
-			current.availableNextStep()
-		}, parent);
+		current.renderChoices('tool', 'node?refined=' + parent + '&mode=link', true, current.availableNextStep, parent);
 	},
 	
 	/**
@@ -213,7 +217,12 @@ define(['cascade'], function ($cascade) {
 				$container.empty();
 				$description.addClass('hidden').empty();
 				renderData && current.renderChoicesData(type, nodes, parent);
-				(!renderData || nodes.length) && callback && callback(nodes);
+				if (!renderData || nodes.length) {
+					// Save the nodes for new-node/update-node component
+					current[type + 's'] = nodes;
+
+					callback && callback(nodes);
+				}
 			}
 		});
 	},
@@ -277,9 +286,9 @@ define(['cascade'], function ($cascade) {
 		}
 		if (type === 'node') {
 			// Add the button to create a new instance
-			_('subscription-new-node').removeAttr('disabled').removeClass('hidden').data('parent',parent);
+			$('.node-popup-trigger').removeClass('hidden').data('parent', parent);
 		} else {
-			_('subscription-new-node').attr('disabled', 'disabled').addClass('hidden');
+			$('.node-popup-trigger').addClass('hidden');
 		}
 	},
 

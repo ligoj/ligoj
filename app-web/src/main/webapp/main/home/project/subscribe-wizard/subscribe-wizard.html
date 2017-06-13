@@ -105,7 +105,8 @@
 	<div class="form-actions">
 		<input type="submit" class="btn btn-success btn-raised" id="subscription-create" value="{{create}}">
 		<input type="button" class="btn btn-link" id="subscription-previous" value="{{previous}}">
-		<input type="button" class="btn btn-default pull-left" id="subscription-new-node" value="New Node" data-toggle="modal-ajax" data-cascade="true" data-target="#node-popup" data-ajax="/main/home/node-popup" data-plugins="i18n,html,js">
+		<input type="button" class="btn btn-default pull-left node-popup-trigger" id="subscription-new-node" value="{{node-new}}" data-toggle="modal-ajax" data-cascade="true" data-target="#node-popup" data-ajax="/main/home/node-popup" data-plugins="i18n,html,js">
+		<input type="button" class="btn btn-default pull-left node-popup-trigger" id="subscription-update-node" value="{{node-update}}" data-toggle="modal-ajax" data-cascade="true" data-target="#node-popup" data-ajax="/main/home/node-popup" data-plugins="i18n,html,js">
 		<input type="submit" class="btn btn-primary btn-raised" id="subscription-next" value="{{next}}">
 		<a class="btn btn-link cancel-subscription">{{cancel}}</a>
 	</div>

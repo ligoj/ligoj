@@ -32,6 +32,7 @@ define(['cascade'], function ($cascade) {
 				}
 			}).on('show.bs.modal', function (event) {
 				current.relatedTarget = event.relatedTarget;
+				debugger;
 				
 				// Reset the UI
 				current.setModel(null);
@@ -54,16 +55,17 @@ define(['cascade'], function ($cascade) {
 			_('node-id').val(model.id || '');
 			_('node-name').val(model.name || '');
 			_('node-mode').find('button').removeClass('active').filter('[value="' + (model.mode || 'link') + '"]').addClass('active');
-			current.updateIdState(model.refined && model.refined.id);
+			current.updateIdState(model.refined && model.refined.id, model.id);
 		},
 		
 		/**
 		 * Update the UI state of the 'id' field from the selected tool.
 		 * @param {string} tool The tool identifier.
+		 * @param {string} id The optional node identifier.
 		 */
-		updateIdState: function(tool) {
+		updateIdState: function(tool, id) {
 			if (tool) {
-				_('node-id').val(tool + ':').removeClass('disabled').removeAttr('disabled');
+				_('node-id').val(id || (tool + ':')).removeClass('disabled').removeAttr('disabled');
 			} else {
 				_('node-id').val('').addClass('disabled').attr('disabled', 'disabled');			
 			}
