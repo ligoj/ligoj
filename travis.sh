@@ -115,6 +115,7 @@ BUILD)
 
   # Minimal Maven settings
   export MAVEN_OPTS="-Xmx1G -Xms128m"
+  export DISPLAY=:0.0
   MAVEN_ARGS="-Dmaven.test.redirectTestOutputToFile=false -Djava.net.preferIPv4Stack=true -Dsurefire.useFile=false -B -e -V -DbuildVersion=$BUILD_VERSION"
 
   if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
@@ -129,7 +130,7 @@ BUILD)
 
     mvn clean package jacoco:report sonar:sonar \
           $MAVEN_ARGS \
-          -Pjacoco -Djacoco.includes=org.ligoj.app.* \
+          -Pjacoco -Djacoco.includes=org.ligoj.app.*:org.ligoj.boot.* \
           -Dsonar.host.url=$SONAR_HOST_URL \
           -Dsonar.organization=ligoj-github \
           -Dsonar.login=$SONAR_TOKEN \
@@ -137,7 +138,8 @@ BUILD)
           -Dsonar.github.repository=$TRAVIS_REPO_SLUG \
           -Dsonar.github.oauth=$GITHUB_TOKEN \
           -Dmaven.javadoc.skip=true \
-          -Dmaven.ut.reuseForks=true -Dmaven.it.reuseForks=false
+          -Dmaven.ut.reuseForks=true -Dmaven.it.reuseForks=false \
+          -Djava.awt.headless=true
 
     mvn coveralls:report \
           $MAVEN_ARGS

@@ -53,8 +53,8 @@ define(function () {
 		createButton: function () {
 			current.currentId = null;
 			_('name').val('');
-			_('create').removeClass('hide');
-			_('save').addClass('hide');
+			_('create').removeClass('hidden');
+			_('save').addClass('hidden');
 			_('authorizations-business').select2('data', '');
 			_('authorizations-ui').select2('data', '');
 			_('myModalLabel').text(current.$messages.add);
@@ -86,7 +86,7 @@ define(function () {
 				data: current.formToJSON(),
 				success: function () {
 					notifyManager.notify(Handlebars.compile(current.$messages.created)(_('name').val()));
-					_('popup').modal('hide');
+					_('popup').modal('hidden');
 					// Refresh the table
 					current.table && current.table.api().ajax.reload();
 				}
@@ -132,11 +132,11 @@ define(function () {
 				_('name').val(uc.name);
 				$('.modal-title').text(current.$messages[uc.id ? 'update' : 'create']);
 				if (current.currentId) {
-					_('create').addClass('hide');
-					_('save').removeClass('hide');
+					_('create').addClass('hidden');
+					_('save').removeClass('hidden');
 				} else {
-					_('create').removeClass('hide');
-					_('save').addClass('hide');
+					_('create').removeClass('hidden');
+					_('save').addClass('hidden');
 				}
 				_('authorizations-business').select2('data', uc['authorizations-business']);
 				_('authorizations-ui').select2('data', uc['authorizations-ui']);

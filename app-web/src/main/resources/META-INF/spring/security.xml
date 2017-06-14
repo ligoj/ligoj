@@ -86,5 +86,5 @@
 	</authentication-manager>
 
 	<beans:bean name="authentication-provider" class="org.ligoj.app.http.security.${security:Rest}AuthenticationProvider" p:ssoPostUrl="${sso.url}" p:ssoPostContent="${sso.content}" />
-	<beans:bean id="user-service" class="org.ligoj.app.http.security.UserDetailsService" />
+	<beans:bean id="user-service" class="org.ligoj.app.http.security.SimpleUserDetailsService" />
 </beans:beans>

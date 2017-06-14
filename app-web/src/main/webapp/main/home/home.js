@@ -21,7 +21,7 @@ define(['cascade'], function ($cascade) {
 			current.requireTool(current, globalTool.node.id, function ($tool) {
 				var $global = ($tool.$view.is('.global-configuration') ? $tool.$view : $tool.$view.find('.global-configuration')).clone();
 				$tool.renderGlobal($global, globalTool);
-				$global.removeClass('hidden hide');
+				$global.removeClass('hidden');
 			});
 		},
 

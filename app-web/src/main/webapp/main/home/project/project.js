@@ -82,9 +82,9 @@ define(['cascade'], function ($cascade) {
 		 */
 		loadProjects: function () {
 			current.initializeSearch();
-			_('details').addClass('hide');
-			$('.subscribe-configuration').addClass('hide');
-			_('main').removeClass('hide');
+			_('details').addClass('hidden');
+			$('.subscribe-configuration').addClass('hidden');
+			_('main').removeClass('hidden');
 			$(function() {
 				_('entityTable_filter').find('input').trigger('focus');
 			});
@@ -99,12 +99,12 @@ define(['cascade'], function ($cascade) {
 
 			if ((typeof callback === 'undefined')) {
 				// Display the project UI
-				$('.subscribe-configuration').addClass('hide');
-				_('main').addClass('hide');
+				$('.subscribe-configuration').addClass('hidden');
+				_('main').addClass('hidden');
 			}
 			if (id === current.currentId) {
 				// Project is already loaded, cache useless Ajax call, display the details
-				_('details').removeClass('hide');
+				_('details').removeClass('hidden');
 				callback && callback(current.model);
 			} else {
 				$cascade.appendSpin(current.$view, 'fa-4x', 'fa fa-circle-o faa-burst animated centered');
@@ -115,7 +115,7 @@ define(['cascade'], function ($cascade) {
 					success: function (data) {
 						current.model = data;
 						current.fillForm(data);
-						_('details').removeClass('hide');
+						_('details').removeClass('hidden');
 						callback && callback(data);
 					}
 				});
@@ -273,14 +273,15 @@ define(['cascade'], function ($cascade) {
 
 		save: function () {
 			_('confirmCreate').button('loading');
+			var data = current.formToJSON();
 			$.ajax({
 				type: current.currentId ? 'PUT' : 'POST',
 				url: REST_PATH + 'project',
 				dataType: 'json',
 				contentType: 'application/json',
-				data: current.formToJSON(),
+				data: data,
 				success: function (id) {
-					notifyManager.notify(Handlebars.compile(current.$messages[current.currentId ? 'updated' : 'created'])(current.currentId || id));
+					notifyManager.notify(Handlebars.compile(current.$messages[current.currentId ? 'updated' : 'created'])(data.name + '(' + (current.currentId || id) + ')'));
 					_('popup').modal('hide');
 					current.table && current.table.api().ajax.reload();
 					if (id) {
@@ -343,9 +344,9 @@ define(['cascade'], function ($cascade) {
 			$('.project-name').text(name);
 
 			if (project.description) {
-				_('detail-description').text(project.description).removeClass('hide');
+				_('detail-description').text(project.description).removeClass('hidden');
 			} else {
-				_('detail-description').addClass('hide');
+				_('detail-description').addClass('hidden');
 			}
 
 			// Audit project
@@ -515,9 +516,9 @@ define(['cascade'], function ($cascade) {
 			});
 
 			// Update buttons
-			_('subscription-previous')[$currentTab.prev().length ? 'removeClass' : 'addClass']('hide');
-			_('subscription-next').addClass('hide');
-			_('subscription-create').addClass('hide');
+			_('subscription-previous')[$currentTab.prev().length ? 'removeClass' : 'addClass']('hidden');
+			_('subscription-next').addClass('hidden');
+			_('subscription-create').addClass('hidden');
 			current.invokeSubscriptionWizardStep($currentTab.index());
 		},
 
@@ -527,9 +528,9 @@ define(['cascade'], function ($cascade) {
 		 */
 		newSubscription: function (project) {
 			// Subscription UI mode
-			_('main').addClass('hide');
-			_('details').addClass('hide');
-			$('.subscribe-configuration').addClass('hide');
+			_('main').addClass('hidden');
+			_('details').addClass('hidden');
+			$('.subscribe-configuration').addClass('hidden');
 
 			current.initializeSubscription();
 			_('project').text(project.name);
@@ -538,14 +539,14 @@ define(['cascade'], function ($cascade) {
 			validationManager.reset(_('subscribe-definition'));
 			_('subscribe-parameters-container').empty();
 			_('subscription-set-parameters').attr('disabled', 'disabled');
-			_('subscribe-definition').removeClass('hide').find('li,.choice').removeClass('active').end().find(':checked').removeAttr('checked');
+			_('subscribe-definition').removeClass('hidden').find('li,.choice').removeClass('active').end().find(':checked').removeAttr('checked');
 
 			// Show first tab
 			_('subscribe-definition').find('.nav-pills li').first().find('a').tab('show');
 		},
 
 		availableNextStep: function () {
-			_('subscription-next').removeClass('hide');
+			_('subscription-next').removeClass('hidden');
 		},
 
 		/**
@@ -553,6 +554,7 @@ define(['cascade'], function ($cascade) {
 		 * @param  {Integer} step Wizard step index : 0 to 5
 		 */
 		invokeSubscriptionWizardStep: function (step) {
+			var parent;
 			// Load the choices
 			switch (step) {
 				case 0:
@@ -561,31 +563,35 @@ define(['cascade'], function ($cascade) {
 					break;
 				case 1:
 					// Show tools
-					current.renderChoices('tool', 'node/' + _('subscribe-service').find('input:checked').val() + '/children/link', true, current.availableNextStep);
+					parent = _('subscribe-service').find('input:checked').val();
+					current.renderChoices('tool', 'node/' + parent + '/children/link', true, current.availableNextStep, parent);
 					break;
 				case 2:
 					// Show nodes
-					current.renderChoices('node', 'node/' + _('subscribe-tool').find('input:checked').val() + '/children/link', true, current.availableNextStep);
+					parent = _('subscribe-tool').find('input:checked').val();
+					current.renderChoices('node', 'node/' + parent + '/children/link', true, current.availableNextStep, parent);
 					break;
 				case 3:
 					// Show modes
+					parent = _('subscribe-tool').find('input:checked').val();
 					_('subscribe-mode').find('.choices').empty();
 					current.renderChoicesData('mode', [
 						current.newMode('create', 'plus'),
 						current.newMode('link', 'link')
-					]);
+					], parent);
 					current.availableNextStep();
 					break;
 				case 4:
 					// Show parameters
+					parent = current.getSelectedNode();
 					current.parameterConfiguration = null;
-					current.renderChoices('parameters', 'node/' + current.getSelectedNode() + '/parameter/' + (current.isSubscriptionCreateMode() ? 'CREATE' : 'LINK'), false, function (data) {
-						current.configureSubscriptionParameters(current.getSelectedNode(), data, function (configuration) {
+					current.renderChoices('parameters', 'node/' + parent + '/parameter/' + (current.isSubscriptionCreateMode() ? 'CREATE' : 'LINK'), false, function (data) {
+						current.configureSubscriptionParameters(parent, data, function (configuration) {
 							// Configuration and validators are available
 							current.parameterConfiguration = configuration;
-							_('subscription-create').removeClass('hide').trigger('focus');
+							_('subscription-create').removeClass('hidden').trigger('focus');
 						});
-					});
+					}, parent);
 					break;
 				case 5 :
 					// Create the subscription with provided parameters
@@ -598,25 +604,31 @@ define(['cascade'], function ($cascade) {
 	/**
 	 * Render choices
 	 */
-	renderChoices: function (type, url, renderData, callback) {
+	renderChoices: function (type, url, renderData, callback, parent) {
 		var $container = _('subscribe-' + type).find('.choices');
 		var $description = $container.closest('.tab-pane').find('.choice-description');
 		$container.html('<i class="loader fa fa-spin fa-refresh fa-5"></i>');
-		$description.addClass('hide').empty();
+		$description.addClass('hidden').empty();
 		$.ajax({
 			dataType: 'json',
 			url: REST_PATH + url,
 			type: 'GET',
 			success: function (nodes) {
 				$container.empty();
-				$description.addClass('hide').empty();
-				renderData && current.renderChoicesData(type, nodes);
+				$description.addClass('hidden').empty();
+				renderData && current.renderChoicesData(type, nodes, parent);
 				(!renderData || nodes.length) && callback && callback(nodes);
 			}
 		});
 	},
 
-	renderChoicesData: function (type, nodes) {
+	/**
+	 * Renders the choices of the subscription.
+	 * @param {string} type Node type : service, tool, node, parameters
+	 * @param {Array} nodes The nodes to render.
+	 * @param {string} parent Optional parent node identifier
+	 */
+	renderChoicesData: function (type, nodes, parent) {
 		var icon;
 		var node;
 		var index;
@@ -648,8 +660,8 @@ define(['cascade'], function ($cascade) {
 				mode = node.mode || 'link';
 			}
 			_('subscribe-mode').removeClass('mode-create').removeClass('mode-link').addClass('mode-' + mode);
-			$description.addClass('hide').empty();
-			node.description && $description.html(node.description).removeClass('hide');
+			$description.addClass('hidden').empty();
+			node.description && $description.html(node.description).removeClass('hidden');
 			if (current.$parent.getToolFromId(node.id)) {
 				// Use provided image for 'img' node
 				$name.html(current.$parent.toIconNameTool(node));
@@ -659,13 +671,19 @@ define(['cascade'], function ($cascade) {
 			}
 		});
 		if (type === 'mode') {
-			_('subscribe-mode').find('label.choice.hide').removeClass('hide');
-			_('subscribe-mode').filter('.mode-link').find('label.choice input[value="create"]').closest('label').addClass('hide');
+			_('subscribe-mode').find('label.choice.hidden').removeClass('hidden');
+			_('subscribe-mode').filter('.mode-link').find('label.choice input[value="create"]').closest('label').addClass('hidden');
 		} else {
 			_('subscribe-mode').removeClass('mode-create').removeClass('mode-link');
 		}
-		if ($inputs.closest('.choice:not(.hide)').first().find('input[data-index]').prop('checked', 'checked').trigger('change').closest('.choice').addClass('active').focus()) {
+		if ($inputs.closest('.choice:not(.hidden)').first().find('input[data-index]').prop('checked', 'checked').trigger('change').closest('.choice').addClass('active').focus()) {
 			_('subscription-next').removeAttr('disabled');
+		}
+		if (type === 'node') {
+			// Add the button to create a new instance
+			_('subscription-new-node').removeAttr('disabled').removeClass('hidden').data('parent',parent);
+		} else {
+			_('subscription-new-node').attr('disabled', 'disabled').addClass('hidden');
 		}
 	},
 
@@ -940,9 +958,9 @@ define(['cascade'], function ($cascade) {
 	 * Load a configuration from the subscription identifier.
 	 */
 	loadSubscriptionConfiguration: function (id) {
-		_('subscribe-definition').addClass('hide');
-		_('details').addClass('hide');
-		_('main').addClass('hide');
+		_('subscribe-definition').addClass('hidden');
+		_('details').addClass('hidden');
+		_('main').addClass('hidden');
 		$.ajax({
 			dataType: 'json',
 			url: REST_PATH + 'subscription/' + id + '/configuration',
@@ -966,7 +984,7 @@ define(['cascade'], function ($cascade) {
 					}
 
 					// Show the souscription specific configuration view
-					$subscribe.removeClass('hide hidden').find('.project-name').text(current.model.name);
+					$subscribe.removeClass('hidden').find('.project-name').text(current.model.name);
 				});
 			}
 		});

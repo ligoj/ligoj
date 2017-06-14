@@ -2,6 +2,8 @@ img.tool {
 	vertical-align: top;
 	margin-right: 2px;
 	margin-top: 2px;
+}
+.img-circle img.tool, .thumbnail img.tool {
 	-webkit-filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
 	filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
 }

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.web.servlet.ErrorPage;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -36,6 +35,9 @@ import com.samaxes.filter.CacheFilter;
 @ImportResource("classpath:/META-INF/spring/application.xml")
 public class Application extends SpringBootServletInitializer {
 
+	private static final String SERVICE_PASSWORD_RECOVERY = "/rest/service/password/recovery/*";
+	private static final String SERVICE_PASSWORD_RESET = "/rest/service/password/reset/*";
+
 	@Value("${ligoj.endpoint.management.url:http://localhost:8081/ligoj-api/manage}")
 	private String endpointManagement;
 
@@ -46,14 +48,14 @@ public class Application extends SpringBootServletInitializer {
 	private String endpointPlugin;
 
 	@Value("${app-env:auto}")
-	private String environmentCode;
+	protected String environmentCode;
 
 	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+	protected SpringApplicationBuilder configure(final SpringApplicationBuilder application) {
 		return application.sources(Application.class);
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
 
@@ -135,10 +137,9 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public FilterRegistrationBean htmlProxyFilter() {
-		// Fix the environment
-		fixEnvironment();
-
-		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(new HtmlProxyFilter());
+		final HtmlProxyFilter proxyFilter = new HtmlProxyFilter();
+		proxyFilter.setSuffix(getEnvironment());
+		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(proxyFilter);
 		registrationBean.addUrlPatterns("/index.html", "/", "/login.html");
 		registrationBean.setOrder(10);
 		return registrationBean;
@@ -147,7 +148,7 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public FilterRegistrationBean cacheFilter() {
 		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(new CacheFilter());
-		registrationBean.addUrlPatterns("/rest/service/password/reset/*", "/rest/service/password/recovery/*");
+		registrationBean.addUrlPatterns(SERVICE_PASSWORD_RESET, SERVICE_PASSWORD_RECOVERY);
 		final Map<String, String> initParameters = new HashMap<>();
 		initParameters.put("privacy", "public");
 		initParameters.put("static", "true");
@@ -160,7 +161,7 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public FilterRegistrationBean doSFilter() {
 		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(new DoSFilter());
-		registrationBean.addUrlPatterns("/rest/service/password/reset/*", "/rest/service/password/recovery/*", "/captcha.png");
+		registrationBean.addUrlPatterns(SERVICE_PASSWORD_RESET, SERVICE_PASSWORD_RECOVERY, "/captcha.png");
 		final Map<String, String> initParameters = new HashMap<>();
 		initParameters.put("maxRequestsPerSec", "6");
 		initParameters.put("delayMs", "-1");
@@ -178,7 +179,7 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public FilterRegistrationBean captchaFilter() {
 		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(new CaptchaFilter());
-		registrationBean.addUrlPatterns("/rest/service/password/reset/*", "/rest/service/password/recovery/*");
+		registrationBean.addUrlPatterns(SERVICE_PASSWORD_RESET, SERVICE_PASSWORD_RECOVERY);
 		registrationBean.setOrder(100);
 		return registrationBean;
 	}
@@ -186,18 +187,16 @@ public class Application extends SpringBootServletInitializer {
 	/**
 	 * Fix the system environment from "auto" to the guess value.
 	 */
-	private void fixEnvironment() {
+	protected String getEnvironment() {
 		// Auto detect environment variable
 		if (environmentCode.equals("auto")) {
 			if (System.getProperty("java.class.path", "").contains(".war")) {
-				System.setProperty("app-env", "-prod");
-			} else {
-				System.setProperty("app-env", "");
+				return "-prod";
 			}
-		} else {
-			// Export to system property
-			System.setProperty("app-env", environmentCode);
+			return "";
 		}
+		// Export to same property
+		return environmentCode;
 	}
 
 	@Bean
@@ -212,14 +211,9 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public EmbeddedServletContainerCustomizer containerCustomizer() {
-		return new EmbeddedServletContainerCustomizer() {
-			@Override
-			public void customize(ConfigurableEmbeddedServletContainer container) {
-				container.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"),
-						new ErrorPage(HttpStatus.UNAUTHORIZED, "/403.html"), new ErrorPage(HttpStatus.FORBIDDEN, "/403.html"),
-						new ErrorPage(HttpStatus.NOT_FOUND, "/404.html"), new ErrorPage(HttpStatus.METHOD_NOT_ALLOWED, "/404.html"),
-						new ErrorPage(HttpStatus.SERVICE_UNAVAILABLE, "/503.html"));
-			}
-		};
+		return container -> container.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"),
+				new ErrorPage(HttpStatus.UNAUTHORIZED, "/403.html"), new ErrorPage(HttpStatus.FORBIDDEN, "/403.html"),
+				new ErrorPage(HttpStatus.NOT_FOUND, "/404.html"), new ErrorPage(HttpStatus.METHOD_NOT_ALLOWED, "/404.html"),
+				new ErrorPage(HttpStatus.SERVICE_UNAVAILABLE, "/503.html"));
 	}
 }

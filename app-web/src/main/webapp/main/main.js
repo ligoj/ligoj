@@ -55,6 +55,7 @@ define(['cascade'], function ($cascade) {
 		toIconBase: function (node, suffix, dataSrc, fragments) {
 			var uiClasses = node && node.uiClasses;
 			var title = current.getNodeName(node) || fragments[2] || fragments[1];
+			var result;
 			if (uiClasses) {
 				// Use classes instead of picture
 				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i title="' + title + '" class="' + uiClasses + '"></i>');
@@ -213,9 +214,9 @@ define(['cascade'], function ($cascade) {
 					moment(data.createdDate).format(formatManager.messages.shortdateMomentJs),
 					current.getUserLink(data.lastModifiedBy),
 					moment(data.lastModifiedDate).format(formatManager.messages.shortdateMomentJs)
-				])).removeClass('hide');
+				])).removeClass('hidden');
 			} else {
-				_('detail-audit').addClass('hide');
+				_('detail-audit').addClass('hidden');
 			}
 		},
 

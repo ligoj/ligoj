@@ -7,11 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 /**
  * User details service test.
  */
-public class UserDetailsServiceTest {
+public class SimpleUserDetailsServiceTest {
 
 	@Test
 	public void testLoadByUserName() {
-		final UserDetails userDetails = new UserDetailsService().loadUserByUsername("JUNIT");
+		final UserDetails userDetails = new SimpleUserDetailsService().loadUserByUsername("JUNIT");
 		Assert.assertEquals("JUNIT", userDetails.getUsername());
 	}
 }

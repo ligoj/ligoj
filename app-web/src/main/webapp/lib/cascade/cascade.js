@@ -423,10 +423,12 @@ define([
 		 * Load partials from a markup definition, inject the compiled template HTML inside the current element with loaded i18n file, load the CSS and initialize the controller.
 		 * 'data-ajax' attribute defines the identifier of resources to load. Is used to build the base name of HTML, JS,... and also used as an identifier built with the identifier of containing view.
 		 * 'data-plugins' attribute defines the resources to be loaded. By default the HTML template is loaded and injected inside the current element.
+		 * @param {function} callback Optional callback when partial is loaded.
 		 */
-		loadPartial: function () {
+		loadPartial: function (callback, $parent) {
 			var $target = $(this);
 			var context = $self.$current;
+			callback = typeof callback === 'function' ? callback : null;
 
 			// Get the resource to load : HTML, CSS, JS, i28N ? By default the HTML is loaded
 			var plugins = ($target.attr('data-plugins') || 'html').split(',');
@@ -441,15 +443,16 @@ define([
 					context = context.$parent;
 				}
 				if (context) {
-					// Parent context has been found, us it for this partial
+					// Parent context has been found, use it for this partial
 					var $parent = $('<div class="hidden"></div>');
 					context.$view.append($parent);
-					$target = $parent;
 				} else {
 					// Stop the navigation there, invalid context reference
 					traceLog('Invalid partial reference home "' + home + '" in not within the current context "' + $self.$current.$path + '"');
 					return;
 				}
+			} else {
+				$parent = $parent || $target;
 			}
 
 			// Sub module management
@@ -458,8 +461,9 @@ define([
 			}
 
 			$self.loadFragment(context, $self.$current.$transaction, home, id, {
-				$parentElement: $target,
-				plugins: plugins
+				$parentElement: $parent,
+				plugins: plugins,
+				callback: callback
 			});
 		},
 

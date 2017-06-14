@@ -40,7 +40,7 @@ define([
 		// Some browser (like Chrome) the first submit is used (hidden or not) and receive a click
 		if ((e.which === 13 || e.keyCode === 13) && !$(e.target).is('textarea')) {
 			// Determines the right input
-			var $button = $(this).find('input:visible[type=submit]:not(.disabled):not(.hide):not([disabled]),button:visible[type=submit]:not(.disabled):not(.hide):not([disabled])').first();
+			var $button = $(this).find('input:visible[type=submit]:not(.disabled):not(.hide):not(.hidden):not([disabled]),button:visible[type=submit]:not(.disabled):not(.hide):not(.hidden):not([disabled])').first();
 			if ($button.length) {
 				$button.trigger('click');
 				e.preventDefault();
@@ -55,20 +55,26 @@ define([
 		if ($target.is('[data-ajax]')) {
 			$.proxy($cascade.loadPartial, $target)();
 		}
-	}).on('show.bs.collapse', '.collapse[data-ajax]',
+	})
 	// Load active partials for collapse
-	$cascade.loadPartial).on('show.bs.popover', '[data-ajax]',
+	.on('show.bs.collapse', '.collapse[data-ajax]', $cascade.loadPartial)
 	// Load active partials for popover
-	$cascade.loadPartial).on('show.bs.modal', '.modal[data-ajax]',
+	.on('show.bs.popover', '[data-ajax]', $cascade.loadPartial)
 	// Load active partials for modal
-	$cascade.loadPartial);
+	.on('click.bs.modal.data-api.ajax', '[data-toggle="modal-ajax"][data-ajax]:not([cascade-loaded])', function (e) {
+		var $link = $(this).attr('cascade-loaded','true');
+		$.proxy($cascade.loadPartial, $link)(function() {
+			$link.attr('data-toggle', 'modal').trigger('click.bs.modal.data-api');
+		}, []);
+		e.preventDefault();
+	}).on('show.bs.modal', '.modal[data-ajax]', $cascade.loadPartial);
 
 	$.fn.hideGroup = function () {
-		$(this).closest('.form-group').addClass('hide');
+		$(this).closest('.form-group').addClass('hidden');
 		return this;
 	};
 	$.fn.showGroup = function () {
-		$(this).closest('.form-group').removeClass('hide');
+		$(this).closest('.form-group').removeClass('hidden');
 		return this;
 	};
 	$.fn.rawText = function (rawText) {
