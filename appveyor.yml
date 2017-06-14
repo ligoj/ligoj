@@ -30,21 +30,9 @@ cache:
   - C:\maven\
   - C:\Users\appveyor\.m2
 artifacts:
-  - path: 'bootstrap-business\target\*.jar'
-  - path: 'bootstrap-core\target\*.jar'
-  - path: 'bootstrap-business-parent\target\*.jar'
-  - path: 'bootstrap-business-test\target\*.jar'
-  - path: 'bootstrap-launcher\target\*.jar'
-  - path: 'bootstrap-web\target\*.jar'
-  - path: 'bootstrap-web-parent\target\*.jar'
-  - path: 'bootstrap-web-test\target\*.jar'
+  - path: 'app-api\target\*.war'
+  - path: 'app-web\target\*.war'
 on_failure:
-  - ps: Get-ChildItem bootstrap-business\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - ps: Get-ChildItem bootstrap-core\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - ps: Get-ChildItem bootstrap-business-parent\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - ps: Get-ChildItem bootstrap-business-test\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - ps: Get-ChildItem bootstrap-launcher\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - ps: Get-ChildItem bootstrap-web\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - ps: Get-ChildItem bootstrap-web-parent\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - ps: Get-ChildItem bootstrap-web-test\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem app-api\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem app-web\target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
   - ps: Get-ChildItem *.log | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
