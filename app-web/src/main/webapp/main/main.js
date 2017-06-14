@@ -55,6 +55,7 @@ define(['cascade'], function ($cascade) {
 		toIconBase: function (node, suffix, dataSrc, fragments) {
 			var uiClasses = node && node.uiClasses;
 			var title = current.getNodeName(node) || fragments[2] || fragments[1];
+			var result;
 			if (uiClasses) {
 				// Use classes instead of picture
 				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i title="' + title + '" class="' + uiClasses + '"></i>');

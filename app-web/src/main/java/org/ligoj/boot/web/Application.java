@@ -211,10 +211,9 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public EmbeddedServletContainerCustomizer containerCustomizer() {
-		return container -> {
-			container.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"), new ErrorPage(HttpStatus.UNAUTHORIZED, "/403.html"),
-					new ErrorPage(HttpStatus.FORBIDDEN, "/403.html"), new ErrorPage(HttpStatus.NOT_FOUND, "/404.html"),
-					new ErrorPage(HttpStatus.METHOD_NOT_ALLOWED, "/404.html"), new ErrorPage(HttpStatus.SERVICE_UNAVAILABLE, "/503.html"));
-		};
+		return container -> container.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"),
+				new ErrorPage(HttpStatus.UNAUTHORIZED, "/403.html"), new ErrorPage(HttpStatus.FORBIDDEN, "/403.html"),
+				new ErrorPage(HttpStatus.NOT_FOUND, "/404.html"), new ErrorPage(HttpStatus.METHOD_NOT_ALLOWED, "/404.html"),
+				new ErrorPage(HttpStatus.SERVICE_UNAVAILABLE, "/503.html"));
 	}
 }
