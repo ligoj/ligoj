@@ -38,7 +38,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 				} else {
 					decimals = digits - 1;
 				}
-				return Handlebars.compile(format)([value.toFixed(decimals).replace(/\.00/, ''), sizes[e], unit]);
+				return Handlebars.compile(format)([value.toFixed(decimals).replace(decimals == 1 ? /\.0/ : /\.00/, ''), sizes[e], unit]);
 			}
 			return '';
 		},
