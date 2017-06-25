@@ -220,7 +220,7 @@ th.responsive-datetime {
 .nav>li>a.hide {
 	display: none;
 }
-.navbar .nav>li.disabled>a, .caret {
+.navbar .nav>li.disabled>a, .btn.disabled .caret {
 	color: #999;
 }
 .alert>h1, .alert>h2, .alert>h3, .alert>h4, .alert>h5, .alert>h6 {

@@ -66,11 +66,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Transactional
 public class PluginResourceTest extends AbstractServerTest {
 
+	protected static final String USER_HOME_DIRECTORY = "target/test-classes/home-test";
+
 	/**
 	 * File used to be created when a plugin is downloaded from this test class
 	 */
-	private static final File TEMP_FILE = Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER,
-			PluginsClassLoader.PLUGINS_DIR, "plugin-iam-node-test.jar").toFile();
+	private static final File TEMP_FILE = Paths
+			.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR, "plugin-iam-node-test.jar").toFile();
 
 	@Autowired
 	private PluginResource resource;
@@ -80,7 +82,7 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Autowired
 	private NodeRepository nodeRepository;
-	
+
 	@Autowired
 	private RestartEndpoint restartEndpoint;
 
@@ -418,9 +420,8 @@ public class PluginResourceTest extends AbstractServerTest {
 	private PluginResource newPluginResourceInstall() {
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
 		final Path directory = Mockito.mock(Path.class);
-		Mockito.when(directory.resolve(ArgumentMatchers.anyString()))
-				.thenReturn(Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR)
-						.resolve("plugin-iam-node-test.jar"));
+		Mockito.when(directory.resolve(ArgumentMatchers.anyString())).thenReturn(Paths
+				.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR).resolve("plugin-iam-node-test.jar"));
 		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(directory);
 		final PluginResource pluginResource = new PluginResource() {
 			@Override
@@ -439,8 +440,8 @@ public class PluginResourceTest extends AbstractServerTest {
 		try {
 			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader));
 			Assert.assertNotNull(PluginsClassLoader.getInstance());
-			Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(
-					Paths.get(PluginsClassLoaderTest.USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
+			Mockito.when(pluginsClassLoader.getPluginDirectory())
+					.thenReturn(Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
 			final PluginResource pluginResource = new PluginResource() {
 				@Override
 				protected PluginsClassLoader getPluginClassLoader() {

@@ -18,7 +18,7 @@
 	</table>
 </div>
 
-<form id="popup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-title">
+<form id="popup" class="modal fade form-horizontal" tabindex="-1" role="dialog" aria-labelledby="modal-title">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -28,27 +28,27 @@
 				<h4 class="modal-title" id="modal-title">{{project}}</h4>
 			</div>
 			<div class="modal-body">
-				<div class="form-group required label-floating">
-					<label for="name">{{name}}</label>
-					<div>
+				<div class="form-group required">
+					<label class="control-label col-sm-4" for="name">{{name}}</label>
+					<div class="col-sm-8">
 						<input type="text" id="name" maxlength="50" class="form-control" required>
 					</div>
 				</div>
-				<div class="form-group required label-floating">
-					<label for="pkey">{{pkey}}</label>
-					<div>
+				<div class="form-group required">
+					<label class="control-label col-sm-4" for="pkey">{{pkey}}</label>
+					<div class="col-sm-8">
 						<input type="text" id="pkey" maxlength="100" class="form-control" required>
 					</div>
 				</div>
-				<div class="form-group label-floating">
-					<label for="description">{{description}}</label>
-					<div>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="description">{{description}}</label>
+					<div class="col-sm-8">
 						<textarea rows="3" id="description" maxlength="250" class="form-control"></textarea>
 					</div>
 				</div>
-				<div class="form-group label-floating">
-					<label for="teamLeader">{{manager}}</label>
-					<div>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="teamLeader">{{manager}}</label>
+					<div class="col-sm-8">
 						<input type="text" id="teamLeader" maxlength="50" class="form-control">
 					</div>
 				</div>
@@ -87,115 +87,4 @@
 			</tr>
 		</tbody>
 	</table>
-</form>
-<form id="subscribe-definition" class="form-horizontal hidden subscribe-configuration">
-	<div class="alert alert-info" role="alert">
-		<h3>
-			<span id="project">...</span> : {{subscribe}}</h3>
-		<p>
-			{{warn.subscription-deletion}}
-		</p>
-	</div>
-	<fieldset>
-		<ul class="nav nav-pills nav-justified">
-			<li class="disabled" role="navigation">
-				<a href="#subscribe-service" data-toggle="tab" aria-expanded="true">1. {{service}}</a>
-			</li>
-			<li class="disabled" role="navigation">
-				<a href="#subscribe-tool" data-toggle="tab" aria-expanded="false">2. {{tool}}</a>
-			</li>
-			<li class="disabled" role="navigation">
-				<a href="#subscribe-node" data-toggle="tab" aria-expanded="false">3. {{node}}</a>
-			</li>
-			<li class="disabled" role="navigation">
-				<a href="#subscribe-mode" data-toggle="tab" aria-expanded="false">4. {{mode}}</a>
-			</li>
-			<li class="disabled" role="navigation">
-				<a href="#subscribe-parameters" data-toggle="tab" aria-expanded="false">5. {{parameters}}</a>
-			</li>
-		</ul>
-		<div class="tab-content">
-			<div class="tab-pane container-fluid" id="subscribe-service">
-				<div class="row">
-					<div class="col-sm-3 choice-summary bg-info">
-						<div class="selected-service"></div>
-						<div class="choice-description"></div>
-					</div>
-					<div class="col-sm-9">
-						<h3>Select the service you want to subsbribe for your project</h3>
-						<h4> A service is a set of features for your project. They may differ depending on the available tool you will choose. </h4>
-						<div class="choices btn-group" data-toggle="buttons"></div>
-					</div>
-				</div>
-			</div>
-			<div class="tab-pane container-fluid" id="subscribe-tool">
-				<div class="row">
-					<div class="col-sm-3 choice-summary bg-info">
-						<div class="selected-service"></div>
-						<div class="selected-tool"></div>
-						<div class="choice-description"></div>
-					</div>
-					<div class="col-sm-9">
-						<h3>Select a tool providing the selected service.</h3>
-						<h4> A tool is specific implementation of a service, and several instances (or nodes) can be deployed. </h4>
-						<div class="choices btn-group" data-toggle="buttons"></div>
-					</div>
-				</div>
-			</div>
-			<div class="tab-pane container-fluid" id="subscribe-node">
-				<div class="row">
-					<div class="col-sm-3 choice-summary bg-info">
-						<div class="selected-service"></div>
-						<div class="selected-tool"></div>
-						<div class="selected-node"></div>
-						<div class="choice-description"></div>
-					</div>
-					<div class="col-sm-9">
-						<h3>Select a node executing the tool.</h3>
-						<h4> A node is a running instance, server or whatever instance based of a tool. </h4>
-						<div class="choices btn-group" data-toggle="buttons"></div>
-					</div>
-				</div>
-			</div>
-			<div class="tab-pane container-fluid" id="subscribe-mode">
-				<div class="row">
-					<div class="col-sm-3 choice-summary bg-info">
-						<div class="selected-service"></div>
-						<div class="selected-tool"></div>
-						<div class="selected-node"></div>
-						<div class="selected-mode"></div>
-						<div class="choice-description"></div>
-					</div>
-					<div class="col-sm-9">
-						<h3>Select the creation mode for this subscription. More information on selection.</h3>
-						<h4> A mode is a type of subscription. "Link" mode will link the project to the tool, and "Create" will in addition, create the project inside the tool. </h4>
-						<div class="choices btn-group" data-toggle="buttons"></div>
-					</div>
-				</div>
-			</div>
-			<div class="tab-pane container-fluid" id="subscribe-parameters">
-				<div class="row">
-					<div class="col-sm-3 choice-summary bg-info">
-						<div class="selected-service"></div>
-						<div class="selected-tool"></div>
-						<div class="selected-node"></div>
-						<div class="selected-mode"></div>
-						<div class="choice-description"></div>
-					</div>
-					<div class="col-sm-9">
-						<h3>Provide required parameters for the selected node.</h3>
-						<h4> Parameters are used to maintain the association between the project and the node. In addition, in creation mode, parameters are required to create the project inside the target node. </h4>
-						<div class="choices" id="subscribe-parameters-container"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-	</fieldset>
-	<div class="form-actions">
-		<input type="submit" class="btn btn-success btn-raised" id="subscription-create" value="{{create}}">
-		<input type="button" class="btn btn-link" id="subscription-previous" value="{{previous}}">
-		<input type="submit" class="btn btn-primary btn-raised" id="subscription-next" value="{{next}}">
-		<input class="btn btn-link cancel-subscription" type="button" value="{{cancel}}">
-	</div>
 </form>

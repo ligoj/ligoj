@@ -1,5 +1,5 @@
 /*!
- * Cascade v0.0.1 (https://github.com/fabdouglas/cascadejs)
+ * Cascade v0.0.2 (https://github.com/fabdouglas/cascadejs)
  * Copyright 2016 Fabrice Daugan.
  * Licensed under the MIT license
  */
@@ -444,7 +444,7 @@ define([
 				}
 				if (context) {
 					// Parent context has been found, use it for this partial
-					var $parent = $('<div class="hidden"></div>');
+					var $parent = $('<div></div>');
 					context.$view.append($parent);
 				} else {
 					// Stop the navigation there, invalid context reference

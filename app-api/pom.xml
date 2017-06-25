@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-business-parent</artifactId>
-		<version>1.6.3</version>
+		<version>1.6.4</version>
 		<relativePath />
 	</parent>
 
@@ -20,7 +20,7 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>1.0.7</api.version>
+		<api.version>1.0.8</api.version>
 		<spring-boot.version>1.5.3.RELEASE</spring-boot.version>
 	</properties>
 
