@@ -27,6 +27,12 @@ Open your browser at : http://localhost:8080/ligoj
 User/password for administrator role : ligoj-admin
 
 You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin-id-ldap-embedded
+
+## Make Ligoj home persistent
+You can keep your plugins installation by mapping `/usr/local/ligoj` with a volume.
+```
+docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.5.1
+```
 # Dev section
 ## Pre-requisite for the bellow samples
 Maven
