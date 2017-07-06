@@ -14,8 +14,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 			// Register a filter for all Ajax calls
 			$.ajaxPrefilter(function (options, originalOptions, jqXHR) {
 				var serverUrlSplit = options.url && options.url.split('/');
-				var serverUrl = serverUrlSplit && serverUrlSplit[0].startsWith(REST_MATCH_PATH) && serverUrlSplit.slice(1).join('/');
-				if (serverUrl && !current.isAllowedBusiness(serverUrl, options.type)) {
+				if (serverUrlSplit.length && serverUrlSplit[0].startsWith(REST_MATCH_PATH) && !current.isAllowedBusiness(options.url, options.type)) {
 					// Cancel this before the server tell it
 					traceLog('Not allowed call aborted', options.type + ' ' + options.url);
 					jqXHR.abort();
