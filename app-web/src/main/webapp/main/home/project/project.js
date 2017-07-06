@@ -506,7 +506,9 @@ define(['cascade'], function ($cascade) {
 						current.$view.find('.subscribe-configuration').remove();
 						// Inject the partial of this service in the current view
 						var $subscribe = ($service.$view.is('.subscribe-configuration') ? $service.$view : $service.$view.find('.subscribe-configuration')).clone();
-						current.$view.append($subscribe);
+						var $subscribeWrapper = $('<div id="subscribe-configuration-wrapper' + service.id + '"></div>');
+						current.$view.append($subscribeWrapper);
+						$subscribeWrapper.html($subscribe);
 						if ($service && $service.configure) {
 							// Delegate the configuration to the service
 							$service.configure(data);
