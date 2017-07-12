@@ -408,7 +408,7 @@ define([
 
 			// Pack
 			_('expand-mode').on('click', function () {
-				var doExpand = $(this).toggleClass('plus').hasClass('plus');
+				var doExpand = $(this).toggleClass('indent').hasClass('indent');
 				$container.find('.node').each(function () {
 					current[doExpand ? 'zoomIn' : 'zoomOut']($(this));
 				}).find('.caption').find('i.fa')[doExpand ? 'addClass' : 'removeClass']('forced');

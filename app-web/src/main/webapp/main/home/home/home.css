@@ -367,6 +367,6 @@
 	box-shadow: 0 4px 20px 0 rgba(0,0,0,.14),0 7px 10px -5px rgba(3,169,244,.4);
 }
 
-#expand-mode:not(.plus) i.fa-minus, #expand-mode.plus i.fa-plus {
+#expand-mode:not(.indent) i.fa-dedent, #expand-mode.indent i.fa-indent {
 	display: none;
 }
