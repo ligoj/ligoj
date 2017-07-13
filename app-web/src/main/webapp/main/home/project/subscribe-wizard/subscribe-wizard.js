@@ -404,6 +404,14 @@ define(['cascade'], function ($cascade) {
 
 	/**
 	 * Create a new Select2 based on the selected node.
+	 * @param {jquery} $input The UI component to render.
+	 * @param {string} restUrl The remote data source URL.
+	 * @param {function} formatResult Rendering function of the Select2 result.
+	 * @param {function} changeHandler On 'change' callback.
+	 * @param {object} parameter Parameter configuration.
+	 * @param {function|string} customQuery Optional custom query appended to REST URL.
+	 * @param {boolean} allowNew When true, new entries are accepted.
+	 * @param {boolean} lowercase When true, the result are transformed in to lower case.
 	 */
 	newNodeSelect2: function ($input, restUrl, formatResult, changeHandler, parameter, customQuery, allowNew, lowercase) {
 		return $input.select2({
@@ -421,7 +429,8 @@ define(['cascade'], function ($cascade) {
 			},
 			ajax: {
 				url: function (term) {
-					return REST_PATH + restUrl + (customQuery || (current.getSelectedNode() + '/')) + encodeURIComponent(term);
+					customQuery = typeof customQuery === function ? customQuery($input, restUrl, parameter) : (customQuery || (current.getSelectedNode() + '/'));
+					return REST_PATH + restUrl + customQuery + encodeURIComponent(term);
 				},
 				dataType: 'json',
 				results: function (data) {
