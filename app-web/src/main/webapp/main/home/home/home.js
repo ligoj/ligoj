@@ -711,15 +711,15 @@ define([
 			if (!loopStatus.serviceDisplayed) {
 				loopStatus.serviceDisplayed = true;
 				tr += '<td rowspan="' + current.computeServiceRowSpan(service) + '" class="status status-' + service.value.toLowerCase() + '">&nbsp;</td>';
-				tr += '<td rowspan="' + current.computeServiceRowSpan(service) + '">' + service.label + '</td>';
+				tr += '<td rowspan="' + current.computeServiceRowSpan(service) + '">' + service.node.name + '</td>';
 			}
 			if (!loopStatus.toolDisplayed) {
 				loopStatus.toolDisplayed = true;
 				tr += '<td rowspan="' + tool.specifics.length + '" class="status status-' + tool.value.toLowerCase() + '">&nbsp;</td>';
-				tr += '<td class="icon-xs" rowspan="' + tool.specifics.length + '">' + current.$parent.toIcon(tool.node) + '<span class="hidden-xs" title="' + tool.description + '">' + tool.label + '</span></td>';
+				tr += '<td class="icon-xs" rowspan="' + tool.specifics.length + '">' + current.$parent.toIcon(tool.node) + '<span class="hidden-xs" title="' + tool.description + '"> ' + tool.node.name + '</span></td>';
 			}
 			tr += '<td class="status status-' + nodeEvent.value.toLowerCase() + '">&nbsp;</td>';
-			tr += '<td>' + nodeEvent.label + '<a class="refresh-node pull-right"><i class="fa fa-refresh"></i></a></td><td data-id="' + node + '"></td></tr>';
+			tr += '<td>' + node.name + '<a class="refresh-node pull-right"><i class="fa fa-refresh"></i></a></td><td data-id="' + node.id + '"></td></tr>';
 			_('status').find('tbody').append(tr);
 			_('status').find('[data-id="' + node + '"]').data('status', nodeEvent.value);
 		},
