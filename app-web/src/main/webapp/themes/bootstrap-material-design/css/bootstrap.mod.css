@@ -664,6 +664,9 @@ img.nav-icon {
 .icon-x3 {
 	width: 48px;
 }
+.icon-xs .fa {
+	width: 16px;
+}
 
 .form-group .form-control+.form-control-feedback {
 	top: 10px;
