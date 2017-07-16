@@ -79,7 +79,6 @@ define(['cascade'], function ($cascade) {
 			validationManager.mapping['refined'] = '#node-tool';
 			validationManager.mapping['name'] = '#node-name';
 			validationManager.mapping['mode'] = '#node-mode';
-			var refined = _('node-tool').select2('data');
 
 			// Build the data
 			var data = {
