@@ -95,6 +95,9 @@ th.responsive-datetime {
 		max-width: 0;
 		border: none;
 	}
+	td.hidden-xs * {
+		display: none;
+	}
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
@@ -113,6 +116,9 @@ th.responsive-datetime {
 		padding: 0 !important;
 		max-width: 0;
 		border: none;
+	}
+	td.hidden-sm * {
+		display: none;
 	}
 }
 
@@ -133,6 +139,9 @@ th.responsive-datetime {
 		max-width: 0;
 		border: none;
 	}
+	td.hidden-md * {
+		display: none;
+	}
 }
 
 @media (min-width: 1200px) {
@@ -151,6 +160,9 @@ th.responsive-datetime {
 		padding: 0 !important;
 		max-width: 0;
 		border: none;
+	}
+	td.hidden-lg * {
+		display: none;
 	}
 }
 .pagination>li>a, .pagination>li>span {
