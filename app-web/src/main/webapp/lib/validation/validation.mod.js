@@ -64,7 +64,7 @@ define([
 			for (key in mapping) {
 				if ({}.hasOwnProperty.call(mapping, key) && mapping[key].indexOf('#') !== -1) {
 					var $form =  $(mapping[key]).closest('form');
-					if ($form.length) {
+					if ($form.length && validationManager.isVisible($form)) {
 						// This form seems to be a good candidate
 						return $form;
 					}
