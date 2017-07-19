@@ -385,7 +385,7 @@ define(['cascade'], function ($cascade) {
 			var result = '<div id="' + id + '" class="carousel"';
 			var groupBySubscription = subscription.node && (typeof subscription.node.subscriptions !== 'undefined');
 
-			// Too much carousel -> disable
+			// Too much carousel items -> disable auto scroll
 			result += (groupBySubscription && subscription.node.subscriptions.length > 50) ? ' data-interval=""' : ' data-ride="carousel"';
 			result += '> ';
 			if (groupBySubscription) {
@@ -402,7 +402,10 @@ define(['cascade'], function ($cascade) {
 			result += '<div class="carousel-inner" role="listbox">';
 			for (i = 0; i < items.length; i++) {
 				item = items[i];
-				result += '<div class="item item-' + i + ((startIndex ? i === startIndex : i === 0) ? ' active' : '') + '">' + current.toCarousselText($.isArray(item) ? item[1] : item) + '</div>';
+				if (item) {
+					// Item is well defined, and worth to be displayed
+					result += '<div class="item item-' + i + ((startIndex ? i === startIndex : i === 0) ? ' active' : '') + '">' + current.toCarousselText($.isArray(item) ? item[1] : item) + '</div>';
+				}
 			}
 			result += '</div>';
 
@@ -427,11 +430,14 @@ define(['cascade'], function ($cascade) {
 			var i;
 			for (i = 0; i < items.length; i++) {
 				item = items[i];
-				result += '<li';
-				if (target) {
-					result += ' data-target="#' + target + '"';
+				if (items) {
+					// Item is well defined, and worth to be displayed
+					result += '<li';
+					if (target) {
+						result += ' data-target="#' + target + '"';
+					}
+					result += ' data-slide-to="' + i + '"' + ((startIndex ? i === startIndex : i === 0) ? ' class="active"' : '') + ($.isArray(item) ? ' data-toggle="tooltip" data-container="body" title="' + (current.$messages[item[0]] || item[0]) + '"' : '') + '></li>';
 				}
-				result += ' data-slide-to="' + i + '"' + ((startIndex ? i === startIndex : i === 0) ? ' class="active"' : '') + ($.isArray(item) ? ' data-toggle="tooltip" data-container="body" title="' + (current.$messages[item[0]] || item[0]) + '"' : '') + '></li>';
 			}
 			result += '</ol>';
 			return result;
