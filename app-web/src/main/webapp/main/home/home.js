@@ -312,7 +312,13 @@ define(['cascade'], function ($cascade) {
 
 				if (newContent && newContent !== '&nbsp;') {
 					// Add generated detailed data
-					$details.empty().html(newContent).find('.carousel').carousel({interval: false});
+					$details.empty().html(newContent);
+					// Render service and tool callbacks
+					$tool.$parent.renderDetailsKeyCallback && $tool.$parent.renderDetailsKeyCallback(subscription, $details);
+					$tool.renderDetailsKeyCallback && $tool.renderDetailsKeyCallback(subscription, $details);
+					
+					// Also start the carousel if needed
+					$details.find('.carousel').carousel({interval: false});
 					renderCallback && renderCallback(subscription, filter, $tool, $details);
 				}
 			});
@@ -378,12 +384,16 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Generate a carousel component based on given HTML items. Depending on the amount of subscriptions of same type, and the container, the behavior of the carousel may differ.
 		 */
-		generateCarousel: function (subscription, items, startIndex) {
+		generateCarousel: function (subscription, items, startIndex, part) {
 			var i;
 			var item;
+			part = part || 0;
 			var id = 'subscription-details-' + subscription.id;
-			var result = '<div id="' + id + '" class="carousel"';
+			var result = '<div id="' + id + '" class="carousel carousel-part' + part + '"';
 			var groupBySubscription = subscription.node && (typeof subscription.node.subscriptions !== 'undefined');
+			var $carousel = _(id);
+			startIndex = $carousel.length ? -1 : current.getVisibleCarouselStartIndex(items,startIndex || 0);
+			var baseIndex = $carousel.find('.carousel-inner > .item').length;
 
 			// Too much carousel items -> disable auto scroll
 			result += (groupBySubscription && subscription.node.subscriptions.length > 50) ? ' data-interval=""' : ' data-ride="carousel"';
@@ -391,56 +401,109 @@ define(['cascade'], function ($cascade) {
 			if (groupBySubscription) {
 				// Carousel indicator is moved to header instead of each raw
 				var $group = $('tr[data-subscription="' + subscription.id + '"]').closest('table.subscriptions').find('.group-carousel');
-				if ($group.length && !$group.has('.carousel-indicators').length) {
+				if ($group.length && !$group.hasClass('carousel-part' + part).length) {
 					// Add a global carousel indicator for this table
-					$group.append(current.generateCarouselIndicators(items, null, startIndex));
+					current.generateCarouselIndicators(items, null, startIndex, baseIndex, $group);
+					$group.addClass('.carousel-part' + part);
 				}
 			} else {
 				// This carousel is independent
-				result += current.generateCarouselIndicators(items, id, startIndex);
+				result += current.generateCarouselIndicators(items, id, startIndex, baseIndex, $carousel);
 			}
-			result += '<div class="carousel-inner" role="listbox">';
-			for (i = 0; i < items.length; i++) {
-				item = items[i];
-				if (item) {
-					// Item is well defined, and worth to be displayed
-					result += '<div class="item item-' + i + ((startIndex ? i === startIndex : i === 0) ? ' active' : '') + '">' + current.toCarousselText($.isArray(item) ? item[1] : item) + '</div>';
-				}
-			}
-			result += '</div>';
+			
+			result += current.generateCarouselInner(items, startIndex, baseIndex, $carousel);
 
+			if ($carousel.length) {
+				// Content is already inserted into the DOM
+				return '';
+			}
 			// Carousel navigation is not available in grouped mode
 			if (!groupBySubscription) {
 				result += '<a class="right carousel-control" data-target="#' + id + '" role="button" data-slide="next"><span class="fa fa-chevron-right" aria-hidden="true"></span><span class="sr-only">Next</span></a>';
 			}
-			result += '</div>';
-			return result;
+			return result + '</div>';
+		},
+		
+		/**
+		 * Generate the carousel items.
+		 * The content can also be merged into an existing carousel.
+		 */
+		generateCarouselInner(items, startIndex, baseIndex, $carousel) {
+			var merge = $carousel.length;
+			var result = merge ? '' : '<div class="carousel-inner" role="listbox">';
+			var value;
+			for (i = 0; i < items.length; i++) {
+				item = items[i];
+				value = $.isArray(item) ? item[1] : item;
+				if (value) {
+					// Item is well defined, and worth to be displayed
+					result += '<div class="item item-' + (baseIndex + i) + ((merge === 0 && (startIndex ? i === startIndex : i === 0)) ? ' active' : '') + '">' + current.toCarouselText(value) + '</div>';
+				}
+			}
+			
+			if (merge === 0) {
+				return result + '</div>';
+			}
+			$carousel.find('.carousel-inner').append(result);
 		},
 
-		toCarousselText: function(item) {
+		toCarouselText: function(item) {
 			return typeof item === 'undefined' ? '?' : item;
 		},
 
 		/**
-		 * Generate carousel indicators for given items. Each item can be either a raw string, either an array where first item is the tooltip key, and the second is the item text.
+		 * Return the start index if visible and not out the bounds of the available carousel items.
 		 */
-		generateCarouselIndicators: function (items, target, startIndex) {
-			var result = '<ol class="carousel-indicators">';
-			var item;
+		getVisibleCarouselStartIndex : function(items, startIndex) {
+			// Find the real visible start index
 			var i;
 			for (i = 0; i < items.length; i++) {
-				item = items[i];
-				if (items) {
-					// Item is well defined, and worth to be displayed
-					result += '<li';
-					if (target) {
-						result += ' data-target="#' + target + '"';
+				if (startIndex === i) {
+					var item = items[i];
+					if ($.isArray(item) ? item[1] : item) {
+						return startIndex;
 					}
-					result += ' data-slide-to="' + i + '"' + ((startIndex ? i === startIndex : i === 0) ? ' class="active"' : '') + ($.isArray(item) ? ' data-toggle="tooltip" data-container="body" title="' + (current.$messages[item[0]] || item[0]) + '"' : '') + '></li>';
+					return 0;
 				}
 			}
-			result += '</ol>';
-			return result;
+
+			// Out of bounds index
+			return 0;
+		},
+
+		/**
+		 * Generate carousel indicators for given items. Each item can be either a raw string, either an array where first item is the tooltip key, and the second is the item text.
+		 * The content can also be merged into an existing carousel.
+		 */
+		generateCarouselIndicators: function (items, id, startIndex, baseIndex, $carousel) {
+			var merge = $carousel.length;
+			var mergeInd = merge && $carousel.has('.carousel-indicators').length;
+			var result = mergeInd ? '' : '<ol class="carousel-indicators">';
+			var item;
+			var i;
+			
+			for (i = 0; i < items.length; i++) {
+				item = items[i];
+				if ($.isArray(item) ? item[1] : item) {
+					// Item is well defined, and worth to be displayed
+					result += '<li';
+					if (id) {
+						result += ' data-target="#' + id + '"';
+					}
+					result += ' data-slide-to="' + (baseIndex + i) + '"' + ((merge === 0 && (startIndex ? i === startIndex : i === 0)) ? ' class="active"' : '') + ($.isArray(item) ? ' data-toggle="tooltip" data-container="body" title="' + (current.$messages[item[0]] || item[0]) + '"' : '') + '></li>';
+				}
+			}
+			if (merge === 0) {
+				return result + '</ol>';
+			}
+			// Merge into an existing carousel;
+			if (mergeInd) {
+				// Merge the indicators to the existing carousel
+				$carousel.find('.carousel-indicators').append(result);
+			} else {
+				// Create the indicators
+				$carousel.append(result + '</ol>');
+			}
 		},
 
 		roundPercent: function (percent) {
