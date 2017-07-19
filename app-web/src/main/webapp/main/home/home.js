@@ -486,13 +486,13 @@ define(['cascade'], function ($cascade) {
 			
 			for (i = 0; i < items.length; i++) {
 				item = items[i];
-				if ($.isArray(item) ? item[1] : item) {
+				if (id === null || $.isArray(item) ? item[1] : item) {
 					// Item is well defined, and worth to be displayed
 					result += '<li';
 					if (id) {
 						result += ' data-target="#' + id + '"';
 					}
-					result += ' data-slide-to="' + (baseIndex + i) + '"' + ((merge === 0 && (startIndex ? i === startIndex : i === 0)) ? ' class="active"' : '') + ($.isArray(item) ? ' data-toggle="tooltip" data-container="body" title="' + (current.$messages[item[0]] || item[0]) + '"' : '') + '></li>';
+					result += ' data-slide-to="' + (baseIndex + i) + '"' + ((mergeInd === 0 && (startIndex ? i === startIndex : i === 0)) ? ' class="active"' : '') + ($.isArray(item) ? ' data-toggle="tooltip" data-container="body" title="' + (current.$messages[item[0]] || item[0]) + '"' : '') + '></li>';
 				}
 			}
 			if (merge === 0) {
