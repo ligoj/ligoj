@@ -23,6 +23,11 @@ define(['cascade'], function ($cascade) {
 		 */
 		currentId: 0,
 
+		/**
+		 * Edited subscription model
+		 */
+		currentSubscription: null,
+
 		initialize: function (parameters) {
 			current.$view.on('click', '.cancel-subscription', function () {
 				window.location.replace(current.$url + '/' + current.currentId);
@@ -53,18 +58,28 @@ define(['cascade'], function ($cascade) {
 				var id = parseInt(parameters[0], 10);
 				if (parameters.length === 1) {
 					// Project mode
-					current.loadProject(id);
+					current.loadProject(id, function(model, refresh) {
+						if (!refresh && current.currentSubscription) {
+							_('subscriptions').find('tr[data-id="' + current.currentSubscription.id + '"]').find('td.key').html('<i class="fa spin fa-spinner fa-pulse"></i>');
+							current.$parent.refreshSubscription(current.currentSubscription);
+						}
+						current.currentSubscription = null;
+					});
 				} else if (parameters.length === 2) {
 					// Subscription creation mode
+					current.currentSubscription = null;
 					current.loadProject(id, current.newSubscription);
 				} else {
 					// Subscription configuration mode
 					current.loadProject(id, function () {
-						current.loadSubscriptionConfiguration(parseInt(parameters[2], 10));
+						current.loadSubscriptionConfiguration(parseInt(parameters[2], 10), function(subscription) {
+							current.currentSubscription = subscription;
+						});
 					});
 				}
 			} else {
 				// Search mode
+				current.currentSubscription = null;
 				current.currentId = null;
 				current.mode = null;
 				current.loadProjects();
@@ -85,23 +100,26 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Project mode, load project where id = current.currentId
+		 * Project mode, load project where id = current.currentId.
+		 * @param {integer} id Project identifier to load.
+		 * @param {function} Optional callback called when the project is loaded. 
+		 * Passed arguments are : project's model, and a true boolean when the project has been refreshed. 
 		 */
 		loadProject: function (id, callback) {
 			// Restore QR Code position
 			$('.qrcode-toggle').find('.fa-qrcode').removeClass('hidden').end().find('.qrcode').addClass('hidden');
 
-			if ((typeof callback === 'undefined')) {
-				// Display the project UI
-				$('.subscribe-configuration').addClass('hidden');
-				_('main').addClass('hidden');
-			}
+			$('.subscribe-configuration').addClass('hidden');
+			_('main').addClass('hidden');
+			_('details').addClass('hidden');
+
+			$cascade.appendSpin(current.$view, 'fa-4x', 'fa fa-circle-o faa-burst animated centered');
 			if (id === current.currentId) {
 				// Project is already loaded, cache useless Ajax call, display the details
 				_('details').removeClass('hidden');
-				callback && callback(current.model);
+				callback && callback(current.model, false);
+				$cascade.removeSpin(current.$view);
 			} else {
-				$cascade.appendSpin(current.$view, 'fa-4x', 'fa fa-circle-o faa-burst animated centered');
 				$.ajax({
 					dataType: 'json',
 					url: REST_PATH + 'project/' + id,
@@ -110,7 +128,8 @@ define(['cascade'], function ($cascade) {
 						current.model = data;
 						current.fillForm(data);
 						_('details').removeClass('hidden');
-						callback && callback(data);
+						callback && callback(data, true);
+						$cascade.removeSpin(current.$view);
 					}
 				});
 			}
@@ -491,7 +510,7 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Load a configuration from the subscription identifier.
 		 */
-		loadSubscriptionConfiguration: function (id) {
+		loadSubscriptionConfiguration: function (id, callback) {
 			_('subscribe-definition').addClass('hidden');
 			_('details').addClass('hidden');
 			_('main').addClass('hidden');
@@ -500,6 +519,7 @@ define(['cascade'], function ($cascade) {
 				url: REST_PATH + 'subscription/' + id + '/configuration',
 				type: 'GET',
 				success: function (data) {
+					data.id = parseInt(id, 10);
 					var service = current.$parent.getServiceFromNode(data.node);
 					current.$parent.requireService(current, service.id, function ($service) {
 						// Destroy the previous view, some cache could be performed there ...
@@ -512,6 +532,7 @@ define(['cascade'], function ($cascade) {
 						if ($service && $service.configure) {
 							// Delegate the configuration to the service
 							$service.configure(data);
+							callback && callback(data);
 
 							// Inject the project name
 						} else {

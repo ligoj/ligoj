@@ -202,7 +202,7 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Refresh the status of given subscription.
-		 * @param subscription : Single or multiple subscription to detail.
+		 * @param subscriptions : Single or multiple subscription to detail.
 		 */
 		refreshSubscription: function (subscriptions, renderCallback) {
 			if (!$.isArray(subscriptions)) {
@@ -291,6 +291,7 @@ define(['cascade'], function ($cascade) {
 			var $details;
 			if (replace) {
 				$details = $td;
+				$td.removeClass('rendered');
 			} else {
 				$details = $td.find('.details');
 				if ($details.length === 0) {
