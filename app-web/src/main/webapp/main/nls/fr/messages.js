@@ -70,7 +70,7 @@ define({
 	'finished': 'Terminé',
 	'user': 'Utilisateur',
 	'unknown': 'Inconnu',
-	'created-date': 'Creation',
+	'created-date': 'Création',
 	'updated-date': 'Mise-à-jour',
 	'copy-clipboard': 'Copier dans le presse-papier',
 	'copied': 'Copié',
