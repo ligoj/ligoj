@@ -301,7 +301,8 @@ define(['cascade'], function ($cascade) {
 
 			// Build the content
 			current.$child && current.requireTool(current.$child, subscription.node.id, function ($tool) {
-				var newContent = subscription.status === 'up' && current.render(subscription, 'renderDetails' + filter.capitalize(), $tool);
+				var renderBaseFunction = 'renderDetails' + filter.capitalize();
+				var newContent = subscription.status === 'up' && current.render(subscription, renderBaseFunction, $tool);
 				if (!$td.is('.rendered')) {
 					// Add minimum data
 					$cascade.removeSpin($td).addClass('rendered').prepend(((renderCallback && renderCallback(subscription, filter, $tool, $td)) || '') + current.render(subscription, 'render' + filter.capitalize(), $tool));
@@ -314,8 +315,9 @@ define(['cascade'], function ($cascade) {
 					// Add generated detailed data
 					$details.empty().html(newContent);
 					// Render service and tool callbacks
-					$tool.$parent.renderDetailsKeyCallback && $tool.$parent.renderDetailsKeyCallback(subscription, $details);
-					$tool.renderDetailsKeyCallback && $tool.renderDetailsKeyCallback(subscription, $details);
+					var callbak = renderBaseFunction + 'Callback';
+					$tool.$parent[callbak] && $tool.$parent[callbak](subscription, $details);
+					$tool[callbak] && $tool[callbak](subscription, $details);
 					
 					// Also start the carousel if needed
 					$details.find('.carousel').carousel({interval: false});
