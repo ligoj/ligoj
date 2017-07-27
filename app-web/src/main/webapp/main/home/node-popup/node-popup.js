@@ -55,9 +55,10 @@ define(['cascade'], function ($cascade) {
 			current.model = model;
 			_('node-tool').select2('data', model.refined || null);
 			_('node-id').val(model.id || '');
-			current.updateModeState(model);
 			_('node-name').val(model.name || '');
+			current.updateModeState(model);
 			current.updateIdState(model.refined && model.refined.id, model.id);
+			_('node-delete')[model.id ? 'removeClass' : 'addClass']('hidden');
 		},
 
 		/**
