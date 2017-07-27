@@ -28,7 +28,7 @@ define(['cascade'], function ($cascade) {
 				}
 				return false;
 			}).on('change', 'input', function () {
-				_('subscription-next').removeAttr('disabled');
+				_('subscription-next').enable();
 			}).find('a[data-toggle="tab"]').on('show.bs.tab', current.configureSubscriptionTab).on('shown.bs.tab', function (e) {
 				// Focus to the first available input
 				$($(e.target).attr('href')).find('.choice.active').focus();
@@ -73,7 +73,7 @@ define(['cascade'], function ($cascade) {
 			validationManager.reset(_('subscribe-definition'));
 			_('project').text(project.name);
 			_('subscribe-parameters-container').empty();
-			_('subscription-set-parameters').attr('disabled', 'disabled');
+			_('subscription-set-parameters').disable();
 			_('subscribe-definition').removeClass('hidden').find('li,.choice').removeClass('active').end().find(':checked').removeAttr('checked');
 
 			// Show first tab
@@ -89,9 +89,9 @@ define(['cascade'], function ($cascade) {
 			var $currentTab = $(e.target).closest('li');
 
 			// Update pills
-			$(e.relatedTarget).closest('li').removeClass('active').addClass('disabled');
-			$currentTab.addClass('active').removeClass('disabled').removeClass('label-success').prev().addClass('label-success').removeClass('disabled');
-			$currentTab.nextAll().removeClass('label-success').addClass('disabled');
+			$(e.relatedTarget).closest('li').removeClass('active').disable();
+			$currentTab.addClass('active').enable().removeClass('label-success').prev().addClass('label-success').enable();
+			$currentTab.nextAll().removeClass('label-success').disable();
 
 			// Clear previous choices on restart
 			$currentTab.closest('ul').children('li').filter(function () {
@@ -123,7 +123,7 @@ define(['cascade'], function ($cascade) {
 			// Reset the UI
 			validationManager.reset(_('subscribe-definition'));
 			_('subscribe-parameters-container').empty();
-			_('subscription-set-parameters').attr('disabled', 'disabled');
+			_('subscription-set-parameters').disable();
 			_('subscribe-definition').removeClass('hidden').find('li,.choice').removeClass('active').end().find(':checked').removeAttr('checked');
 
 			// Show first tab
@@ -282,7 +282,7 @@ define(['cascade'], function ($cascade) {
 				_('subscribe-mode').removeClass('mode-create').removeClass('mode-link');
 			}
 			if ($inputs.closest('.choice:not(.hidden)').first().find('input[data-index]').prop('checked', 'checked').trigger('change').closest('.choice').addClass('active').focus()) {
-				_('subscription-next').removeAttr('disabled');
+				_('subscription-next').enable();
 			}
 			if (type === 'node') {
 				// Add the button to create/update a node

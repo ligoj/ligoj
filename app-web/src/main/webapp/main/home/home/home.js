@@ -752,11 +752,11 @@ define([
 				},
 				beforeSend: function () {
 					_('status').find('.status').addClass('refresh');
-					$button.addClass('disabled').find('i').addClass('fa-spin');
+					$button.disable().find('i').addClass('fa-spin');
 				},
 				complete: function () {
 					_('status').find('.status.refresh').removeClass('refresh');
-					$button.removeClass('disabled').find('i').removeClass('fa-spin');
+					$button.disable().find('i').removeClass('fa-spin');
 				}
 			});
 		},
@@ -773,10 +773,10 @@ define([
 					notifyManager.notify(current.$messages.statusRefreshed);
 				},
 				beforeSend: function () {
-					_('refreshSubBtn').addClass('disabled').find('.fa-refresh').addClass('fa-spin');
+					_('refreshSubBtn').disable().find('.fa-refresh').addClass('fa-spin');
 				},
 				complete: function () {
-					_('refreshSubBtn').removeClass('disabled').find('.fa-refresh').removeClass('fa-spin');
+					_('refreshSubBtn').disable().find('.fa-refresh').removeClass('fa-spin');
 				}
 			});
 		},

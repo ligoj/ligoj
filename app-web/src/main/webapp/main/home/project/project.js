@@ -153,7 +153,7 @@ define(['cascade'], function ($cascade) {
 				var uc = $source.length && current.table.fnGetData($source.closest('tr')[0]);
 				uc = uc && uc.id ? uc : {};
 				_('name').val(uc.name || '');
-				_('pkey').prop('disabled', uc.nbSubscriptions > 0).select2('val', uc.pkey || '');
+				_('pkey').disable(uc.nbSubscriptions > 0).select2('val', uc.pkey || '');
 				_('teamLeader').select2('data', uc.id ? uc.teamLeader : {
 					id: current.$session.userName
 				});
