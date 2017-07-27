@@ -73,6 +73,13 @@ define([
 		$(this).closest('.form-group').addClass('hidden');
 		return this;
 	};
+	/**
+	 * $ shortcut to apply disabled mode.
+	 */
+	$.fn.disable = function (yes) {
+		$(this)[yes ? 'attr' : 'removeAttr']('disabled', 'disabled')[yes ? 'addClass' : 'removeClass']('disabled')
+		return this;
+	};
 	$.fn.showGroup = function () {
 		$(this).closest('.form-group').removeClass('hidden');
 		return this;

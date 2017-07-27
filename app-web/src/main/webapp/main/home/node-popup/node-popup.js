@@ -16,7 +16,7 @@ define(['cascade'], function ($cascade) {
 				}
 				return item;
 			}).on('change', function (e) {
-				current.updateIdState(e.val);
+				current.updateIdVal(e.val);
 			});
 
 			// Popup/ Component event management
@@ -34,7 +34,6 @@ define(['cascade'], function ($cascade) {
 				current.relatedTarget = event.relatedTarget;
 
 				// Reset the UI
-				current.setModel(null);
 				$popup.trigger('node:show', [current, current.relatedTarget]);
 			}).on('submit', current.saveOrUpdate);
 
@@ -53,12 +52,12 @@ define(['cascade'], function ($cascade) {
 		setModel: function (model) {
 			model = model || {};
 			current.model = model;
-			_('node-tool').select2('data', model.refined || null);
-			_('node-id').val(model.id || '');
+			_('node-tool').disable(model.id).select2('data', model.refined || null);
+			_('node-id').disable(model.id);
 			_('node-name').val(model.name || '');
-			current.updateModeState(model);
-			current.updateIdState(model.refined && model.refined.id, model.id);
 			_('node-delete')[model.id ? 'removeClass' : 'addClass']('hidden');
+			current.updateModeState(model);
+			current.updateIdVal(model.refined && model.refined.id, model.id);
 		},
 
 		/**
@@ -72,22 +71,22 @@ define(['cascade'], function ($cascade) {
 				availableModes = ['all', 'none', 'create', 'link'];
 			}
 			var $modes = _('node-mode').find('button').addClass('hidden').removeClass('active');
-			for (var i = 0; i < availableModes.length; i++) {
-				$modes.filter('[value="' + availableModes[i] + '"]').removeClass('hidden');
+			for (const index in availableModes) {
+				$modes.filter('[value="' + availableModes[index] + '"]').removeClass('hidden');
 			}
 			$modes.filter('[value="' + (model.mode || availableModes[0]) + '"]').addClass('active');
 		},
 
 		/**
 		 * Update the UI state of the 'id' field from the selected tool.
-		 * @param {string} tool The tool identifier.
-		 * @param {string} id The optional node identifier.
+		 * @param {string} parent The parent node identifier.
+		 * @param {string} id The optional current node identifier.
 		 */
-		updateIdState: function (tool, id) {
-			if (tool) {
-				_('node-id').val(id || (tool + ':')).removeClass('disabled').removeAttr('disabled');
+		updateIdVal: function (parent, id) {
+			if (parent) {
+				_('node-id').val(id || (parent + ':'));
 			} else {
-				_('node-id').val('').addClass('disabled').attr('disabled', 'disabled');
+				_('node-id').val(id || 'feature:');
 			}
 		},
 
