@@ -76,8 +76,16 @@ define([
 	/**
 	 * $ shortcut to apply disabled mode.
 	 */
-	$.fn.disable = function (yes) {
-		$(this)[yes ? 'attr' : 'removeAttr']('disabled', 'disabled')[yes ? 'addClass' : 'removeClass']('disabled')
+	$.fn.disable = function () {
+		var yes = (arguments.length === 0 || arguments[0]) && 'disabled';
+		$(this)[yes ? 'attr' : 'removeAttr']('disabled', 'disabled').prop('disabled', yes)[yes ? 'addClass' : 'removeClass']('disabled')
+		return this;
+	};
+	/**
+	 * $ shortcut to apply enabled mode.
+	 */
+	$.fn.enable = function () {
+		$(this).disable(!(arguments.length === 0 || arguments[0]));
 		return this;
 	};
 	$.fn.showGroup = function () {
