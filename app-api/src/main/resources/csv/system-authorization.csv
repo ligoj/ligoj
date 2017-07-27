@@ -1,19 +1,19 @@
 method;pattern;type;role.name
-   ;.*;BUSINESS;ADMIN
-   ;^rest$;BUSINESS;USER
-   ;^rest/api.*;BUSINESS;USER
-   ;^rest/session;BUSINESS;USER
-   ;^rest/service/[^/]+/[^/]+/validate/.*;BUSINESS;USER
-   ;^rest/service.*;BUSINESS;USER
-   ;^rest/id/user.*;BUSINESS;USER
-   ;^rest/id/group.*;BUSINESS;USER
-   ;^rest/id/company.*;BUSINESS;USER
-   ;^rest/id/delegate.*;BUSINESS;USER
-   ;^rest/id/password;BUSINESS;USER
-   ;^rest/system/setting;BUSINESS;USER
-   ;^rest/message.*;BUSINESS;USER
-GET;^rest/project.*;BUSINESS;USER
-GET;^rest/subscription.*;BUSINESS;USER
+   ;.*;API;ADMIN
+   ;^rest$;API;USER
+   ;^rest/api.*;API;USER
+   ;^rest/session;API;USER
+   ;^rest/service/[^/]+/[^/]+/validate/.*;API;USER
+   ;^rest/service.*;API;USER
+   ;^rest/id/user.*;API;USER
+   ;^rest/id/group.*;API;USER
+   ;^rest/id/company.*;API;USER
+   ;^rest/id/delegate.*;API;USER
+   ;^rest/id/password;API;USER
+   ;^rest/system/setting;API;USER
+   ;^rest/message.*;API;USER
+GET;^rest/project.*;API;USER
+GET;^rest/subscription.*;API;USER
 
 ;.*;UI;ADMIN
 ;^api.*;UI;USER

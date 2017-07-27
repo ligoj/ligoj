@@ -55,9 +55,26 @@ define(['cascade'], function ($cascade) {
 			current.model = model;
 			_('node-tool').select2('data', model.refined || null);
 			_('node-id').val(model.id || '');
+			current.updateModeState(model);
 			_('node-name').val(model.name || '');
-			_('node-mode').find('button').removeClass('active').filter('[value="' + (model.mode || 'link') + '"]').addClass('active');
 			current.updateIdState(model.refined && model.refined.id, model.id);
+		},
+
+		/**
+		 * Update the UI state of the mode depending on the inherited subscription mode.
+		 */
+		updateModeState: function (model) {
+			var availableModes;
+			if (model.refined && model.refined.mode !== 'all') {
+				availableModes = [model.refined.mode];
+			} else {
+				availableModes = ['all', 'none', 'create', 'link'];
+			}
+			var $modes = _('node-mode').find('button').addClass('hidden').removeClass('active');
+			for (var i = 0; i < availableModes.length; i++) {
+				$modes.filter('[value="' + availableModes[i] + '"]').removeClass('hidden');
+			}
+			$modes.filter('[value="' + (model.mode || availableModes[0]) + '"]').addClass('active');
 		},
 
 		/**
