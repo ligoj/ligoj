@@ -85,7 +85,7 @@ define([
 		unload: function (context) {
 			// First, unload children
 			if (context.$siblings) {
-				for (var index = 0; index < context.$siblings.length; index++) {
+				for (const index in context.$siblings) {
 					$self.unload(context.$siblings[index]);
 				}
 				delete context.$siblings;
@@ -264,7 +264,7 @@ define([
 		loadPlugins: function (plugins, callback) {
 			var requiredPath = [];
 			var requiredNames = [];
-			for (var index = 0; index < plugins.length; index++) {
+			for (const index in plugins) {
 				var plugin = plugins[index];
 				if (typeof $self.plugins[plugin] === 'undefined') {
 					// This plugin has not yet been loaded
@@ -274,7 +274,7 @@ define([
 			}
 			if (requiredPath.length) {
 				require(requiredPath, function () {
-					for (var index = 0; index < requiredPath.length; index++) {
+					for (const index in requiredPath) {
 						var $plugin = arguments[index];
 						$plugin.$cascade = $self;
 						$self.plugins[requiredNames[index]] = $plugin;
@@ -316,7 +316,7 @@ define([
 			// Build the required modules
 			var index;
 			var requireJsModules = [];
-			for (index = 0; index < options.plugins.length; index++) {
+			for (const index in options.plugins) {
 				var plugin = $self.plugins[options.plugins[index]];
 				requireJsModules.push(plugin.load.require(options));
 			}
@@ -335,7 +335,7 @@ define([
 				// Associate the requireJs module to the load plugin
 				var resolved = {};
 				var $require = {};
-				for (index = 0; index < options.plugins.length; index++) {
+				for (const index in options.plugins) {
 					$require[options.plugins[index]] = requireJsModules[index];
 					resolved[options.plugins[index]] = arguments[index];
 				}
@@ -356,7 +356,7 @@ define([
 
 				// Process each plugin
 				var skipContext = false;
-				for (index = 0; index < options.plugins.length; index++) {
+				for (const index in options.plugins) {
 					skipContext |= ($self.plugins[options.plugins[index]].load.controller || $.noop)(arguments[index], options, $current);
 				}
 				if (skipContext) {
@@ -387,7 +387,7 @@ define([
 		 * @param  {context} $context Target context.
 		 */
 		copyAPI: function ($context) {
-			for (var index = 0; index < $self.apiFunctions.length; index++) {
+			for (const index in $self.apiFunctions) {
 				var api = $self.apiFunctions[index];
 				$context['$' + api] = $self.proxy($context, $self[api]);
 			}
@@ -413,8 +413,8 @@ define([
 		 * @param  {object} to   Target context to fill.
 		 */
 		shareContext: function (from, to) {
-			for (var i = 0; i < $self.protected.length; i++) {
-				to[$self.protected[i]] = from[$self.protected[i]];
+			for (const index in $self.protected) {
+				to[$self.protected[index]] = from[$self.protected[index]];
 			}
 			to.$page = from;
 		},
@@ -645,7 +645,7 @@ define([
 			}
 		},
 		closestFromSiblings: function (siblings, item) {
-			for (var index = 0; index < siblings.length; index++) {
+			for (const index in siblings) {
 				var owner = $self.closest(siblings[index], item);
 				if (typeof owner !== 'undefined') {
 					return owner;
@@ -704,7 +704,7 @@ define([
 		trigger: function (event, data, context) {
 			applicationManager.debug && traceDebug('Trigger event', event);
 			var callbacks = $self.callbacks[event] || [];
-			for (var i = 0; i < callbacks.length; i++) {
+			for (const i in callbacks) {
 				if (typeof callbacks[i] === 'function') {
 					callbacks[i](data || (context || $self.$context).$view, context);
 				} else {
