@@ -4,6 +4,11 @@ define(['cascade'], function ($cascade) {
 		model: '',
 
 		/**
+		 * Cascade context of parameter management.
+		 */
+		parameterContext: null,
+
+		/**
 		 * The source node of this popup. Copied from Bootstrap modal event.
 		 */
 		relatedTarget: null,
@@ -20,8 +25,7 @@ define(['cascade'], function ($cascade) {
 			});
 
 			// Popup/ Component event management
-			var $popup = _('node-popup');
-			$popup.on('shown.bs.modal', function () {
+			_('node-popup').on('shown.bs.modal', function () {
 				// Efficient pre-focus depending on the UI data
 				if (_('node-name').val()) {
 					_('node-name').focus();
@@ -32,21 +36,51 @@ define(['cascade'], function ($cascade) {
 				}
 			}).on('show.bs.modal', function (event) {
 				current.relatedTarget = event.relatedTarget;
-
-				$cascade.loadFragment(current, current.$transaction, 'main/home/node-parameter', 'node-parameter', {
-					callback: function(context) {
-						$popup.trigger('node:show', [current, current.relatedTarget]);
-					},
-					plugins: ['i18n', 'js']
-				});
+				current.parameterContext = null;
+				$(this).trigger('node:show', [current, current.relatedTarget]);
 			}).on('submit', current.saveOrUpdate);
 
+			_('node-parameters').on('show.bs.collapse', current.configureParameters);
 			_('node-delete').on('click', current.deletePopup);
 			_('node-mode').find('button').on('click', function (e) {
 				$(this).addClass('active').siblings().removeClass('active');
 				e.preventDefault();
 				return false;
 			});
+		},
+
+		configureParameters: function () {
+			// Load parameter configuration context
+			var parent = _('node-tool').val();
+			var $container = $(this).find('.panel-body').html('<i class="loader fa fa-spin fa-refresh fa-5"></i>');
+			if (parent) {
+				// A prent node is selected, get the not yet provided parameters
+				$container.html('<i class="loader fa fa-spin fa-refresh fa-5"></i>');
+				_('node-create').disable();
+				var mode = _('node-mode').find('.active').attr('value');
+				$.ajax({
+					dataType: 'json',
+					url: REST_PATH + 'node/' + parent + '/parameter/' + mode.toUpperCase(),
+					type: 'GET',
+					success: function (data) {
+						$cascade.loadFragment(current, current.$transaction, 'main/home/node-parameter', 'node-parameter', {
+							plugins: ['i18n', 'js'],
+							callback: function (context) {
+								current.parameterContext = context;
+								$container.empty();
+								debugger;
+								context.configureParameters($container, data, parent, mode, function () {
+									// Configuration and validators are available
+									_('node-create').enable();
+								});
+							}
+						});
+					}
+				});
+			} else {
+				// No selected tool, no available parameter
+				$container.html('Select a tool');
+			}
 		},
 
 		/**
@@ -106,7 +140,7 @@ define(['cascade'], function ($cascade) {
 				id: _('node-id').val(),
 				refined: _('node-tool').val(),
 				name: _('node-name').val(),
-				mode: _('node-mode').find('.active').attr('value') || null
+				mode: _('node-mode').find('.active').attr('value')
 			};
 			$.ajax({
 				type: current.model.id ? 'PUT' : 'POST',

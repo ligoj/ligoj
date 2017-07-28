@@ -1,18 +1,17 @@
 define(['cascade'], function ($cascade) {
 	var current = {
 
-
 		/**
 		 * Tool parameters configuration for current subscription creation
 		 * @type {object}
 		 */
-		configuration : null,
+		configuration: null,
 		initialize: function () {},
-		
+
 		/**
 		 * Return the parameter values inside the given container and configure the validation mapping.
 		 */
-		getParameters : function($container) {
+		getParameters: function ($container) {
 			var parameters = [];
 			var i = 0;
 			$container.find('input[data-type]').each(function () {
@@ -36,13 +35,14 @@ define(['cascade'], function ($cascade) {
 			});
 			return parameters;
 		},
-	
+
 		/**
 		 * Hold the parameter generation configuration : UI input, validator, UI component
 		 */
-		newSubscriptionParameterConfiguration: function (node) {
+		newSubscriptionParameterConfiguration: function (node, mode) {
 			var configuration = {
 				node: node,
+				mode: mode,
 				validators: {
 					integer: function ($element) {
 						var intRegex = /^\d*$/;
@@ -58,16 +58,24 @@ define(['cascade'], function ($cascade) {
 				},
 				renderers: {
 					select: function (parameter, $element) {
-						$element.select2({data: parameter.values});
+						$element.select2({
+							data: parameter.values
+						});
 					},
 					multiple: function (parameter, $element) {
-						$element.select2({multiple: true, data: parameter.values});
+						$element.select2({
+							multiple: true,
+							data: parameter.values
+						});
 					},
 					binary: function (parameter, $element) {
 						$element.attr('type', 'checkbox');
 					},
 					tags: function (parameter, $element) {
-						$element.select2({multiple: true, tags: parameter.values});
+						$element.select2({
+							multiple: true,
+							tags: parameter.values
+						});
 					},
 					integer: function (parameter, $element) {
 						$element.on('change', function () {
@@ -98,7 +106,7 @@ define(['cascade'], function ($cascade) {
 							var name = current.$messages[id] || parameter.name || '';
 							var description = current.$messages[id + '-description'] || parameter.description;
 							description = description ? ('<span class="help-block">' + description + '</span>') : '';
-							var $dom = $('<div class="form-group' + required + '"><label class="control-label" for="' + id + '">' + name + '</label><div>' + description + '</div></div>');
+							var $dom = $('<div class="form-group' + required + '"><label class="control-label col-md-3" for="' + id + '">' + name + '</label><div class="col-md-9">' + description + '</div></div>');
 							$dom.children('div').prepend($input);
 							$container.append($dom);
 							validator && $input.on('change', validator).on('keyup', validator);
@@ -109,7 +117,7 @@ define(['cascade'], function ($cascade) {
 			};
 			return configuration;
 		},
-	
+
 		/**
 		 * Replace the default text rendering by a Select2 for a service providing a suggest for the search.
 		 */
@@ -120,7 +128,7 @@ define(['cascade'], function ($cascade) {
 				// Render the normal input
 				var $fieldset = previousProvider(parameter, container, $input);
 				$input = $fieldset.find('input');
-	
+
 				// Create the select2 suggestion a LIKE %criteria% for project name, display name and description
 				current.newNodeSelect2($input, restUrl, current.$super('toName'), function (e) {
 					_(id + '_alert').parent().remove();
@@ -131,44 +139,44 @@ define(['cascade'], function ($cascade) {
 				}, parameter, customQuery, allowNew, lowercase);
 			};
 		},
-	
+
 		/**
-		 * Build node/subscription parameters.
-		 * @param node Node identifier to use for the target subscription.
-		 * @param parameters Required parameters to complete the subscription.
+		 * Build node/subscription parameters: UI and configuration.
+		 * Note this is an ansynchronous function thats requires the related node's context to render the parameter.
+		 * @param {jQuery} $container Target container where the parameters will be redered..
+		 * @param {Array} parameters Required parameters to complete the subscription.
+		 * @param {string} node Node identifier to use for the target subscription.
+		 * @param {string} mode Mode context : link, create, none,...
+		 * @param {function} callback Optional callback(configuration) called when UI is rendered.
 		 */
-		configureParameters: function (node, parameters, callback) {
+		configureParameters: function ($container, parameters, node, mode, callback) {
 			current.configuration = null;
 			current.$super('requireTool')(current, node, function ($tool) {
 				/*
 				 * Parameter configuration of new subscription wizard : validators, type of parameters, renderer,...
 				 */
-				var c = _('subscribe-parameters-container');
-				var configuration = current.newSubscriptionParameterConfiguration(node);
+				var configuration = current.newSubscriptionParameterConfiguration(node, mode);
 				current.configuration = configuration;
 				$tool.configureSubscriptionParameters && $tool.configureSubscriptionParameters(configuration);
 				var providers = configuration.providers;
 				var renderers = configuration.renderers;
 				var iProviders = providers.input;
 				var cProviders = providers['form-group'];
-				var i;
-				var parameter;
-				var $input;
-				for (i = 0; i < parameters.length; i++) {
-					parameter = parameters[i];
-					$input = (iProviders[parameter.id] || iProviders[parameter.type] || iProviders.standard)(parameter, undefined);
-					(cProviders[parameter.id] || cProviders[parameter.type] || cProviders.standard)(parameter, c, $input);
-	
+				for (const index in parameters) {
+					var parameter = parameters[index];
+					var $input = (iProviders[parameter.id] || iProviders[parameter.type] || iProviders.standard)(parameter);
+					(cProviders[parameter.id] || cProviders[parameter.type] || cProviders.standard)(parameter, $container, $input);
+
 					// Post transformations
 					renderers[parameter.type] && renderers[parameter.type](parameter, $input);
 					renderers[parameter.id] && renderers[parameter.id](parameter, $input);
 				}
-	
-				// Expose the configuration
+
+				// Notify the configuration is ready and all parameters are rendered
 				callback && callback(configuration);
 			});
 		},
-	
+
 		/**
 		 * Create a new Select2 based on the selected node.
 		 * @param {jquery} $input The UI component to render.
@@ -208,7 +216,7 @@ define(['cascade'], function ($cascade) {
 				}
 			}).on('change', changeHandler);
 		},
-	
+
 		/**
 		 * Check the inputs in the given selector and return true is all inputs are valid.
 		 */
