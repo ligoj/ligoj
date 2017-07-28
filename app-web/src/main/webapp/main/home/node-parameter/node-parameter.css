@@ -1,0 +1,13 @@
+.secured:not(.touched) .secured-mode .fa-unlock-alt, .secured.touched .secured-mode .fa-unlock, .secured.untouched .secured-mode .fa-unlock, .secured:not(.untouched) .secured-mode .fa-lock {
+	display: none;
+}
+.secured .secured-mode {
+    font-size: 10px;
+    float: right;
+    position: relative;
+    top: -12px;
+}
+
+.secured.untouched .secured-mode .fa-lock {
+	cursor: pointer;
+}

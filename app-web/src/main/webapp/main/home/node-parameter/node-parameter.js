@@ -6,34 +6,53 @@ define(['cascade'], function ($cascade) {
 		 * @type {object}
 		 */
 		configuration: null,
-		initialize: function () {},
+		initialize: function () {
+			// Reset the secured input on demand
+			$(document).off('click.secured-parameter').on('click.secured-parameter', '.form-group.secured.untouched .secured-mode .fa-lock', function (e) {
+				$(e.target).closest('.form-group.secured').addClass('touched').removeClass('untouched').find('.parameter').enable().val('');
+			});
+		},
 
 		/**
 		 * Return the parameter values inside the given container and configure the validation mapping.
 		 */
-		getParameters: function ($container) {
-			var parameters = [];
+		getParameterValues: function ($container) {
+			var values = [];
 			var i = 0;
-			$container.find('input[data-type]').each(function () {
-				var $that = $(this);
-				var type = $that.attr('data-type');
-				var id = $that.attr('id');
+			$container.find('.parameter').each(function () {
+				var $input = $(this);
+				var $group = $input.closest('form-group');
+				var id = $input.attr('id');
+				var parameter = current.configuration.parameters[id];
+				var type = parameter.type;
 				validationManager.mapping['parameters[' + i + '].parameter'] = id;
 				validationManager.mapping[id] = id;
-				var parameter = {
-					parameter: id,
-					selections: type === 'multiple' ? $that.select2('val') : undefined,
-					tags: type === 'tags' ? $that.select2('val') : undefined,
-					index: type === 'select' ? $that.val() : undefined,
-					binary: type === 'binary' ? $that.is(':checked') : undefined,
-					integer: type === 'integer' && $that.val() ? parseInt($that.val(), 10) : undefined,
-					text: type === 'text' ? $that.val() : undefined,
-					date: type === 'date' ? moment($that.val(), formatManager.messages.shortdateMomentJs).valueOf() : undefined
-				};
-				parameters.push(parameter);
+				if (parameter.secured && $group.is('.untouched')) {
+					// Secured untouched parameter
+					values.push({
+						parameter: id,
+						untouched: true
+					});
+				} else {
+					var value = {
+						parameter: id,
+						selections: type === 'multiple' ? $input.select2('val') : null,
+						tags: type === 'tags' ? $input.select2('val') : null,
+						index: (type === 'select' && $input.val()) || null,
+						bool: type === 'bool' ? $input.is(':checked') : null,
+						integer: (type === 'integer' && $input.val() !== '') ? parseInt($input.val(), 10) : null,
+						text: (type === 'text' && $input.val() !== '') ? $input.val() : null,
+						date: (type === 'date' && $input.val() !== '') ? moment($input.val(), formatManager.messages.shortdateMomentJs).valueOf() : null
+					};
+					Object.keys(value).forEach((key) => (value[key] === null || value[key] === '') && delete value[key]);
+					if (Object.keys(value).length === 2) {
+						values.push(value);
+					}
+				}
 				i++;
 			});
-			return parameters;
+			// Trim the data
+			return values;
 		},
 
 		/**
@@ -56,38 +75,66 @@ define(['cascade'], function ($cascade) {
 						return false;
 					}
 				},
+				values: {
+					select: function (value, $element) {
+						$element.select2('val', value.text); // Not fully implemented
+					},
+					multiple: function (value, $element) {
+						var selections = [];
+						for (const index in value.selections) {
+							selections.push(value.parameter.values[value.selections[index]]);
+						}
+						$element.select2('val', selections);
+					},
+					bool: function (value, $element) {
+						$element.prop('checked', value.bool);
+					},
+					tags: function (value, $element) {
+						$element.select2('tags', tags);
+					},
+					text: function (value, $element) {
+						$element.val(value.text);
+					},
+					integer: function (value, $element) {
+						$element.val(value.integer);
+					}
+				},
 				renderers: {
-					select: function (parameter, $element) {
-						$element.select2({
+					select: function (parameter, $input) {
+						$input.select2({
 							data: parameter.values
 						});
 					},
-					multiple: function (parameter, $element) {
-						$element.select2({
+					multiple: function (parameter, $input) {
+						$input.select2({
 							multiple: true,
 							data: parameter.values
 						});
 					},
-					binary: function (parameter, $element) {
-						$element.attr('type', 'checkbox');
+					bool: function (parameter, $input) {
+						$input.attr('type', 'checkbox');
 					},
-					tags: function (parameter, $element) {
-						$element.select2({
+					tags: function (parameter, $input) {
+						$input.select2({
 							multiple: true,
 							tags: parameter.values
 						});
 					},
-					integer: function (parameter, $element) {
-						$element.on('change', function () {
-							configuration.validators.integer($element);
+					integer: function (parameter, $input) {
+						$input.on('change', function () {
+							configuration.validators.integer($input);
 						});
+					},
+					secured: function (parameter, $input) {
+						// Add a tiny unlocker
+						$input.after('<span class="secured-mode"><i class="fa fa-lock text-warning" title="' + current.$messages['secured-untouched'] + '" data-toggle="tooltip"></i><i class="fa fa-unlock-alt text-info" title="' + current.$messages['secured-touched'] + '" data-toggle="tooltip"></i><i title="' + current.$messages['secured-empty'] + '" data-toggle="tooltip" class="fa fa-unlock"></i></span>');
 					}
 				},
 				providers: {
 					'input': {
 						standard: function (parameter) {
 							// Create a basic input, manages type, id, required
-							return $('<input class="form-control" type="' + (/password/.test(parameter.id) ? 'password' : 'text') + '" autocomplete="off" data-type="' + parameter.type + '" id="' + parameter.id + '"' + (parameter.mandatory ? ' required' : '') + '>');
+							return $('<input class="form-control parameter" type="' + (/password/.test(parameter.id) ? 'password' : 'text') + '" autocomplete="off" data-type="' + parameter.type + '" id="' + parameter.id + '"' + (parameter.mandatory ? ' required' : '') + '>');
 						},
 						date: function (parameter) {
 							// Create a data input
@@ -101,12 +148,13 @@ define(['cascade'], function ($cascade) {
 						standard: function (parameter, $container, $input) {
 							// Create a "form-group" with empty "controls", manages name, id, description, required
 							var required = parameter.mandatory ? ' required' : '';
+							var secured = parameter.secured ? ' secured' : '';
 							var id = parameter.id;
 							var validator = configuration.validators[id];
 							var name = current.$messages[id] || parameter.name || '';
 							var description = current.$messages[id + '-description'] || parameter.description;
 							description = description ? ('<span class="help-block">' + description + '</span>') : '';
-							var $dom = $('<div class="form-group' + required + '"><label class="control-label col-md-3" for="' + id + '">' + name + '</label><div class="col-md-9">' + description + '</div></div>');
+							var $dom = $('<div class="form-group' + required + secured + '"><label class="control-label col-md-4" for="' + id + '">' + name + '</label><div class="col-md-8">' + description + '</div></div>');
 							$dom.children('div').prepend($input);
 							$container.append($dom);
 							validator && $input.on('change', validator).on('keyup', validator);
@@ -141,6 +189,48 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
+		 * Build node/subscription parameter values: UI and configuration.
+		 * Note this is an ansynchronous function thats requires the related node's context to render the parameter.
+		 * @param {jQuery} $container Target container where the parameters will be redered..
+		 * @param {Array} values Parameter values with parameter definition.
+		 * @param {string} node Node identifier to use for the target subscription.
+		 * @param {string} mode Mode context : link, create, none,...
+		 * @param {function} callback Optional callback(configuration) called when UI is rendered.
+		 */
+		configureParameterValues: function ($container, values, node, mode, callback) {
+
+			// Drop required flag for nodes
+			var parameters = [];
+			for (const index in values) {
+				var parameter = values[index].parameter;
+				parameters.push(parameter);
+				delete parameter.mandatory;
+			}
+			current.configureParameters($container, parameters, node, mode, function (configuration) {
+				for (const index in values) {
+					var value = values[index];
+					var parameter = value.parameter;
+					var $element = _(parameter.id);
+					var $group = $element.closest('.form-group');
+
+					// Set the input value
+					configuration.values[parameter.type](value, $element);
+
+					// Handle the secured data flag
+					if (parameter.secured && value.text === '-secured-') {
+						// There is provided secured data
+						$element.disable();
+						// Add touch flag for secured values
+						$group.addClass('untouched');
+					}
+				}
+
+				// Notify the configuration is ready and all parameters are rendered
+				callback && callback(configuration);
+			});
+		},
+
+		/**
 		 * Build node/subscription parameters: UI and configuration.
 		 * Note this is an ansynchronous function thats requires the related node's context to render the parameter.
 		 * @param {jQuery} $container Target container where the parameters will be redered..
@@ -157,6 +247,7 @@ define(['cascade'], function ($cascade) {
 				 */
 				var configuration = current.newSubscriptionParameterConfiguration(node, mode);
 				current.configuration = configuration;
+				configuration.parameters = {};
 				$tool.configureSubscriptionParameters && $tool.configureSubscriptionParameters(configuration);
 				var providers = configuration.providers;
 				var renderers = configuration.renderers;
@@ -170,6 +261,12 @@ define(['cascade'], function ($cascade) {
 					// Post transformations
 					renderers[parameter.type] && renderers[parameter.type](parameter, $input);
 					renderers[parameter.id] && renderers[parameter.id](parameter, $input);
+
+					// Secured
+					parameter.secured && renderers.secured(parameter, $input);
+
+					// Save the id based parameter store
+					configuration.parameters[parameter.id] = parameter;
 				}
 
 				// Notify the configuration is ready and all parameters are rendered
@@ -220,13 +317,13 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Check the inputs in the given selector and return true is all inputs are valid.
 		 */
-		validateSubscriptionParameters: function (configuration, $selector) {
+		validateSubscriptionParameters: function ($selector) {
 			var validate = true;
 			$selector.each(function () {
 				var $that = $(this);
 				var type = $that.attr('data-type');
 				var id = $that.attr('id');
-				var validators = configuration.validators;
+				var validators = current.configuration.validators;
 				if (validators[id] && !validators[id]($that)) {
 					validate = false;
 					return;

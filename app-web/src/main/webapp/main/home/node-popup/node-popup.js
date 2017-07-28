@@ -1,6 +1,9 @@
 define(['cascade'], function ($cascade) {
 	var current = {
 
+		/**
+		 * The current node.
+		 */
 		model: '',
 
 		/**
@@ -15,12 +18,12 @@ define(['cascade'], function ($cascade) {
 
 		initialize: function () {
 			current.$main.newSelect2Node('#node-tool', '?depth=1', null, null, null, true, function (item) {
-				if (!item.id.match('^[a-z]+(:[a-z0-9]+){2}$')) {
-					// Disable service
-					item.disabled = true;
-				}
+				// Disable service
+				item.disabled = (typeof item.data.refined === 'undefined') || item.data.mode === 'none';
 				return item;
 			}).on('change', function (e) {
+				current.model.refined = e.added && e.added.data;
+				current.updateModeState();
 				current.updateIdVal(e.val);
 				current.refreshParameters();
 			});
@@ -58,7 +61,7 @@ define(['cascade'], function ($cascade) {
 			var $collapse = _('node-parameters');
 			var $container = $collapse.find('.panel-body');
 			$container.data('dirty', true);
-			if ($collapse.attr('aria-expanded')) {
+			if ($collapse.attr('aria-expanded') === "true") {
 				current.showParameters();
 			}
 		},
@@ -73,7 +76,7 @@ define(['cascade'], function ($cascade) {
 					_('node-parameters').find('.panel-footer.alert-info').removeClass('hidden');
 					_('node-parameters').find('.panel-footer.alert-danger').addClass('hidden');
 					_('node-create').disable();
-					current.configureParameters($container, parent, _('node-mode').find('.active').attr('value'));
+					current.configureParameters($container, current.model.id || parent, _('node-mode').find('.active').attr('value'));
 				}
 			} else {
 				// No selected tool, no available parameter
@@ -83,25 +86,20 @@ define(['cascade'], function ($cascade) {
 			}
 		},
 
-		configureParameters: function ($container, parent, mode) {
+		configureParameters: function ($container, node, mode) {
 			$container.html('<i class="loader fa fa-spin fa-refresh fa-5"></i>')
 			$.ajax({
 				dataType: 'json',
-				url: REST_PATH + 'node/' + parent + '/parameter/' + mode.toUpperCase(),
+				url: REST_PATH + 'node/' + node + '/parameter-value/' + mode.toUpperCase(),
 				type: 'GET',
-				success: function (parameters) {
+				success: function (parameterValues) {
 					// Load parameter configuration context
 					$cascade.loadFragment(current, current.$transaction, 'main/home/node-parameter', 'node-parameter', {
-						plugins: ['i18n', 'js'],
+						plugins: ['i18n', 'css', 'js'],
 						callback: function (context) {
 							current.parameterContext = context;
 							$container.empty();
-
-							// Drop required flag for nodes
-							for (const index in parameters) {
-								delete parameters[index].mandatory;
-							}
-							context.configureParameters($container, parameters, parent, mode, function () {
+							context.configureParameterValues($container, parameterValues, node, mode, function () {
 								// Configuration and validators are available
 								$container.data('dirty', false);
 								_('node-create').enable();
@@ -124,15 +122,16 @@ define(['cascade'], function ($cascade) {
 			_('node-name').val(model.name || '');
 			_('node-delete')[model.id ? 'removeClass' : 'addClass']('hidden');
 			_('node-parameters').collapse('hide').find('.panel-body').data('dirty', true);
-			current.updateModeState(model);
+			current.updateModeState();
 			current.updateIdVal(model.refined && model.refined.id, model.id);
 		},
 
 		/**
 		 * Update the UI state of the mode depending on the inherited subscription mode.
 		 */
-		updateModeState: function (model) {
+		updateModeState: function () {
 			var availableModes;
+			var model = current.model;
 			if (model.refined && model.refined.mode !== 'all') {
 				availableModes = [model.refined.mode];
 			} else {
@@ -164,12 +163,20 @@ define(['cascade'], function ($cascade) {
 			validationManager.mapping['refined'] = '#node-tool';
 			validationManager.mapping['name'] = '#node-name';
 			validationManager.mapping['mode'] = '#node-mode';
+			var $container = _('node-parameters').find('.panel-body');
+			if (!current.parameterContext.validateSubscriptionParameters($container.find('input[data-type]'))) {
+				// At least one error, validation manager has already managed the UI errors
+				return;
+			}
+			// Trim parameters to drop not provided parameters
+
 
 			// Build the data
 			var data = {
 				id: _('node-id').val(),
-				refined: _('node-tool').val(),
+				node: _('node-tool').val(),
 				name: _('node-name').val(),
+				parameters: current.parameterContext.getParameterValues($container),
 				mode: _('node-mode').find('.active').attr('value')
 			};
 			$.ajax({
