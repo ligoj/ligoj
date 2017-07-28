@@ -70,12 +70,16 @@ define(['cascade'], function ($cascade) {
 				// Check the parameters need to be refreshed
 				if ($container.data('dirty')) {
 					// A parent node is selected, get the not yet provided parameters
+					_('node-parameters').find('.panel-footer.alert-info').removeClass('hidden');
+					_('node-parameters').find('.panel-footer.alert-danger').addClass('hidden');
 					_('node-create').disable();
 					current.configureParameters($container, parent, _('node-mode').find('.active').attr('value'));
 				}
 			} else {
 				// No selected tool, no available parameter
-				$container.html('Select a tool');
+				$container.empty();
+				_('node-parameters').find('.panel-footer.alert-info').addClass('hidden');
+				_('node-parameters').find('.panel-footer.alert-danger').removeClass('hidden');
 			}
 		},
 

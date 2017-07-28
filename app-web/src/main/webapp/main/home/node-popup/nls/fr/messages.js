@@ -8,6 +8,7 @@ define({
 	'mode-all': 'Tous',
 	'mode-all-tooltip': 'Tous les modes de souscription seront possibles',
 	'partial-subscription': 'Certains paramètres pourraient ne pas être validés à ce niveau depuis l\'IHM. Pour une souscription partielle dans un noeud, des validations AJAX peuvent échouer, utiliser alers les appels API.',
+	'required-tool': 'Sélectionner un outil',
 	'error': {
 		'NodeId': 'Identifiant de noeud invalide, doit correspondre à [a-z]+(:[a-z0-9]+)+'
 	}
