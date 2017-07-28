@@ -62,14 +62,18 @@ define(['cascade'], function ($cascade) {
 					dataType: 'json',
 					url: REST_PATH + 'node/' + parent + '/parameter/' + mode.toUpperCase(),
 					type: 'GET',
-					success: function (data) {
+					success: function (parameters) {
 						$cascade.loadFragment(current, current.$transaction, 'main/home/node-parameter', 'node-parameter', {
 							plugins: ['i18n', 'js'],
 							callback: function (context) {
 								current.parameterContext = context;
 								$container.empty();
-								debugger;
-								context.configureParameters($container, data, parent, mode, function () {
+
+								// Drop required flag for nodes
+								for (const index in parameters) {
+									delete parameters[index].mandatory;
+								}
+								context.configureParameters($container, parameters, parent, mode, function () {
 									// Configuration and validators are available
 									_('node-create').enable();
 								});
