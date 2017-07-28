@@ -137,9 +137,9 @@ function _(id) {
 		}
 		return Math.min.apply(Math, narray);
 	};
-	Array.prototype.binarySearch = function (find) {
+	Array.binarySearch = function (array, find) {
 		var low = 0;
-		var high = this.length - 1;
+		var high = array.length - 1;
 		var i;
 		while (low <= high) {
 			i = Math.floor((low + high) / 2);
