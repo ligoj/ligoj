@@ -22,6 +22,7 @@ define(['cascade'], function ($cascade) {
 				return item;
 			}).on('change', function (e) {
 				current.updateIdVal(e.val);
+				current.refreshParameters();
 			});
 
 			// Popup/ Component event management
@@ -40,51 +41,71 @@ define(['cascade'], function ($cascade) {
 				$(this).trigger('node:show', [current, current.relatedTarget]);
 			}).on('submit', current.saveOrUpdate);
 
-			_('node-parameters').on('show.bs.collapse', current.configureParameters);
+			_('node-parameters').on('show.bs.collapse', current.showParameters);
 			_('node-delete').on('click', current.deletePopup);
 			_('node-mode').find('button').on('click', function (e) {
-				$(this).addClass('active').siblings().removeClass('active');
 				e.preventDefault();
+				current.refreshParameters();
+				$(this).addClass('active').siblings().removeClass('active');
 				return false;
 			});
 		},
 
-		configureParameters: function () {
-			// Load parameter configuration context
-			var parent = _('node-tool').val();
-			var $container = $(this).find('.panel-body').html('<i class="loader fa fa-spin fa-refresh fa-5"></i>');
-			if (parent) {
-				// A prent node is selected, get the not yet provided parameters
-				$container.html('<i class="loader fa fa-spin fa-refresh fa-5"></i>');
-				_('node-create').disable();
-				var mode = _('node-mode').find('.active').attr('value');
-				$.ajax({
-					dataType: 'json',
-					url: REST_PATH + 'node/' + parent + '/parameter/' + mode.toUpperCase(),
-					type: 'GET',
-					success: function (parameters) {
-						$cascade.loadFragment(current, current.$transaction, 'main/home/node-parameter', 'node-parameter', {
-							plugins: ['i18n', 'js'],
-							callback: function (context) {
-								current.parameterContext = context;
-								$container.empty();
+		/**
+		 * Refresh the parameters panel as needed.
+		 */
+		refreshParameters: function () {
+			var $collapse = _('node-parameters');
+			var $container = $collapse.find('.panel-body');
+			$container.data('dirty', true);
+			if ($collapse.attr('aria-expanded')) {
+				current.showParameters();
+			}
+		},
 
-								// Drop required flag for nodes
-								for (const index in parameters) {
-									delete parameters[index].mandatory;
-								}
-								context.configureParameters($container, parameters, parent, mode, function () {
-									// Configuration and validators are available
-									_('node-create').enable();
-								});
-							}
-						});
-					}
-				});
+		showParameters: function () {
+			var parent = _('node-tool').val();
+			var $container = _('node-parameters').find('.panel-body');
+			if (parent) {
+				// Check the parameters need to be refreshed
+				if ($container.data('dirty')) {
+					// A parent node is selected, get the not yet provided parameters
+					_('node-create').disable();
+					current.configureParameters($container, parent, _('node-mode').find('.active').attr('value'));
+				}
 			} else {
 				// No selected tool, no available parameter
 				$container.html('Select a tool');
 			}
+		},
+
+		configureParameters: function ($container, parent, mode) {
+			$container.html('<i class="loader fa fa-spin fa-refresh fa-5"></i>')
+			$.ajax({
+				dataType: 'json',
+				url: REST_PATH + 'node/' + parent + '/parameter/' + mode.toUpperCase(),
+				type: 'GET',
+				success: function (parameters) {
+					// Load parameter configuration context
+					$cascade.loadFragment(current, current.$transaction, 'main/home/node-parameter', 'node-parameter', {
+						plugins: ['i18n', 'js'],
+						callback: function (context) {
+							current.parameterContext = context;
+							$container.empty();
+
+							// Drop required flag for nodes
+							for (const index in parameters) {
+								delete parameters[index].mandatory;
+							}
+							context.configureParameters($container, parameters, parent, mode, function () {
+								// Configuration and validators are available
+								$container.data('dirty', false);
+								_('node-create').enable();
+							});
+						}
+					});
+				}
+			});
 		},
 
 		/**
@@ -98,6 +119,7 @@ define(['cascade'], function ($cascade) {
 			_('node-id').disable(model.id);
 			_('node-name').val(model.name || '');
 			_('node-delete')[model.id ? 'removeClass' : 'addClass']('hidden');
+			_('node-parameters').collapse('hide').find('.panel-body').data('dirty', true);
 			current.updateModeState(model);
 			current.updateIdVal(model.refined && model.refined.id, model.id);
 		},
