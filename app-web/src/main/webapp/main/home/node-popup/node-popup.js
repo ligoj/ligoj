@@ -33,8 +33,12 @@ define(['cascade'], function ($cascade) {
 			}).on('show.bs.modal', function (event) {
 				current.relatedTarget = event.relatedTarget;
 
-				// Reset the UI
-				$popup.trigger('node:show', [current, current.relatedTarget]);
+				$cascade.loadFragment(current, current.$transaction, 'main/home/node-parameter', 'node-parameter', {
+					callback: function(context) {
+						$popup.trigger('node:show', [current, current.relatedTarget]);
+					},
+					plugins: ['i18n', 'js']
+				});
 			}).on('submit', current.saveOrUpdate);
 
 			_('node-delete').on('click', current.deletePopup);
