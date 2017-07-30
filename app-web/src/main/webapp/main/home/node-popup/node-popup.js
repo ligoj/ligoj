@@ -39,8 +39,11 @@ define(['cascade'], function ($cascade) {
 					_('node-tool').focus();
 				}
 			}).on('show.bs.modal', function (event) {
-				current.relatedTarget = event.relatedTarget;
+				// Mark parameters as unloaded
 				current.parameterContext = null;
+
+				// Save the source and notify the load
+				current.relatedTarget = event.relatedTarget;
 				$(this).trigger('node:show', [current, current.relatedTarget]);
 			}).on('submit', current.saveOrUpdate);
 
@@ -164,7 +167,7 @@ define(['cascade'], function ($cascade) {
 			validationManager.mapping['name'] = '#node-name';
 			validationManager.mapping['mode'] = '#node-mode';
 			var $container = _('node-parameters').find('.panel-body');
-			if (!current.parameterContext.validateSubscriptionParameters($container.find('input[data-type]'))) {
+			if (current.parameterContext && !current.parameterContext.validateSubscriptionParameters($container.find('input[data-type]'))) {
 				// At least one error, validation manager has already managed the UI errors
 				return;
 			}
@@ -176,7 +179,8 @@ define(['cascade'], function ($cascade) {
 				id: _('node-id').val(),
 				node: _('node-tool').val(),
 				name: _('node-name').val(),
-				parameters: current.parameterContext.getParameterValues($container),
+				untouchedParameters: current.parameterContext === null,
+				parameters: current.parameterContext ? current.parameterContext.getParameterValues($container) : null,
 				mode: _('node-mode').find('.active').attr('value')
 			};
 			$.ajax({
@@ -186,7 +190,7 @@ define(['cascade'], function ($cascade) {
 				contentType: 'application/json',
 				data: JSON.stringify(data),
 				success: function () {
-					notifyManager.notify(Handlebars.compile(current.$messages[current.currentId ? 'updated' : 'created'])(data.name));
+					notifyManager.notify(Handlebars.compile(current.$messages[current.model.id ? 'updated' : 'created'])(data.name));
 					_('node-popup').modal('hide').trigger('node:saved', [current, current.relatedTarget, data, current.model]);
 				}
 			});
