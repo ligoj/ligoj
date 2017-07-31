@@ -67,6 +67,26 @@ org.ligoj.boot.web.Application
 ```
 Notes these launchers (*.launch) are already configured for Eclipse.
 
+## Compatibilities
+###Database
+Compatibility and performance for 10K+users and 1K+ projects
+
+| Vendor     | Version | Driver                   | Dialect                                                  | Status                  |
+|------------|---------|--------------------------|----------------------------------------------------------|-------------------------|
+| MySQL      | 5.5     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | A bit slow in plugin-id |
+| MySQL      | 5.6     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
+| MySQL      | 5.7     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | Slow in plugin-id       |
+| MariaDB    | 10.1    | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | Slow in plugin-id       |
+| MariaDB    | 10.1    | org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | ?                       |
+| PostGreSQL | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
+
+###JSE
+
+| Vendor     | Version  | Status |
+|------------|----------|--------|
+| Oracle     | 1.8u121+ | OK     |
+| OpenJQK    | 1.8u121+ | OK     |
+
 # Ops section
 ## With Docker
 Build the images and run the containers
