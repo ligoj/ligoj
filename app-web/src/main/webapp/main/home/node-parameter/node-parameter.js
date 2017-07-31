@@ -134,7 +134,7 @@ define(['cascade'], function ($cascade) {
 					'input': {
 						standard: function (parameter) {
 							// Create a basic input, manages type, id, required
-							return $('<input class="form-control parameter" type="' + (/password/.test(parameter.id) ? 'password' : 'text') + '" autocomplete="off" data-type="' + parameter.type + '" id="' + parameter.id + '"' + (parameter.mandatory ? ' required' : '') + '>');
+							return $('<input class="form-control parameter" type="' + (/(password|secret)/.test(parameter.id) ? 'password' : 'text') + '" autocomplete="off" data-type="' + parameter.type + '" id="' + parameter.id + '"' + (parameter.mandatory ? ' required' : '') + '>');
 						},
 						date: function (parameter) {
 							// Create a data input
