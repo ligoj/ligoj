@@ -123,13 +123,17 @@ server.address            = ${SERVER_HOST}
 server.context-path       = /${CONTEXT}
 management.context-path   = /manage
 management.security.roles = USER
-database.app.hbm2ddl      = [update]/none/validate. With "update", the server takes up to 30s to start
-database.app              = Database name
-database.app.user         = ${jdbc.username}
-database.app.password     = ${jdbc.password}
-jpa.dialect               = JPA Dialect : org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect,  org.hibernate.dialect.PostgreSQL95Dialect, ...
-jdbc.driverClassName      = JDBC Driver : com.mysql.cj.jdbc.Driver, org.postgresql.Driver,...
-jdbc.url                  = JDBC URL : jdbc:postgresql:database, jdbc:mysql://localhost:3306/ligoj?useColumnNamesInFindColumn=true&useUnicode=yes ...
+jpa.hbm2ddl               = <[update],none,validate>. With "update", the server takes up to 30s to start
+jdbc.vendor               = <[mysql],postgresql,mariadb>
+jdbc.port                 = 3306
+jdbc.database             = ligoj
+jdbc.username             = ligoj
+jdbc.password             = ligoj
+jdbc.host                 = localhost
+jpa.dialect               = <[org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect],org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect>
+jdbc.driverClassName      = <[com.mysql.cj.jdbc.Driver],org.postgresql.Driver>
+jdbc.urlparam             = ?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC
+jdbc.url                  = jdbc:${jdbc.vendor}://${jdbc.host}:${jdbc.port}/${jdbc.database}${jdbc.urlparam:}
 jdbc.validationQuery      = select 1;
 jdbc.maxIdleTime          = 180000
 jdbc.maxPoolSize          = 150
