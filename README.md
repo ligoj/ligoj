@@ -140,4 +140,5 @@ jdbc.maxPoolSize          = 150
 health.node               = 0 0 0/1 1/1 * ?
 health.subscription       = 0 0 2 1/1 * ?
 app.crypto.file           = Secret file location
+app.safe.mode             = <[false],true> When true, plug-ins are not loaded and their state is not updated
 ```
