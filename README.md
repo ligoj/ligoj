@@ -20,8 +20,8 @@ A web application to centralize the related tools of your projects, a 21th centu
 ```
 docker build -t ligoj-api:1.6.0 --build-arg VERSION=1.6.0 app-api
 docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.0
-docker build -t ligoj-web:1.6.0 --build-arg VERSION=1.6.0 app-web
-docker run -d --name ligoj-web --link ligoj-api:api -p 8080:8080 ligoj-web:1.6.0 
+docker build -t ligoj-ui:1.6.0 --build-arg VERSION=1.6.0 app-ui
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.0 
 ```
 Open your browser at : http://localhost:8080/ligoj  
 User/password for administrator role : ligoj-admin
@@ -55,7 +55,7 @@ From your IDE with Maven, or from Maven CLI :
 ```
 git clone https://github.com/ligoj/ligoj
 mvn spring-boot:run -f app-api/pom.xml& 
-mvn spring-boot:run -f app-web/pom.xml&
+mvn spring-boot:run -f app-ui/pom.xml&
 ```
 ## With your IDE
 From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
@@ -93,8 +93,8 @@ Build the images and run the containers
 ```
 docker build -t ligoj-api:1.6.0 --build-arg VERSION=1.6.0 app-api
 docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.0
-docker build -t ligoj-web:1.6.0 --build-arg VERSION=1.6.0 app-web
-docker run -d --name ligoj-web --link ligoj-api:api -p 8080:8080 ligoj-web:1.6.0 
+docker build -t ligoj-ui:1.6.0 --build-arg VERSION=1.6.0 app-ui
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.0 
 ```
 Docker build (ARG) variables:
 ```

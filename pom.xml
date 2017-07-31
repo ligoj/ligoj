@@ -27,7 +27,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>app-api</module>
-		<module>app-web</module>
+		<module>app-ui</module>
 	</modules>
 
 	<profiles>
