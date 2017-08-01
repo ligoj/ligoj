@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.cache.annotation.CacheRemoveAll;
+import javax.cache.annotation.CacheResult;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.ws.rs.DELETE;
@@ -152,18 +154,29 @@ public class PluginResource {
 	}
 
 	/**
-	 * Search plug-ins in repo which can be installed.
+	 * Query and get the last version of all available plug-ins.
+	 * 
+	 * @return All plug-ins with their last available version. Key is the plug-in identifier.
+	 */
+	@CacheResult(cacheName = "plugins-last-version")
+	public Map<String, MavenSearchResultItem> getLastPluginVersions() throws IOException {
+		final String searchResult = new CurlProcessor().get(getPluginSearchUrl());
+		// Extract artifacts
+		final ObjectMapper jsonMapper = new ObjectMapper();
+		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), MavenSearchResultItem[].class))
+				.collect(Collectors.toMap(MavenSearchResultItem::getArtifact, Function.identity()));
+	}
+
+	/**
+	 * Search plug-ins in repository which can be installed.
 	 *
 	 * @return All plug-ins artifacts name.
 	 */
 	@GET
 	@Path("search")
-	public List<String> search(@QueryParam("q") final String query) throws IOException {
-		final String searchResult = new CurlProcessor().get(getPluginSearchUrl());
-		// Extract artifacts
-		final ObjectMapper jsonMapper = new ObjectMapper();
-		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), MavenSearchResultItem[].class))
-				.map(MavenSearchResultItem::getArtifact).filter(a -> a.contains(query)).collect(Collectors.toList());
+	public List<MavenSearchResultItem> search(@QueryParam("q") final String query) throws IOException {
+		return SpringUtils.getBean(PluginResource.class).getLastPluginVersions().values().stream().filter(a -> a.getArtifact().contains(query))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -194,6 +207,16 @@ public class PluginResource {
 		final Thread restartThread = new Thread(() -> restartEndpoint.restart(), "Restart");
 		restartThread.setDaemon(false);
 		restartThread.start();
+	}
+
+	/**
+	 * Request a reset of plug-in cache meta-data
+	 */
+	@POST
+	@Path("remote-plugin-cache")
+	@CacheRemoveAll(cacheName = "plugins-last-version")
+	public void invalidateLastPLuginVersions() {
+		// Nothing to do
 	}
 
 	/**

@@ -18,4 +18,7 @@ public class MavenSearchResultItem {
 	 */
 	@JsonProperty("a")
 	private String artifact;
+
+	@JsonProperty("latestVersion")
+	private String version;
 }

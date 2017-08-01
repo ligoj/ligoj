@@ -513,18 +513,19 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void searchPluginsInMavenRepoNoResult() throws IOException {
-		final List<String> result = searchPluginsInMavenRepo("no-result");
+		final List<MavenSearchResultItem> result = searchPluginsInMavenRepo("no-result");
 		Assert.assertTrue("Search result should be empty.", result.isEmpty());
 	}
 
 	@Test
 	public void searchPluginsOnMavenRepoOneResult() throws IOException {
-		final List<String> result = searchPluginsInMavenRepo("buil");
-		Assert.assertEquals("There should be 1 result.", 1, result.size());
-		Assert.assertEquals("Bad result", "plugin-build", result.get(0));
+		final List<MavenSearchResultItem> result = searchPluginsInMavenRepo("buil");
+		Assert.assertEquals(1, result.size());
+		Assert.assertEquals("plugin-build", result.get(0).getArtifact());
+		Assert.assertEquals("0.0.1", result.get(0).getVersion());
 	}
 
-	private List<String> searchPluginsInMavenRepo(final String query) throws IOException {
+	private List<MavenSearchResultItem> searchPluginsInMavenRepo(final String query) throws IOException {
 		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
 						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
