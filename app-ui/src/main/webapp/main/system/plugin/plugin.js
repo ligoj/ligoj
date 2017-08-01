@@ -67,11 +67,13 @@ define(function () {
 				allowClear: true,
 				minimumInputLength: 1,
 				multiple:true,
+				escapeMarkup: function (m) {
+					return m;
+				},
 				ajax: {
 					url: REST_PATH + 'plugin/search',
 					dataType: 'json',
 					quietMillis: 250,
-					cache: true,
 					data: function (term) {
 						return { 'q': term };
 					},
@@ -80,9 +82,9 @@ define(function () {
 							more: false,
 							results: $(data).map(function () {
 								return {
-									id: this,
+									id: this.a,
 									data: this,
-									text: this
+									text: this.a + ' <span class="label label-info">' + this.latestVersion + '</span>'
 								};
 							})
 						};
