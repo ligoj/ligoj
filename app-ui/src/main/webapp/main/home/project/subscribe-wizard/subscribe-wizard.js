@@ -284,7 +284,7 @@ define(['cascade'], function ($cascade) {
 				node: current.getSelectedNode(),
 				project: current.model.id,
 				parameters: current.parameterContext.getParameterValues($container),
-				mode: current.parameterContext.model.mode
+				mode: current.parameterContext.configuration.mode
 			});
 		},
 
