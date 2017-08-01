@@ -18,10 +18,10 @@ A web application to centralize the related tools of your projects, a 21th centu
 
 # User section
 ```
-docker build -t ligoj-api:1.5.1 --build-arg VERSION=1.5.1 app-api
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.5.1
-docker build -t ligoj-web:1.5.1 --build-arg VERSION=1.5.1 app-web
-docker run -d --name ligoj-web --link ligoj-api:api -p 8080:8080 ligoj-web:1.5.1 
+docker build -t ligoj-api:1.6.0 --build-arg VERSION=1.6.0 app-api
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.0
+docker build -t ligoj-ui:1.6.0 --build-arg VERSION=1.6.0 app-ui
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.0 
 ```
 Open your browser at : http://localhost:8080/ligoj  
 User/password for administrator role : ligoj-admin
@@ -31,7 +31,7 @@ You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin
 ## Make Ligoj home persistent
 You can keep your plugins installation by mapping `/usr/local/ligoj` with a volume.
 ```
-docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.5.1
+docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.6.0
 ```
 # Dev section
 ## Pre-requisite for the bellow samples
@@ -55,7 +55,7 @@ From your IDE with Maven, or from Maven CLI :
 ```
 git clone https://github.com/ligoj/ligoj
 mvn spring-boot:run -f app-api/pom.xml& 
-mvn spring-boot:run -f app-web/pom.xml&
+mvn spring-boot:run -f app-ui/pom.xml&
 ```
 ## With your IDE
 From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
@@ -91,10 +91,10 @@ Compatibility and performance for 10K+users and 1K+ projects
 ## With Docker
 Build the images and run the containers
 ```
-docker build -t ligoj-api:1.5.1 --build-arg VERSION=1.5.1 app-api
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.5.1
-docker build -t ligoj-web:1.5.1 --build-arg VERSION=1.5.1 app-web
-docker run -d --name ligoj-web --link ligoj-api:api -p 8080:8080 ligoj-web:1.5.1 
+docker build -t ligoj-api:1.6.0 --build-arg VERSION=1.6.0 app-api
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.0
+docker build -t ligoj-ui:1.6.0 --build-arg VERSION=1.6.0 app-ui
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.0 
 ```
 Docker build (ARG) variables:
 ```
@@ -123,17 +123,22 @@ server.address            = ${SERVER_HOST}
 server.context-path       = /${CONTEXT}
 management.context-path   = /manage
 management.security.roles = USER
-database.app.hbm2ddl      = [update]/none/validate. With "update", the server takes up to 30s to start
-database.app              = Database name
-database.app.user         = ${jdbc.username}
-database.app.password     = ${jdbc.password}
-jpa.dialect               = JPA Dialect : org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect,  org.hibernate.dialect.PostgreSQL95Dialect, ...
-jdbc.driverClassName      = JDBC Driver : com.mysql.cj.jdbc.Driver, org.postgresql.Driver,...
-jdbc.url                  = JDBC URL : jdbc:postgresql:database, jdbc:mysql://localhost:3306/ligoj?useColumnNamesInFindColumn=true&useUnicode=yes ...
+jpa.hbm2ddl               = <[update],none,validate>. With "update", the server takes up to 30s to start
+jdbc.vendor               = <[mysql],postgresql,mariadb>
+jdbc.port                 = 3306
+jdbc.database             = ligoj
+jdbc.username             = ligoj
+jdbc.password             = ligoj
+jdbc.host                 = localhost
+jpa.dialect               = <[org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect],org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect>
+jdbc.driverClassName      = <[com.mysql.cj.jdbc.Driver],org.postgresql.Driver>
+jdbc.urlparam             = ?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC
+jdbc.url                  = jdbc:${jdbc.vendor}://${jdbc.host}:${jdbc.port}/${jdbc.database}${jdbc.urlparam:}
 jdbc.validationQuery      = select 1;
 jdbc.maxIdleTime          = 180000
 jdbc.maxPoolSize          = 150
 health.node               = 0 0 0/1 1/1 * ?
 health.subscription       = 0 0 2 1/1 * ?
 app.crypto.file           = Secret file location
+app.safe.mode             = <[false],true> When true, plug-ins are not loaded and their state is not updated
 ```

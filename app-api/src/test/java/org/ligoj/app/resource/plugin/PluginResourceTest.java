@@ -295,6 +295,22 @@ public class PluginResourceTest extends AbstractServerTest {
 		resource.refreshPlugins(event);
 	}
 
+	/**
+	 * Disable plug-in refresh
+	 */
+	@Test
+	public void refreshFailSafe() throws Exception {
+		ThreadClassLoaderScope scope = null;
+		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
+		Mockito.when(pluginsClassLoader.isSafeMode()).thenReturn(true);
+		try {
+			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader));
+			new PluginResource().refreshPlugins(null);
+		} finally {
+			IOUtils.closeQuietly(scope);
+		}
+	}
+
 	@Test
 	public void refreshPluginsUpdate() throws Exception {
 		final SampleService service1 = new SampleService() {

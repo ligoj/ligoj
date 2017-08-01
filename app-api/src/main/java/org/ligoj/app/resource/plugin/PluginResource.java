@@ -254,6 +254,11 @@ public class PluginResource {
 	 */
 	@EventListener
 	public void refreshPlugins(final ContextRefreshedEvent event) throws Exception {
+		if (getPluginClassLoader() != null && getPluginClassLoader().isSafeMode()) {
+			// Ignore this refresh
+			log.info("SAFE MODE - Plugins state refresh is disabled");
+			return;
+		}
 		// Get the existing plug-in features
 		final Map<String, Plugin> plugins = repository.findAll().stream().collect(Collectors.toMap(Plugin::getKey, Function.identity()));
 
