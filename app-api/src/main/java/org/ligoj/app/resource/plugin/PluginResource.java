@@ -213,25 +213,6 @@ public class PluginResource {
 	}
 
 	/**
-	 * Install or update to the last available version of given plug-in from the remote server.
-	 * 
-	 * @param artifact
-	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
-	 */
-	@POST
-	@Path("{artifact:[\\w-]+}")
-	public void install(@PathParam("artifact") final String artifact) {
-		final String metaData = StringUtils.defaultString(new CurlProcessor().get(getPluginUrl() + artifact + "/maven-metadata.xml"), "");
-		final Matcher matcher = Pattern.compile("<latest>([^<]+)</latest>").matcher(metaData);
-		if (!matcher.find()) {
-			// Plug-in not found
-			throw new BusinessException(
-					String.format("Versions discovery cannot be performed from the remote server %s for plugin %s", getPluginUrl(), artifact));
-		}
-		install(artifact, matcher.group(1));
-	}
-
-	/**
 	 * Request a restart of the current application context in a separated thread.
 	 */
 	@PUT
@@ -289,6 +270,25 @@ public class PluginResource {
 		} catch (final IOException ioe) {
 			throw new BusinessException(artifact, String.format("Cannot be downloaded from remote server %s", artifact), ioe);
 		}
+	}
+
+	/**
+	 * Install or update to the last available version of given plug-in from the remote server.
+	 * 
+	 * @param artifact
+	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 */
+	@POST
+	@Path("{artifact:[\\w-]+}")
+	public void install(@PathParam("artifact") final String artifact) {
+		final String metaData = StringUtils.defaultString(new CurlProcessor().get(getPluginUrl() + artifact + "/maven-metadata.xml"), "");
+		final Matcher matcher = Pattern.compile("<latest>([^<]+)</latest>").matcher(metaData);
+		if (!matcher.find()) {
+			// Plug-in not found
+			throw new BusinessException(
+					String.format("Versions discovery cannot be performed from the remote server %s for plugin %s", getPluginUrl(), artifact));
+		}
+		install(artifact, matcher.group(1));
 	}
 
 	/**

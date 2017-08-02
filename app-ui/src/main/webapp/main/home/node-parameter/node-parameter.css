@@ -11,3 +11,12 @@
 .secured.untouched .secured-mode .fa-lock {
 	cursor: pointer;
 }
+
+.select2-chosen>.need-check {
+	display: none;
+}
+
+.select2-drop .need-check {
+	font-size: x-small;
+	text-align: right;
+}

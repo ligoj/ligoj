@@ -222,39 +222,4 @@
 		border-right-style: solid;
 		border-right-width: 7px;
 	}
-	.exploded th.tool {
-		width: 150px;
-	}
-	.exploded th.service {
-		width: 100px;
-	}
-	.exploded .key .carousel-indicators, .key .carousel-control {
-		display: none;
-	}
-	.exploded .key .carousel-inner {
-		display: table;
-	}
-	.exploded .key .carousel-inner .item {
-		display: table-cell;
-	}
-}
-
-.select2-chosen>.need-check {
-	display: none;
-}
-
-.select2-drop .need-check {
-	font-size: x-small;
-	text-align: right;
-}
-.qrcode-toggle {
-	float: right;
-	top: -26px;
-	right: -21px;
-	position: relative;
-}
-.qrcode-toggle .qrcode {
-	position: absolute;
-	right: 0;
-	top: -5px;
 }

@@ -388,8 +388,6 @@ define(['cascade'], function ($cascade) {
 		 * Generate a carousel component based on given HTML items. Depending on the amount of subscriptions of same type, and the container, the behavior of the carousel may differ.
 		 */
 		generateCarousel: function (subscription, items, startIndex, part) {
-			var i;
-			var item;
 			part = part || 0;
 			var id = 'subscription-details-' + subscription.id;
 			var result = '<div id="' + id + '" class="carousel carousel-part' + part + '"';
