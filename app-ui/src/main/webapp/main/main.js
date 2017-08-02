@@ -281,10 +281,13 @@ define(['cascade'], function ($cascade) {
 			return current.newSelect2(selector, REST_PATH + 'project' + (filter || ''), placeholder || current.$messages.project, textFunction, idProperty || 'id', textProperty || 'name');
 		},
 		newSelect2Company: function (selector, filter, placeholder) {
-			return current.newSelect2(selector, REST_PATH + 'service/id/company/filter' + (filter || '/read'), placeholder || current.$messages.company);
+			return current.newSelect2Container(selector, filter, placeholder, 'company');
 		},
 		newSelect2Group: function (selector, filter, placeholder) {
-			return current.newSelect2(selector, REST_PATH + 'service/id/group/filter' + (filter || '/read'), placeholder || current.$messages.group);
+			return current.newSelect2Container(selector, filter, placeholder, 'group');
+		},
+		newSelect2Container: function (selector, filter, placeholder, type) {
+			return current.newSelect2(selector, REST_PATH + 'service/id/' + type + '/filter' + (filter || '/read'), placeholder || current.$messages[type]);
 		},
 		newSelect2: function (selector, url, placeholder, textFunction, idProperty, textProperty, toItem) {
 			var toText = function (object) {

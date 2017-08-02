@@ -210,50 +210,14 @@ define(['cascade'], function ($cascade) {
 		 * @param {string} parent Optional parent node identifier
 		 */
 		renderChoicesData: function (type, nodes, parent) {
-			var icon;
-			var node;
 			var $container = _('subscribe-' + type).find('.choices');
-			var $name = _('subscribe-definition').find('.selected-' + type);
-			for (const index in nodes) {
-				node = nodes[index];
-				if (node.uiClasses) {
-					// Use classes instead of picture
-					icon = node.uiClasses.startsWith('$') ? '<span class="icon-text">' + node.uiClasses.substring(1) + '</span>' : ('<i class="' + node.uiClasses + '"></i>');
-				} else {
-					// Use a provided picture
-					icon = current.$super('getToolFromId')(node.id) ? current.$super('toIcon')(node, 'x64w') : '<i class="fa fa-cloud"></i>';
-				}
-				var $choice = $('<label class="choice btn"><input data-index="' + index + '" type="radio" name="s-choice-' + type + '" value="' + node.id + '" autocomplete="off"><div class="icon img-circle">' + icon + '</div>' + current.$main.getNodeName(node) + '</label>');
-				$container.append($choice);
-				
-				// Save the context
-				$choice.find('input').data('node', node);
-			}
+			
+			// Nodes, inside the container : center panel
+			current.renderNodes($container, nodes, type);
 
-			// Description management
-			$name.empty();
+			// Description : left panel
+			var $inputs = current.renderDescriptionPanel($container, nodes, type);
 
-			var $inputs = $container.find('input[data-index]').off().on('change', function () {
-				var $pane = $container.closest('.tab-pane');
-				var $description = $pane.find('.choice-description');
-				var mode;
-				node = nodes[parseInt($(this).attr('data-index'), 10)];
-				if (type === 'mode') {
-					mode = node.id;
-				} else {
-					mode = node.mode || 'link';
-				}
-				_('subscribe-mode').removeClass('mode-create').removeClass('mode-link').addClass('mode-' + mode);
-				$description.addClass('hidden').empty();
-				node.description && $description.html(node.description).removeClass('hidden');
-				if (current.$super('getToolFromId')(node.id)) {
-					// Use provided image for 'img' node
-					$name.html(current.$super('toIconNameTool')(node));
-				} else {
-					// Use classes of 'i' node
-					$name.html('<span><i class="' + (node.uiClasses || 'fa fa-cloud') + '"></i></span><span>' + current.$main.getNodeName(node) + '</span>');
-				}
-			});
 			if (type === 'mode') {
 				_('subscribe-mode').find('label.choice.hidden').removeClass('hidden');
 				_('subscribe-mode').filter('.mode-link').find('label.choice input[value="create"]').closest('label').addClass('hidden');
@@ -274,6 +238,50 @@ define(['cascade'], function ($cascade) {
 			} else {
 				$('.node-popup-trigger').addClass('hidden');
 			}
+		},
+		
+		renderNodes: function($container, nodes, type) {
+			for (const index in nodes) {
+				var node = nodes[index];
+				var icon;
+				if (node.uiClasses) {
+					// Use classes instead of picture
+					icon = node.uiClasses.startsWith('$') ? '<span class="icon-text">' + node.uiClasses.substring(1) + '</span>' : ('<i class="' + node.uiClasses + '"></i>');
+				} else {
+					// Use a provided picture
+					icon = current.$super('getToolFromId')(node.id) ? current.$super('toIcon')(node, 'x64w') : '<i class="fa fa-cloud"></i>';
+				}
+				var $choice = $('<label class="choice btn"><input data-index="' + index + '" type="radio" name="s-choice-' + type + '" value="' + node.id + '" autocomplete="off"><div class="icon img-circle">' + icon + '</div>' + current.$main.getNodeName(node) + '</label>');
+				$container.append($choice);
+				
+				// Save the context
+				$choice.find('input').data('node', node);
+			}
+		},
+		
+		renderDescriptionPanel: function($container, nodes, type) {
+			var $name = _('subscribe-definition').find('.selected-' + type).empty();
+			return $container.find('input[data-index]').off().on('change', function () {
+				var $pane = $container.closest('.tab-pane');
+				var $description = $pane.find('.choice-description');
+				var mode;
+				var node = nodes[parseInt($(this).attr('data-index'), 10)];
+				if (type === 'mode') {
+					mode = node.id;
+				} else {
+					mode = node.mode || 'link';
+				}
+				_('subscribe-mode').removeClass('mode-create').removeClass('mode-link').addClass('mode-' + mode);
+				$description.addClass('hidden').empty();
+				node.description && $description.html(node.description).removeClass('hidden');
+				if (current.$super('getToolFromId')(node.id)) {
+					// Use provided image for 'img' node
+					$name.html(current.$super('toIconNameTool')(node));
+				} else {
+					// Use classes of 'i' node
+					$name.html('<span><i class="' + (node.uiClasses || 'fa fa-cloud') + '"></i></span><span>' + current.$main.getNodeName(node) + '</span>');
+				}
+			});
 		},
 
 		/**

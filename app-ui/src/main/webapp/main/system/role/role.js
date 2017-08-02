@@ -76,33 +76,16 @@ define(function () {
 			});
 		},
 
-		// create business call
-		createEntity: function () {
+		// Save or update API call
+		saveOrUpdate: function () {
 			$.ajax({
-				type: 'POST',
+				type: current.currentId ? 'PUT' : 'POST',
 				url: REST_PATH + 'system/security/role',
 				dataType: 'json',
 				contentType: 'application/json',
 				data: current.formToJSON(),
 				success: function () {
-					notifyManager.notify(Handlebars.compile(current.$messages.created)(_('name').val()));
-					_('popup').modal('hidden');
-					// Refresh the table
-					current.table && current.table.api().ajax.reload();
-				}
-			});
-		},
-
-		// update business call
-		updateEntity: function () {
-			$.ajax({
-				type: 'PUT',
-				url: REST_PATH + 'system/security/role',
-				dataType: 'json',
-				contentType: 'application/json',
-				data: current.formToJSON(),
-				success: function () {
-					notifyManager.notify(Handlebars.compile(current.$messages.updated)(_('name').val()));
+					notifyManager.notify(Handlebars.compile(current.$messages[current.currentId ? 'updated' : 'created'])(_('name').val()));
 					_('popup').modal('hide');
 					// Refresh the table
 					current.table && current.table.api().ajax.reload();
@@ -113,8 +96,8 @@ define(function () {
 		// initialize the page
 		initialize: function () {
 			// initialize components
-			_('save').click(current.updateEntity);
-			_('create').click(current.createEntity);
+			_('save').click(current.saveOrUpdate);
+			_('create').click(current.saveOrUpdate);
 			current.initializeDataTable();
 			_('authorizations-business').select2(current.selectInitConf);
 			_('authorizations-ui').select2(current.selectInitConf);

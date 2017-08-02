@@ -31,36 +31,7 @@ define([
 					}
 				},
 				error: function (xhr) {
-					if (xhr.status === 400) {
-						if ((typeof xhr.responseText === 'string') && /^\{.*\}$/.exec(xhr.responseText) && JSON.parse(xhr.responseText).errors) {
-							var error = JSON.parse(xhr.responseText).errors;
-							if (error.password) {
-								current.error(messages.error['password-complexity']);
-								current.focusPassword();
-							} else if (error.session) {
-								// CAPTCHA failed
-								current.error(messages.error.cookie);
-								$('#captcha').val('').focus();
-							} else {
-								// Other REST error
-								current.error(messages.error.captcha);
-								current.focusPassword();
-							}
-						} else {
-							// Other server error
-							current.error();
-							current.focusPassword();
-						}
-					} else if (xhr.status === 403) {
-						current.error(messages.error.connected);
-						$('#username').val('').focus();
-					} else if (xhr.status === 503) {
-						current.error(messages.error.mail);
-					} else {
-						// Other network error
-						current.error();
-						current.focusPassword();
-					}
+					current.handleError(xhr);
 					captcha && current.refreshCaptcha();
 				},
 				complete: function () {
@@ -69,6 +40,42 @@ define([
 					$submit.removeClass('loading');
 				}
 			});
+		},
+		
+		/**
+		 * AJAX error management
+		 */
+		handleAjaxError: function(xhr) {
+			if (xhr.status === 400) {
+				if ((typeof xhr.responseText === 'string') && /^\{.*\}$/.exec(xhr.responseText) && JSON.parse(xhr.responseText).errors) {
+					var error = JSON.parse(xhr.responseText).errors;
+					if (error.password) {
+						current.error(messages.error['password-complexity']);
+						current.focusPassword();
+					} else if (error.session) {
+						// CAPTCHA failed
+						current.error(messages.error.cookie);
+						$('#captcha').val('').focus();
+					} else {
+						// Other REST error
+						current.error(messages.error.captcha);
+						current.focusPassword();
+					}
+				} else {
+					// Other server error
+					current.error();
+					current.focusPassword();
+				}
+			} else if (xhr.status === 403) {
+				current.error(messages.error.connected);
+				$('#username').val('').focus();
+			} else if (xhr.status === 503) {
+				current.error(messages.error.mail);
+			} else {
+				// Other network error
+				current.error();
+				current.focusPassword();
+			}
 		},
 		focusPassword: function () {
 			$('#password:visible').focus();

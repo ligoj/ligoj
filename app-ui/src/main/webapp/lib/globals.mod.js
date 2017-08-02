@@ -117,7 +117,7 @@ function _(id) {
 	Array.minAuto = function (array) {
 		return Array.min(array) || Array.minSparse(array);
 	};
-	Array.maxSparse = function (array) {
+	Array.sparse = function (array, compareFunction) {
 		var narray = [];
 		var i;
 		for (i = 0; i < array.length; i++) {
@@ -125,17 +125,13 @@ function _(id) {
 				narray.push(array[i]);
 			}
 		}
-		return Math.max.apply(Math, narray);
+		return compareFunction.apply(Math, narray);
+	};
+	Array.maxSparse = function (array) {
+		return Array.sparse(array, Math.max);
 	};
 	Array.minSparse = function (array) {
-		var narray = [];
-		var i;
-		for (i = 0; i < array.length; i++) {
-			if (array[i]) {
-				narray.push(array[i]);
-			}
-		}
-		return Math.min.apply(Math, narray);
+		return Array.sparse(array, Math.min);
 	};
 	Array.binarySearch = function (array, find) {
 		var low = 0;
