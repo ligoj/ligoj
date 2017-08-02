@@ -65,7 +65,7 @@ define(['cascade'], function ($cascade) {
 			} else {
 				// Use a provided picture
 				var url = 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';
-				result = '<img src="' + url + '" title="' + title + '" alt="' + title + '"' + (dataSrc ? ' data-src="' + url + '"' : '') + ' class="tool"/>';
+				result = '<img src="' + url + '" title="' + title + '" alt="" onerror="this.className=this.className+\' broken\'"' + (dataSrc ? ' data-src="' + url + '"' : '') + ' class="tool"/>';
 			}
 			return result;
 		},

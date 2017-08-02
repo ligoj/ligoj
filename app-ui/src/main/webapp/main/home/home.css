@@ -1,12 +1,16 @@
 img.tool {
 	vertical-align: top;
 	margin-top: 2px;
+	width: 16px;
+	height: 16px;
+}
+img.tool.broken {
+	visibility: hidden;
 }
 .img-circle img.tool, .thumbnail img.tool {
 	-webkit-filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
 	filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
 }
-
 .table>thead>tr>th.status, .table>tbody>tr>td.status {
 	width: 10px;
 	border-right-width: 1px;
