@@ -4,11 +4,11 @@ docker run --name ligoj-db -d -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e 
 ```
 # Build Docker image
 ```
-docker build -t ligoj-api:1.6.0 --build-arg VERSION=1.6.0 .
+docker build -t ligoj-api:1.6.1 --build-arg VERSION=1.6.1 .
 ```
 # Run Docker image
 ```
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.0
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.1
 ```
 
 # Tips 
