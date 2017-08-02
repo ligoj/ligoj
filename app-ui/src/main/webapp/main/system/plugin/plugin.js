@@ -2,7 +2,10 @@ define(function () {
 	var current = {
 
 		initialize: function () {
-			_('table').dataTable({
+			_('table').on('click', '.update', function() {
+				// Update the plug-in
+				current.installNext(_('table').dataTable().fnGetData($(this).closest('tr')[0]).plugin.artifact, 0);
+			}).dataTable({
 				ajax: REST_PATH + 'plugin',
 				dataSrc: '',
 				sAjaxDataProp: '',
@@ -26,7 +29,15 @@ define(function () {
 						className: 'hidden-xs hidden-sm'
 					}, {
 						data: 'plugin.version',
-						className: 'truncate'
+						className: 'truncate',
+						render : function(version, _m, plugin) {
+							var result = version;
+							if (plugin.newVersion) {
+								// Upgrade is available
+								result += ' <a class="label label-success update" data-toggle="tooltip" title="' + current.$messages['plugin-update'] + '"><i class="fa fa-arrow-circle-o-up"></i> ' + plugin.newVersion + '</a>';
+							}
+							return result;
+						}
 					}, {
 						data: 'plugin.type',
 						className: 'hidden-xs hidden-sm'
@@ -111,10 +122,12 @@ define(function () {
 		/**
 		 * Install a the plug-ins from the one at the specified index, and then the next ones.
 		 * There is one AJAX call by plug-in, and stops at any error.
-		 * @param {string[]} plugins The plug-in identifiers array to install.
-		 * @param {number} index The starting plug-in index within the given array.
+		 * @param {string[]|string} plugins The plug-in identifiers array to install. Accept a sole plugin string too.
+		 * @param {number} index The starting plug-in index within the given array. When undefined, is 0.
 		 */
 		installNext : function(plugins, index) {
+			plugins = typeof plugins === 'array' ? plugins : [plugins];
+			index = index || 0;
 			if (index >= plugins.length) {
 				// All plug-ins are installed
 				current.table && current.table.api().ajax.reload();
