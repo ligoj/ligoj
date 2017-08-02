@@ -93,26 +93,45 @@ public class PluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void findAll() {
+	public void findAll() throws IOException {
 		final SampleService service1 = new SampleService();
-		final SampleTool tool1 = new SampleTool();
+		final SampleTool1 tool1 = new SampleTool1();
+		final SampleTool2 tool2 = new SampleTool2();
+		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.start();
 
 		try {
 
 			// Add some plug-ins
+
+			// This plug-in is available in the remote storage with a newer version
 			final Plugin pluginId = new Plugin();
 			pluginId.setKey("service:sample");
 			pluginId.setType(PluginType.SERVICE);
-			pluginId.setVersion("1.0");
+			pluginId.setVersion("0.0.0.8");
+			pluginId.setArtifact("plugin-sample");
 			repository.saveAndFlush(pluginId);
 			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleService", service1);
 
-			final Plugin pluginIdLdap = new Plugin();
-			pluginIdLdap.setKey("service:sample:tool");
-			pluginIdLdap.setType(PluginType.TOOL);
-			pluginIdLdap.setVersion("1.1");
-			repository.saveAndFlush(pluginIdLdap);
-			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleTool", tool1);
+			// This plug-in is available in the remote storage with the same version
+			final Plugin pluginTool1 = new Plugin();
+			pluginTool1.setKey("service:sample:tool");
+			pluginTool1.setArtifact("plugin-sample-tool");
+			pluginTool1.setType(PluginType.TOOL);
+			pluginTool1.setVersion("1.1");
+			repository.saveAndFlush(pluginTool1);
+			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleTool1", tool1);
+
+			// This plug-in is available in the remote storage with the same version
+			final Plugin pluginTool2 = new Plugin();
+			pluginTool2.setKey("service:sample:tool");
+			pluginTool2.setArtifact("plugin-sample-tool");
+			pluginTool2.setType(PluginType.TOOL);
+			pluginTool2.setVersion("1.1");
+			repository.saveAndFlush(pluginTool2);
+			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleTool2", tool2);
 
 			final List<PluginVo> plugins = resource.findAll();
 			Assert.assertEquals(4, plugins.size());
@@ -122,6 +141,7 @@ public class PluginResourceTest extends AbstractServerTest {
 			Assert.assertEquals("feature:iam:empty", plugin0.getId());
 			Assert.assertEquals("IAM Empty", plugin0.getName());
 			Assert.assertEquals("Gfi Informatique", plugin0.getVendor());
+			Assert.assertNull(plugin0.getNewVersion());
 			Assert.assertTrue(plugin0.getLocation().endsWith(".jar"));
 			Assert.assertNotNull(plugin0.getPlugin().getVersion());
 			Assert.assertNull(plugin0.getNode());
@@ -147,7 +167,8 @@ public class PluginResourceTest extends AbstractServerTest {
 			Assert.assertEquals("Sample", plugin2.getName());
 			Assert.assertNull(plugin2.getVendor());
 			Assert.assertFalse(plugin2.getLocation().endsWith(".jar"));
-			Assert.assertEquals("1.0", plugin2.getPlugin().getVersion());
+			Assert.assertEquals("0.0.0.8", plugin2.getPlugin().getVersion());
+			Assert.assertEquals("0.0.1", plugin2.getNewVersion());
 			Assert.assertEquals("service:sample", plugin2.getNode().getId());
 			Assert.assertEquals(3, plugin2.getNodes());
 			Assert.assertEquals(3, plugin2.getSubscriptions());
@@ -160,6 +181,7 @@ public class PluginResourceTest extends AbstractServerTest {
 			Assert.assertNull(plugin3.getVendor());
 			Assert.assertFalse(plugin3.getLocation().endsWith(".jar"));
 			Assert.assertEquals("1.1", plugin3.getPlugin().getVersion());
+			Assert.assertNull(plugin3.getNewVersion());
 			Assert.assertEquals("service:sample:tool", plugin3.getNode().getId());
 			Assert.assertEquals(2, plugin3.getNodes());
 			Assert.assertEquals(3, plugin3.getSubscriptions());
@@ -180,7 +202,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assert.assertEquals(PluginType.SERVICE, repository.findByExpected("key", "service:sample").getType());
 		Assert.assertNotNull(repository.findByExpected("key", "service:sample").getVersion());
 
-		final SampleTool service2 = new SampleTool();
+		final SampleTool1 service2 = new SampleTool1();
 		resource.configurePluginInstall(service2);
 	}
 
@@ -252,7 +274,7 @@ public class PluginResourceTest extends AbstractServerTest {
 	@Test
 	public void determinePluginType() {
 		Assert.assertEquals(PluginType.SERVICE, resource.determinePluginType(new SampleService()));
-		Assert.assertEquals(PluginType.TOOL, resource.determinePluginType(new SampleTool()));
+		Assert.assertEquals(PluginType.TOOL, resource.determinePluginType(new SampleTool1()));
 	}
 
 	@Test(expected = TechnicalException.class)
@@ -519,9 +541,9 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void searchPluginsOnMavenRepoOneResult() throws IOException {
-		final List<MavenSearchResultItem> result = searchPluginsInMavenRepo("buil");
+		final List<MavenSearchResultItem> result = searchPluginsInMavenRepo("samp");
 		Assert.assertEquals(1, result.size());
-		Assert.assertEquals("plugin-build", result.get(0).getArtifact());
+		Assert.assertEquals("plugin-sample", result.get(0).getArtifact());
 		Assert.assertEquals("0.0.1", result.get(0).getVersion());
 	}
 

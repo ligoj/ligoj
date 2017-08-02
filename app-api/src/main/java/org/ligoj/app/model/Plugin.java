@@ -41,6 +41,11 @@ public class Plugin extends AbstractAudited<Integer> {
 	private String key;
 
 	/**
+	 * The Maven artifact id.
+	 */
+	private String artifact;
+
+	/**
 	 * The plug-in type.
 	 */
 	@NotNull

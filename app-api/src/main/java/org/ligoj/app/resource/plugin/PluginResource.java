@@ -1,5 +1,6 @@
 package org.ligoj.app.resource.plugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -39,6 +40,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +54,7 @@ import org.ligoj.app.dao.SubscriptionRepository;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Plugin;
 import org.ligoj.app.model.PluginType;
+import org.ligoj.app.model.Subscription;
 import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.SpringUtils;
@@ -129,20 +132,29 @@ public class PluginResource {
 	 * @return All plug-ins with details.
 	 */
 	@GET
-	public List<PluginVo> findAll() {
-		// Get the existing plug-in features
+	public List<PluginVo> findAll() throws IOException {
+		// Get the available plug-ins
+		final Map<String, MavenSearchResultItem> lastVersion = SpringUtils.getBean(PluginResource.class).getLastPluginVersions();
+
+		// Get the installed plug-in features
 		return repository.findAll().stream().map(p -> {
 			final String key = p.getKey();
-			final PluginVo vo = new PluginVo();
-			vo.setId(key);
 
 			// Find the associated feature class
 			final FeaturePlugin feature = SpringUtils.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream()
 					.filter(f -> key.equals(f.getKey())).findFirst().get();
+			final PluginVo vo = new PluginVo();
+			vo.setId(p.getKey());
 			vo.setName(StringUtils.removeStart(feature.getName(), "Ligoj - Plugin "));
 			vo.setLocation(getPluginLocation(feature).getPath());
 			vo.setVendor(feature.getVendor());
 			vo.setPlugin(p);
+
+			// Expose the resolve newer version
+			vo.setNewVersion(Optional.ofNullable(lastVersion.get(p.getArtifact())).map(MavenSearchResultItem::getVersion)
+					.filter(v -> toExtendedVersion(v).compareTo(toExtendedVersion(p.getVersion())) > 0).orElse(null));
+
+			// Node statistics
 			if (p.getType() != PluginType.FEATURE) {
 				// This is a node (service or tool) add statistics and details
 				vo.setNodes(nodeRepository.countByRefined(key));
@@ -151,6 +163,27 @@ public class PluginResource {
 			}
 			return vo;
 		}).sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
+	}
+
+	/**
+	 * Convert a version to a comparable string and following the semver
+	 * specification. Maximum 4 version ranges are accepted.
+	 * TODO Remove with ligoj/ligoj-api/v1.1.2
+	 * 
+	 * @param version
+	 *            The version string to convert. May be <code>null</code>
+	 * @return The given version to be comparable with another version. Handle
+	 *         the 'SNAPSHOT' case considered has oldest than the one without
+	 *         this suffix.
+	 * @see PluginsClassLoader#toExtendedVersion(String)
+	 */
+	private static String toExtendedVersion(final String version) {
+		final StringBuilder fileWithVersionExp = new StringBuilder();
+		final String[] allFragments = { "0", "0", "0", "0" };
+		final String[] versionFragments = ObjectUtils.defaultIfNull(StringUtils.split(version, "-."), allFragments);
+		System.arraycopy(versionFragments, 0, allFragments, 0, versionFragments.length);
+		Arrays.stream(allFragments).map(s -> StringUtils.leftPad(StringUtils.leftPad(s, 7, '0'), 8, 'Z')).forEach(fileWithVersionExp::append);
+		return fileWithVersionExp.toString();
 	}
 
 	/**
@@ -180,7 +213,7 @@ public class PluginResource {
 	}
 
 	/**
-	 * Install the last available version of given plug-in from the remote server.
+	 * Install or update to the last available version of given plug-in from the remote server.
 	 * 
 	 * @param artifact
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
@@ -294,9 +327,15 @@ public class PluginResource {
 		event.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().forEach(s -> {
 			final Plugin plugin = plugins.get(s.getKey());
 			if (plugin == null) {
+				// New plug-in case
 				newFeatures.put(s.getKey(), s);
-			} else if (!plugin.getVersion().equals(getVersion(s))) {
-				updateFeatures.put(s.getKey(), s);
+			} else {
+				// Update the artifactId. May have not changed
+				plugin.setArtifact(toArtifactId(s));
+				if (!plugin.getVersion().equals(getVersion(s))) {
+					// The version is different, is all cases, consider it as an update
+					updateFeatures.put(s.getKey(), s);
+				}
 			}
 			removedPlugins.remove(plugin);
 		});
@@ -387,33 +426,97 @@ public class PluginResource {
 		final String newVersion = getVersion(plugin);
 		log.info("Installing the new plugin {} v{}", plugin.getKey(), newVersion);
 		try {
-			final List<Class<?>> installedEntities = plugin.getInstalledEntities();
+			// Build and persist the Plugin entity
 			final Plugin entity = new Plugin();
-
-			// Special process for service plug-ins
-			if (plugin instanceof ServicePlugin) {
-				// Either a service either a tool, depends on the level of refinement
-				entity.setType(determinePluginType((ServicePlugin) plugin));
-
-				if (!installedEntities.contains(Node.class)) {
-					// Persist the partial default node now for the bellow installation process
-					nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
-				}
-			} else {
-				// A simple feature
-				entity.setType(PluginType.FEATURE);
-			}
-
-			configurePluginEntities(plugin, installedEntities);
-
+			entity.setArtifact(toArtifactId(plugin));
 			entity.setKey(plugin.getKey());
 			entity.setVersion(newVersion);
+			entity.setType(plugin instanceof ServicePlugin ? determinePluginType((ServicePlugin) plugin) : PluginType.FEATURE);
 			repository.saveAndFlush(entity);
+
+			// Special process for service plug-ins
+			final List<Class<?>> installedEntities = plugin.getInstalledEntities();
+			if (entity.getType() != PluginType.FEATURE && !installedEntities.contains(Node.class)) {
+				// Persist the partial default node now for the bellow installation process
+				nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
+			}
+
+			// Configure the plug-in entities
+			configurePluginEntities(plugin, installedEntities);
 		} catch (final Exception e) { // NOSONAR - Catch all to notice every time the failure
 			// Something happened
 			log.error("Installing the new plugin {} v{} failed", plugin.getKey(), newVersion, e);
 			throw new TechnicalException(String.format("Configuring the new plugin %s failed", plugin.getKey()), e);
 		}
+	}
+
+	/**
+	 * Guess the Maven artifactId from plug-in artifact name. Use the key and replace the "service" or "feature" part by
+	 * "plugin".
+	 * 
+	 * @param plugin
+	 *            The plugin class.
+	 * @return The Maven "artifactId" as it should be be when naming convention is respected. Required to detect the new
+	 *         version.
+	 */
+	public String toArtifactId(final FeaturePlugin plugin) {
+		return "plugin-" + Arrays.stream(plugin.getKey().split(":")).skip(1).collect(Collectors.joining("-"));
+	}
+
+	/**
+	 * Get a file reference for a specific subscription. This file will use the
+	 * subscription as a context to isolate it, and using the related node and
+	 * the subscription's identifier. The parent directory is created as needed.
+	 * 
+	 * @param subscription
+	 *            The subscription used a context of the file to create.
+	 * @param fragments
+	 *            The file fragments.
+	 * @return The file reference.
+	 * @throws IOException
+	 *             When the file creation failed.
+	 */
+	public File toFile(final Subscription subscription, final String... fragments) throws IOException {
+		java.nio.file.Path parent = toPath(getPluginClassLoader().getHomeDirectory(), subscription.getNode());
+		parent = parent.resolve(String.valueOf(subscription.getId()));
+
+		// Ensure the t
+		for (int i = 0; i < fragments.length; i++) {
+			parent = parent.resolve(fragments[i]);
+		}
+		FileUtils.forceMkdir(parent.getParent().toFile());
+		return parent.toFile();
+	}
+
+	/**
+	 * Convert a {@link Node} to a {@link Path} inside the given parent
+	 * directory.
+	 * 
+	 * @param parent
+	 *            The parent path.
+	 * @param node
+	 *            The related node.
+	 * @return The computed sibling path.
+	 */
+	private java.nio.file.Path toPath(final java.nio.file.Path parent, final Node node) {
+		return (node.isRefining() ? toPath(parent, node.getRefined()) : parent).resolve(toFragmentId(node).replace(':', '-'));
+	}
+
+	/**
+	 * Return the last part of the node identifier, excluding the part of the
+	 * parent. Built like that :
+	 * <ul>
+	 * <li>node = 'service:id:ldap:ad1', fragment = 'ad1'</li>
+	 * <li>node = 'service:id:ldap', fragment = 'ldap'</li>
+	 * <li>node = 'service:id', fragment = 'service:id'</li>
+	 * </ul>
+	 * 
+	 * @param node
+	 *            The node to convert to a simple fragment String.
+	 * @return The simple fragment.
+	 */
+	private String toFragmentId(final Node node) {
+		return node.isRefining() ? node.getId().substring(node.getRefined().getId().length() + 1) : node.getId();
 	}
 
 	/**

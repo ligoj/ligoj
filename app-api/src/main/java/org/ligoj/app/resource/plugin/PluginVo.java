@@ -43,4 +43,9 @@ public class PluginVo extends NamedBean<String> {
 	 * Location of this plug-in.
 	 */
 	private String location;
+	
+	/**
+	 * When not <code>null</code>, a new version of this plug-in is available
+	 */
+	private String newVersion;
 }
