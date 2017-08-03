@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -64,6 +65,7 @@ import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.restart.RestartEndpoint;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Persistable;
@@ -108,6 +110,9 @@ public class PluginResource {
 	@Autowired
 	private RestartEndpoint restartEndpoint;
 
+	@Autowired
+	private ApplicationContext context;
+
 	/**
 	 * Return the plug-ins download URL.
 	 * 
@@ -134,35 +139,42 @@ public class PluginResource {
 	@GET
 	public List<PluginVo> findAll() throws IOException {
 		// Get the available plug-ins
-		final Map<String, MavenSearchResultItem> lastVersion = SpringUtils.getBean(PluginResource.class).getLastPluginVersions();
+		final Map<String, MavenSearchResultItem> lastVersion = context.getBean(PluginResource.class).getLastPluginVersions();
 
 		// Get the installed plug-in features
-		return repository.findAll().stream().map(p -> {
-			final String key = p.getKey();
+		return repository.findAll().stream()
+				.map(p -> toVo(lastVersion, p, context.getBeansOfType(FeaturePlugin.class).values().stream()
+						.filter(f -> p.getKey().equals(f.getKey())).findFirst().orElse(null)))
+				.filter(Objects::nonNull).sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
+	}
 
-			// Find the associated feature class
-			final FeaturePlugin feature = SpringUtils.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream()
-					.filter(f -> key.equals(f.getKey())).findFirst().get();
-			final PluginVo vo = new PluginVo();
-			vo.setId(p.getKey());
-			vo.setName(StringUtils.removeStart(feature.getName(), "Ligoj - Plugin "));
-			vo.setLocation(getPluginLocation(feature).getPath());
-			vo.setVendor(feature.getVendor());
-			vo.setPlugin(p);
+	private PluginVo toVo(final Map<String, MavenSearchResultItem> lastVersion, final Plugin p, final FeaturePlugin feature) {
+		if (feature == null) {
+			// Plug-in is no more available or in fail-safe mode
+			return null;
+		}
+		
+		// Plug-in implementation is available
+		final String key = p.getKey();
+		final PluginVo vo = new PluginVo();
+		vo.setId(p.getKey());
+		vo.setName(StringUtils.removeStart(feature.getName(), "Ligoj - Plugin "));
+		vo.setLocation(getPluginLocation(feature).getPath());
+		vo.setVendor(feature.getVendor());
+		vo.setPlugin(p);
 
-			// Expose the resolve newer version
-			vo.setNewVersion(Optional.ofNullable(lastVersion.get(p.getArtifact())).map(MavenSearchResultItem::getVersion)
-					.filter(v -> toExtendedVersion(v).compareTo(toExtendedVersion(p.getVersion())) > 0).orElse(null));
+		// Expose the resolve newer version
+		vo.setNewVersion(Optional.ofNullable(lastVersion.get(p.getArtifact())).map(MavenSearchResultItem::getVersion)
+				.filter(v -> toExtendedVersion(v).compareTo(toExtendedVersion(p.getVersion())) > 0).orElse(null));
 
-			// Node statistics
-			if (p.getType() != PluginType.FEATURE) {
-				// This is a node (service or tool) add statistics and details
-				vo.setNodes(nodeRepository.countByRefined(key));
-				vo.setSubscriptions(subscriptionRepository.countByNode(key));
-				vo.setNode(NodeResource.toVo(nodeRepository.findOne(key)));
-			}
-			return vo;
-		}).sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
+		// Node statistics
+		if (p.getType() != PluginType.FEATURE) {
+			// This is a node (service or tool) add statistics and details
+			vo.setNodes(nodeRepository.countByRefined(key));
+			vo.setSubscriptions(subscriptionRepository.countByNode(key));
+			vo.setNode(NodeResource.toVo(nodeRepository.findOne(key)));
+		}
+		return vo;
 	}
 
 	/**

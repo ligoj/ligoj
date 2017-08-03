@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -93,19 +94,14 @@ public class PluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void findAll() throws IOException {
+	public void findAllNewVersion() throws IOException {
 		final SampleService service1 = new SampleService();
-		final SampleTool1 tool1 = new SampleTool1();
-		final SampleTool2 tool2 = new SampleTool2();
 		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
 						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 
 		try {
-
-			// Add some plug-ins
-
 			// This plug-in is available in the remote storage with a newer version
 			final Plugin pluginId = new Plugin();
 			pluginId.setKey("service:sample");
@@ -115,51 +111,8 @@ public class PluginResourceTest extends AbstractServerTest {
 			repository.saveAndFlush(pluginId);
 			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleService", service1);
 
-			// This plug-in is available in the remote storage with the same version
-			final Plugin pluginTool1 = new Plugin();
-			pluginTool1.setKey("service:sample:tool");
-			pluginTool1.setArtifact("plugin-sample-tool");
-			pluginTool1.setType(PluginType.TOOL);
-			pluginTool1.setVersion("1.1");
-			repository.saveAndFlush(pluginTool1);
-			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleTool1", tool1);
-
-			// This plug-in is available in the remote storage with the same version
-			final Plugin pluginTool2 = new Plugin();
-			pluginTool2.setKey("service:sample:tool");
-			pluginTool2.setArtifact("plugin-sample-tool");
-			pluginTool2.setType(PluginType.TOOL);
-			pluginTool2.setVersion("1.1");
-			repository.saveAndFlush(pluginTool2);
-			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleTool2", tool2);
-
 			final List<PluginVo> plugins = resource.findAll();
-			Assert.assertEquals(4, plugins.size());
-
-			// Plug-in from the API
-			final PluginVo plugin0 = plugins.get(0);
-			Assert.assertEquals("feature:iam:empty", plugin0.getId());
-			Assert.assertEquals("IAM Empty", plugin0.getName());
-			Assert.assertEquals("Gfi Informatique", plugin0.getVendor());
-			Assert.assertNull(plugin0.getNewVersion());
-			Assert.assertTrue(plugin0.getLocation().endsWith(".jar"));
-			Assert.assertNotNull(plugin0.getPlugin().getVersion());
-			Assert.assertNull(plugin0.getNode());
-			Assert.assertEquals(0, plugin0.getNodes());
-			Assert.assertEquals(0, plugin0.getSubscriptions());
-			Assert.assertEquals(PluginType.FEATURE, plugin0.getPlugin().getType());
-
-			// Plug-in (feature) embedded in the current project
-			final PluginVo plugin1 = plugins.get(1);
-			Assert.assertEquals("feature:welcome:data-rbac", plugin1.getId());
-			Assert.assertEquals("Welcome Data RBAC", plugin1.getName());
-			Assert.assertNull(plugin1.getVendor());
-			Assert.assertFalse(plugin1.getLocation().endsWith(".jar"));
-			Assert.assertNotNull(plugin1.getPlugin().getVersion());
-			Assert.assertNull(plugin1.getNode());
-			Assert.assertEquals(0, plugin1.getNodes());
-			Assert.assertEquals(0, plugin1.getSubscriptions());
-			Assert.assertEquals(PluginType.FEATURE, plugin1.getPlugin().getType());
+			Assert.assertEquals(3, plugins.size());
 
 			// External plug-in service
 			final PluginVo plugin2 = plugins.get(2);
@@ -173,23 +126,93 @@ public class PluginResourceTest extends AbstractServerTest {
 			Assert.assertEquals(3, plugin2.getNodes());
 			Assert.assertEquals(3, plugin2.getSubscriptions());
 			Assert.assertEquals(PluginType.SERVICE, plugin2.getPlugin().getType());
-
-			// External plug-in tool
-			final PluginVo plugin3 = plugins.get(3);
-			Assert.assertEquals("service:sample:tool", plugin3.getId());
-			Assert.assertEquals("Tool", plugin3.getName());
-			Assert.assertNull(plugin3.getVendor());
-			Assert.assertFalse(plugin3.getLocation().endsWith(".jar"));
-			Assert.assertEquals("1.1", plugin3.getPlugin().getVersion());
-			Assert.assertNull(plugin3.getNewVersion());
-			Assert.assertEquals("service:sample:tool", plugin3.getNode().getId());
-			Assert.assertEquals(2, plugin3.getNodes());
-			Assert.assertEquals(3, plugin3.getSubscriptions());
-			Assert.assertEquals(PluginType.TOOL, plugin3.getPlugin().getType());
 		} finally {
 			destroySingleton("sampleService");
 			destroySingleton("sampleTool");
 		}
+	}
+
+	@Test
+	public void findAllSameVersion() throws IOException {
+		final SampleService service1 = new SampleService();
+		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.start();
+
+		try {
+			// This plug-in is available in the remote storage with a newer version
+			final Plugin pluginId = new Plugin();
+			pluginId.setKey("service:sample");
+			pluginId.setType(PluginType.SERVICE);
+			pluginId.setVersion("0.0.1");
+			pluginId.setArtifact("plugin-sample");
+			repository.saveAndFlush(pluginId);
+			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleService", service1);
+
+			final List<PluginVo> plugins = resource.findAll();
+			Assert.assertEquals(3, plugins.size());
+
+			// External plug-in service
+			final PluginVo plugin2 = plugins.get(2);
+			Assert.assertEquals("service:sample", plugin2.getId());
+			Assert.assertEquals("Sample", plugin2.getName());
+			Assert.assertNull(plugin2.getVendor());
+			Assert.assertFalse(plugin2.getLocation().endsWith(".jar"));
+			Assert.assertEquals("0.0.1", plugin2.getPlugin().getVersion());
+			Assert.assertNull(plugin2.getNewVersion());
+			Assert.assertEquals("service:sample", plugin2.getNode().getId());
+			Assert.assertEquals(3, plugin2.getNodes());
+			Assert.assertEquals(3, plugin2.getSubscriptions());
+			Assert.assertEquals(PluginType.SERVICE, plugin2.getPlugin().getType());
+		} finally {
+			destroySingleton("sampleService");
+			destroySingleton("sampleTool");
+		}
+	}
+
+	@Test
+	public void findAllOrphan() throws IOException {
+		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.start();
+
+		// A tool where plug-in is no more available -> will not be returned
+		final Plugin orphanPLugin = new Plugin();
+		orphanPLugin.setKey("any");
+		orphanPLugin.setArtifact("plugin-any");
+		orphanPLugin.setType(PluginType.TOOL);
+		orphanPLugin.setVersion("1.1");
+		repository.saveAndFlush(orphanPLugin);
+
+		final List<PluginVo> plugins = resource.findAll();
+		Assert.assertEquals(2, plugins.size());
+
+		// Plug-in from the API
+		final PluginVo plugin0 = plugins.get(0);
+		Assert.assertEquals("feature:iam:empty", plugin0.getId());
+		Assert.assertEquals("IAM Empty", plugin0.getName());
+		Assert.assertEquals("Gfi Informatique", plugin0.getVendor());
+		Assert.assertNull(plugin0.getNewVersion());
+		Assert.assertTrue(plugin0.getLocation().endsWith(".jar"));
+		Assert.assertNotNull(plugin0.getPlugin().getVersion());
+		Assert.assertNull(plugin0.getNode());
+		Assert.assertEquals(0, plugin0.getNodes());
+		Assert.assertEquals(0, plugin0.getSubscriptions());
+		Assert.assertEquals(PluginType.FEATURE, plugin0.getPlugin().getType());
+
+		// Plug-in (feature) embedded in the current project
+		final PluginVo plugin1 = plugins.get(1);
+		Assert.assertEquals("feature:welcome:data-rbac", plugin1.getId());
+		Assert.assertEquals("Welcome Data RBAC", plugin1.getName());
+		Assert.assertNull(plugin1.getVendor());
+		Assert.assertFalse(plugin1.getLocation().endsWith(".jar"));
+		Assert.assertNotNull(plugin1.getPlugin().getVersion());
+		Assert.assertNull(plugin1.getNode());
+		Assert.assertEquals(0, plugin1.getNodes());
+		Assert.assertEquals(0, plugin1.getSubscriptions());
+		Assert.assertEquals(PluginType.FEATURE, plugin1.getPlugin().getType());
 	}
 
 	@Test
@@ -221,6 +244,18 @@ public class PluginResourceTest extends AbstractServerTest {
 
 		// Check the managed entity is persisted
 		Assert.assertEquals(1, em.createQuery("FROM SystemBench WHERE prfChar=?").setParameter(0, "InitData").getResultList().size());
+	}
+
+	@Test
+	public void invalidateLastPLuginVersions() throws IOException {
+		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.start();
+		final Map<String, MavenSearchResultItem> versions = resource.getLastPluginVersions();
+		Assert.assertSame(versions, resource.getLastPluginVersions());
+		resource.invalidateLastPLuginVersions();
+		Assert.assertNotSame(versions, resource.getLastPluginVersions());
 	}
 
 	@Test
