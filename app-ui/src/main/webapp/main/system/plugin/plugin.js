@@ -60,7 +60,6 @@ define(function () {
 						extend: 'create',
 						text: 'install',
 						action: function () {
-							_('search').select2('val','');
 							_('popup').modal('show');
 						}
 					}, {
@@ -107,6 +106,11 @@ define(function () {
 				current.install(_('search').select2('val'));
 				_('popup').modal('hide');
 			});
+			_('popup').on('show.bs.modal', function() {
+				_('search').select2('data', null);
+			}).on('shown.bs.modal', function() {
+				_('search').select2('focus');
+			});
 		},
 		
 		/**
@@ -126,7 +130,7 @@ define(function () {
 		 * @param {number} index The starting plug-in index within the given array. When undefined, is 0.
 		 */
 		installNext : function(plugins, index) {
-			plugins = typeof plugins === 'array' ? plugins : [plugins];
+			plugins = $.isArray(plugins) ? plugins : [plugins];
 			index = index || 0;
 			if (index >= plugins.length) {
 				// All plug-ins are installed
