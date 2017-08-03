@@ -66,6 +66,7 @@ org.ligoj.boot.api.Application
 org.ligoj.boot.web.Application
 ```
 Notes these launchers (*.launch) are already configured for Eclipse.
+Important : Using Eclipse compiler, enable 'Store information about method parameters (usable with reflection)' in general preferences/Java/Compiler
 
 ## Compatibilities
 ###Database
@@ -107,8 +108,9 @@ Docker environment variables:
 ```
 CONTEXT      : Context, without starting '/'
 SERVER_HOST  : 0.0.0.0
-SERVER_PORT  : 8081
+SERVER_PORT  : 8081 (8080 for UI server)
 JAVA_MEMORY  : JVM Memory
+CRYPTO       : Secret AES file loacation for secured application data
 CUSTOM_OPTS  : Additional JVM options, like -D...
 JAVA_OPTIONS : Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties
 jdbc.url     : DB URL

@@ -3,47 +3,42 @@ LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
 
 RUN set -xe \
   apt-get update && \
-  apt-get update --fix-missing && \
-  apt-get install -y \
-   curl \
-   mysql-client
+  apt-get update --fix-missing
 
+# ARGS (build)
 ARG APP="ligoj"
 ARG GROUP_ID="org.${APP}.app"
 ARG ARTIFACT_ID="app-api"
 ARG NEXUS_HOST="oss.sonatype.org"
-ARG NEXUS_URL="https://${NEXUS_HOST}"
 ARG VERSION
-#ARG WAR_URL="${NEXUS_URL}/service/local/repositories/orgligoj-1087/content/org/${APP}/app/${ARTIFACT_ID}/${VERSION}/${ARTIFACT_ID}-${VERSION}.war"
-ARG WAR_URL="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
+ARG NEXUS_URL="https://${NEXUS_HOST}"
+ARG SERVER_HOME="/usr/local/${APP}"
+ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
+
+ADD ${WAR} "${SERVER_HOME}/${ARTIFACT_ID}.war"
+WORKDIR "${SERVER_HOME}"
+
+# ENV (run)
 ENV CONTEXT "${APP}-api"
-ENV CONTEXT_URL "/${CONTEXT}"
-ENV SERVER_HOST "0.0.0.0"
-ENV SERVER_PORT "8081"
-ENV LIGOJ_HOME /home/ligoj
-ENV SERVER_HOME /usr/local/ligoj
-ENV JAVA_MEMORY="-Xms712M -Xmx1024M"
-ENV CUSTOM_OPTS="-Djpa.hbm2ddl=update"
-ENV CRYPTO="-Dapp.crypto.password=public"
-ENV JAVA_OPTIONS="-Duser.timezone=UTC"
-RUN set -xe && \
-  mkdir -p "$SERVER_HOME" && \
-  mkdir -p "$LIGOJ_HOME" && \
-    echo "Downloading application ${WAR_URL}" && \
-        curl -sSL "${WAR_URL}" -o "${SERVER_HOME}/ligoj-api.war" && \
-  echo "Cleaning" && \
-        apt-get purge -y --auto-remove curl
+ENV CONTEXT_URL="/${CONTEXT}" \
+    SERVER_HOST="0.0.0.0" \
+    SERVER_PORT="8081" \
+    LIGOJ_HOME=/home/ligoj \
+    JAVA_MEMORY="-Xms712M -Xmx1024M" \
+    CUSTOM_OPTS="-Djpa.hbm2ddl=update" \
+    CRYPTO="-Dapp.crypto.password=public" \
+    SERVER_HOME="${SERVER_HOME}" \
+    ARTIFACT_ID="${ARTIFACT_ID}" \
+    JAVA_OPTIONS="-Duser.timezone=UTC"
 
-COPY wait-for-mysql.sh "${SERVER_HOME}/wait-for-mysql.sh"
-WORKDIR "${LIGOJ_HOME}"
-RUN chmod +x "${SERVER_HOME}/wait-for-mysql.sh"
-
-# With database container
-ENV DATABASE="ligoj"
-CMD ./wait-for-mysql.sh $DATABASE java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS -Dserver.address="${SERVER_HOST}" -Dserver.port="${SERVER_PORT}" -Dserver.context-path="${CONTEXT_URL}" -Dligoj.home="${LIGOJ_HOME}" -jar "$SERVER_HOME/ligoj-api.war"
-
-# Without database container
-# CMD java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS -Dserver.address="${SERVER_HOST}" -Dserver.port="${SERVER_PORT}" -Dserver.context-path="${CONTEXT_URL}" -Dligoj.home="${LIGOJ_HOME}" -jar "$SERVER_HOME/ligoj-api.war"
+EXPOSE ${SERVER_PORT}
+CMD mkdir -p "$LIGOJ_HOME" && \
+  java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
+    -Dserver.address="${SERVER_HOST}" \
+    -Dserver.port="${SERVER_PORT}" \
+    -Dserver.context-path="${CONTEXT_URL}" \
+    -Dligoj.home="${LIGOJ_HOME}" \
+    -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
 HEALTHCHECK --interval=5s --timeout=3s --retries=10 \
 CMD curl -v --silent "http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health" 2>&1 | grep UP
