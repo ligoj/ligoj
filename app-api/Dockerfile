@@ -6,21 +6,19 @@ RUN set -xe \
   apt-get update --fix-missing
 
 # ARGS (build)
-ARG APP="ligoj"
-ARG GROUP_ID="org.${APP}.app"
+ARG GROUP_ID="org.ligoj.app"
 ARG ARTIFACT_ID="app-api"
 ARG NEXUS_HOST="oss.sonatype.org"
 ARG VERSION
 ARG NEXUS_URL="https://${NEXUS_HOST}"
-ARG SERVER_HOME="/usr/local/${APP}"
+ARG SERVER_HOME="/usr/local/ligoj"
 ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
 
 ADD ${WAR} "${SERVER_HOME}/${ARTIFACT_ID}.war"
 WORKDIR "${SERVER_HOME}"
 
 # ENV (run)
-ENV CONTEXT "${APP}-api"
-ENV CONTEXT_URL="/${CONTEXT}" \
+ENV CONTEXT_URL="/ligoj-api" \
     SERVER_HOST="0.0.0.0" \
     SERVER_PORT="8081" \
     LIGOJ_HOME=/home/ligoj \
@@ -40,5 +38,5 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -Dligoj.home="${LIGOJ_HOME}" \
     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
-HEALTHCHECK --interval=10s --timeout=3s --retries=5 \
+HEALTHCHECK --interval=10s --timeout=2s --retries=5 --start-period=20s \
 CMD curl -v --silent "http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health" 2>&1 | grep UP

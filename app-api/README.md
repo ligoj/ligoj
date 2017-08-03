@@ -3,7 +3,7 @@ Compile Java sources and produce the WAR file.
 ```
 mvn clean package -DskipTests=true
 ```
-Note: you can run this command either from the root module, either from the "app-api" module. When executed from the root module, bot WAR (app-api and app-ui) will be created. But if you want to produce production binaries, enable the "minify" profile "-Pminify".
+Note: you can run this command either from the root module, either from the "app-api" module. When executed from the root module, both WAR (app-api and app-ui) will be created. But if you want to produce production binaries, enable the "minify" profile "-Pminify".
 
 # Test the WAR
 ```
@@ -57,7 +57,7 @@ docker --rm -it \
 
 ## Start the API container linked to an external database (Option2)
 ```
-docker --rm -it \
+docker run --rm -it \
  --name "ligoj-api" \
  -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password="ligoj" -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138' \
  ligoj-api:1.6.1
@@ -70,7 +70,7 @@ docker run --rm -it \
  ligoj-api:1.6.1 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
 ```
 
-More complex run with crypto and volume configurations
+More complex run with crypto, port mapping and volume configurations
 ```
 docker run --rm -it \
  --name "ligoj-api" \
