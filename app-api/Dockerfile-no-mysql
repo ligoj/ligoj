@@ -34,16 +34,9 @@ RUN set -xe && \
   echo "Cleaning" && \
         apt-get purge -y --auto-remove curl
 
-COPY wait-for-mysql.sh "${SERVER_HOME}/wait-for-mysql.sh"
 WORKDIR "${LIGOJ_HOME}"
-RUN chmod +x "${SERVER_HOME}/wait-for-mysql.sh"
-
-# With database container
-ENV DATABASE="ligoj"
-CMD ./wait-for-mysql.sh $DATABASE java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS -Dserver.address="${SERVER_HOST}" -Dserver.port="${SERVER_PORT}" -Dserver.context-path="${CONTEXT_URL}" -Dligoj.home="${LIGOJ_HOME}" -jar "$SERVER_HOME/ligoj-api.war"
 
 # Without database container
-# CMD java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS -Dserver.address="${SERVER_HOST}" -Dserver.port="${SERVER_PORT}" -Dserver.context-path="${CONTEXT_URL}" -Dligoj.home="${LIGOJ_HOME}" -jar "$SERVER_HOME/ligoj-api.war"
-
+CMD java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS -Dserver.address="${SERVER_HOST}" -Dserver.port="${SERVER_PORT}" -Dserver.context-path="${CONTEXT_URL}" -Dligoj.home="${LIGOJ_HOME}" -jar "$SERVER_HOME/ligoj-api.war"
 HEALTHCHECK --interval=5s --timeout=3s --retries=10 \
 CMD curl -v --silent "http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health" 2>&1 | grep UP
