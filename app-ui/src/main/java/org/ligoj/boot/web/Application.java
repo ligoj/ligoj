@@ -38,7 +38,7 @@ public class Application extends SpringBootServletInitializer {
 	private static final String SERVICE_PASSWORD_RECOVERY = "/rest/service/password/recovery/*";
 	private static final String SERVICE_PASSWORD_RESET = "/rest/service/password/reset/*";
 
-	@Value("${ligoj.endpoint.management.url:http://localhost:8081/ligoj-api/manage}")
+	@Value("${ligoj.endpoint.manage.url:http://localhost:8081/ligoj-api/manage}")
 	private String endpointManagement;
 
 	@Value("${ligoj.endpoint.api.url:http://localhost:8081/ligoj-api/rest}")
@@ -62,8 +62,8 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public ServletRegistrationBean managementServlet() {
 		// Due to the current limitation of BackendProxyServlet
-		System.setProperty("ligoj.endpoint.managment.url", endpointManagement);
-		return newBackend("managementProxy", "ligoj.endpoint.managment.url", "/manage", "/manage/*");
+		System.setProperty("ligoj.endpoint.manage.url", endpointManagement);
+		return newBackend("managementProxy", "ligoj.endpoint.manage.url", "/manage", "/manage/*");
 	}
 
 	@Bean
