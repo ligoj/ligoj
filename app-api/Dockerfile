@@ -40,5 +40,5 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -Dligoj.home="${LIGOJ_HOME}" \
     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
-HEALTHCHECK --interval=5s --timeout=3s --retries=10 \
+HEALTHCHECK --interval=10s --timeout=3s --retries=5 \
 CMD curl -v --silent "http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health" 2>&1 | grep UP
