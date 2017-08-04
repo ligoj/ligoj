@@ -5,7 +5,10 @@ import java.util.Collections;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.ligoj.app.resource.plugin.WebjarsServlet;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
+import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.web.servlet.ErrorPage;
@@ -25,6 +28,7 @@ import org.springframework.web.filter.DelegatingFilterProxy;
  */
 @SpringBootApplication
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
+@EnableAutoConfiguration(exclude = { LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class })
 public class Application extends SpringBootServletInitializer {
 
 	@Override
