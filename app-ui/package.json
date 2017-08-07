@@ -6,7 +6,7 @@
 	"version": "1.0.0",
 	"homepage": "https://github.com/ligoj/ligoj",
 	"engines": {
-		"jetty": "9.3"
+		"jetty": "9.4"
 	},
 	"contributors": ["fabrice.daugan@gmail.com"],
 	"license": "TBD",
@@ -88,7 +88,7 @@
 	    "requirejs-i18njs": "2.0.6",
 	    "requirejs-text": "2.0.15",
 	    "later": "1.2.0",
-	    "moment": "2.16",
+	    "moment": "2.18.1",
 	    "jquery2": "3.2.1",
 	    "jqueryui": "1.11.4",
 	    "jquery.sparkline": "2.1.2-fork",
@@ -98,8 +98,8 @@
 		"name": "RequireJS",
 		"url": "http://requirejs.org/docs/download.html",
 		"sources": "https://github.com/jrburke/requirejs",
-		"version": "2.2.0",
-		"lastChecked": "2016-07-09",
+		"version": "2.3.4",
+		"lastChecked": "2017-08-07",
 		"note": "require.js?version script references must be updated in the HTML files with along the requirejs version"
 	}, {
 		"name": "Respond.js",
@@ -122,11 +122,11 @@
 		"lastChecked": "2016-11-26",
 		"known-issues": ["#1113"]
 	}, {
-		"name": "JQuery2",
+		"name": "JQuery",
 		"url": "http://jquery.com/",
 		"sources": "https://github.com/jquery/jquery",
-		"version": "2.2.1",
-		"lastChecked": "2016-03-09",
+		"version": "3.2.1",
+		"lastChecked": "2017-07-08",
 		"known-issues": []
 	}, {
 		"name": "JQueryUI",
@@ -192,7 +192,7 @@
 		"url": "http://requirejs.org/docs/api.html#text",
 		"sources": "http://github.com/requirejs/text",
 		"version": "2.0.15",
-		"lastChecked": "2016-07-09"
+		"lastChecked": "2017-08-07"
 	}, {
 		"name": "css",
 		"sources": "https://github.com/guybedford/require-css",
@@ -205,7 +205,7 @@
 		"url": "http://requirejs.org/docs/api.html#i18n",
 		"sources": "http://github.com/requirejs/i18n",
 		"version": "2.0.6",
-		"lastChecked": "2016-03-09"
+		"lastChecked": "2017-08-07"
 	}, {
 		"name": "domReady",
 		"url": "http://requirejs.org/docs/api.html#pageload",
