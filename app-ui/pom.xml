@@ -11,7 +11,7 @@
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-ui</artifactId>
 	<packaging>war</packaging>
-	<version>1.6.2</version>
+	<version>1.6.3-SNAPSHOT</version>
 	<name>Ligoj - Web</name>
 	<properties>
 		<sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
