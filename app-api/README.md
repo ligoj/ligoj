@@ -7,12 +7,12 @@ Note: you can run this command either from the root module, either from the "app
 
 # Test the WAR
 ```
-java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dapp.safe.mode=true -Djdbc.host=ligoj-db -jar target/app-api-1.6.1.war
+java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dapp.safe.mode=true -Djdbc.host=ligoj-db -jar target/app-api-1.6.2.war
 ```
 
 # Build Docker image
 ```
-docker build -t ligoj-api:1.6.1 --build-arg VERSION=1.6.1 .
+docker build -t ligoj-api:1.6.2 --build-arg VERSION=1.6.2 .
 ```
 
 ## Custom builds
@@ -23,17 +23,17 @@ In case of a custom build you can specify its remote or local location.
 
 Staged OSS build from Sonatype
 ```
-docker build -t ligoj-api:1.6.1 --build-arg VERSION=1.6.1 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/1.6.1/app-api-1.6.1.war" .
+docker build -t ligoj-api:1.6.2 --build-arg VERSION=1.6.2 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/1.6.2/app-api-1.6.2.war" .
 ```
 
 Private remote build
 ```
-docker build -t ligoj-api:1.6.1 --build-arg VERSION=1.6.1 --build-arg WAR="https://storage.company.com/releases/app-api-1.6.1.war" .
+docker build -t ligoj-api:1.6.2 --build-arg VERSION=1.6.2 --build-arg WAR="https://storage.company.com/releases/app-api-1.6.2.war" .
 ```
 
 Reuse the local maven package
 ```
-docker build -t ligoj-api:1.6.1 --build-arg VERSION=1.6.1 --build-arg WAR="target/app-api-1.6.1.war" .
+docker build -t ligoj-api:1.6.2 --build-arg VERSION=1.6.2 --build-arg WAR="target/app-api-1.6.2.war" .
 ```
 Note the local WAR path must be relative to the Dockerfile (not the current path), and must be bellow the Dockerfile: do not use "../bar/foo.war"
 
@@ -52,7 +52,7 @@ docker run -d \
 docker --rm -it \
   --name ligoj-api \
   -e CUSTOM_OPTS='-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db' \
-  ligoj-api:1.6.1 
+  ligoj-api:1.6.2 
 ```
 
 ## Start the API container linked to an external database (Option2)
@@ -60,14 +60,14 @@ docker --rm -it \
 docker run --rm -it \
  --name "ligoj-api" \
  -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password="ligoj" -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138' \
- ligoj-api:1.6.1
+ ligoj-api:1.6.2
 ```
 
 You can experience network issue with remote database. To validate the link, try this :
 ```
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj-api:1.6.1 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
+ ligoj-api:1.6.2 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
 ```
 
 More complex run with crypto, port mapping and volume configurations
@@ -78,7 +78,7 @@ docker run --rm -it \
  -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 -Dapp.safe.mode=true" \
  -v ~/.ligoj:/home/ligoj \
  -p 8680:8081 \
- ligoj-api:1.6.1
+ ligoj-api:1.6.2
 ```
 Note: On Windows host, replace "\" by "`" for multi-line support.
 
