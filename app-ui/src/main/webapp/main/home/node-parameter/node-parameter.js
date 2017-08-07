@@ -19,7 +19,7 @@ define(['cascade'], function ($cascade) {
 		getParameterValues: function ($container) {
 			var values = [];
 			var i = 0;
-			$container.find('.parameter').each(function () {
+			$container.find('.parameter[data-type]').each(function () {
 				var $input = $(this);
 				var $group = $input.closest('form-group');
 				var id = $input.attr('id');
