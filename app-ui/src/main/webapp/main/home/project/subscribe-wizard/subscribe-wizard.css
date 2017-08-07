@@ -1,3 +1,7 @@
+#subscribe-definition .choice img.tool {
+	width: 64px;
+	height: 64px;
+}
 #subscribe-definition .tab-pane h3, #subscribe-definition .tab-pane h4 {
 	text-align: center;
 }
