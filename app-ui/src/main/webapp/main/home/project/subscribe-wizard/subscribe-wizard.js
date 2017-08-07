@@ -306,6 +306,9 @@ define(['cascade'], function ($cascade) {
 				return;
 			}
 
+			
+			// Persist the subscription
+			_('subscription-create').disable();
 			$.ajax({
 				type: 'POST',
 				url: REST_PATH + 'subscription',
@@ -315,6 +318,9 @@ define(['cascade'], function ($cascade) {
 				success: function (id) {
 					notifyManager.notify(Handlebars.compile(current.$messages.created)(id));
 					_('subscribe-definition').trigger('subscribe:saved');
+				},
+				error: function () {
+					_('subscription-create').enable();
 				}
 			});
 		},
