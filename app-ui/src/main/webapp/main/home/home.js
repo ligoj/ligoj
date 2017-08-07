@@ -402,10 +402,10 @@ define(['cascade'], function ($cascade) {
 			if (groupBySubscription) {
 				// Carousel indicator is moved to header instead of each raw
 				var $group = $('tr[data-subscription="' + subscription.id + '"]').closest('table.subscriptions').find('.group-carousel');
-				if ($group.length && !$group.hasClass('carousel-part' + part).length) {
+				if ($group.length && !$group.hasClass('carousel-part' + part)) {
 					// Add a global carousel indicator for this table
 					current.generateCarouselIndicators(items, null, startIndex, baseIndex, $group);
-					$group.addClass('.carousel-part' + part);
+					$group.addClass('carousel-part' + part);
 				}
 			} else {
 				// This carousel is independent
