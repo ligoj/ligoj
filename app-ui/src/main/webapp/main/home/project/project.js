@@ -541,7 +541,7 @@ define(['cascade'], function ($cascade) {
 						}
 
 						// Show the souscription specific configuration view
-						$subscribe.removeClass('hidden').find('.project-name').text(current.model.name);
+						$subscribe.removeClass('hidden').removeClass('hide').find('.project-name').text(current.model.name);
 					});
 				}
 			});
