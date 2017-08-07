@@ -122,13 +122,6 @@
 		"lastChecked": "2016-11-26",
 		"known-issues": ["#1113"]
 	}, {
-		"name": "JQuery",
-		"url": "http://jquery.com/",
-		"sources": "https://github.com/jquery/jquery",
-		"version": "1.12.1",
-		"lastChecked": "2016-03-09",
-		"known-issues": []
-	}, {
 		"name": "JQuery2",
 		"url": "http://jquery.com/",
 		"sources": "https://github.com/jquery/jquery",
