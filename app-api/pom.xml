@@ -21,6 +21,7 @@
 	</scm>
 	<properties>
 		<api.version>1.1.2</api.version>
+		<mail.version>1.5.6</mail.version>
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
 		<spring-cloud.version>1.2.3.RELEASE</spring-cloud.version>
 	</properties>
@@ -69,6 +70,19 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-actuator</artifactId>
 				<version>${spring-boot.version}</version>
+			</dependency>
+			<!-- JSR-925 -->
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>activation</artifactId>
+				<version>1.1.1</version>
+				<scope>runtime</scope>
+			</dependency>
+			<!-- JSR-919 -->
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>javax.mail</artifactId>
+				<version>${mail.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -136,6 +150,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<!-- JSR-919 -->
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
