@@ -540,7 +540,7 @@ define(['cascade'], function ($cascade) {
 							traceLog('No managed configuration for service ' + service.id);
 						}
 
-						// Show the souscription specific configuration view
+						// Show the subscription specific configuration view
 						$subscribe.removeClass('hidden').removeClass('hide').find('.project-name').text(current.model.name);
 					});
 				}
