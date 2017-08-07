@@ -705,10 +705,10 @@ define([
 			applicationManager.debug && traceDebug('Trigger event', event);
 			var callbacks = $self.callbacks[event] || [];
 			for (var index = 0; index < callbacks.length; index++) {
-				if (typeof callbacks[i] === 'function') {
-					callbacks[i](data || (context || $self.$context).$view, context);
+				if (typeof callbacks[index] === 'function') {
+					callbacks[index](data || (context || $self.$context).$view, context);
 				} else {
-					traceLog('Expected function, but got "' + typeof callbacks[i] + '" : ' + callbacks[i]);
+					traceLog('Expected function, but got "' + typeof callbacks[index] + '" : ' + callbacks[index]);
 				}
 			}
 			return $self;

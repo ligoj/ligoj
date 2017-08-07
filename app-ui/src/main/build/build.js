@@ -8,7 +8,7 @@
 		}
 	],
 	paths : {
-		'jquery' : 'jquery/jquery-2.x',
+		'jquery' : 'jquery/jquery',
 
 		// Copy/paste from application.js
 		'main': '../main',
