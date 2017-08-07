@@ -241,7 +241,7 @@ define(['cascade'], function ($cascade) {
 		},
 		
 		renderNodes: function($container, nodes, type) {
-			for (const index in nodes) {
+			for (var index = 0; index < nodes.length; index++) {
 				var node = nodes[index];
 				var icon;
 				if (node.uiClasses) {

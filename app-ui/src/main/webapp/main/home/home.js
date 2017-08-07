@@ -429,7 +429,7 @@ define(['cascade'], function ($cascade) {
 		 * Generate the carousel items.
 		 * The content can also be merged into an existing carousel.
 		 */
-		generateCarouselInner(items, startIndex, baseIndex, $carousel) {
+		generateCarouselInner: function(items, startIndex, baseIndex, $carousel) {
 			var merge = $carousel.length;
 			var result = merge ? '' : '<div class="carousel-inner" role="listbox">';
 			var value;

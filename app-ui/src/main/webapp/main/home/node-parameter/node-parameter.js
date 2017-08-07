@@ -81,7 +81,7 @@ define(['cascade'], function ($cascade) {
 					},
 					multiple: function (value, $element) {
 						var selections = [];
-						for (const index in value.selections) {
+						for (var index = 0; index < value.selections.length; index++) {
 							selections.push(value.parameter.values[value.selections[index]]);
 						}
 						$element.select2('val', selections);
@@ -201,13 +201,13 @@ define(['cascade'], function ($cascade) {
 
 			// Drop required flag for nodes
 			var parameters = [];
-			for (const index in values) {
+			for (var index = 0; index < values.length; index++) {
 				var parameter = values[index].parameter;
 				parameters.push(parameter);
 				delete parameter.mandatory;
 			}
 			current.configureParameters($container, parameters, node, mode, function (configuration) {
-				for (const index in values) {
+				for (var index = 0; index < values.length; index++) {
 					var value = values[index];
 					var parameter = value.parameter;
 					var $element = _(parameter.id);
@@ -253,7 +253,7 @@ define(['cascade'], function ($cascade) {
 				var renderers = configuration.renderers;
 				var iProviders = providers.input;
 				var cProviders = providers['form-group'];
-				for (const index in parameters) {
+				for (var index = 0; index < parameters.length; index++) {
 					var parameter = parameters[index];
 					var $input = (iProviders[parameter.id] || iProviders[parameter.type] || iProviders.standard)(parameter);
 					(cProviders[parameter.id] || cProviders[parameter.type] || cProviders.standard)(parameter, $container, $input);

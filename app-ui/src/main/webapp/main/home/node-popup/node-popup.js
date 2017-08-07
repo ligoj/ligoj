@@ -141,7 +141,7 @@ define(['cascade'], function ($cascade) {
 				availableModes = ['all', 'none', 'create', 'link'];
 			}
 			var $modes = _('node-mode').find('button').addClass('hidden').removeClass('active');
-			for (const index in availableModes) {
+			for (var index = 0; index < availableModes.length; index++) {
 				$modes.filter('[value="' + availableModes[index] + '"]').removeClass('hidden');
 			}
 			$modes.filter('[value="' + (model.mode || availableModes[0]) + '"]').addClass('active');
