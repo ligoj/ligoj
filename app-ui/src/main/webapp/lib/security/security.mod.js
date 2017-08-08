@@ -28,22 +28,22 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 */
 		_pruneHierarchy: function (item) {
 			var parent = item.parent();
-			if (parent.size() === 1) {
+			if (parent.length === 1) {
 				if (item.attr('data-security-on-forbidden') === 'disable') {
 					item.addClass('disabled').addClass('security-disabled').removeAttr('href').attr('disabled', 'disabled').click(function (e) {
 						e.preventDefault();
 					});
-					if (item.closest('.panel').size() === 1) {
+					if (item.closest('.panel').length === 1) {
 						item.closest('.panel').find('.panel-heading').addClass('disabled');
 					}
 				} else if (parent[0].tagName.toLowerCase() === 'td') {
 					// Add IE7 fix, replace empty by space
 					parent.html('&nbsp');
-				} else if (item.closest('.panel').size() === 1) {
+				} else if (item.closest('.panel').length === 1) {
 					item.closest('.panel').remove();
 				} else {
-					var childrenSize = parent.children().size();
-					if (childrenSize === 1 || (childrenSize === 2 && parent.children('[data-toggle="dropdown"]').size() === 1)) {
+					var childrenSize = parent.children().length;
+					if (childrenSize === 1 || (childrenSize === 2 && parent.children('[data-toggle="dropdown"]').length === 1)) {
 						// Parent will be empty too
 						current._pruneHierarchy(parent);
 					} else {
