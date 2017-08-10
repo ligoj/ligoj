@@ -282,27 +282,27 @@ define(['cascade'], function ($cascade) {
 			});
 		},
 
-		formToJSON: function () {
-			return JSON.stringify({
+		uiToModel: function () {
+			return {
 				id: current.currentId,
 				name: _('name').val(),
 				pkey: _('pkey').val(),
 				teamLeader: _('teamLeader').val(),
 				description: _('description').val()
-			});
+			};
 		},
 
 		save: function () {
 			_('confirmCreate').button('loading');
-			var data = current.formToJSON();
+			var data = current.uiToModel();
 			$.ajax({
 				type: current.currentId ? 'PUT' : 'POST',
 				url: REST_PATH + 'project',
 				dataType: 'json',
 				contentType: 'application/json',
-				data: data,
+				data: JSON.stringify(data),
 				success: function (id) {
-					notifyManager.notify(Handlebars.compile(current.$messages[current.currentId ? 'updated' : 'created'])(data.name + '(' + (current.currentId || id) + ')'));
+					notifyManager.notify(Handlebars.compile(current.$messages[current.currentId ? 'updated' : 'created'])(data.name + ' (' + (data.id || id) + ')'));
 					_('popup').modal('hide');
 					current.table && current.table.api().ajax.reload();
 					if (id) {
