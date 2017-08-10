@@ -153,7 +153,7 @@ public class PluginResource {
 			// Plug-in is no more available or in fail-safe mode
 			return null;
 		}
-		
+
 		// Plug-in implementation is available
 		final String key = p.getKey();
 		final PluginVo vo = new PluginVo();
@@ -205,7 +205,7 @@ public class PluginResource {
 	 */
 	@CacheResult(cacheName = "plugins-last-version")
 	public Map<String, MavenSearchResultItem> getLastPluginVersions() throws IOException {
-		final String searchResult = new CurlProcessor().get(getPluginSearchUrl());
+		final String searchResult = StringUtils.defaultString(new CurlProcessor().get(getPluginSearchUrl()), "{\"response\":{\"docs\":[]}}}");
 		// Extract artifacts
 		final ObjectMapper jsonMapper = new ObjectMapper();
 		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), MavenSearchResultItem[].class))
