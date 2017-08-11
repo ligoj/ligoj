@@ -187,7 +187,7 @@ define(['cascade'], function ($cascade) {
 			$description.addClass('hidden').empty();
 			$.ajax({
 				dataType: 'json',
-				url: REST_PATH + url,
+				url: REST_PATH + url + (url.indexOf('?') === -1 ? '?' : '&') + 'rows=1000',
 				type: 'GET',
 				success: function (nodes) {
 					nodes = $.isArray(nodes.data) ? nodes.data : nodes;
