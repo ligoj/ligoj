@@ -28,11 +28,11 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Return the root of refinement. This corresponds to the basic service. The result will be cached.
 		 */
-		getServiceFromNode: function (node) {
+		getService: function (node) {
 			if (node.service) {
 				return node.service;
 			}
-			node.service = (node.refined && this.getServiceFromNode(node.refined)) || node;
+			node.service = (node.refined && this.getService(node.refined)) || node;
 			return node.service;
 		},
 

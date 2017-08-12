@@ -425,7 +425,7 @@ define(['cascade'], function ($cascade) {
 					data: 'node',
 					className: 'hidden-xs hidden-sm truncate service',
 					render: function (_i, _j, subscription) {
-						var id = current.$parent.getServiceFromNode(subscription.node).id;
+						var id = current.$parent.getService(subscription.node).id;
 						var label = current.$messages[id] || id;
 						return label;
 					}
@@ -520,13 +520,14 @@ define(['cascade'], function ($cascade) {
 				type: 'GET',
 				success: function (data) {
 					data.id = parseInt(id, 10);
-					var service = current.$parent.getServiceFromNode(data.node);
+					var service = current.$parent.getService(data.node);
+					var tool = current.$parent.getTool(data.node);
 					current.$parent.requireService(current, service.id, function ($service) {
 						// Destroy the previous view, some cache could be performed there ...
 						current.$view.find('.subscribe-configuration').remove();
 						// Inject the partial of this service in the current view
 						var $subscribe = ($service.$view.is('.subscribe-configuration') ? $service.$view : $service.$view.find('.subscribe-configuration')).clone();
-						var $subscribeWrapper = $('<div id="subscribe-configuration-wrapper' + service.id + '"></div>');
+						var $subscribeWrapper = $('<div class="configuration-wrapper-' + service.id.replace(':','-') + ' configuration-wrapper-' + tool.id.replace(':','-') +'"></div>');
 						current.$view.append($subscribeWrapper);
 						$subscribeWrapper.html($subscribe);
 						if ($service && $service.configure) {
