@@ -482,6 +482,7 @@ define(['cascade'], function ($cascade) {
 			var result = mergeInd ? '' : '<ol class="carousel-indicators">';
 			var item;
 			var i;
+			var index = baseIndex;
 			
 			for (i = 0; i < items.length; i++) {
 				item = items[i];
@@ -491,7 +492,8 @@ define(['cascade'], function ($cascade) {
 					if (id) {
 						result += ' data-target="#' + id + '"';
 					}
-					result += ' data-slide-to="' + (baseIndex + i) + '"' + ((mergeInd === 0 && (startIndex ? i === startIndex : i === 0)) ? ' class="active"' : '') + ($.isArray(item) ? ' data-toggle="tooltip" data-container="body" title="' + (current.$messages[item[0]] || item[0]) + '"' : '') + '></li>';
+					result += ' data-slide-to="' + baseIndex + '"' + ((mergeInd === 0 && (startIndex ? i === startIndex : i === 0)) ? ' class="active"' : '') + ($.isArray(item) ? ' data-toggle="tooltip" data-container="body" title="' + (current.$messages[item[0]] || item[0]) + '"' : '') + '></li>';
+					baseIndex++;
 				}
 			}
 			if (merge === 0) {

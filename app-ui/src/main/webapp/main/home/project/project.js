@@ -527,7 +527,7 @@ define(['cascade'], function ($cascade) {
 						current.$view.find('.subscribe-configuration').remove();
 						// Inject the partial of this service in the current view
 						var $subscribe = ($service.$view.is('.subscribe-configuration') ? $service.$view : $service.$view.find('.subscribe-configuration')).clone();
-						var $subscribeWrapper = $('<div class="configuration-wrapper-' + service.id.replace(':','-') + ' configuration-wrapper-' + tool.id.replace(':','-') +'"></div>');
+						var $subscribeWrapper = $('<div class="configuration-wrapper-' + service.id.replace(/:/g, '-') + ' configuration-wrapper-' + tool.id.replace(/:/g, '-') +'"></div>');
 						current.$view.append($subscribeWrapper);
 						$subscribeWrapper.html($subscribe);
 						if ($service && $service.configure) {
