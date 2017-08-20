@@ -323,12 +323,12 @@
 		"lastChecked": "2016-01-16",
 		"known-issues": ["#19"]
 	}, {
-		"name": "cronGen",
-		"url": "https://github.com/hsal/cronGen",
-		"sources": "https://github.com/hsal/cronGen",
+		"name": "jqcron2",
+		"url": "https://github.com/fabdouglas/jqcron2",
+		"sources": "https://github.com/fabdouglas/jqcron2",
 		"version": "0.0.0",
-		"lastChecked": "2016-01-16",
-		"known-issues": ["#8", "#9"]
+		"lastChecked": "2017-08-20",
+		"known-issues": []
 	}, {
 		"name": "Bootstrap Switch",
 		"id": "bootstrap-switch",
