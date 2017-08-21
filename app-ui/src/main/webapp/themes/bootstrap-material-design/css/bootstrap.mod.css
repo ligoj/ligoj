@@ -361,12 +361,21 @@ body {
 	position: static;
 	padding-bottom: 18px;
 }
-.modal.large {
-	width: 80%;
 
-	/* respsonsive width */
-	margin-left: -40%;
+@media (min-width: 768px) {
+	.modal.medium .modal-dialog {
+		width: 750px;
+	}
+	.modal.large .modal-dialog {
+		width: 750px;
+	}
 }
+@media (min-width: 1024px) {
+	.modal.large .modal-dialog {
+		width: 1010px;
+	}
+}
+
 .form-group.has-error option {
 	color: black;
 }
