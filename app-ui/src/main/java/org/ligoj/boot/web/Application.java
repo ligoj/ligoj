@@ -55,6 +55,12 @@ public class Application extends SpringBootServletInitializer {
 		return application.sources(Application.class);
 	}
 
+	/**
+	 * Require main either invoked from IDE, either from the CLI
+	 * 
+	 * @param args
+	 *            Application arguments.
+	 */
 	public static void main(final String[] args) {
 		SpringApplication.run(Application.class, args);
 	}

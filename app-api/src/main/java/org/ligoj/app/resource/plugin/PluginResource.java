@@ -230,7 +230,7 @@ public class PluginResource {
 	@PUT
 	@Path("restart")
 	public void restart() {
-		final Thread restartThread = new Thread(() -> restartEndpoint.restart(), "Restart");
+		final Thread restartThread = new Thread(() -> restartEndpoint.restart(), "Restart"); // NOPMD
 		restartThread.setDaemon(false);
 		restartThread.start();
 	}

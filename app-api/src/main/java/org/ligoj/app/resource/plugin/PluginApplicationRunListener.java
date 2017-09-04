@@ -59,7 +59,7 @@ public class PluginApplicationRunListener implements SpringApplicationRunListene
 	}
 
 	@Override
-	public void finished(final ConfigurableApplicationContext context,final Throwable exception) {
+	public void finished(final ConfigurableApplicationContext context, final Throwable exception) {
 		// Nothing to do
 	}
 
