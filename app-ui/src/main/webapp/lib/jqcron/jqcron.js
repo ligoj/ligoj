@@ -242,6 +242,11 @@ define(['jquery'], function($) {
 					items[3] = '?';
 					items[5] = _selectorDow.getCronValue();
 				}
+				
+				// Cannot have day-of-week AND a day-of-month
+				if (items[3] !== '*' && items[3] !== '?') {
+					items[5] = '?';					
+				}
 			}
 			return items.join(' ');
 		};
