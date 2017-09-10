@@ -17,6 +17,29 @@ define([
 				$('[aria-describedby="' + $(this).attr('id') + '"]').popover('hide');
 			});
 		}
+	}).on('show.bs.dropdown', null, function(e) {
+		// Close previous dropdowns
+		$('.dropdown-menu.detached').closeDropdown();
+
+		// Handle the dropdown inside an absolute/overflow-hidden container, move the dropdown to body
+		var $trigger = $(e.relatedTarget);
+		if (!$trigger.hasClass('detached') && $trigger.closest('.dropdown-overflow').length) {
+			var flag = 'dropdown-' + Math.random();
+			var $dropdown = $trigger.next('.dropdown-menu').addClass('detached').attr('data-previous-container',flag);
+			$trigger.addClass('detached').attr('data-dropdown-container',flag)
+			$('body').append($dropdown.css({
+				position: 'absolute',
+				display: 'initial',
+				left: $dropdown.offset().left + 'px',
+				width : $dropdown.width() + 'px',
+			 	top: ($dropdown.offset().top + $(e.target).outerHeight()) + 'px'
+			}).data('open', true).detach());
+		}
+	}).on('hidden.bs.dropdown', null, function(e) {
+		var $trigger = $(e.relatedTarget);
+		if ($trigger.hasClass('detached')) {
+			$('[data-previous-container="' + $trigger.attr('data-dropdown-container') + '"]').closeDropdown();
+		}
 	}).on('change', '.btn-file :file', function () {
 		var $input = $(this);
 		var label = $input.val().replace(/\\/g, '/').replace(/.*\//, '');
@@ -72,6 +95,43 @@ define([
 	$.fn.hideGroup = function () {
 		$(this).closest('.form-group').addClass('hidden');
 		return this;
+	};
+	$.fn.closeDropdown = function () {
+		this.each(function() {
+			var $dropdown = $(this);
+			var flag = $dropdown.attr('data-previous-container') || $dropdown.attr('data-dropdown-container');
+			var $trigger = $();
+			var $container = $();
+			if (flag) {
+				$trigger = $('[data-dropdown-container="' + flag + '"]');
+				$dropdown = $('[data-previous-container="' + flag + '"]');
+				$container = $trigger.parent();
+			} else if ($dropdown.is('.dropdown-menu')) {
+				$container = $dropdown.parent();
+				$trigger = $container.find('[data-toggle="dropdown"]');
+			} else if ($dropdown.is('.dropdown')) {
+				$container = $dropdown;
+				$trigger = $container.find('[data-toggle="dropdown"]');
+				$dropdown = $container.find('.dropdown-menu');
+			} else if ($dropdown.is('[data-toggle="dropdown"]')) {
+				$container = $dropdown.parent();
+				$trigger = $dropdown;
+				$dropdown = $container.find('.dropdown-menu');
+			}
+			if ($trigger.hasClass('detached')) {
+				$container.removeClass('open').append($dropdown.removeClass('detached').css({
+					position: '',
+					left: '',
+					width: '',
+					display: '',
+					top: ''
+				}).detach());
+				$trigger.removeClass('detached');
+			}
+			$container.removeAttr('data-open');
+			$trigger.removeAttr('data-dropdown-container');
+			$dropdown.data('open', false).removeAttr('data-previous-container');
+		});
 	};
 	/**
 	 * $ shortcut to apply disabled mode.
@@ -159,6 +219,7 @@ define([
 		$('.modal-backdrop').remove();
 		$('.tooltip').remove();
 		$('.popover').remove();
+		$('.dropdown-menu.detached').closeDropdown();
 		synchronizeMenu(url);
 	});
 
