@@ -165,7 +165,8 @@ public class PluginResource {
 
 		// Expose the resolve newer version
 		vo.setNewVersion(Optional.ofNullable(lastVersion.get(p.getArtifact())).map(MavenSearchResultItem::getVersion)
-				.filter(v -> toExtendedVersion(v).compareTo(toExtendedVersion(p.getVersion())) > 0).orElse(null));
+				.filter(v -> PluginsClassLoader.toExtendedVersion(v).compareTo(PluginsClassLoader.toExtendedVersion(p.getVersion())) > 0)
+				.orElse(null));
 
 		// Node statistics
 		if (p.getType() != PluginType.FEATURE) {
@@ -175,27 +176,6 @@ public class PluginResource {
 			vo.setNode(NodeResource.toVo(nodeRepository.findOne(key)));
 		}
 		return vo;
-	}
-
-	/**
-	 * Convert a version to a comparable string and following the semver
-	 * specification. Maximum 4 version ranges are accepted.
-	 * TODO Remove with ligoj/ligoj-api/v1.1.2
-	 * 
-	 * @param version
-	 *            The version string to convert. May be <code>null</code>
-	 * @return The given version to be comparable with another version. Handle
-	 *         the 'SNAPSHOT' case considered has oldest than the one without
-	 *         this suffix.
-	 * @see PluginsClassLoader#toExtendedVersion(String)
-	 */
-	private static String toExtendedVersion(final String version) {
-		final StringBuilder fileWithVersionExp = new StringBuilder();
-		final String[] allFragments = { "0", "0", "0", "0" };
-		final String[] versionFragments = ObjectUtils.defaultIfNull(StringUtils.split(version, "-."), allFragments);
-		System.arraycopy(versionFragments, 0, allFragments, 0, versionFragments.length);
-		Arrays.stream(allFragments).map(s -> StringUtils.leftPad(StringUtils.leftPad(s, 7, '0'), 8, 'Z')).forEach(fileWithVersionExp::append);
-		return fileWithVersionExp.toString();
 	}
 
 	/**
