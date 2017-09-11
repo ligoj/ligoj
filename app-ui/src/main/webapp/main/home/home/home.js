@@ -219,7 +219,7 @@ define([
 			$node.find('.thumbnail>.details').addClass('hidden');
 			$node.removeClass('in');
 			$node.find('.caption i').addClass('fa-caret-right').removeClass('fa-caret-down');
-			$node.find('.open [data-toggle="dropdown"]').parent().removeClass('open');
+			$node.find('.open [data-toggle="dropdown"]').closeDropdown();
 			current.masonry();
 		},
 
