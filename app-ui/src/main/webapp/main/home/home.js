@@ -482,8 +482,6 @@ define(['cascade'], function ($cascade) {
 			var result = mergeInd ? '' : '<ol class="carousel-indicators">';
 			var item;
 			var i;
-			var index = baseIndex;
-			
 			for (i = 0; i < items.length; i++) {
 				item = items[i];
 				if (id === null || $.isArray(item) ? item[1] : item) {

@@ -13,6 +13,7 @@ define({
 	"Min" : "Doit \u00EAtre plus grand que {{this}}",
 	"NotNull" : "Ne peut pas \u00EAtre vide",
 	"Null" : "Doit \u00EAtre nul",
+	"Positive" : "Doit être un nombre positif",
 	"Past" : "Doit \u00EAtre dans le pass\u00E9",
 	"Pattern" : "Doit respecter '{{regexp}}'",
 	"Size" : "La taille doit \u00EAtre entre {{min}} et {{max}}",
