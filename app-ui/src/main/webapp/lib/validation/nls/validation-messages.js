@@ -14,6 +14,7 @@ define({
 		"Min" : "Must be greater than or equal to {{this}}",
 		"NotNull" : "May not be empty",
 		"Null" : "Must be null",
+		"Positive" : "Must be a positive number",
 		"Past" : "Must be in the past",
 		"Pattern" : "Must match '{{regexp}}'",
 		"Size" : "Size must be between {{min}} and {{max}}",
