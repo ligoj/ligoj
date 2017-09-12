@@ -260,7 +260,7 @@ define(['cascade'], function ($cascade) {
 				// Save the context
 				$choice.find('input').data('node', node);
 
-				$choice.dblclick(current.goToNextStep);
+				$choice.on('dblclick', current.goToNextStep);
 			}
 		},
 		
