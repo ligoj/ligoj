@@ -303,10 +303,10 @@ define(['cascade'], function ($cascade) {
 			// Build the content
 			current.$child && current.requireTool(current.$child, subscription.node.id, function ($tool) {
 				var renderBaseFunction = 'renderDetails' + filter.capitalize();
-				var newContent = subscription.status === 'up' && current.render(subscription, renderBaseFunction, $tool);
+				var newContent = subscription.status === 'up' && current.render(subscription, renderBaseFunction, $tool, $tr, $td);
 				if (!$td.is('.rendered')) {
 					// Add minimum data
-					$cascade.removeSpin($td).addClass('rendered').prepend(((renderCallback && renderCallback(subscription, filter, $tool, $td)) || '') + current.render(subscription, 'render' + filter.capitalize(), $tool));
+					$cascade.removeSpin($td).addClass('rendered').prepend(((renderCallback && renderCallback(subscription, filter, $tool, $td)) || '') + current.render(subscription, 'render' + filter.capitalize(), $tool, $tr, $td));
 				}
 				// Update the UI is managed
 				$tool.$parent.configurerFeatures && $tool.$parent.configurerFeatures($td, subscription);
@@ -346,17 +346,17 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Namespace based dynamic call : tool and service specific.
 		 */
-		render: function (subscription, namespace, $tool) {
+		render: function (subscription, namespace, $tool, $tr, $td) {
 			var result = '';
 			if (subscription.parameters) {
 				// Render service
 				if ($tool.$parent[namespace]) {
-					result += $tool.$parent[namespace](subscription) || '';
+					result += $tool.$parent[namespace](subscription, $tr, $td) || '';
 				}
 
 				// Render tool
 				if ($tool[namespace]) {
-					result += $tool[namespace](subscription) || '';
+					result += $tool[namespace](subscription, $tr, $td) || '';
 				}
 			}
 			return result.length ? result : '';
@@ -371,8 +371,8 @@ define(['cascade'], function ($cascade) {
 			return subscription.parameters && subscription.parameters[parameter];
 		},
 
-		renderServicelink: function (icon, link, tooltipKey, textKey, attr) {
-			return '<a href="' + link + '"' + (attr || '') + ' class="feature"><i class="fa fa-' + icon + '" data-toggle="tooltip"' + (tooltipKey ? ' title="' + current.$messages[tooltipKey] + '"' : '') + '></i> ' + (textKey ? current.$messages[textKey] : '') + '</a>';
+		renderServicelink: function (icon, link, tooltipKey, textKey, attr, clazz) {
+			return '<a href="' + link + '"' + (attr || '') + ' class="feature ' + (clazz || '') + '"><i class="fa fa-' + icon + '" data-toggle="tooltip"' + (tooltipKey ? ' title="' + current.$messages[tooltipKey] + '"' : '') + '></i> ' + (textKey ? current.$messages[textKey] : '') + '</a>';
 		},
 
 		renderServiceHelpLink: function (parameters, serviceKey) {
