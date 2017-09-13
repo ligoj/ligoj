@@ -256,7 +256,7 @@ define(['jquery'], function($) {
 			if(!str) return;
 			try {
 				str = str.replace(/\s+/g, ' ').replace(/^ +/, '').replace(/ +$/, ''); // sanitize
-				var mask = str.replace(/[^\* ]/g, '-').replace(/-+/g, '-').replace(/ +/g, '');
+				var mask = str.replace(/\?/g, '*').replace(/[^\* ]/g, '-').replace(/-+/g, '-').replace(/ +/g, '');
 				var items = str.split(' ');
 				if (items.length === 7) {
 					items = items.slice(0, 6);
