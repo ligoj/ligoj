@@ -15,18 +15,8 @@ define(['cascade'], function ($cascade) {
 		 * Initialize subscription form
 		 */
 		initialize: function (parameters) {
-			_('subscribe-definition').submit(function (event) {
-				event.preventDefault();
-				var $step = _('subscribe-definition').find('.nav-pills li.active');
-				if ($step.next().length) {
-					// Show next tab
-					$step.next().find('a').tab('show');
-				} else {
-					// Final step, no target tab
-					current.invokeSubscriptionWizardStep($step.index() + 1);
-				}
-				return false;
-			}).on('change', 'input', function () {
+			_('subscribe-definition').submit(current.goToNextStep)
+			.on('change', 'input', function () {
 				_('subscription-next').enable();
 			}).find('a[data-toggle="tab"]').on('show.bs.tab', current.configureSubscriptionTab).on('shown.bs.tab', function (e) {
 				// Focus to the first available input
@@ -55,6 +45,19 @@ define(['cascade'], function ($cascade) {
 					nodeComponent.setModel(_('subscribe-node').find('input:checked').data('node'));
 				}
 			});
+		},
+
+		goToNextStep: function(event) {
+			event && event.preventDefault();
+			var $step = _('subscribe-definition').find('.nav-pills li.active');
+			if ($step.next().length) {
+				// Show next tab
+				$step.next().find('a').tab('show');
+			} else {
+				// Final step, no target tab
+				current.invokeSubscriptionWizardStep($step.index() + 1);
+			}
+			return false;
 		},
 
 		setModel: function (project) {
@@ -256,6 +259,8 @@ define(['cascade'], function ($cascade) {
 				
 				// Save the context
 				$choice.find('input').data('node', node);
+
+				$choice.on('dblclick', current.goToNextStep);
 			}
 		},
 		
