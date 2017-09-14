@@ -227,6 +227,12 @@ public class PluginResourceTest extends AbstractServerTest {
 
 		final SampleTool1 service2 = new SampleTool1();
 		resource.configurePluginInstall(service2);
+		
+		// Uninstall the plug-in from the plug-in registry
+		repository.deleteAllBy("key", "service:sample:tool1");
+		
+		// reinstall
+		resource.configurePluginInstall(service2);
 	}
 
 	@Test(expected = TechnicalException.class)
