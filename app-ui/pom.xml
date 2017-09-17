@@ -11,7 +11,7 @@
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-ui</artifactId>
 	<packaging>war</packaging>
-	<version>1.6.5-SNAPSHOT</version>
+	<version>1.6.5</version>
 	<name>Ligoj - Web</name>
 	<properties>
 		<sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
@@ -117,7 +117,7 @@
 		<profile>
 			<id>minify</id>
 			<properties>
-				<!--  Remove with LB-1.6.4+ -->
+				<!--  Remove with LB-1.6.5+ -->
 				<reference-html>${basedir}/src/main/webapp/index.html</reference-html>
 			</properties>
 		</profile>
