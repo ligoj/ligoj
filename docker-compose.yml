@@ -14,7 +14,7 @@ services:
     depends_on: 
       - db
   ui:
-    image: ligoj-web:1.6.5
+    image: ligoj-ui:1.6.5
     links:
       - api:ligoj-api
     ports: 
