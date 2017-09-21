@@ -1,3 +1,9 @@
+## API (REST) container running a stateless SpringBoot application.
+Roles :
+- URL security level, with RBAC : User / Role / Permission for a URL pattern supporting dynamic configuration
+- Resource security level (most complex) giving to users, groups and companies an access (read, write, +grant) to nodes, users, groups, companies
+- Plug-in runtime and life-cycle management
+
 # Packaging (with Maven)
 Compile Java sources and produce the WAR file.
 ```
