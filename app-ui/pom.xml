@@ -117,7 +117,7 @@
 		<profile>
 			<id>minify</id>
 			<properties>
-				<!--  Remove with LB-1.6.4+ -->
+				<!--  Remove with LB-1.6.5+ -->
 				<reference-html>${basedir}/src/main/webapp/index.html</reference-html>
 			</properties>
 		</profile>

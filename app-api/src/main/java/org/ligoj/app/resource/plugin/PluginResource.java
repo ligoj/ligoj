@@ -426,15 +426,20 @@ public class PluginResource {
 			entity.setType(plugin instanceof ServicePlugin ? determinePluginType((ServicePlugin) plugin) : PluginType.FEATURE);
 			repository.saveAndFlush(entity);
 
-			// Special process for service plug-ins
-			final List<Class<?>> installedEntities = plugin.getInstalledEntities();
-			if (entity.getType() != PluginType.FEATURE && !installedEntities.contains(Node.class)) {
-				// Persist the partial default node now for the bellow installation process
-				nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
-			}
+			// Manage disable then re-enable base with double install
+			if (!nodeRepository.exists(plugin.getKey())) {
+				// This feature has not previously been installed
 
-			// Configure the plug-in entities
-			configurePluginEntities(plugin, installedEntities);
+				// Special process for service plug-ins
+				final List<Class<?>> installedEntities = plugin.getInstalledEntities();
+				if (entity.getType() != PluginType.FEATURE && !installedEntities.contains(Node.class)) {
+					// Persist the partial default node now for the bellow installation process
+					nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
+				}
+
+				// Configure the plug-in entities
+				configurePluginEntities(plugin, installedEntities);
+			}
 		} catch (final Exception e) { // NOSONAR - Catch all to notice every time the failure
 			// Something happened
 			log.error("Installing the new plugin {} v{} failed", plugin.getKey(), newVersion, e);
