@@ -30,13 +30,16 @@ You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin
 
 ## Make Ligoj home persistent
 You can keep your plugins installation by mapping `/usr/local/ligoj` with a volume.
+
 ```
 docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.6.4
 ```
 # Dev section
 ## Pre-requisite for the bellow samples
 Maven
+
 Java 8: Open JDK or Oracle
+
 A MySQL database 'ligoj' with all rights for user 'ligoj@localhost' and password 'ligoj'
 
 ### With your own database :
@@ -48,10 +51,14 @@ FLUSH PRIVILEGES;
 quit
 ```
 ### With a fresh new database 
+
+```
 docker run --name ligoj-db -d -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=ligoj -e MYSQL_USER=ligoj -e MYSQL_PASSWORD=ligoj -d mysql:5.7
+```
 
 ## With Maven CLI
 From your IDE with Maven, or from Maven CLI :
+
 ```
 git clone https://github.com/ligoj/ligoj
 mvn spring-boot:run -f app-api/pom.xml& 
@@ -59,6 +66,7 @@ mvn spring-boot:run -f app-ui/pom.xml&
 ```
 ## With your IDE
 From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
+
 ```
 org.ligoj.boot.api.Application
 ```
@@ -69,7 +77,7 @@ Notes these launchers (*.launch) are already configured for Eclipse.
 Important : Using Eclipse compiler, enable 'Store information about method parameters (usable with reflection)' in general preferences/Java/Compiler
 
 ## Compatibilities
-###Database
+### Database
 Compatibility and performance for 10K+users and 1K+ projects
 
 | Vendor     | Version | Driver                   | Dialect                                                  | Status                  |
@@ -81,7 +89,7 @@ Compatibility and performance for 10K+users and 1K+ projects
 | MariaDB    | 10.1    | org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | ?                       |
 | PostGreSQL | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
 
-###JSE
+### JSE
 
 | Vendor     | Version  | Status |
 |------------|----------|--------|
@@ -91,6 +99,7 @@ Compatibility and performance for 10K+users and 1K+ projects
 # Ops section
 ## With Docker
 Build the images and run the containers
+
 ```
 docker build -t ligoj-api:1.6.4 --build-arg VERSION=1.6.4 app-api
 docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.4
@@ -98,6 +107,7 @@ docker build -t ligoj-ui:1.6.4 --build-arg VERSION=1.6.4 app-ui
 docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.4 
 ```
 Docker build (ARG) variables:
+
 ```
 NEXUS_URL : Repository base host used to download the WAR files
 VERSION   : Ligoj version, used to build the WAR_URL
@@ -105,6 +115,7 @@ WAR_URL   : Full WAR URL, built from NEXUS_URL and VERSION
 ```
 
 Docker environment variables:
+
 ```
 CONTEXT      : Context, without starting '/'
 SERVER_HOST  : 0.0.0.0
@@ -119,6 +130,7 @@ jdbc.password: DB password
 ```
 
 Spring-Boot properties (injected in CUSTOM_OPTS):
+
 ```
 server.port               = ${SERVER_PORT}
 server.address            = ${SERVER_HOST}
