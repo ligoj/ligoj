@@ -227,10 +227,10 @@ public class PluginResourceTest extends AbstractServerTest {
 
 		final SampleTool1 service2 = new SampleTool1();
 		resource.configurePluginInstall(service2);
-		
+
 		// Uninstall the plug-in from the plug-in registry
 		repository.deleteAllBy("key", "service:sample:tool1");
-		
+
 		// reinstall
 		resource.configurePluginInstall(service2);
 	}
@@ -499,6 +499,7 @@ public class PluginResourceTest extends AbstractServerTest {
 	private PluginResource newPluginResourceInstall() {
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
 		final Path directory = Mockito.mock(Path.class);
+		Mockito.when(pluginsClassLoader.getHomeDirectory()).thenReturn(Paths.get(USER_HOME_DIRECTORY));
 		Mockito.when(directory.resolve(ArgumentMatchers.anyString())).thenReturn(Paths
 				.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR).resolve("plugin-iam-node-test.jar"));
 		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(directory);
@@ -586,6 +587,31 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assert.assertEquals(1, result.size());
 		Assert.assertEquals("plugin-sample", result.get(0).getArtifact());
 		Assert.assertEquals("0.0.1", result.get(0).getVersion());
+	}
+
+	@Test
+	public void toFile() throws IOException {
+		final Subscription subscription = new Subscription();
+		final Node service = new Node();
+		service.setId("service:s1");
+		final Node tool = new Node();
+		tool.setId("service:s1:t1");
+		tool.setRefined(service);
+		subscription.setNode(tool);
+		subscription.setId(99);
+		final String[] fragments = new String[] { "sub-dir" };
+		final File file = newPluginResourceInstall().toFile(subscription, fragments);
+		Assert.assertNotNull(USER_HOME_DIRECTORY + "/service-s1/t1/99/sub-dir", file.toString());
+	}
+	
+	@Test
+	public void 	getParentNode() {
+		Assert.assertEquals("service:sample", newPluginResourceInstall().getParentNode("service:sample:tool1").getId());
+	}
+	
+	@Test
+	public void 	getParentNodeRoot() {
+		Assert.assertNull(newPluginResourceInstall().getParentNode("service:sample"));
 	}
 
 	private List<MavenSearchResultItem> searchPluginsInMavenRepo(final String query) throws IOException {
