@@ -433,7 +433,8 @@ define(['cascade'], function ($cascade) {
 			var merge = $carousel.length;
 			var result = merge ? '' : '<div class="carousel-inner" role="listbox">';
 			var value;
-			for (i = 0; i < items.length; i++) {
+			var item;
+			for (var i = 0; i < items.length; i++) {
 				item = items[i];
 				value = $.isArray(item) ? item[1] : item;
 				if (value) {
