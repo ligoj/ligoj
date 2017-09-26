@@ -21,7 +21,7 @@ define(['cascade'], function ($cascade) {
 			var i = 0;
 			$container.find('.parameter[data-type]').each(function () {
 				var $input = $(this);
-				var $group = $input.closest('form-group');
+				var $group = $input.closest('.form-group');
 				var id = $input.attr('id');
 				var parameter = current.configuration.parameters[id];
 				var type = parameter.type;
