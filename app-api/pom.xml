@@ -20,7 +20,7 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>1.1.6</api.version>
+		<api.version>1.1.7</api.version>
 		<mail.version>1.5.6</mail.version>
 		<spring-boot.version>1.5.7.RELEASE</spring-boot.version>
 		<spring-cloud.version>1.2.3.RELEASE</spring-cloud.version>
