@@ -8,13 +8,13 @@ services:
       MYSQL_USER: ligoj
       MYSQL_PASSWORD: ligoj
   api:
-    image: ligoj-api:1.6.5
+    image: ligoj-api:1.6.6
     links:
       - db
     depends_on: 
       - db
   ui:
-    image: ligoj-ui:1.6.5
+    image: ligoj-ui:1.6.6
     links:
       - api:ligoj-api
     ports: 
