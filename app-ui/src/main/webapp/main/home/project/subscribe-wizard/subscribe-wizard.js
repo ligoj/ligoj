@@ -134,7 +134,7 @@ define(['cascade'], function ($cascade) {
 					modes.push(current.newMode('link', 'link'));
 				}
 				_('subscribe-mode').find('.choices').empty();
-				current.renderChoicesData('mode', modes, parent);
+				current.renderChoicesData('mode', modes);
 				current.availableNextStep();
 				break;
 			case 4:
@@ -146,7 +146,7 @@ define(['cascade'], function ($cascade) {
 					$cascade.loadFragment(current, current.$transaction, 'main/home/node-parameter', 'node-parameter', {
 						callback: function (context) {
 							current.parameterContext = context;
-							_('subscribe-parameters').find('.choices').empty()
+							_('subscribe-parameters').find('.choices').empty();
 							context.configureParameters(_('subscribe-parameters-container'), data, parent, mode, function () {
 								// Configuration and validators are available
 								_('subscription-create').enable().trigger('focus');
