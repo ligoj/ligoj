@@ -154,7 +154,7 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public FilterRegistrationBean cacheFilter() {
 		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(new CacheFilter());
-		registrationBean.addUrlPatterns(SERVICE_PASSWORD_RESET, SERVICE_PASSWORD_RECOVERY);
+		registrationBean.addUrlPatterns("/dist/*", "/img/*", "/main/*", "/themes/*");
 		final Map<String, String> initParameters = new HashMap<>();
 		initParameters.put("privacy", "public");
 		initParameters.put("static", "true");
