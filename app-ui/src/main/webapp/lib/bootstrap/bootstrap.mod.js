@@ -23,16 +23,17 @@ define([
 
 		// Handle the dropdown inside an absolute/overflow-hidden container, move the dropdown to body
 		var $trigger = $(e.relatedTarget);
-		if (!$trigger.hasClass('detached') && $trigger.closest('.dropdown-overflow').length) {
+		if (!$trigger.hasClass('detached') && $trigger.closest('.dropdown-overflow').length && $trigger.closest('.dropdown').length) {
 			var flag = 'dropdown-' + Math.random();
-			var $dropdown = $trigger.next('.dropdown-menu').addClass('detached').attr('data-previous-container',flag);
+			var $dropdown = $trigger.closest('.dropdown');
+			var $menu = $dropdown.find('.dropdown-menu').addClass('detached').attr('data-previous-container',flag);
 			$trigger.addClass('detached').attr('data-dropdown-container',flag)
-			$('body').append($dropdown.css({
+			$('body').append($menu.css({
 				position: 'absolute',
 				display: 'initial',
-				left: $dropdown.offset().left + 'px',
-				width : $dropdown.width() + 'px',
-			 	top: ($dropdown.offset().top + $(e.target).outerHeight()) + 'px'
+				left: $menu.offset().left + 'px',
+				width : $menu.width() + 'px',
+			 	top: ($menu.offset().top + $(e.target).outerHeight()) + 'px'
 			}).data('open', true).detach());
 		}
 	}).on('hidden.bs.dropdown', null, function(e) {
