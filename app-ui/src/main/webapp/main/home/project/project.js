@@ -405,6 +405,13 @@ define(['cascade'], function ($cascade) {
 		 * Fill the datatables of subscription, no AJAX, laready loaded with the project's detail.
 		 */
 		fillSubscriptionsTable: function (project, $nodes) {
+			var buttons = project.manageSubscriptions ? [{
+					extend: 'create',
+					text: current.$messages.subscribe,
+					init: function (_i, $button) {
+						$button.off('click.dtb').attr('href', current.$url + '/' + current.currentId + '/subscription');
+					}
+				}] : [];
 			current.subscriptions = _('subscriptions').dataTable({
 				dom: '<"row"<"col-xs-6"B>>t',
 				pageLength: -1,
@@ -424,20 +431,27 @@ define(['cascade'], function ($cascade) {
 				}, {
 					data: 'node.refined.refined.name',
 					className: 'hidden-xs service',
-					render: function (_i, _j, subscription) {
-						return current.$parent.toIcon(subscription.node.refined.refined);
+					render: function (_i, mode, subscription) {
+						if (mode === 'display') {
+							return current.$parent.toIcon(subscription.node.refined.refined);
+						}
+						return subscription.node.refined.refined.name;
 					}
 				}, {
 					data: 'node.refined.name',
 					className: 'responsive-tool icon-xs tool truncated',
-					render: function (_i, _j, subscription) {
-						return current.$parent.toIconNameTool(subscription.node.refined);
+					render: function (_i, mode, subscription) {
+						if (mode === 'display') {
+							return current.$parent.toIconNameTool(subscription.node.refined);
+						}
+						return subscription.node.refined.name;
 					}
 				}, {
 					data: 'node.name',
 					className: 'hidden-xs responsive-node truncated'
 				}, {
 					data: null,
+					orderable: false,
 					className: 'truncate key rendered',
 					render: function (_i, _j, subscription) {
 						return current.$parent.render(subscription, 'renderKey', $nodes[subscription.node.id]);
@@ -467,13 +481,7 @@ define(['cascade'], function ($cascade) {
 						return '&nbsp';
 					}
 				}],
-				buttons: project.manageSubscriptions ? [{
-					extend: 'create',
-					text: current.$messages.subscribe,
-					init: function (_i, $button) {
-						$button.off('click.dtb').attr('href', current.$url + '/' + current.currentId + '/subscription');
-					}
-				}] : []
+				buttons: buttons
 			});
 			// Launch Ajax requests to refresh statuses just after the table has been rendered
 			for (var index = 0; index < project.subscriptions.length; index++) {
