@@ -14,6 +14,12 @@
 	.exploded .key .carousel-inner .item {
 		display: table-cell;
 	}
+	.responsive-tool {
+	    width: 150px;
+	}
+	.responsive-node {
+	    width: 64px;
+	}
 }
 .qrcode-toggle {
 	float: right;
@@ -26,3 +32,4 @@
 	right: 0;
 	top: -5px;
 }
+

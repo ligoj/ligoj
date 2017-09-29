@@ -73,8 +73,9 @@
 		<thead>
 			<tr>
 				<th class="status"><i class="fa fa-power-off" data-toggle="tooltip" title="{{status-subscription}}"></i></th>
-				<th class="hidden-xs hidden-sm truncate service" title="Subscribed service name">{{service}}</th>
-				<th class="icon-xs truncate tool" title="Tool providing this service">{{tool}}</th>
+				<th class="icon hidden-xs service"><i class="fa fa-glass" data-toggle="tooltip" title="{{service}}"></i></th>
+				<th class="icon-xs truncate tool"><i class="fa fa-wrench" data-toggle="tooltip" title="{{tool}}"></i><span class="hidden-xs">{{tool}}</span></th>
+				<th class="hidden-xs truncate node"><i class="fa fa-cube" data-toggle="tooltip" title="Node running this subscription"></i> {{node}}</th>
 				<th title="{details}}">{{details}}</th>
 				<th class="hidden-xs hidden-sm hidden-md truncate" title="{{subscription-date}}">{{created-date}}</th>
 				<th>{{features}}</th>
@@ -83,7 +84,7 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td colspan="7" class="dataTables_empty">{{loading}}</td>
+				<td colspan="8" class="dataTables_empty">{{loading}}</td>
 			</tr>
 		</tbody>
 	</table>

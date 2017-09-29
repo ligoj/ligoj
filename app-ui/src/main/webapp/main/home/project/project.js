@@ -414,7 +414,7 @@ define(['cascade'], function ($cascade) {
 				],
 				data: project.subscriptions,
 				createdRow: function (nRow, subscription) {
-					$(nRow).addClass(subscription.node.id.replace(/:/g, '-')).addClass(subscription.node.refined.id.replace(/:/g, '-')).addClass(subscription.node.service.id.replace(/:/g, '-')).attr('data-subscription', subscription.id).attr('data-id', subscription.id).find('.unsubscribe, .delete').on('click', current.unsubscribe);
+					$(nRow).addClass(subscription.node.id.replace(/:/g, '-')).addClass(subscription.node.refined.id.replace(/:/g, '-')).addClass(subscription.node.refined.refined.id.replace(/:/g, '-')).attr('data-subscription', subscription.id).attr('data-id', subscription.id).find('.unsubscribe, .delete').on('click', current.unsubscribe);
 					current.$parent.applySubscriptionStyle($(nRow), subscription, false);
 				},
 				columns: [{
@@ -422,19 +422,20 @@ define(['cascade'], function ($cascade) {
 					className: 'status',
 					orderable: false
 				}, {
-					data: 'node',
-					className: 'hidden-xs hidden-sm truncate service',
+					data: 'node.refined.refined.name',
+					className: 'hidden-xs service',
 					render: function (_i, _j, subscription) {
-						var id = current.$parent.getService(subscription.node).id;
-						var label = current.$messages[id] || id;
-						return label;
+						return current.$parent.toIcon(subscription.node.refined.refined);
 					}
 				}, {
-					data: 'tool',
-					className: 'icon-xs',
+					data: 'node.refined.name',
+					className: 'responsive-tool icon-xs tool truncated',
 					render: function (_i, _j, subscription) {
-						return current.$parent.toIconNameTool(subscription.node);
+						return current.$parent.toIconNameTool(subscription.node.refined);
 					}
+				}, {
+					data: 'node.name',
+					className: 'hidden-xs responsive-node truncated'
 				}, {
 					data: null,
 					className: 'truncate key rendered',
