@@ -21,7 +21,7 @@
 	
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>root</artifactId>
-	<version>1.6.7-SNAPSHOT</version>
+	<version>1.6.7</version>
 	<name>Ligoj - Application</name>
 	<description>Ligoj - One page for your yeam</description>
 	<packaging>pom</packaging>

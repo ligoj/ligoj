@@ -26,12 +26,12 @@ mvn clean package -DskipTests=true -Pminifiy
 Test the integration with a running API end-point
 
 ```
-java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar target/app-ui-1.6.6.war
+java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar target/app-ui-1.6.7.war
 ```
 
 # Build Docker image
 ```
-docker build -t ligoj-ui:1.6.6 --build-arg VERSION=1.6.6 .
+docker build -t ligoj-ui:1.6.7 --build-arg VERSION=1.6.7 .
 ```
 
 ## Custom builds
@@ -43,19 +43,19 @@ In case of a custom build you can specify its remote or local location.
 Staged OSS build from Sonatype
 
 ```
-docker build -t ligoj-ui:1.6.6 --build-arg VERSION=1.6.6 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-ui/1.6.6/app-ui-1.6.6.war" .
+docker build -t ligoj-ui:1.6.7 --build-arg VERSION=1.6.7 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-ui/1.6.7/app-ui-1.6.7.war" .
 ```
 
 Private remote build
 
 ```
-docker build -t ligoj-ui:1.6.6 --build-arg VERSION=1.6.6 --build-arg WAR="https://storage.company.com/releases/app-ui-1.6.6.war" .
+docker build -t ligoj-ui:1.6.7 --build-arg VERSION=1.6.7 --build-arg WAR="https://storage.company.com/releases/app-ui-1.6.7.war" .
 ```
 
 Reuse the local maven package
 
 ```
-docker build -t ligoj-ui:1.6.6 --build-arg VERSION=1.6.6 --build-arg WAR="target/app-ui-1.6.6.war" .
+docker build -t ligoj-ui:1.6.7 --build-arg VERSION=1.6.7 --build-arg WAR="target/app-ui-1.6.7.war" .
 ```
 Note the local WAR path must be relative to the Dockerfile (not the current path), and must be bellow the Dockerfile: do not use "../bar/foo.war"
 
@@ -66,7 +66,7 @@ docker run --rm -it \
   --name ligoj-ui \
   -e ENDPOINT='http://192.168.4.138:8680/ligoj-api' \
   -p 8080:8080 \
-  ligoj-ui:1.6.6 
+  ligoj-ui:1.6.7 
 ```
 
 You can experience network issue with remote API. To validate the link, try this :
@@ -74,7 +74,7 @@ You can experience network issue with remote API. To validate the link, try this
 ```
 docker run --rm -it \
  --name "ligoj-ui" \
- ligoj-ui:1.6.6 bash -c "apt-get install -y curl && curl --failed http://192.168.4.138:8081/ligoj-api/manage/health"
+ ligoj-ui:1.6.7 bash -c "apt-get install -y curl && curl --failed http://192.168.4.138:8081/ligoj-api/manage/health"
 ```
 
 More complex run with crypto and volume configurations
@@ -86,7 +86,7 @@ docker run --rm -it \
  -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 -Dapp.safe.mode=true" \
  -v ~/.ligoj:/home/ligoj \
  -p 8680:8081 \
- ligoj-api:1.6.6
+ ligoj-api:1.6.7
 ```
 Note: On Windows host, replace "\" by "`" for multi-line support.
 
@@ -109,9 +109,9 @@ mvn clean package -Pminifiy -DskipTests=true
 
 # Build Docker image
 ```
-docker build -t ligoj-ui:1.6.6 --build-arg VERSION=1.6.6 .
+docker build -t ligoj-ui:1.6.7 --build-arg VERSION=1.6.7 .
 ```
 # Run Docker image with security disabled
 ```
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.6 
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.7 
 ```

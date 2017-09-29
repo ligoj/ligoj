@@ -13,14 +13,15 @@ A web application to centralize the related tools of your projects, a 21th centu
 [![Code Climate](https://img.shields.io/codeclimate/github/ligoj/ligoj.svg)](https://codeclimate.com/github/ligoj/ligoj)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/ligoj/badge)](https://www.codefactor.io/repository/github/ligoj/ligoj)
 [![codebeat badge](https://codebeat.co/badges/c8c372da-c0f2-4ba1-8fb4-5d5713aeb53f)](https://codebeat.co/projects/github-com-ligoj-ligoj-api-master)
+[![Docker Build Status](https://img.shields.io/docker/build/ligoj-api/ffmpeg.svg)]()
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
 
 # User section
 ```
-docker build -t ligoj-api:1.6.6 --build-arg VERSION=1.6.6 app-api
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.6
-docker build -t ligoj-ui:1.6.6 --build-arg VERSION=1.6.6 app-ui
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.6 
+docker build -t ligoj-api:1.6.7 --build-arg VERSION=1.6.7 app-api
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.7
+docker build -t ligoj-ui:1.6.7 --build-arg VERSION=1.6.7 app-ui
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.7 
 ```
 Open your browser at : http://localhost:8080/ligoj  
 User/password for administrator role : ligoj-admin
@@ -31,7 +32,7 @@ You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin
 You can keep your plugins installation by mapping `/usr/local/ligoj` with a volume.
 
 ```
-docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.6.6
+docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.6.7
 ```
 # Dev section
 ## Pre-requisite for the bellow samples
@@ -100,10 +101,10 @@ Compatibility and performance for 10K+users and 1K+ projects
 Build the images and run the containers
 
 ```
-docker build -t ligoj-api:1.6.6 --build-arg VERSION=1.6.6 app-api
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.6
-docker build -t ligoj-ui:1.6.6 --build-arg VERSION=1.6.6 app-ui
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.6 
+docker build -t ligoj-api:1.6.7 --build-arg VERSION=1.6.7 app-api
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.7
+docker build -t ligoj-ui:1.6.7 --build-arg VERSION=1.6.7 app-ui
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.7 
 ```
 Docker build (ARG) variables:
 
