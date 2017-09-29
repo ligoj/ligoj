@@ -276,7 +276,7 @@ define(['cascade'], function ($cascade) {
 			}
 			$tr.find('td.status').removeClass('status-up').removeClass('status-down').removeClass('status-unknown').addClass(tdClass).removeAttr('data-original-title').attr('data-title', tooltip).attr('data-container', 'body').attr('rel', 'tooltip').tooltip('fixTitle')[contentClass ? 'addClass' : 'removeClass']('text-danger').html(contentClass ? '<i class="fa ' + contentClass + '"></i>' : '&nbsp;');
 
-			// Update fresh details & key
+			// Update fresh keys & features
 			if (refresh) {
 				// Replace the original content with content based on live data
 				current.updateSubscriptionDetails($tr, subscription, 'key', true, renderCallback);
@@ -284,9 +284,15 @@ define(['cascade'], function ($cascade) {
 			}
 		},
 
+		/**
+		 * Update the subscription UI details in the target jquery row. No involved AJAX call.
+		 * @param {jquery} $tr the Container row of this subscription.
+		 * @param {object} subscription The subscription object to update.
+		 * @param {string} filter The target UI scope, such as "key" of "feature". 
+		 * @param {boolean} replace When true, the details are overridden, Otherwise, the content is added.
+		 */
 		updateSubscriptionDetails: function ($tr, subscription, filter, replace, renderCallback) {
 			var $td = $tr.find('td.' + filter);
-
 			// Build the container
 			var $details;
 			if (replace) {
@@ -302,12 +308,16 @@ define(['cascade'], function ($cascade) {
 
 			// Build the content
 			current.$child && current.requireTool(current.$child, subscription.node.id, function ($tool) {
-				var renderBaseFunction = 'renderDetails' + filter.capitalize();
-				var newContent = subscription.status === 'up' && current.render(subscription, renderBaseFunction, $tool, $tr, $td);
+				var renderDetailsFunction = 'renderDetails' + filter.capitalize();
+				var renderFunction = 'render' + filter.capitalize();
 				if (!$td.is('.rendered')) {
 					// Add minimum data
-					$cascade.removeSpin($td).addClass('rendered').prepend(((renderCallback && renderCallback(subscription, filter, $tool, $td)) || '') + current.render(subscription, 'render' + filter.capitalize(), $tool, $tr, $td));
+					$cascade.removeSpin($td).addClass('rendered').prepend(((renderCallback && renderCallback(subscription, filter, $tool, $td)) || '') + current.render(subscription, renderFunction, $tool, $tr, $td));
 				}
+				
+				// Generate the detailed part
+				var newContent = subscription.status === 'up' && current.render(subscription, renderDetailsFunction, $tool, $tr, $td);
+				
 				// Update the UI is managed
 				$tool.$parent.configurerFeatures && $tool.$parent.configurerFeatures($td, subscription);
 				$tool.configurerFeatures && $tool.configurerFeatures($td, subscription);
@@ -316,7 +326,7 @@ define(['cascade'], function ($cascade) {
 					// Add generated detailed data
 					$details.empty().html(newContent);
 					// Render service and tool callbacks
-					var callbak = renderBaseFunction + 'Callback';
+					var callbak = renderDetailsFunction + 'Callback';
 					$tool.$parent[callbak] && $tool.$parent[callbak](subscription, $details);
 					$tool[callbak] && $tool[callbak](subscription, $details);
 					
@@ -348,7 +358,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		render: function (subscription, namespace, $tool, $tr, $td) {
 			var result = '';
-			if (subscription.parameters) {
+			if (subscription.parameters) { // TODO Simplify
 				// Render service
 				if ($tool.$parent[namespace]) {
 					result += $tool.$parent[namespace](subscription, $tr, $td) || '';
@@ -358,7 +368,7 @@ define(['cascade'], function ($cascade) {
 				if ($tool[namespace]) {
 					result += $tool[namespace](subscription, $tr, $td) || '';
 				}
-			}
+			} // TODO Simplify
 			return result.length ? result : '';
 		},
 
