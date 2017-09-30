@@ -1,5 +1,5 @@
-/*! Buttons for DataTables 1.2.0
- * ©2016 SpryMedia Ltd - datatables.net/license
+/*! Buttons for DataTables 1.4.2
+ * ©2016-2017 SpryMedia Ltd - datatables.net/license
  */
 
 (function( factory ){
@@ -48,6 +48,11 @@ var _dtButtons = DataTable.ext.buttons;
  */
 var Buttons = function( dt, config )
 {
+	// If there is no config set it to an empty object
+	if ( typeof( config ) === 'undefined' ) {
+		config = {};	
+	}
+	
 	// Allow a boolean true for defaults
 	if ( config === true ) {
 		config = {};
@@ -191,8 +196,8 @@ $.extend( Buttons.prototype, {
 		$('body').off( 'keyup.'+this.s.namespace );
 
 		// Individual button destroy (so they can remove their own events if
-		// needed
-		var buttons = this.s.buttons;
+		// needed). Take a copy as the array is modified by `remove`
+		var buttons = this.s.buttons.slice();
 		var i, ien;
 		
 		for ( i=0, ien=buttons.length ; i<ien ; i++ ) {
@@ -251,6 +256,24 @@ $.extend( Buttons.prototype, {
 	{
 		var button = this._nodeToButton( node );
 		return $(button.node);
+	},
+
+	/**
+	 * Set / get a processing class on the selected button
+	 * @param  {boolean} flag true to add, false to remove, undefined to get
+	 * @return {boolean|Buttons} Getter value or this if a setter.
+	 */
+	processing: function ( node, flag )
+	{
+		var button = this._nodeToButton( node );
+
+		if ( flag === undefined ) {
+			return $(button.node).hasClass( 'processing' );
+		}
+
+		$(button.node).toggleClass( 'processing', flag );
+
+		return this;
 	},
 
 	/**
@@ -410,6 +433,7 @@ $.extend( Buttons.prototype, {
 
 		for ( var i=0, ien=buttons.length ; i<ien ; i++ ) {
 			container.append( buttons[i].inserter );
+			container.append( ' ' );
 
 			if ( buttons[i].buttons && buttons[i].buttons.length ) {
 				this._draw( buttons[i].collection, buttons[i].buttons );
@@ -462,7 +486,8 @@ $.extend( Buttons.prototype, {
 			if ( built.conf.buttons ) {
 				var collectionDom = this.c.dom.collection;
 				built.collection = $('<'+collectionDom.tag+'/>')
-					.addClass( collectionDom.className );
+					.addClass( collectionDom.className )
+					.attr( 'role', 'menu') ;
 				built.conf._collection = built.collection;
 
 				this._expandButton( built.buttons, built.conf.buttons, true, attachPoint );
@@ -569,7 +594,7 @@ $.extend( Buttons.prototype, {
 		}
 
 		if ( config.titleAttr ) {
-			button.attr( 'title', config.titleAttr );
+			button.attr( 'title', text( config.titleAttr ) );
 		}
 
 		if ( ! config.namespace ) {
@@ -879,7 +904,9 @@ Buttons.background = function ( show, className, fade ) {
 	else {
 		$('body > div.'+className)
 			.fadeOut( fade, function () {
-				$(this).remove();
+				$(this)
+					.removeClass( className )
+					.remove();
 			} );
 	}
 };
@@ -1116,7 +1143,7 @@ Buttons.defaults = {
  * @type {string}
  * @static
  */
-Buttons.version = '1.2.0';
+Buttons.version = '1.4.2';
 
 
 $.extend( _dtButtons, {
@@ -1133,7 +1160,7 @@ $.extend( _dtButtons, {
 
 			// Remove any old collection
 			if ( $('div.dt-button-background').length ) {
-				multiLevel = $('div.dt-button-collection').offset();
+				multiLevel = $('.dt-button-collection').offset();
 				$('body').trigger( 'click.dtb-collection' );
 			}
 
@@ -1147,8 +1174,8 @@ $.extend( _dtButtons, {
 
 			if ( multiLevel && position === 'absolute' ) {
 				config._collection.css( {
-					top: multiLevel.top + 5, // magic numbers for a little offset
-					left: multiLevel.left + 5
+					top: multiLevel.top,
+					left: multiLevel.left
 				} );
 			}
 			else if ( position === 'absolute' ) {
@@ -1156,6 +1183,21 @@ $.extend( _dtButtons, {
 					top: hostOffset.top + host.outerHeight(),
 					left: hostOffset.left
 				} );
+
+				// calculate overflow when positioned beneath
+				var tableBottom = tableContainer.offset().top + tableContainer.height();
+				var listBottom = hostOffset.top + host.outerHeight() + config._collection.outerHeight();
+				var bottomOverflow = listBottom - tableBottom;
+				
+				// calculate overflow when positioned above
+				var listTop = hostOffset.top - config._collection.outerHeight();
+				var tableTop = tableContainer.offset().top;
+				var topOverflow = tableTop - listTop;
+				
+				// if bottom overflow is larger, move to the top because it fits better
+				if (bottomOverflow > topOverflow) {
+					config._collection.css( 'top', hostOffset.top - config._collection.outerHeight() - 5);
+				}
 
 				var listRight = hostOffset.left + config._collection.outerWidth();
 				var tableRight = tableContainer.offset().left + tableContainer.width();
@@ -1187,7 +1229,10 @@ $.extend( _dtButtons, {
 				$('div.dt-button-background').on( 'click.dtb-collection', function () {} );
 
 				$('body').on( 'click.dtb-collection', function (e) {
-					if ( ! $(e.target).parents().andSelf().filter( config._collection ).length ) {
+					// andSelf is deprecated in jQ1.8, but we want 1.7 compat
+					var back = $.fn.addBack ? 'addBack' : 'andSelf';
+
+					if ( ! $(e.target).parents()[back]().filter( config._collection ).length ) {
 						config._collection
 							.fadeOut( config.fade, function () {
 								config._collection.detach();
@@ -1268,6 +1313,7 @@ $.extend( _dtButtons, {
 			buttons: $.map( vals, function ( val, i ) {
 				return {
 					text: lang[i],
+					className: 'button-page-length',
 					action: function ( e, dt ) {
 						dt.page.len( val ).draw();
 					},
@@ -1314,7 +1360,9 @@ DataTable.Api.register( 'buttons()', function ( group, selector ) {
 		group = undefined;
 	}
 
-	return this.iterator( true, 'table', function ( ctx ) {
+	this.selector.buttonGroup = group;
+
+	var res = this.iterator( true, 'table', function ( ctx ) {
 		if ( ctx._buttons ) {
 			return Buttons.buttonSelector(
 				Buttons.instanceSelector( group, ctx._buttons ),
@@ -1322,6 +1370,9 @@ DataTable.Api.register( 'buttons()', function ( group, selector ) {
 			);
 		}
 	}, true );
+
+	res._groupSelector = group;
+	return res;
 } );
 
 // Individual button selector
@@ -1388,6 +1439,19 @@ DataTable.Api.registerPlural( 'buttons().nodes()', 'button().node()', function (
 	return jq;
 } );
 
+// Get / set button processing state
+DataTable.Api.registerPlural( 'buttons().processing()', 'button().processing()', function ( flag ) {
+	if ( flag === undefined ) {
+		return this.map( function ( set ) {
+			return set.inst.processing( set.node );
+		} );
+	}
+
+	return this.each( function ( set ) {
+		set.inst.processing( set.node, flag );
+	} );
+} );
+
 // Get / set button text (i.e. the button labels)
 DataTable.Api.registerPlural( 'buttons().text()', 'button().text()', function ( label ) {
 	if ( label === undefined ) {
@@ -1408,25 +1472,40 @@ DataTable.Api.registerPlural( 'buttons().trigger()', 'button().trigger()', funct
 	} );
 } );
 
-// Get the container elements for the button sets selected
+// Get the container elements
 DataTable.Api.registerPlural( 'buttons().containers()', 'buttons().container()', function () {
 	var jq = $();
+	var groupSelector = this._groupSelector;
 
-	// jQuery will automatically reduce duplicates to a single entry
-	$( this.each( function ( set ) {
-		jq = jq.add( set.inst.container() );
-	} ) );
+	// We need to use the group selector directly, since if there are no buttons
+	// the result set will be empty
+	this.iterator( true, 'table', function ( ctx ) {
+		if ( ctx._buttons ) {
+			var insts = Buttons.instanceSelector( groupSelector, ctx._buttons );
+
+			for ( var i=0, ien=insts.length ; i<ien ; i++ ) {
+				jq = jq.add( insts[i].container() );
+			}
+		}
+	} );
 
 	return jq;
 } );
 
 // Add a new button
 DataTable.Api.register( 'button().add()', function ( idx, conf ) {
-	if ( this.length === 1 ) {
-		this[0].inst.add( conf, idx );
+	var ctx = this.context;
+
+	// Don't use `this` as it could be empty - select the instances directly
+	if ( ctx.length ) {
+		var inst = Buttons.instanceSelector( this._groupSelector, ctx[0]._buttons );
+
+		if ( inst.length ) {
+			inst[0].add( conf, idx );
+		}
 	}
 
-	return this.button( idx );
+	return this.button( this._groupSelector, idx );
 } );
 
 // Destroy the button sets selected
@@ -1496,6 +1575,118 @@ DataTable.Api.register( 'buttons.exportData()', function ( options ) {
 	}
 } );
 
+// Get information about the export that is common to many of the export data
+// types (DRY)
+DataTable.Api.register( 'buttons.exportInfo()', function ( conf ) {
+	if ( ! conf ) {
+		conf = {};
+	}
+
+	return {
+		filename: _filename( conf ),
+		title: _title( conf ),
+		messageTop: _message(this, conf.messageTop || conf.message, 'top'),
+		messageBottom: _message(this, conf.messageBottom, 'bottom')
+	};
+} );
+
+
+
+/**
+ * Get the file name for an exported file.
+ *
+ * @param {object}	config Button configuration
+ * @param {boolean} incExtension Include the file name extension
+ */
+var _filename = function ( config )
+{
+	// Backwards compatibility
+	var filename = config.filename === '*' && config.title !== '*' && config.title !== undefined ?
+		config.title :
+		config.filename;
+
+	if ( typeof filename === 'function' ) {
+		filename = filename();
+	}
+
+	if ( filename === undefined || filename === null ) {
+		return null;
+	}
+
+	if ( filename.indexOf( '*' ) !== -1 ) {
+		filename = $.trim( filename.replace( '*', $('title').text() ) );
+	}
+
+	// Strip characters which the OS will object to
+	filename = filename.replace(/[^a-zA-Z0-9_\u00A1-\uFFFF\.,\-_ !\(\)]/g, "");
+
+	var extension = _stringOrFunction( config.extension );
+	if ( ! extension ) {
+		extension = '';
+	}
+
+	return filename + extension;
+};
+
+/**
+ * Simply utility method to allow parameters to be given as a function
+ *
+ * @param {undefined|string|function} option Option
+ * @return {null|string} Resolved value
+ */
+var _stringOrFunction = function ( option )
+{
+	if ( option === null || option === undefined ) {
+		return null;
+	}
+	else if ( typeof option === 'function' ) {
+		return option();
+	}
+	return option;
+};
+
+/**
+ * Get the title for an exported file.
+ *
+ * @param {object} config	Button configuration
+ */
+var _title = function ( config )
+{
+	var title = _stringOrFunction( config.title );
+
+	return title === null ?
+		null : title.indexOf( '*' ) !== -1 ?
+			title.replace( '*', $('title').text() || 'Exported data' ) :
+			title;
+};
+
+var _message = function ( dt, option, position )
+{
+	var message = _stringOrFunction( option );
+	if ( message === null ) {
+		return null;
+	}
+
+	var caption = $('caption', dt.table().container()).eq(0);
+	if ( message === '*' ) {
+		var side = caption.css( 'caption-side' );
+		if ( side !== position ) {
+			return null;
+		}
+
+		return caption.length ?
+			caption.text() :
+			'';
+	}
+
+	return message;
+};
+
+
+
+
+
+
 
 var _exportTextarea = $('<textarea/>')[0];
 var _exportData = function ( dt, inOpts )
@@ -1530,6 +1721,9 @@ var _exportData = function ( dt, inOpts )
 			return str;
 		}
 
+		// Always remove script tags
+		str = str.replace( /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '' );
+
 		if ( config.stripHtml ) {
 			str = str.replace( /<[^>]*>/g, '' );
 		}
@@ -1552,21 +1746,26 @@ var _exportData = function ( dt, inOpts )
 
 
 	var header = dt.columns( config.columns ).indexes().map( function (idx) {
-		return config.format.header( dt.column( idx ).header().innerHTML, idx );
+		var el = dt.column( idx ).header();
+		return config.format.header( el.innerHTML, idx, el );
 	} ).toArray();
 
 	var footer = dt.table().footer() ?
 		dt.columns( config.columns ).indexes().map( function (idx) {
 			var el = dt.column( idx ).footer();
-			return config.format.footer( el ? el.innerHTML : '', idx );
+			return config.format.footer( el ? el.innerHTML : '', idx, el );
 		} ).toArray() :
 		null;
 
 	var rowIndexes = dt.rows( config.rows, config.modifier ).indexes().toArray();
-	var cells = dt
-		.cells( rowIndexes, config.columns )
+	var selectedCells = dt.cells( rowIndexes, config.columns );
+	var cells = selectedCells
 		.render( config.orthogonal )
 		.toArray();
+	var cellNodes = selectedCells
+		.nodes()
+		.toArray();
+
 	var columns = header.length;
 	var rows = columns > 0 ? cells.length / columns : 0;
 	var body = new Array( rows );
@@ -1576,7 +1775,7 @@ var _exportData = function ( dt, inOpts )
 		var row = new Array( columns );
 
 		for ( var j=0 ; j<columns ; j++ ) {
-			row[j] = config.format.body( cells[ cellCounter ], j, i );
+			row[j] = config.format.body( cells[ cellCounter ], i, j, cellNodes[ cellCounter ] );
 			cellCounter++;
 		}
 

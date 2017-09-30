@@ -49,7 +49,9 @@ $.extend( true, DataTable.Buttons.defaults, {
 			className: 'dt-button-collection dropdown-menu',
 			button: {
 				tag: 'li',
-				className: 'dt-button'
+				className: 'dt-button',
+				active: 'active',
+				disabled: 'disabled'
 			},
 			buttonLiner: {
 				tag: 'a',
@@ -62,6 +64,7 @@ $.extend( true, DataTable.Buttons.defaults, {
 DataTable.ext.buttons.collection.text = function ( dt ) {
 	return dt.i18n('buttons.collection', 'Collection <span class="caret"/>');
 };
+
 
 return DataTable.Buttons;
 }));
