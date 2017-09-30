@@ -60,7 +60,6 @@ var applicationManager = {
 				'globals.mod': 'globals.mod',
 				'handlebars.mod': 'handlebars/handlebars.mod',
 				'highcharts': 'highcharts/highcharts',
-				'json2': 'json2',
 				'jquery-ui': 'jquery-ui/jquery-ui.custom',
 				'l10n.mod': 'l10n/l10n.mod',
 				'masonry': 'masonry/masonry.pkgd',

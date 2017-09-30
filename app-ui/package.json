@@ -231,12 +231,6 @@
 		"version": "3.7.3",
 		"lastChecked": "2016-03-09"
 	}, {
-		"name": "Json2",
-		"url": "http://www.json.org/",
-		"sources": "https://github.com/douglascrockford/JSON-js",
-		"version": "2014-02-04",
-		"lastChecked": "2016-03-09"
-	}, {
 		"name": "jQuery Form",
 		"url": "http://jquery.malsup.com/form/",
 		"sources": "https://github.com/malsup/form",
