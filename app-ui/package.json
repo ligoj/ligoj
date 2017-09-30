@@ -89,8 +89,8 @@
 	    "requirejs-text": "2.0.15",
 	    "later": "1.2.0",
 	    "moment": "2.18.1",
-	    "jquery2": "3.2.1",
-	    "jqueryui": "1.11.4",
+	    "jquery": "3.2.1",
+	    "jqueryui": "1.12.1",
 	    "jquery.sparkline": "2.1.2-fork",
 	    "fuelux": "3.16.0"
 	},
@@ -132,9 +132,8 @@
 		"name": "JQueryUI",
 		"url": "http://jqueryui.com",
 		"sources": "https://github.com/jquery/jqueryui.com",
-		"version": "1.11.4",
-		"lastChecked": "2016-03-09",
-		"known-issues": ["1.11 does not support IE7 anymore"]
+		"version": "1.12.1",
+		"lastChecked": "2017-09-30"
 	}, {
 		"name": "Sparkline",
 		"url": "http://omnipotent.net/jquery.sparkline/#s-about",
@@ -153,21 +152,21 @@
 		"name": "Font Awesome",
 		"url": "https://fortawesome.github.io",
 		"sources": "https://github.com/FortAwesome/Font-Awesome/",
-		"version": "4.6.1",
-		"lastChecked": "2016-04-17"
+		"version": "4.7.0",
+		"lastChecked": "2017-09-30"
 	}, {
 		"name": "Bootbox",
 		"url": "https://github.com/makeusabrew/bootbox/",
 		"sources": "https://github.com/makeusabrew/bootbox",
 		"version": "4.4.0",
-		"lastChecked": "2015-11-13"
+		"lastChecked": "2017-09-30"
 	}, {
 		"name": "Bootstrap",
 		"url": "http://twitter.github.com/bootstrap/",
 		"sources": "https://github.com/twitter/bootstrap",
 		"version": "3.3.7",
 		"lastVersion": "3.3.7",
-		"lastChecked": "2017-10-31",
+		"lastChecked": "2017-09-30",
 		"known-issues": ["#19192"]
 	}, {
 		"name": "Bootstrap Jasny",
