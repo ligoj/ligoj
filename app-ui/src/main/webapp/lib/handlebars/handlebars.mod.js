@@ -1,5 +1,7 @@
-define(["handlebars/handlebars"], function() {
+var Handlebars;
+define(["handlebars/handlebars"], function(handlebars) {
 	// Register the length helper
+	Handlebars = Handlebars || handlebars;
 	Handlebars.registerHelper('length', function(assignments) {
 		return assignments.length;
 	});
