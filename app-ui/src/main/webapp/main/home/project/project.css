@@ -32,4 +32,6 @@
 	right: 0;
 	top: -5px;
 }
-
+div.dt-button-background {
+	opacity: 0
+}

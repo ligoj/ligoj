@@ -402,9 +402,105 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Fill the datatables of subscription, no AJAX, laready loaded with the project's detail.
+		 * Fill the datatables of subscription, no AJAX, already loaded with the project's detail.
 		 */
 		fillSubscriptionsTable: function (project, $nodes) {
+			require(['datatables/dataTables.rowGroup'], function() {
+				current.fillSubscriptionsTableInternal(project, $nodes);
+			});
+		},
+		
+		/**
+		 * Data source column number.
+		 */
+		dataSrcToNumCol : {'node.refined.refined.id' : 1,'node.refined.id' : 2,'node.id' : 3},
+		
+		/**
+		 * Registered data source for grouping.
+		 */
+		dataSrcs : ['node.id', 'node.refined.id', 'node.refined.refined.id'],
+		
+		/**
+		 * Return the data corresponding to the given depth starting from a node.
+		 * @param {object} node The subscription node.
+		 * @param {integer} depth The positive depth to follow within the node's redefinition.
+		 * @return The node data in the given depth.
+		 */
+		dataSrcGetter : function(node, depth) {
+			if (depth == 0) {
+				return node.id;
+			}
+			return current.dataSrcGetter(node.refined, depth - 1);
+		}, 
+		
+		/**
+		 * Group the subscriptions table by the given data path (dataSrc).
+		 * @param {string} dataSrc Optional data source. When null, disable group mode.
+		 */
+		groupBy: function(dataSrc) {
+			if (dataSrc) {
+				current.subscriptions.DataTable().order([[ current.dataSrcToNumCol[dataSrc], 'asc' ]]);
+				current.subscriptions.DataTable().rowGroup().dataSrc(dataSrc);
+				current.subscriptions.DataTable().draw();
+			} else {
+				// No more group
+				current.subscriptions.DataTable().rowGroup().disable();
+				current.subscriptions.DataTable().draw();
+			}
+		},
+		
+		/**
+		 * Remove groups where there is only one subscription.
+		 */
+		pruneUselessGroups: function(groups) {
+			var total = 0;
+			for (var id in groups) {
+				var count = groups[id];
+				if (count === 1) {
+					delete groups[id];
+				} else {
+					total += count;
+				}
+			}
+			return total;
+		},
+
+		getAutoGroupDataSrc: function() {
+			var subscriptions = current.model.subscriptions;
+			var modes = [];
+			for (var depth = 0; depth < current.dataSrcs.length; depth++) {
+				var dataSrc = current.dataSrcs[depth];
+				var mode = {ids:{}};
+				modes.push(mode);
+				for (var i = 0; i< subscriptions.length; i++) {
+					var id = current.dataSrcGetter(subscriptions[i].node, depth);
+					mode.ids[id] = (mode.ids[id] || 0) + 1;
+				}
+				// Remove groups where there is only one subscription
+				mode.nbGrouped = current.pruneUselessGroups(mode.ids);
+
+				// Count relevant groups of subscriptions
+				mode.nbGroups = Object.keys(mode.ids).length;
+			}
+			var maxDepth = null;
+			var maxGrouped = 0;
+			var maxGroups = 0;
+			for (var depth = 0; depth < current.dataSrcs.length; depth++) {
+				var mode = modes[depth];
+				if (mode.nbGroups > maxGroups || mode.nbGroups === maxGroups && mode.nbGrouped > maxGrouped) {
+					maxGroups = mode.nbGroups;
+					maxGrouped = mode.nbGrouped;
+					maxDepth = current.dataSrcs[depth];
+				}
+			}
+			if (maxGroups === 1) {
+				// One group means no needed group
+				maxDepth = null;
+			} 
+			return maxDepth;
+		},
+
+		fillSubscriptionsTableInternal: function (project, $nodes) {
 			var buttons = project.manageSubscriptions ? [{
 					extend: 'create',
 					text: current.$messages.subscribe,
@@ -412,6 +508,39 @@ define(['cascade'], function ($cascade) {
 						$button.off('click.dtb').attr('href', current.$url + '/' + current.currentId + '/subscription');
 					}
 				}] : [];
+			buttons.push({
+				extend: 'collection',
+				text: '<i class="fa fa-object-group"></i>',
+				fade: 0,
+				autoClose : true,
+				buttons: [{
+					text: '<i class="fa fa-magic fa-fw"></i> ' + current.$messages['group-by-auto'],
+					action: function ( e, dt, node, config ) {
+						current.groupBy(current.getAutoGroupDataSrc());
+					}
+				}, {
+					text: '<i class="fa fa-ban fa-fw"></i> ' + current.$messages['group-by-none'],
+					action: function ( e, dt, node, config ) {
+						current.groupBy();
+					}
+				}, {
+					text: '<i class="fa fa-glass fa-fw"></i> ' + current.$messages.service,
+					action: function ( e, dt, node, config ) {
+						current.groupBy('node.refined.refined.id', 1);
+					}
+				}, {
+					text: '<i class="fa fa-wrench fa-fw"></i> ' + current.$messages.tool,
+					action: function ( e, dt, node, config ) {
+						current.groupBy('node.refined.id', 2);
+					}
+				}, {
+					text: '<i class="fa fa-cube fa-fw"></i> ' + current.$messages.node,
+					action: function ( e, dt, node, config ) {
+						current.groupBy('node.id', 3);
+					}
+				}]
+			});
+			var groupBy = current.getAutoGroupDataSrc();
 			current.subscriptions = _('subscriptions').dataTable({
 				dom: '<"row"<"col-xs-6"B>>t',
 				pageLength: -1,
@@ -429,7 +558,7 @@ define(['cascade'], function ($cascade) {
 					className: 'status',
 					orderable: false
 				}, {
-					data: 'node.refined.refined.name',
+					data: 'node.refined.refined.id',
 					className: 'hidden-xs service',
 					render: function (_i, mode, subscription) {
 						if (mode === 'display') {
@@ -438,7 +567,7 @@ define(['cascade'], function ($cascade) {
 						return subscription.node.refined.refined.name;
 					}
 				}, {
-					data: 'node.refined.name',
+					data: 'node.refined.id',
 					className: 'responsive-tool icon-xs tool truncated',
 					render: function (_i, mode, subscription) {
 						if (mode === 'display') {
@@ -447,8 +576,11 @@ define(['cascade'], function ($cascade) {
 						return subscription.node.refined.name;
 					}
 				}, {
-					data: 'node.name',
-					className: 'hidden-xs responsive-node truncated'
+					data: 'node.id',
+					className: 'hidden-xs responsive-node truncated',
+					render: function (_i, _m, subscription) {
+						return subscription.node.name;
+					}
 				}, {
 					data: null,
 					orderable: false,
@@ -481,8 +613,31 @@ define(['cascade'], function ($cascade) {
 						return '&nbsp';
 					}
 				}],
-				buttons: buttons
+				buttons: buttons,
+				rowGroup: {
+					dataSrc: groupBy || "project",
+					startRender: function (rows, group ) {
+						var dataSrc = rows.table().rowGroup().dataSrc();
+						var subscription0 = rows.data()[0];
+						var $tr = $('<tr/>');
+						var $td;
+						if (dataSrc === 'node.id') {
+							// node mode
+							$td = $('<td colspan="8"> ' + subscription0.node.name + '</td>');
+						} else if (dataSrc === 'node.refined.id') {
+							// tool mode
+							$td = $('<td colspan="8"> ' + subscription0.node.refined.name + '</td>');
+						} else {
+							// service mode
+							$td = $('<td colspan="8"> ' + subscription0.node.refined.refined.name + '</td>');
+						}
+						$td.prepend($('<span class="badge bade-default">' + rows.count() + '</span>'));
+						return $tr.append($td);
+					}
+				}
 			});
+			current.groupBy(groupBy);
+
 			// Launch Ajax requests to refresh statuses just after the table has been rendered
 			for (var index = 0; index < project.subscriptions.length; index++) {
 				current.$parent.refreshSubscription(project.subscriptions[index]);
