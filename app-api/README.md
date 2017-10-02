@@ -6,6 +6,7 @@ Roles :
 
 # Packaging (with Maven)
 Compile Java sources and produce the WAR file.
+
 ```
 mvn clean package -DskipTests=true
 ```
@@ -28,16 +29,19 @@ By default, the location is "https://oss.sonatype.org/service/local/artifact/mav
 In case of a custom build you can specify its remote or local location.
 
 Staged OSS build from Sonatype
+
 ```
 docker build -t ligoj-api:1.6.8 --build-arg VERSION=1.6.8 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/1.6.8/app-api-1.6.8.war" .
 ```
 
 Private remote build
+
 ```
 docker build -t ligoj-api:1.6.8 --build-arg VERSION=1.6.8 --build-arg WAR="https://storage.company.com/releases/app-api-1.6.8.war" .
 ```
 
 Reuse the local maven package
+
 ```
 docker build -t ligoj-api:1.6.8 --build-arg VERSION=1.6.8 --build-arg WAR="target/app-api-1.6.8.war" .
 ```
@@ -70,6 +74,7 @@ docker run --rm -it \
 ```
 
 You can experience network issue with remote database. To validate the link, try this :
+
 ```
 docker run --rm -it \
  --name "ligoj-api" \
@@ -77,6 +82,7 @@ docker run --rm -it \
 ```
 
 More complex run with crypto, port mapping and volume configurations
+
 ```
 docker run --rm -it \
  --name "ligoj-api" \
@@ -86,5 +92,5 @@ docker run --rm -it \
  -p 8680:8081 \
  ligoj-api:1.6.8
 ```
-Note: On Windows host, replace "\" by "`" for multi-line support.
+Note: On Windows host, replace all \ (escape) by ` for multi-line support.
 
