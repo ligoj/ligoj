@@ -89,7 +89,7 @@ define([
 		var $link = $(this).attr('cascade-loaded','true');
 		$.proxy($cascade.loadPartial, $link)(function() {
 			$link.attr('data-toggle', 'modal').trigger('click.bs.modal.data-api');
-		}, []);
+		});
 		e.preventDefault();
 	}).on('show.bs.modal', '.modal[data-ajax]', $cascade.loadPartial);
 
