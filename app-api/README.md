@@ -94,3 +94,73 @@ docker run --rm -it \
 ```
 Note: On Windows host, replace all \ (escape) by ` for multi-line support.
 
+## Relevant variables
+
+
+```
+CONTEXT      : Context, without starting '/'
+SERVER_HOST  : 0.0.0.0
+SERVER_PORT  : 8081 (8080 for UI server)
+JAVA_MEMORY  : JVM Memory
+CRYPTO       : Secret AES file loacation for secured application data
+CUSTOM_OPTS  : Additional JVM options, like -D...
+JAVA_OPTIONS : Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties
+jdbc.url     : DB URL
+jdbc.username: DB user
+jdbc.password: DB password
+```
+
+Java properties (injected in CUSTOM_OPTS with -Dxxx=yyyy):
+
+```
+user.timezone = UTC
+```
+
+Spring-Boot properties (injected in CUSTOM_OPTS):
+
+```
+server.port               = ${SERVER_PORT}
+server.address            = ${SERVER_HOST}
+server.context-path       = /${CONTEXT}
+management.context-path   = /manage
+management.security.roles = USER
+jpa.hbm2ddl               = <[update],none,validate>. With "update", the server takes up to 30s to start
+jdbc.vendor               = <[mysql],postgresql,mariadb>
+jdbc.port                 = 3306
+jdbc.database             = ligoj
+jdbc.username             = ligoj
+jdbc.password             = ligoj
+jdbc.host                 = localhost
+jpa.dialect               = <[org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect],org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect>
+jdbc.driverClassName      = <[com.mysql.cj.jdbc.Driver],org.postgresql.Driver>
+jdbc.urlparam             = ?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC
+jdbc.url                  = jdbc:${jdbc.vendor}://${jdbc.host}:${jdbc.port}/${jdbc.database}${jdbc.urlparam:}
+jdbc.validationQuery      = select 1;
+jdbc.maxIdleTime          = 180000
+jdbc.maxPoolSize          = 150
+health.node               = 0 0 0/1 1/1 * ?
+health.subscription       = 0 0 2 1/1 * ?
+app.crypto.file           = Secret file location
+app.safe.mode             = <[false],true> When true, plug-ins are not loaded and their state is not updated
+```
+
+## Compatibilities
+### Database
+Compatibility and performance for 10K+users and 1K+ projects
+
+| Vendor     | Version | Driver                   | Dialect                                                  | Status                  |
+|------------|---------|--------------------------|----------------------------------------------------------|-------------------------|
+| MySQL      | 5.5     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | A bit slow in plugin-id |
+| MySQL      | 5.6     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
+| MySQL      | 5.7     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | Slow in plugin-id       |
+| MariaDB    | 10.1    | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | Slow in plugin-id       |
+| MariaDB    | 10.1    | org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | ?                       |
+| PostGreSQL | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
+
+### JSE
+
+| Vendor     | Version  | Status |
+|------------|----------|--------|
+| Oracle     | 1.8u121+ | OK     |
+| OpenJQK    | 1.8u121+ | OK     |
+
