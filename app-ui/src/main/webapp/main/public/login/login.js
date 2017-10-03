@@ -45,7 +45,7 @@ define([
 		/**
 		 * AJAX error management
 		 */
-		handleAjaxError: function(xhr) {
+		handleError: function(xhr) {
 			if (xhr.status === 400) {
 				if ((typeof xhr.responseText === 'string') && /^\{.*\}$/.exec(xhr.responseText) && JSON.parse(xhr.responseText).errors) {
 					var error = JSON.parse(xhr.responseText).errors;

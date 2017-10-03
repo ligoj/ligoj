@@ -45,7 +45,7 @@ html {
 .bs-inbox .count {
 	vertical-align: middle;
 	position: relative;
-	top: 2px;
+	top: 4px;
 	font-weight: 700;
 }
 .bs-inbox .popover {

@@ -423,9 +423,10 @@ define([
 		 * Load partials from a markup definition, inject the compiled template HTML inside the current element with loaded i18n file, load the CSS and initialize the controller.
 		 * 'data-ajax' attribute defines the identifier of resources to load. Is used to build the base name of HTML, JS,... and also used as an identifier built with the identifier of containing view.
 		 * 'data-plugins' attribute defines the resources to be loaded. By default the HTML template is loaded and injected inside the current element.
+		 * Partials does not interfere with the hierarchy.
 		 * @param {function} callback Optional callback when partial is loaded.
 		 */
-		loadPartial: function (callback, $parent) {
+		loadPartial: function (callback) {
 			var $target = $(this);
 			var context = $self.$current;
 			callback = typeof callback === 'function' ? callback : null;
@@ -459,9 +460,7 @@ define([
 			if ($(this).attr('data-cascade') === 'true') {
 				home += '/' + id;
 			}
-
-			$self.loadFragment(context, $self.$current.$transaction, home, id, {
-				$parentElement: $parent,
+			$self.loadFragment(context, context.$transaction, home, id, {
 				plugins: plugins,
 				callback: callback
 			});
