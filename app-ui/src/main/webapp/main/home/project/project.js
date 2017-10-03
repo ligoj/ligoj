@@ -575,7 +575,7 @@ define(['cascade'], function ($cascade) {
 					}
 				}, {
 					data: 'node.refined.id',
-					className: 'responsive-tool icon-xs tool truncated',
+					className: 'responsive-tool icon-xs tool truncate',
 					render: function (_i, mode, subscription) {
 						if (mode === 'display') {
 							return current.$parent.toIconNameTool(subscription.node.refined);
@@ -584,7 +584,7 @@ define(['cascade'], function ($cascade) {
 					}
 				}, {
 					data: 'node.id',
-					className: 'hidden-xs responsive-node truncated',
+					className: 'hidden-xs responsive-node truncate',
 					render: function (_i, _m, subscription) {
 						return subscription.node.name;
 					}
