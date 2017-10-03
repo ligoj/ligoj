@@ -35,3 +35,7 @@
 div.dt-button-background {
 	opacity: 0
 }
+
+#subscriptions .group.group-start {
+	cursor: pointer;
+}
