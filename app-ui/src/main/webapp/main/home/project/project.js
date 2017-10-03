@@ -441,6 +441,7 @@ define(['cascade'], function ($cascade) {
 			if (dataSrc) {
 				current.subscriptions.DataTable().order([[ current.dataSrcToNumCol[dataSrc], 'asc' ]]);
 				current.subscriptions.DataTable().rowGroup().dataSrc(dataSrc);
+				current.subscriptions.DataTable().rowGroup().enable();
 				current.subscriptions.DataTable().draw();
 			} else {
 				// No more group
@@ -493,7 +494,7 @@ define(['cascade'], function ($cascade) {
 					maxDepth = current.dataSrcs[depth];
 				}
 			}
-			if (maxGroups === 1) {
+			if (maxGroups === 1 && maxGrouped === subscriptions.length) {
 				// One group means no needed group
 				maxDepth = null;
 			} 
