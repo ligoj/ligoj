@@ -244,7 +244,7 @@ define(['jquery'], function($) {
 				}
 				
 				// Cannot have day-of-week AND a day-of-month
-				if (items[3] !== '*' && items[3] !== '?') {
+				if ((items[3] !== '*' && items[3] !== '?') || (items[3] === '*' && items[5] === '*')) {
 					items[5] = '?';					
 				}
 			}
