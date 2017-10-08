@@ -205,6 +205,33 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
+		 * Return the relevant 2 letters identifying the given user.
+		 * @param {Object|string} user The user data : login, fullname, etc... The identifier is required, either in 'id' attribute, either as a string.
+		 * @return {string} The relevant 2 letters identifying the given user.
+		 */
+		toUser2Letters: function (user) {
+			if (user.firstName && user.lastName) {
+				return user.firstName.charAt(0) + user.lastName.charAt(0);
+			}
+			if (user.fullName) {
+				// Use first letter of first and last part of the full name
+				var split = user.fullName.split(' ');
+				if (split.length === 1) {
+					// No words detected
+					return user.fullName.charAt(0) + (user.fullName.length >= 2 ? user.fullName.charAt(1) : '');
+				}
+				return split[0].charAt(0) + split[split.length - 1].charAt(0)
+			}
+
+			// Fail safe rendering based on login
+			var id = user.id || user || '??';
+			if (id.length === 1) {
+				id = id + id;
+			}
+			return id.charAt(0) + id.charAt(1);
+		},
+
+		/**
 		 * Fill audit data in the UI
 		 */
 		fillAuditData: function (data) {
