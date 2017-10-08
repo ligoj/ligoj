@@ -480,7 +480,6 @@ define(['cascade'], function ($cascade) {
 			var subscriptions = current.model.subscriptions;
 			var modes = [];
 			for (var depth = 0; depth < current.dataSrcs.length; depth++) {
-				var dataSrc = current.dataSrcs[depth];
 				var mode = {ids:{}};
 				modes.push(mode);
 				for (var i = 0; i< subscriptions.length; i++) {
@@ -526,27 +525,27 @@ define(['cascade'], function ($cascade) {
 				autoClose : true,
 				buttons: [{
 					text: '<i class="fa fa-magic fa-fw"></i> ' + current.$messages['group-by-auto'],
-					action: function ( e, dt, node, config ) {
+					action: function () {
 						current.groupBy(current.getAutoGroupDataSrc());
 					}
 				}, {
 					text: '<i class="fa fa-ban fa-fw"></i> ' + current.$messages['group-by-none'],
-					action: function ( e, dt, node, config ) {
+					action: function () {
 						current.groupBy();
 					}
 				}, {
 					text: '<i class="fa fa-glass fa-fw"></i> ' + current.$messages.service,
-					action: function ( e, dt, node, config ) {
+					action: function () {
 						current.groupBy('node.refined.refined.id', 1);
 					}
 				}, {
 					text: '<i class="fa fa-wrench fa-fw"></i> ' + current.$messages.tool,
-					action: function ( e, dt, node, config ) {
+					action: function () {
 						current.groupBy('node.refined.id', 2);
 					}
 				}, {
 					text: '<i class="fa fa-cube fa-fw"></i> ' + current.$messages.node,
-					action: function ( e, dt, node, config ) {
+					action: function () {
 						current.groupBy('node.id', 3);
 					}
 				}]
@@ -642,7 +641,7 @@ define(['cascade'], function ($cascade) {
 							// service mode
 							groupText = subscription0.node.refined.refined.name;
 						}
-						var $td = $('<td colspan="7"><span class="badge bade-default">' + rows.count() + '</span> ' + subscription0.node.name + '</td>');
+						var $td = $('<td colspan="7"><span class="badge bade-default">' + rows.count() + '</span> ' + groupText + '</td>');
 						$tr.attr('data-group', group).append('<td/>').append($td)
 						if (current.model.subscriptions.length > 10 && rows.count() > 2) {
 							// Collapse this group

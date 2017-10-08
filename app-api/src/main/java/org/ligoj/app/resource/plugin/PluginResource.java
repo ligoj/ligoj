@@ -338,7 +338,7 @@ public class PluginResource {
 
 		// Then install/update the plug-in
 		update(updateFeatures, plugins);
-		install(newFeatures);
+		installInternal(newFeatures);
 		log.info("Plugins are now configured");
 
 		// And remove the old plug-in no more installed
@@ -348,7 +348,7 @@ public class PluginResource {
 	/**
 	 * Install all ordered plug-ins.
 	 */
-	private void install(final Map<String, FeaturePlugin> newFeatures) throws Exception {
+	private void installInternal(final Map<String, FeaturePlugin> newFeatures) throws Exception {
 		for (final FeaturePlugin feature : newFeatures.values()) {
 			feature.install();
 		}
