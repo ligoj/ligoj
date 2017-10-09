@@ -443,7 +443,6 @@ output {
 	background-position: center bottom, center calc(100% - 1px);
 	background-color: transparent;
 	transition: background 0s ease-out;
-	float: none;
 	box-shadow: none;
 	border-radius: 0;
 	font-weight: 400;
@@ -748,7 +747,7 @@ select.form-control[multiple], .form-group.is-focused select.form-control[multip
 .input-group .input-group-addon {
 	border: 0;
 	background: transparent;
-	padding: 6px 15px 0;
+	padding: 17px 15px 0;
 }
 
 .form-group input[type=file] {
