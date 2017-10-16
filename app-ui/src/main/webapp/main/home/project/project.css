@@ -39,3 +39,44 @@ div.dt-button-background {
 #subscriptions .group.group-start {
 	cursor: pointer;
 }
+#subscriptions .group.group-start td:first-child {
+	padding: 0;
+}
+.group-start .grouped-count {
+	padding-bottom: 13px;
+    margin-bottom: 0;
+    margin-top: 0;
+    vertical-align: top;
+    display: block;
+    padding-top: 13px;
+}
+
+.table.grouped>thead>tr>th.status, .table.grouped>tbody>tr>td.status {
+	width: 32px;
+	font-size: unset;
+}
+.table.grouped>thead>tr>th.status i {
+	margin-left: 8px;
+}
+.table.grouped>tbody>tr>td.status {
+	padding-left: 24px;
+}
+.table.grouped {
+	border-left: none;
+}
+.group-start .toggle {
+	position: absolute;
+	display: block;
+}
+.group-start .toggle i {
+    position: relative;
+    left: 15px;
+    top: 12px;
+    display: inline;
+}    
+.group-start.row-group-collapsed .toggle i.fa-minus-square-o {
+	display: none;
+}
+.group-start:not(.row-group-collapsed) .toggle i.fa-plus-square-o {
+	display: none;
+}

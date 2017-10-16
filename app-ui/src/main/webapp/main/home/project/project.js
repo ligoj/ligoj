@@ -446,12 +446,13 @@ define(['cascade'], function ($cascade) {
 		groupBy: function(dataSrc) {
 			if (dataSrc) {
 				current.subscriptions.DataTable().order([[ current.dataSrcToNumCol[dataSrc], 'asc' ]]);
-				current.subscriptions.DataTable().rowGroup().dataSrc(dataSrc);
-				current.subscriptions.DataTable().rowGroup().enable();
+				current.subscriptions.DataTable().rowGroup().dataSrc(dataSrc).enable();
 				current.subscriptions.DataTable().draw();
+				current.subscriptions.addClass('grouped');
 			} else {
 				// No more group
 				current.subscriptions.DataTable().rowGroup().disable();
+				current.subscriptions.removeClass('grouped');
 				
 				// Also show collapsed groups
 				_('subscriptions').find('tr.hidden[data-subscription]').removeClass('hidden');
@@ -626,23 +627,29 @@ define(['cascade'], function ($cascade) {
 				buttons: buttons,
 				rowGroup: {
 					dataSrc: groupBy || "project",
-					startRender: function (rows, group ) {
+					startRender: function (rows, group, i ) {
 						var dataSrc = rows.table().rowGroup().dataSrc();
-						var subscription0 = rows.data()[0];
-						var $tr = $('<tr/>');
-						var groupText;
+						var $tr = $('<tr/>').attr('data-group', group);
+						var subscription = rows.data()[0];
+						
+						// Add common subscription status
+						$tr.append('<td/>');
+						
+						// Add service/too/node TD
 						if (dataSrc === 'node.id') {
-							// node mode
-							groupText = subscription0.node.name;
-						} else if (dataSrc === 'node.refined.id') {
-							// tool mode
-							groupText = subscription0.node.refined.name;
+							// Node mode
+							$tr.append('<td>' + current.$parent.toIcon(subscription.node.refined.refined) +'</td>');
+							$tr.append('<td>' + current.$parent.toIconNameTool(subscription.node.refined) +'</td>');
+							$tr.append('<td colspan="5">' + subscription.node.name +'</td>');
+						} else if (dataSrc === 'node.refined.id' || dataSrc === 'node.id') {
+							// Tool mode
+							$tr.append('<td>' + current.$parent.toIcon(subscription.node.refined.refined) +'</td>');
+							$tr.append('<td colspan="6">' + current.$parent.toIconNameTool(subscription.node.refined) +'</td>');
 						} else {
-							// service mode
-							groupText = subscription0.node.refined.refined.name;
+							// Service mode
+							$tr.append('<td colspan="7">' + current.$parent.toIcon(subscription.node.refined.refined) +'</td>');
 						}
-						var $td = $('<td colspan="7"><span class="badge bade-default">' + rows.count() + '</span> ' + groupText + '</td>');
-						$tr.attr('data-group', group).append('<td/>').append($td)
+						$tr.children().eq(0).append('<div class="grouped-count label label-default"><span class="toggle"><i class="fa fa-plus-square-o"></i><i class="fa fa-minus-square-o"></i></span>' + rows.count() + '</div>');
 						if (current.model.subscriptions.length > 10 && rows.count() > 2) {
 							// Collapse this group
 							current.collapseGroup($tr, group);

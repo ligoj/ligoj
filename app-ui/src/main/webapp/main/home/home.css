@@ -13,16 +13,20 @@ img.tool.broken {
 }
 .table>thead>tr>th.status, .table>tbody>tr>td.status {
 	width: 10px;
+	font-size: xx-small;
 	border-right-width: 1px;
 	border-right-style: solid;
 	vertical-align: middle;
-	font-size: xx-small;
 	box-sizing: border-box;
-	padding-left: 2px;
+	padding-left: 0;
 	padding-right: 0;
+    background-clip: content-box;
+    padding-top: 0;
+    line-height: 36px;
+    padding-bottom: 0;
 }
 
-.table>thead>tr>th.status>i {
+.masonry-container .table>thead>tr>th.status>i {
 	margin-left: -1px;
 }
 
@@ -130,7 +134,6 @@ table thead>tr>th.status.status-unknown.refresh, table tbody>tr>td.status.status
 
 .subscriptions td.features .details {
 	float: right;
-	overflow: hidden;
 }
 
 .subscriptions tr.service-kpi-sonar td.features .details {
