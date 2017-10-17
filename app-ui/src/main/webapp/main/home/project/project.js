@@ -647,7 +647,7 @@ define(['cascade'], function ($cascade) {
 							$tr.append('<td colspan="6">' + current.$parent.toIconNameTool(subscription.node.refined) +'</td>');
 						} else {
 							// Service mode
-							$tr.append('<td colspan="7">' + current.$parent.toIcon(subscription.node.refined.refined) +'</td>');
+							$tr.append('<td colspan="7">' + current.$parent.toIcon(subscription.node.refined.refined) + '&nbsp;' + subscription.node.refined.refined.name + '</td>');
 						}
 						$tr.children().eq(0).append('<div class="grouped-count label label-default"><span class="toggle"><i class="fa fa-plus-square-o"></i><i class="fa fa-minus-square-o"></i></span>' + rows.count() + '</div>');
 						if (current.model.subscriptions.length > 10 && rows.count() > 2) {
