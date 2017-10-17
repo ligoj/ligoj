@@ -328,7 +328,7 @@ public class PluginResource {
 					// The version is different, consider it as an update
 					updateFeatures.put(s.getKey(), s);
 				}
-				
+
 				// This plug-in has just been handled, so not removed
 				removedPlugins.remove(plugin);
 			}
@@ -352,7 +352,10 @@ public class PluginResource {
 	 */
 	private void installInternal(final Map<String, FeaturePlugin> newFeatures) throws Exception {
 		for (final FeaturePlugin feature : newFeatures.values()) {
-			feature.install();
+			// Do not trigger the install event when corresponding node is already there
+			if (!nodeRepository.exists(feature.getKey())) {
+				feature.install();
+			}
 		}
 	}
 
