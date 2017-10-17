@@ -325,11 +325,13 @@ public class PluginResource {
 				// Update the artifactId. May have not changed
 				plugin.setArtifact(toArtifactId(s));
 				if (!plugin.getVersion().equals(getVersion(s))) {
-					// The version is different, is all cases, consider it as an update
+					// The version is different, consider it as an update
 					updateFeatures.put(s.getKey(), s);
 				}
+				
+				// This plug-in has just been handled, so not removed
+				removedPlugins.remove(plugin);
 			}
-			removedPlugins.remove(plugin);
 		});
 
 		// First install the data of new plug-ins
