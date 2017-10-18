@@ -242,8 +242,11 @@ define(['cascade'], function ($cascade) {
 					data: 'name',
 					width: '200px',
 					className: 'truncate',
-					render: function (_i, _j, data) {
-						return '<a href="' + current.$url + '/' + data.id + '">' + data.name + '</a>';
+					render: function (_i, mode, data) {
+						if (mode === 'display') {
+							return '<a href="' + current.$url + '/' + data.id + '">' + data.name + '</a>';
+						}
+						return data.name;
 					}
 				}, {
 					data: 'description',
@@ -561,7 +564,7 @@ define(['cascade'], function ($cascade) {
 				],
 				data: project.subscriptions,
 				createdRow: function (nRow, subscription) {
-					$(nRow).addClass(subscription.node.id.replace(/:/g, '-')).addClass(subscription.node.refined.id.replace(/:/g, '-')).addClass(subscription.node.refined.refined.id.replace(/:/g, '-')).attr('data-subscription', subscription.id).attr('data-id', subscription.id).find('.unsubscribe, .delete').on('click', current.unsubscribe);
+					$(nRow).addClass('loading').addClass(subscription.node.id.replace(/:/g, '-')).addClass(subscription.node.refined.id.replace(/:/g, '-')).addClass(subscription.node.refined.refined.id.replace(/:/g, '-')).attr('data-subscription', subscription.id).attr('data-id', subscription.id).find('.unsubscribe, .delete').on('click', current.unsubscribe);
 					current.$parent.applySubscriptionStyle($(nRow), subscription, false);
 				},
 				columns: [{
@@ -602,8 +605,11 @@ define(['cascade'], function ($cascade) {
 				}, {
 					data: 'createdDate',
 					className: 'hidden-xs hidden-sm hidden-md truncate responsive-date',
-					render: function (_i, _j, subscription) {
-						return moment(subscription.createdDate).format(formatManager.messages.shortdateMomentJs);
+					render: function (_i, mode, subscription) {
+						if (mode === 'display') {
+							return moment(subscription.createdDate).format(formatManager.messages.shortdateMomentJs);
+						}
+						return subscription.createdDate;
 					}
 				}, {
 					data: null,

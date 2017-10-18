@@ -297,7 +297,6 @@ define(['cascade'], function ($cascade) {
 			var $details;
 			if (replace) {
 				$details = $td;
-				$td.removeClass('rendered');
 			} else {
 				$details = $td.find('.details');
 				if ($details.length === 0) {
