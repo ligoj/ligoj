@@ -262,7 +262,7 @@ define([
 				subscription = subscriptions[nodeSubscriptions[index]];
 				project = projects[subscription.project];
 				tableContent = '<tr class="trigger-visibility" data-subscription="' + subscription.id + '" data-project="' + project.id + '">';
-				tableContent += '<td class="status"></td>';
+				tableContent += '<td class="status"><div class="status-content"></div></td>';
 				tableContent += '<td class="project zoomable"><a href="#/home/project/' + project.id + '" title="' + project.name + '" data-toggle="tooltip" data-container="#_ucDiv">' + project.name + '</a></td>';
 				tableContent += '<td class="key zoomable zoomable-default in"></td>';
 				tableContent += '<td class="features"></td></tr>';
@@ -710,15 +710,15 @@ define([
 			var tr = '<tr>';
 			if (!loopStatus.serviceDisplayed) {
 				loopStatus.serviceDisplayed = true;
-				tr += '<td rowspan="' + current.computeServiceRowSpan(service) + '" class="status status-' + service.value.toLowerCase() + '">&nbsp;</td>';
+				tr += '<td rowspan="' + current.computeServiceRowSpan(service) + '" class="status status-' + service.value.toLowerCase() + '"><div class="status-content">&nbsp;</div></td>';
 				tr += '<td rowspan="' + current.computeServiceRowSpan(service) + '">' + service.node.name + '</td>';
 			}
 			if (!loopStatus.toolDisplayed) {
 				loopStatus.toolDisplayed = true;
-				tr += '<td rowspan="' + tool.specifics.length + '" class="status status-' + tool.value.toLowerCase() + '">&nbsp;</td>';
+				tr += '<td rowspan="' + tool.specifics.length + '" class="status status-' + tool.value.toLowerCase() + '"><div class="status-content">&nbsp;</div></td>';
 				tr += '<td class="icon-xs" rowspan="' + tool.specifics.length + '">' + current.$parent.toIcon(tool.node) + '<span class="hidden-xs" title="' + tool.description + '"> ' + tool.node.name + '</span></td>';
 			}
-			tr += '<td class="status status-' + nodeEvent.value.toLowerCase() + '">&nbsp;</td>';
+			tr += '<td class="status status-' + nodeEvent.value.toLowerCase() + '"><div class="status-content">&nbsp;</div></td>';
 			tr += '<td>' + node.name + '<a class="refresh-node pull-right"><i class="fa fa-refresh"></i></a></td><td data-id="' + node.id + '"></td></tr>';
 			_('status').find('tbody').append(tr);
 			_('status').find('[data-id="' + node + '"]').data('status', nodeEvent.value);
@@ -751,11 +751,11 @@ define([
 					notifyManager.notify(current.$messages.statusRefreshed);
 				},
 				beforeSend: function () {
-					_('status').find('.status').addClass('refresh');
+					_('status').find('tbody>tr').addClass('refresh');
 					$button.disable().find('i').addClass('fa-spin');
 				},
 				complete: function () {
-					_('status').find('.status.refresh').removeClass('refresh');
+					_('status').find('tr.refresh').removeClass('refresh');
 					$button.disable().find('i').removeClass('fa-spin');
 				}
 			});

@@ -370,3 +370,18 @@
 #expand-mode:not(.indent) i.fa-dedent, #expand-mode.indent i.fa-indent {
 	display: none;
 }
+#status td {
+	vertical-align: middle;
+}
+#status td.status-up+td {
+	background-color: rgba(92, 184, 92, 0.09);
+}
+#status td.status-down+td {
+	background-color: rgba(217, 83, 79, 0.09);
+}
+#status td.status {
+	height: 1px;
+}
+#status td.status .status-content {
+	height: 100%;
+}

@@ -564,13 +564,16 @@ define(['cascade'], function ($cascade) {
 				],
 				data: project.subscriptions,
 				createdRow: function (nRow, subscription) {
-					$(nRow).addClass('loading').addClass(subscription.node.id.replace(/:/g, '-')).addClass(subscription.node.refined.id.replace(/:/g, '-')).addClass(subscription.node.refined.refined.id.replace(/:/g, '-')).attr('data-subscription', subscription.id).attr('data-id', subscription.id).find('.unsubscribe, .delete').on('click', current.unsubscribe);
+					$(nRow).addClass(subscription.node.id.replace(/:/g, '-')).addClass(subscription.node.refined.id.replace(/:/g, '-')).addClass(subscription.node.refined.refined.id.replace(/:/g, '-')).attr('data-subscription', subscription.id).attr('data-id', subscription.id).find('.unsubscribe, .delete').on('click', current.unsubscribe);
 					current.$parent.applySubscriptionStyle($(nRow), subscription, false);
 				},
 				columns: [{
 					data: 'null',
 					className: 'status',
-					orderable: false
+					orderable: false,
+					render: function () {
+						return '<div class="draw status-content"></div>';
+					}
 				}, {
 					data: 'node.refined.refined.id',
 					className: 'hidden-xs service',

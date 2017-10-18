@@ -233,12 +233,12 @@ define(['cascade'], function ($cascade) {
 				},
 				beforeSend: function () {
 					ids.forEach(function (id) {
-						$('[data-subscription="' + id + '"]').find('.status').addClass('refresh');
+						$('[data-subscription="' + id + '"]').addClass('refresh');
 					});
 				},
 				complete: function () {
 					ids.forEach(function (id) {
-						$('[data-subscription="' + id + '"]').find('.status.refresh').removeClass('refresh');
+						$('[data-subscription="' + id + '"]').removeClass('refresh');
 					});
 				}
 			});
@@ -274,7 +274,11 @@ define(['cascade'], function ($cascade) {
 				tdClass = 'status-unknown';
 				tooltip = current.$messages['subscription-state-unknown'];
 			}
-			$tr.find('td.status').removeClass('status-up').removeClass('status-down').removeClass('status-unknown').addClass(tdClass).removeAttr('data-original-title').attr('data-title', tooltip).attr('data-container', 'body').attr('rel', 'tooltip').tooltip('fixTitle')[contentClass ? 'addClass' : 'removeClass']('text-danger').html(contentClass ? '<i class="fa ' + contentClass + '"></i>' : '&nbsp;');
+			$tr.find('td.status').removeClass('status-up').removeClass('status-down').removeClass('status-unknown')
+				.addClass(tdClass)[contentClass ? 'addClass' : 'removeClass']('text-danger')
+				.removeAttr('data-original-title').attr('data-title', tooltip).attr('data-container', 'body').attr('rel', 'tooltip')
+				.tooltip('fixTitle')
+				.find('.status-content').html(contentClass ? '<i class="fa ' + contentClass + '"></i>' : '&nbsp;');
 
 			// Update fresh keys & features
 			if (refresh) {

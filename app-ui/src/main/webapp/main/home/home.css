@@ -11,7 +11,7 @@ img.tool.broken {
 	-webkit-filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
 	filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5));
 }
-.table>thead>tr>th.status, .table>tbody>tr>td.status {
+.table td.status,.table th.status {
 	width: 10px;
 	font-size: xx-small;
 	border-right-width: 1px;
@@ -20,21 +20,24 @@ img.tool.broken {
 	box-sizing: border-box;
 	padding-left: 0;
 	padding-right: 0;
-    background-clip: content-box;
-    padding-top: 0;
-    line-height: 36px;
-    padding-bottom: 0;
+	padding-top: 0;
+	line-height: 36px;
+	padding-bottom: 0;
 }
 
-.masonry-container .table>thead>tr>th.status>i {
-	margin-left: -1px;
+.status.status-up .status-content {
+	background-color: #5cb85c;
 }
 
-.table>tbody>tr>td.status>i {
-	margin-left: -2px;
+.status.status-down .status-content {
+	background: #d9534f;
 }
 
-table thead>tr>th.status.refresh, table tbody>tr>td.status.refresh {
+.status.status-unknown .status-content {
+	background-color: #337ab7;
+}
+
+.refresh .status .status-content {
 	background-size: 40px 40px;
 	-moz-animation: progress-bar-stripes 2s linear infinite;
 	-webkit-animation: progress-bar-stripes 2s linear infinite;
@@ -42,19 +45,7 @@ table thead>tr>th.status.refresh, table tbody>tr>td.status.refresh {
 	animation: progress-bar-stripes 2s linear infinite;
 }
 
-table tr>td.status.status-up {
-	background-color: #5cb85c;
-}
-
-table tr>td.status.status-down {
-	background: #d9534f;
-}
-
-table tr>td.status.status-unknown {
-	background-color: #337ab7;
-}
-
-table thead>tr>th.status.status-down.refresh, table tbody>tr>td.status.status-down.refresh {
+.refresh .status.status-down .status-content {
 	background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
 	background-image: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, .15)), to(rgba(255, 255, 255, .15)));
 	background-image: -ms-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
@@ -63,7 +54,7 @@ table thead>tr>th.status.status-down.refresh, table tbody>tr>td.status.status-do
 	background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
 }
 
-table thead>tr>th.status.status-up.refresh, table tbody>tr>td.status.status-up.refresh {
+.refresh .status.status-up .status-content {
 	background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
 	background-image: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, .15)), to(rgba(255, 255, 255, .15)));
 	background-image: -ms-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
@@ -72,13 +63,103 @@ table thead>tr>th.status.status-up.refresh, table tbody>tr>td.status.status-up.r
 	background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
 }
 
-table thead>tr>th.status.status-unknown.refresh, table tbody>tr>td.status.status-unknown.refresh {
+.refresh .status.status-unknown .status-content {
 	background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
 	background-image: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, .15)), to(rgba(255, 255, 255, .15)));
 	background-image: -ms-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
 	background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
 	background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
 	background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+}
+
+.refresh .status .status-content {
+	position: relative;
+	transition: border-color 0.25s;
+}
+
+.refresh .status .status-content:before,
+.refresh .status .status-content:after {
+	position: absolute;
+	z-index: 1;
+	border: 2px solid transparent;
+	box-sizing: border-box;
+	content: '';
+ }
+
+.refresh .status .status-content:before {
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	animation: 1s top-left-border 0s infinite;
+}
+
+.refresh .status .status-content:after {
+	width: 0;
+	height: 0;
+	bottom: 0;
+	right: 0;
+	animation: 1s border-bottom-border 0.5s infinite;
+}
+
+@keyframes top-left-border {
+	0% {
+		border-top-color: #4b9fd5;
+		border-right-color: transparent;
+		width: 0;
+		height: 0;
+	}
+
+	25% {
+		border-top-color: #4b9fd5;
+		border-right-color: transparent;
+		width: 100%;
+		height: 0;
+	}
+
+	50% {
+		border-top-color: transparent;
+		border-right-color: #4b9fd5;
+		width: 100%;
+		height: 100%;
+	}
+	
+	75%,100% {
+		border-top-color: transparent;
+		border-right-color: transparent;
+		width: 100%;
+		height: 100%;
+	}
+}
+
+@keyframes border-bottom-border {
+	0% {
+		width: 0;
+		height: 0;
+		border-bottom-color: #4b9fd5;
+		border-left-color: transparent;
+	}
+
+	25% {
+		border-bottom-color: #4b9fd5;
+		border-left-color: transparent;
+		width: 100%;
+		height: 0;
+	}
+	
+	50% {
+		border-bottom-color: transparent;
+		border-left-color: #4b9fd5;
+		width: 100%;
+		height: 100%;
+	}
+
+	75%,100% {
+		border-bottom-color: transparent;
+		border-left-color: transparent;
+		width: 100%;
+		height: 100%;
+	}
 }
 
 .subscriptions .btn-link {
