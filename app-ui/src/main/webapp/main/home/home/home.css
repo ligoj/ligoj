@@ -373,10 +373,10 @@
 #status td {
 	vertical-align: middle;
 }
-#status td.status-up+td {
+#status td.status-up+td, #status td.status-up+td+td[data-id] {
 	background-color: rgba(92, 184, 92, 0.09);
 }
-#status td.status-down+td {
+#status td.status-down+td, #status td.status-down+td+td[data-id] {
 	background-color: rgba(217, 83, 79, 0.09);
 }
 #status td.status {
