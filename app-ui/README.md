@@ -77,19 +77,6 @@ docker run --rm -it \
  ligoj-ui:1.6.10 bash -c "apt-get install -y curl && curl --failed http://192.168.4.138:8081/ligoj-api/manage/health"
 ```
 
-More complex run with crypto and volume configurations
-
-```
-docker run --rm -it \
- --name "ligoj-api" \
- -e CRYPTO="-Dapp.crypto.file=/home/ligoj/security.key" \
- -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 -Dapp.safe.mode=true" \
- -v ~/.ligoj:/home/ligoj \
- -p 8680:8081 \
- ligoj-api:1.6.10
-```
-Note: On Windows host, replace "\" by "`" for multi-line support.
-
 ## Endpoints
 
 | Property     | Endpoint | Default |
@@ -115,3 +102,31 @@ docker build -t ligoj-ui:1.6.10 --build-arg VERSION=1.6.10 .
 ```
 docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.10 
 ```
+
+
+## Relevant variables
+
+
+```
+CONTEXT      : Context, without starting '/'
+SERVER_HOST  : 0.0.0.0
+SERVER_PORT  : 8080
+JAVA_MEMORY  : JVM Memory
+CUSTOM_OPTS  : Additional JVM options, like -D...
+JAVA_OPTIONS : Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties
+```
+
+Spring-Boot properties, injected in CUSTOM_OPTS
+(In addition of endpoint properties)
+
+```
+server.port           = ${SERVER_PORT}
+server.address        = ${SERVER_HOST}
+server.context-path   = /${CONTEXT}
+security.max-sessions = "1" # max concurrent session for one user, "-1" unlimited
+security              = "Trusted" # or "Rest" corresponds to the security mode the UI node authenticate the user
+sso.url               = ${ligoj.endpoint.api.url}/security/login # Authentication end-point URL
+sso.content           = {"name":"%s","password":"%s"}
+app-env               = auto # Suffix for index and login HTML files, maybe "-prod", "auto" or empty. When "auto", the suffix is guessed from the way the application is started
+```
+

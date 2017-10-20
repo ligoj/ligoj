@@ -100,7 +100,7 @@ Note: On Windows host, replace all \ (escape) by ` for multi-line support.
 ```
 CONTEXT      : Context, without starting '/'
 SERVER_HOST  : 0.0.0.0
-SERVER_PORT  : 8081 (8080 for UI server)
+SERVER_PORT  : 8081
 JAVA_MEMORY  : JVM Memory
 CRYPTO       : Secret AES file loacation for secured application data
 CUSTOM_OPTS  : Additional JVM options, like -D...

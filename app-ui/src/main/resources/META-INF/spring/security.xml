@@ -23,7 +23,7 @@
 		<intercept-url pattern="/**" access="hasParameter('api-key') or hasHeader('x-api-key') or isFullyAuthenticated()" />
 		<form-login login-page="/login.html?denied" authentication-success-handler-ref="authentication-success-handler" authentication-failure-handler-ref="authentication-failure-handler" />
 		<session-management>
-			<concurrency-control expired-url="/login.html?concurrency" />
+			<concurrency-control expired-url="/login.html?concurrency" max-sessions="${security.max-sessions:1}"/>
 		</session-management>
 		<access-denied-handler error-page="/login.html?denied" />
 		<logout invalidate-session="true" logout-success-url="/login.html?logout" />
