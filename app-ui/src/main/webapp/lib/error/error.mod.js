@@ -183,7 +183,7 @@ define([
 					current.manageBusinesSideError(JSON.parse(xhr.responseText), true);
 				} else {
 					// An unknown business/web server error
-					notifyManager.notify(xhr.responseText, errorMessages.error500, 'error');
+					notifyManager.notify(errorMessages.error500, null, 'error');
 				}
 			} else if (xhr.status === 503) {
 				// Server resource issue
