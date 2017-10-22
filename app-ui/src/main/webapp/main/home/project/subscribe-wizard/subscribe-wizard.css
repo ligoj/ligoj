@@ -193,21 +193,7 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-@media (min-width: 992px) {
-	#subscriptions .service {
-		width: 100px;
-	}
-}
-
 @media (min-width: 768px) {
-	#subscriptions tr>.tool {
-		width: 120px;
-	}
-
-	#subscriptions tr>.features {
-		width: 140px;
-	}
-
 	#subscribe-definition .tab-pane>.row {
 		position: relative;
 	}

@@ -36,6 +36,12 @@ div.dt-button-background {
 	opacity: 0
 }
 
+#subscriptions tr>.features {
+	width: 160px;
+}
+#subscriptions tr>td:nth-child(2) {
+	overflow: hidden;
+}
 #subscriptions .group.group-start {
 	cursor: pointer;
 }
