@@ -606,15 +606,6 @@ define(['cascade'], function ($cascade) {
 						return current.$parent.render(subscription, 'renderKey', $nodes[subscription.node.id]);
 					}
 				}, {
-					data: 'createdDate',
-					className: 'hidden-xs hidden-sm hidden-md truncate responsive-date',
-					render: function (_i, mode, subscription) {
-						if (mode === 'display') {
-							return moment(subscription.createdDate).format(formatManager.messages.shortdateMomentJs);
-						}
-						return subscription.createdDate;
-					}
-				}, {
 					data: null,
 					orderable: false,
 					className: 'features rendered',
@@ -649,14 +640,14 @@ define(['cascade'], function ($cascade) {
 							// Node mode
 							$tr.append('<td>' + current.$parent.toIcon(subscription.node.refined.refined) +'</td>');
 							$tr.append('<td>' + current.$parent.toIconNameTool(subscription.node.refined) +'</td>');
-							$tr.append('<td colspan="5">' + subscription.node.name +'</td>');
+							$tr.append('<td colspan="4">' + subscription.node.name +'</td>');
 						} else if (dataSrc === 'node.refined.id' || dataSrc === 'node.id') {
 							// Tool mode
 							$tr.append('<td>' + current.$parent.toIcon(subscription.node.refined.refined) +'</td>');
-							$tr.append('<td colspan="6">' + current.$parent.toIconNameTool(subscription.node.refined) +'</td>');
+							$tr.append('<td colspan="5">' + current.$parent.toIconNameTool(subscription.node.refined) +'</td>');
 						} else {
 							// Service mode
-							$tr.append('<td colspan="7">' + current.$parent.toIcon(subscription.node.refined.refined) + '&nbsp;' + subscription.node.refined.refined.name + '</td>');
+							$tr.append('<td colspan="6">' + current.$parent.toIcon(subscription.node.refined.refined) + '&nbsp;' + subscription.node.refined.refined.name + '</td>');
 						}
 						$tr.children().eq(0).append('<div class="grouped-count label label-default"><span class="toggle"><i class="fa fa-plus-square-o"></i><i class="fa fa-minus-square-o"></i></span>' + rows.count() + '</div>');
 						if (current.model.subscriptions.length > 10 && rows.count() > 2) {
