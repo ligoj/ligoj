@@ -6,7 +6,7 @@
 	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<context:component-scan base-package="org.ligoj.bootstrap.http.security" />
-	<http auto-config="true" use-expressions="true" entry-point-ref="ajaxFormLoginEntryPoint">
+	<http auto-config="true" use-expressions="true" entry-point-ref="ajaxFormLoginEntryPoint" >
 		<intercept-url pattern="/4*" access="permitAll" />
 		<intercept-url pattern="/themes/**" access="permitAll" />
 		<intercept-url pattern="/captcha.png" access="permitAll" />
@@ -22,15 +22,38 @@
 		<intercept-url pattern="/rest/service/password/recovery/**" access="isAnonymous()" />
 		<intercept-url pattern="/**" access="hasParameter('api-key') or hasHeader('x-api-key') or isFullyAuthenticated()" />
 		<form-login login-page="/login.html?denied" authentication-success-handler-ref="authentication-success-handler" authentication-failure-handler-ref="authentication-failure-handler" />
-		<session-management>
-			<concurrency-control expired-url="/login.html?concurrency" max-sessions="${security.max-sessions:1}"/>
-		</session-management>
+		<session-management session-authentication-strategy-ref="sas"/>
 		<access-denied-handler error-page="/login.html?denied" />
 		<logout invalidate-session="true" logout-success-url="/login.html?logout" />
 		<custom-filter position="DIGEST_AUTH_FILTER" ref="digestAuthenticationFilter" />
+		<custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />
 		<expression-handler ref="extendedSecurityExpressionHandler"/>
 		<csrf disabled="true" />
 	</http>
+
+	<beans:bean id="sas" class="org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy">
+	    <beans:constructor-arg>
+	        <beans:list>
+	            <beans:bean class="org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy">
+	                <beans:constructor-arg ref="sessionRegistry"/>
+			 	    <beans:property name="maximumSessions" value="${security.max-sessions:1}" />
+	            		<beans:property name="exceptionIfMaximumExceeded" value="false" />
+	            </beans:bean>
+	            <beans:bean class="org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy"/>
+	            <beans:bean class="org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy">
+	                <beans:constructor-arg ref="sessionRegistry"/>
+	            </beans:bean>
+	        </beans:list>
+	    </beans:constructor-arg>
+	</beans:bean>
+	<beans:bean id="sessionRegistry" class="org.springframework.security.core.session.SessionRegistryImpl"/>
+	<beans:bean id="concurrencyFilter" class="org.springframework.security.web.session.ConcurrentSessionFilter">
+	    <beans:constructor-arg index="0" ref="sessionRegistry"/>
+	    <beans:constructor-arg index="1" value="/login.html?concurrency"/>       
+		<beans:property name="redirectStrategy">
+			<beans:bean class="org.springframework.security.web.DefaultRedirectStrategy" />
+		</beans:property>
+	</beans:bean>
 	<beans:bean name="digestAuthenticationFilter" class="org.ligoj.app.http.security.DigestAuthenticationFilter" p:ssoPostUrl="${ligoj.endpoint.api.url}/security/sso">
 		<beans:property name="authenticationFailureHandler">
 			<beans:bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
