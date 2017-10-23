@@ -181,8 +181,7 @@ define([
 				var filterSelector = oSettings.oInit.fnFilterSelector || oSettings.oInit.filterSelector;
 				if (typeof filterSelector === 'function') {
 					filterSelector = filterSelector();
-				}
-				if (typeof filterSelector === 'string') {
+				} else if (typeof filterSelector === 'string') {
 					filterSelector = $(filterSelector);
 				}
 				self.resetFilters(table);
