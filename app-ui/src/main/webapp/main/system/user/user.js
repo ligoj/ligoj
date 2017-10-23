@@ -113,10 +113,10 @@ define(function () {
 				fnServerData: function () {
 					dataTableFilterManager.addFilterData.apply(dataTableFilterManager, arguments);
 				},
-				fnFilterSelector: function () {
-					return $('.dataTables_filter input[type="text"]');
+				filterSelector: function () {
+					return $('.dataTables_filter input[type="search"]');
 				},
-				fnFilterMapping: {
+				filterMapping: {
 					table_filter: function (rootFilters, value, helper) {
 						var filter = helper.addGroupFilter(rootFilters, 'or');
 						helper.addFilter(filter, 'login', 'cn', value);
