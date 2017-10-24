@@ -31,7 +31,8 @@ img.tool.broken {
 
 .status.status-down .status-content {
 	background: #d9534f;
-}
+	font-size: 7px;
+    color: black;}
 
 .status.status-unknown .status-content {
 	background-color: #337ab7;
