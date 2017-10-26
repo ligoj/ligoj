@@ -188,7 +188,6 @@ img.tool.broken {
 	width: 12px;
 	height: 12px;
 }
-
 .subscriptions .carousel-indicators>li:hover {
 	border-color: #999;
 	background-color: #ccc;
@@ -198,7 +197,6 @@ img.tool.broken {
 	width: 10px;
 	height: 10px;
 }
-
 .subscriptions .carousel-control.left>span, .subscriptions .carousel-control.right>span {
 	font-size: 15px;
 	color: #ddd;

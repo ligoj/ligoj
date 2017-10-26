@@ -46,7 +46,7 @@ define([
 			}).on('click', '.group-carousel .carousel-indicators>li', function (e) {
 				var $indicator = $(e.target);
 				$indicator.closest('.carousel-indicators').find('.active').removeClass('active');
-				$indicator.addClass('active').closest('table').find('.carousel').carousel(parseInt($indicator.attr('data-slide-to'), 10));
+				$indicator.addClass('active').closest('.node').find('.carousel').carousel(parseInt($indicator.attr('data-slide-to'), 10));
 			}).on('mouseenter', '.node', function (e) {
 				var $node = $(e.target).closest('.node');
 				if (!$node.is('.in')) {
@@ -242,7 +242,7 @@ define([
 
 			// Remove old data (refresh)
 			$thumbnail.children('.details').remove();
-			tableContent = '<div class="details"><table class="subscriptions table dataTable justified"><thead><tr>';
+			tableContent = '<div class="details group-carousel"><table class="subscriptions table dataTable justified"><thead><tr>';
 
 			// Status
 			tableContent += '<th class="status"><i class="fa fa-power-off" data-toggle="tooltip" title="' + current.$messages['status-subscription'] + '"></i></th>';
@@ -251,7 +251,7 @@ define([
 			tableContent += '<th class="project zoomable"><i class="fa fa-folder-open" data-toggle="tooltip" title="' + current.$messages.project + '" data-container="#_ucDiv"></i></th>';
 
 			// Subscription
-			tableContent += '<th class="key zoomable zoomable-default in group-carousel"><i class="fa fa-plug" data-toggle="tooltip" title="' + current.$messages.subscription + '" data-container="#_ucDiv"></i></th>';
+			tableContent += '<th class="key zoomable zoomable-default in"><i class="fa fa-plug" data-toggle="tooltip" title="' + current.$messages.subscription + '" data-container="#_ucDiv"></i></th>';
 
 			// Features
 			tableContent += '<th class="features"><i class="fa fa-cogs" data-toggle="tooltip" title="' + current.$messages.features + '" data-container="#_ucDiv"></i></th></tr></thead><tbody></tbody></table></div>';

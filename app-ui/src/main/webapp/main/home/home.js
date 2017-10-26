@@ -414,7 +414,7 @@ define(['cascade'], function ($cascade) {
 			result += '> ';
 			if (groupBySubscription) {
 				// Carousel indicator is moved to header instead of each raw
-				var $group = $('tr[data-subscription="' + subscription.id + '"]').closest('table.subscriptions').find('.group-carousel');
+				var $group = $('tr[data-subscription="' + subscription.id + '"]').closest('.node').find('.group-carousel');
 				if ($group.length && !$group.hasClass('carousel-part' + part)) {
 					// Add a global carousel indicator for this table
 					current.generateCarouselIndicators(items, null, startIndex, baseIndex, $group);
