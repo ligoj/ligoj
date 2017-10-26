@@ -681,7 +681,7 @@ define(['cascade'], function ($cascade) {
 							$tr.append('<td colspan="6">' + current.$parent.toIcon(subscription.node.refined.refined) + '&nbsp;' + subscription.node.refined.refined.name + '</td>');
 						} else {
 							// Orphan group
-							$tr.append('<td colspan="6">'+ current.$messages. +'</td>');
+							$tr.append('<td colspan="6">'+ current.$messages['group-by-other'] +'</td>');
 						}
 						$tr.children().eq(0).append('<div class="grouped-count label label-default"><span class="toggle"><i class="fa fa-plus-square-o"></i><i class="fa fa-minus-square-o"></i></span>' + rows.count() + '</div>');
 						if (current.model.subscriptions.length > 10 && group !== '_other_' && rows.count() > 2) {
