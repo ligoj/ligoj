@@ -180,19 +180,23 @@ img.tool.broken {
 }
 
 .subscriptions .carousel-indicators {
-	bottom: -22px;
+	bottom: -24px;
 }
 
 .subscriptions .carousel-indicators .active {
-	background-color: #ccc;
-	width: 8px;
-	height: 8px;
+	background-color: #bbb;
+	width: 12px;
+	height: 12px;
 }
 
+.subscriptions .carousel-indicators>li:hover {
+	border-color: #999;
+	background-color: #ccc;
+}
 .subscriptions .carousel-indicators>li {
-	border-color: #ddd;
-	width: 6px;
-	height: 6px;
+	border-color: #aaa;
+	width: 10px;
+	height: 10px;
 }
 
 .subscriptions .carousel-control.left>span, .subscriptions .carousel-control.right>span {
