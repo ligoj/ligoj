@@ -12,6 +12,7 @@ define({
 	"subscription-state-up" : "Souscription vérifiée",
 	"subscription-state-down" : "Souscription cassée ou non valide",
 	"subscription-state-unknown" : "Souscription dans un état inconnu",
+	"group-by-other" : "Autre",
 	"error" : {
 		"Validation" : "Ensemble de paramètres invalide",
 		"not-accepted-parameter" : "Paramètre {{this}} non attendu"
