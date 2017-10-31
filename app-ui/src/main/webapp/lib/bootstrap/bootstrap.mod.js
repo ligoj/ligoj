@@ -17,6 +17,13 @@ define([
 				$('[aria-describedby="' + $(this).attr('id') + '"]').popover('hide');
 			});
 		}
+	}).on('show.bs.tooltip', null, function(e) {
+		// Close nicely previous tooltips when a new one is displayed
+		$('[data-toggle="tooltip"][aria-describedby]').each(function() {
+			$(this).tooltip('hide');
+		});
+		// Destroy orphan previous tooltips
+		$('.tooltip.in').empty().remove();
 	}).on('show.bs.dropdown', null, function(e) {
 		// Close previous dropdowns
 		$('.dropdown-menu.detached').closeDropdown();
