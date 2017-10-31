@@ -216,9 +216,10 @@ th.responsive-datetime {
 }
 
 /* Prevent tooltip getting event and triggering mouseleave from other components. */
-
+/* Make tooltip visible even for items inside Select2 */
 .tooltip {
 	pointer-events: none;
+	z-index: 10001;
 }
 .panel-group .form-actions, .panel-group form {
 	/* See http://localhost:8081/poc/#/primevere/instruction */
