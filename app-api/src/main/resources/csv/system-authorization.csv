@@ -12,6 +12,7 @@ method;pattern;type;role.name
    ;^rest/id/password;API;USER
    ;^rest/system/setting;API;USER
    ;^rest/message.*;API;USER
+GET;^rest/node.*;API;USER
 GET;^rest/project.*;API;USER
 GET;^rest/subscription.*;API;USER
 
