@@ -23,7 +23,7 @@
 		<api.version>1.1.9</api.version>
 		<mail.version>1.5.6</mail.version>
 		<spring-boot.version>1.5.8.RELEASE</spring-boot.version>
-		<spring-cloud.version>1.2.3.RELEASE</spring-cloud.version>
+		<spring-cloud.version>1.2.4.RELEASE</spring-cloud.version>
 	</properties>
 
 	<dependencyManagement>
