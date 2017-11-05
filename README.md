@@ -2,7 +2,7 @@
 # The landing page of your team
 
 A web application to centralize the related tools of your projects, a 21th century links management with security and data collection.
-More technical details can be found in the sub directories [![ligo-api]](https://github.com/ligoj/ligoj/tree/master/app-api) and [![ligo-ui]](https://github.com/ligoj/ligoj/tree/master/app-ui).
+More technical details can be found in the sub directories [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api) and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 
 [![Build Status](https://travis-ci.org/ligoj/ligoj.svg?branch=master)](https://travis-ci.org/ligoj/ligoj)
