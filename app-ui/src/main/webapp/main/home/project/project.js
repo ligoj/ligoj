@@ -627,7 +627,7 @@ define(['cascade'], function ($cascade) {
 				buttons: buttons,
 				rowGroup: {
 					dataSrc: groupBy || "project",
-					startRender: function (rows, group, i ) {
+					startRender: function (rows, group) {
 						var dataSrc = rows.table().rowGroup().dataSrc();
 						var $tr = $('<tr/>').attr('data-group', group);
 						var subscription = rows.data()[0];
