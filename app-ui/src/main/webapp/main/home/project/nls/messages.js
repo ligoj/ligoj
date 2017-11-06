@@ -16,6 +16,7 @@ define({
 		"group-by" : "Group subscriptions by affinity",
 		"group-by-none" : "None",
 		"group-by-auto" : "Auto",
+		"group-by-other" : "Other",
 		"error" : {
 			"Validation" : "Invalid parameters set",
 			"not-accepted-parameter" : "Unexpected parameter {{this}}"

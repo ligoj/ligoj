@@ -422,7 +422,7 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Data source column number.
 		 */
-		dataSrcToNumCol : {'node.refined.refined.id' : 1,'node.refined.id' : 2,'node.id' : 3},
+		dataSrcToNumCol : {'node.refined.refined.id' : 1,'node.refined.id' : 2,'node.id' : 3, 'compact' : 4},
 		
 		/**
 		 * Registered data source for grouping.
@@ -448,7 +448,11 @@ define(['cascade'], function ($cascade) {
 		 */
 		groupBy: function(dataSrc) {
 			if (dataSrc) {
-				current.subscriptions.DataTable().order([[ current.dataSrcToNumCol[dataSrc], 'asc' ]]);
+				var masterDataSrc = dataSrc;
+				if (dataSrc.startsWith('compact-')) {
+					masterDataSrc = 'compact';
+				}
+				current.subscriptions.DataTable().order([[ current.dataSrcToNumCol[masterDataSrc], 'asc' ]]);
 				current.subscriptions.DataTable().rowGroup().dataSrc(dataSrc).enable();
 				current.subscriptions.DataTable().draw();
 				current.subscriptions.addClass('grouped');
@@ -483,12 +487,13 @@ define(['cascade'], function ($cascade) {
 		getAutoGroupDataSrc: function() {
 			var subscriptions = current.model.subscriptions;
 			var modes = [];
+			var nodeId;
 			for (var depth = 0; depth < current.dataSrcs.length; depth++) {
-				var mode = {ids:{}};
+				var mode = {ids:{}, depth: depth};
 				modes.push(mode);
 				for (var i = 0; i< subscriptions.length; i++) {
-					var id = current.dataSrcGetter(subscriptions[i].node, depth);
-					mode.ids[id] = (mode.ids[id] || 0) + 1;
+					nodeId = current.dataSrcGetter(subscriptions[i].node, depth);
+					mode.ids[nodeId] = (mode.ids[nodeId] || 0) + 1;
 				}
 				// Remove groups where there is only one subscription
 				mode.nbGrouped = current.pruneUselessGroups(mode.ids);
@@ -497,20 +502,34 @@ define(['cascade'], function ($cascade) {
 				mode.nbGroups = Object.keys(mode.ids).length;
 			}
 			var maxDepth = null;
+			var nbSoloGroups = 0;
 			var maxGrouped = 0;
 			var maxGroups = 0;
+			var maxMode = null;
 			for (var depth = 0; depth < current.dataSrcs.length; depth++) {
 				var mode = modes[depth];
 				if (mode.nbGroups > maxGroups || mode.nbGroups === maxGroups && mode.nbGrouped > maxGrouped) {
 					maxGroups = mode.nbGroups;
 					maxGrouped = mode.nbGrouped;
+					maxMode = mode;
 					maxDepth = current.dataSrcs[depth];
 				}
 			}
 			if (maxGroups === 1 && maxGrouped === subscriptions.length) {
 				// One group means no needed group
 				maxDepth = null;
-			} 
+			}
+			
+			// Check compact mode utility
+			if (maxDepth !== null && (subscriptions.length - mode.nbGrouped) > 1) {
+				// More than 1 subscription is not within a group, create a special compact group
+				maxDepth = 'compact-' + maxDepth.replace(/\./g, '__');
+				for (var i = 0; i< subscriptions.length; i++) {
+					nodeId = current.dataSrcGetter(subscriptions[i].node, maxMode.depth);
+					subscriptions[i][maxDepth] = maxMode.ids[nodeId] ? nodeId : 'z_orphan_';
+					subscriptions[i].compact = subscriptions[i][maxDepth];
+				}
+			}
 			return maxDepth;
 		},
 
@@ -599,6 +618,9 @@ define(['cascade'], function ($cascade) {
 						return subscription.node.name;
 					}
 				}, {
+					data: 'compact',
+					className: 'hidden'
+				}, {
 					data: null,
 					orderable: false,
 					className: 'truncate key rendered',
@@ -635,6 +657,15 @@ define(['cascade'], function ($cascade) {
 						// Add common subscription status
 						$tr.append('<td/>');
 						
+						// Orphan group detection
+						if (group === 'z_orphan_') {
+							// Orphan group case
+							dataSrc = group;
+						} else if (dataSrc && dataSrc.startsWith('compact-')) {
+							// Not the orphan group
+							dataSrc = dataSrc.substring('compact-'.length).replace(/__/g, '.');
+						}
+
 						// Add service/too/node TD
 						if (dataSrc === 'node.id') {
 							// Node mode
@@ -645,12 +676,15 @@ define(['cascade'], function ($cascade) {
 							// Tool mode
 							$tr.append('<td>' + current.$parent.toIcon(subscription.node.refined.refined) +'</td>');
 							$tr.append('<td colspan="5">' + current.$parent.toIconNameTool(subscription.node.refined) +'</td>');
-						} else {
+						} else if (dataSrc === 'node.refined.refined.id') {
 							// Service mode
 							$tr.append('<td colspan="6">' + current.$parent.toIcon(subscription.node.refined.refined) + '&nbsp;' + subscription.node.refined.refined.name + '</td>');
+						} else {
+							// Orphan group
+							$tr.append('<td colspan="6">'+ current.$messages['group-by-other'] +'</td>');
 						}
 						$tr.children().eq(0).append('<div class="grouped-count label label-default"><span class="toggle"><i class="fa fa-plus-square-o"></i><i class="fa fa-minus-square-o"></i></span>' + rows.count() + '</div>');
-						if (current.model.subscriptions.length > 10 && rows.count() > 2) {
+						if (current.model.subscriptions.length > 10 && group !== '_other_' && rows.count() > 2) {
 							// Collapse this group
 							current.collapseGroup($tr, group);
 						}

@@ -37,6 +37,13 @@
 .masonry-container>.node>.thumbnail .caption, .masonry-container>.node>.thumbnail>.details, .masonry-container a, .masonry-container>.node>.thumbnail .btn-link {
 	color: #fff;
 }
+.masonry-container .details .carousel-indicators {
+	top: 1px;
+    bottom: unset;
+    width: 100%;
+    margin-left: 0;
+    left: 0;
+}
 .masonry-container>.node>.thumbnail .details th>i {
 	color: rgb(255, 255, 255);
 	color: rgba(255, 255, 255, .48);
@@ -68,42 +75,44 @@
 	width: 10px;
 	box-sizing: border-box;
 }
-.masonry-container .group-carousel {
+.group-carousel {
 	position: relative;
 }
-.masonry-container .group-carousel .carousel-indicators {
-	top: 5px;
-}
-.masonry-container .zoomable.group-carousel:not(.in) .carousel-indicators {
-	display: none;
-}
-.subscriptions .group-carousel .carousel-indicators .active {
+.group-carousel .carousel-indicators .active {
 	background-color: rgba(204, 204, 204);
 	background-color: rgba(204, 204, 204, .54);
-	width: 12px;
-	height: 12px;
+	width: 22px;
+	height: 22px;
 }
-.subscriptions .group-carousel .carousel-indicators>li {
+.group-carousel .carousel-indicators>li {
 	border-color: #ddd;
-	width: 10px;
-	height: 10px;
+	width: 18px;
+	height: 18px;
 }
-.subscriptions .mode-th-large .group-carousel .carousel-indicators .active {
-	width: 10px;
-	height: 10px;
+.mode-th-large .group-carousel .carousel-indicators .active {
+	background-color: #bbb;
+	width: 22px;
+	height: 22px;
 }
-.subscriptions .mode-th-large .group-carousel .carousel-indicators>li {
-	width: 8px;
-	height: 8px;
+.mode-th-large .group-carousel .carousel-indicators>li {
+	width: 18px;
+	height: 18px;
 }
-.subscriptions .mode-th .group-carousel .carousel-indicators .active {
-	width: 8px;
-	height: 8px;
+.mode-th-large .group-carousel .carousel-indicators>li:hover {
+	border-color: rgba(84, 84, 84);
+	border-color: rgba(84, 84, 84, .54);
+	background-color: rgba(104, 104, 104);
+	background-color: rgba(104, 104, 104, .54);
 }
-.subscriptions .mode-th .group-carousel .carousel-indicators>li {
-	width: 6px;
-	height: 6px;
+.mode-th .group-carousel .carousel-indicators .active {
+	width: 20px;
+	height: 20px;
 }
+.mode-th .group-carousel .carousel-indicators>li {
+	width: 16px;
+	height: 16px;
+}
+
 .masonry-container>.node.mode-th-list th.key, .masonry-container.th-list th.features, .masonry-container>.node:not(.mode-th-list) table>thead>tr>th.zoomable.in {
 	width: auto;
 }
@@ -148,15 +157,19 @@
 }
 .masonry-container>.node>.thumbnail .caption {
 	opacity: .7;
-	position: absolute;
-	top: 10px;
-	width: 100%;
-}
+    position: absolute;
+    top: 10px;
+    margin-left: -4px;
+    width: 100%;
+    padding-right: 0;
+    padding-top: 22px;
+    padding-left: 0;
+ }
 .masonry-container>.node>.thumbnail .caption>h3 {
 	text-align: right;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	margin-right: 4px;
+	margin-right: 6px;
 }
 
 /* Layout configurations */
