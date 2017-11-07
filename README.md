@@ -1,6 +1,8 @@
 ## :link: Ligoj [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.app/root/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.app/root) [![Download](https://api.bintray.com/packages/ligoj/maven-repo/ligoj/images/download.svg) ](https://bintray.com/ligoj/maven-repo/ligoj/_latestVersion)
 # The landing page of your team
 
+![alt text](https://github.com/ligoj/ligoj/raw/master/docs/assets/img/home-multi-project.png "Simple home page")
+
 A web application to centralize the related tools of your projects, a 21th century links management with security and data collection.
 More technical details can be found in the sub directories [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api) and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
