@@ -40,7 +40,7 @@ define(['cascade'], function ($cascade) {
 				} else if (fragments.length > 2) {
 					parent = fragments.slice(0, fragments.length - 1).join(':');
 				}
-				result = (parent ? current.toIcon(parent, suffix, null, true) + ' <i class="fa fa-angle-right"></i> ' : '') + result;
+				result = (parent ? current.toIcon(parent, suffix, null, true) + ' <i class="fa fa-angle-right" data-toggle="tooltip" title="' + current.getNodeName(node) + '"></i> ' : '') + result;
 			}
 			return result;
 		},
@@ -58,14 +58,14 @@ define(['cascade'], function ($cascade) {
 			var result;
 			if (uiClasses) {
 				// Use classes instead of picture
-				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i title="' + title + '" class="' + uiClasses + '"></i>');
+				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i data-toggle="tooltip" title="' + title + '" class="' + uiClasses + '"></i>');
 			} else if (fragments.length < 3) {
 				// Simple service
-				result = '<i title="' + title + '" class="fa fa-wrench"></i>';
+				result = '<i data-toggle="tooltip" title="' + title + '" class="fa fa-wrench"></i>';
 			} else {
 				// Use a provided picture
 				var url = 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';
-				result = '<img src="' + url + '" title="' + title + '" alt="" onerror="this.className=this.className+\' broken\'"' + (dataSrc ? ' data-src="' + url + '"' : '') + ' class="tool"/>';
+				result = '<img src="' + url + '" data-toggle="tooltip" title="' + title + '" alt="" onerror="this.className=this.className+\' broken\'"' + (dataSrc ? ' data-src="' + url + '"' : '') + ' class="tool"/>';
 			}
 			return result;
 		},
