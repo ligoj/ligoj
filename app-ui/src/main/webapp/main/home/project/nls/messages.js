@@ -13,6 +13,7 @@ define({
 		"subscription-state-up" : "Checked subscription",
 		"subscription-state-down" : "Subscription is either invalid or broken",
 		"subscription-state-unknown" : "Subscription is in an unknown state",
+		"nb-subscriptions" : "Amount of subscriptions",
 		"group-by" : "Group subscriptions by affinity",
 		"group-by-none" : "None",
 		"group-by-auto" : "Auto",

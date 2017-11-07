@@ -12,6 +12,7 @@ define({
 	"subscription-state-up" : "Souscription vérifiée",
 	"subscription-state-down" : "Souscription cassée ou non valide",
 	"subscription-state-unknown" : "Souscription dans un état inconnu",
+	"nb-subscriptions" : "Nombre de souscriptions",
 	"group-by" : "Grouper les souscriptions par affinité",
 	"group-by-none" : "Aucun",
 	"group-by-other" : "Autre",
