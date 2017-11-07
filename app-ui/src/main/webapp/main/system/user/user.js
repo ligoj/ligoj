@@ -46,8 +46,8 @@ define(function () {
 			});
 		},
 
-		// create business call
-		saveOrUpdate: function (method) {
+		// Save or update API call
+		saveOrUpdate: function () {
 			$.ajax({
 				type: method,
 				url: REST_PATH + 'system/user',
@@ -57,7 +57,7 @@ define(function () {
 				success: function () {
 					notifyManager.notify(Handlebars.compile(current.$messages.created)(_('login').val()));
 					_('popup').modal('hide');
-					// Re fresh the table
+					// Refresh the table
 					current.table && current.table.api().ajax.reload();
 				}
 			});

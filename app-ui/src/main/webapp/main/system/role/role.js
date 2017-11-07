@@ -38,7 +38,7 @@ define(function () {
 			});
 		},
 
-		// ---------------- BUTON MANAGEMENT ----------------
+		// ---------------- BUTTON MANAGEMENT ----------------
 
 		// delete button management
 		deleteButton: function () {
@@ -140,8 +140,8 @@ define(function () {
 		// initialize the datatable
 		initializeDataTable: function () {
 			current.table = _('table').dataTable({
-				dom: '<"row"<"col-xs-6"B><"col-xs-6"f>r>t<"row"<"col-xs-6"i><"col-xs-6"p>>',
 				searching: true,
+				dom: '<"row"<"col-xs-6"B><"col-xs-6"f>r>t<"row"<"col-xs-6"i><"col-xs-6"p>>',
 				ajax: {
 					url : REST_PATH + 'system/security/role/withAuth',
 					callback :function (json, callback) {
