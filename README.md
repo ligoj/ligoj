@@ -24,10 +24,10 @@ More technical details can be found in the sub directories [ligo-api](https://gi
 
 # User section
 ```
-docker build -t ligoj-api:1.6.12 --build-arg VERSION=1.6.12 app-api
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.12
-docker build -t ligoj-ui:1.6.12 --build-arg VERSION=1.6.12 app-ui
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.12 
+docker build -t ligoj-api:1.6.13 --build-arg VERSION=1.6.13 app-api
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.13
+docker build -t ligoj-ui:1.6.13 --build-arg VERSION=1.6.13 app-ui
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.13 
 ```
 Open your browser at : http://localhost:8080/ligoj  
 User/password for administrator role : ligoj-admin
@@ -38,7 +38,7 @@ You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin
 You can keep your plugins installation by mapping `/usr/local/ligoj` with a volume.
 
 ```
-docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.6.12
+docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.6.13
 ```
 # Dev section
 ## Pre-requisite for the bellow samples
@@ -99,10 +99,10 @@ Compatibility and performance for 10K+users and 1K+ projects
 Build the images and run the containers
 
 ```
-docker build -t ligoj-api:1.6.12 --build-arg VERSION=1.6.12 app-api
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.12
-docker build -t ligoj-ui:1.6.12 --build-arg VERSION=1.6.12 app-ui
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.12 
+docker build -t ligoj-api:1.6.13 --build-arg VERSION=1.6.13 app-api
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.6.13
+docker build -t ligoj-ui:1.6.13 --build-arg VERSION=1.6.13 app-ui
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.6.13 
 ```
 Docker build (ARG) variables:
 
