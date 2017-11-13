@@ -176,7 +176,6 @@ define([
 			var node = model.nodes[$node.attr('data-id')];
 			$img.attr('src', $img.attr('data-src').slice(0, -5) + '.png');
 			$node.addClass('in');
-			$node.find('.thumbnail>.details').removeClass('hidden');
 			$node.find('.caption i').addClass('fa-caret-down').removeClass('fa-caret-right');
 
 			if (node.detailed === undefined) {
@@ -216,7 +215,6 @@ define([
 		zoomOut: function ($node) {
 			var $img = $node.find('.thumbnail>.main>img');
 			$img.attr('src', $img.attr('data-src'));
-			$node.find('.thumbnail>.details').addClass('hidden');
 			$node.removeClass('in');
 			$node.find('.caption i').addClass('fa-caret-right').removeClass('fa-caret-down');
 			$node.find('.open [data-toggle="dropdown"]').closeDropdown();
