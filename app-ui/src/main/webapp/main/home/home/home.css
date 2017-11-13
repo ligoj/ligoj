@@ -41,6 +41,7 @@
 .masonry-container .details .carousel-indicators {
 	top: 1px;
 	bottom: unset;
+	height: 1px;
 	width: 100%;
 	margin-left: 0;
 	left: 0;
@@ -236,7 +237,7 @@
 		width: 80%;
 	}
 }
-.masonry-container .thumbnail>.details {
+.masonry-container .thumbnail>.details, .masonry-container .thumbnail>.details>.scroll-wrapper {
 	max-height: 270px;
 	overflow-y: auto;
 	overflow-x: hidden;
@@ -408,4 +409,8 @@
 }
 #status td.status .status-content {
 	height: 100%;
+}
+
+.masonry-container .details .scroll-element.scroll-x {
+	display: none !important;
 }

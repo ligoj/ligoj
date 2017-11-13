@@ -95,7 +95,7 @@ define([
 		 */
 		onScroll: function (event) {
 			var $target = $(event.target);
-			if (event.target === document || $target.is('.masonry-container .details')) {
+			if (event.target === document || $target.is('.masonry-container .details') || $target.is('.masonry-container .scrollbar-macosx')) {
 				current.checkVisibleSubscriptions($target);
 			}
 		},
@@ -177,12 +177,9 @@ define([
 			$img.attr('src', $img.attr('data-src').slice(0, -5) + '.png');
 			$node.addClass('in');
 			$node.find('.caption i').addClass('fa-caret-down').removeClass('fa-caret-right');
-
 			if (node.detailed === undefined) {
 				// Details need to be loaded
 				current.loadDetails(node, $node);
-				node.detailed = true;
-				current.filterNodes($node);
 			} else {
 				// Update the pack
 				current.masonry();
@@ -240,7 +237,7 @@ define([
 
 			// Remove old data (refresh)
 			$thumbnail.children('.details').remove();
-			tableContent = '<div class="details group-carousel"><table class="subscriptions table dataTable justified"><thead><tr>';
+			tableContent = '<div class="details group-carousel"><div class="scrollbar-macosx"><table class="subscriptions table dataTable justified"><thead><tr>';
 
 			// Status
 			tableContent += '<th class="status"><i class="fa fa-power-off" data-toggle="tooltip" title="' + current.$messages['status-subscription'] + '"></i></th>';
@@ -252,7 +249,7 @@ define([
 			tableContent += '<th class="key zoomable zoomable-default in"><i class="fa fa-plug" data-toggle="tooltip" title="' + current.$messages.subscription + '" data-container="#_ucDiv"></i></th>';
 
 			// Features
-			tableContent += '<th class="features"><i class="fa fa-cogs" data-toggle="tooltip" title="' + current.$messages.features + '" data-container="#_ucDiv"></i></th></tr></thead><tbody></tbody></table></div>';
+			tableContent += '<th class="features"><i class="fa fa-cogs" data-toggle="tooltip" title="' + current.$messages.features + '" data-container="#_ucDiv"></i></th></tr></thead><tbody></tbody></table></div></div>';
 			$thumbnail.append(tableContent);
 			$tbody = $thumbnail.find('.subscriptions tbody');
 			for (index = 0; index < nodeSubscriptions.length; index++) {
@@ -268,6 +265,14 @@ define([
 				$tbody.append($tr);
 				current.$parent.applySubscriptionStyle($tr, subscription, false);
 			}
+			
+			// Add custom scrollbar
+			require(['jquery.scrollbar', 'css!main/home/home/scrollbar.css'], function() {
+			    jQuery($node.find('.scrollbar-macosx')).scrollbar({ignoreMobile: true});
+				node.detailed = true;
+				current.filterNodes($node);
+			});
+
 		},
 
 		distinct: function (value, index, self) {
