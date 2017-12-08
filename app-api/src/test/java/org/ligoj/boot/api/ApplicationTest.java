@@ -10,9 +10,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.server.ErrorPageRegistry;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -44,7 +44,7 @@ public class ApplicationTest extends SpringBootServletInitializer {
 		new Application().securityFilterChainRegistration();
 		new Application().requestContextListener();
 		new Application().httpSessionEventPublisher();
-		new Application().containerCustomizer().customize(Mockito.mock(ConfigurableEmbeddedServletContainer.class));
+		new Application().errorPageRegistrar().registerErrorPages(Mockito.mock(ErrorPageRegistry.class));
 	}
 
 	private String[] getArgs(String... args) {

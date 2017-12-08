@@ -24,11 +24,6 @@ import lombok.Setter;
 public class Plugin extends AbstractAudited<Integer> {
 
 	/**
-	 * SID
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * The currently installed plug-in version. Should follow the <a href="http://semver.org/">semantic versioning</a>
 	 */
 	@NotNull

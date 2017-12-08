@@ -9,12 +9,13 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
-import org.springframework.boot.web.servlet.ErrorPage;
+import org.springframework.boot.web.server.ErrorPage;
+import org.springframework.boot.web.server.ErrorPageRegistrar;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ import org.springframework.web.filter.DelegatingFilterProxy;
  */
 @SpringBootApplication
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
-@EnableAutoConfiguration(exclude = { LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class })
+@EnableAutoConfiguration(exclude = { LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, SecurityAutoConfiguration.class })
 public class Application extends SpringBootServletInitializer {
 
 	@Override
@@ -52,8 +53,8 @@ public class Application extends SpringBootServletInitializer {
 	 * @return ServletRegistrationBean
 	 */
 	@Bean
-	public ServletRegistrationBean webjarsServlet() {
-		final ServletRegistrationBean registrationBean = new ServletRegistrationBean(new WebjarsServlet(), "/webjars/*");
+	public ServletRegistrationBean<WebjarsServlet> webjarsServlet() {
+		final ServletRegistrationBean<WebjarsServlet> registrationBean = new ServletRegistrationBean<>(new WebjarsServlet(), "/webjars/*");
 		registrationBean.setName("Webjars");
 		return registrationBean;
 	}
@@ -64,8 +65,8 @@ public class Application extends SpringBootServletInitializer {
 	 * @return ServletRegistrationBean
 	 */
 	@Bean
-	public ServletRegistrationBean cxfServlet() {
-		final ServletRegistrationBean registrationBean = new ServletRegistrationBean(new CXFServlet(), "/rest/*");
+	public ServletRegistrationBean<CXFServlet> cxfServlet() {
+		final ServletRegistrationBean<CXFServlet> registrationBean = new ServletRegistrationBean<>(new CXFServlet(), "/rest/*");
 		registrationBean.setName("CXFServlet");
 		registrationBean.setInitParameters(Collections.singletonMap("service-list-path", "web-services"));
 		registrationBean.setOrder(10);
@@ -78,10 +79,10 @@ public class Application extends SpringBootServletInitializer {
 	 * @return FilterRegistrationBean
 	 */
 	@Bean
-	public FilterRegistrationBean securityFilterChainRegistration() {
+	public FilterRegistrationBean<DelegatingFilterProxy> securityFilterChainRegistration() {
 		final DelegatingFilterProxy delegatingFilterProxy = new DelegatingFilterProxy();
 		delegatingFilterProxy.setTargetBeanName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
-		final FilterRegistrationBean registrationBean = new FilterRegistrationBean(delegatingFilterProxy);
+		final FilterRegistrationBean<DelegatingFilterProxy> registrationBean = new FilterRegistrationBean<>(delegatingFilterProxy);
 		registrationBean.setName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
 		registrationBean.addUrlPatterns("/rest/*", "/manage/*");
 		return registrationBean;
@@ -108,11 +109,11 @@ public class Application extends SpringBootServletInitializer {
 	/**
 	 * Error management
 	 * 
-	 * @return EmbeddedServletContainerCustomizer
+	 * @return ErrorPageRegistrar
 	 */
 	@Bean
-	public EmbeddedServletContainerCustomizer containerCustomizer() {
-		return container -> container.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"));
+	public ErrorPageRegistrar errorPageRegistrar() {
+		return registry -> registry.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"));
 	}
 
 }

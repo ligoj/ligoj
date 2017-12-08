@@ -353,7 +353,7 @@ public class PluginResource {
 	private void installInternal(final Map<String, FeaturePlugin> newFeatures) throws Exception {
 		for (final FeaturePlugin feature : newFeatures.values()) {
 			// Do not trigger the install event when corresponding node is already there
-			if (!nodeRepository.exists(feature.getKey())) {
+			if (!nodeRepository.existsById(feature.getKey())) {
 				feature.install();
 			}
 		}
@@ -432,7 +432,7 @@ public class PluginResource {
 			repository.saveAndFlush(entity);
 
 			// Manage disable then re-enable base with double install
-			if (!nodeRepository.exists(plugin.getKey())) {
+			if (!nodeRepository.existsById(plugin.getKey())) {
 				// This feature has not previously been installed
 
 				// Special process for service plug-ins

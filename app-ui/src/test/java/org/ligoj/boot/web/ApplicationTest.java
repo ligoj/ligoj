@@ -9,7 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
+import org.springframework.boot.web.server.ErrorPageRegistry;
 import org.springframework.util.StringUtils;
 
 /**
@@ -37,7 +37,7 @@ public class ApplicationTest {
 	@Test
 	public void configure() throws Exception {
 		new Application().configure(Mockito.mock(SpringApplicationBuilder.class));
-		new Application().containerCustomizer().customize(Mockito.mock(ConfigurableEmbeddedServletContainer.class));
+		new Application().containerCustomizer().registerErrorPages(Mockito.mock(ErrorPageRegistry.class));
 	}
 
 	@Test

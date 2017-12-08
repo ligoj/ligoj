@@ -47,11 +47,8 @@ import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.model.system.SystemUser;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.cloud.context.restart.RestartEndpoint;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
@@ -126,14 +123,13 @@ public class PluginResourceTest extends AbstractServerTest {
 	}
 
 	private PluginVo findAll(final String version) throws IOException {
-		final SampleService service1 = new SampleService();
+		registerSingleton("sampleService", new SampleService());
 		final Plugin pluginId = new Plugin();
 		pluginId.setVersion(version);
 		pluginId.setKey("service:sample");
 		pluginId.setType(PluginType.SERVICE);
 		pluginId.setArtifact("plugin-sample");
 		repository.saveAndFlush(pluginId);
-		((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleService", service1);
 
 		final List<PluginVo> plugins = resource.findAll();
 		Assert.assertEquals(3, plugins.size());
@@ -359,25 +355,17 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void refreshPluginsUpdate() throws Exception {
-		final SampleService service1 = new SampleService() {
-			@Override
-			public String getVersion() {
-				return "1.1";
-			}
-		};
-		final SampleService service2 = new SampleService() {
-			@Override
-			public String getVersion() {
-				return "2.0";
-			}
-		};
-
 		try {
 			// Precondition
 			Assert.assertNull(repository.findBy("key", "service:sample"));
 
 			// Add a plug-in is an initial version
-			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleService", service1);
+			registerSingleton("sampleService", new SampleService() {
+				@Override
+				public String getVersion() {
+					return "1.1";
+				}
+			});
 
 			final ContextRefreshedEvent event = Mockito.mock(ContextRefreshedEvent.class);
 			Mockito.when(event.getApplicationContext()).thenReturn(applicationContext);
@@ -386,33 +374,18 @@ public class PluginResourceTest extends AbstractServerTest {
 
 			// Add a plug-in is a different version
 			destroySingleton("sampleService");
-			((ConfigurableApplicationContext) applicationContext).getBeanFactory().registerSingleton("sampleService", service2);
+			registerSingleton("sampleService", new SampleService() {
+				@Override
+				public String getVersion() {
+					return "2.0";
+				}
+			});
 			resource.refreshPlugins(event);
 			Assert.assertEquals("2.0", repository.findByExpected("key", "service:sample").getVersion());
 		} finally {
 			destroySingleton("sampleService");
 		}
 
-	}
-
-	/**
-	 * Destroy the given bean instance (usually a prototype instance
-	 * obtained from this factory) according to its bean definition.
-	 * <p>
-	 * Any exception that arises during destruction should be caught
-	 * and logged instead of propagated to the caller of this method.
-	 * 
-	 * @param beanName
-	 *            the name of the bean definition
-	 * @param beanInstance
-	 *            the bean instance to destroy
-	 */
-	private void destroySingleton(final String beanName) {
-		try {
-			((DefaultSingletonBeanRegistry) ((ConfigurableApplicationContext) applicationContext).getBeanFactory()).destroySingleton(beanName);
-		} catch (NoSuchBeanDefinitionException e) {
-			// Ignore
-		}
 	}
 
 	@Test(expected = TechnicalException.class)
