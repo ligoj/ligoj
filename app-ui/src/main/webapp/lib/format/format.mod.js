@@ -3,12 +3,21 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		messages: null,
 
 		/**
-		 * get formated date
-		 * @param long timestamp
+		 * Get formated date.
+		 * @param long timestamp. Null is accepted.
 		 */
 		formatDate: function (timestamp) {
 			return timestamp ? moment(timestamp).format('L') : '';
 		},
+
+		/**
+		 * Get formated date time.
+		 * @param long timestamp. Null is accepted.
+		 */
+		formatDateTime: function (timestamp) {
+			return timestamp ? moment(timestamp).format('L LT') : '';
+		},
+
 		/**
 		 * Bytes to human readable string. Trailing decimal '0' are removed
 		 * @param {number} bytes    The amount of bytes.
@@ -19,24 +28,31 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		 * @return {string}         Human readable string
 		 */
 		formatUnit: function (bytes, digits, sizes, unit, pow, format) {
-			bytes = (Math.round(bytes * 1000) / 1000) || 0;
+			bytes = (Math.round(bytes * pow) / pow) || 0;
 			digits = Math.max(digits || 3, 2);
 			if (bytes) {
 				var s = sizes;
 				var e = Math.max(0, Math.floor(Math.log(bytes) / Math.log(pow)));
-				var value = bytes / Math.pow(pow, e);
 				var decimals;
-				if (value >= 100 && digits < 3) {
-					// Need to shift to the upper power
-					value /= 1024;
-					e++;
-					decimals = 2;
-				} else if (value >= 100) {
-					decimals = digits - 3;
-				} else if (value >= 10) {
-					decimals = digits - 2;
+				if (e <= 1) { 
+					// No need to format
+					decimals = 0;
+					e = 0;
+					value = bytes;
 				} else {
-					decimals = digits - 1;
+					var value = bytes / Math.pow(pow, e);
+					if (value >= 100 && digits < 3) {
+						// Need to shift to the upper power
+						value /= 1024;
+						e++;
+						decimals = 2;
+					} else if (value >= 100) {
+						decimals = digits - 3;
+					} else if (value >= 10) {
+						decimals = digits - 2;
+					} else {
+						decimals = digits - 1;
+					}
 				}
 				return Handlebars.compile(format)([value.toFixed(decimals).replace(decimals == 1 ? /\.0/ : /\.00/, ''), sizes[e], unit]);
 			}
