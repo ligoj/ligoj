@@ -190,8 +190,8 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Build node/subscription parameter values: UI and configuration.
-		 * Note this is an ansynchronous function thats requires the related node's context to render the parameter.
-		 * @param {jQuery} $container Target container where the parameters will be redered..
+		 * Note this is an asynchronous function thats requires the related node's context to render the parameter.
+		 * @param {jQuery} $container Target container where the parameters will be rendered..
 		 * @param {Array} values Parameter values with parameter definition.
 		 * @param {string} node Node identifier to use for the target subscription.
 		 * @param {string} mode Mode context : link, create, none,...
@@ -232,8 +232,8 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Build node/subscription parameters: UI and configuration.
-		 * Note this is an ansynchronous function thats requires the related node's context to render the parameter.
-		 * @param {jQuery} $container Target container where the parameters will be redered..
+		 * Note this is an asynchronous function thats requires the related node's context to render the parameter.
+		 * @param {jQuery} $container Target container where the parameters will be rendered..
 		 * @param {Array} parameters Required parameters to complete the subscription.
 		 * @param {string} node Node identifier to use for the target subscription.
 		 * @param {string} mode Mode context : link, create, none,...
