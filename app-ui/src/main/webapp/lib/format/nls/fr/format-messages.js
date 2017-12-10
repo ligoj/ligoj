@@ -1,6 +1,6 @@
 define({
 	"shortdateMomentJs" : 'DD/MM/YYYY',
 	'unit-size' : 'B',
-	'format-size' : '{{[0]}}{{[1]}}{{[2]}}',
-	'format-cost' : '{{[2]}}{{[0]}} {{[1]}}',
+	'format-size' : '{{value}}{{{preUnit}}}{{weight}}{{unit}}{{{postUnit}}}',
+	'format-cost' : '{{{preUnit}}}{{unit}}{{{postUnit}}}{{value}}{{{preUnit}}}{{weight}}{{{postUnit}}}',
 });
