@@ -488,8 +488,10 @@ define(['cascade'], function ($cascade) {
 			var subscriptions = current.model.subscriptions;
 			var modes = [];
 			var nodeId;
-			for (var depth = 0; depth < current.dataSrcs.length; depth++) {
-				var mode = {ids:{}, depth: depth};
+			var depth;
+			var mode;
+			for (depth = 0; depth < current.dataSrcs.length; depth++) {
+				mode = {ids:{}, depth: depth};
 				modes.push(mode);
 				for (var i = 0; i< subscriptions.length; i++) {
 					nodeId = current.dataSrcGetter(subscriptions[i].node, depth);
@@ -502,12 +504,11 @@ define(['cascade'], function ($cascade) {
 				mode.nbGroups = Object.keys(mode.ids).length;
 			}
 			var maxDepth = null;
-			var nbSoloGroups = 0;
 			var maxGrouped = 0;
 			var maxGroups = 0;
 			var maxMode = null;
-			for (var depth = 0; depth < current.dataSrcs.length; depth++) {
-				var mode = modes[depth];
+			for (depth = 0; depth < current.dataSrcs.length; depth++) {
+				mode = modes[depth];
 				if (mode.nbGroups > maxGroups || mode.nbGroups === maxGroups && mode.nbGrouped > maxGrouped) {
 					maxGroups = mode.nbGroups;
 					maxGrouped = mode.nbGrouped;
@@ -524,10 +525,10 @@ define(['cascade'], function ($cascade) {
 			if (maxDepth !== null && (subscriptions.length - mode.nbGrouped) > 1) {
 				// More than 1 subscription is not within a group, create a special compact group
 				maxDepth = 'compact-' + maxDepth.replace(/\./g, '__');
-				for (var i = 0; i< subscriptions.length; i++) {
-					nodeId = current.dataSrcGetter(subscriptions[i].node, maxMode.depth);
-					subscriptions[i][maxDepth] = maxMode.ids[nodeId] ? nodeId : 'z_orphan_';
-					subscriptions[i].compact = subscriptions[i][maxDepth];
+				for (var j = 0; j< subscriptions.length; j++) {
+					nodeId = current.dataSrcGetter(subscriptions[j].node, maxMode.depth);
+					subscriptions[j][maxDepth] = maxMode.ids[nodeId] ? nodeId : 'z_orphan_';
+					subscriptions[j].compact = subscriptions[j][maxDepth];
 				}
 			}
 			return maxDepth;

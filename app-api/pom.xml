@@ -20,7 +20,7 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>2.0.0-SNAPSHOT</api.version>
+		<api.version>2.0.0</api.version>
 	</properties>
 
 	<dependencies>
