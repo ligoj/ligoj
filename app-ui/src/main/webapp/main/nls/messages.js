@@ -89,6 +89,7 @@ define({
 		'notifications': 'Notifications',
 		'locked-details': '<i class="fa fa-lock"></i> Locked since {{[0]}} by {{[1]}}',
 		'isolated-details': '<i class="fa fa-sign-out"></i> Is also isolated from company {{this}}',
+		'low-resolution': 'Current resolution is not suitable to the best experience, switch to wider device',
 		'menu': {
 			home: 'Home',
 			api: 'Api',
