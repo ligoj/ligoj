@@ -76,19 +76,19 @@ define([
 		},
 
 		isLoginPrompDisplayed: function () {
-			return _('_login').length === 0 && $('button[data-target="#_login"]').length === 0;
+			return _('_login').length !== 0 && $('button[data-target="#_login"]').length !== 0;
 		},
 
 		/**
 		 * Show the authentication requirement and load the login form for the popup.
 		 */
 		showAuthenticationAlert: function () {
-			if (current.isLoginPrompDisplayed()) {
+			if (!current.isLoginPrompDisplayed()) {
 				require([
 					'text!main/public/login/login-popup.html', 'i18n!main/public/login/nls/messages'
 				], function (html, messages) {
 					current.loginMessages = messages;
-					if (current.isLoginPrompDisplayed()) {
+					if (!current.isLoginPrompDisplayed()) {
 						$('body').first().append(Handlebars.compile(html)(messages));
 						var $popup = _('_login');
 						$cascade.trigger('html', $popup);
@@ -244,10 +244,9 @@ define([
 			var alertType = notifyManager.getTypeFromBusiness(errorObj.code);
 
 			// First translate from user's scope
-			var index;
 			var i18nMessage = (errorObj.message && ($cascade.$messages.error[errorObj.message] || errorMessages[errorObj.message] || errorObj.message)) || errorMessages.errorxxx;
 			if (i18nMessage && errorObj.parameters && errorObj.parameters.length && i18nMessage.indexOf('{{') !== -1) {
-				for (index = 0; index < errorObj.parameters.length; index++) {
+				for (var index = 0; index < errorObj.parameters.length; index++) {
 					var parameterKey = errorObj.parameters[index];
 					var i18nParameter = $cascade.$messages.error[parameterKey] || $cascade.$messages[parameterKey] || errorMessages[parameterKey];
 					if (i18nParameter) {
@@ -301,13 +300,23 @@ define([
 		 */
 		manageRequireJsError: function (err) {
 			// Never cache errors
-			err.requireModules && current.undef(err.requireModules);
+			if (err.requireModules) {
+				current.undef(err.requireModules);
+				if (current.ignoredRequireModules[err.requireModules[0]]) {
+					// Ignore this AMD error, already handled
+					return;
+				}
+			}
 			if (err.xhr && err.xhr.status === 401) {
 				current.showAuthenticationAlert();
 			} else if (err.requireType === 'timeout' && err.requireModules) {
-				!current.isLoginPrompDisplayed() && notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-timeout-details'])(err.requireModules[0]), errorMessages['error404-timeout']);
+				if (!current.isLoginPrompDisplayed()) {
+					notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-timeout-details'])(err.requireModules[0]), errorMessages['error404-timeout']);
+				}
 			} else if (err.requireType === 'scripterror' && err.requireModules) {
-				!current.isLoginPrompDisplayed() && notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-scripterror-details'])(err.requireModules[0]), errorMessages['error404-scripterror']);
+				if (!current.isLoginPrompDisplayed()) {
+					notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-scripterror-details'])(err.requireModules[0]), errorMessages['error404-scripterror']);
+				}
 			} else if (err.requireModules && err.requireModules[0] && err.requireModules[0].startsWith('text!') && err.requireModules[0].endsWith('.html')) {
 				// Broken AMD link, moved page,... add a 404 like message and move to home page
 				if (err.requireModules[0] === 'text!main/home/home.html') {
@@ -320,9 +329,17 @@ define([
 					window.location.hash = '#/';
 				}
 			} else {
-				// Not manage AMD error
+				// Not managed AMD error
 				traceLog('Technical error', err.stack);
 				throw err;
+			}
+		},
+		
+		ignoredRequireModules : {},
+		
+		ignoreRequireModuleError: function(modules) {
+			for (var index = 0; index < modules.length; index++) {
+				current.ignoredRequireModules[modules[index]] = true;
 			}
 		},
 
@@ -330,8 +347,7 @@ define([
 		 * Clear error state for given modules.
 		 */
 		undef: function (modules) {
-			var i;
-			for (i = 0; i < modules.length; i++) {
+			for (var i = 0; i < modules.length; i++) {
 				require.undef(modules[i]);
 			}
 		}

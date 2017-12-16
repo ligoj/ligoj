@@ -368,7 +368,7 @@ define([
 
 				// Initialize the controller
 				$self.initializeContext($current, transaction, options.callback, options.parameters);
-			});
+			}, options.errorCallback);
 		},
 
 		/**

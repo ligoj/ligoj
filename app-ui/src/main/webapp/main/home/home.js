@@ -72,7 +72,14 @@ define(['cascade'], function ($cascade) {
 		requireService: function (context, node, callback) {
 			var service = current.getServiceNameFromId(node);
 			$cascade.loadFragment(context, context.$transaction, 'main/service/' + service + '/', service, {
-				callback: callback,
+				callback: function($context) {
+					callback && callback($context);
+				},
+				errorCallback: function(err) {
+					errorManager.ignoreRequireModuleError(err.requireModules);
+					errorManager.ignoreRequireModuleError(['main/service/' + service + '/nls/messages']);
+					callback && callback();
+				},
 				plugins: ['css', 'i18n', 'partial', 'js']
 			});
 		},
@@ -94,11 +101,22 @@ define(['cascade'], function ($cascade) {
 			// First, load service dependencies
 			var transaction = context.$transaction;
 			current.requireService(context, node, function ($current) {
+				if (typeof $current === 'undefined') {
+					callback && callback();
+					return;
+				}
 				// Then, load tool dependencies
 				var service = current.getServiceNameFromId(node);
 				var tool = current.getToolNameFromId(node);
 				$cascade.loadFragment($current, transaction, 'main/service/' + service + '/' + tool, tool, {
-					callback: callback,
+					callback: function($context) {
+						callback && callback($context);
+					},
+					errorCallback: function(err) {
+						errorManager.ignoreRequireModuleError(err.requireModules);
+						errorManager.ignoreRequireModuleError(['main/service/' + service + '/' + tool + '/nls/messages']);
+						callback && callback();
+					},
 					plugins: ['css', 'i18n', 'partial', 'js']
 				});
 			});
@@ -322,16 +340,16 @@ define(['cascade'], function ($cascade) {
 				var newContent = subscription.status === 'up' && current.render(subscription, renderDetailsFunction, $tool, $tr, $td);
 				
 				// Update the UI is managed
-				$tool.$parent.configurerFeatures && $tool.$parent.configurerFeatures($td, subscription);
-				$tool.configurerFeatures && $tool.configurerFeatures($td, subscription);
+				$tool && $tool.$parent.configurerFeatures && $tool.$parent.configurerFeatures($td, subscription);
+				$tool && $tool.configurerFeatures && $tool.configurerFeatures($td, subscription);
 
 				if (newContent && newContent !== '&nbsp;') {
 					// Add generated detailed data
 					$details.empty().html(newContent);
 					// Render service and tool callbacks
 					var callbak = renderDetailsFunction + 'Callback';
-					$tool.$parent[callbak] && $tool.$parent[callbak](subscription, $details);
-					$tool[callbak] && $tool[callbak](subscription, $details);
+					$tool && $tool.$parent[callbak] && $tool.$parent[callbak](subscription, $details);
+					$tool && $tool[callbak] && $tool[callbak](subscription, $details);
 					
 					// Also start the carousel if needed
 					$details.find('.carousel').carousel({interval: false});
@@ -361,7 +379,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		render: function (subscription, namespace, $tool, $tr, $td) {
 			var result = '';
-			if (subscription.parameters) { // TODO Simplify
+			if (subscription.parameters && $tool) { // TODO Simplify
 				// Render service
 				if ($tool.$parent[namespace]) {
 					result += $tool.$parent[namespace](subscription, $tr, $td) || '';
