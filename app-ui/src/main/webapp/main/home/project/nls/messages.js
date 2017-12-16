@@ -11,7 +11,7 @@ define({
 		"delete-subscription" : "Delete this subscription from the portal, and also from the remote instance. This option is available since this subscription has been created in 'create' mode. A confirmation is expected.",
 		"confirm-delete-subscription" : "Deleting this subscription will remove the link between the tool and this project, and also destroy the remote data (group, project, etc.) in the tool. This operation cannot be undone.",
 		"subscription-state-up" : "Checked subscription",
-		"subscription-state-down" : "Subscription is either invalid or broken",
+		"subscription-state-down" : "Subscription is either invalid either broken",
 		"subscription-state-unknown" : "Subscription is in an unknown state",
 		"nb-subscriptions" : "Amount of subscriptions",
 		"group-by" : "Group subscriptions by affinity",
