@@ -27,7 +27,7 @@ public class PluginApplicationRunListener implements SpringApplicationRunListene
 	public PluginApplicationRunListener(final SpringApplication application, final String... args) throws IOException {
 		if (PluginsClassLoader.getInstance() == null) {
 			// Replace the main class loader
-			log.info("Restore the plugin classloader for application {}({})", application, args);
+			log.info("Install the plugin classloader for application {}({})", application, args);
 			Thread.currentThread().setContextClassLoader(new PluginsClassLoader());
 		}
 	}
