@@ -1041,6 +1041,13 @@ img.nav-icon {
 	filter: alpha(opacity=100);
 }
 
+/* Select2 style+ */
+.select2-highlighted a {
+	color: white;
+}
+.select2-highlighted a:hover {
+	color: wheat;
+}
 
 /* Visible FS */
 
