@@ -4,6 +4,14 @@ define([
 	// Global handler for better bootstrap implicit experience
 	$('body').popover({selector: '[data-toggle="popover"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body'});
 	$('body').tooltip({selector: '[data-toggle="tooltip"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body'});
+	
+	var closeTooltips = function() {
+		$('[data-toggle="tooltip"][aria-describedby]').each(function() {
+			$(this).tooltip('hide');
+		});
+		// Destroy orphan previous tooltips
+		$('.tooltip.in').empty().remove();	
+	};
 	$(document).on('click', '.toggle-visibility', function () {
 		$(this).toggleClass('active');
 	}).on('click', '.disabled,[disabled]', function (event) {
@@ -17,13 +25,9 @@ define([
 				$('[aria-describedby="' + $(this).attr('id') + '"]').popover('hide');
 			});
 		}
-	}).on('show.bs.tooltip', null, function(e) {
+	}).on('show.bs.tooltip', null, function() {
 		// Close nicely previous tooltips when a new one is displayed
-		$('[data-toggle="tooltip"][aria-describedby]').each(function() {
-			$(this).tooltip('hide');
-		});
-		// Destroy orphan previous tooltips
-		$('.tooltip.in').empty().remove();
+		closeTooltips();
 	}).on('show.bs.dropdown', null, function(e) {
 		// Close previous dropdowns
 		$('.dropdown-menu.detached').closeDropdown();
@@ -98,7 +102,9 @@ define([
 			$link.attr('data-toggle', 'modal').trigger('click.bs.modal.data-api');
 		});
 		e.preventDefault();
-	}).on('show.bs.modal', '.modal[data-ajax]', $cascade.loadPartial);
+	}).on('show.bs.modal', '.modal', closeTooltips)
+	.on('hide.bs.modal', '.modal', closeTooltips)
+	.on('show.bs.modal', '.modal[data-ajax]', $cascade.loadPartial);
 
 	$.fn.hideGroup = function () {
 		$(this).closest('.form-group').addClass('hidden');
