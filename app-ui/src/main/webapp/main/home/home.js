@@ -402,8 +402,15 @@ define(['cascade'], function ($cascade) {
 			return subscription.parameters && subscription.parameters[parameter];
 		},
 
-		renderServicelink: function (icon, link, tooltipKey, textKey, attr, clazz) {
+		renderServiceLink: function (icon, link, tooltipKey, textKey, attr, clazz) {
 			return '<a href="' + link + '"' + (attr || '') + ' class="feature ' + (clazz || '') + '"><i class="fa fa-' + icon + '" data-toggle="tooltip"' + (tooltipKey ? ' title="' + current.$messages[tooltipKey] + '"' : '') + '></i> ' + (textKey ? current.$messages[textKey] : '') + '</a>';
+		},
+
+		/**
+		 * @deprecated See #renderServiceLink
+		 */
+		renderServicelink: function (icon, link, tooltipKey, textKey, attr, clazz) {
+			return current.renderServiceLink(icon, link, tooltipKey, textKey, attr, clazz);
 		},
 
 		renderServiceHelpLink: function (parameters, serviceKey) {
