@@ -10,7 +10,7 @@ services:
   api:
     image: ligoj-api:1.7.0
     links:
-      - db
+      - db:ligoj-db
     depends_on: 
       - db
   ui:

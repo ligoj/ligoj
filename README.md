@@ -119,14 +119,21 @@ Compatibility and performance for 10K+users and 1K+ projects
 
 # Ops section
 ## With Docker
-Build the images and run the containers
+Build the images and run the containers with docker compose
 
 ```
 docker build -t ligoj-api:1.7.0 --build-arg VERSION=1.7.0 app-api
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.7.0
 docker build -t ligoj-ui:1.7.0 --build-arg VERSION=1.7.0 app-ui
+docker-compose up
+```
+
+Docker run separately:
+
+```
+docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.7.0
 docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.7.0 
 ```
+
 Docker build (ARG) variables:
 
 ```
