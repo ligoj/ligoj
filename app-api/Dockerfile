@@ -23,7 +23,7 @@ ENV CONTEXT_URL="/ligoj-api" \
     SERVER_PORT="8081" \
     LIGOJ_HOME=/home/ligoj \
     JAVA_MEMORY="-Xms712M -Xmx1024M" \
-    CUSTOM_OPTS="-Djpa.hbm2ddl=update" \
+    CUSTOM_OPTS="-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
     ARTIFACT_ID="${ARTIFACT_ID}" \
