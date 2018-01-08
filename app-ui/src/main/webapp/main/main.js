@@ -24,6 +24,19 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
+		 * Trim the given object by removing properties either 'null', either 'undefined' either an empty String.
+		 * These properties are deleted from the object. This is not a recursive operation.
+		 * @param {object} data	The object to clean/trim.
+		 */
+		trimObject: function (data) {
+			Object.keys(data).forEach(function (key) {
+				if (typeof data[key] === 'undefined' || data[key] === null || data[key] === '') {
+					delete data[key];
+				}
+			});
+		},
+
+		/**
 		 * Icon of corresponding tool with optional recursive display.
 		 * @param {Object|string} node The node : tool, service ... The priority is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
 		 * @param {string} suffix For URL icon, the suffix to add to the path.

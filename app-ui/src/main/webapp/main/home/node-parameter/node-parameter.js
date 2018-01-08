@@ -44,7 +44,7 @@ define(['cascade'], function ($cascade) {
 						text: (type === 'text' && $input.val() !== '') ? $input.val() : null,
 						date: (type === 'date' && $input.val() !== '') ? moment($input.val(), formatManager.messages.shortdateMomentJs).valueOf() : null
 					};
-					Object.keys(value).forEach((key) => (value[key] === null || value[key] === '') && delete value[key]);
+					current.$main.trimObject(value);
 					if (Object.keys(value).length === 2) {
 						values.push(value);
 					}
