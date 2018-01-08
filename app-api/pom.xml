@@ -11,7 +11,7 @@
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-api</artifactId>
 	<packaging>war</packaging>
-	<version>1.6.14-SNAPSHOT</version>
+	<version>1.7.0</version>
 	<name>Ligoj - Business</name>
 
 	<scm>
