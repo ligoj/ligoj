@@ -87,7 +87,7 @@ docker run --rm -it \
 | ligoj.endpoint.plugins.url | Plug-ins API URL     | ${ligoj.endpoint}/webjars     |
 
 # Packaging
-When the WAR is built you can enable minified CSS/JS with the maven profile 'minify'. This requires 'cleancss' npm module.
+When the WAR is built you can enable minified CSS/JS with the maven profile 'minify'. This requires 'clean-css-cli' NPM module.
 
 ```
 npm install clean-css-cli -g

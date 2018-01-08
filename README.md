@@ -48,7 +48,7 @@ Java 8: Open JDK or Oracle
 
 A MySQL database 'ligoj' with all rights for user 'ligoj@localhost' and password 'ligoj' for ligoj-api container.
 
-### With your own database :
+### With your own database
 ```sql
 mysql --user=root
 CREATE DATABASE `ligoj` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_bin;
@@ -70,6 +70,29 @@ git clone https://github.com/ligoj/ligoj
 mvn spring-boot:run -f app-api/pom.xml& 
 mvn spring-boot:run -f app-ui/pom.xml&
 ```
+
+
+### Packaging UI & API
+When the WAR is built you can enable minified CSS/JS with the maven profile 'minify'. This requires 'clean-css-cli' NPM module.
+
+```
+npm install clean-css-cli -g
+mvn clean package -Pminifiy -DskipTests=true
+```
+
+### Deploying
+Nexus OSS
+
+```
+mvn clean deploy -Dgpg.skip=false -Psources,javadoc,minify -DskipTests=true
+```
+
+Bintray
+
+```
+mvn deploy -Dgpg.skip=false -Psources,javadoc,bintray,minify -DskipTests=true
+```
+
 ## With your IDE
 From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
 
