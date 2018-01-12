@@ -1,5 +1,4 @@
-## :link: Ligoj [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.app/root/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.app/root) [![Download](https://api.bintray.com/packages/ligoj/maven-repo/ligoj/images/download.svg) ](https://bintray.com/ligoj/maven-repo/ligoj/_latestVersion)
-# The landing page of your team
+## :link: Ligoj - API [![Docker API](https://img.shields.io/docker/build/ligoj/ligoj-api.svg)](https://hub.docker.com/r/ligoj/ligoj-api) - UI [![Docker UI](https://img.shields.io/docker/build/ligoj/ligoj-ui.svg)](https://hub.docker.com/r/ligoj/ligoj-ui)
 
 ![alt text](https://github.com/ligoj/ligoj/raw/master/docs/assets/img/home-multi-project.png "Simple home page")
 
