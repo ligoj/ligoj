@@ -1,0 +1,29 @@
+---
+engines:
+  duplication:
+    enabled: false
+  csslint:
+    enabled: true
+    checks:
+      box-sizing:
+        enabled: false
+  markdownlint:
+    enabled: true
+  eslint:
+    enabled: true
+    no-unused-expressions:
+      enabled: false
+    checks:
+      complexity:
+        enabled: false
+      max-statements:
+        enabled: false
+ratings:
+  paths:
+  - "**.js"
+  - "**.css"
+exclude_paths:
+- "**/dist/"
+- "**/build/"
+- "**/lib/"
+- "**/themes/"
