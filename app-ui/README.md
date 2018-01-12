@@ -1,4 +1,6 @@
-## UI (REST+JS) container running a stateful SpringBoot application.
+[![Docker](https://img.shields.io/docker/build/ligoj/ligoj-ui.svg)](https://hub.docker.com/r/ligoj/ligoj-ui)
+
+# UI (REST+JS) container running a stateful SpringBoot application.
 Browser side roles :
 - URL security level applied to UI component with hierarchy pruning. Can be overridden
 - i18n
@@ -10,17 +12,13 @@ Server side roles :
 
 # Packaging (with Maven)
 Compile Java sources, optionaly minify sources (css/js) and package into the WAR file.
-
-```
-mvn clean package -DskipTests=true
-```
-Note: you can run this command either from the root module, either from the "app-ui" module. When executed from the root module, both WAR (app-api and app-ui) will be created. But if you want to produce production binaries, enable the "minify" profile "-Pminify".
-The maven profile 'minify' requires 'cleancss' npm module.
+You can enable minified CSS/JS with the maven profile 'minify'. This requires 'clean-css-cli' NPM module.
 
 ```
 npm install clean-css-cli -g
-mvn clean package -DskipTests=true -Pminifiy
+mvn clean package -Pminifiy -DskipTests=true
 ```
+Note: you can run this command either from the root module, either from the "app-ui" module. When executed from the root module, both WAR (app-api and app-ui) will be created.
 
 # Test the WAR
 Test the integration with a running API end-point
@@ -34,30 +32,28 @@ java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar target/app-ui-1
 docker build -t ligoj-ui:1.7.1 .
 ```
 
-## Custom builds
-### Custom URL
-During the build, the WAR file "ligoj-ui.war" is not copied from your local FS but from a previously released remote location such as Nexus.
-By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-ui&v=1.0.0&p=war"
+During the Docker build, the WAR file "ligoj-ui.war" is not copied from your local FS but from a previously released remote location such as Nexus.
+By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-ui&v=1.7.1&p=war"
 In case of a custom build you can specify its remote or local location.
 
-Staged OSS build from Sonatype
+## Staged OSS build from Sonatype
 
 ```
 docker build -t ligoj-ui:1.7.1 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-ui/1.7.1/app-ui-1.7.1.war" .
 ```
 
-Private remote build
+## Private remote build
 
 ```
 docker build -t ligoj-ui:1.7.1 --build-arg WAR="https://storage.company.com/releases/app-ui-1.7.1.war" .
 ```
 
-Reuse the local maven package
+## Local maven package
 
 ```
 docker build -t ligoj-ui:1.7.1 --build-arg WAR="target/app-ui-1.7.1.war" .
 ```
-Note the local WAR path must be relative to the Dockerfile (not the current path), and must be bellow the Dockerfile: do not use "../bar/foo.war"
+Note the local WAR path must be relative to the Dockerfile (not the current path), and must be below the Dockerfile: do not use "../bar/foo.war"
 
 # Run Docker image
 
@@ -86,26 +82,14 @@ docker run --rm -it \
 | ligoj.endpoint.manage.url | Health status and management     | ${ligoj.endpoint}/manage     |
 | ligoj.endpoint.plugins.url | Plug-ins API URL     | ${ligoj.endpoint}/webjars     |
 
-# Packaging
-When the WAR is built you can enable minified CSS/JS with the maven profile 'minify'. This requires 'clean-css-cli' NPM module.
 
-```
-npm install clean-css-cli -g
-mvn clean package -Pminifiy -DskipTests=true
-```
-
-# Build Docker image
-```
-docker build -t ligoj-ui:1.7.1 .
-```
-# Run Docker image with security disabled
+## Run with security disabled
 ```
 docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.7.1 
 ```
 
 
 ## Relevant variables
-
 
 ```
 CONTEXT      : Context, without starting '/'

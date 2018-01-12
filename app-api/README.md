@@ -1,4 +1,6 @@
-## API (REST) container running a stateless SpringBoot application.
+[![Docker](https://img.shields.io/docker/build/ligoj/ligoj-api.svg)](https://hub.docker.com/r/ligoj/ligoj-api)
+
+# API (REST) container running a stateless SpringBoot application.
 Roles :
 - URL security level, with RBAC : User / Role / Permission for a URL pattern supporting dynamic configuration
 - Resource security level (most complex) giving to users, groups and companies an access (read, write, +grant) to nodes, users, groups, companies
@@ -146,7 +148,7 @@ app.safe.mode             = <[false],true> When true, plug-ins are not loaded an
 
 ## Compatibilities
 ### Database
-Compatibility and performance for 10K+users and 1K+ projects
+Compatibility and performance for 10K+ users and 1K+ projects
 
 | Vendor     | Version | Driver                   | Dialect                                                  | Status                  |
 |------------|---------|--------------------------|----------------------------------------------------------|-------------------------|
