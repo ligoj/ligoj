@@ -18,14 +18,11 @@ More technical details can be found in the sub directories [ligo-api](https://gi
 [![Code Climate](https://img.shields.io/codeclimate/github/ligoj/ligoj.svg)](https://codeclimate.com/github/ligoj/ligoj)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/ligoj/badge)](https://www.codefactor.io/repository/github/ligoj/ligoj)
 [![codebeat badge](https://codebeat.co/badges/c8c372da-c0f2-4ba1-8fb4-5d5713aeb53f)](https://codebeat.co/projects/github-com-ligoj-ligoj-api-master)
-[![Docker Build Status](https://img.shields.io/docker/build/ligoj-api/ffmpeg.svg)]()
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
 
 # User section
 ```
-docker build -t ligoj-api:1.7.1 app-api
 docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.7.1
-docker build -t ligoj-ui:1.7.1 app-ui
 docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.7.1 
 ```
 Open your browser at : http://localhost:8080/ligoj  
@@ -121,8 +118,6 @@ Compatibility and performance for 10K+users and 1K+ projects
 Build the images and run the containers with docker compose
 
 ```
-docker build -t ligoj-api:1.7.1 app-api
-docker build -t ligoj-ui:1.7.1 app-ui
 docker-compose up
 ```
 
