@@ -104,13 +104,13 @@ Spring-Boot properties, injected in CUSTOM_OPTS
 (In addition of endpoint properties)
 
 ```
-server.port           = ${SERVER_PORT}
-server.address        = ${SERVER_HOST}
-server.context-path   = /${CONTEXT}
-security.max-sessions = "1" # max concurrent session for one user, "-1" unlimited
-security              = "Trusted" # or "Rest" corresponds to the security mode the UI node authenticate the user
-sso.url               = ${ligoj.endpoint.api.url}/security/login # Authentication end-point URL
-sso.content           = {"name":"%s","password":"%s"}
-app-env               = auto # Suffix for index and login HTML files, maybe "-prod", "auto" or empty. When "auto", the suffix is guessed from the way the application is started
+server.port                 = ${SERVER_PORT}
+server.address              = ${SERVER_HOST}
+server.servlet.context-path = /${CONTEXT}
+security.max-sessions       = "1" # max concurrent session for one user, "-1" unlimited
+security                    = "Trusted" # or "Rest" corresponds to the security mode the UI node authenticate the user
+sso.url                     = ${ligoj.endpoint.api.url}/security/login # Authentication end-point URL
+sso.content                 = {"name":"%s","password":"%s"}
+app-env                     = auto # Suffix for index and login HTML files, maybe "-prod", "auto" or empty. When "auto", the suffix is guessed from the way the application is started
 ```
 

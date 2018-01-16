@@ -34,7 +34,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
   java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
     -Dserver.address="${SERVER_HOST}" \
     -Dserver.port="${SERVER_PORT}" \
-    -Dserver.context-path="${CONTEXT_URL}" \
+    -Dserver.servlet.context-path="${CONTEXT_URL}" \
     -Dligoj.home="${LIGOJ_HOME}" \
     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
