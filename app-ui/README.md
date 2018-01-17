@@ -112,5 +112,6 @@ security                    = "Trusted" # or "Rest" corresponds to the security 
 sso.url                     = ${ligoj.endpoint.api.url}/security/login # Authentication end-point URL
 sso.content                 = {"name":"%s","password":"%s"}
 app-env                     = auto # Suffix for index and login HTML files, maybe "-prod", "auto" or empty. When "auto", the suffix is guessed from the way the application is started
+log.http                    = info # When "debug", all HTTP queries are logged. Increase log files.
 ```
 
