@@ -116,34 +116,36 @@ Java properties (injected in CUSTOM_OPTS with -Dxxx=yyyy):
 
 ```
 user.timezone = UTC
+log.sql       = info # When "debug", all SQL queries are logged. Increase log files.
+log.http      = info # When "debug", all HTTP queries are logged. Increase log files.
 ```
 
 Spring-Boot properties (injected in CUSTOM_OPTS):
 
 ```
-server.port               = ${SERVER_PORT}
-server.address            = ${SERVER_HOST}
-server.context-path       = /${CONTEXT}
-management.context-path   = /manage
-management.security.roles = USER
-jpa.hbm2ddl               = <[update],none,validate>. With "update", the server takes up to 30s to start
-jdbc.vendor               = <[mysql],postgresql,mariadb>
-jdbc.port                 = 3306
-jdbc.database             = ligoj
-jdbc.username             = ligoj
-jdbc.password             = ligoj
-jdbc.host                 = localhost
-jpa.dialect               = <[org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect],org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect>
-jdbc.driverClassName      = <[com.mysql.cj.jdbc.Driver],org.postgresql.Driver>
-jdbc.urlparam             = ?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC
-jdbc.url                  = jdbc:${jdbc.vendor}://${jdbc.host}:${jdbc.port}/${jdbc.database}${jdbc.urlparam:}
-jdbc.validationQuery      = select 1;
-jdbc.maxIdleTime          = 180000
-jdbc.maxPoolSize          = 150
-health.node               = 0 0 0/1 1/1 * ?
-health.subscription       = 0 0 2 1/1 * ?
-app.crypto.file           = Secret file location
-app.safe.mode             = <[false],true> When true, plug-ins are not loaded and their state is not updated
+server.port                 = ${SERVER_PORT}
+server.address              = ${SERVER_HOST}
+server.servlet.context-path = /${CONTEXT}
+management.context-path     = /manage
+management.security.roles   = USER
+jpa.hbm2ddl                 = <[update],none,validate>. With "update", the server takes up to 30s to start
+jdbc.vendor                 = <[mysql],postgresql,mariadb>
+jdbc.port                   = 3306
+jdbc.database               = ligoj
+jdbc.username               = ligoj
+jdbc.password               = ligoj
+jdbc.host                   = localhost
+jpa.dialect                 = <[org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect],org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect>
+jdbc.driverClassName        = <[com.mysql.cj.jdbc.Driver],org.postgresql.Driver>
+jdbc.urlparam               = ?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC
+jdbc.url                    = jdbc:${jdbc.vendor}://${jdbc.host}:${jdbc.port}/${jdbc.database}${jdbc.urlparam:}
+jdbc.validationQuery        = select 1;
+jdbc.maxIdleTime            = 180000
+jdbc.maxPoolSize            = 150
+health.node                 = 0 0 0/1 1/1 * ?
+health.subscription         = 0 0 2 1/1 * ?
+app.crypto.file             = Secret file location
+app.safe.mode               = <[false],true> When true, plug-ins are not loaded and their state is not updated
 ```
 
 ## Compatibilities

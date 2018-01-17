@@ -51,7 +51,7 @@
 					}
 				}, {
 					"name": "org.hibernate.SQL",
-					"level": "debug",
+					"level": "${sys:log.sql:-info}",
 					"additivity": "false",
 					"AppenderRef": {
 						"ref": "STDOUT"
@@ -107,7 +107,7 @@
 					}
 				}, {
 					"name": "org.eclipse.jetty.server.Server",
-					"level": "debug",
+					"level": "${sys:log.http:-info}",
 					"additivity": "false",
 					"AppenderRef": {
 						"ref": "STDOUT"
