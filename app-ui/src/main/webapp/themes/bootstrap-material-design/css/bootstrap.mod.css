@@ -967,6 +967,12 @@ img.nav-icon {
 	color: #fff;
 	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgba(156, 39, 176, .4);
 }
+.nav-pills.navbar-inverse > li > a {
+	color : #d8d2d2
+}
+.nav-pills.navbar-inverse > li:hover > a, .nav-pills.navbar-inverse > li.active > a {
+	color: #fff;
+}
 .nav-pills .pill:hover, .nav-pills .pill:focus,.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus, .dropdown-menu li a:hover, .dropdown-menu li a:focus, .dropdown-menu li a:active{
 	background-color: #9c27b0;
 	color: #fff;
