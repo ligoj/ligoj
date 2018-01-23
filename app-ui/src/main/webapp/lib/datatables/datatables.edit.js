@@ -149,6 +149,20 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 		className : "btn-primary btn-raised"
 	};
 
+	DataTable.ext.buttons.link = {
+		text : $cascade.$messages["new"],
+		className : "btn-link",
+		href : "#/",
+		tag : "a",
+		attr : "",
+		init : function(_i, $button, oConfig) {
+			$button.attr("href", oConfig.href).off('click.dtb').off('keyup.dtb');
+			if (oConfig.attr) {
+				$button.attr(oConfig.attr, oConfig.attr);
+			};
+		}
+	};
+
 	DataTable.ext.buttons.cancel = {
 		text : $cascade.$messages["cancel"],
 		className : "btn-link"
