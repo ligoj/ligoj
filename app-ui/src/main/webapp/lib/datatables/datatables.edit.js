@@ -120,7 +120,14 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 	var DataTable = $.fn.dataTable;
 	DataTable.ext.buttons.create = {
 		text : $cascade.$messages["new"],
-		className : "btn-success btn-raised"
+		className : "btn-success btn-raised",
+		init : function(_i, $button, oConfig) {
+			Object.keys(oConfig).forEach(function (index) {
+				if (index.startsWith('attr-')) {
+					$button.attr(index.substr('attr-'.length), oConfig[index]);
+				}
+			});
+		}
 	};
 	DataTable.ext.buttons.popup = {
 		text : $cascade.$messages["new"],
@@ -154,12 +161,12 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 		className : "btn-link",
 		href : "#/",
 		tag : "a",
-		attr : "",
 		init : function(_i, $button, oConfig) {
-			$button.attr("href", oConfig.href).off('click.dtb').off('keyup.dtb');
-			if (oConfig.attr) {
-				$button.attr(oConfig.attr, oConfig.attr);
-			};
+			Object.keys(oConfig).forEach(function (index) {
+				if (index.startsWith('attr-')) {
+					$button.attr(index.substr('attr-'.length), oConfig[index]);
+				}
+			});
 		}
 	};
 
