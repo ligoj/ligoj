@@ -129,6 +129,16 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 			});
 		}
 	};
+	DataTable.ext.buttons.button2 = {
+		text : $cascade.$messages["new"],
+		init : function(_i, $button, oConfig) {
+			Object.keys(oConfig).forEach(function (index) {
+				if (index.startsWith('attr-')) {
+					$button.attr(index.substr('attr-'.length), oConfig[index]);
+				}
+			});
+		}
+	};
 	DataTable.ext.buttons.popup = {
 		text : $cascade.$messages["new"],
 		className : "btn-raised",
@@ -167,6 +177,13 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 					$button.attr(index.substr('attr-'.length), oConfig[index]);
 				}
 			});
+			if (oConfig.href) {
+				$button.attr("href", oConfig.href);
+			}
+			if (typeof(oConfig.action) !== 'function') {
+				// Regular link
+				$button.off('click.dtb');
+			}
 		}
 	};
 
