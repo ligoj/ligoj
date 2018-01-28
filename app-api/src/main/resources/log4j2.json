@@ -18,7 +18,7 @@
 					"type": "Console",
 					"name": "STDOUT",
 					"PatternLayout": {
-						"pattern": "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%xEx{filters(com.sun.proxy,org.springframework.data.projection,org.springframework.dao.support,org.springframework.transaction,java.lang.Thread,org.apache.cxf,org.eclipse.jetty,org.springframework.web,javax.servlet,org.springframework.aop,org.junit,org.apache.maven,sun.reflect,java.lang.reflect,org.springframework.cglib,org.springframework.security)}%n"
+						"pattern": "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%xEx{filters(com.sun.proxy,org.springframework.data.projection,org.springframework.dao.support,org.springframework.transaction,java.lang.Thread,org.apache.cxf,org.eclipse.jetty,org.springframework.web,javax.servlet,org.springframework.aop,org.junit,org.apache.maven,sun.reflect,java.lang.reflect,org.springframework.cglib,org.springframework.security,java.util.stream.ReferencePipeline)}%n"
 					}
 				}, {
 					"type": "Console",
