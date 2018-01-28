@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-business-parent</artifactId>
-		<version>2.0.1</version>
+		<version>2.1.0</version>
 		<relativePath />
 	</parent>
 
@@ -20,7 +20,7 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>2.0.2</api.version>
+		<api.version>2.1.0</api.version>
 		<spring-cloud.version>2.0.0.M5</spring-cloud.version>
 
 		<spring-data.version>2.0.3.RELEASE</spring-data.version>
@@ -103,6 +103,13 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
+		</dependency>
+
+		<!-- JSR-925 -->
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 	<build>

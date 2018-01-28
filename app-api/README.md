@@ -61,7 +61,7 @@ docker run -d \
   -e MYSQL_USER=ligoj \
   -e MYSQL_PASSWORD=ligoj \
   mysql:5.6
-docker --rm -it \
+docker run --rm -it \
   --name ligoj-api \
   -e CUSTOM_OPTS='-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db' \
   ligoj-api:1.7.1 
