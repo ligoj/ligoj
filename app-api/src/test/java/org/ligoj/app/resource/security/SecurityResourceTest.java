@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.iam.IAuthenticationContributor;
@@ -31,7 +32,6 @@ public class SecurityResourceTest extends AbstractServerTest {
 
 	@Test
 	public void loginUnknownUser() throws Exception {
-		thrown.expect(BadCredentialsException.class);
 		final User user = new User();
 		user.setName("any");
 		user.setPassword("any");
@@ -40,12 +40,14 @@ public class SecurityResourceTest extends AbstractServerTest {
 		final SecurityResource resource = new SecurityResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
 		resource.iamProvider = new IamProvider[] { iamProvider };
-		resource.login(user);
+		Assertions.assertThrows(BadCredentialsException.class, () -> {
+			resource.login(user);
+		});
 	}
 
 	@Test
 	public void login() throws Exception {
-		
+
 		// Mock the authentication
 		final IamProvider iamProvider = Mockito.mock(IamProvider.class);
 		Mockito.when(iamProvider.authenticate(ArgumentMatchers.any(Authentication.class))).thenAnswer(i -> i.getArguments()[0]);
@@ -59,14 +61,14 @@ public class SecurityResourceTest extends AbstractServerTest {
 		Mockito.when(applicationContext.getBeansOfType(IAuthenticationContributor.class))
 				.thenAnswer(i -> Collections.singletonMap("some", contributor));
 		resource.applicationContext = applicationContext;
-		
+
 		// Perform the login
 		final Response login = resource.login(new User("fdauganA", "Azerty01"));
-		
+
 		// Check the response
 		Assert.assertNotNull(login);
 		Assert.assertEquals(204, login.getStatus());
-		
+
 		// Check the contributor has been involed
 		Mockito.verify(contributor).accept(ArgumentMatchers.any(), ArgumentMatchers.any());
 	}

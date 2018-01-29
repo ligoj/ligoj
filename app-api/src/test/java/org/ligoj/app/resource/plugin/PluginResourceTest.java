@@ -24,10 +24,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.eclipse.jetty.util.thread.ThreadClassLoaderScope;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.api.FeaturePlugin;
@@ -84,7 +84,7 @@ public class PluginResourceTest extends AbstractServerTest {
 	@Autowired
 	private RestartEndpoint restartEndpoint;
 
-	@Before
+	@BeforeEach
 	public void prepareData() throws IOException {
 		persistEntities("csv", new Class[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class },
 				StandardCharsets.UTF_8.name());
@@ -99,7 +99,7 @@ public class PluginResourceTest extends AbstractServerTest {
 
 		try {
 			// This plug-in is available in the remote storage with a newer version
-			Assert.assertEquals("0.0.1", findAll("0.0.0.8").getNewVersion());
+			Assertions.assertEquals("0.0.1", findAll("0.0.0.8").getNewVersion());
 		} finally {
 			destroySingleton("sampleService");
 			destroySingleton("sampleTool");
@@ -115,7 +115,7 @@ public class PluginResourceTest extends AbstractServerTest {
 
 		try {
 			// This plug-in is available in the remote storage with a newer version
-			Assert.assertNull(findAll("0.0.1").getNewVersion());
+			Assertions.assertNull(findAll("0.0.1").getNewVersion());
 		} finally {
 			destroySingleton("sampleService");
 			destroySingleton("sampleTool");
@@ -132,20 +132,20 @@ public class PluginResourceTest extends AbstractServerTest {
 		repository.saveAndFlush(pluginId);
 
 		final List<PluginVo> plugins = resource.findAll();
-		Assert.assertEquals(3, plugins.size());
+		Assertions.assertEquals(3, plugins.size());
 
 		// External plug-in service
 		final PluginVo plugin2 = plugins.get(2);
-		Assert.assertEquals("service:sample", plugin2.getId());
-		Assert.assertEquals("Sample", plugin2.getName());
-		Assert.assertNull(plugin2.getVendor());
-		Assert.assertFalse(plugin2.getLocation().endsWith(".jar"));
-		Assert.assertEquals("service:sample", plugin2.getNode().getId());
-		Assert.assertEquals(3, plugin2.getNodes());
-		Assert.assertEquals(3, plugin2.getSubscriptions());
-		Assert.assertEquals(PluginType.SERVICE, plugin2.getPlugin().getType());
+		Assertions.assertEquals("service:sample", plugin2.getId());
+		Assertions.assertEquals("Sample", plugin2.getName());
+		Assertions.assertNull(plugin2.getVendor());
+		Assertions.assertFalse(plugin2.getLocation().endsWith(".jar"));
+		Assertions.assertEquals("service:sample", plugin2.getNode().getId());
+		Assertions.assertEquals(3, plugin2.getNodes());
+		Assertions.assertEquals(3, plugin2.getSubscriptions());
+		Assertions.assertEquals(PluginType.SERVICE, plugin2.getPlugin().getType());
 
-		Assert.assertEquals(version, plugin2.getPlugin().getVersion());
+		Assertions.assertEquals(version, plugin2.getPlugin().getVersion());
 		return plugin2;
 
 	}
@@ -166,32 +166,32 @@ public class PluginResourceTest extends AbstractServerTest {
 		repository.saveAndFlush(orphanPLugin);
 
 		final List<PluginVo> plugins = resource.findAll();
-		Assert.assertEquals(2, plugins.size());
+		Assertions.assertEquals(2, plugins.size());
 
 		// Plug-in from the API
 		final PluginVo plugin0 = plugins.get(0);
-		Assert.assertEquals("feature:iam:empty", plugin0.getId());
-		Assert.assertEquals("IAM Empty", plugin0.getName());
-		Assert.assertEquals("Gfi Informatique", plugin0.getVendor());
-		Assert.assertNull(plugin0.getNewVersion());
-		Assert.assertTrue(plugin0.getLocation().endsWith(".jar"));
-		Assert.assertNotNull(plugin0.getPlugin().getVersion());
-		Assert.assertNull(plugin0.getNode());
-		Assert.assertEquals(0, plugin0.getNodes());
-		Assert.assertEquals(0, plugin0.getSubscriptions());
-		Assert.assertEquals(PluginType.FEATURE, plugin0.getPlugin().getType());
+		Assertions.assertEquals("feature:iam:empty", plugin0.getId());
+		Assertions.assertEquals("IAM Empty", plugin0.getName());
+		Assertions.assertEquals("Gfi Informatique", plugin0.getVendor());
+		Assertions.assertNull(plugin0.getNewVersion());
+		Assertions.assertTrue(plugin0.getLocation().endsWith(".jar"));
+		Assertions.assertNotNull(plugin0.getPlugin().getVersion());
+		Assertions.assertNull(plugin0.getNode());
+		Assertions.assertEquals(0, plugin0.getNodes());
+		Assertions.assertEquals(0, plugin0.getSubscriptions());
+		Assertions.assertEquals(PluginType.FEATURE, plugin0.getPlugin().getType());
 
 		// Plug-in (feature) embedded in the current project
 		final PluginVo plugin1 = plugins.get(1);
-		Assert.assertEquals("feature:welcome:data-rbac", plugin1.getId());
-		Assert.assertEquals("Welcome Data RBAC", plugin1.getName());
-		Assert.assertNull(plugin1.getVendor());
-		Assert.assertFalse(plugin1.getLocation().endsWith(".jar"));
-		Assert.assertNotNull(plugin1.getPlugin().getVersion());
-		Assert.assertNull(plugin1.getNode());
-		Assert.assertEquals(0, plugin1.getNodes());
-		Assert.assertEquals(0, plugin1.getSubscriptions());
-		Assert.assertEquals(PluginType.FEATURE, plugin1.getPlugin().getType());
+		Assertions.assertEquals("feature:welcome:data-rbac", plugin1.getId());
+		Assertions.assertEquals("Welcome Data RBAC", plugin1.getName());
+		Assertions.assertNull(plugin1.getVendor());
+		Assertions.assertFalse(plugin1.getLocation().endsWith(".jar"));
+		Assertions.assertNotNull(plugin1.getPlugin().getVersion());
+		Assertions.assertNull(plugin1.getNode());
+		Assertions.assertEquals(0, plugin1.getNodes());
+		Assertions.assertEquals(0, plugin1.getSubscriptions());
+		Assertions.assertEquals(PluginType.FEATURE, plugin1.getPlugin().getType());
 	}
 
 	@Test
@@ -200,9 +200,9 @@ public class PluginResourceTest extends AbstractServerTest {
 		// So corresponds to API jar and not this project
 		final SampleService service1 = new SampleService();
 		resource.configurePluginInstall(service1);
-		Assert.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
-		Assert.assertEquals(PluginType.SERVICE, repository.findByExpected("key", "service:sample").getType());
-		Assert.assertNotNull(repository.findByExpected("key", "service:sample").getVersion());
+		Assertions.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
+		Assertions.assertEquals(PluginType.SERVICE, repository.findByExpected("key", "service:sample").getType());
+		Assertions.assertNotNull(repository.findByExpected("key", "service:sample").getVersion());
 
 		final SampleTool1 service2 = new SampleTool1();
 		resource.configurePluginInstall(service2);
@@ -214,7 +214,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		resource.configurePluginInstall(service2);
 	}
 
-	@Test(expected = TechnicalException.class)
+	@Test
 	public void configurePluginInstallManagedEntitiesNotSameClassloader() {
 		final ServicePlugin service1 = Mockito.mock(ServicePlugin.class);
 		Mockito.when(service1.getKey()).thenReturn("service:sample");
@@ -222,13 +222,9 @@ public class PluginResourceTest extends AbstractServerTest {
 		em.createQuery("DELETE Subscription").executeUpdate();
 		em.createQuery("DELETE Node").executeUpdate();
 
-		resource.configurePluginInstall(service1);
-		Assert.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
-		Assert.assertEquals(PluginType.SERVICE, repository.findByExpected("key", "service:sample").getType());
-		Assert.assertNotNull(repository.findByExpected("key", "service:sample").getVersion());
-
-		// Check the managed entity is persisted
-		Assert.assertEquals(1, em.createQuery("FROM SystemBench WHERE prfChar=?").setParameter(0, "InitData").getResultList().size());
+		Assertions.assertThrows(TechnicalException.class, () -> {
+			resource.configurePluginInstall(service1);
+		});
 	}
 
 	@Test
@@ -238,9 +234,9 @@ public class PluginResourceTest extends AbstractServerTest {
 						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 		final Map<String, MavenSearchResultItem> versions = resource.getLastPluginVersions();
-		Assert.assertSame(versions, resource.getLastPluginVersions());
+		Assertions.assertSame(versions, resource.getLastPluginVersions());
 		resource.invalidateLastPLuginVersions();
-		Assert.assertNotSame(versions, resource.getLastPluginVersions());
+		Assertions.assertNotSame(versions, resource.getLastPluginVersions());
 	}
 
 	@Test
@@ -256,29 +252,31 @@ public class PluginResourceTest extends AbstractServerTest {
 		em.createQuery("DELETE Node").executeUpdate();
 
 		resource.configurePluginInstall(service1);
-		Assert.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
-		Assert.assertEquals(PluginType.SERVICE, repository.findByExpected("key", "service:sample").getType());
-		Assert.assertNotNull(repository.findByExpected("key", "service:sample").getVersion());
+		Assertions.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
+		Assertions.assertEquals(PluginType.SERVICE, repository.findByExpected("key", "service:sample").getType());
+		Assertions.assertNotNull(repository.findByExpected("key", "service:sample").getVersion());
 
 		// Check the managed entity is persisted
-		Assert.assertEquals(1, em.createQuery("FROM SystemBench WHERE prfChar=?").setParameter(0, "InitData").getResultList().size());
+		Assertions.assertEquals(1, em.createQuery("FROM SystemBench WHERE prfChar=?").setParameter(0, "InitData").getResultList().size());
 	}
 
-	@Test(expected = TechnicalException.class)
+	@Test
 	public void configurePluginInstallError() {
 		final FeaturePlugin service1 = Mockito.mock(FeaturePlugin.class);
 		Mockito.when(service1.getInstalledEntities()).thenThrow(BusinessException.class);
-		resource.configurePluginInstall(service1);
+		Assertions.assertThrows(TechnicalException.class, () -> {
+			resource.configurePluginInstall(service1);
+		});
 	}
 
 	@Test
 	public void manifestData() {
-		Assert.assertTrue(Integer.class.getPackage().getImplementationVersion().startsWith("1.8"));
-		Assert.assertEquals("1.8", Integer.class.getPackage().getSpecificationVersion());
-		Assert.assertEquals("Java Runtime Environment", Integer.class.getPackage().getImplementationTitle());
+		Assertions.assertTrue(Integer.class.getPackage().getImplementationVersion().startsWith("1.8"));
+		Assertions.assertEquals("1.8", Integer.class.getPackage().getSpecificationVersion());
+		Assertions.assertEquals("Java Runtime Environment", Integer.class.getPackage().getImplementationTitle());
 
 		// Oracle Corporation
-		Assert.assertNotNull(Integer.class.getPackage().getImplementationVendor());
+		Assertions.assertNotNull(Integer.class.getPackage().getImplementationVendor());
 	}
 
 	@Test
@@ -287,32 +285,34 @@ public class PluginResourceTest extends AbstractServerTest {
 		final Plugin plugin = new Plugin();
 		plugin.setVersion("old version");
 		resource.configurePluginUpdate(service1, plugin);
-		Assert.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
-		Assert.assertNotNull("1.0", plugin.getVersion());
+		Assertions.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
+		Assertions.assertNotNull("1.0", plugin.getVersion());
 	}
 
 	@Test
 	public void determinePluginType() {
-		Assert.assertEquals(PluginType.SERVICE, resource.determinePluginType(new SampleService()));
-		Assert.assertEquals(PluginType.TOOL, resource.determinePluginType(new SampleTool1()));
+		Assertions.assertEquals(PluginType.SERVICE, resource.determinePluginType(new SampleService()));
+		Assertions.assertEquals(PluginType.TOOL, resource.determinePluginType(new SampleTool1()));
 	}
 
-	@Test(expected = TechnicalException.class)
+	@Test
 	public void determinePluginTypeError() {
 		final ServicePlugin service1 = Mockito.mock(ServicePlugin.class);
 		Mockito.when(service1.getKey()).thenReturn("service:sample:tool");
-		resource.determinePluginType(service1);
+		Assertions.assertThrows(TechnicalException.class, () -> {
+			resource.determinePluginType(service1);
+		});
 	}
 
 	@Test
 	public void getVersion() {
 		// Version is resolved from the date
-		Assert.assertTrue(resource.getVersion(new SampleService()).startsWith("20"));
+		Assertions.assertTrue(resource.getVersion(new SampleService()).startsWith("20"));
 	}
 
 	@Test
 	public void getVersionIOException() {
-		Assert.assertEquals("?", new PluginResource() {
+		Assertions.assertEquals("?", new PluginResource() {
 			@Override
 			protected String getLastModifiedTime(final FeaturePlugin plugin) throws IOException, URISyntaxException {
 				throw new IOException();
@@ -322,7 +322,7 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void getVersionURISyntaxException() {
-		Assert.assertEquals("?", new PluginResource() {
+		Assertions.assertEquals("?", new PluginResource() {
 			@Override
 			protected String getLastModifiedTime(final FeaturePlugin plugin) throws IOException, URISyntaxException {
 				throw new URISyntaxException("input", "reason");
@@ -357,7 +357,7 @@ public class PluginResourceTest extends AbstractServerTest {
 	public void refreshPluginsUpdate() throws Exception {
 		try {
 			// Precondition
-			Assert.assertNull(repository.findBy("key", "service:sample"));
+			Assertions.assertNull(repository.findBy("key", "service:sample"));
 
 			// Add a plug-in is an initial version
 			registerSingleton("sampleService", new SampleService() {
@@ -370,7 +370,7 @@ public class PluginResourceTest extends AbstractServerTest {
 			final ContextRefreshedEvent event = Mockito.mock(ContextRefreshedEvent.class);
 			Mockito.when(event.getApplicationContext()).thenReturn(applicationContext);
 			resource.refreshPlugins(event);
-			Assert.assertEquals("1.1", repository.findByExpected("key", "service:sample").getVersion());
+			Assertions.assertEquals("1.1", repository.findByExpected("key", "service:sample").getVersion());
 
 			// Add a plug-in is a different version
 			destroySingleton("sampleService");
@@ -381,16 +381,18 @@ public class PluginResourceTest extends AbstractServerTest {
 				}
 			});
 			resource.refreshPlugins(event);
-			Assert.assertEquals("2.0", repository.findByExpected("key", "service:sample").getVersion());
+			Assertions.assertEquals("2.0", repository.findByExpected("key", "service:sample").getVersion());
 		} finally {
 			destroySingleton("sampleService");
 		}
 
 	}
 
-	@Test(expected = TechnicalException.class)
-	public void configurePluginEntityNotFound() throws MalformedURLException, IOException {
-		new PluginResource().configurePluginEntity(Arrays.stream(new URL[] { new URL("file://tmp") }), SystemUser.class, "---");
+	@Test
+	public void configurePluginEntityNotFound() {
+		Assertions.assertThrows(TechnicalException.class, () -> {
+			new PluginResource().configurePluginEntity(Arrays.stream(new URL[] { new URL("file://tmp") }), SystemUser.class, "---");
+		});
 	}
 
 	@Test
@@ -411,25 +413,29 @@ public class PluginResourceTest extends AbstractServerTest {
 		pluginResource.configurePluginEntity(Arrays.stream(new URL[] { url }), SystemUser.class, url.toString());
 	}
 
-	@Test(expected = BusinessException.class)
+	@Test
 	public void installNotExists() {
-		newPluginResourceInstall().install("any");
+		Assertions.assertThrows(TechnicalException.class, () -> {
+			newPluginResourceInstall().install("any");
+		});
 	}
 
-	@Test(expected = BusinessException.class)
+	@Test
 	public void installNotExistsVersion() {
-		newPluginResourceInstall().install("any", "dummy");
+		Assertions.assertThrows(TechnicalException.class, () -> {
+			newPluginResourceInstall().install("any", "dummy");
+		});
 	}
 
 	@Test
 	public void install() {
 		newPluginResourceInstall().install("plugin-iam-node");
-		Assert.assertTrue(TEMP_FILE.exists());
+		Assertions.assertTrue(TEMP_FILE.exists());
 	}
 
 	@Test
 	public void getPluginClassLoaderOutOfClassLoader() {
-		Assert.assertNull(resource.getPluginClassLoader());
+		Assertions.assertNull(resource.getPluginClassLoader());
 	}
 
 	@Test
@@ -446,7 +452,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
 		try {
 			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader));
-			Assert.assertNotNull(resource.getPluginClassLoader());
+			Assertions.assertNotNull(resource.getPluginClassLoader());
 		} finally {
 			IOUtils.closeQuietly(scope);
 		}
@@ -475,7 +481,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
 		try {
 			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader));
-			Assert.assertNotNull(PluginsClassLoader.getInstance());
+			Assertions.assertNotNull(PluginsClassLoader.getInstance());
 			Mockito.when(pluginsClassLoader.getPluginDirectory())
 					.thenReturn(Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
 			final PluginResource pluginResource = new PluginResource() {
@@ -493,7 +499,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		}
 	}
 
-	@After
+	@AfterEach
 	public void cleanArtifacts() {
 		FileUtils.deleteQuietly(TEMP_FILE);
 	}
@@ -512,11 +518,11 @@ public class PluginResourceTest extends AbstractServerTest {
 	 */
 	@Test
 	public void removeWidest() throws IOException {
-		Assert.assertFalse(TEMP_FILE.exists());
+		Assertions.assertFalse(TEMP_FILE.exists());
 		FileUtils.touch(TEMP_FILE);
-		Assert.assertTrue(TEMP_FILE.exists());
+		Assertions.assertTrue(TEMP_FILE.exists());
 		newPluginResourceRemove("plugin-iam");
-		Assert.assertFalse(TEMP_FILE.exists());
+		Assertions.assertFalse(TEMP_FILE.exists());
 	}
 
 	/**
@@ -524,25 +530,25 @@ public class PluginResourceTest extends AbstractServerTest {
 	 */
 	@Test
 	public void removeExact() throws IOException {
-		Assert.assertFalse(TEMP_FILE.exists());
+		Assertions.assertFalse(TEMP_FILE.exists());
 		FileUtils.touch(TEMP_FILE);
-		Assert.assertTrue(TEMP_FILE.exists());
+		Assertions.assertTrue(TEMP_FILE.exists());
 		newPluginResourceRemove("plugin-iam");
-		Assert.assertFalse(TEMP_FILE.exists());
+		Assertions.assertFalse(TEMP_FILE.exists());
 	}
 
 	@Test
 	public void searchPluginsInMavenRepoNoResult() throws IOException {
 		final List<MavenSearchResultItem> result = searchPluginsInMavenRepo("no-result");
-		Assert.assertTrue("Search result should be empty.", result.isEmpty());
+		Assertions.assertTrue(result.isEmpty(), "Search result should be empty.");
 	}
 
 	@Test
 	public void searchPluginsOnMavenRepoOneResult() throws IOException {
 		final List<MavenSearchResultItem> result = searchPluginsInMavenRepo("samp");
-		Assert.assertEquals(1, result.size());
-		Assert.assertEquals("plugin-sample", result.get(0).getArtifact());
-		Assert.assertEquals("0.0.1", result.get(0).getVersion());
+		Assertions.assertEquals(1, result.size());
+		Assertions.assertEquals("plugin-sample", result.get(0).getArtifact());
+		Assertions.assertEquals("0.0.1", result.get(0).getVersion());
 	}
 
 	@Test
@@ -557,17 +563,17 @@ public class PluginResourceTest extends AbstractServerTest {
 		subscription.setId(99);
 		final String[] fragments = new String[] { "sub-dir" };
 		final File file = newPluginResourceInstall().toFile(subscription, fragments);
-		Assert.assertNotNull(USER_HOME_DIRECTORY + "/service-s1/t1/99/sub-dir", file.toString());
+		Assertions.assertNotNull(USER_HOME_DIRECTORY + "/service-s1/t1/99/sub-dir", file.toString());
 	}
 
 	@Test
 	public void getParentNode() {
-		Assert.assertEquals("service:sample", newPluginResourceInstall().getParentNode("service:sample:tool1").getId());
+		Assertions.assertEquals("service:sample", newPluginResourceInstall().getParentNode("service:sample:tool1").getId());
 	}
 
 	@Test
 	public void getParentNodeRoot() {
-		Assert.assertNull(newPluginResourceInstall().getParentNode("service:sample"));
+		Assertions.assertNull(newPluginResourceInstall().getParentNode("service:sample"));
 	}
 
 	private List<MavenSearchResultItem> searchPluginsInMavenRepo(final String query) throws IOException {

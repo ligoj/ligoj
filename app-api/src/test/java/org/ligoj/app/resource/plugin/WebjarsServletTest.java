@@ -13,10 +13,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -29,13 +29,13 @@ public class WebjarsServletTest {
 
 	private ClassLoader classloader;
 
-	@Before
+	@BeforeEach
 	public void saveClassloader() {
 		Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/resources/webjars/image.png");
 		classloader = Thread.currentThread().getContextClassLoader();
 	}
 
-	@After
+	@AfterEach
 	public void restoreClassloader() {
 		Thread.currentThread().setContextClassLoader(classloader);
 	}
@@ -68,7 +68,7 @@ public class WebjarsServletTest {
 		final ByteArrayOutputStream baos = initializeFileAndResponse(response);
 
 		getServlet("false").doGet(request, response);
-		Assert.assertEquals("image-content", new String(baos.toByteArray(), StandardCharsets.UTF_8));
+		Assertions.assertEquals("image-content", new String(baos.toByteArray(), StandardCharsets.UTF_8));
 		Mockito.verify(response).setContentType("image/x-png");
 		Mockito.verify(response, Mockito.never()).setStatus(ArgumentMatchers.anyInt());
 		Mockito.verify(response, Mockito.never()).sendError(ArgumentMatchers.anyInt());
@@ -82,7 +82,7 @@ public class WebjarsServletTest {
 		final WebjarsServlet servlet = getServlet("false");
 
 		servlet.doGet(request, response);
-		Assert.assertEquals("image-content", new String(baos.toByteArray(), StandardCharsets.UTF_8));
+		Assertions.assertEquals("image-content", new String(baos.toByteArray(), StandardCharsets.UTF_8));
 		Mockito.verify(response).setContentType("application/octet-stream");
 	}
 
@@ -94,7 +94,7 @@ public class WebjarsServletTest {
 		final WebjarsServlet servlet = getServlet("false");
 
 		servlet.doGet(request, response);
-		Assert.assertEquals("image-content", new String(baos.toByteArray(), StandardCharsets.UTF_8));
+		Assertions.assertEquals("image-content", new String(baos.toByteArray(), StandardCharsets.UTF_8));
 		Mockito.verify(response).setContentType("font/woff2");
 	}
 

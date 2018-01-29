@@ -5,8 +5,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import org.eclipse.jetty.util.thread.ThreadClassLoaderScope;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.SpringApplication;
 
@@ -31,7 +31,7 @@ public class PluginApplicationRunListenerTest {
 		try {
 			final PluginApplicationRunListener listener = new PluginApplicationRunListener(Mockito.mock(SpringApplication.class), new String[0]);
 			listener.starting();
-			Assert.assertTrue(listener.getOrder() < 0);
+			Assertions.assertTrue(listener.getOrder() < 0);
 			listener.environmentPrepared(null);
 			listener.contextPrepared(null);
 			listener.contextLoaded(null);
