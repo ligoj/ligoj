@@ -32,6 +32,7 @@ ENV CONTEXT_URL="/ligoj-api" \
 EXPOSE ${SERVER_PORT}
 CMD mkdir -p "$LIGOJ_HOME" && \
   java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
+    --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
     -Dserver.address="${SERVER_HOST}" \
     -Dserver.port="${SERVER_PORT}" \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
