@@ -137,4 +137,4 @@ WAR_URL   : Full WAR URL, built from NEXUS_URL and VERSION
 
 Docker environment variables:
 
-See each container [![ligo-api]](https://github.com/ligoj/ligoj/tree/master/app-api) and [![ligo-ui]](https://github.com/ligoj/ligoj/tree/master/app-ui).
+See each container [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api) and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
