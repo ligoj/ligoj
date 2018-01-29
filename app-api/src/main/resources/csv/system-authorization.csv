@@ -15,6 +15,7 @@ method;pattern;type;role.name
 GET;^rest/node.*;API;USER
 GET;^rest/project.*;API;USER
 GET;^rest/subscription.*;API;USER
+GET;^webjars/.*;API;USER
 
 ;.*;UI;ADMIN
 ;^api.*;UI;USER
