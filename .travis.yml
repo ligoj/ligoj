@@ -20,7 +20,7 @@ branches:
     - master
     - dev
 install: /bin/true 
-jdk: oraclejdk8
+jdk: oraclejdk9
 language: java
 notifications: 
   email: false
