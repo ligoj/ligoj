@@ -21,6 +21,7 @@
 	</scm>
 	<properties>
 		<api.version>2.1.0</api.version>
+		<jackson.version>2.9.4</jackson.version>
 	</properties>
 
 	<dependencies>
