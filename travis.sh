@@ -74,7 +74,7 @@ function installMaven {
 #
 function fixBuildVersion {
   echo "Create a clean build version ..."
-  export INITIAL_VERSION=$(maven_expression "project.version -Dskip-sonarsource-repo=true")
+  export INITIAL_VERSION=$(maven_expression "project.version")
   echo "INITIAL_VERSION : $INITIAL_VERSION"
 
   # remove suffix -SNAPSHOT or -RC
