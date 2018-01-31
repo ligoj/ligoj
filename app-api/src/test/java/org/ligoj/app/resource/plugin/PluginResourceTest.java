@@ -28,7 +28,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.api.ServicePlugin;
@@ -53,12 +53,12 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * Test class of {@link PluginResource}
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
@@ -271,12 +271,8 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void manifestData() {
-		Assertions.assertTrue(Integer.class.getPackage().getImplementationVersion().startsWith("1.8"));
-		Assertions.assertEquals("1.8", Integer.class.getPackage().getSpecificationVersion());
-		Assertions.assertEquals("Java Runtime Environment", Integer.class.getPackage().getImplementationTitle());
-
-		// Oracle Corporation
-		Assertions.assertNotNull(Integer.class.getPackage().getImplementationVendor());
+		Assertions.assertTrue(Integer.class.getModule().getDescriptor().rawVersion().get().startsWith("9."));
+		Assertions.assertEquals("java.base", Integer.class.getModule().getName());
 	}
 
 	@Test
@@ -415,16 +411,16 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void installNotExists() {
-		Assertions.assertThrows(TechnicalException.class, () -> {
+		Assertions.assertThrows(BusinessException.class, () -> {
 			newPluginResourceInstall().install("any");
 		});
 	}
 
 	@Test
 	public void installNotExistsVersion() {
-		Assertions.assertThrows(TechnicalException.class, () -> {
+		Assertions.assertEquals("any", Assertions.assertThrows(BusinessException.class, () -> {
 			newPluginResourceInstall().install("any", "dummy");
-		});
+		}).getMessage());
 	}
 
 	@Test
