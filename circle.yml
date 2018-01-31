@@ -10,7 +10,7 @@ jobs:
           key: circleci-feature9-{{ checksum "pom.xml" }}
       - run:
           command: |
-          	M2_HOME=/usr/share/maven
+            M2_HOME=/usr/share/maven
             echo '<settings><profiles><profile><id>spring-milestone</id><repositories>' > $M2_HOME/conf/settings.xml
             echo '<repository><id>spring-milestone</id><url>http://repo.spring.io/milestone/</url></repository>' >> $M2_HOME/conf/settings.xml
             echo '</repositories><pluginRepositories>' >> $M2_HOME/conf/settings.xml
