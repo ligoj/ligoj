@@ -8,8 +8,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.HttpStatus;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.authentication.BadCredentialsException;
 
@@ -20,19 +21,23 @@ public class DigestAuthenticationFilterTest extends AbstractServerTest {
 
 	private DigestAuthenticationFilter filter;
 
-	@Test(expected = BadCredentialsException.class)
+	@Test
 	public void testAuthenticateIOE() {
-		authenticate("der://localhost", "token");
+		Assertions.assertThrows(BadCredentialsException.class, () -> {
+			authenticate("der://localhost", "token");
+		});
 	}
 
-	@Test(expected = BadCredentialsException.class)
+	@Test
 	public void testAuthenticateKo1() {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_MOVED_TEMPORARILY)));
 		httpServer.start();
-		authenticate("http://localhost", "token");
+		Assertions.assertThrows(BadCredentialsException.class, () -> {
+			authenticate("http://localhost", "token");
+		});
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testAuthenticateInvalidHost() {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("")));
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("//OK")));
@@ -40,12 +45,16 @@ public class DigestAuthenticationFilterTest extends AbstractServerTest {
 		filter.setAuthenticationManager(authentication -> {
 			throw new IllegalStateException();
 		});
-		authenticate("http://localhost", "token");
+		Assertions.assertThrows(IllegalStateException.class, () -> {
+			authenticate("http://localhost", "token");
+		});
 	}
 
-	@Test(expected = BadCredentialsException.class)
+	@Test
 	public void testNoToken() {
-		authenticate("http://localhost", null);
+		Assertions.assertThrows(BadCredentialsException.class, () -> {
+			authenticate("http://localhost", null);
+		});
 	}
 
 	@Test
@@ -74,7 +83,7 @@ public class DigestAuthenticationFilterTest extends AbstractServerTest {
 	/**
 	 * Initialize the mock server.
 	 */
-	@Before
+	@BeforeEach
 	public void setup() {
 		filter = new DigestAuthenticationFilter();
 	}

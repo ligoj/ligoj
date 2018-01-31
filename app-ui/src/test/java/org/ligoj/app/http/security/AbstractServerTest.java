@@ -1,7 +1,7 @@
 package org.ligoj.app.http.security;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 
@@ -13,7 +13,7 @@ public abstract class AbstractServerTest {
 
 	protected WireMockServer httpServer;
 
-	@Before
+	@BeforeEach
 	public void prepareMockServer() {
 		if (httpServer != null) {
 			throw new IllegalStateException("A previous HTTP server was already created");
@@ -22,7 +22,7 @@ public abstract class AbstractServerTest {
 		System.setProperty("http.keepAlive", "false");
 	}
 
-	@After
+	@AfterEach
 	public void shutDownMockServer() {
 		System.clearProperty("http.keepAlive");
 		if (httpServer != null) {

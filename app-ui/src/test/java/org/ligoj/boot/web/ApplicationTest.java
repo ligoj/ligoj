@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.server.ErrorPageRegistry;
@@ -44,12 +44,12 @@ public class ApplicationTest {
 	public void getEnvironment() {
 		final Application application = new Application();
 		application.environmentCode = "auto";
-		Assert.assertEquals("", application.getEnvironment());
+		Assertions.assertEquals("", application.getEnvironment());
 		application.environmentCode = "any";
-		Assert.assertEquals("any", application.getEnvironment());
+		Assertions.assertEquals("any", application.getEnvironment());
 		application.environmentCode = "auto";
 		System.setProperty("java.class.path", "any.war");
-		Assert.assertEquals("-prod", application.getEnvironment());
+		Assertions.assertEquals("-prod", application.getEnvironment());
 	}
 
 	protected String[] getArgs(String... args) {

@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.DelegatingServletOutputStream;
 
@@ -38,7 +38,7 @@ public class CaptchaFilterTest {
 		Mockito.when(response.getOutputStream()).thenReturn(out);
 		new CaptchaFilter().doFilter(request, response, null);
 		Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		Assert.assertEquals("{\"errors\":{\"session\":\"null\"}}", new String(baos.toByteArray(), StandardCharsets.UTF_8));
+		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", new String(baos.toByteArray(), StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -52,7 +52,7 @@ public class CaptchaFilterTest {
 		Mockito.when(request.getSession(false)).thenReturn(session);
 		new CaptchaFilter().doFilter(request, response, null);
 		Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		Assert.assertEquals("{\"errors\":{\"session\":\"null\"}}", new String(baos.toByteArray(), StandardCharsets.UTF_8));
+		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", new String(baos.toByteArray(), StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class CaptchaFilterTest {
 		Mockito.when(session.getAttribute(Captcha.NAME)).thenReturn(captcha);
 		new CaptchaFilter().doFilter(request, response, null);
 		Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		Assert.assertEquals("{\"errors\":{\"captcha\":\"invalid\"}}", new String(baos.toByteArray(), StandardCharsets.UTF_8));
+		Assertions.assertEquals("{\"errors\":{\"captcha\":\"invalid\"}}", new String(baos.toByteArray(), StandardCharsets.UTF_8));
 	}
 
 	@Test

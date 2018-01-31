@@ -7,9 +7,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import java.util.IllegalFormatConversionException;
 
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -21,14 +21,16 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 
 	private RestAuthenticationProvider authenticationProvider;
 
-	@Test(expected = BadCredentialsException.class)
+	@Test
 	public void authenticateIOE() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("//OK")));
 		httpServer.start();
-		authenticate("der://localhost");
+		Assertions.assertThrows(BadCredentialsException.class, () -> {
+			authenticate("der://localhost");
+		});
 	}
 
-	@Test(expected = IllegalFormatConversionException.class)
+	@Test
 	public void authenticateInvalidException() {
 		authenticationProvider.setSsoPostUrl("");
 		authenticationProvider.setSsoWelcome("");
@@ -40,14 +42,18 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 		Mockito.when(principal.toString()).thenReturn(null);
 		Mockito.when(authentication.getCredentials()).thenReturn(credential);
 		Mockito.when(authentication.getPrincipal()).thenReturn(principal);
-		authenticationProvider.authenticate(authentication);
+		Assertions.assertThrows(IllegalFormatConversionException.class, () -> {
+			authenticationProvider.authenticate(authentication);
+		});
 	}
 
-	@Test(expected = BadCredentialsException.class)
+	@Test
 	public void authenticateKo1() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_UNAUTHORIZED)));
 		httpServer.start();
-		authenticate("http://localhost");
+		Assertions.assertThrows(BadCredentialsException.class, () -> {
+			authenticate("http://localhost");
+		});
 	}
 
 	@Test
@@ -55,11 +61,11 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NO_CONTENT)));
 		httpServer.start();
 		final Authentication authentication = authenticate("http://localhost");
-		Assert.assertNotNull(authentication);
-		Assert.assertEquals("junit", authentication.getName());
-		Assert.assertEquals("junit", authentication.getPrincipal().toString());
+		Assertions.assertNotNull(authentication);
+		Assertions.assertEquals("junit", authentication.getName());
+		Assertions.assertEquals("junit", authentication.getPrincipal().toString());
 
-		Assert.assertTrue(authenticationProvider.supports(Object.class));
+		Assertions.assertTrue(authenticationProvider.supports(Object.class));
 	}
 
 	@Test
@@ -67,9 +73,9 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NO_CONTENT).withHeader("X-Real-User", "junit")));
 		httpServer.start();
 		final Authentication authentication = authenticate("http://localhost");
-		Assert.assertNotNull(authentication);
-		Assert.assertEquals("junit", authentication.getName());
-		Assert.assertEquals("junit", authentication.getPrincipal().toString());
+		Assertions.assertNotNull(authentication);
+		Assertions.assertEquals("junit", authentication.getName());
+		Assertions.assertEquals("junit", authentication.getPrincipal().toString());
 	}
 
 	@Test
@@ -77,9 +83,9 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NO_CONTENT).withHeader("X-Real-User", "other")));
 		httpServer.start();
 		final Authentication authentication = authenticate("http://localhost");
-		Assert.assertNotNull(authentication);
-		Assert.assertEquals("other", authentication.getName());
-		Assert.assertEquals("other", authentication.getPrincipal().toString());
+		Assertions.assertNotNull(authentication);
+		Assertions.assertEquals("other", authentication.getName());
+		Assertions.assertEquals("other", authentication.getPrincipal().toString());
 	}
 
 	@Test
@@ -87,9 +93,9 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NO_CONTENT)));
 		httpServer.start();
 		final Authentication authentication = authenticate("http://localhost", "jUniT");
-		Assert.assertNotNull(authentication);
-		Assert.assertEquals("junit", authentication.getName());
-		Assert.assertEquals("junit", authentication.getPrincipal().toString());
+		Assertions.assertNotNull(authentication);
+		Assertions.assertEquals("junit", authentication.getName());
+		Assertions.assertEquals("junit", authentication.getPrincipal().toString());
 	}
 
 	private Authentication authenticate(final String host) {
@@ -119,7 +125,7 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 	/**
 	 * Initialize the mock server.
 	 */
-	@Before
+	@BeforeEach
 	public void setup() {
 		authenticationProvider = new RestAuthenticationProvider();
 		authenticationProvider.setSsoPostContent("");

@@ -5,9 +5,8 @@ import java.util.Collections;
 import javax.transaction.Transactional;
 import javax.ws.rs.core.Response;
 
-import org.junit.Assert;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.iam.IAuthenticationContributor;
@@ -66,8 +65,8 @@ public class SecurityResourceTest extends AbstractServerTest {
 		final Response login = resource.login(new User("fdauganA", "Azerty01"));
 
 		// Check the response
-		Assert.assertNotNull(login);
-		Assert.assertEquals(204, login.getStatus());
+		Assertions.assertNotNull(login);
+		Assertions.assertEquals(204, login.getStatus());
 
 		// Check the contributor has been involed
 		Mockito.verify(contributor).accept(ArgumentMatchers.any(), ArgumentMatchers.any());
