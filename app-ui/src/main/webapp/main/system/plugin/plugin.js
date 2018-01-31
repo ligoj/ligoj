@@ -151,7 +151,9 @@ define(function () {
 						notifyManager.notify(Handlebars.compile(current.$messages['downloaded' + (next ? '-continue' : '')])([plugin, (index + 1), plugins.length]));
 
 						// Install the next plug-in
-						next & current.installNext(plugins, index + 1);
+						if (next) {
+							current.installNext(plugins, index + 1);
+						}
 					}
 				});
 			} else {
