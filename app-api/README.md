@@ -1,6 +1,7 @@
 [![Docker](https://img.shields.io/docker/build/ligoj/ligoj-api.svg)](https://hub.docker.com/r/ligoj/ligoj-api)
 
 # API (REST) container running a stateless SpringBoot application.
+
 Roles :
 - URL security level, with RBAC : User / Role / Permission for a URL pattern supporting dynamic configuration
 - Resource security level (most complex) giving to users, groups and companies an access (read, write, +grant) to nodes, users, groups, companies
@@ -15,17 +16,21 @@ mvn clean package -DskipTests=true
 Note: you can run this command either from the root module, either from the "app-api" module. When executed from the root module, both WAR (app-api and app-ui) will be created. But if you want to produce production binaries, enable the "minify" profile "-Pminify".
 
 # Test the WAR
+
 ```
 java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dapp.safe.mode=true -Djdbc.host=ligoj-db -jar target/app-api-1.7.1.war
 ```
 
 # Build Docker image
+
 ```
 docker build -t ligoj-api:1.7.1 .
 ```
 
 ## Custom builds
+
 ### Custom URL
+
 During the build, the WAR file "ligoj-api.war" is not copied from your local FS but from a previously released remote location such as Nexus.
 By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=1.0.0&p=war"
 In case of a custom build you can specify its remote or local location.
@@ -47,11 +52,13 @@ Reuse the local maven package
 ```
 docker build -t ligoj-api:1.7.1 --build-arg WAR="target/app-api-1.7.1.war" .
 ```
+
 Note the local WAR path must be relative to the Dockerfile (not the current path), and must be bellow the Dockerfile: do not use "../bar/foo.war"
 
 # Run Docker image
 
 ## Start the API container linked to the database container (Option1)
+
 ```
 docker run -d \
   --name ligoj-db \
@@ -68,6 +75,7 @@ docker run --rm -it \
 ```
 
 ## Start the API container linked to an external database (Option2)
+
 ```
 docker run --rm -it \
  --name "ligoj-api" \
@@ -94,6 +102,7 @@ docker run --rm -it \
  -p 8680:8081 \
  ligoj-api:1.7.1
 ```
+
 Note: On Windows host, replace all \ (escape) by ` for multi-line support.
 
 ## Relevant variables
@@ -149,7 +158,9 @@ app.safe.mode               = <[false],true> When true, plug-ins are not loaded 
 ```
 
 ## Compatibilities
+
 ### Database
+
 Compatibility and performance for 10K+ users and 1K+ projects.
 
 | Vendor     | Version | Driver                   | Dialect                                                  | Status                  |

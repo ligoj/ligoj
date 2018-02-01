@@ -13,6 +13,12 @@ engines:
     checks:
       box-sizing:
         enabled: false
+      star-property-hack:
+        enabled: false
+      adjoining-classes:
+        enabled: false
+      ids:
+    enabled: false
   markdownlint:
     enabled: true
   eslint:

@@ -20,23 +20,29 @@ More technical details can be found in the sub directories [ligo-api](https://gi
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
 
 # User section
+
 ```
 docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.7.1
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.7.1 
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.7.1
 ```
+
 Open your browser at : http://localhost:8080/ligoj  
 User/password for administrator role : ligoj-admin
 
 You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin-id-ldap-embedded
 
 ## Make Ligoj home persistent
+
 You can keep your plugins installation by mapping `/usr/local/ligoj` with a volume.
 
 ```
 docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.7.1
 ```
+
 # Dev section
+
 ## Pre-requisite for the bellow samples
+
 Maven
 
 Java 8: Open JDK or Oracle
@@ -44,6 +50,7 @@ Java 8: Open JDK or Oracle
 A MySQL database 'ligoj' with all rights for user 'ligoj@localhost' and password 'ligoj' for ligoj-api container.
 
 ### With your own database
+
 ```sql
 mysql --user=root
 CREATE DATABASE `ligoj` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_bin;
@@ -51,6 +58,7 @@ GRANT ALL PRIVILEGES ON `ligoj`.*  TO 'ligoj'@'localhost' IDENTIFIED BY 'ligoj';
 FLUSH PRIVILEGES;
 quit
 ```
+
 ### With a fresh new database 
 
 ```
@@ -58,6 +66,7 @@ docker run --name ligoj-db -d -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e 
 ```
 
 ## With Maven CLI
+
 From your IDE with Maven, or from Maven CLI :
 
 ```
@@ -66,8 +75,8 @@ mvn spring-boot:run -f app-api/pom.xml&
 mvn spring-boot:run -f app-ui/pom.xml&
 ```
 
-
 ### Packaging UI & API
+
 When the WAR is built you can enable minified CSS/JS with the maven profile 'minify'. This requires 'clean-css-cli' NPM module.
 
 ```
@@ -76,6 +85,7 @@ mvn clean package -Pminifiy -DskipTests=true
 ```
 
 ### Deploying
+
 Nexus OSS
 
 ```
@@ -89,6 +99,7 @@ mvn deploy -Dgpg.skip=false -Psources,javadoc,bintray,minify -DskipTests=true
 ```
 
 ## With your IDE
+
 From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
 
 ```
@@ -97,11 +108,14 @@ org.ligoj.boot.api.Application
 ```
 org.ligoj.boot.web.Application
 ```
+
 Notes these launchers (*.launch) are already configured for Eclipse.
 Important : Using Eclipse compiler, enable 'Store information about method parameters (usable with reflection)' in general preferences/Java/Compiler
 
 ## Compatibilities
+
 ### Database
+
 See each container [![ligo-api]](https://github.com/ligoj/ligoj/tree/master/app-api)
 Compatibility and performance for 10K+users and 1K+ projects
 
@@ -113,7 +127,9 @@ Compatibility and performance for 10K+users and 1K+ projects
 | OpenJQK    | 1.8u121+ | OK     |
 
 # Ops section
+
 ## With Docker
+
 Build the images and run the containers with docker compose
 
 ```
@@ -124,7 +140,7 @@ Docker run separately:
 
 ```
 docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.7.1
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.7.1 
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.7.1
 ```
 
 Docker build (ARG) variables:

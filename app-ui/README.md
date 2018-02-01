@@ -1,6 +1,7 @@
 [![Docker](https://img.shields.io/docker/build/ligoj/ligoj-ui.svg)](https://hub.docker.com/r/ligoj/ligoj-ui)
 
 # UI (REST+JS) container running a stateful SpringBoot application.
+
 Browser side roles :
 - URL security level applied to UI component with hierarchy pruning. Can be overridden
 - i18n
@@ -11,6 +12,7 @@ Server side roles :
 - Session holder 
 
 # Packaging (with Maven)
+
 Compile Java sources, optionaly minify sources (css/js) and package into the WAR file.
 You can enable minified CSS/JS with the maven profile 'minify'. This requires 'clean-css-cli' NPM module.
 
@@ -18,9 +20,11 @@ You can enable minified CSS/JS with the maven profile 'minify'. This requires 'c
 npm install clean-css-cli -g
 mvn clean package -Pminifiy -DskipTests=true
 ```
+
 Note: you can run this command either from the root module, either from the "app-ui" module. When executed from the root module, both WAR (app-api and app-ui) will be created.
 
 # Test the WAR
+
 Test the integration with a running API end-point
 
 ```
@@ -28,6 +32,7 @@ java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar target/app-ui-1
 ```
 
 # Build Docker image
+
 ```
 docker build -t ligoj-ui:1.7.1 .
 ```
@@ -53,6 +58,7 @@ docker build -t ligoj-ui:1.7.1 --build-arg WAR="https://storage.company.com/rele
 ```
 docker build -t ligoj-ui:1.7.1 --build-arg WAR="target/app-ui-1.7.1.war" .
 ```
+
 Note the local WAR path must be relative to the Dockerfile (not the current path), and must be below the Dockerfile: do not use "../bar/foo.war"
 
 # Run Docker image
