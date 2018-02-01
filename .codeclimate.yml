@@ -18,7 +18,7 @@ engines:
       adjoining-classes:
         enabled: false
       ids:
-    enabled: false
+        enabled: false
   markdownlint:
     enabled: true
   eslint:
