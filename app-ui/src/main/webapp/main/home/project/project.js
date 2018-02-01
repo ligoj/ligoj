@@ -46,6 +46,7 @@ define(['cascade'], function ($cascade) {
 					});
 				});
 			});
+			
 			this.onHashChange(parameters);
 		},
 
@@ -372,6 +373,7 @@ define(['cascade'], function ($cascade) {
 			current.currentId = project ? project.id : 0;
 			var name = project ? project.name + ' (' + project.pkey + ')' : '';
 			$('.project-name').text(name);
+			$('.cascade-title').text(current.$messages.title + (project ? ' / ' + project.name : ''));
 
 			if (project.description) {
 				_('detail-description').text(project.description).removeClass('hidden');
