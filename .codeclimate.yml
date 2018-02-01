@@ -2,11 +2,7 @@
 engines:
   duplication:
     enabled: false
-  argument-count:
-    enabled: false
   file-lines:
-    enabled: false
-  method-complexity:
     enabled: false
   method-count:
     enabled: false
