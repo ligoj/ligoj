@@ -41,80 +41,8 @@ docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj l
 
 # Dev section
 
-## Pre-requisite for the bellow samples
+See [Wiki page](https://github.com/ligoj/ligoj/wiki/Dev-Setup)
 
-Maven 3.5.2+
-
-Java 9: Open JDK or Oracle
-
-A MySQL (or another compatible) database 'ligoj' with all rights for user 'ligoj@localhost' and password 'ligoj' for ligoj-api container.
-
-### With your own database
-
-```sql
-mysql --user=root
-CREATE DATABASE `ligoj` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_bin;
-GRANT ALL PRIVILEGES ON `ligoj`.*  TO 'ligoj'@'localhost' IDENTIFIED BY 'ligoj';
-FLUSH PRIVILEGES;
-quit
-```
-
-### With a fresh new database 
-
-```
-docker run --name ligoj-db -d -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=ligoj -e MYSQL_USER=ligoj -e MYSQL_PASSWORD=ligoj -d mysql:5.7
-```
-
-## With Maven CLI
-
-From your IDE with Maven, or from Maven CLI :
-
-```
-git clone https://github.com/ligoj/ligoj
-mvn spring-boot:run -f app-api/pom.xml& 
-mvn spring-boot:run -f app-ui/pom.xml&
-```
-
-### Packaging UI & API
-
-When the WAR is built you can enable minified CSS/JS with the maven profile 'minify'. This requires 'clean-css-cli' NPM module.
-
-```
-npm install clean-css-cli -g
-mvn clean package -Pminifiy -DskipTests=true
-```
-
-### Deploying
-
-Nexus OSS
-
-```
-mvn clean deploy -Dgpg.skip=false -Psources,javadoc,minify -DskipTests=true
-```
-
-Bintray
-
-```
-mvn deploy -Dgpg.skip=false -Psources,javadoc,bintray,minify -DskipTests=true
-```
-
-## With your IDE
-
-From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
-
-```
-org.ligoj.boot.api.Application
-```
-```
-org.ligoj.boot.web.Application
-```
-
-Notes these launchers (*.launch) are already configured for Eclipse.
-Important : Using Eclipse compiler, enable 'Store information about method parameters (usable with reflection)' in general preferences/Java/Compiler
-
-## Compatibilities
-
-See each container [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api) and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui)
 
 # Ops section
 
