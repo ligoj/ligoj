@@ -121,3 +121,13 @@ app-env                     = auto # Suffix for index and login HTML files, mayb
 log.http                    = info # When "debug", all HTTP queries are logged. Increase log files.
 ```
 
+## Compatibilities
+
+### JSE
+
+| Vendor     | Version  | Status  | Notes |
+|------------|----------|---------|-------|
+| Oracle     | 1.8u121+ | REBUILD | You have to rebuild the binary |
+| OpenJDK    | 1.8u121+ | REBUILD | You have to rebuild the binary |
+| Oracle     | 9.0.1+   | OK      | Warning about illegal reflective access [SPR-15859](https://jira.spring.io/browse/SPR-15859) |
+| OpenJDK    | 9.0.1+   | OK      | Warning about illegal reflective access [SPR-15859](https://jira.spring.io/browse/SPR-15859) |

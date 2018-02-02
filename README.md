@@ -43,11 +43,11 @@ docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj l
 
 ## Pre-requisite for the bellow samples
 
-Maven
+Maven 3.5.2+
 
-Java 8: Open JDK or Oracle
+Java 9: Open JDK or Oracle
 
-A MySQL database 'ligoj' with all rights for user 'ligoj@localhost' and password 'ligoj' for ligoj-api container.
+A MySQL (or another compatible) database 'ligoj' with all rights for user 'ligoj@localhost' and password 'ligoj' for ligoj-api container.
 
 ### With your own database
 
@@ -114,17 +114,7 @@ Important : Using Eclipse compiler, enable 'Store information about method param
 
 ## Compatibilities
 
-### Database
-
-See each container [![ligo-api]](https://github.com/ligoj/ligoj/tree/master/app-api)
-Compatibility and performance for 10K+users and 1K+ projects
-
-### JSE
-
-| Vendor     | Version  | Status |
-|------------|----------|--------|
-| Oracle     | 1.8u121+ | OK     |
-| OpenJQK    | 1.8u121+ | OK     |
+See each container [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api) and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui)
 
 # Ops section
 

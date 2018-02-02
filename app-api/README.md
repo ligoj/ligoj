@@ -33,7 +33,7 @@ docker build -t ligoj-api:1.7.1 .
 ### Custom URL
 
 During the build, the WAR file "ligoj-api.war" is not copied from your local FS but from a previously released remote location such as Nexus.
-By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=1.0.0&p=war"
+By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=1.7.1&p=war"
 In case of a custom build you can specify its remote or local location.
 
 Staged OSS build from Sonatype
@@ -106,7 +106,7 @@ docker run --rm -it \
 
 Note: On Windows host, replace all \ (escape) by ` for multi-line support.
 
-Note: There is uncovered Hibernate issue with schema generation `update` mode. The configured database user must see only the target database. If there are several visible databases by this user, the update mechanism will populate the tables of all visible tables, including the ones of the not targeted database. This strategy may produce an empty SQL schema update when some tables are already existing in a database different from the target one.
+Note: There is an uncovered Hibernate issue with schema generation `update` mode. The configured database user must see only the target database. If there are several visible databases by this user, the update mechanism will populate the tables of all visible tables, including the ones of the not targeted database. This strategy may produce an empty SQL schema update when some tables are already existing in a database different from the target one.
 
 ## Relevant variables
 
@@ -166,14 +166,14 @@ app.safe.mode               = <[false],true> When true, plug-ins are not loaded 
 
 Compatibility and performance for 10K+ users and 1K+ projects.
 
-| Vendor     | Version | Driver                   | Dialect                                                  | Status                  |
-|------------|---------|--------------------------|----------------------------------------------------------|-------------------------|
-| MySQL      | 5.5     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | A bit slow in plugin-id |
-| MySQL      | 5.6     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
-| MySQL      | 5.7     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | Slow in plugin-id       |
-| MariaDB    | 10.1    | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | Slow in plugin-id       |
-| MariaDB    | 10.1    | org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | ?                       |
-| PostGreSQL | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
+| Vendor     | Version | Driver   | Dialect     | Status  |
+|------------|---------|----------|-------------|---------|
+| [MySQL](https://www.mysql.com)  | 5.5 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | A bit slow in plugin-id |
+| [MySQL](https://www.mysql.com)  | 5.6 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | OK                      |
+| [MySQL](https://www.mysql.com)  | 5.7 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | Slow in plugin-id       |
+| [MariaDB](https://mariadb.org/) | 10.1| com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | Slow in plugin-id       |
+| [MariaDB](https://mariadb.org/) | 10.1| org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | ?                       |
+| [PostGreSQL](https://www.postgresql.org/) | 9.6 | org.postgresql.Driver | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
 
 ### JSE
 
