@@ -13,6 +13,7 @@ Compile Java sources and produce the WAR file.
 ```
 mvn clean package -DskipTests=true
 ```
+
 Note: you can run this command either from the root module, either from the "app-api" module. When executed from the root module, both WAR (app-api and app-ui) will be created. But if you want to produce production binaries, enable the "minify" profile "-Pminify".
 
 # Test the WAR
@@ -91,7 +92,7 @@ docker run --rm -it \
  ligoj-api:1.7.1 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
 ```
 
-More complex run with crypto, port mapping and volume configurations
+More complex run with crypto, port mapping, disabled schema generation and volume configurations
 
 ```
 docker run --rm -it \
@@ -104,6 +105,8 @@ docker run --rm -it \
 ```
 
 Note: On Windows host, replace all \ (escape) by ` for multi-line support.
+
+Note: There is uncovered Hibernate issue with schema generation `update` mode. The configured database user must see only the target database. If there are several visible databases by this user, the update mechanism will populate the tables of all visible tables, including the ones of the not targeted database. This strategy may produce an empty SQL schema update when some tables are already existing in a database different from the target one.
 
 ## Relevant variables
 
