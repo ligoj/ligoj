@@ -438,7 +438,7 @@ define(['cascade'], function ($cascade) {
 		 * @return The node data in the given depth.
 		 */
 		dataSrcGetter : function(node, depth) {
-			if (depth == 0) {
+			if (depth === 0) {
 				return node.id;
 			}
 			return current.dataSrcGetter(node.refined, depth - 1);

@@ -49,7 +49,7 @@
 	$.fn.sidebartree = function(option) {
 		return this.each(function() {
 			var $this = $(this),
-			    options = typeof option === 'object' && option,
+				options = option && typeof option === 'object',
 				data = new SideBarTree($this, options);
 			$this.data('sidebartree', data);
 			data.init();

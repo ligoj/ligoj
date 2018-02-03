@@ -268,7 +268,7 @@ define([
 			
 			// Add custom scrollbar
 			require(['jquery.scrollbar', 'css!main/home/home/scrollbar.css'], function() {
-			    jQuery($node.find('.scrollbar-macosx')).scrollbar({ignoreMobile: true});
+				jQuery($node.find('.scrollbar-macosx')).scrollbar({ignoreMobile: true});
 				node.detailed = true;
 				current.filterNodes($node);
 			});

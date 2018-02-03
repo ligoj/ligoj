@@ -61,7 +61,7 @@ define([
 		 * @return {jQuery} A non empty jQuery object when a form containing at least one target unique element has been found.
 		 */
 		closestForm: function(mapping) {
-			for (key in mapping) {
+			for (var key in mapping) {
 				if ({}.hasOwnProperty.call(mapping, key) && mapping[key].indexOf('#') !== -1) {
 					var $form =  $(mapping[key]).closest('form');
 					if ($form.length && validationManager.isVisible($form)) {

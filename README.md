@@ -19,17 +19,18 @@ More technical details can be found in the sub directories [ligo-api](https://gi
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/ligoj/badge)](https://www.codefactor.io/repository/github/ligoj/ligoj)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
 
-# User section
+# Get started
 
 ```
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.7.1
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.7.1
+docker-compose up
 ```
 
-Open your browser at : http://localhost:8080/ligoj  
-User/password for administrator role : ligoj-admin
+Open your browser at : [Ligoj Home](http://localhost:8080/ligoj) 
+User/password for administrator role : `ligoj-admin` and `ligoj-user` for a regular user
 
 You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin-id-ldap-embedded
+
+# Deeper
 
 ## Make Ligoj home persistent
 
@@ -39,36 +40,8 @@ You can keep your plugins installation by mapping `/usr/local/ligoj` with a volu
 docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj-api:1.7.1
 ```
 
-# Dev section
+## Dev section
 
 See [Wiki page](https://github.com/ligoj/ligoj/wiki/Dev-Setup)
-
-
-# Ops section
-
-## With Docker
-
-Build the images and run the containers with docker compose
-
-```
-docker-compose up
-```
-
-Docker run separately:
-
-```
-docker run -d --name ligoj-api --link ligoj-db:db ligoj-api:1.7.1
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj-ui:1.7.1
-```
-
-Docker build (ARG) variables:
-
-```
-NEXUS_URL : Repository base host used to download the WAR files
-VERSION   : Ligoj version, used to build the WAR_URL
-WAR_URL   : Full WAR URL, built from NEXUS_URL and VERSION
-```
-
-Docker environment variables:
 
 See each container [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api) and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).

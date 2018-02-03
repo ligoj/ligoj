@@ -1,9 +1,9 @@
 define(['jquery'], function($) {
 	function scrollToTop() {
-		verticalOffset = (typeof verticalOffset) === 'undefined' ? 0 : verticalOffset;
+		var verticalOffset = (typeof verticalOffset) === 'undefined' ? 0 : verticalOffset;
 		var $element = $('body');
-		offset = $element.offset();
-		offsetTop = offset.top;
+		var offset = $element.offset();
+		var offsetTop = offset.top;
 		$('html, body').animate({
 			scrollTop : offsetTop
 		}, 500, 'linear');

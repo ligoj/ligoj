@@ -198,7 +198,7 @@ public class Application extends SpringBootServletInitializer {
 	 */
 	protected String getEnvironment() {
 		// Auto detect environment variable
-		if (environmentCode.equals("auto")) {
+		if ("auto".equals(environmentCode)) {
 			if (System.getProperty("java.class.path", "").contains(".war")) {
 				return "-prod";
 			}

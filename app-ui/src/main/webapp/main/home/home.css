@@ -18,11 +18,8 @@ img.tool.broken {
 	border-right-style: solid;
 	vertical-align: middle;
 	box-sizing: border-box;
-	padding-left: 0;
-	padding-right: 0;
-	padding-top: 0;
+	padding: 0;
 	line-height: 36px;
-	padding-bottom: 0;
 }
 
 .status.status-up .status-content {

@@ -33,19 +33,19 @@ import lombok.extern.slf4j.Slf4j;
 public class DigestAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
 	/**
+	 * SSO post URL.
+	 */
+	@Setter
+	@Getter
+	private String ssoPostUrl;
+
+	/**
 	 * Constructor defining the filtering path.
 	 */
 	public DigestAuthenticationFilter() {
 		super("/oauth");
 		setAuthenticationManager(authentication -> authentication);
 	}
-
-	/**
-	 * SSO post URL.
-	 */
-	@Setter
-	@Getter
-	private String ssoPostUrl;
 
 	@Override
 	public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response) {

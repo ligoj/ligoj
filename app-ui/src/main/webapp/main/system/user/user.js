@@ -47,7 +47,7 @@ define(function () {
 		},
 
 		// Save or update API call
-		saveOrUpdate: function () {
+		saveOrUpdate: function (method) {
 			$.ajax({
 				type: method,
 				url: REST_PATH + 'system/user',

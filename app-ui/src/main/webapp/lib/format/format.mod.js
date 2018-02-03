@@ -39,13 +39,14 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 				var s = sizes;
 				var e = Math.max(0, Math.floor(Math.log(bytes) / Math.log(pow)));
 				var decimals;
+				var value;
 				if (e <= 1 && bytes < 10 * pow) { 
 					// No need to format
 					decimals = 0;
 					e = 0;
 					value = bytes;
 				} else {
-					var value = bytes / Math.pow(pow, e);
+					value = bytes / Math.pow(pow, e);
 					if (value >= 100 && digits < 3) {
 						// Need to shift to the upper power
 						value /= 1024;

@@ -314,7 +314,6 @@ define([
 			options.context = context;
 
 			// Build the required modules
-			var index;
 			var requireJsModules = [];
 			for (var index = 0; index < options.plugins.length; index++) {
 				var plugin = $self.plugins[options.plugins[index]];
@@ -335,9 +334,9 @@ define([
 				// Associate the requireJs module to the load plugin
 				var resolved = {};
 				var $require = {};
-				for (var index = 0; index < options.plugins.length; index++) {
-					$require[options.plugins[index]] = requireJsModules[index];
-					resolved[options.plugins[index]] = arguments[index];
+				for (var index2 = 0; index2 < options.plugins.length; index2++) {
+					$require[options.plugins[index2]] = requireJsModules[index2];
+					resolved[options.plugins[index2]] = arguments[index2];
 				}
 
 				// Configure the new context
@@ -356,8 +355,8 @@ define([
 
 				// Process each plugin
 				var skipContext = false;
-				for (var index = 0; index < options.plugins.length; index++) {
-					skipContext |= ($self.plugins[options.plugins[index]].load.controller || $.noop)(arguments[index], options, $current);
+				for (var index3 = 0; index3 < options.plugins.length; index3++) {
+					skipContext |= ($self.plugins[options.plugins[index3]].load.controller || $.noop)(arguments[index3], options, $current);
 				}
 				if (skipContext) {
 					return true;
@@ -453,7 +452,7 @@ define([
 					return;
 				}
 			} else {
-				$parent = $parent || $target;
+				$parent = context.$parent || $target;
 			}
 
 			// Sub module management
@@ -603,10 +602,10 @@ define([
 			$(function () {
 				var handleHash = function () {
 					var hash = location.hash;
-					if (hash && hash.indexOf('#/') === 0) {
-						$self.load(hash.substr(2));
-					} else if (hash === '') {
+					if (hash === '') {
 						$self.load('');
+					} else if (hash && hash.indexOf('#/') === 0) {
+						$self.load(hash.substr(2));
 					}
 				};
 				$(window).hashchange(function () {
