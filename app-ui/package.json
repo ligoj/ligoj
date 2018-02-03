@@ -195,9 +195,9 @@
 	}, {
 		"name": "css",
 		"sources": "https://github.com/guybedford/require-css",
-		"version": "0.1.8+JS-PR",
+		"version": "0.1.10+JS-PR",
 		"fork": "https://github.com/fabdouglas/require-css",
-		"lastChecked": "2016-07-09",
+		"lastChecked": "2018-02-03",
 		"known-issues": ["#15-Multiple IE load", "#15-Lenovo Agent", "#15-RequireJS module"]
 	}, {
 		"name": "i18n",
