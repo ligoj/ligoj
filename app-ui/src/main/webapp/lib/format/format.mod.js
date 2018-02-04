@@ -60,7 +60,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 						decimals = digits - 1;
 					}
 				}
-				value = value.toFixed(decimals).replace(decimals == 1 ? /\.0/ : /\.00/, '');
+				value = value.toFixed(decimals).replace(decimals === 1 ? /\.0/ : /\.00/, '');
 				if (typeof format === 'function') {
 					format(value, sizes[e], unit);
 				} else {

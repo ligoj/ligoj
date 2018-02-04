@@ -434,6 +434,7 @@ define([
 			var plugins = ($target.attr('data-plugins') || 'html').split(',');
 			var id = $target.attr('data-ajax');
 			var home = context.$path;
+			var $parent;
 			if (id.charAt(0) === '/') {
 				// Absolute path for home
 				var index = id.lastIndexOf('/');
@@ -444,16 +445,15 @@ define([
 				}
 				if (context) {
 					// Parent context has been found, use it for this partial
-					var $parent = $('<div></div>');
+					$parent = $('<div></div>');
 					context.$view.append($parent);
 				} else {
 					// Stop the navigation there, invalid context reference
 					traceLog('Invalid partial reference home "' + home + '" in not within the current context "' + $self.$current.$path + '"');
 					return;
 				}
-			} else {
-				$parent = context.$parent || $target;
 			}
+			context.$parent = context.$parent || $target;
 
 			// Sub module management
 			if ($(this).attr('data-cascade') === 'true') {

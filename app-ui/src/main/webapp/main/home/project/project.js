@@ -712,7 +712,7 @@ define(['cascade'], function ($cascade) {
 		 * @param {function} f The function to apply.
 		 */
 		applyFunctionGroup: function($tr, f) {
-			var id = $tr.attr('data-group')
+			var id = $tr.attr('data-group');
 			var subscriptions = current.model.subscriptions;
 			var $subscriptions = _('subscriptions');
 			for (var i = 0; i< subscriptions.length; i++) {

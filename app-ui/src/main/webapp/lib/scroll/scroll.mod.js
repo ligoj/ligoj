@@ -1,6 +1,5 @@
 define(['jquery'], function($) {
 	function scrollToTop() {
-		var verticalOffset = (typeof verticalOffset) === 'undefined' ? 0 : verticalOffset;
 		var $element = $('body');
 		var offset = $element.offset();
 		var offsetTop = offset.top;
