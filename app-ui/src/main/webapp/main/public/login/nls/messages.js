@@ -36,6 +36,7 @@ define({
 			"password" : "Passwords do not match",
 			"password-complexity" : "Password is too weak<br/>8 or more upper, lower and digit chars",
 			"password-complexity-validation" : "Too weak, 8 or more upper, lower and digit chars",
+			"password-in-history" : "Password is in history of old passwords",
 			"login" : "Authentication failed",
 			"mail" : "Mail cannot be sent",
 			"concurrency" : "Your account is being used somewhere else",
