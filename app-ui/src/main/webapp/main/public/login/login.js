@@ -49,6 +49,7 @@ define([
 			if (xhr.status === 400) {
 				if ((typeof xhr.responseText === 'string') && /^\{.*\}$/.exec(xhr.responseText) && JSON.parse(xhr.responseText).errors) {
 					var error = JSON.parse(xhr.responseText).errors;
+					console.log(error)
 					if (error.password) {
 						current.error(messages.error['password-complexity']);
 						current.focusPassword();
@@ -56,6 +57,9 @@ define([
 						// CAPTCHA failed
 						current.error(messages.error.cookie);
 						$('#captcha').val('').focus();
+					} else if (error['new-password']) {
+						current.error(messages.error['password-in-history']);
+						current.focusPassword();
 					} else {
 						// Other REST error
 						current.error(messages.error.captcha);
