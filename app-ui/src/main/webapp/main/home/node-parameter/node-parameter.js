@@ -90,7 +90,7 @@ define(['cascade'], function ($cascade) {
 						$element.prop('checked', value.bool);
 					},
 					tags: function (value, $element) {
-						$element.select2('tags', tags);
+						$element.select2('tags', value.split(','));
 					},
 					text: function (value, $element) {
 						$element.val(value.text);

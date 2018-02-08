@@ -59,7 +59,6 @@
 		'scroll.mod': 'scroll/scroll.mod',
 		'security.mod': 'security/security.mod',
 		'select2': 'select2/select2',
-		'sidebartree.mod': 'sidebartree/sidebartree.mod',
 		'sparkline': 'sparkline/jquery.sparkline',
 		'toastr': 'toastr/toastr',
 		'toastr.mod': 'toastr/toastr.mod',

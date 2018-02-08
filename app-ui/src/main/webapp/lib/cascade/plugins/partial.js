@@ -5,6 +5,7 @@ define([], function () {
 	var $self = {
 		load: {
 			require: function (options) {
+				options.partial = true;
 				return 'text!' + options.home + '/' + options.id + '.html';
 			},
 			controller: function (template, options, $current) {

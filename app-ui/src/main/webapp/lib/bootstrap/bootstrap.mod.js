@@ -38,13 +38,13 @@ define([
 			var flag = 'dropdown-' + Math.random();
 			var $dropdown = $trigger.closest('.dropdown');
 			var $menu = $dropdown.find('.dropdown-menu').addClass('detached').attr('data-previous-container',flag);
-			$trigger.addClass('detached').attr('data-dropdown-container',flag)
+			$trigger.addClass('detached').attr('data-dropdown-container',flag);
 			$('body').append($menu.css({
 				position: 'absolute',
 				display: 'initial',
 				left: $menu.offset().left + 'px',
 				width : $menu.width() + 'px',
-			 	top: ($menu.offset().top + $(e.target).outerHeight()) + 'px'
+				top: ($menu.offset().top + $(e.target).outerHeight()) + 'px'
 			}).data('open', true).detach());
 		}
 	}).on('hidden.bs.dropdown', null, function(e) {
@@ -152,7 +152,7 @@ define([
 	 */
 	$.fn.disable = function () {
 		var yes = (arguments.length === 0 || arguments[0]) && 'disabled';
-		$(this)[yes ? 'attr' : 'removeAttr']('disabled', 'disabled').prop('disabled', yes)[yes ? 'addClass' : 'removeClass']('disabled')
+		$(this)[yes ? 'attr' : 'removeAttr']('disabled', 'disabled').prop('disabled', yes)[yes ? 'addClass' : 'removeClass']('disabled');
 		return this;
 	};
 	/**

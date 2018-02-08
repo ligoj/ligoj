@@ -46,6 +46,7 @@ define(['cascade'], function ($cascade) {
 					});
 				});
 			});
+			
 			this.onHashChange(parameters);
 		},
 
@@ -372,6 +373,7 @@ define(['cascade'], function ($cascade) {
 			current.currentId = project ? project.id : 0;
 			var name = project ? project.name + ' (' + project.pkey + ')' : '';
 			$('.project-name').text(name);
+			$('.cascade-title').text(current.$messages.title + (project ? ' / ' + project.name : ''));
 
 			if (project.description) {
 				_('detail-description').text(project.description).removeClass('hidden');
@@ -436,7 +438,7 @@ define(['cascade'], function ($cascade) {
 		 * @return The node data in the given depth.
 		 */
 		dataSrcGetter : function(node, depth) {
-			if (depth == 0) {
+			if (depth === 0) {
 				return node.id;
 			}
 			return current.dataSrcGetter(node.refined, depth - 1);
@@ -710,7 +712,7 @@ define(['cascade'], function ($cascade) {
 		 * @param {function} f The function to apply.
 		 */
 		applyFunctionGroup: function($tr, f) {
-			var id = $tr.attr('data-group')
+			var id = $tr.attr('data-group');
 			var subscriptions = current.model.subscriptions;
 			var $subscriptions = _('subscriptions');
 			for (var i = 0; i< subscriptions.length; i++) {

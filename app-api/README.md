@@ -1,6 +1,7 @@
 [![Docker](https://img.shields.io/docker/build/ligoj/ligoj-api.svg)](https://hub.docker.com/r/ligoj/ligoj-api)
 
 # API (REST) container running a stateless SpringBoot application.
+
 Roles :
 - URL security level, with RBAC : User / Role / Permission for a URL pattern supporting dynamic configuration
 - Resource security level (most complex) giving to users, groups and companies an access (read, write, +grant) to nodes, users, groups, companies
@@ -12,46 +13,53 @@ Compile Java sources and produce the WAR file.
 ```
 mvn clean package -DskipTests=true
 ```
+
 Note: you can run this command either from the root module, either from the "app-api" module. When executed from the root module, both WAR (app-api and app-ui) will be created. But if you want to produce production binaries, enable the "minify" profile "-Pminify".
 
 # Test the WAR
+
 ```
-java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dapp.safe.mode=true -Djdbc.host=ligoj-db -jar target/app-api-1.7.1.war
+java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dapp.safe.mode=true -Djdbc.host=ligoj-db -jar target/app-api-1.7.2.war
 ```
 
 # Build Docker image
+
 ```
-docker build -t ligoj-api:1.7.1 .
+docker build -t ligoj/ligoj-api:1.7.2 .
 ```
 
 ## Custom builds
+
 ### Custom URL
+
 During the build, the WAR file "ligoj-api.war" is not copied from your local FS but from a previously released remote location such as Nexus.
-By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=1.0.0&p=war"
+By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=1.7.2&p=war"
 In case of a custom build you can specify its remote or local location.
 
 Staged OSS build from Sonatype
 
 ```
-docker build -t ligoj-api:1.7.1 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/1.7.1/app-api-1.7.1.war" .
+docker build -t ligoj/ligoj-api:1.7.2 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/1.7.2/app-api-1.7.2.war" .
 ```
 
 Private remote build
 
 ```
-docker build -t ligoj-api:1.7.1 --build-arg WAR="https://storage.company.com/releases/app-api-1.7.1.war" .
+docker build -t ligoj/ligoj-api:1.7.2 --build-arg WAR="https://storage.company.com/releases/app-api-1.7.2.war" .
 ```
 
 Reuse the local maven package
 
 ```
-docker build -t ligoj-api:1.7.1 --build-arg WAR="target/app-api-1.7.1.war" .
+docker build -t ligoj/ligoj-api:1.7.2 --build-arg WAR="target/app-api-1.7.2.war" .
 ```
+
 Note the local WAR path must be relative to the Dockerfile (not the current path), and must be bellow the Dockerfile: do not use "../bar/foo.war"
 
 # Run Docker image
 
 ## Start the API container linked to the database container (Option1)
+
 ```
 docker run -d \
   --name ligoj-db \
@@ -64,15 +72,16 @@ docker run -d \
 docker run --rm -it \
   --name ligoj-api \
   -e CUSTOM_OPTS='-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db' \
-  ligoj-api:1.7.1 
+  ligoj/ligoj-api:1.7.2 
 ```
 
 ## Start the API container linked to an external database (Option2)
+
 ```
 docker run --rm -it \
  --name "ligoj-api" \
  -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password="ligoj" -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138' \
- ligoj-api:1.7.1
+ ligoj/ligoj-api:1.7.2
 ```
 
 You can experience network issue with remote database. To validate the link, try this :
@@ -80,10 +89,10 @@ You can experience network issue with remote database. To validate the link, try
 ```
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj-api:1.7.1 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
+ ligoj/ligoj-api:1.7.2 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
 ```
 
-More complex run with crypto, port mapping and volume configurations
+More complex run with crypto, port mapping, disabled schema generation and volume configurations
 
 ```
 docker run --rm -it \
@@ -92,9 +101,12 @@ docker run --rm -it \
  -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 -Dapp.safe.mode=true" \
  -v ~/.ligoj:/home/ligoj \
  -p 8680:8081 \
- ligoj-api:1.7.1
+ ligoj/ligoj-api:1.7.2
 ```
+
 Note: On Windows host, replace all \ (escape) by ` for multi-line support.
+
+Note: There is an uncovered Hibernate issue with schema generation `update` mode. The configured database user must see only the target database. If there are several visible databases by this user, the update mechanism will populate the tables of all visible tables, including the ones of the not targeted database. This strategy may produce an empty SQL schema update when some tables are already existing in a database different from the target one.
 
 ## Relevant variables
 
@@ -149,17 +161,19 @@ app.safe.mode               = <[false],true> When true, plug-ins are not loaded 
 ```
 
 ## Compatibilities
+
 ### Database
+
 Compatibility and performance for 10K+ users and 1K+ projects.
 
-| Vendor     | Version | Driver                   | Dialect                                                  | Status                  |
-|------------|---------|--------------------------|----------------------------------------------------------|-------------------------|
-| MySQL      | 5.5     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | A bit slow in plugin-id |
-| MySQL      | 5.6     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
-| MySQL      | 5.7     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | Slow in plugin-id       |
-| MariaDB    | 10.1    | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | Slow in plugin-id       |
-| MariaDB    | 10.1    | org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | ?                       |
-| PostGreSQL | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
+| Vendor     | Version | Driver   | Dialect     | Status  |
+|------------|---------|----------|-------------|---------|
+| [MySQL](https://www.mysql.com)  | 5.5 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | A bit slow in plugin-id |
+| [MySQL](https://www.mysql.com)  | 5.6 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | OK                      |
+| [MySQL](https://www.mysql.com)  | 5.7 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | Slow in plugin-id       |
+| [MariaDB](https://mariadb.org/) | 10.1| com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | Slow in plugin-id       |
+| [MariaDB](https://mariadb.org/) | 10.1| org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | ?                       |
+| [PostGreSQL](https://www.postgresql.org/) | 9.6 | org.postgresql.Driver | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
 
 ### JSE
 

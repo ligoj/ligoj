@@ -98,3 +98,22 @@ html {
 i.resource {
 	min-width: 12px;
 }
+
+.cascade-title {
+	font-size: x-large;
+	display: block;
+	text-align: center;
+	height: 0;
+	position: relative;
+	top: 10px;
+}
+@media (max-width: 767px) {
+.navbar-collapse .cascade-title {
+	display: none;
+}
+}
+@media (min-width: 768px) {
+.navbar-header .cascade-title {
+	display: none;
+}
+}

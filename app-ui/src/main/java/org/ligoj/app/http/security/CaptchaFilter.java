@@ -47,7 +47,7 @@ public class CaptchaFilter implements Filter {
 				// CAPTCHA does not match -> the CAPTCHA must be regenerated.
 				log.info("Invalid captcha received from {} '{}' instead of {}", httpServletRequest.getRemoteHost(),
 						request.getParameter(CAPTCHA_HEADER), captcha.getAnswer());
-				fail(response, "captcha", "invalid");
+				fail(response, CAPTCHA_HEADER, "invalid");
 			}
 		}
 	}

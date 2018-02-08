@@ -84,7 +84,7 @@ public class DigestAuthenticationFilterTest extends AbstractServerTest {
 	 * Initialize the mock server.
 	 */
 	@BeforeEach
-	public void setup() {
+	public void init() {
 		filter = new DigestAuthenticationFilter();
 	}
 

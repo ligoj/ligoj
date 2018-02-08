@@ -59,7 +59,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @return{Boolean} true when allowed.
 		 */
 		isAllowed: function (url) {
-			return current.authorizations === undefined || current.authorizations === null || current._isAllowed(url, current.authorizations);
+			return (typeof current.authorizations === 'undefined') || current.authorizations === null || current._isAllowed(url, current.authorizations);
 		},
 
 		/**

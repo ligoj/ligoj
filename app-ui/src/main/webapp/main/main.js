@@ -233,7 +233,7 @@ define(['cascade'], function ($cascade) {
 					// No words detected
 					return user.fullName.charAt(0) + (user.fullName.length >= 2 ? user.fullName.charAt(1) : '');
 				}
-				return split[0].charAt(0) + split[split.length - 1].charAt(0)
+				return split[0].charAt(0) + split[split.length - 1].charAt(0);
 			}
 
 			// Fail safe rendering based on login

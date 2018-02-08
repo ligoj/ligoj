@@ -47,9 +47,10 @@ define([], function () {
 			controller: function (messages, options, $current) {
 				// Build the messages with inheritance
 				$self.buildMessages($current, messages || {});
-				if (!options.siblingMode && $current.$messages.title) {
+				if (!options.siblingMode && !options.partial && $current.$messages.title) {
 					// Title has been redefined at this level
 					document.title = $current.$messages.title;
+					$('.cascade-title').text(document.title);
 				}
 			}
 		}

@@ -126,7 +126,7 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 	 * Initialize the mock server.
 	 */
 	@BeforeEach
-	public void setup() {
+	public void init() {
 		authenticationProvider = new RestAuthenticationProvider();
 		authenticationProvider.setSsoPostContent("");
 	}
