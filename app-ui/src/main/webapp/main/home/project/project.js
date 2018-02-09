@@ -779,31 +779,35 @@ define(['cascade'], function ($cascade) {
 				success: function (data) {
 					data.id = parseInt(id, 10);
 					var service = current.$parent.getService(data.node);
-					var tool = current.$parent.getTool(data.node);
 					current.$parent.requireService(current, service.id, function ($service) {
-						// Destroy the previous view, some cache could be performed there ...
-						current.$view.find('.subscribe-configuration').remove();
-						// Inject the partial of this service in the current view
-						var $subscribe = ($service.$view.is('.subscribe-configuration') ? $service.$view : $service.$view.find('.subscribe-configuration')).clone();
-						var $subscribeWrapper = $('<div id="configuration-wrapper-' + data.id + '" class="configuration-wrapper-' + service.id.replace(/:/g, '-') + ' configuration-wrapper-' + tool.id.replace(/:/g, '-') +'"></div>');
-						current.$view.append($subscribeWrapper);
-						$subscribeWrapper.html($subscribe);
-						if ($service && $service.configure) {
-							// Delegate the configuration to the service
-							$service.configure(data);
-							callback && callback(data);
-
-							// Inject the project name
-						} else {
-							// Not managed configuration for this service
-							traceLog('No managed configuration for service ' + service.id);
-						}
-
-						// Show the subscription specific configuration view
-						$subscribe.removeClass('hidden').removeClass('hide').find('.project-name').text(current.model.name);
+						current.configurePluginView($service, service, data, callback);
 					});
 				}
 			});
+		},
+
+		configurePluginView: function($context, service, data, callback) {
+			var tool = current.$parent.getTool(data.node);
+			// Destroy the previous view, some cache could be performed there ...
+			current.$view.find('.subscribe-configuration').remove();
+			// Inject the partial of this service in the current view
+			var $subscribe = ($context.$view.is('.subscribe-configuration') ? $context.$view : $context.$view.find('.subscribe-configuration')).clone();
+			var $subscribeWrapper = $('<div id="configuration-wrapper-' + data.id + '" class="configuration-wrapper-' + service.id.replace(/:/g, '-') + ' configuration-wrapper-' + tool.id.replace(/:/g, '-') +'"></div>');
+			current.$view.append($subscribeWrapper);
+			$subscribeWrapper.html($subscribe);
+			if ($context && $context.configure) {
+				// Delegate the configuration to the service
+				$context.configure(data);
+				callback && callback(data);
+
+				// Inject the project name
+			} else {
+				// Not managed configuration for this service
+				traceLog('No managed configuration for service ' + service.id);
+			}
+
+			// Show the subscription specific configuration view
+			$subscribe.removeClass('hidden').removeClass('hide').find('.project-name').text(current.model.name);
 		},
 
 		/**
