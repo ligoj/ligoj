@@ -73,6 +73,7 @@ define(['cascade'], function ($cascade) {
 			var service = current.getServiceNameFromId(node);
 			$cascade.loadFragment(context, context.$transaction, 'main/service/' + service + '/', service, {
 				callback: function($context) {
+					$context.node = 'service:' + service;
 					callback && callback($context);
 				},
 				errorCallback: function(err) {
@@ -110,6 +111,7 @@ define(['cascade'], function ($cascade) {
 				var tool = current.getToolNameFromId(node);
 				$cascade.loadFragment($current, transaction, 'main/service/' + service + '/' + tool, tool, {
 					callback: function($context) {
+						$context.node = 'service:' + service + ':' + ':' + tool;
 						callback && callback($context);
 					},
 					errorCallback: function(err) {
@@ -329,6 +331,9 @@ define(['cascade'], function ($cascade) {
 
 			// Build the content
 			current.$child && current.requireTool(current.$child, subscription.node.id, function ($tool) {
+				// Render common UI of this tool
+				current.renderTool($tool);				
+
 				var renderDetailsFunction = 'renderDetails' + filter.capitalize();
 				var renderFunction = 'render' + filter.capitalize();
 				if (!$td.is('.rendered')) {
@@ -356,6 +361,25 @@ define(['cascade'], function ($cascade) {
 					renderCallback && renderCallback(subscription, filter, $tool, $details);
 				}
 			});
+		},
+		
+		/**
+		 * Render the tool feature, only once per tool.
+		 * @param {object} $tool The tool's context.
+		 */
+		renderTool: function($tool) {
+			if ((typeof $tool === 'undefined') || (!$tool.$view.is('.render-tool') && $tool.$view.find('.render-tool').length === 0) || current.$view.find('.render-tool.' + $tool.node.replace(/:/g, '-')).length === 1) {
+				// This feature is not supported or has already been already rendered
+				return;
+			}
+			// Add the view of this tool
+			var $view = ($tool.$view.is('.render-tool') ? $tool.$view : $tool.$view.find('.render-tool')).clone().addClass($tool.node.replace(/:/g, '-'));
+			current.$view.append($view);
+
+			if (typeof $tool.renderTool === 'function') {
+				// Render this tool
+				$tool.renderTool($view);
+			}
 		},
 
 		/**
