@@ -20,7 +20,7 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>2.1.0</api.version>
+		<api.version>2.2.0</api.version>
 		<jackson.version>2.9.4</jackson.version>
 	</properties>
 
