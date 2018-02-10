@@ -147,7 +147,7 @@ define(['cascade'], function ($cascade) {
 						callback: function (context) {
 							current.parameterContext = context;
 							_('subscribe-parameters').find('.choices').empty();
-							context.configureParameters(_('subscribe-parameters-container'), data, parent, mode, function () {
+							context.configureParameters(_('subscribe-parameters-container'), data, parent, mode, parent, function () {
 								// Configuration and validators are available
 								_('subscription-create').enable().trigger('focus');
 							});
