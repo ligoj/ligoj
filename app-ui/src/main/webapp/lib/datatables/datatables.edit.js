@@ -117,27 +117,27 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 	};
 
 	var initMapAttributes = function (_i, $button, oConfig) {
-		Object.keys(oConfig).forEach(function (option) {
-			if (option.startsWith('attr-')) {
-				$button.attr(option.substr('attr-'.length), oConfig[option]);
-			} else if (option === 'attr') {
-				// Attributes in configuration object 'attr'
-				Object.keys(oConfig[option]).forEach(function (attribute) {
-					$button.attr(attribute, oConfig[option][attribute]);
-				});
-			}
-		});
+		var $buttonInner = $button.find('a').length ? $button.find('a').first() : $button;
+		if (oConfig.href) {
+			$buttonInner.attr("href", oConfig.href);
+		}
+		if (typeof (oConfig.action) !== 'function') {
+			// Regular link
+			$buttonInner.off('click.dtb');
+			$button.off('click.dtb');
+		}
+		if (oConfig['link-attr']) {
+			$buttonInner.attr(oConfig['link-attr']);
+		}
 	};
 
 	var DataTable = $.fn.dataTable;
 	DataTable.ext.buttons.create = {
 		text: $cascade.$messages["new"],
-		className: "btn-success btn-raised",
-		init: initMapAttributes
+		className: "btn-success btn-raised"
 	};
 	DataTable.ext.buttons.button2 = {
-		text: $cascade.$messages["new"],
-		init: initMapAttributes
+		text: $cascade.$messages["new"]
 	};
 	DataTable.ext.buttons.popup = {
 		text: $cascade.$messages["new"],
@@ -166,25 +166,19 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 		className: "btn-primary btn-raised"
 	};
 
+	DataTable.ext.buttons['dropdown-link'] = {
+		text: $cascade.$messages["new"],
+		className: "btn-link",
+		href: "#/",
+		init: initMapAttributes
+	};
+
 	DataTable.ext.buttons.link = {
 		text: $cascade.$messages["new"],
 		className: "btn-link",
 		href: "#/",
 		tag: "a",
-		init: function (_i, $button, oConfig) {
-			Object.keys(oConfig).forEach(function (index) {
-				if (index.startsWith('attr-')) {
-					$button.attr(index.substr('attr-'.length), oConfig[index]);
-				}
-			});
-			if (oConfig.href) {
-				$button.attr("href", oConfig.href);
-			}
-			if (typeof (oConfig.action) !== 'function') {
-				// Regular link
-				$button.off('click.dtb');
-			}
-		}
+		init: initMapAttributes
 	};
 
 	DataTable.ext.buttons.cancel = {
