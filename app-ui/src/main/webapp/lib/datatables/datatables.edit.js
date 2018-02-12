@@ -1,40 +1,39 @@
-define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-bs"], function($, $cascade, Buttons) {
+define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-bs"], function ($, $cascade, Buttons) {
 
-	$.fn.dataTableExt.afnSortData['dom-text'] = function(oSettings, iColumn) {
+	$.fn.dataTableExt.afnSortData['dom-text'] = function (oSettings, iColumn) {
 		var aData = [];
-		$('td:eq(' + oSettings.oApi._fnColumnIndexToVisible(oSettings, iColumn) + ') input', oSettings.oApi._fnGetTrNodes(oSettings)).each(function() {
+		$('td:eq(' + oSettings.oApi._fnColumnIndexToVisible(oSettings, iColumn) + ') input', oSettings.oApi._fnGetTrNodes(oSettings)).each(function () {
 			aData.push(this.value);
 		});
 		return aData;
 	};
 
-	$.fn.dataTableExt.afnSortData['dom-select'] = function(oSettings, iColumn) {
+	$.fn.dataTableExt.afnSortData['dom-select'] = function (oSettings, iColumn) {
 		var aData = [];
-		$('td:eq(' + oSettings.oApi._fnColumnIndexToVisible(oSettings, iColumn) + ') select', oSettings.oApi._fnGetTrNodes(oSettings)).each(function() {
+		$('td:eq(' + oSettings.oApi._fnColumnIndexToVisible(oSettings, iColumn) + ') select', oSettings.oApi._fnGetTrNodes(oSettings)).each(function () {
 			aData.push($(this).val());
 		});
 		return aData;
 	};
 
-	$.extend( Buttons.prototype, {
+	$.extend(Buttons.prototype, {
 
 		/**
 		 * Destroy the instance, cleaning up event handlers and removing DOM
 		 * elements
 		 * @return {Buttons} Self for chaining
 		 */
-		destroy: function ()
-		{
+		destroy: function () {
 			// Key event listener
-			$('body').off( 'keyup.'+this.s.namespace );
+			$('body').off('keyup.' + this.s.namespace);
 
 			// Individual button destroy (so they can remove their own events if
 			// needed
 			var buttons = this.s.buttons;
 			var i, ien;
 
-			for ( i=buttons.length ; i-->0 ; ) {
-				this.remove( buttons[i].node );
+			for (i = buttons.length; i-- > 0;) {
+				this.remove(buttons[i].node);
 			}
 
 			// Container
@@ -43,9 +42,9 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 			// Remove from the settings object collection
 			var buttonInsts = this.s.dt.settings()[0];
 
-			for ( i=0, ien=buttonInsts.length ; i<ien ; i++ ) { // FIX FDA, remove loop issue
-				if ( buttonInsts.inst === this ) {
-					buttonInsts.splice( i, 1 );
+			for (i = 0, ien = buttonInsts.length; i < ien; i++) { // FIX FDA, remove loop issue
+				if (buttonInsts.inst === this) {
+					buttonInsts.splice(i, 1);
 					break;
 				}
 			}
@@ -58,7 +57,7 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 	 * Put all data of the table in a javascript object
 	 * @param {Object} dataTable Table containing the row to export
 	 */
-	$.fn.dataTableExt.table2object = function(dataTable) {
+	$.fn.dataTableExt.table2object = function (dataTable) {
 		var result = new Array();
 
 		var lines = dataTable.fnGetNodes();
@@ -66,7 +65,7 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 			var row = new Object();
 
 			// Iterate on each input and select
-			$('input,select', lines[idx]).each(function() {
+			$('input,select', lines[idx]).each(function () {
 				if (this.name) {
 					// Automatically format date
 					if ($(this).is('.date')) {
@@ -90,7 +89,7 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 	 * TODO ALO : remove this method and use JSON.stringify(table2object) instead ?
 	 * @param {Object} dataTable Table containing the row to export
 	 */
-	$.fn.dataTableExt.table2json = function(dataTable) {
+	$.fn.dataTableExt.table2json = function (dataTable) {
 		var lines = dataTable.fnGetNodes();
 		var result = "[";
 		var firstLine = true;
@@ -103,7 +102,7 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 				result += ',';
 			}
 			result += '{';
-			$('input,select', line).each(function() {
+			$('input,select', line).each(function () {
 				if (firstCell) {
 					firstCell = false;
 				} else {
@@ -117,61 +116,62 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 		return result;
 	};
 
+	var initMapAttributes = function (_i, $button, oConfig) {
+		Object.keys(oConfig).forEach(function (option) {
+			if (option.startsWith('attr-')) {
+				$button.attr(option.substr('attr-'.length), oConfig[option]);
+			} else if (option === 'attr') {
+				// Attributes in configuration object 'attr'
+				Object.keys(oConfig[option]).forEach(function (attribute) {
+					$button.attr(attribute, oConfig[option][attribute]);
+				});
+			}
+		});
+	};
+
 	var DataTable = $.fn.dataTable;
 	DataTable.ext.buttons.create = {
-		text : $cascade.$messages["new"],
-		className : "btn-success btn-raised",
-		init : function(_i, $button, oConfig) {
-			Object.keys(oConfig).forEach(function (index) {
-				if (index.startsWith('attr-')) {
-					$button.attr(index.substr('attr-'.length), oConfig[index]);
-				}
-			});
-		}
+		text: $cascade.$messages["new"],
+		className: "btn-success btn-raised",
+		init: initMapAttributes
 	};
 	DataTable.ext.buttons.button2 = {
-		text : $cascade.$messages["new"],
-		init : function(_i, $button, oConfig) {
-			Object.keys(oConfig).forEach(function (index) {
-				if (index.startsWith('attr-')) {
-					$button.attr(index.substr('attr-'.length), oConfig[index]);
-				}
-			});
-		}
+		text: $cascade.$messages["new"],
+		init: initMapAttributes
 	};
 	DataTable.ext.buttons.popup = {
-		text : $cascade.$messages["new"],
-		className : "btn-raised",
-		target : "#popup",
-		tag : "button",
-		init : function(_i, $button, oConfig) {
+		text: $cascade.$messages["new"],
+		className: "btn-raised",
+		target: "#popup",
+		tag: "button",
+		init: function (_i, $button, oConfig) {
 			$button.attr("data-target", oConfig.target).attr("data-toggle", "modal");
 		}
 	};
 
 	DataTable.ext.buttons.edit = {
-		text : $cascade.$messages["update"],
-		className : ""
+		text: $cascade.$messages.update,
+		className: ""
 	};
 
 	DataTable.ext.buttons.delete = {
-		text : $cascade.$messages["delete"],
-		tag : "button",
-		className : "btn-danger btn-raised"
+		text: $cascade.$messages.delete,
+		tag: "button",
+		className: "btn-danger btn-raised"
 	};
 
 	DataTable.ext.buttons.save = {
-		text : $cascade.$messages["save"],
-		tag : "button",
-		className : "btn-primary btn-raised"
+		text: $cascade.$messages.save,
+		tag: "button",
+		className: "btn-primary btn-raised"
 	};
 
 	DataTable.ext.buttons.link = {
-		text : $cascade.$messages["new"],
-		className : "btn-link",
-		href : "#/",
-		tag : "a",
-		init : function(_i, $button, oConfig) {
+		text: $cascade.$messages["new"],
+		className: "btn-link",
+		href: "#/",
+		tag: "a",
+		init: function (_i, $button, oConfig) {
 			Object.keys(oConfig).forEach(function (index) {
 				if (index.startsWith('attr-')) {
 					$button.attr(index.substr('attr-'.length), oConfig[index]);
@@ -180,7 +180,7 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 			if (oConfig.href) {
 				$button.attr("href", oConfig.href);
 			}
-			if (typeof(oConfig.action) !== 'function') {
+			if (typeof (oConfig.action) !== 'function') {
 				// Regular link
 				$button.off('click.dtb');
 			}
@@ -188,7 +188,7 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 	};
 
 	DataTable.ext.buttons.cancel = {
-		text : $cascade.$messages["cancel"],
-		className : "btn-link"
+		text: $cascade.$messages["cancel"],
+		className: "btn-link"
 	};
 });

@@ -208,7 +208,6 @@ define(['cascade'], function ($cascade) {
 				delete parameter.mandatory;
 			}
 			current.configureParameters($container, parameters, node, mode, id, function (configuration) {
-				debugger;
 				for (var index = 0; index < values.length; index++) {
 					var value = values[index];
 					var parameter = value.parameter;

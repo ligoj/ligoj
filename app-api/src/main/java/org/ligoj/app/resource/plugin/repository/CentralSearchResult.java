@@ -1,4 +1,4 @@
-package org.ligoj.app.resource.plugin;
+package org.ligoj.app.resource.plugin.repository;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MavenSearchResultItem {
+public class CentralSearchResult implements Artifact {
 	/**
 	 * Artifact name (Maven central representation)
 	 */
