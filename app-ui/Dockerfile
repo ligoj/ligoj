@@ -38,4 +38,4 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
-CMD curl --fail http://localhost:8080${CONTEXT_URL}/login.html || exit 1
+CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/login.html || exit 1
