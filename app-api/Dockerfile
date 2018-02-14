@@ -48,6 +48,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     --add-opens java.xml/javax.xml.catalog=ALL-UNNAMED \
     --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
     --add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED \
+    -Djavax.net.ssl.trustStorePassword=changeit \
     -Dserver.address="${SERVER_HOST}" \
     -Dserver.port="${SERVER_PORT}" \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \

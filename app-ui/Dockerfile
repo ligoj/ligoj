@@ -33,6 +33,7 @@ EXPOSE ${SERVER_PORT}
 CMD mkdir -p "$LIGOJ_HOME" && \
   java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
     -Dligoj.endpoint="${ENDPOINT}" \
+    -Djavax.net.ssl.trustStorePassword=changeit \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
     -Dserver.port="${SERVER_PORT}" \
     -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
