@@ -109,7 +109,9 @@ define(function () {
 					return m;
 				},
 				ajax: {
-					url: REST_PATH + 'plugin/search',
+					url: function() {
+						return REST_PATH + 'plugin/search?repository=' + current.repository
+					},
 					dataType: 'json',
 					quietMillis: 250,
 					data: function (term) {
@@ -122,9 +124,9 @@ define(function () {
 							more: false,
 							results: $(data).map(function () {
 								return {
-									id: this.a,
+									id: this.artifact,
 									data: this,
-									text: this.a + ' <span class="label label-info">' + this.latestVersion + '</span>'
+									text: this.artifact + ' <span class="label label-info">' + this.version + '</span>'
 								};
 							})
 						};
@@ -188,7 +190,7 @@ define(function () {
 			if (plugin) {
 				$.ajax({
 					type: 'POST',
-					url: REST_PATH + 'plugin/' + encodeURIComponent(plugin),
+					url: REST_PATH + 'plugin/' + encodeURIComponent(plugin) + '?repository=' + current.repository,
 					dataType: 'text',
 					contentType: 'application/json',
 					success: function () {

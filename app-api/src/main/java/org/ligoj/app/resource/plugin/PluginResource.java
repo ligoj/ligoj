@@ -237,7 +237,9 @@ public class PluginResource {
 			// Download and copy the file, note the previous version is not removed
 			getRepositoryManager(repository).install(artifact, version, target);
 			log.info("Plugin {} v{} has been downloaded, restart is required", artifact, version);
-		} catch (final IOException ioe) {
+		} catch (final Exception ioe) {
+			// Installation failed, either download, either FS error
+			log.info("Unable to install plugin {} v{}", artifact, version, ioe);
 			throw new BusinessException(artifact, String.format("Cannot be downloaded from remote server %s", artifact), ioe);
 		}
 	}

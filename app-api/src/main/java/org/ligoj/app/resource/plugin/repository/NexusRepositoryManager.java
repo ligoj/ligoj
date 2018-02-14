@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.cache.annotation.CacheRemoveAll;
@@ -34,7 +33,7 @@ public class NexusRepositoryManager extends AbstractRepositoryManager {
 		// Extract artifacts
 		final ObjectMapper jsonMapper = new ObjectMapper();
 		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/data"), NexusSearchResult[].class))
-				.collect(Collectors.toMap(NexusSearchResult::getArtifact, Function.identity(), (a1, a2) -> a1));
+				.collect(Collectors.toMap(NexusSearchResult::getArtifact, ArtifactVo::new, (a1, a2) -> a1));
 	}
 
 	@Override

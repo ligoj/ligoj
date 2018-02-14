@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.cache.annotation.CacheRemoveAll;
@@ -39,7 +38,7 @@ public class CentralRepositoryManager extends AbstractRepositoryManager {
 		// Extract artifacts
 		final ObjectMapper jsonMapper = new ObjectMapper();
 		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), CentralSearchResult[].class))
-				.collect(Collectors.toMap(CentralSearchResult::getArtifact, Function.identity()));
+				.collect(Collectors.toMap(CentralSearchResult::getArtifact, ArtifactVo::new));
 	}
 
 	@Override
