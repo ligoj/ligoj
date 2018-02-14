@@ -11,7 +11,10 @@ define({
 		'restart': 'Restart',
 		'restart-requested': 'Restart has been requested',
 		'plugin-update': 'Update this plug-in',
-		'repository': 'Repository'
+		'repository': 'Repository',
+		'check-new-version': 'Check now',
+		'check-new-version-help': 'Check now the last available versions from the repository.<br/>24h cache is used.',
+		'check-new-version-requested': 'Check is requested, updating the list...'
 	},
 	fr: true
 });

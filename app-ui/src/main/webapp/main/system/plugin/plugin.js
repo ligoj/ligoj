@@ -77,6 +77,13 @@ define(function () {
 					className: 'btn-danger',
 					action: current.restart
 				}, {
+					text: current.$messages['check-new-version'],
+					action: current.checkNewVersion,
+					attr: {
+						'title': current.$messages['check-new-version-help'],
+						'data-toggle': 'tooltip'
+					}
+				}, {
 					extend: 'collection',
 					className: 'btn-default plugin-repository-selected',
 					text: current.$messages.repository,
@@ -156,7 +163,7 @@ define(function () {
 			if (current.repository !== repository) {
 				// Reload the plug-in list
 				current.repository = repository;
-				current.table && current.table.api().ajax.reload();
+				current.clearAndReload();
 			}
 		},
 
@@ -181,7 +188,7 @@ define(function () {
 			index = index || 0;
 			if (index >= plugins.length) {
 				// All plug-ins are installed
-				current.table && current.table.api().ajax.reload();
+				current.clearAndReload();
 				return;
 			}
 
@@ -206,6 +213,31 @@ define(function () {
 			} else {
 				// The token was empty, install the next real plug-in
 				current.installNext(plugins, index + 1);
+			}
+		},
+
+		/**
+		 * Invalid the repository cache.
+		 */
+		checkNewVersion: function() {
+			$.ajax({
+				type: 'PUT',
+				url: REST_PATH + 'plugin/cache?repository=' + current.repository,
+				dataType: 'text',
+				contentType: 'application/json',
+				success: function () {
+					notifyManager.notify(current.$messages['check-new-version-requested']);
+					current.clearAndReload();
+				}
+			});
+		},
+		
+		/**
+		 * Clear the plugin list and reload it.
+		 */
+		clearAndReload: function() {
+			if (current.table) {
+				current.table.api().clear().draw().ajax.reload();
 			}
 		},
 

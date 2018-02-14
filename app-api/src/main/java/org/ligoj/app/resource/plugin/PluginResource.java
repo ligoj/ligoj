@@ -196,8 +196,8 @@ public class PluginResource {
 	/**
 	 * Request a reset of plug-in cache meta-data
 	 */
-	@POST
-	@Path("remote-plugin-cache")
+	@PUT
+	@Path("cache")
 	public void invalidateLastPluginVersions(@QueryParam("repository") @DefaultValue("central") final String repository) {
 		getRepositoryManager(repository).invalidateLastPluginVersions();
 	}
