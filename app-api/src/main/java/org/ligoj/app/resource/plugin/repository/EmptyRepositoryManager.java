@@ -1,7 +1,7 @@
 package org.ligoj.app.resource.plugin.repository;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
@@ -21,8 +21,8 @@ public class EmptyRepositoryManager implements RepositoryManager {
 	}
 
 	@Override
-	public void install(String artifact, String version, Path target) throws IOException {
-		// Nothing to do
+	public InputStream getArtifactInputStream(String artifact, String version) throws IOException {
+		return null;
 	}
 
 }

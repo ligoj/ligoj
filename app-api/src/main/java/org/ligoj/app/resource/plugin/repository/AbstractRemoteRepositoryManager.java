@@ -1,10 +1,8 @@
 package org.ligoj.app.resource.plugin.repository;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractRepositoryManager implements RepositoryManager {
+public abstract class AbstractRemoteRepositoryManager implements RepositoryManager {
 
 	@Autowired
 	protected ConfigurationResource configuration;
@@ -65,25 +63,23 @@ public abstract class AbstractRepositoryManager implements RepositoryManager {
 	}
 
 	/**
-	 * Install the specific version of given plug-in from the remote server. The previous version is not deleted. The
-	 * downloaded version will be used only if it is a most recent version than the locally ones.
+	 * Return the input stream from the remote URL.
 	 * 
 	 * @param artifact
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
 	 * @param version
 	 *            The version to install.
-	 * @param target
-	 *            The target file name to write.
-	 * @param defaultUrl
+	 * @param defaultArtifactUrl
 	 *            The default artifact base URL.
+	 * @return The opened {@link InputStream} of the artifact to download.
 	 * @see #getArtifactlBaseUrl(String)
 	 * @throws IOException
 	 *             When download failed.
 	 */
-	protected void install(String artifact, String version, Path target, final String defaultArtifactUrl) throws IOException {
+	public InputStream getArtifactInputStream(String artifact, String version, final String defaultArtifactUrl) throws IOException {
 		final String url = getArtifactUrl(artifact, version, defaultArtifactUrl);
-		log.info("Downloading plugin {} v{} from {} to {}", artifact, version, url, target.toString());
-		Files.copy(new URL(url).openStream(), target, StandardCopyOption.REPLACE_EXISTING);
+		log.info("Resolved remote URL is {}", url);
+		return new URL(url).openStream();
 	}
 
 }

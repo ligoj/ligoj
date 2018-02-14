@@ -4,8 +4,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -110,6 +112,14 @@ public class PluginResourceTest extends AbstractServerTest {
 		configuration.delete("plugins.repository-manager.central.search.url");
 		Assertions.assertTrue(
 				"1.0.0".compareTo(resource.getRepositoryManager("central").getLastPluginVersions().get("plugin-iam-node").getVersion()) <= 0);
+	}
+
+	@Test
+	public void getRepositoryManager() throws IOException {
+		Assertions.assertTrue(resource.getRepositoryManager("not-exist").getLastPluginVersions().isEmpty());
+		Assertions.assertNull(resource.getRepositoryManager("not-exist").getArtifactInputStream("any", "1.2.3"));
+		resource.getRepositoryManager("not-exist").invalidateLastPluginVersions();
+		Assertions.assertEquals("empty", resource.getRepositoryManager("not-exist").getId());
 	}
 
 	@Test
@@ -439,6 +449,14 @@ public class PluginResourceTest extends AbstractServerTest {
 		configuration.delete("plugins.repository-manager.central.search.url");
 		newPluginResourceInstall().install("plugin-iam-node", "central");
 		Assertions.assertTrue(TEMP_FILE.exists());
+	}
+
+	@Test
+	public void upload() throws IOException {
+		final InputStream input = new ByteArrayInputStream("test".getBytes("UTF-8"));
+		newPluginResourceInstall().upload(input, "plugin-sample", "1.2.9");
+		Assertions.assertTrue(TEMP_FILE.exists());
+		Assertions.assertEquals("test", FileUtils.readFileToString(TEMP_FILE, "UTF-8"));
 	}
 
 	@Test

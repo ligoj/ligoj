@@ -1,7 +1,7 @@
 package org.ligoj.app.resource.plugin.repository;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.io.InputStream;
 import java.util.Map;
 
 public interface RepositoryManager {
@@ -20,20 +20,7 @@ public interface RepositoryManager {
 	 */
 	String getId();
 
-	/**
-	 * Install the specific version of given plug-in from the remote server. The previous version is not deleted. The
-	 * downloaded version will be used only if it is a most recent version than the locally ones.
-	 * 
-	 * @param artifact
-	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
-	 * @param version
-	 *            The version to install.
-	 * @param target
-	 *            The target file name to write.
-	 * @throws IOException
-	 *             When download failed.
-	 */
-	void install(String artifact, String version, Path target) throws IOException;
+	InputStream getArtifactInputStream(String artifact, String version) throws IOException;
 
 	/**
 	 * Invalid the possible version cache.

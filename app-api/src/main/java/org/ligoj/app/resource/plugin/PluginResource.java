@@ -2,12 +2,14 @@ package org.ligoj.app.resource.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +28,7 @@ import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -40,6 +43,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.api.SubscriptionMode;
@@ -76,7 +80,7 @@ import lombok.extern.slf4j.Slf4j;
  * @see <a href="https://repository.sonatype.org/nexus-indexer-lucene-plugin/default/docs/path__lucene_search.html">OSS
  *      lucene_search</a>
  */
-@Path("/plugin")
+@Path("/system/plugin")
 @Slf4j
 @Component
 @Transactional
@@ -226,21 +230,49 @@ public class PluginResource {
 	 *            The version to install.
 	 * @param repository
 	 *            The repository identifier to query.
+	 * @throws IOException
+	 *             When the file cannot be read from the repository.
 	 */
 	@POST
 	@Path("{artifact:[\\w-]+}/{version:[\\w-]+}")
 	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version,
-			@QueryParam("repository") @DefaultValue("central") final String repository) {
+			@QueryParam("repository") @DefaultValue("central") final String repository) throws IOException {
+		install(null, artifact, version, repository);
+	}
+
+	/**
+	 * Upload a file of entries to create or update users. The whole entry is replaced.
+	 * 
+	 * @param input
+	 *            The Maven artifact file.
+	 * @param pluginId
+	 *            The Maven <code>artifactId</code>.
+	 * @param version
+	 *            The Maven <code>version</code>.
+	 */
+	@PUT
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Path("upload")
+	public void upload(@Multipart(required = true, value = "plugin-file") final InputStream input,
+			@Multipart(required = true, value = "plugin-id") final String pluginId,
+			@Multipart(required = true, value = "plugin-version") final String version) {
+		install(input, pluginId, version, "(local)");
+	}
+
+	private void install(final InputStream input, final String artifact, final String version, final String repository) {
 		final PluginsClassLoader classLoader = getPluginClassLoader();
 		final java.nio.file.Path target = classLoader.getPluginDirectory().resolve(artifact + "-" + version + ".jar");
+		log.info("Download plug-in {} v{ from {}}", artifact, version, repository);
 		try {
+			// Get the right input
+			final InputStream input2 = input == null ? getRepositoryManager(repository).getArtifactInputStream(artifact, version) : input;
 			// Download and copy the file, note the previous version is not removed
-			getRepositoryManager(repository).install(artifact, version, target);
-			log.info("Plugin {} v{} has been downloaded, restart is required", artifact, version);
+			Files.copy(input2, target, StandardCopyOption.REPLACE_EXISTING);
+			log.info("Plugin {} v{} has been installed, restart is required", artifact, version);
 		} catch (final Exception ioe) {
 			// Installation failed, either download, either FS error
-			log.info("Unable to install plugin {} v{}", artifact, version, ioe);
-			throw new BusinessException(artifact, String.format("Cannot be downloaded from remote server %s", artifact), ioe);
+			log.info("Unable to install plugin {} v{} from {}", artifact, version, repository, ioe);
+			throw new BusinessException(artifact, String.format("Cannot be installed", artifact), ioe);
 		}
 	}
 

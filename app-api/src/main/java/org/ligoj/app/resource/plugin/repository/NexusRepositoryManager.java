@@ -1,7 +1,7 @@
 package org.ligoj.app.resource.plugin.repository;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Nexus repository manager.
  */
 @Component
-public class NexusRepositoryManager extends AbstractRepositoryManager {
+public class NexusRepositoryManager extends AbstractRemoteRepositoryManager {
 
 	private static final String DEFAULT_ARTIFACT_URL = "https://oss.sonatype.org/service/local/repositories/releases/content/org/ligoj/plugin";
 
@@ -42,8 +42,8 @@ public class NexusRepositoryManager extends AbstractRepositoryManager {
 	}
 
 	@Override
-	public void install(String artifact, String version, Path target) throws IOException {
-		install(artifact, version, target, DEFAULT_ARTIFACT_URL);
+	public InputStream getArtifactInputStream(String artifact, String version) throws IOException {
+		return getArtifactInputStream(artifact, version, DEFAULT_ARTIFACT_URL);
 	}
 
 	@Override

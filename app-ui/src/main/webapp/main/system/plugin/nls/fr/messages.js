@@ -8,5 +8,12 @@ define({
 	'repository': 'Référentiel',
 	'check-new-version': 'Vérifier maintenant',
 	'check-new-version-help': 'Vérifier maintenant les dernières versions disponibles du référentiel. Utilisation de cache de 24h.',
-	'check-new-version-requested': 'Vérification envoyée, mise à jour de la liste...'
+	'check-new-version-requested': 'Vérification envoyée, mise à jour de la liste...',
+	'upload-plugin': 'Import ...',
+	'file': 'Fichier',
+	'upload-plugin-go': 'Importer',
+	'upload-plugin-title': 'Importer un plug-in',
+	'upload-plugin-progress': 'Import ...',
+	'upload-plugin-help': 'Importer un plug-in en fournissant son identifiant et sa version',
+	'upload-plugin-finished': 'Plug-in {{this}} a été importé, un redémarrage est requis'
 });

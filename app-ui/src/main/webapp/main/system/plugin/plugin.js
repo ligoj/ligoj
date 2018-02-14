@@ -16,11 +16,11 @@ define(function () {
 				current.installNext(_('table').dataTable().fnGetData($(this).closest('tr')[0]).plugin.artifact, 0);
 			}).dataTable({
 				ajax: function () {
-					return REST_PATH + 'plugin?repository=' + current.repository;
+					return REST_PATH + 'system/plugin?repository=' + current.repository;
 				},
 				dataSrc: '',
 				sAjaxDataProp: '',
-				dom: '<"row"<"col-sm-6"B><"col-sm-6"f>r>t',
+				dom: '<"row"<"col-sm-11"B><"col-sm-1"f>r>t',
 				pageLength: -1,
 				destroy: true,
 				order: [
@@ -84,6 +84,15 @@ define(function () {
 						'data-toggle': 'tooltip'
 					}
 				}, {
+					text: current.$messages['upload-plugin'],
+					attr: {
+						'title': current.$messages['upload-plugin-help'],
+						'data-toggle': 'tooltip'
+					},
+					action: function() {
+						_('popup-plugin-upload').modal('show');
+					}
+				}, {
 					extend: 'collection',
 					className: 'btn-default plugin-repository-selected',
 					text: current.$messages.repository,
@@ -117,7 +126,7 @@ define(function () {
 				},
 				ajax: {
 					url: function() {
-						return REST_PATH + 'plugin/search?repository=' + current.repository
+						return REST_PATH + 'system/plugin/search?repository=' + current.repository
 					},
 					dataType: 'json',
 					quietMillis: 250,
@@ -149,6 +158,56 @@ define(function () {
 				_('search').select2('data', null);
 			}).on('shown.bs.modal', function () {
 				_('search').select2('focus');
+			});
+			_('popup-plugin-upload').on('show.bs.modal', function () {
+				$(this).find('.modal-body input').val('');
+				_('upload').button('reset');
+				validationManager.mapping.DEFAULT = 'plugin-file';
+				validationManager.reset($(this));
+			}).on('shown.bs.modal', function () {
+				_('plugin-file').trigger('focus');
+			}).on('submit', function (e) {
+				var plugin = _('plugin-id').val();
+				$(this).ajaxSubmit({
+					url: REST_PATH + 'system/plugin/upload',
+					type: 'PUT',
+					dataType: 'text',
+					beforeSubmit: function () {
+						_('upload').button('loading');
+					},
+					success: function () {
+						_('popup-plugin-upload').modal('hide');
+						notifyManager.notify(Handlebars.compile(current.$messages['upload-plugin-finished'])(plugin));
+					},
+					complete: function () {
+						_('upload').button('complete');
+					}
+				});
+				e.preventDefault();
+				return false;
+			});
+			
+			_('plugin-file').on('change', function() {
+				var file = $(this).val();
+				var fileNoExt = file.match(/[\\/]([^\\/]+)\.jar/);
+				if (fileNoExt) {
+					// Guess the artifact/version parts
+					var parts = fileNoExt[1].match(/^(plugin-[^\\/]+)-((\d+\.\d+.\d+)(-(SNAPSHOT|RC.*|M.*))?)$/);
+					if (parts && parts.length >= 4) {
+						_('plugin-id').val(parts[1]);
+						_('plugin-version').val(parts[2]);
+					} else {
+						// Use only the no extension file
+						_('plugin-id').val('');
+						_('plugin-version').val(fileNoExt);
+					}
+					validationManager.reset($(this));
+					_('upload').enable();
+				} else {
+					// Not a JAR file, reject it
+					validationManager.addError($(this), {rule: 'Pattern', parameters: {regexp:'*.jar'}}, 'Pattern');
+					_('upload').disable();
+				}
 			});
 		},
 
@@ -197,7 +256,7 @@ define(function () {
 			if (plugin) {
 				$.ajax({
 					type: 'POST',
-					url: REST_PATH + 'plugin/' + encodeURIComponent(plugin) + '?repository=' + current.repository,
+					url: REST_PATH + 'system/plugin/' + encodeURIComponent(plugin) + '?repository=' + current.repository,
 					dataType: 'text',
 					contentType: 'application/json',
 					success: function () {
@@ -222,7 +281,7 @@ define(function () {
 		checkNewVersion: function() {
 			$.ajax({
 				type: 'PUT',
-				url: REST_PATH + 'plugin/cache?repository=' + current.repository,
+				url: REST_PATH + 'system/plugin/cache?repository=' + current.repository,
 				dataType: 'text',
 				contentType: 'application/json',
 				success: function () {
@@ -247,7 +306,7 @@ define(function () {
 		restart: function () {
 			$.ajax({
 				type: 'PUT',
-				url: REST_PATH + 'plugin/restart',
+				url: REST_PATH + 'system/plugin/restart',
 				dataType: 'text',
 				contentType: 'application/json',
 				success: function () {
