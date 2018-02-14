@@ -82,7 +82,7 @@ public abstract class AbstractRepositoryManager implements RepositoryManager {
 	 */
 	protected void install(String artifact, String version, Path target, final String defaultArtifactUrl) throws IOException {
 		final String url = getArtifactUrl(artifact, version, defaultArtifactUrl);
-		log.info("Downloading plugin {} v{} from {} to ", artifact, version, url);
+		log.info("Downloading plugin {} v{} from {} to {}", artifact, version, url, target.toString());
 		Files.copy(new URL(url).openStream(), target, StandardCopyOption.REPLACE_EXISTING);
 	}
 
