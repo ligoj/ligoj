@@ -43,6 +43,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     --add-opens java.base/java.lang.package=ALL-UNNAMED \
     --add-opens java.base/java.lang.module=ALL-UNNAMED \
     --add-opens java.base/java.util=ALL-UNNAMED \
+    --add-opens java.base/jdk.internal.math=ALL-UNNAMED \
     --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED \
     --add-opens java.xml/javax.xml.catalog=ALL-UNNAMED \
     --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
