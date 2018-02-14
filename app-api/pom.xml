@@ -22,6 +22,7 @@
 	<properties>
 		<api.version>2.2.0</api.version>
 		<jackson.version>2.9.4</jackson.version>
+		<spring-boot.version>2.0.0.RC1</spring-boot.version>
 	</properties>
 
 	<dependencies>
@@ -100,6 +101,7 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- JSR-925 -->

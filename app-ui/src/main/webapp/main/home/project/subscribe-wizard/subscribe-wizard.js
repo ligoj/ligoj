@@ -249,7 +249,10 @@ define(['cascade'], function ($cascade) {
 				var icon;
 				if (node.uiClasses) {
 					// Use classes instead of picture
-					icon = node.uiClasses.startsWith('$') ? '<span class="icon-text">' + node.uiClasses.substring(1) + '</span>' : ('<i class="' + node.uiClasses + '"></i>');
+					icon = current.toUiClassIcon(node.uiClasses);
+				} else if (node.refined && node.refined.uiClasses && node.refined.refined) {
+					// Use the parent node UI classes for this node instance
+					icon = current.toUiClassIcon(node.refined.refined.uiClasses);
 				} else {
 					// Use a provided picture
 					icon = current.$super('getToolFromId')(node.id) ? current.$super('toIcon')(node, 'x64w') : '<i class="fa fa-cloud"></i>';
@@ -263,7 +266,14 @@ define(['cascade'], function ($cascade) {
 				$choice.on('dblclick', current.goToNextStep);
 			}
 		},
-		
+
+		/**
+		 * Return the icon markup corresponding to the given UI classes.
+		 */
+		toUiClassIcon: function(uiClasses) {
+			return uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i class="' + uiClasses + '"></i>');
+		},
+
 		renderDescriptionPanel: function($container, nodes, type) {
 			var $name = _('subscribe-definition').find('.selected-' + type).empty();
 			return $container.find('input[data-index]').off().on('change', function () {
