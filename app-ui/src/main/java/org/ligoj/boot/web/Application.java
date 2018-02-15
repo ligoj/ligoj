@@ -195,6 +195,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Fix the system environment from "auto" to the guess value.
+	 * @return The computed web environment.
 	 */
 	protected String getEnvironment() {
 		// Auto detect environment variable

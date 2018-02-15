@@ -9,7 +9,7 @@ RUN set -xe \
 ARG GROUP_ID="org.ligoj.app"
 ARG ARTIFACT_ID="app-ui"
 ARG NEXUS_HOST="oss.sonatype.org"
-ARG VERSION="1.7.2"
+ARG VERSION="1.7.5"
 ARG NEXUS_URL="https://${NEXUS_HOST}"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
@@ -33,9 +33,10 @@ EXPOSE ${SERVER_PORT}
 CMD mkdir -p "$LIGOJ_HOME" && \
   java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
     -Dligoj.endpoint="${ENDPOINT}" \
+    -Djavax.net.ssl.trustStorePassword=changeit \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
     -Dserver.port="${SERVER_PORT}" \
     -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
-CMD curl --fail http://localhost:8080${CONTEXT_URL}/login.html || exit 1
+CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/login.html || exit 1

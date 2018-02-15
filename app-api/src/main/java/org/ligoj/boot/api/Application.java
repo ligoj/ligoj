@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.boot.web.server.ErrorPageRegistrar;
@@ -29,7 +28,7 @@ import org.springframework.web.filter.DelegatingFilterProxy;
  */
 @SpringBootApplication
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
-@EnableAutoConfiguration(exclude = { LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, SecurityAutoConfiguration.class })
+@EnableAutoConfiguration(exclude = { LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class})
 public class Application extends SpringBootServletInitializer {
 
 	@Override
@@ -43,7 +42,7 @@ public class Application extends SpringBootServletInitializer {
 	 * @param args
 	 *            Application arguments.
 	 */
-	public static void main(final String[] args) { 
+	public static void main(final String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
 
@@ -115,5 +114,4 @@ public class Application extends SpringBootServletInitializer {
 	public ErrorPageRegistrar errorPageRegistrar() {
 		return registry -> registry.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"));
 	}
-
 }

@@ -1,0 +1,68 @@
+{
+    "totalCount": 220,
+    "from": -1,
+    "count": -1,
+    "tooManyResults": false,
+    "collapsed": true,
+    "repoDetails": [{
+        "repositoryId": "orgligoj-1154",
+        "repositoryName": "orgligoj-1154 (staging: closed)",
+        "repositoryContentClass": "maven2",
+        "repositoryKind": "hosted",
+        "repositoryPolicy": "RELEASE",
+        "repositoryURL": "https://oss.sonatype.org/service/local/repositories/orgligoj-1154"
+    }, {
+        "repositoryId": "releases",
+        "repositoryName": "Releases",
+        "repositoryContentClass": "maven2",
+        "repositoryKind": "hosted",
+        "repositoryPolicy": "RELEASE",
+        "repositoryURL": "https://oss.sonatype.org/service/local/repositories/releases"
+    }],
+    "data": [{
+        "groupId": "org.ligoj.plugin",
+        "artifactId": "plugin-sample",
+        "version": "0.0.1",
+        "latestRelease": "0.0.1",
+        "latestReleaseRepositoryId": "releases",
+        "artifactHits": [{
+            "repositoryId": "releases",
+            "artifactLinks": [{
+                "extension": "pom"
+            }, {
+                "classifier": "sources",
+                "extension": "jar"
+            }]
+        }]
+    }, {
+        "groupId": "org.ligoj.plugin",
+        "artifactId": "plugin-sample",
+        "version": "0.0.0",
+        "latestRelease": "0.0.1",
+        "latestReleaseRepositoryId": "releases",
+        "artifactHits": [{
+            "repositoryId": "releases",
+            "artifactLinks": [{
+                "extension": "pom"
+            }, {
+                "classifier": "sources",
+                "extension": "jar"
+            }]
+        }]
+    }, {
+        "groupId": "org.ligoj.plugin",
+        "artifactId": "plugin-qa",
+        "version": "1.0.0",
+        "latestRelease": "1.0.0",
+        "latestReleaseRepositoryId": "releases",
+        "artifactHits": [{
+            "repositoryId": "releases",
+            "artifactLinks": [{
+                "extension": "pom"
+            }, {
+                "classifier": "sources",
+                "extension": "jar"
+            }]
+        }]
+    }]
+}

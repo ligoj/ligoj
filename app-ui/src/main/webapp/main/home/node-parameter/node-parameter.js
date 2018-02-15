@@ -86,17 +86,17 @@ define(['cascade'], function ($cascade) {
 						}
 						$element.select2('val', selections);
 					},
-					bool: function (value, $element) {
-						$element.prop('checked', value.bool);
+					bool: function (value, $element, parameter, node) {
+						$element.prop('checked', node ? value.bool : !!parameter.defaultValue);
 					},
 					tags: function (value, $element) {
 						$element.select2('tags', value.split(','));
 					},
-					text: function (value, $element) {
-						$element.val(value.text);
+					text: function (value, $element, parameter, node) {
+						$element.val(node ? value.text : (parameter.defaultValue || ''));
 					},
-					integer: function (value, $element) {
-						$element.val(value.integer);
+					integer: function (value, $element, parameter, node) {
+						$element.val((node || (typeof parameter.defaultValue === 'undefined') || parameter.defaultValue === null) ? value.integer : parameter.defaultValue);
 					}
 				},
 				renderers: {
@@ -195,9 +195,10 @@ define(['cascade'], function ($cascade) {
 		 * @param {Array} values Parameter values with parameter definition.
 		 * @param {string} node Node identifier to use for the target subscription.
 		 * @param {string} mode Mode context : link, create, none,...
+		 * @param {string} id The persisted node identifier owning the parameters. Undefined for a new mode.
 		 * @param {function} callback Optional callback(configuration) called when UI is rendered.
 		 */
-		configureParameterValues: function ($container, values, node, mode, callback) {
+		configureParameterValues: function ($container, values, node, mode, id, callback) {
 
 			// Drop required flag for nodes
 			var parameters = [];
@@ -206,7 +207,7 @@ define(['cascade'], function ($cascade) {
 				parameters.push(parameter);
 				delete parameter.mandatory;
 			}
-			current.configureParameters($container, parameters, node, mode, function (configuration) {
+			current.configureParameters($container, parameters, node, mode, id, function (configuration) {
 				for (var index = 0; index < values.length; index++) {
 					var value = values[index];
 					var parameter = value.parameter;
@@ -214,7 +215,7 @@ define(['cascade'], function ($cascade) {
 					var $group = $element.closest('.form-group');
 
 					// Set the input value
-					configuration.values[parameter.type](value, $element);
+					configuration.values[parameter.type](value, $element, parameter, id);
 
 					// Handle the secured data flag
 					if (parameter.secured && value.text === '-secured-') {
@@ -237,9 +238,10 @@ define(['cascade'], function ($cascade) {
 		 * @param {Array} parameters Required parameters to complete the subscription.
 		 * @param {string} node Node identifier to use for the target subscription.
 		 * @param {string} mode Mode context : link, create, none,...
+		 * @param {string} id The persisted node identifier owning the parameters. Undefined for a new mode.
 		 * @param {function} callback Optional callback(configuration) called when UI is rendered.
 		 */
-		configureParameters: function ($container, parameters, node, mode, callback) {
+		configureParameters: function ($container, parameters, node, mode, id, callback) {
 			current.configuration = null;
 			current.$super('requireTool')(current, node, function ($tool) {
 				/*

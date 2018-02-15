@@ -9,8 +9,4 @@
 			http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
    		    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
 
-	<import resource="classpath*:/META-INF/spring/jpa-context.xml" />
-	<import resource="classpath*:/META-INF/spring/business-context.xml" />
-	<import resource="classpath:META-INF/spring/rest-context-common.xml" />
-	<jaxrs:server id="restServer" address="/" staticSubresourceResolution="true"/>
 </beans>

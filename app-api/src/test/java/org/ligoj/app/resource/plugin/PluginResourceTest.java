@@ -4,8 +4,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -39,12 +41,15 @@ import org.ligoj.app.model.Plugin;
 import org.ligoj.app.model.PluginType;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
+import org.ligoj.app.resource.plugin.repository.Artifact;
+import org.ligoj.app.resource.plugin.repository.CentralRepositoryManager;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.model.system.SystemBench;
 import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.model.system.SystemUser;
+import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +59,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import net.sf.ehcache.CacheManager;
 
 /**
  * Test class of {@link PluginResource}
@@ -67,7 +74,7 @@ public class PluginResourceTest extends AbstractServerTest {
 	protected static final String USER_HOME_DIRECTORY = "target/test-classes/home-test";
 
 	/**
-	 * File used to be created when a plugin is downloaded from this test class
+	 * File used to be created when a plug-in is downloaded from this test class
 	 */
 	private static final File TEMP_FILE = Paths
 			.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR, "plugin-iam-node-test.jar").toFile();
@@ -79,15 +86,40 @@ public class PluginResourceTest extends AbstractServerTest {
 	private PluginRepository repository;
 
 	@Autowired
+	private CentralRepositoryManager centralRepositoryManager;
+
+	@Autowired
 	private NodeRepository nodeRepository;
 
 	@Autowired
 	private RestartEndpoint restartEndpoint;
 
+	@Autowired
+	ConfigurationResource configuration;
+
 	@BeforeEach
 	public void prepareData() throws IOException {
 		persistEntities("csv", new Class[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class },
 				StandardCharsets.UTF_8.name());
+		FileUtils.deleteQuietly(TEMP_FILE);
+		CacheManager.getInstance().getCache("plugins-last-version-nexus").removeAll();
+		CacheManager.getInstance().getCache("plugins-last-version-central").removeAll();
+		CacheManager.getInstance().getCache("configuration").removeAll();
+	}
+
+	@Test
+	public void findAllCentralOnline() throws IOException {
+		configuration.delete("plugins.repository-manager.central.search.url");
+		Assertions.assertTrue(
+				"1.0.0".compareTo(resource.getRepositoryManager("central").getLastPluginVersions().get("plugin-iam-node").getVersion()) <= 0);
+	}
+
+	@Test
+	public void getRepositoryManager() throws IOException {
+		Assertions.assertTrue(resource.getRepositoryManager("not-exist").getLastPluginVersions().isEmpty());
+		Assertions.assertNull(resource.getRepositoryManager("not-exist").getArtifactInputStream("any", "1.2.3"));
+		resource.getRepositoryManager("not-exist").invalidateLastPluginVersions();
+		Assertions.assertEquals("empty", resource.getRepositoryManager("not-exist").getId());
 	}
 
 	@Test
@@ -131,7 +163,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		pluginId.setArtifact("plugin-sample");
 		repository.saveAndFlush(pluginId);
 
-		final List<PluginVo> plugins = resource.findAll();
+		final List<PluginVo> plugins = resource.findAll("central");
 		Assertions.assertEquals(3, plugins.size());
 
 		// External plug-in service
@@ -165,7 +197,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		orphanPLugin.setVersion("1.1");
 		repository.saveAndFlush(orphanPLugin);
 
-		final List<PluginVo> plugins = resource.findAll();
+		final List<PluginVo> plugins = resource.findAll("central");
 		Assertions.assertEquals(2, plugins.size());
 
 		// Plug-in from the API
@@ -225,18 +257,6 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assertions.assertThrows(TechnicalException.class, () -> {
 			resource.configurePluginInstall(service1);
 		});
-	}
-
-	@Test
-	public void invalidateLastPLuginVersions() throws IOException {
-		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
-				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
-						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
-		httpServer.start();
-		final Map<String, MavenSearchResultItem> versions = resource.getLastPluginVersions();
-		Assertions.assertSame(versions, resource.getLastPluginVersions());
-		resource.invalidateLastPLuginVersions();
-		Assertions.assertNotSame(versions, resource.getLastPluginVersions());
 	}
 
 	@Test
@@ -412,20 +432,68 @@ public class PluginResourceTest extends AbstractServerTest {
 	@Test
 	public void installNotExists() {
 		Assertions.assertThrows(BusinessException.class, () -> {
-			newPluginResourceInstall().install("any");
+			newPluginResourceInstall().install("any", "central");
 		});
 	}
 
 	@Test
 	public void installNotExistsVersion() {
 		Assertions.assertEquals("any", Assertions.assertThrows(BusinessException.class, () -> {
-			newPluginResourceInstall().install("any", "dummy");
+			newPluginResourceInstall().install("any", "dummy", "central");
 		}).getMessage());
 	}
 
 	@Test
-	public void install() {
-		newPluginResourceInstall().install("plugin-iam-node");
+	public void installCentralOnline() throws IOException {
+		configuration.delete("plugins.repository-manager.central.artifact.url");
+		configuration.delete("plugins.repository-manager.central.search.url");
+		newPluginResourceInstall().install("plugin-iam-node", "central");
+		Assertions.assertTrue(TEMP_FILE.exists());
+	}
+
+	@Test
+	public void upload() throws IOException {
+		final InputStream input = new ByteArrayInputStream("test".getBytes("UTF-8"));
+		newPluginResourceInstall().upload(input, "plugin-sample", "1.2.9");
+		Assertions.assertTrue(TEMP_FILE.exists());
+		Assertions.assertEquals("test", FileUtils.readFileToString(TEMP_FILE, "UTF-8"));
+	}
+
+	@Test
+	public void installCentral() throws IOException {
+		httpServer.stubFor(get(urlEqualTo("/maven2/org/ligoj/plugin/plugin-sample/0.0.1/plugin-sample-0.0.1.jar"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+						.withBody(IOUtils.toByteArray(new ClassPathResource("mock-server/maven-repo/plugin-sample-0.0.1.jar").getInputStream()))));
+		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.start();
+
+		newPluginResourceInstall().install("plugin-sample", "central");
+		Assertions.assertTrue(TEMP_FILE.exists());
+	}
+
+	@Test
+	public void installNexusOnline() throws IOException {
+		configuration.delete("plugins.repository-manager.nexus.artifact.url");
+		configuration.delete("plugins.repository-manager.nexus.search.url");
+		newPluginResourceInstall().install("plugin-iam-node", "nexus");
+		Assertions.assertTrue(TEMP_FILE.exists());
+	}
+
+	@Test
+	public void installNexus() throws IOException {
+		httpServer
+				.stubFor(get(urlEqualTo("/service/local/repositories/releases/content/org/ligoj/plugin/plugin-sample/0.0.1/plugin-sample-0.0.1.jar"))
+						.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+								IOUtils.toByteArray(new ClassPathResource("mock-server/nexus-repo/plugin-sample-0.0.1.jar").getInputStream()))));
+		httpServer
+				.stubFor(get(urlEqualTo("/service/local/lucene/search?g=org.ligoj.plugin&collapseresults=true&repositoryId=releases&p=jar&c=sources"))
+						.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils
+								.toString(new ClassPathResource("mock-server/nexus-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.start();
+
+		newPluginResourceInstall().install("plugin-sample", "nexus");
 		Assertions.assertTrue(TEMP_FILE.exists());
 	}
 
@@ -535,13 +603,13 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void searchPluginsInMavenRepoNoResult() throws IOException {
-		final List<MavenSearchResultItem> result = searchPluginsInMavenRepo("no-result");
+		final List<Artifact> result = searchPluginsInMavenRepo("no-result");
 		Assertions.assertTrue(result.isEmpty(), "Search result should be empty.");
 	}
 
 	@Test
 	public void searchPluginsOnMavenRepoOneResult() throws IOException {
-		final List<MavenSearchResultItem> result = searchPluginsInMavenRepo("samp");
+		final List<Artifact> result = searchPluginsInMavenRepo("samp");
 		Assertions.assertEquals(1, result.size());
 		Assertions.assertEquals("plugin-sample", result.get(0).getArtifact());
 		Assertions.assertEquals("0.0.1", result.get(0).getVersion());
@@ -572,11 +640,58 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assertions.assertNull(newPluginResourceInstall().getParentNode("service:sample"));
 	}
 
-	private List<MavenSearchResultItem> searchPluginsInMavenRepo(final String query) throws IOException {
+	private List<Artifact> searchPluginsInMavenRepo(final String query) throws IOException {
 		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
 						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
-		return resource.search(query);
+		return resource.search(query, "central");
+	}
+
+	@Test
+	public void invalidateLastPluginVersions() throws IOException {
+		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.start();
+		final Map<String, Artifact> versions = centralRepositoryManager.getLastPluginVersions();
+		Assertions.assertSame(versions, centralRepositoryManager.getLastPluginVersions());
+		resource.invalidateLastPluginVersions("central");
+		Assertions.assertNotSame(versions, centralRepositoryManager.getLastPluginVersions());
+	}
+
+	@Test
+	public void isSafeModeHeadless() {
+		Assertions.assertFalse(new PluginResource() {
+			@Override
+			protected PluginsClassLoader getPluginClassLoader() {
+				return null;
+			}
+
+		}.isSafeMode());
+	}
+
+	@Test
+	public void isSafeModeNotSafeMode() {
+		Assertions.assertFalse(new PluginResource() {
+			@Override
+			protected PluginsClassLoader getPluginClassLoader() {
+				return Mockito.mock(PluginsClassLoader.class);
+			}
+
+		}.isSafeMode());
+	}
+
+	@Test
+	public void isSafeMode() {
+		PluginsClassLoader classLoader = Mockito.mock(PluginsClassLoader.class);
+		Mockito.doReturn(true).when(classLoader).isSafeMode();
+		Assertions.assertTrue(new PluginResource() {
+			@Override
+			protected PluginsClassLoader getPluginClassLoader() {
+				return classLoader;
+			}
+
+		}.isSafeMode());
 	}
 }

@@ -79,7 +79,7 @@ define(['cascade'], function ($cascade) {
 					_('node-parameters').find('.panel-footer.alert-info').removeClass('hidden');
 					_('node-parameters').find('.panel-footer.alert-danger').addClass('hidden');
 					_('node-create').disable();
-					current.configureParameters($container, current.model.id || parent, _('node-mode').find('.active').attr('value'));
+					current.configureParameters($container, current.model.id || parent, _('node-mode').find('.active').attr('value'), current.model.id);
 				}
 			} else {
 				// No selected tool, no available parameter
@@ -89,7 +89,7 @@ define(['cascade'], function ($cascade) {
 			}
 		},
 
-		configureParameters: function ($container, node, mode) {
+		configureParameters: function ($container, node, mode, id) {
 			$container.html('<i class="loader fa fa-spin fa-refresh fa-5"></i>');
 			$.ajax({
 				dataType: 'json',
@@ -102,7 +102,7 @@ define(['cascade'], function ($cascade) {
 						callback: function (context) {
 							current.parameterContext = context;
 							$container.empty();
-							context.configureParameterValues($container, parameterValues, node, mode, function () {
+							context.configureParameterValues($container, parameterValues, node, mode, id, function () {
 								// Configuration and validators are available
 								$container.data('dirty', false);
 								_('node-create').enable();

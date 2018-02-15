@@ -9,7 +9,7 @@ RUN set -xe \
 ARG GROUP_ID="org.ligoj.app"
 ARG ARTIFACT_ID="app-api"
 ARG NEXUS_HOST="oss.sonatype.org"
-ARG VERSION="1.7.2"
+ARG VERSION="1.7.5"
 ARG NEXUS_URL="https://${NEXUS_HOST}"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
@@ -33,6 +33,22 @@ EXPOSE ${SERVER_PORT}
 CMD mkdir -p "$LIGOJ_HOME" && \
   java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
     --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
+    --add-opens java.base/jdk.internal.module=ALL-UNNAMED \
+    --add-opens java.base/jdk.internal.ref=ALL-UNNAMED \
+    --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED \
+    --add-opens java.base/jdk.internal.ref=ALL-UNNAMED \
+    --add-opens java.base/jdk.internal.perf=ALL-UNNAMED \
+    --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED \
+    --add-opens java.base/java.lang=ALL-UNNAMED \
+    --add-opens java.base/java.lang.package=ALL-UNNAMED \
+    --add-opens java.base/java.lang.module=ALL-UNNAMED \
+    --add-opens java.base/java.util=ALL-UNNAMED \
+    --add-opens java.base/jdk.internal.math=ALL-UNNAMED \
+    --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED \
+    --add-opens java.xml/javax.xml.catalog=ALL-UNNAMED \
+    --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
+    --add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED \
+    -Djavax.net.ssl.trustStorePassword=changeit \
     -Dserver.address="${SERVER_HOST}" \
     -Dserver.port="${SERVER_PORT}" \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
@@ -40,4 +56,4 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
 HEALTHCHECK --interval=10s --timeout=2s --retries=5 --start-period=20s \
-CMD curl -v --silent "http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health" 2>&1 | grep UP
+CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health || exit 1

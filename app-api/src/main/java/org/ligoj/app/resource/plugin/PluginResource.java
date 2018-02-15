@@ -2,6 +2,7 @@ package org.ligoj.app.resource.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -22,16 +23,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.cache.annotation.CacheRemoveAll;
-import javax.cache.annotation.CacheResult;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,8 +42,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.api.SubscriptionMode;
@@ -57,12 +56,14 @@ import org.ligoj.app.model.Plugin;
 import org.ligoj.app.model.PluginType;
 import org.ligoj.app.model.Subscription;
 import org.ligoj.app.resource.node.NodeResource;
+import org.ligoj.app.resource.plugin.repository.Artifact;
+import org.ligoj.app.resource.plugin.repository.EmptyRepositoryManager;
+import org.ligoj.app.resource.plugin.repository.RepositoryManager;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.SpringUtils;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
-import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.context.ApplicationContext;
@@ -71,23 +72,22 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Persistable;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Manage plug-in life-cycle.
+ * 
+ * @see <a href="https://repository.sonatype.org/nexus-indexer-lucene-plugin/default/docs/path__lucene_search.html">OSS
+ *      lucene_search</a>
  */
-@Path("/plugin")
+@Path("/system/plugin")
 @Slf4j
 @Component
 @Transactional
 @Produces(MediaType.APPLICATION_JSON)
 public class PluginResource {
 
-	private static final String DEFAULT_PLUGIN_URL = "http://central.maven.org/maven2/org/ligoj/plugin/";
-
-	private static final String DEFAULT_PLUGIN_SEARCH_URL = "http://search.maven.org/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin";
+	private static final RepositoryManager EMPTY_REPOSITORY = new EmptyRepositoryManager();
 
 	@Autowired
 	private NodeRepository nodeRepository;
@@ -102,9 +102,6 @@ public class PluginResource {
 	protected CsvForJpa csvForJpa;
 
 	@Autowired
-	private ConfigurationResource configuration;
-
-	@Autowired
 	protected EntityManager em;
 
 	@Autowired
@@ -114,41 +111,25 @@ public class PluginResource {
 	private ApplicationContext context;
 
 	/**
-	 * Return the plug-ins download URL.
-	 * 
-	 * @return The plug-ins download URL. Ends with "/".
-	 */
-	private String getPluginUrl() {
-		return StringUtils.appendIfMissing(ObjectUtils.defaultIfNull(configuration.get("plugins.url"), DEFAULT_PLUGIN_URL), "/");
-	}
-
-	/**
-	 * Return the plug-ins search URL.
-	 * 
-	 * @return The plug-ins search URL.
-	 */
-	private String getPluginSearchUrl() {
-		return ObjectUtils.defaultIfNull(configuration.get("plugins.search.url"), DEFAULT_PLUGIN_SEARCH_URL);
-	}
-
-	/**
 	 * Return all plug-ins with details.
 	 *
+	 * @param repository
+	 *            The repository identifier to query.
 	 * @return All plug-ins with details.
 	 */
 	@GET
-	public List<PluginVo> findAll() throws IOException {
+	public List<PluginVo> findAll(@QueryParam("repository") @DefaultValue("central") final String repository) throws IOException {
 		// Get the available plug-ins
-		final Map<String, MavenSearchResultItem> lastVersion = context.getBean(PluginResource.class).getLastPluginVersions();
+		final Map<String, Artifact> lastVersion = getRepositoryManager(repository).getLastPluginVersions();
 
 		// Get the installed plug-in features
-		return repository.findAll().stream()
+		return this.repository.findAll().stream()
 				.map(p -> toVo(lastVersion, p, context.getBeansOfType(FeaturePlugin.class).values().stream()
 						.filter(f -> p.getKey().equals(f.getKey())).findFirst().orElse(null)))
 				.filter(Objects::nonNull).sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
 	}
 
-	private PluginVo toVo(final Map<String, MavenSearchResultItem> lastVersion, final Plugin p, final FeaturePlugin feature) {
+	private PluginVo toVo(final Map<String, Artifact> lastVersion, final Plugin p, final FeaturePlugin feature) {
 		if (feature == null) {
 			// Plug-in is no more available or in fail-safe mode
 			return null;
@@ -164,7 +145,7 @@ public class PluginResource {
 		vo.setPlugin(p);
 
 		// Expose the resolve newer version
-		vo.setNewVersion(Optional.ofNullable(lastVersion.get(p.getArtifact())).map(MavenSearchResultItem::getVersion)
+		vo.setNewVersion(Optional.ofNullable(lastVersion.get(p.getArtifact())).map(Artifact::getVersion)
 				.filter(v -> PluginsClassLoader.toExtendedVersion(v).compareTo(PluginsClassLoader.toExtendedVersion(p.getVersion())) > 0)
 				.orElse(null));
 
@@ -179,29 +160,30 @@ public class PluginResource {
 	}
 
 	/**
-	 * Query and get the last version of all available plug-ins.
-	 * 
-	 * @return All plug-ins with their last available version. Key is the plug-in identifier.
-	 */
-	@CacheResult(cacheName = "plugins-last-version")
-	public Map<String, MavenSearchResultItem> getLastPluginVersions() throws IOException {
-		final String searchResult = StringUtils.defaultString(new CurlProcessor().get(getPluginSearchUrl()), "{\"response\":{\"docs\":[]}}}");
-		// Extract artifacts
-		final ObjectMapper jsonMapper = new ObjectMapper();
-		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), MavenSearchResultItem[].class))
-				.collect(Collectors.toMap(MavenSearchResultItem::getArtifact, Function.identity()));
-	}
-
-	/**
 	 * Search plug-ins in repository which can be installed.
 	 *
+	 * @param repository
+	 *            The repository identifier to query.
 	 * @return All plug-ins artifacts name.
 	 */
 	@GET
 	@Path("search")
-	public List<MavenSearchResultItem> search(@QueryParam("q") final String query) throws IOException {
-		return SpringUtils.getBean(PluginResource.class).getLastPluginVersions().values().stream().filter(a -> a.getArtifact().contains(query))
+	public List<Artifact> search(@QueryParam("q") final String query, @QueryParam("repository") @DefaultValue("central") final String repository)
+			throws IOException {
+		return getRepositoryManager(repository).getLastPluginVersions().values().stream().filter(a -> a.getArtifact().contains(query))
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Return the {@link RepositoryManager} with the given identifier.
+	 * 
+	 * @param repository
+	 *            The repository identifier.
+	 * @return The {@link RepositoryManager} with the given identifier or {@link #EMPTY_REPOSITORY}
+	 */
+	protected RepositoryManager getRepositoryManager(final String repository) {
+		return SpringUtils.getApplicationContext().getBeansOfType(RepositoryManager.class).values().stream().filter(r -> r.getId().equals(repository))
+				.findFirst().orElse(EMPTY_REPOSITORY);
 	}
 
 	/**
@@ -218,11 +200,10 @@ public class PluginResource {
 	/**
 	 * Request a reset of plug-in cache meta-data
 	 */
-	@POST
-	@Path("remote-plugin-cache")
-	@CacheRemoveAll(cacheName = "plugins-last-version")
-	public void invalidateLastPLuginVersions() {
-		// Nothing to do
+	@PUT
+	@Path("cache")
+	public void invalidateLastPluginVersions(@QueryParam("repository") @DefaultValue("central") final String repository) {
+		getRepositoryManager(repository).invalidateLastPluginVersions();
 	}
 
 	/**
@@ -247,20 +228,51 @@ public class PluginResource {
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
 	 * @param version
 	 *            The version to install.
+	 * @param repository
+	 *            The repository identifier to query.
+	 * @throws IOException
+	 *             When the file cannot be read from the repository.
 	 */
 	@POST
 	@Path("{artifact:[\\w-]+}/{version:[\\w-]+}")
-	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version) {
-		final String url = getPluginUrl() + artifact + "/" + version + "/" + artifact + "-" + version + ".jar";
+	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version,
+			@QueryParam("repository") @DefaultValue("central") final String repository) throws IOException {
+		install(null, artifact, version, repository);
+	}
+
+	/**
+	 * Upload a file of entries to create or update users. The whole entry is replaced.
+	 * 
+	 * @param input
+	 *            The Maven artifact file.
+	 * @param pluginId
+	 *            The Maven <code>artifactId</code>.
+	 * @param version
+	 *            The Maven <code>version</code>.
+	 */
+	@PUT
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Path("upload")
+	public void upload(@Multipart(required = true, value = "plugin-file") final InputStream input,
+			@Multipart(required = true, value = "plugin-id") final String pluginId,
+			@Multipart(required = true, value = "plugin-version") final String version) {
+		install(input, pluginId, version, "(local)");
+	}
+
+	private void install(final InputStream input, final String artifact, final String version, final String repository) {
 		final PluginsClassLoader classLoader = getPluginClassLoader();
 		final java.nio.file.Path target = classLoader.getPluginDirectory().resolve(artifact + "-" + version + ".jar");
-		log.info("Downloading plugin {} v{} from {} to ", artifact, version, url);
+		log.info("Download plug-in {} v{ from {}}", artifact, version, repository);
 		try {
+			// Get the right input
+			final InputStream input2 = input == null ? getRepositoryManager(repository).getArtifactInputStream(artifact, version) : input;
 			// Download and copy the file, note the previous version is not removed
-			Files.copy(new URL(url).openStream(), target, StandardCopyOption.REPLACE_EXISTING);
-			log.info("Plugin {} v{} has been downloaded, restart is required", artifact, version);
-		} catch (final IOException ioe) {
-			throw new BusinessException(artifact, String.format("Cannot be downloaded from remote server %s", artifact), ioe);
+			Files.copy(input2, target, StandardCopyOption.REPLACE_EXISTING);
+			log.info("Plugin {} v{} has been installed, restart is required", artifact, version);
+		} catch (final Exception ioe) {
+			// Installation failed, either download, either FS error
+			log.info("Unable to install plugin {} v{} from {}", artifact, version, repository, ioe);
+			throw new BusinessException(artifact, String.format("Cannot be installed", artifact), ioe);
 		}
 	}
 
@@ -269,18 +281,21 @@ public class PluginResource {
 	 * 
 	 * @param artifact
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 * @param repository
+	 *            The repository identifier to query.
+	 * @throws IOException
+	 *             When install failed.
 	 */
 	@POST
 	@Path("{artifact:[\\w-]+}")
-	public void install(@PathParam("artifact") final String artifact) {
-		final String metaData = StringUtils.defaultString(new CurlProcessor().get(getPluginUrl() + artifact + "/maven-metadata.xml"), "");
-		final Matcher matcher = Pattern.compile("<latest>([^<]+)</latest>").matcher(metaData);
-		if (!matcher.find()) {
-			// Plug-in not found
-			throw new BusinessException(
-					String.format("Versions discovery cannot be performed from the remote server %s for plugin %s", getPluginUrl(), artifact));
+	public void install(@PathParam("artifact") final String artifact, @QueryParam("repository") @DefaultValue("central") final String repository)
+			throws IOException {
+		final Artifact resultItem = getRepositoryManager(repository).getLastPluginVersions().get(artifact);
+		if (resultItem == null) {
+			// Plug-in not found, or not the last version
+			throw new BusinessException(String.format("No latest version found for plug-in %s on repository %s", artifact, repository));
 		}
-		install(artifact, matcher.group(1));
+		install(artifact, resultItem.getVersion(), repository);
 	}
 
 	/**
@@ -288,6 +303,15 @@ public class PluginResource {
 	 */
 	protected PluginsClassLoader getPluginClassLoader() {
 		return PluginsClassLoader.getInstance();
+	}
+
+	/**
+	 * Indicate the safe mode is enabled.
+	 * 
+	 * @return <code>true</code> when the safe mode is enabled.
+	 */
+	protected boolean isSafeMode() {
+		return getPluginClassLoader() != null && getPluginClassLoader().isSafeMode();
 	}
 
 	/**
@@ -302,7 +326,7 @@ public class PluginResource {
 	 */
 	@EventListener
 	public void refreshPlugins(final ContextRefreshedEvent event) throws Exception {
-		if (getPluginClassLoader() != null && getPluginClassLoader().isSafeMode()) {
+		if (isSafeMode()) {
 			// Ignore this refresh
 			log.info("SAFE MODE - Plugins state refresh is disabled");
 			return;
