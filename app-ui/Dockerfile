@@ -1,4 +1,4 @@
-FROM openjdk:9-jre
+FROM openjdk:9-jre-slim
 LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
 
 RUN set -xe \
