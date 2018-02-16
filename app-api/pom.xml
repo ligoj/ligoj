@@ -21,9 +21,11 @@
 	</scm>
 	<properties>
 		<api.version>2.2.1</api.version>
+		<cxf.version>3.2.2</cxf.version>
 		<jackson.version>2.9.4</jackson.version>
 		<spring-boot.version>2.0.0.RC1</spring-boot.version>
 		<spring-security.version>5.0.1.RELEASE</spring-security.version>
+		<swagger.version>3.9.3</swagger.version>
 	</properties>
 
 	<dependencyManagement>
@@ -58,6 +60,23 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<!-- Swagger -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>swagger-ui</artifactId>
+			<version>${swagger.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-json-basic</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-service-description-swagger</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
