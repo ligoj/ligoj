@@ -548,6 +548,10 @@ define(['cascade'], function ($cascade) {
 				extend: 'collection',
 				text: '<i class="fa fa-object-group"></i>',
 				fade: 0,
+				attr: {
+					'title': current.$messages['group-by'],
+					'data-toggle': 'tooltip'
+				},
 				autoClose : true,
 				buttons: [{
 					text: '<i class="fa fa-magic fa-fw"></i> ' + current.$messages['group-by-auto'],
