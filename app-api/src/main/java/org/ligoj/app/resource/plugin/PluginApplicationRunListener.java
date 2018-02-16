@@ -23,6 +23,8 @@ public class PluginApplicationRunListener implements SpringApplicationRunListene
 	 *            The current application.
 	 * @param args
 	 *            The application arguments.
+	 * @throws IOException
+	 *             When reading plug-ins directory
 	 */
 	public PluginApplicationRunListener(final SpringApplication application, final String... args) throws IOException {
 		if (PluginsClassLoader.getInstance() == null) {

@@ -116,6 +116,8 @@ public class PluginResource {
 	 * @param repository
 	 *            The repository identifier to query.
 	 * @return All plug-ins with details.
+	 * @throws IOException
+	 *             When the last version index file cannot be be retrieved.
 	 */
 	@GET
 	public List<PluginVo> findAll(@QueryParam("repository") @DefaultValue("central") final String repository) throws IOException {
@@ -129,6 +131,9 @@ public class PluginResource {
 				.filter(Objects::nonNull).sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
 	}
 
+	/**
+	 * Build the plug-in information from the plug-in itself and the last version being available.
+	 */
 	private PluginVo toVo(final Map<String, Artifact> lastVersion, final Plugin p, final FeaturePlugin feature) {
 		if (feature == null) {
 			// Plug-in is no more available or in fail-safe mode
@@ -162,13 +167,17 @@ public class PluginResource {
 	/**
 	 * Search plug-ins in repository which can be installed.
 	 *
+	 * @param query
+	 *            The optional searched term..
 	 * @param repository
 	 *            The repository identifier to query.
 	 * @return All plug-ins artifacts name.
+	 * @throws IOException
+	 *             When the last version index file cannot be be retrieved.
 	 */
 	@GET
 	@Path("search")
-	public List<Artifact> search(@QueryParam("q") final String query, @QueryParam("repository") @DefaultValue("central") final String repository)
+	public List<Artifact> search(@QueryParam("q") @DefaultValue("") final String query, @QueryParam("repository") @DefaultValue("central") final String repository)
 			throws IOException {
 		return getRepositoryManager(repository).getLastPluginVersions().values().stream().filter(a -> a.getArtifact().contains(query))
 				.collect(Collectors.toList());
@@ -199,6 +208,8 @@ public class PluginResource {
 
 	/**
 	 * Request a reset of plug-in cache meta-data
+	 * @param repository
+	 *            The repository identifier to reset.
 	 */
 	@PUT
 	@Path("cache")
@@ -300,6 +311,7 @@ public class PluginResource {
 
 	/**
 	 * Return the current plug-in class loader.
+	 * @return The current plug-in class loader.
 	 */
 	protected PluginsClassLoader getPluginClassLoader() {
 		return PluginsClassLoader.getInstance();
@@ -403,10 +415,6 @@ public class PluginResource {
 	 *             if an I/O error occurs
 	 * @throws IOException
 	 *             if an I/O error occurs
-	 * @throws SecurityException
-	 *             In the case of the default provider, and a security manager is
-	 *             installed, its {@link SecurityManager#checkRead(String) checkRead}
-	 *             method denies read access to the file.
 	 */
 	protected String getLastModifiedTime(final FeaturePlugin plugin) throws IOException, URISyntaxException {
 		return Files.getLastModifiedTime(Paths.get(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toURI())).toString();

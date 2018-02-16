@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Base class for remote repository manager.
+ */
 @Slf4j
 public abstract class AbstractRemoteRepositoryManager implements RepositoryManager {
 
@@ -56,6 +59,12 @@ public abstract class AbstractRemoteRepositoryManager implements RepositoryManag
 	/**
 	 * Return the plug-ins download URL.
 	 * 
+	 * @param artifact
+	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 * @param version
+	 *            The version to install.
+	 * @param defaultUrl
+	 *            The default artifact base URL.
 	 * @return The plug-ins download URL. Ends with "/".
 	 */
 	protected String getArtifactUrl(String artifact, String version, final String defaultUrl) {
@@ -69,15 +78,15 @@ public abstract class AbstractRemoteRepositoryManager implements RepositoryManag
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
 	 * @param version
 	 *            The version to install.
-	 * @param defaultArtifactUrl
+	 * @param defaultUrl
 	 *            The default artifact base URL.
 	 * @return The opened {@link InputStream} of the artifact to download.
 	 * @see #getArtifactlBaseUrl(String)
 	 * @throws IOException
 	 *             When download failed.
 	 */
-	public InputStream getArtifactInputStream(String artifact, String version, final String defaultArtifactUrl) throws IOException {
-		final String url = getArtifactUrl(artifact, version, defaultArtifactUrl);
+	public InputStream getArtifactInputStream(String artifact, String version, final String defaultUrl) throws IOException {
+		final String url = getArtifactUrl(artifact, version, defaultUrl);
 		log.info("Resolved remote URL is {}", url);
 		return new URL(url).openStream();
 	}

@@ -39,6 +39,9 @@ public class WebjarsServlet extends HttpServlet {
 	 */
 	private final Map<String, String> mimeTypes = new HashMap<>();
 
+	/**
+	 * Constructor registering additional MIME types.
+	 */
 	public WebjarsServlet() {
 		// Register additional MIME types
 		mimeTypes.put("woff", "application/font-woff");
@@ -85,7 +88,11 @@ public class WebjarsServlet extends HttpServlet {
 	}
 
 	/**
-	 * Guess the MIME type from the file name
+	 * Guess the MIME type from the file name.
+	 * 
+	 * @param filename
+	 *            The requested file name.
+	 * @return The resolved MIME type. May be <code>null</code>.
 	 */
 	protected String guessMimeType(final String filename) {
 		// First, get the mime type provided by the Servlet container
@@ -117,7 +124,7 @@ public class WebjarsServlet extends HttpServlet {
 	 * 
 	 * @param webjarsResourceURI
 	 *            Requested resource's URI.
-	 * @return file name
+	 * @return The resolved file name.
 	 */
 	private String getFileName(final String webjarsResourceURI) {
 		return Paths.get(webjarsResourceURI).toFile().getName();
