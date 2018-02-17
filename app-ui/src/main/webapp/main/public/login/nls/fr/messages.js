@@ -35,6 +35,7 @@ define({
 		"password" : "Mots de passe différents",
 		"password-complexity" : "Mot de passe trop faible<br/>8 ou plus majuscules, minuscules et chiffres",
 		"password-complexity-validation" : "Trop faible, 8 ou plus majuscules, minuscules et chiffres",
+		"password-policy" : "Le nouveau mot de passe est dans l'historique des anciens mots de passe ou le mot de passe est trop jeune pour changer",
 		"login" : "Authentification échouée",
 		"mail" : "Mail non envoyé",
 		"concurrency" : "Compte utilisé ailleurs en ce moment",
