@@ -56,6 +56,9 @@ define([
 						// CAPTCHA failed
 						current.error(messages.error.cookie);
 						$('#captcha').val('').focus();
+					} else if (error['new-password']) {
+						current.error(messages.error['password-in-history']);
+						current.focusPassword();
 					} else {
 						// Other REST error
 						current.error(messages.error.captcha);
