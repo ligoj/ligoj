@@ -23,9 +23,10 @@
 }
 .qrcode-toggle {
 	float: right;
-	top: -26px;
-	right: -21px;
+	top: -28px;
+	right: -19px;
 	position: relative;
+	z-index: 1;
 }
 .qrcode-toggle .qrcode {
 	position: absolute;
@@ -85,4 +86,10 @@ div.dt-button-background {
 }
 .group-start:not(.row-group-collapsed) .toggle i.fa-plus-square-o {
 	display: none;
+}
+.details-audit {
+	float: right;
+	height: 0;
+	position: relative;
+	top: -8px;
 }

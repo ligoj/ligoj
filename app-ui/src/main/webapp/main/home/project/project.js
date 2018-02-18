@@ -376,7 +376,7 @@ define(['cascade'], function ($cascade) {
 			$('.cascade-title').text(current.$messages.title + (project ? ' / ' + project.name : ''));
 
 			if (project.description) {
-				_('detail-description').text(project.description).removeClass('hidden');
+				_('detail-description').html(project.description).removeClass('hidden');
 			} else {
 				_('detail-description').addClass('hidden');
 			}
