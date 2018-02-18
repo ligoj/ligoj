@@ -19,7 +19,7 @@ define(['jquery', 'cascade', 'i18n!bootbox/nls/bootbox-messages', 'bootbox/bootb
 			buttons: {
 				danger: {
 					label: $cascade.$messages.delete,
-					className: 'btn-danger btn-raised',
+					className: 'btn-primary btn-danger btn-raised',
 					callback: callback
 				},
 				cancel: {
