@@ -1,6 +1,7 @@
 define({
 	"title" : "Projet",
 	"configure" : "Configurer",
+	"configure-present" : "Configurer (a déjà une configuration)",
 	"pkey" : "Clé",
 	"internal-key" : "Clé interne",
 	"manager" : "Gestionnaire",

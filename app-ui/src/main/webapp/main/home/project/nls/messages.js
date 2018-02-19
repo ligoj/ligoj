@@ -2,6 +2,7 @@ define({
 	"root" : {
 		"title" : "Project",
 		"configure" : "Configure",
+		"configure-present" : "Configure (has configuration)",
 		"pkey" : "Key",
 		"internal-key" : "Internal key",
 		"manager" : "Manager",
