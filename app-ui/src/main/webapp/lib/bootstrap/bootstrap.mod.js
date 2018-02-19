@@ -3,7 +3,7 @@ define([
 ], function ($, $cascade) {
 	// Global handler for better bootstrap implicit experience
 	$('body').popover({selector: '[data-toggle="popover"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body'});
-	$('body').tooltip({selector: '[data-toggle="tooltip"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body'});
+	$('body').tooltip({selector: '[data-toggle="tooltip"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body', animation: false});
 	
 	var closeTooltips = function() {
 		$('[data-toggle="tooltip"][aria-describedby]').each(function() {
