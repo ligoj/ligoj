@@ -6,6 +6,7 @@ define([
 		lastAjaxReceive: {},
 		lastAjaxSend: {},
 		loginMessages: null,
+		isLoginPrompBeingDisplayed: false,
 
 		/**
 		 * Return error messages.
@@ -61,6 +62,7 @@ define([
 					if (data.success) {
 						_('_login').modal('hide').remove();
 						notifyManager.clear();
+						current.isLoginPrompBeingDisplayed = false;
 						notifyManager.notify(current.loginMessages['success-login']);
 						location.reload();
 					}
@@ -76,7 +78,7 @@ define([
 		},
 
 		isLoginPrompDisplayed: function () {
-			return _('_login').length !== 0 && $('button[data-target="#_login"]').length !== 0;
+			return (_('_login').length !== 0 && $('button[data-target="#_login"]').length !== 0) || current.isLoginPrompBeingDisplayed;
 		},
 
 		/**
@@ -84,25 +86,24 @@ define([
 		 */
 		showAuthenticationAlert: function () {
 			if (!current.isLoginPrompDisplayed()) {
+				current.isLoginPrompBeingDisplayed = true;
 				require([
 					'text!main/public/login/login-popup.html', 'i18n!main/public/login/nls/messages'
 				], function (html, messages) {
 					current.loginMessages = messages;
-					if (!current.isLoginPrompDisplayed()) {
-						$('body').first().append(Handlebars.compile(html)(messages));
-						var $popup = _('_login');
-						$cascade.trigger('html', $popup);
-						$popup.on('show', function () {
-							$('.modal').not($popup).modal('hide');
-							_('_login_msgbox').removeClass('label-important').removeClass('label-info').hide();
-						}).on('shown', function () {
-							_('_login_username').focus();
-						}).on('hidden', function () {
-							_('_login').remove();
-						});
-						_('_login_save').removeClass('disabled').on('click', current.login);
-						notifyManager.notify(errorMessages['error401-details'], errorMessages.error401, 'error', 'toast-top-right', -1);
-					}
+					$('body').first().append(Handlebars.compile(html)(messages));
+					var $popup = _('_login');
+					$cascade.trigger('html', $popup);
+					$popup.on('show', function () {
+						$('.modal').not($popup).modal('hide');
+						_('_login_msgbox').removeClass('label-important').removeClass('label-info').hide();
+					}).on('shown', function () {
+						_('_login_username').focus();
+					}).on('hidden', function () {
+						_('_login').remove();
+					});
+					_('_login_save').removeClass('disabled').on('click', current.login);
+					notifyManager.notify(errorMessages['error401-details'], errorMessages.error401, 'error', 'toast-top-right', -1);
 				});
 			}
 		},
@@ -188,7 +189,6 @@ define([
 			} else if (xhr.status === 503) {
 				// Server resource issue
 				// A required resource cause the service unavailable
-				traceLog('xhr.status === 503');
 				if (current.isJsonText(xhr.responseText)) {
 					// A JSON formated response from business server
 					errorObj = JSON.parse(xhr.responseText);
