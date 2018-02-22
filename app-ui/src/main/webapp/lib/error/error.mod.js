@@ -38,7 +38,7 @@ define([
 		},
 
 		manageScriptError: function (message, url, line) {
-			traceLog('Uncaught error : ' + message + ':' + line);
+			traceLog('Uncaught error : ' + message + ':' + line, url + ':' + line);
 			notifyManager && notifyManager.notifyDanger(message + '<br/>URL : ' + url + '<br/>Line : ' + line, errorMessages.internal);
 		},
 		manageSecurityError: function (url) {
