@@ -101,23 +101,24 @@ define(['cascade'], function ($cascade) {
 		requireTool: function (context, node, callback) {
 			// First, load service dependencies
 			var transaction = context.$transaction;
-			current.requireService(context, node, function ($current) {
-				if (typeof $current === 'undefined') {
+			current.requireService(context, node, function ($service) {
+				if (typeof $service === 'undefined') {
 					callback && callback();
 					return;
 				}
+
 				// Then, load tool dependencies
 				var service = current.getServiceNameFromId(node);
 				var tool = current.getToolNameFromId(node);
-				$cascade.loadFragment($current, transaction, 'main/service/' + service + '/' + tool, tool, {
-					callback: function($context) {
-						$context.node = 'service:' + service + ':' + ':' + tool;
-						callback && callback($context);
+				$cascade.loadFragment($service, transaction, 'main/service/' + service + '/' + tool, tool, {
+					callback: function($tool) {
+						$tool.node = 'service:' + service + ':' + ':' + tool;
+						callback && callback($tool, $service);
 					},
 					errorCallback: function(err) {
 						errorManager.ignoreRequireModuleError(err.requireModules);
 						errorManager.ignoreRequireModuleError(['main/service/' + service + '/' + tool + '/nls/messages']);
-						callback && callback();
+						callback && callback(null, $service);
 					},
 					plugins: ['css', 'i18n', 'partial', 'js']
 				});
@@ -330,9 +331,10 @@ define(['cascade'], function ($cascade) {
 			}
 
 			// Build the content
-			current.$child && current.requireTool(current.$child, subscription.node.id, function ($tool) {
-				// Render common UI of this tool
-				current.renderTool($tool);				
+			current.$child && current.requireTool(current.$child, subscription.node.id, function ($tool, $service) {
+				// Render common UI of this tool/service
+				current.renderOnce($service, 'service');				
+				current.renderOnce($tool, 'tool');				
 
 				var renderDetailsFunction = 'renderDetails' + filter.capitalize();
 				var renderFunction = 'render' + filter.capitalize();
@@ -364,21 +366,24 @@ define(['cascade'], function ($cascade) {
 		},
 		
 		/**
-		 * Render the tool feature, only once per tool.
-		 * @param {object} $tool The tool's context.
+		 * Render the tool or service feature, only once per tool or service.
+		 * @param {object} $context The tool or service's context.
+		 * @param {string} scope 'tool' or 'service'.
 		 */
-		renderTool: function($tool) {
-			if ((typeof $tool === 'undefined') || (!$tool.$view.is('.render-tool') && $tool.$view.find('.render-tool').length === 0) || current.$view.find('.render-tool.' + $tool.node.replace(/:/g, '-')).length === 1) {
+		renderOnce: function($context, scope) {
+			var sopeClass = 'render-' + scope;
+			var sopeSelector = '.' + sopeClass;
+			if ((typeof $context === 'undefined') || (!$context.$view.is(sopeSelector) && $context.$view.find(sopeSelector).length === 0) || current.$view.find(sopeSelector + '.' + $context.node.replace(/:/g, '-')).length === 1) {
 				// This feature is not supported or has already been already rendered
 				return;
 			}
-			// Add the view of this tool
-			var $view = ($tool.$view.is('.render-tool') ? $tool.$view : $tool.$view.find('.render-tool')).clone().addClass($tool.node.replace(/:/g, '-'));
+			// Add the view of this scope
+			var $view = ($context.$view.is(sopeSelector) ? $context.$view : $context.$view.find(sopeSelector)).clone().addClass($context.node.replace(/:/g, '-'));
 			current.$view.append($view);
 
-			if (typeof $tool.renderTool === 'function') {
-				// Render this tool
-				$tool.renderTool($view);
+			if (typeof $context[sopeClass] === 'function') {
+				// Render this scope
+				$context[sopeClass]($view);
 			}
 		},
 
