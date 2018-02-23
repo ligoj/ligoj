@@ -7,7 +7,7 @@ define({
 		"error0" : "Offline mode, no business server available",
 		"error400" : "Validation error",
 		"error401" : "Authentication required",
-		"error401-details" : "Your session has expired, you have to login<br/><button class='btn btn-primary btn-raised' data-toggle='modal' data-#target='_login'>Connection</button>",
+		"error401-details" : "Your session has expired, you have to login<br/><button class='btn btn-primary btn-raised' data-toggle='modal' data-target='#_login'>Connection</button>",
 		"error403" : "Permission required",
 		"error403-details" : "You don't have the authorizations to permform this action",
 		"error404" : "Business service not available",

@@ -48,7 +48,7 @@ define([
 		},
 
 		login: function () {
-			_('_login_save').addClass('disabled').off('click');
+			_('_login_save').disable().off('click');
 			_('_login_msgbox').removeClass('label-important').addClass('label-info').text(current.loginMessages.validating).show();
 			$.ajax({
 				type: 'POST',
@@ -72,7 +72,7 @@ define([
 					_('_login_password').focus();
 				},
 				complete: function () {
-					_('_login_save').removeClass('disabled').on('click', current.login);
+					_('_login_save').enable().on('click', current.login);
 				}
 			});
 		},
@@ -102,7 +102,7 @@ define([
 					}).on('hidden', function () {
 						_('_login').remove();
 					});
-					_('_login_save').removeClass('disabled').on('click', current.login);
+					_('_login_save').enable().on('click', current.login);
 					notifyManager.notify(errorMessages['error401-details'], errorMessages.error401, 'error', 'toast-top-right', -1);
 				});
 			}
