@@ -77,7 +77,7 @@ define({
 	'all': 'Tous',
 	'fullscreen': 'Plein écran',
 	'exit-fullscreen': 'Sortir du plein écran',
-	'reportBug': 'Rapporter une anomalie ou une demande',
+	'reportBug': 'Rapporter une anomalie',
 	'members': 'Membres',
 	'company': 'Entité',
 	'node': 'Noeud',

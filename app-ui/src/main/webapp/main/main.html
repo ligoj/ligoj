@@ -20,14 +20,7 @@
 							<a href="logout">{{menu.logout}}</a>
 						</li>
 						<li>
-							<a href="#/api">{{menu.api}}</a>
-						</li>
-						<li>
 							<a href="#/id/user">{{menu.profile}}</a>
-						</li>
-						<li role="separator" class="divider"></li>
-						<li>
-							<a target="blank" href="//jira/secure/IssueNavigator.jspa?reset=true&amp;jqlQuery=project+%3D+SAAS+AND+fixVersion+%3D+%220.0.0%22+ORDER+BY+updated+DESC%2C+priority+DESC%2C+created+ASC&amp;mode=hide" id="_version"><i class="fa fa-lock menu-icon"></i>0.0.0</a>
 						</li>
 					</ul>
 				</li>
@@ -41,8 +34,28 @@
 						</span>
 					</a>
 				</li>
-				<li data-container="body" data-toggle="tooltip" title="{{reportBug}}" data-placement="bottom">
-					<a target="blank" href="https://github.com/ligoj/ligoj/issues"><i class="fa fa-bug icon-info"></i></a>
+				<li class="dropdown">
+					<a class="navbar-link" data-toggle="dropdown"><i class="fa fa-question-circle icon-info"></i></a>
+					<ul class="dropdown-menu">
+						<li>
+							<a target="blank" href="https://github.com/ligoj/ligoj/issues"><i class="fa fa-bug menu-icon"></i>{{reportBug}}</a>
+						</li>
+						<li>
+							<a href="#/api">{{menu.api}}</a>
+						</li>
+						<li role="separator" class="divider"></li>
+						<li>
+							<a target="blank" href="https://github.com/ligoj/ligoj/releases/tag/0.0.0" id="_version"><i class="fa fa-lock menu-icon"></i>0.0.0</a>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a class="navbar-link" data-toggle="dropdown"><i class="fa fa-cog icon-info"></i></a>
+					<ul class="dropdown-menu">
+						<li class="system">
+							<a href="#/system">{{menu.administration}}</a>
+						</li>
+					</ul>
 				</li>
 			</ul>
 			<ul class="nav navbar-nav">
@@ -51,9 +64,6 @@
 				</li>
 				<li>
 					<a href="#/id">{{menu.id}}</a>
-				</li>
-				<li class="system">
-					<a href="#/system">{{menu.administration}}</a>
 				</li>
 			</ul>
 		</div>

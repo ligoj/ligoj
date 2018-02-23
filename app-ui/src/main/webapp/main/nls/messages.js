@@ -79,7 +79,7 @@ define({
 		'all': 'All',
 		'fullscreen': 'Fullscreen',
 		'exit-fullscreen': 'Exit fullscreen',
-		'reportBug': 'Report an issue or a request ',
+		'reportBug': 'Report an issue ',
 		'members': 'Members',
 		'company': 'Company',
 		'node': 'Node',
