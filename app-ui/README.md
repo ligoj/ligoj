@@ -28,35 +28,35 @@ Note: you can run this command either from the root module, either from the "app
 Test the integration with a running API end-point
 
 ```
-java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar target/app-ui-1.7.5.war
+java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar target/app-ui-1.7.6.war
 ```
 
 # Build Docker image
 
 ```
-docker build -t ligoj/ligoj-ui:1.7.5 .
+docker build -t ligoj/ligoj-ui:1.7.6 .
 ```
 
 During the Docker build, the WAR file "ligoj-ui.war" is not copied from your local FS but from a previously released remote location such as Nexus.
-By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-ui&v=1.7.5&p=war"
+By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-ui&v=1.7.6&p=war"
 In case of a custom build you can specify its remote or local location.
 
 ## Staged OSS build from Sonatype
 
 ```
-docker build -t ligoj/ligoj-ui:1.7.5 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-ui/1.7.5/app-ui-1.7.5.war" .
+docker build -t ligoj/ligoj-ui:1.7.6 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-ui/1.7.6/app-ui-1.7.6.war" .
 ```
 
 ## Private remote build
 
 ```
-docker build -t ligoj/ligoj-ui:1.7.5 --build-arg WAR="https://storage.company.com/releases/app-ui-1.7.5.war" .
+docker build -t ligoj/ligoj-ui:1.7.6 --build-arg WAR="https://storage.company.com/releases/app-ui-1.7.6.war" .
 ```
 
 ## Local maven package
 
 ```
-docker build -t ligoj/ligoj-ui:1.7.5 --build-arg WAR="target/app-ui-1.7.5.war" .
+docker build -t ligoj/ligoj-ui:1.7.6 --build-arg WAR="target/app-ui-1.7.6.war" .
 ```
 
 Note the local WAR path must be relative to the Dockerfile (not the current path), and must be below the Dockerfile: do not use "../bar/foo.war"
@@ -68,7 +68,7 @@ docker run --rm -it \
   --name ligoj-ui \
   -e ENDPOINT='http://192.168.4.138:8680/ligoj-api' \
   -p 8080:8080 \
-  ligoj/ligoj-ui:1.7.5 
+  ligoj/ligoj-ui:1.7.6 
 ```
 
 You can experience network issue with remote API. To validate the link, try this :
@@ -76,7 +76,7 @@ You can experience network issue with remote API. To validate the link, try this
 ```
 docker run --rm -it \
  --name "ligoj-ui" \
- ligoj/ligoj-ui:1.7.5 bash -c "apt-get install -y curl && curl --failed http://192.168.4.138:8081/ligoj-api/manage/health"
+ ligoj/ligoj-ui:1.7.6 bash -c "apt-get install -y curl && curl --failed http://192.168.4.138:8081/ligoj-api/manage/health"
 ```
 
 ## Endpoints
@@ -91,7 +91,7 @@ docker run --rm -it \
 
 ## Run with security disabled
 ```
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj/ligoj-ui:1.7.5 
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj/ligoj-ui:1.7.6 
 ```
 
 
