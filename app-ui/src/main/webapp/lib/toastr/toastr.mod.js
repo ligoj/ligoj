@@ -25,16 +25,16 @@ define(['toastr'], function (toastr) {
 		typeToIcon: function (type) {
 			type = notifyManager.getTypeFromBusiness(type);
 			if (type === 'danger' || type === 'error') {
-				return '<i class=" fa fa - meh - o "></i> ';
+				return '<i class=" fa fa-meh-o "></i> ';
 			}
 			if (type === 'warning') {
-				return '<i class=" fa fa - warning "></i> ';
+				return '<i class=" fa fa-warning "></i> ';
 			}
 			if (type === 'info') {
-				return '<i class=" fa fa - info "></i> ';
+				return '<i class=" fa fa-info "></i> ';
 			}
 			if ((typeof type) === 'undefined' || type === 'success') {
-				return '<i class=" fa fa - thumbs - up "></i> ';
+				return '<i class=" fa fa-thumbs-up "></i> ';
 			}
 			return '';
 		},
