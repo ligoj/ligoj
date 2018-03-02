@@ -197,8 +197,8 @@ define([
 					// An unknown business/web server error
 					notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-details'])(current._trimUrl(xhr)), errorMessages.error503);
 				}
-			} else if (xhr.status === 504) {
-				notifyManager.notifyDanger(errorMessages['error504-details'], errorMessages.error504);
+			} else if (xhr.status > 500) {
+				notifyManager.notifyDanger(errorMessages['error' + xhr.status +'-details'], errorMessages['error' + xhr.status] || errorMessages.error500);
 			} else if (xhr.status === 200 || (xhr.status === 0 && xhr.statusText === 'n/a')) {
 				// JavaScript error
 				traceLog('Javascript error (' + xhr.status + ') : ' + xhr.responseText, errorThrown);

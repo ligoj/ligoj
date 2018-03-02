@@ -27,6 +27,8 @@ define({
 		"error415" : "Invalid sent media type",
 		"error415-details" : "The contract of called service may have changed",
 		"error500" : "Internal error",
+		"error501" : "Not yet available",
+		"error501-details" : "This managed error is related to a not yet available feature. Retry later or contact your administrator",
 		"error503" : "Server resource",
 		"error503-details" : "The requested business service '{{this}}' is currently not available.<br/>Retry later or contact your administrator",
 		"error504" : "Timeout communication",

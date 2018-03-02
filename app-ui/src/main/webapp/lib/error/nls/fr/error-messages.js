@@ -26,6 +26,8 @@ define({
 	"error415" : "Type de média envoyé invalide",
 	"error415-details" : "Le contrat du service appelé a peut-être changé",
 	"error500" : "Erreur interne",
+	"error501" : "Pas encore disponible",
+	"error501-details" : "TCette errur gérée est liée à une fonctionnalité pas encore disponible. Réessayez plus tard ou contactez votre administrateur",
 	"error503" : "Ressource serveur",
 	"error503-details" : "Le service métier demandé '{{this}}' n'est pas encore disponible.<br/>Réessayez plus tard ou contactez votre administrateur",
 	"error504" : "Délais de communication",
