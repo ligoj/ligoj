@@ -20,7 +20,7 @@ More technical details can be found in the sub directories [ligo-api](https://gi
 # Get started
 
 ```
-docker-compose up
+curl https://raw.githubusercontent.com/ligoj/ligoj/master/docker-compose.yml -o docker-compose.yml -s && docker-compose up
 ```
 
 Open your browser at : [Ligoj Home](http://localhost:8080/ligoj) 
