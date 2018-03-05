@@ -1,4 +1,4 @@
-FROM openjdk:9-jre-slim
+FROM openjdk:9-jre
 LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
 
 RUN set -xe \
@@ -36,6 +36,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -Djavax.net.ssl.trustStorePassword=changeit \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
     -Dserver.port="${SERVER_PORT}" \
+    -Djavax.net.ssl.trustStorePassword=changeit \
     -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
