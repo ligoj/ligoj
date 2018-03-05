@@ -1,4 +1,4 @@
-FROM openjdk:9-jre-slim
+FROM openjdk:9-jre
 LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
 
 RUN set -xe \
@@ -9,7 +9,7 @@ RUN set -xe \
 ARG GROUP_ID="org.ligoj.app"
 ARG ARTIFACT_ID="app-api"
 ARG NEXUS_HOST="oss.sonatype.org"
-ARG VERSION="1.7.7"
+ARG VERSION="1.7.8"
 ARG NEXUS_URL="https://${NEXUS_HOST}"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
@@ -55,5 +55,5 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -Dligoj.home="${LIGOJ_HOME}" \
     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
-HEALTHCHECK --interval=10s --timeout=2s --retries=5 --start-period=20s \
+HEALTHCHECK --interval=10s --timeout=1s --retries=5 --start-period=30s \
 CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health || exit 1
