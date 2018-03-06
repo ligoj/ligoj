@@ -793,7 +793,7 @@ define(['cascade'], function ($cascade) {
 		configurePluginView: function($context, service, data, callback) {
 			var tool = current.$parent.getTool(data.node);
 			// Destroy the previous view, some cache could be performed there ...
-			current.$view.find('.subscribe-configuration').remove();
+			current.$view.find('.subscribe-configuration').not('#subscribe-definition').remove();
 			// Inject the partial of this service in the current view
 			var $subscribe = ($context.$view.is('.subscribe-configuration') ? $context.$view : $context.$view.find('.subscribe-configuration')).clone();
 			var $subscribeWrapper = $('<div id="configuration-wrapper-' + data.id + '" class="configuration-wrapper-' + service.id.replace(/:/g, '-') + ' configuration-wrapper-' + tool.id.replace(/:/g, '-') +'"></div>');
