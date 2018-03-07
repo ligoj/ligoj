@@ -168,14 +168,32 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Replace the default text rendering by a Select2 for a service providing a suggest for the search.
+		 * @param {object} configuration The parameters configuration.
+		 * @param {string} id The parameter's identifier.
+		 * @param {string} restUrl The remote data source URL.
+		 * @param {function|string} customPath Optional custom url path appended to REST URL.
+		 * @param {function} changeHandler Optional callback when the selection change.
+		 * @param {boolean} allowNew When true, new entries are accepted.
+		 * @param {boolean} lowercase When true, the result are transformed in to lower case.
 		 */
-		registerXServiceSelect2: function (configuration, id, restUrl, customQuery, allowNew, changeHandler, lowercase) {
+		registerXServiceSelect2: function (configuration, id, restUrl, customPath, allowNew, changeHandler, lowercase) {
 			var cProviders = configuration.providers['form-group'];
 			var previousProvider = cProviders[id] || cProviders.standard;
-			cProviders[id] = function (parameter, container, $input) {
+			cProviders[id] = function (parameter, $container, $input) {
 				// Render the normal input
-				var $fieldset = previousProvider(parameter, container, $input);
+				var $fieldset = previousProvider(parameter, $container, $input);
 				$input = $fieldset.find('input');
+
+				var customQuery = function() {
+					var values =current.getParameterValues($container);
+					var queryParameters = [];
+					for (var index = 0; index < values.length; index++) {
+						var parameter = values[index];
+						var value = parameter.text || parameter.date || parameter.tags || parameter.index || parameter.bool || parameter.integer;
+						queryParameters.push(values[index].parameter + '=' + encodeURIComponent(value));
+					}
+					return queryParameters.join('&');
+				};
 
 				// Create the select2 suggestion a LIKE %criteria% for project name, display name and description
 				current.newNodeSelect2($input, restUrl, current.$super('toName'), function (e) {
@@ -184,10 +202,10 @@ define(['cascade'], function ($cascade) {
 						$input.next().after('<div><br><div id="' + id + '_alert" class="well">' + current.$messages.id + ': ' + e.added.id + (e.added.name ? '<br>' + current.$messages.name + ': ' + e.added.name : '') + (e.added.key || e.added.pkey ? '<br>' + current.$messages.pkey + ': ' + (e.added.key || e.added.pkey) : '') + (e.added.description ? '<br>' + current.$messages.description + ': ' + e.added.description : '') + (e.added['new'] ? '<br><i class="fa fa-warning"></i> ' + current.$messages['new'] : '') + '</div></div>');
 					}
 					changeHandler && changeHandler();
-				}, parameter, customQuery, allowNew, lowercase);
+				}, parameter, customPath, allowNew, lowercase, customQuery);
 			};
 		},
-
+		
 		/**
 		 * Build node/subscription parameter values: UI and configuration.
 		 * Note this is an asynchronous function thats requires the related node's context to render the parameter.
@@ -283,11 +301,12 @@ define(['cascade'], function ($cascade) {
 		 * @param {function} formatResult Rendering function of the Select2 result.
 		 * @param {function} changeHandler On 'change' callback.
 		 * @param {object} parameter Parameter configuration.
-		 * @param {function|string} customQuery Optional custom query appended to REST URL.
+		 * @param {function|string} customPath Optional custom url path appended to REST URL.
 		 * @param {boolean} allowNew When true, new entries are accepted.
 		 * @param {boolean} lowercase When true, the result are transformed in to lower case.
+		 * @param {function|string} customQuery Optional custom query parameters appended to url. Note the initial '?' is managed for you.
 		 */
-		newNodeSelect2: function ($input, restUrl, formatResult, changeHandler, parameter, customQuery, allowNew, lowercase) {
+		newNodeSelect2: function ($input, restUrl, formatResult, changeHandler, parameter, customPath, allowNew, lowercase, customQuery) {
 			return $input.select2({
 				minimumInputLength: 1,
 				formatResult: formatResult,
@@ -303,8 +322,10 @@ define(['cascade'], function ($cascade) {
 				},
 				ajax: {
 					url: function (term) {
-						customQuery = (typeof customQuery === 'function') ? customQuery($input, restUrl, parameter) : (customQuery || (current.configuration.node + '/'));
-						return REST_PATH + restUrl + customQuery + encodeURIComponent(term);
+						var path = restUrl + ((typeof customPath === 'function') ? customPath($input, restUrl, parameter) : (customPath || (current.configuration.node + '/')));
+						var query = (typeof customQuery === 'function') ? customQuery($input, path, parameter) : (customQuery || '');
+						query = ((typeof query === 'string') && !query.startsWith('?')) ? '?' + query : query;
+						return REST_PATH + path + encodeURIComponent(term) + query;
 					},
 					dataType: 'json',
 					results: function (data) {
