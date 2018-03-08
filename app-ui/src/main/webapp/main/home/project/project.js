@@ -462,12 +462,11 @@ define(['cascade'], function ($cascade) {
 				// No more group
 				current.subscriptions.DataTable().rowGroup().disable();
 				current.subscriptions.removeClass('grouped');
-				
-				// Also show collapsed groups
-				_('subscriptions').find('tr.hidden[data-subscription]').removeClass('hidden');
-				
 				current.subscriptions.DataTable().draw();
 			}
+
+			// Also show collapsed groups
+			_('subscriptions').find('tr.hidden[data-subscription]').removeClass('hidden');
 		},
 		
 		/**
