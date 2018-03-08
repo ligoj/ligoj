@@ -449,6 +449,9 @@ define(['cascade'], function ($cascade) {
 		 * @param {string} dataSrc Optional data source. When null, disable group mode.
 		 */
 		groupBy: function(dataSrc) {
+			// Show collapsed groups
+			_('subscriptions').find('tr.hidden[data-subscription]').removeClass('hidden');
+
 			if (dataSrc) {
 				var masterDataSrc = dataSrc;
 				if (dataSrc.startsWith('compact-')) {
@@ -460,21 +463,34 @@ define(['cascade'], function ($cascade) {
 				current.subscriptions.addClass('grouped');
 				
 				// For auto group, collaspe the big groups
-				debugger;
-				var group = dataSrc;
-				var $tr = _('subscriptions').find('body>tr.group-start[data-group="'+ dataSrc +'"]');
-				var $rows = $tr.nextUntil('.group-end');
-				if (current.model.subscriptions.length > 10 && group !== '_other_' && $rows.length > 2) {
-					current.collapseGroup($tr);
+				var size = current.model.subscriptions.length;
+				if (size > 20) {
+					var $groups = _('subscriptions').find('tbody>tr.group-start');
+					var sizes = {};
+					var groups = [];
+					$groups.each(function() {
+						var group = $(this).attr('data-group');
+						groups.push(group);
+						sizes[group] = $(this).nextUntil('.group-end').length;
+					});
+					cursor = size;
+					while (size > 20 && cursor > 2) {
+						for (var index = groups.length; index-- > 0;) {
+							group = groups[index];
+							if (sizes[group] === cursor) {
+								// Reduce the remaining size
+								size -= cursor;
+								current.collapseGroup($groups.filter('[data-group="' + group +'"]'));
+							}
+						}
+						cursor--;
+					}
 				}
 			} else {
 				// No more group
 				current.subscriptions.DataTable().rowGroup().disable();
 				current.subscriptions.removeClass('grouped');
 				current.subscriptions.DataTable().draw();
-
-				// Also show collapsed groups
-				_('subscriptions').find('tr.hidden[data-subscription]').removeClass('hidden');
 			}
 		},
 		
