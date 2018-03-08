@@ -765,7 +765,7 @@ img.nav-icon {
 @media (min-width: 992px) {
 	.retractable {
 		height: 100%;
-		position: absolute;
+		position: fixed;
 		background-color: #f8f8f8;
 		border-right: 1px solid #e3e3e3;
 		margin-top: -70px;
