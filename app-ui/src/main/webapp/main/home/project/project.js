@@ -458,15 +458,24 @@ define(['cascade'], function ($cascade) {
 				current.subscriptions.DataTable().rowGroup().dataSrc(dataSrc).enable();
 				current.subscriptions.DataTable().draw();
 				current.subscriptions.addClass('grouped');
+				
+				// For auto group, collaspe the big groups
+				debugger;
+				var group = dataSrc;
+				var $tr = _('subscriptions').find('body>tr.group-start[data-group="'+ dataSrc +'"]');
+				var $rows = $tr.nextUntil('.group-end');
+				if (current.model.subscriptions.length > 10 && group !== '_other_' && $rows.length > 2) {
+					current.collapseGroup($tr);
+				}
 			} else {
 				// No more group
 				current.subscriptions.DataTable().rowGroup().disable();
 				current.subscriptions.removeClass('grouped');
 				current.subscriptions.DataTable().draw();
-			}
 
-			// Also show collapsed groups
-			_('subscriptions').find('tr.hidden[data-subscription]').removeClass('hidden');
+				// Also show collapsed groups
+				_('subscriptions').find('tr.hidden[data-subscription]').removeClass('hidden');
+			}
 		},
 		
 		/**
@@ -690,10 +699,6 @@ define(['cascade'], function ($cascade) {
 							$tr.append('<td colspan="6">'+ current.$messages['group-by-other'] +'</td>');
 						}
 						$tr.children().eq(0).append('<div class="grouped-count label label-default"><span class="toggle"><i class="fa fa-plus-square-o"></i><i class="fa fa-minus-square-o"></i></span>' + rows.count() + '</div>');
-						if (current.model.subscriptions.length > 10 && group !== '_other_' && rows.count() > 2) {
-							// Collapse this group
-							current.collapseGroup($tr, group);
-						}
 						return $tr;
 					}
 				}
@@ -716,6 +721,8 @@ define(['cascade'], function ($cascade) {
 		 */
 		applyFunctionGroup: function($tr, f) {
 			var id = $tr.attr('data-group');
+			$tr.nextUntil('.group-end')[f]('hidden');
+			$tr[f]('row-group-collapsed');
 			var subscriptions = current.model.subscriptions;
 			var $subscriptions = _('subscriptions');
 			for (var i = 0; i< subscriptions.length; i++) {
@@ -725,7 +732,6 @@ define(['cascade'], function ($cascade) {
 					$subscriptions.find('tr[data-subscription="' + subscription.id + '"]')[f]('hidden');
 				}
 			}
-			$tr[f]('row-group-collapsed');
 		},
 
 		/**

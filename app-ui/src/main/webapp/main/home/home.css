@@ -22,6 +22,11 @@ img.tool.broken {
 	line-height: 36px;
 }
 
+.status .status-content {
+	background-color: #5cb85c;
+	cursor: default;
+}
+
 .status.status-up .status-content {
 	background-color: #5cb85c;
 }
@@ -43,6 +48,7 @@ img.tool.broken {
 	-webkit-animation: progress-bar-stripes 2s linear infinite;
 	-o-animation: progress-bar-stripes 2s linear infinite;
 	animation: progress-bar-stripes 2s linear infinite;
+	cursor: progress;
 }
 
 .refresh .status.status-down .status-content {
