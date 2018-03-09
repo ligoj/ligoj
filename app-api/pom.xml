@@ -25,6 +25,7 @@
 		<spring-boot.version>2.0.0.RC1</spring-boot.version>
 		<swagger.version>3.9.3</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
+		<spring-security.version>5.0.3.RELEASE</spring-security.version>
 	</properties>
 
 	<dependencyManagement>
@@ -33,10 +34,12 @@
 			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-web</artifactId>
+				<version>${spring-security.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-config</artifactId>
+				<version>${spring-security.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.xml.ws</groupId>

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-web-parent</artifactId>
-		<version>2.1.0</version>
+		<version>2.1.1</version>
 		<relativePath />
 	</parent>
 
@@ -17,6 +17,7 @@
 		<sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>Web:BoldAndItalicTagsCheck</sonar.issue.ignore.multicriteria.e1.ruleKey>
 		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/*.html</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		<spring-security.version>5.0.3.RELEASE</spring-security.version>
 	</properties>
 	<scm>
 		<connection>scm:git:https://github.com/ligoj/ligoj.git</connection>
