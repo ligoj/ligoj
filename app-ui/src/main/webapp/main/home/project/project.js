@@ -471,7 +471,7 @@ define(['cascade'], function ($cascade) {
 					$groups.each(function() {
 						var group = $(this).attr('data-group');
 						groups.push(group);
-						sizes[group] = $(this).nextUntil('.group-end').length;
+						sizes[group] = $(this).nextUntil('.group-start').length;
 					});
 					cursor = size;
 					while (size > 20 && cursor > 2) {
@@ -737,7 +737,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		applyFunctionGroup: function($tr, f) {
 			var id = $tr.attr('data-group');
-			$tr.nextUntil('.group-end')[f]('hidden');
+			$tr.nextUntil('.group-start')[f]('hidden');
 			$tr[f]('row-group-collapsed');
 			var subscriptions = current.model.subscriptions;
 			var $subscriptions = _('subscriptions');
