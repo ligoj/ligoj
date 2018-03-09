@@ -44,6 +44,7 @@ define({
 	'resetok': 'La liste a été reconstruite',
 	'day': 'Jour',
 	'week': 'Semaine',
+	'month': 'Mois',
 	'from': 'De',
 	'to': 'Au',
 	'nextYear': 'Année à venir',

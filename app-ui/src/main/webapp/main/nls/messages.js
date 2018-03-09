@@ -45,6 +45,7 @@ define({
 		'resetok': 'List has been rebuilt',
 		'day': 'Day',
 		'week': 'Week',
+		'month': 'Month',
 		'from': 'From',
 		'to': 'To',
 		'nextYear': 'Next year',
