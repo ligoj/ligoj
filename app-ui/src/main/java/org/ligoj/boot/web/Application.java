@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.boot.web.server.ErrorPageRegistrar;
@@ -35,7 +34,7 @@ import com.samaxes.filter.CacheFilter;
  */
 @SpringBootApplication
 @ImportResource("classpath:/META-INF/spring/application.xml")
-@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class })
+@EnableAutoConfiguration
 public class Application extends SpringBootServletInitializer {
 
 	private static final String SERVICE_PASSWORD_RECOVERY = "/rest/service/password/recovery/*";
