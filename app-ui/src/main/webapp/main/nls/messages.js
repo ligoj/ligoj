@@ -46,6 +46,7 @@ define({
 		'day': 'Day',
 		'week': 'Week',
 		'month': 'Month',
+		'month': 'Months',
 		'from': 'From',
 		'to': 'To',
 		'nextYear': 'Next year',
