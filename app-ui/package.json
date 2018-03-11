@@ -89,7 +89,7 @@
 	    "requirejs-text": "2.0.15",
 	    "later": "1.2.0",
 	    "moment": "2.21.0",
-	    "jquery": "3.2.1",
+	    "jquery": "3.3.1",
 	    "jqueryui": "1.12.1",
 	    "jquery.sparkline": "2.1.2-fork",
 	    "fuelux": "3.16.0"
@@ -125,8 +125,8 @@
 		"name": "JQuery",
 		"url": "http://jquery.com/",
 		"sources": "https://github.com/jquery/jquery",
-		"version": "3.2.1",
-		"lastChecked": "2017-07-08",
+		"version": "3.3.1",
+		"lastChecked": "2018-03-11",
 		"known-issues": []
 	}, {
 		"name": "JQueryUI",
