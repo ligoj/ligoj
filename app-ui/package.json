@@ -68,7 +68,7 @@
 		"xo": "^0.12.0"
 	},
 	"dependencies": {
-	    "requirejs": "2.3.4",
+	    "requirejs": "2.3.5",
 	    "d3": ">=4",
 	    "bootstrap": "3.3.7",
 	    "bootstrap-notify": "3.3.6",
@@ -98,8 +98,8 @@
 		"name": "RequireJS",
 		"url": "http://requirejs.org/docs/download.html",
 		"sources": "https://github.com/jrburke/requirejs",
-		"version": "2.3.4",
-		"lastChecked": "2017-08-07",
+		"version": "2.3.5",
+		"lastChecked": "2018-03-11",
 		"note": "require.js?version script references must be updated in the HTML files with along the requirejs version"
 	}, {
 		"name": "Respond.js",
