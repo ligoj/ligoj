@@ -88,7 +88,7 @@
 	    "requirejs-i18njs": "2.0.6",
 	    "requirejs-text": "2.0.15",
 	    "later": "1.2.0",
-	    "moment": "2.19.4",
+	    "moment": "2.21.0",
 	    "jquery": "3.2.1",
 	    "jqueryui": "1.12.1",
 	    "jquery.sparkline": "2.1.2-fork",
@@ -259,8 +259,8 @@
 		"name": "Moment.js",
 		"url": "http://momentjs.com/",
 		"sources": "https://github.com/timrwood/moment/",
-		"version": "2.18.1",
-		"lastChecked": "2017-09-30"
+		"version": "2.21.0",
+		"lastChecked": "2018-03-11"
 	}, {
 		"name": "DatePicker",
 		"id": "bootstrap-datepicker",
