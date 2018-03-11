@@ -116,7 +116,7 @@ define([
 			});
 
 			// Setup clipboard
-			new Clipboard('.btn[data-clipboard-target]').on('success', function () {
+			new ClipboardJS('.btn[data-clipboard-target]').on('success', function () {
 				notifyManager.notify(current.$messages.copied);
 			});
 

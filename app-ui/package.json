@@ -78,7 +78,7 @@
 	    "bootstrap-material-design": "0.5.10",
 	    "bootbox": "4.4.0",
 	    "cascade": "0.0.1",
-	    "clipboard": "1.5.10",
+	    "clipboard": "2.0.0",
 	    "handlebars": "4.0.10",
 	    "select2": "3.5.4",
 	    "datatables": "1.10.16",
@@ -334,7 +334,7 @@
 		"id": "clipboardjs",
 		"url": "https://clipboardjs.com/",
 		"sources": "https://github.com/zenorocha/clipboard.js",
-		"version": "1.5.10",
-		"lastChecked": "2016-05-22"
+		"version": "2.0.0",
+		"lastChecked": "2018-03-11"
 	}]
 }
