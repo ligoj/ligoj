@@ -1072,3 +1072,10 @@ img.nav-icon {
 :fullscreen .visible-fs {
 	display: inline-block;
 }
+
+.x-small {
+	font-size: 70%;
+}
+.xx-small {
+	font-size: 50%;
+}
