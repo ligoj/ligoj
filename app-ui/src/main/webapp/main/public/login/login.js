@@ -56,7 +56,7 @@ define([
 						// CAPTCHA failed
 						current.error(messages.error.cookie);
 						$('#captcha').val('').focus();
-					} else if (error['new-password']) {
+					} else if (error['password']) {
 						current.error(messages.error['password-policy']);
 						current.focusPassword();
 					} else {
