@@ -23,6 +23,7 @@
 		<api.version>2.2.2</api.version>
 		<cxf.version>3.2.2</cxf.version>
 		<spring-boot.version>2.0.0.RELEASE</spring-boot.version>
+		<spring-cloud.version>2.0.0.M8</spring-cloud.version>
 		<swagger.version>3.9.3</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
 		<spring-security.version>5.0.3.RELEASE</spring-security.version>
