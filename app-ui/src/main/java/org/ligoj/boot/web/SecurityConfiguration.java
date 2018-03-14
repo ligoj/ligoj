@@ -40,10 +40,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Value("${security.max-sessions:1}")
 	private int maxSession;
+
 	@Value("${security:Rest}")
 	private String security;
+
 	@Value("${sso.url}")
 	private String ssoUrl;
+
 	@Value("${sso.content}")
 	private String ssoContent;
 
@@ -185,7 +188,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final AbstractAuthenticationProvider provider = (AbstractAuthenticationProvider) Class
 				.forName("org.ligoj.app.http.security." + security + "AuthenticationProvider").getConstructors()[0].newInstance();
 		provider.setSsoPostUrl(ssoUrl);
-		provider.setSsoPostUrl(ssoContent);
+		provider.setSsoPostContent(ssoContent);
 		return provider;
 	}
 
