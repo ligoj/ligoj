@@ -27,6 +27,7 @@
 		<swagger.version>3.9.3</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
 		<spring-security.version>5.0.3.RELEASE</spring-security.version>
+		<spring-security-rsa>1.0.5.RELEASE</spring-security-rsa>
 	</properties>
 
 	<dependencyManagement>
@@ -47,9 +48,19 @@
 				<artifactId>jaxws-api</artifactId>
 				<version>${jaxws.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-rsa</artifactId>
+				<version>${spring-security-rsa}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-rsa</artifactId>
+		</dependency>
+
 		<!-- Swagger -->
 		<dependency>
 			<groupId>javax.xml.ws</groupId>
