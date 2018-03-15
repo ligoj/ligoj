@@ -69,7 +69,7 @@ define([
 				},
 				error: function () {
 					_('_login_msgbox').removeClass('label-info').addClass('label-important').text(current.loginMessages['error-login']);
-					_('_login_password').focus();
+					_('_login_password').trigger('focus');
 				},
 				complete: function () {
 					_('_login_save').enable().on('click', current.login);
@@ -98,7 +98,7 @@ define([
 						$('.modal').not($popup).modal('hide');
 						_('_login_msgbox').removeClass('label-important').removeClass('label-info').hide();
 					}).on('shown', function () {
-						_('_login_username').focus();
+						_('_login_username').trigger('focus');
 					}).on('hidden', function () {
 						_('_login').remove();
 					});
