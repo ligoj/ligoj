@@ -373,7 +373,7 @@ define(['cascade'], function ($cascade) {
 		renderOnce: function($context, scope) {
 			var sopeClass = 'render-' + scope;
 			var sopeSelector = '.' + sopeClass;
-			if ((typeof $context === 'undefined') || (!$context.$view.is(sopeSelector) && $context.$view.find(sopeSelector).length === 0) || current.$view.find(sopeSelector + '.' + $context.node.replace(/:/g, '-')).length === 1) {
+			if ((typeof $context === 'undefined') || $context === null || (!$context.$view.is(sopeSelector) && $context.$view.find(sopeSelector).length === 0) || current.$view.find(sopeSelector + '.' + $context.node.replace(/:/g, '-')).length === 1) {
 				// This feature is not supported or has already been already rendered
 				return;
 			}
