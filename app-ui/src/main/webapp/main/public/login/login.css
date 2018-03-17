@@ -19,7 +19,7 @@ input.form-control:-webkit-autofill {
 	-webkit-border-after-style: solid;
 	-webkit-border-after-width: 1px;
 }
-label[for="captcha"] .fa, label[for="captcha"]~span .fa {
+label[for="captcha"] i, label[for="captcha"]~span i {
 	bottom: -10px;
 	position: relative;
 }

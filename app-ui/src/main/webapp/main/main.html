@@ -27,30 +27,30 @@
 			</ul>
 			<ul class="nav navbar-nav navbar-right info">
 				<li class="bs-inbox">
-					<a class="inbox-trigger" data-trigger="manual" data-toggle="popover" data-cascade="true" data-content="&nbsp" data-ajax="/{{$current.$path}}/inbox" data-plugins="i18n,partial,css,js" data-html="html" data-title="<i class='fa fa-refresh faa-spin animated in spin fade'></i>" role="button" data-placement="bottom">
-						<i class="fa fa-inbox icon-info" data-container="body" data-toggle="tooltip" title="{{notifications}}" data-placement="bottom"></i>
+					<a class="inbox-trigger" data-trigger="manual" data-toggle="popover" data-cascade="true" data-content="&nbsp" data-ajax="/{{$current.$path}}/inbox" data-plugins="i18n,partial,css,js" data-html="html" data-title="<i class='fas fa-sync-alt faa-spin animated in spin fade'></i>" role="button" data-placement="bottom">
+						<i class="fas fa-inbox icon-info" data-container="body" data-toggle="tooltip" title="{{notifications}}" data-placement="bottom"></i>
 						<span class="label label-danger">
 							<span class="count"></span>
 						</span>
 					</a>
 				</li>
 				<li class="dropdown">
-					<a class="navbar-link" data-toggle="dropdown"><i class="fa fa-question-circle icon-info"></i></a>
+					<a class="navbar-link" data-toggle="dropdown"><i class="fas fa-question-circle icon-info"></i></a>
 					<ul class="dropdown-menu">
 						<li>
-							<a target="blank" href="https://github.com/ligoj/ligoj/issues"><i class="fa fa-bug menu-icon"></i>{{reportBug}}</a>
+							<a target="blank" href="https://github.com/ligoj/ligoj/issues"><i class="fas fa-bug menu-icon"></i>{{reportBug}}</a>
 						</li>
 						<li>
 							<a href="#/api">{{menu.api}}</a>
 						</li>
 						<li role="separator" class="divider"></li>
 						<li>
-							<a target="blank" href="https://github.com/ligoj/ligoj/releases/tag/0.0.0" id="_version"><i class="fa fa-lock menu-icon"></i>0.0.0</a>
+							<a target="blank" href="https://github.com/ligoj/ligoj/releases/tag/0.0.0" id="_version"><i class="fas fa-lock menu-icon"></i>0.0.0</a>
 						</li>
 					</ul>
 				</li>
 				<li class="dropdown">
-					<a class="navbar-link" data-toggle="dropdown"><i class="fa fa-cog icon-info"></i></a>
+					<a class="navbar-link" data-toggle="dropdown"><i class="fas fa-cog icon-info"></i></a>
 					<ul class="dropdown-menu">
 						<li class="system">
 							<a href="#/system">{{menu.administration}}</a>
@@ -79,7 +79,7 @@
 				<h4 id="_not-yet-implemented-label" class="modal-title">Pas encore implémentée</h4>
 			</div>
 			<div class="modal-body">
-				<i class="fa fa-frown-o"></i> Oh non.... cette fonctionnalité n'est pas encore implémentée. Revenez plus tard.
+				<i class="fas fa-frown"></i> Oh non.... cette fonctionnalité n'est pas encore implémentée. Revenez plus tard.
 			</div>
 			<div class="modal-footer">
 				<a href="#" data-dismiss="modal" aria-hidden="true">{{cancel}}</a>

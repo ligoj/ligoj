@@ -127,7 +127,7 @@ define(['cascade'], function ($cascade) {
 					},
 					secured: function (parameter, $input) {
 						// Add a tiny unlocker
-						$input.after('<span class="secured-mode"><i class="fa fa-lock text-warning" title="' + current.$messages['secured-untouched'] + '" data-toggle="tooltip"></i><i class="fa fa-unlock-alt text-info" title="' + current.$messages['secured-touched'] + '" data-toggle="tooltip"></i><i title="' + current.$messages['secured-empty'] + '" data-toggle="tooltip" class="fa fa-unlock"></i></span>');
+						$input.after('<span class="secured-mode"><i class="fas fa-lock text-warning" title="' + current.$messages['secured-untouched'] + '" data-toggle="tooltip"></i><i class="fas fa-unlock-alt text-info" title="' + current.$messages['secured-touched'] + '" data-toggle="tooltip"></i><i title="' + current.$messages['secured-empty'] + '" data-toggle="tooltip" class="fas fa-unlock"></i></span>');
 					}
 				},
 				providers: {
@@ -139,7 +139,7 @@ define(['cascade'], function ($cascade) {
 						date: function (parameter) {
 							// Create a data input
 							var $input = configuration.providers.input.standard(parameter).addClass('date');
-							var $wrapper = $('<div class="input-group"><span class="add-on"><i class="fa fa-calendar"></i></span></div>');
+							var $wrapper = $('<div class="input-group"><span class="add-on"><i class="fas fa-calendar"></i></span></div>');
 							$wrapper.find('.input-group').prepend($input);
 							return $wrapper;
 						}
@@ -199,7 +199,7 @@ define(['cascade'], function ($cascade) {
 				current.newNodeSelect2($input, restUrl, current.$super('toName'), function (e) {
 					_(id + '_alert').parent().remove();
 					if (e.added && e.added.id) {
-						$input.next().after('<div><br><div id="' + id + '_alert" class="well">' + current.$messages.id + ': ' + e.added.id + (e.added.name ? '<br>' + current.$messages.name + ': ' + e.added.name : '') + (e.added.key || e.added.pkey ? '<br>' + current.$messages.pkey + ': ' + (e.added.key || e.added.pkey) : '') + (e.added.description ? '<br>' + current.$messages.description + ': ' + e.added.description : '') + (e.added['new'] ? '<br><i class="fa fa-warning"></i> ' + current.$messages['new'] : '') + '</div></div>');
+						$input.next().after('<div><br><div id="' + id + '_alert" class="well">' + current.$messages.id + ': ' + e.added.id + (e.added.name ? '<br>' + current.$messages.name + ': ' + e.added.name : '') + (e.added.key || e.added.pkey ? '<br>' + current.$messages.pkey + ': ' + (e.added.key || e.added.pkey) : '') + (e.added.description ? '<br>' + current.$messages.description + ': ' + e.added.description : '') + (e.added['new'] ? '<br><i class="fas fa-warning"></i> ' + current.$messages['new'] : '') + '</div></div>');
 					}
 					changeHandler && changeHandler();
 				}, parameter, customPath, allowNew, lowercase, customQuery);
@@ -317,7 +317,7 @@ define(['cascade'], function ($cascade) {
 					return {
 						id: (typeof lowercase === 'undefined' || lowercase) ? term.toLowerCase() : term,
 						text: term,
-						name: '<i class="fa fa-question-circle-o"></i> ' + term + '<div class="need-check">Need to be checked</div>'
+						name: '<i class="fas fa-question-circle"></i> ' + term + '<div class="need-check">Need to be checked</div>'
 					};
 				},
 				ajax: {

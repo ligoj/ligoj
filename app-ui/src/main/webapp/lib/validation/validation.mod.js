@@ -275,7 +275,7 @@ define([
 		 * @param {Boolean} feedback : When true, a feedback will be added.
 		 */
 		addError: function (field, errors, key, feedback) {
-			validationManager.addMessage(field, 'has-error', errors, key, feedback && 'fa fa-remove');
+			validationManager.addMessage(field, 'has-error', errors, key, feedback && 'fas fa-times');
 		},
 
 		/**
@@ -286,7 +286,7 @@ define([
 		 * @param {Boolean} feedback : When true, a feedback will be added.
 		 */
 		addWarn: function (field, errors, key, feedback) {
-			validationManager.addMessage(field, 'has-warning', errors, key, feedback && 'fa fa-warning');
+			validationManager.addMessage(field, 'has-warning', errors, key, feedback && 'fas fa-warning');
 		},
 
 		/**
@@ -297,7 +297,7 @@ define([
 		 * @param {Boolean} feedback : When true, a feedback will be added.
 		 */
 		addSuccess: function (field, errors, key, feedback) {
-			validationManager.addMessage(field, 'has-success', errors, key, feedback && 'fa fa-check');
+			validationManager.addMessage(field, 'has-success', errors, key, feedback && 'fas fa-check');
 		},
 
 		cleanClass: function ($group) {

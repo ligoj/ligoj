@@ -9,7 +9,7 @@ define(['jquery'], function($) {
 	}
 
 	// Add the markup
-	$('body').append($('<div class="scroll-top-wrapper "><span class="scroll-top-inner"><i class="fa fa-2x fa-arrow-circle-up"></i></span></div>'));
+	$('body').append($('<div class="scroll-top-wrapper "><span class="scroll-top-inner"><i class="fas fa-2x fa-arrow-circle-up"></i></span></div>'));
 
 	$(document).on('scroll', function() {
 		if ($(window).scrollTop() > 100) {

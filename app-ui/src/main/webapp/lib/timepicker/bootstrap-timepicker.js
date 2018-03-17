@@ -1151,8 +1151,8 @@
     appendWidgetTo: 'body',
     showWidgetOnAddonClick: true,
     icons: {
-      up: 'fa fa-chevron-up',
-      down: 'fa fa-chevron-down'
+      up: 'fas fa-chevron-up',
+      down: 'fas fa-chevron-down'
     },
     maxHours: 24,
     explicitMode: false

@@ -90,7 +90,7 @@ define(['cascade'], function ($cascade) {
 		},
 
 		configureParameters: function ($container, node, mode, id) {
-			$container.html('<i class="loader fa fa-spin fa-refresh fa-5"></i>');
+			$container.html('<i class="loader fas fa-spin fa-sync-alt fa-5"></i>');
 			$.ajax({
 				dataType: 'json',
 				url: REST_PATH + 'node/' + node + '/parameter-value/' + mode.toUpperCase(),

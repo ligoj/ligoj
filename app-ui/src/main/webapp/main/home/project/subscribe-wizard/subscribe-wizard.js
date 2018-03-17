@@ -186,7 +186,7 @@ define(['cascade'], function ($cascade) {
 		renderChoices: function (type, url, renderData, callback, parent) {
 			var $container = _('subscribe-' + type).find('.choices');
 			var $description = $container.closest('.tab-pane').find('.choice-description');
-			$container.html('<i class="loader fa fa-spin fa-refresh fa-5"></i>');
+			$container.html('<i class="loader fas fa-spin fa-sync-alt fa-5"></i>');
 			$description.addClass('hidden').empty();
 			$.ajax({
 				dataType: 'json',
@@ -255,7 +255,7 @@ define(['cascade'], function ($cascade) {
 					icon = current.toUiClassIcon(node.refined.refined.uiClasses);
 				} else {
 					// Use a provided picture
-					icon = current.$super('getToolFromId')(node.id) ? current.$super('toIcon')(node, 'x64w') : '<i class="fa fa-cloud"></i>';
+					icon = current.$super('getToolFromId')(node.id) ? current.$super('toIcon')(node, 'x64w') : '<i class="fas fa-cloud"></i>';
 				}
 				var $choice = $('<label class="choice btn"><input data-index="' + index + '" type="radio" name="s-choice-' + type + '" value="' + node.id + '" autocomplete="off"><div class="icon img-circle">' + icon + '</div>' + current.$main.getNodeName(node) + '</label>');
 				$container.append($choice);
@@ -294,7 +294,7 @@ define(['cascade'], function ($cascade) {
 					$name.html(current.$super('toIconNameTool')(node));
 				} else {
 					// Use classes of 'i' node
-					$name.html('<span><i class="' + (node.uiClasses || 'fa fa-cloud') + '"></i></span><span>' + current.$main.getNodeName(node) + '</span>');
+					$name.html('<span><i class="' + (node.uiClasses || 'fas fa-cloud') + '"></i></span><span>' + current.$main.getNodeName(node) + '</span>');
 				}
 			});
 		},
@@ -344,7 +344,7 @@ define(['cascade'], function ($cascade) {
 			return {
 				id: mode,
 				name: current.$messages['mode-' + mode],
-				uiClasses: 'fa fa-' + uiClass,
+				uiClasses: 'fas fa-' + uiClass,
 				description: current.$messages['mode-' + mode + '-description']
 			};
 		},

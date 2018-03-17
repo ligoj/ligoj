@@ -53,7 +53,7 @@ define(['cascade'], function ($cascade) {
 				} else if (fragments.length > 2) {
 					parent = fragments.slice(0, fragments.length - 1).join(':');
 				}
-				result = (parent ? current.toIcon(parent, suffix, null, true) + ' <i class="fa fa-angle-right" data-toggle="tooltip" title="' + current.getNodeName(node) + '"></i> ' : '') + result;
+				result = (parent ? current.toIcon(parent, suffix, null, true) + ' <i class="fas fa-angle-right" data-toggle="tooltip" title="' + current.getNodeName(node) + '"></i> ' : '') + result;
 			}
 			return result;
 		},
@@ -74,7 +74,7 @@ define(['cascade'], function ($cascade) {
 				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i data-toggle="tooltip" title="' + title + '" class="' + uiClasses + '"></i>');
 			} else if (fragments.length < 3) {
 				// Simple service
-				result = '<i data-toggle="tooltip" title="' + title + '" class="fa fa-wrench"></i>';
+				result = '<i data-toggle="tooltip" title="' + title + '" class="fas fa-wrench"></i>';
 			} else {
 				// Use a provided picture
 				var url = 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';
@@ -415,12 +415,12 @@ define(['cascade'], function ($cascade) {
 		 * Object type to class mapping.
 		 */
 		targetTypeClass: {
-			company: 'resource fa fa-building-o',
-			group: 'resource fa fa-users',
-			project: 'resource fa fa-folder',
-			user: 'resource fa fa-user',
-			tree: 'resource fa fa-ellipsis-v',
-			node: 'resource fa fa-wrench'
+			company: 'resource fas fa-building-o',
+			group: 'resource fas fa-users',
+			project: 'resource fas fa-folder',
+			user: 'resource fas fa-user',
+			tree: 'resource fas fa-ellipsis-v',
+			node: 'resource fas fa-wrench'
 		}
 	};
 	return current;

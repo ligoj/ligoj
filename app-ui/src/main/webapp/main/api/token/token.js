@@ -143,9 +143,9 @@ define([
 						width: '55px',
 						orderable: false,
 						render: function () {
-							var row = '<a class="show-token" data-toggle="modal" data-target="#popup"><i class="fa fa-eye-slash" data-toggle="tooltip" title="' + current.$messages.show + '"></i></a>';
-							row += '<a class="regenerate" data-toggle="modal" data-target="#popup" data-mode="regenerate"><i class="fa fa-refresh" data-toggle="tooltip" title="' + current.$messages.regenerate + '"></i></a>';
-							row += '<a class="delete"><i class="fa fa-remove" data-toggle="tooltip" title="' + current.$messages['delete'] + '"></i></a>';
+							var row = '<a class="show-token" data-toggle="modal" data-target="#popup"><i class="fas fa-eye-slash" data-toggle="tooltip" title="' + current.$messages.show + '"></i></a>';
+							row += '<a class="regenerate" data-toggle="modal" data-target="#popup" data-mode="regenerate"><i class="fas fa-sync-alt" data-toggle="tooltip" title="' + current.$messages.regenerate + '"></i></a>';
+							row += '<a class="delete"><i class="fas fa-times" data-toggle="tooltip" title="' + current.$messages['delete'] + '"></i></a>';
 							return row;
 						}
 					}

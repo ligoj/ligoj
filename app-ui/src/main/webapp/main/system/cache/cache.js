@@ -55,7 +55,7 @@ define(function () {
 					width: '16px',
 					orderable: false,
 					render: function () {
-						return '<a class="invalidate"><i class="fa fa-refresh" data-toggle="tooltip" title="' + current.$messages.invalidate + '"></i></a>';
+						return '<a class="invalidate"><i class="fas fa-sync-alt" data-toggle="tooltip" title="' + current.$messages.invalidate + '"></i></a>';
 					}
 				}]
 			});

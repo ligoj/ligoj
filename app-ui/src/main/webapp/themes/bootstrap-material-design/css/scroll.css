@@ -34,6 +34,6 @@
 .scroll-top-wrapper.show:hover {
 	opacity: 1;
 }
-.scroll-top-wrapper i.fa {
+.scroll-top-wrapper i.far {
 	line-height: inherit;
 }

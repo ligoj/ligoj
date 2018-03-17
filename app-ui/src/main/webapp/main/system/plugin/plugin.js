@@ -30,7 +30,7 @@ define(function () {
 					data: null,
 					orderable: false,
 					render: function (data) {
-						return data.plugin.type === 'feature' ? '<i class="fa fa-wrench"></i>' : current.$main.toIcon(data.node);
+						return data.plugin.type === 'feature' ? '<i class="fas fa-wrench"></i>' : current.$main.toIcon(data.node);
 					}
 				}, {
 					data: 'id'
@@ -46,7 +46,7 @@ define(function () {
 						var result = version;
 						if (plugin.newVersion) {
 							// Upgrade is available
-							result += ' <a class="label label-success update" data-toggle="tooltip" title="' + current.$messages['plugin-update'] + '"><i class="fa fa-arrow-circle-o-up"></i> ' + plugin.newVersion + '</a>';
+							result += ' <a class="label label-success update" data-toggle="tooltip" title="' + current.$messages['plugin-update'] + '"><i class="fas fa-arrow-circle-o-up"></i> ' + plugin.newVersion + '</a>';
 						}
 						return result;
 					}

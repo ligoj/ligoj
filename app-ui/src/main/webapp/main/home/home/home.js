@@ -130,7 +130,7 @@ define([
 			$context.find('.trigger-visibility:visible').not('.refreshing').filter(current.isElementInViewport).addClass('.refreshing').each(function () {
 				var $owner = $(this);
 				newVisibleSubscriptions.push(current.model.subscriptions[parseInt($owner.removeClass('trigger-visibility').attr('data-subscription'), 10)]);
-				$owner.find('.features').html('<i class="fa spin fa-spinner fa-pulse"></i>');
+				$owner.find('.features').html('<i class="fas spin fa-spinner fa-pulse"></i>');
 			});
 			newVisibleSubscriptions.length && current.refreshSubcriptionStatus(newVisibleSubscriptions);
 		},
@@ -240,16 +240,16 @@ define([
 			tableContent = '<div class="details group-carousel"><div class="scrollbar-macosx"><table class="subscriptions table dataTable justified"><thead><tr>';
 
 			// Status
-			tableContent += '<th class="status"><i class="fa fa-power-off" data-toggle="tooltip" title="' + current.$messages['status-subscription'] + '"></i></th>';
+			tableContent += '<th class="status"><i class="fas fa-power-off" data-toggle="tooltip" title="' + current.$messages['status-subscription'] + '"></i></th>';
 
 			// Project
-			tableContent += '<th class="project zoomable"><i class="fa fa-folder-open" data-toggle="tooltip" title="' + current.$messages.project + '" data-container="#_ucDiv"></i></th>';
+			tableContent += '<th class="project zoomable"><i class="fas fa-folder-open" data-toggle="tooltip" title="' + current.$messages.project + '" data-container="#_ucDiv"></i></th>';
 
 			// Subscription
-			tableContent += '<th class="key zoomable zoomable-default in"><i class="fa fa-plug" data-toggle="tooltip" title="' + current.$messages.subscription + '" data-container="#_ucDiv"></i></th>';
+			tableContent += '<th class="key zoomable zoomable-default in"><i class="fas fa-plug" data-toggle="tooltip" title="' + current.$messages.subscription + '" data-container="#_ucDiv"></i></th>';
 
 			// Features
-			tableContent += '<th class="features"><i class="fa fa-cogs" data-toggle="tooltip" title="' + current.$messages.features + '" data-container="#_ucDiv"></i></th></tr></thead><tbody></tbody></table></div></div>';
+			tableContent += '<th class="features"><i class="fas fa-cogs" data-toggle="tooltip" title="' + current.$messages.features + '" data-container="#_ucDiv"></i></th></tr></thead><tbody></tbody></table></div></div>';
 			$thumbnail.append(tableContent);
 			$tbody = $thumbnail.find('.subscriptions tbody');
 			for (index = 0; index < nodeSubscriptions.length; index++) {
@@ -318,7 +318,7 @@ define([
 				// Complete list of tags
 				if (node.tag && tagUiClasses[node.tag] === undefined) {
 					tags.push(node.tag);
-					tagUiClasses[node.tag] = node.tagUiClasses || 'fa fa-tag';
+					tagUiClasses[node.tag] = node.tagUiClasses || 'fas fa-tag';
 				}
 			}
 			for (index = 0; index < projectsAsList.length; index++) {
@@ -396,7 +396,7 @@ define([
 				if (node.refined && node.refined.refined === undefined) {
 					// Wrapper
 					var counters = current.toCounter(node.subscriptions.length, node.nbProjects);
-					nodeContent = '<div class="node show ' + current.gridClass + ' ' + current.$parent.getHierarchyId(node.id) + '" data-id="' + node.id + '"><div class="thumbnail"><div class="main"><div class="counters"><span class="badge nb-total" data-toggle="tooltip" data-container="#_ucDiv"  title="' + current.$messages['node-subscriptions'] + '">' + counters + '</span><span class="badge nb-filtered hidden" data-toggle="tooltip" data-container="#_ucDiv" title="' + current.$messages['node-subscriptions-filtered'] + '"></span></div>' + current.$parent.toIcon(node, 'x64w', true) + '<div class="caption"><h3>' + node.name + ' <i class="fa fa-caret-right" data-toggle="tooltip" data-container="#_ucDiv" title="' + current.$messages['toggle-thumbnail'] + '"></i></h3></div>';
+					nodeContent = '<div class="node show ' + current.gridClass + ' ' + current.$parent.getHierarchyId(node.id) + '" data-id="' + node.id + '"><div class="thumbnail"><div class="main"><div class="counters"><span class="badge nb-total" data-toggle="tooltip" data-container="#_ucDiv"  title="' + current.$messages['node-subscriptions'] + '">' + counters + '</span><span class="badge nb-filtered hidden" data-toggle="tooltip" data-container="#_ucDiv" title="' + current.$messages['node-subscriptions-filtered'] + '"></span></div>' + current.$parent.toIcon(node, 'x64w', true) + '<div class="caption"><h3>' + node.name + ' <i class="fas fa-caret-right" data-toggle="tooltip" data-container="#_ucDiv" title="' + current.$messages['toggle-thumbnail'] + '"></i></h3></div>';
 
 					// Tag
 					tagUiClasses = node.tag && (node.tagUiClasses || (node.refined && (node.refined.tagUiClasses || (node.refined.refined && node.refined.tagUiClasses))));
@@ -722,7 +722,7 @@ define([
 				tr += '<td class="icon-xs" rowspan="' + tool.specifics.length + '">' + current.$parent.toIcon(tool.node) + '<span class="hidden-xs" title="' + tool.description + '"> ' + tool.node.name + '</span></td>';
 			}
 			tr += '<td class="status status-' + nodeEvent.value.toLowerCase() + '"><div class="status-content">&nbsp;</div></td>';
-			tr += '<td>' + node.name + '<a class="refresh-node pull-right"><i class="fa fa-refresh"></i></a></td><td data-id="' + node.id + '"></td></tr>';
+			tr += '<td>' + node.name + '<a class="refresh-node pull-right"><i class="fas fa-sync-alt"></i></a></td><td data-id="' + node.id + '"></td></tr>';
 			_('status').find('tbody').append(tr);
 			_('status').find('[data-id="' + node + '"]').data('status', nodeEvent.value);
 		},
@@ -776,10 +776,10 @@ define([
 					notifyManager.notify(current.$messages.statusRefreshed);
 				},
 				beforeSend: function () {
-					_('refreshSubBtn').disable().find('.fa-refresh').addClass('fa-spin');
+					_('refreshSubBtn').disable().find('.fa-sync-alt').addClass('fa-spin');
 				},
 				complete: function () {
-					_('refreshSubBtn').disable().find('.fa-refresh').removeClass('fa-spin');
+					_('refreshSubBtn').disable().find('.fa-sync-alt').removeClass('fa-spin');
 				}
 			});
 		},

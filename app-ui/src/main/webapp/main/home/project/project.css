@@ -81,10 +81,10 @@ div.dt-button-background {
     top: 12px;
     display: inline;
 }    
-.group-start.row-group-collapsed .toggle i.fa-minus-square-o {
+.group-start.row-group-collapsed .toggle i.fa-minus-square {
 	display: none;
 }
-.group-start:not(.row-group-collapsed) .toggle i.fa-plus-square-o {
+.group-start:not(.row-group-collapsed) .toggle i.fa-plus-square {
 	display: none;
 }
 .details-audit {

@@ -61,7 +61,7 @@ define(['cascade'], function ($cascade) {
 					// Project mode
 					current.loadProject(id, function(model, refresh) {
 						if (!refresh && current.currentSubscription) {
-							_('subscriptions').find('tr[data-id="' + current.currentSubscription.id + '"]').find('td.key').html('<i class="fa spin fa-spinner fa-pulse"></i>');
+							_('subscriptions').find('tr[data-id="' + current.currentSubscription.id + '"]').find('td.key').html('<i class="fas spin fa-spinner fa-pulse"></i>');
 							current.$parent.refreshSubscription(current.currentSubscription);
 						}
 						current.currentSubscription = null;
@@ -114,7 +114,7 @@ define(['cascade'], function ($cascade) {
 			_('main').addClass('hidden');
 			_('details').addClass('hidden');
 
-			$cascade.appendSpin(current.$view, 'fa-4x', 'fa fa-circle-o faa-burst animated centered');
+			$cascade.appendSpin(current.$view, 'fa-4x', 'far fa-circle faa-burst animated centered');
 			if (id === current.currentId) {
 				// Project is already loaded, cache useless Ajax call, display the details
 				_('details').removeClass('hidden');
@@ -275,8 +275,8 @@ define(['cascade'], function ($cascade) {
 					width: '48px',
 					orderable: false,
 					render: function () {
-						var editlink = '<a class="update" data-toggle="modal" data-target="#popup"><i class="fa fa-pencil" data-toggle="tooltip" title="' + current.$messages.update + '"></i></a>';
-						return editlink + '<a class="delete"><i class="fa fa-removefa fa-remove" data-toggle="tooltip" title="' + current.$messages['delete'] + '"></i></a>';
+						var editlink = '<a class="update" data-toggle="modal" data-target="#popup"><i class="fas fa-pencil" data-toggle="tooltip" title="' + current.$messages.update + '"></i></a>';
+						return editlink + '<a class="delete"><i class="fas fa-timesfas fa-times" data-toggle="tooltip" title="' + current.$messages['delete'] + '"></i></a>';
 					}
 				}],
 				buttons: securityManager.isAllowedBusiness('project', 'post,put') ? [{
@@ -570,7 +570,7 @@ define(['cascade'], function ($cascade) {
 				}] : [];
 			buttons.push({
 				extend: 'collection',
-				text: '<i class="fa fa-object-group"></i>',
+				text: '<i class="far fa-object-group"></i>',
 				fade: 0,
 				attr: {
 					'title': current.$messages['group-by'],
@@ -578,27 +578,27 @@ define(['cascade'], function ($cascade) {
 				},
 				autoClose : true,
 				buttons: [{
-					text: '<i class="fa fa-magic fa-fw"></i> ' + current.$messages['group-by-auto'],
+					text: '<i class="fas fa-magic fa-fw"></i> ' + current.$messages['group-by-auto'],
 					action: function () {
 						current.groupBy(current.getAutoGroupDataSrc());
 					}
 				}, {
-					text: '<i class="fa fa-ban fa-fw"></i> ' + current.$messages['group-by-none'],
+					text: '<i class="fas fa-ban fa-fw"></i> ' + current.$messages['group-by-none'],
 					action: function () {
 						current.groupBy();
 					}
 				}, {
-					text: '<i class="fa fa-glass fa-fw"></i> ' + current.$messages.service,
+					text: '<i class="fas fas fa-glass-martini fa-fw"></i> ' + current.$messages.service,
 					action: function () {
 						current.groupBy('node.refined.refined.id', 1);
 					}
 				}, {
-					text: '<i class="fa fa-wrench fa-fw"></i> ' + current.$messages.tool,
+					text: '<i class="fas fa-wrench fa-fw"></i> ' + current.$messages.tool,
 					action: function () {
 						current.groupBy('node.refined.id', 2);
 					}
 				}, {
-					text: '<i class="fa fa-cube fa-fw"></i> ' + current.$messages.node,
+					text: '<i class="fas fa-cube fa-fw"></i> ' + current.$messages.node,
 					action: function () {
 						current.groupBy('node.id', 3);
 					}
@@ -672,7 +672,7 @@ define(['cascade'], function ($cascade) {
 					bVisible: project.manageSubscriptions,
 					render: function (_i, _j, subscription) {
 						if (project.manageSubscriptions) {
-							return '<a class="unsubscribe"><i class="fa fa-remove" data-toggle="tooltip" title="' + current.$messages.unsubscribe + '"></i></a>' + ((subscription.node.refined.mode === 'create' || subscription.node.mode === 'create') ? '<a class="delete"><i class="fa fa-trash" data-toggle="tooltip" title="' + current.$messages['delete-subscription'] + '"></i></a>' : '');
+							return '<a class="unsubscribe"><i class="fas fa-times" data-toggle="tooltip" title="' + current.$messages.unsubscribe + '"></i></a>' + ((subscription.node.refined.mode === 'create' || subscription.node.mode === 'create') ? '<a class="delete"><i class="fas fa-trash-alt" data-toggle="tooltip" title="' + current.$messages['delete-subscription'] + '"></i></a>' : '');
 						}
 						return '&nbsp';
 					}
@@ -714,7 +714,7 @@ define(['cascade'], function ($cascade) {
 							// Orphan group
 							$tr.append('<td colspan="6">'+ current.$messages['group-by-other'] +'</td>');
 						}
-						$tr.children().eq(0).append('<div class="grouped-count label label-default"><span class="toggle"><i class="fa fa-plus-square-o"></i><i class="fa fa-minus-square-o"></i></span>' + rows.count() + '</div>');
+						$tr.children().eq(0).append('<div class="grouped-count label label-default"><span class="toggle"><i class="far fa-plus-square"></i><i class="far fa-minus-square"></i></span>' + rows.count() + '</div>');
 						return $tr;
 					}
 				}

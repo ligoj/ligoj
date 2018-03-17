@@ -229,6 +229,6 @@ img.tool.broken {
 	font-weight: bold;
 }
 
-.subscriptions .key>.fa, .subscriptions .key .item>.fa {
+.subscriptions .key>i, .subscriptions .key .item>i {
 	font-size: xx-small;
 }

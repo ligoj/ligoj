@@ -4,29 +4,29 @@
 			<div class="btn-group" data-toggle="buttons" id="grid-mode">
 				<label class="btn btn-default">
 					<input type="radio" name="grid-mode" autocomplete="off">
-					<i class="fa fa-th"></i> </label>
+					<i class="fas fa-th"></i> </label>
 				<label class="btn btn-default active">
 					<input type="radio" name="grid-mode" autocomplete="off" checked>
-					<i class="fa fa-th-large"></i> </label>
+					<i class="fas fa-th-large"></i> </label>
 				<label class="btn btn-default">
 					<input type="radio" name="grid-mode" autocomplete="off">
-					<i class="fa fa-th-list"></i> </label>
+					<i class="fas fa-th-list"></i> </label>
 			</div>
 			<div class="btn-group" data-toggle="buttons" id="tag-mode"></div>
 			<div class="form-group has-feedback pull-right">
 				<input type="text" class="form-control" placeholder="{{project-or-tool}}" id="search" />
-				<span class="fa fa-search form-control-feedback"></span>
+				<span class="fas fa-search form-control-feedback"></span>
 			</div>
 			<div class="btn-group" data-toggle="buttons">
 				<label class="btn btn-default active">
-					<input type="checkbox" autocomplete="off" checked id="color-mode"><i class="fa fa-tint text-warning"></i>
+					<input type="checkbox" autocomplete="off" checked id="color-mode"><i class="fas fa-tint text-warning"></i>
 				</label>
 			</div>
-			<button type="button" data-toggle="tooltip" title="{{expand-toggle}}" class="btn btn-default" id="expand-mode"><i class="fa fa-indent"></i><i class="fa fa-dedent"></i></button>
+			<button type="button" data-toggle="tooltip" title="{{expand-toggle}}" class="btn btn-default" id="expand-mode"><i class="fas fa-indent"></i><i class="fas fa-dedent"></i></button>
 
 			<!--[if (gt IE 9)|!(IE)]><!-->
-			<button type="button" data-toggle="tooltip" title="{{fullscreen}}" class="btn btn-primary hidden-fs" id="fullscreen"><i class="fa fa-expand"></i></button>
-			<button type="button" data-toggle="tooltip" title="{{exit-fullscreen}}" class="btn btn-primary visible-fs" id="exit-fullscreen"><i class="fa fa-compress"></i></button>
+			<button type="button" data-toggle="tooltip" title="{{fullscreen}}" class="btn btn-primary hidden-fs" id="fullscreen"><i class="fas fa-expand"></i></button>
+			<button type="button" data-toggle="tooltip" title="{{exit-fullscreen}}" class="btn btn-primary visible-fs" id="exit-fullscreen"><i class="fas fa-compress"></i></button>
 			<!--<![endif]-->
 		</div>
 	</div>
@@ -53,7 +53,7 @@
 			<div class="panel-group" role="tablist">
 				<div class="panel panel-info">
 					<div class="panel-heading" role="tab">
-						<h4><i class="fa fa-info"></i> Nouveautés </h4>
+						<h4><i class="fas fa-info"></i> Nouveautés </h4>
 					</div>
 					<div class="panel-body">
 						Le portail SaaS intègre constamment de nouvelles fonctionnalités. <a data-toggle="collapse" href="#news-collapse" aria-controls="news-collapse"> Détails »</a>
@@ -118,7 +118,7 @@
 							</div>
 							<div>
 								<br>
-								<a target="blank" href="https://github.com/ligoj/ligoj/issues"><i class="fa fa-bug"></i></a> Vous trouvez un bug, même mineur, ou avez des idées ? Contribuez dans le gestionnaire de demande <a target="blank" href="https://github.com/ligoj/ligoj/issues">JIRA</a>
+								<a target="blank" href="https://github.com/ligoj/ligoj/issues"><i class="fas fa-bug"></i></a> Vous trouvez un bug, même mineur, ou avez des idées ? Contribuez dans le gestionnaire de demande <a target="blank" href="https://github.com/ligoj/ligoj/issues">JIRA</a>
 							</div>
 						</div>
 					</div>
@@ -130,10 +130,10 @@
 			<div class="panel-group" role="tablist" data-secured-service="node/status" data-secured-method="get">
 				<div class="panel panel-default">
 					<div class="panel-heading" role="tab">
-						<h4><i class="fa fa-map-signs"></i> Redirection </h4>
+						<h4><i class="fas fa-map-signs"></i> Redirection </h4>
 					</div>
 					<div class="panel-body">
-						Vous pouvez sélectionner un outil qui sera associé par défaut à l'adresse <a href="{{{$current.$url}}}">{{{$current.$url}}}</a>. Seuls les outils avec une URL générique sont affichés. <a data-toggle="collapse" href="#redirection-collapse" aria-controls="redirection-collapse"> Configurer <i class="fa fa-cog faa-wrench animated-hover"></i> </a>
+						Vous pouvez sélectionner un outil qui sera associé par défaut à l'adresse <a href="{{{$current.$url}}}">{{{$current.$url}}}</a>. Seuls les outils avec une URL générique sont affichés. <a data-toggle="collapse" href="#redirection-collapse" aria-controls="redirection-collapse"> Configurer <i class="fas fa-cog faa-wrench animated-hover"></i> </a>
 						<div id="redirection-collapse" class="collapse">
 							<form>
 								<div class="form-horizontal">
@@ -144,7 +144,7 @@
 												<input id="redirection" type="text" class="form-control" placeholder="URL par défaut">
 												<span class="input-group-btn">
 													<button class="btn btn-default" type="button" id="save-redirect">
-														<i class="fa fa-check"></i>
+														<i class="fas fa-check"></i>
 													</button>
 												</span>
 											</div>
@@ -162,21 +162,21 @@
 			<div class="panel-group" role="tablist">
 				<div class="panel panel-warning">
 					<div class="panel-heading" role="tab">
-						<h4><i class="fa fa-pie-chart"></i> {{global-statuses}}</h4>
+						<h4><i class="fas fa-pie-chart"></i> {{global-statuses}}</h4>
 					</div>
 					<div class="panel-body">
 						<table id="status" class="table table-bordered table-striped dataTable justified">
 							<thead>
 								<tr>
-									<th class="status"><i class="fa fa-power-off" data-toggle="tooltip" title="{{status-service}}"></i></th>
+									<th class="status"><i class="fas fa-power-off" data-toggle="tooltip" title="{{status-service}}"></i></th>
 									<th>{{service}}</th>
-									<th class="status"><i class="fa fa-power-off" data-toggle="tooltip" title="{{status-tool}}"></i></th>
+									<th class="status"><i class="fas fa-power-off" data-toggle="tooltip" title="{{status-tool}}"></i></th>
 									<th class="icon-xs truncate">{{tool}}</th>
-									<th class="status"><i class="fa fa-power-off" data-toggle="tooltip" title="{{status-node}}"></i></th>
+									<th class="status"><i class="fas fa-power-off" data-toggle="tooltip" title="{{status-node}}"></i></th>
 									<th>
-										{{node}} <a role="button" data-toggle="tooltip" data-container="body" title="{{refreshNodeTitle}}" data-secured-service="node/status/refresh" data-secured-method="post" class="refresh-node pull-right"><i class="fa fa-refresh"></i></a></th>
+										{{node}} <a role="button" data-toggle="tooltip" data-container="body" title="{{refreshNodeTitle}}" data-secured-service="node/status/refresh" data-secured-method="post" class="refresh-node pull-right"><i class="fas fa-sync-alt"></i></a></th>
 									<th>
-										<a id="refreshSubBtn" data-toggle="tooltip" data-container="body" title="{{refreshSubTitle}}" data-secured-service="node/statistics/refresh" data-secured-method="post"><i class="fa fa-refresh"></i></a></th>
+										<a id="refreshSubBtn" data-toggle="tooltip" data-container="body" title="{{refreshSubTitle}}" data-secured-service="node/statistics/refresh" data-secured-method="post"><i class="fas fa-sync-alt"></i></a></th>
 								</tr>
 							</thead>
 							<tbody></tbody>

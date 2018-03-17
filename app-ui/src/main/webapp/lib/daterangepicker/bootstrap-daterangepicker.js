@@ -829,7 +829,7 @@
                 html += '<th></th>';
 
             if (!minDate || minDate.isBefore(calendar[1][1])) {
-                html += '<th class="prev available"><i class="fa fa-arrow-left icon-arrow-left fa fa-angle-left"></i></th>';
+                html += '<th class="prev available"><i class="fas fa-arrow-left icon-arrow-left fas fa-angle-left"></i></th>';
             } else {
                 html += '<th></th>';
             }
@@ -842,7 +842,7 @@
 
             html += '<th colspan="5" style="width: auto">' + dateHtml + '</th>';
             if (!maxDate || maxDate.isAfter(calendar[1][1])) {
-                html += '<th class="next available"><i class="fa fa-arrow-right icon-arrow-right fa fa-angle-right"></i></th>';
+                html += '<th class="next available"><i class="fas fa-arrow-right icon-arrow-right fas fa-angle-right"></i></th>';
             } else {
                 html += '<th></th>';
             }

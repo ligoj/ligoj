@@ -171,6 +171,21 @@
 			<artifactId>activation</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-prov-azure</artifactId>
+			<version>1.2.6-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-vm-azure</artifactId>
+			<version>1.0.11-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-scm-git</artifactId>
+			<version>1.0.4-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

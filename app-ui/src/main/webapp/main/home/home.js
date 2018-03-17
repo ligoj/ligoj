@@ -299,7 +299,7 @@ define(['cascade'], function ($cascade) {
 				.addClass(tdClass)[contentClass ? 'addClass' : 'removeClass']('text-danger')
 				.removeAttr('data-original-title').attr('data-title', tooltip).attr('data-container', 'body').attr('rel', 'tooltip')
 				.tooltip('fixTitle')
-				.find('.status-content').html(contentClass ? '<i class="fa ' + contentClass + '"></i>' : '&nbsp;');
+				.find('.status-content').html(contentClass ? '<i class="fas ' + contentClass + '"></i>' : '&nbsp;');
 
 			// Update fresh keys & features
 			if (refresh) {
@@ -388,11 +388,11 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Generate a FontAwesome icon. Provided class will be prefixed by "fa fa-". Tooltip is optional and
+		 * Generate a FontAwesome icon. Provided class will be prefixed by "fas fa-". Tooltip is optional and
 		 * will be resolved with messages if available.
 		 */
 		icon: function (faIcon, tooltip) {
-			return '<i class="fa fa-' + faIcon + '"' + current.tooltip(tooltip) + '></i>&nbsp;';
+			return '<i class="fas fa-' + faIcon + '"' + current.tooltip(tooltip) + '></i>&nbsp;';
 		},
 
 		/**
@@ -432,7 +432,7 @@ define(['cascade'], function ($cascade) {
 		},
 
 		renderServiceLink: function (icon, link, tooltipKey, textKey, attr, clazz) {
-			return '<a href="' + link + '"' + (attr || '') + ' class="feature ' + (clazz || '') + '"><i class="fa fa-' + icon + '" data-toggle="tooltip"' + (tooltipKey ? ' title="' + current.$messages[tooltipKey] + '"' : '') + '></i> ' + (textKey ? current.$messages[textKey] : '') + '</a>';
+			return '<a href="' + link + '"' + (attr || '') + ' class="feature ' + (clazz || '') + '"><i class="fas fa-' + icon + '" data-toggle="tooltip"' + (tooltipKey ? ' title="' + current.$messages[tooltipKey] + '"' : '') + '></i> ' + (textKey ? current.$messages[textKey] : '') + '</a>';
 		},
 
 		/**
@@ -487,7 +487,7 @@ define(['cascade'], function ($cascade) {
 			}
 			// Carousel navigation is not available in grouped mode
 			if (!groupBySubscription) {
-				result += '<a class="right carousel-control" data-target="#' + id + '" role="button" data-slide="next"><span class="fa fa-chevron-right" aria-hidden="true"></span><span class="sr-only">Next</span></a>';
+				result += '<a class="right carousel-control" data-target="#' + id + '" role="button" data-slide="next"><span class="fas fa-chevron-right" aria-hidden="true"></span><span class="sr-only">Next</span></a>';
 			}
 			return result + '</div>';
 		},

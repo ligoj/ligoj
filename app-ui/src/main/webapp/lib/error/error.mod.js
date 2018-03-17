@@ -285,7 +285,7 @@ define([
 				current.manageAjaxError(event, xhr, textStatus, errorThrown);
 			}).ajaxStart(function () {
 				// Add loading indicator
-				$cascade.appendSpin($('body'), '" id="loading', 'fa fa-spin fa-circle-o-notch');
+				$cascade.appendSpin($('body'), '" id="loading', 'fas fa-spin fa-circle-notch');
 			}).ajaxStop(function () {
 				_('loading').remove();
 			});
@@ -325,7 +325,7 @@ define([
 					throw err;
 				} else {
 					// Broken page is not the home page, fail-safe redirection
-					notifyManager.notify(Handlebars.compile(errorMessages['error404-redirected'])({page: window.location.hash, icon: '<i class="fa fa-2 fa-map-signs text-danger"></i>&nbsp;'}), '.top-right', 'warning');
+					notifyManager.notify(Handlebars.compile(errorMessages['error404-redirected'])({page: window.location.hash, icon: '<i class="fas fa-2 fa-map-signs text-danger"></i>&nbsp;'}), '.top-right', 'warning');
 					window.location.hash = '#/';
 				}
 			} else {

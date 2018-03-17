@@ -30,8 +30,8 @@ tr.selected>td {
 }
 table.dataTable thead .sorting:after {
 	display: inline-block;
-	font: normal normal normal 14px/1 FontAwesome;
-	font-size: inherit;
+	font-family: 'Font Awesome 5 Free';
+    	font-size: inherit;
 	text-rendering: auto;
 	-webkit-font-smoothing: antialiased;
 	content: "\f0dc";
@@ -42,7 +42,7 @@ table.dataTable thead .sorting:hover:after {
 }
 table.dataTable thead .sorting_asc:after {
 	display: inline-block;
-	font: normal normal normal 14px/1 FontAwesome;
+	font-family: 'Font Awesome 5 Free';
 	font-size: inherit;
 	text-rendering: auto;
 	-webkit-font-smoothing: antialiased;
@@ -50,7 +50,7 @@ table.dataTable thead .sorting_asc:after {
 }
 table.dataTable thead .sorting_desc:after {
 	display: inline-block;
-	font: normal normal normal 14px/1 FontAwesome;
+	font-family: 'Font Awesome 5 Free';
 	font-size: inherit;
 	text-rendering: auto;
 	-webkit-font-smoothing: antialiased;
@@ -295,8 +295,8 @@ a:hover {
 	margin-left: 2px;
 	margin-top: 1px;
 	position: absolute;
-	font-family: "FontAwesome";
-	font-weight: normal;
+	font-family: "Font Awesome 5 Free";
+	font-weight: 900;
 	font-size: 7px;
 	content: "\f069";
 }
@@ -686,7 +686,7 @@ img.nav-icon {
 .icon-x3 {
 	width: 48px;
 }
-.icon-xs .fa {
+.icon-xs .fa, .icon-xs .fas, .icon-xs .far,.icon-xs .fab {
 	width: 16px;
 }
 

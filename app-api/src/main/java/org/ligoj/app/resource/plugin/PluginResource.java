@@ -647,7 +647,7 @@ public class PluginResource {
 
 		// Add default values
 		node.setTag("functional");
-		node.setTagUiClasses("fa fa-suitcase");
+		node.setTagUiClasses("fas fa-suitcase");
 		node.setMode(SubscriptionMode.LINK);
 		node.setUiClasses("$" + service.getName());
 

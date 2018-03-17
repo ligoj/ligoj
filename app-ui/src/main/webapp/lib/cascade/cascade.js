@@ -543,11 +543,11 @@ define([
 		 * Add a spin. Return the target element.
 		 * @param $to Target container.
 		 * @param sizeClass Optional Fontawesome size icon class such as : 'fa-3x'
-		 * @param iconClass Optional icon class. If not defined, will be 'fa fa-spin fa-circle-o-notch'
+		 * @param iconClass Optional icon class. If not defined, will be 'fas fa-spin fa-circle-notch'
 		 * @return "$to" parameter.
 		 */
 		appendSpin: function ($to, sizeClass, iconClass) {
-			var $spin = $('<i class="' + (iconClass || 'fa fa-circle-o faa-burst animated') + ' spin fade ' + (sizeClass || '') + '"></i>');
+			var $spin = $('<i class="' + (iconClass || 'far fa-circle faa-burst animated') + ' spin fade ' + (sizeClass || '') + '"></i>');
 			$to.append($spin);
 			setTimeout(function () {
 				$spin.addClass('in');
