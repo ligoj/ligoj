@@ -9,7 +9,7 @@
 		"jetty": "9.4"
 	},
 	"contributors": ["fabrice.daugan@gmail.com"],
-	"license": "TBD",
+	"license": "MIT",
 	"bugs": "https://github.com/ligoj/ligoj/issues",
 	"repository": {
 		"type": "git",
