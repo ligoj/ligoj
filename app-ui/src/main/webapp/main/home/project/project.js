@@ -275,7 +275,7 @@ define(['cascade'], function ($cascade) {
 					width: '48px',
 					orderable: false,
 					render: function () {
-						var editlink = '<a class="update" data-toggle="modal" data-target="#popup"><i class="fas fa-pencil" data-toggle="tooltip" title="' + current.$messages.update + '"></i></a>';
+						var editlink = '<a class="update" data-toggle="modal" data-target="#popup"><i class="fas fa-pencil-alt" data-toggle="tooltip" title="' + current.$messages.update + '"></i></a>';
 						return editlink + '<a class="delete"><i class="fas fa-timesfas fa-times" data-toggle="tooltip" title="' + current.$messages['delete'] + '"></i></a>';
 					}
 				}],

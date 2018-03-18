@@ -71,7 +71,7 @@ define(['cascade'], function ($cascade) {
 			var result;
 			if (uiClasses) {
 				// Use classes instead of picture
-				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i data-toggle="tooltip" title="' + title + '" class="' + uiClasses + '"></i>');
+				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i data-toggle="tooltip" title="' + title + '" class="fa-fw ' + uiClasses + '"></i>');
 			} else if (fragments.length < 3) {
 				// Simple service
 				result = '<i data-toggle="tooltip" title="' + title + '" class="fas fa-wrench"></i>';
@@ -415,11 +415,11 @@ define(['cascade'], function ($cascade) {
 		 * Object type to class mapping.
 		 */
 		targetTypeClass: {
-			company: 'resource fas fa-building-o',
+			company: 'resource far fa-building',
 			group: 'resource fas fa-users',
 			project: 'resource fas fa-folder',
 			user: 'resource fas fa-user',
-			tree: 'resource fas fa-ellipsis-v',
+			tree: 'resource fas fa-code-branch fa-rotate-90',
 			node: 'resource fas fa-wrench'
 		}
 	};

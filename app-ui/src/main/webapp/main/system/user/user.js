@@ -141,7 +141,7 @@ define(function () {
 					width: '30px',
 					orderable: false,
 					render: function () {
-						return '<a data-toggle="modal" data-target="#popup"><i class="fas fa-pencil" data-toggle="tooltip" title="' + current.$messages.update + '"></i></a><a class="delete"><i class="fas fa-times" data-toggle="tooltip" title="' + current.$messages['delete'] + '"></i></a>';
+						return '<a data-toggle="modal" data-target="#popup"><i class="fas fa-pencil-alt" data-toggle="tooltip" title="' + current.$messages.update + '"></i></a><a class="delete"><i class="fas fa-times" data-toggle="tooltip" title="' + current.$messages['delete'] + '"></i></a>';
 					}
 				}],
 				buttons: [{
