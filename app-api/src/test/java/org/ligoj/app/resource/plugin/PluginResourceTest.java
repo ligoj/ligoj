@@ -60,8 +60,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import net.sf.ehcache.CacheManager;
-
 /**
  * Test class of {@link PluginResource}
  */
@@ -97,14 +95,15 @@ public class PluginResourceTest extends AbstractServerTest {
 	@Autowired
 	ConfigurationResource configuration;
 
+	@Autowired
+	org.springframework.cache.CacheManager cacheManager;
+
 	@BeforeEach
 	public void prepareData() throws IOException {
 		persistEntities("csv", new Class[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class },
 				StandardCharsets.UTF_8.name());
 		FileUtils.deleteQuietly(TEMP_FILE);
-		CacheManager.getInstance().getCache("plugins-last-version-nexus").removeAll();
-		CacheManager.getInstance().getCache("plugins-last-version-central").removeAll();
-		CacheManager.getInstance().getCache("configuration").removeAll();
+		clearAllCache();
 	}
 
 	@Test

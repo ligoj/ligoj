@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
-	<cache name="plugins-last-version-central" maxEntriesLocalHeap="1" logging="true" statistics="true" timeToLiveSeconds="72000"></cache>
-	<cache name="plugins-last-version-nexus" maxEntriesLocalHeap="1" logging="true" statistics="true" timeToLiveSeconds="72000"></cache>
-</ehcache>

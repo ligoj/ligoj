@@ -15,6 +15,10 @@ ARG SERVER_HOME="/usr/local/ligoj"
 ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
 
 ADD ${WAR} "${SERVER_HOME}/${ARTIFACT_ID}.war"
+
+# Policy file for JMX
+ADD src/test/resources/ligoj.policy "${SERVER_HOME}/ligoj.policy"
+
 WORKDIR "${SERVER_HOME}"
 
 # ENV (run)
@@ -50,6 +54,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     --add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED \
     -Djavax.net.ssl.trustStorePassword=changeit \
     -Dserver.address="${SERVER_HOST}" \
+    -Djava.security.policy="${SERVER_HOME}/ligoj.policy" \
     -Dserver.port="${SERVER_PORT}" \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
     -Dligoj.home="${LIGOJ_HOME}" \
