@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 package org.ligoj.app.resource.plugin;
 
 import java.io.IOException;
@@ -13,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -80,7 +82,7 @@ public class WebjarsServlet extends HttpServlet {
 		try {
 			final String filename = getFileName(webjarsResourceURI);
 			response.setContentType(guessMimeType(filename));
-			IOUtils.copy(inputStream, response.getOutputStream());
+			inputStream.transferTo(response.getOutputStream());
 			response.flushBuffer();
 		} finally {
 			inputStream.close();

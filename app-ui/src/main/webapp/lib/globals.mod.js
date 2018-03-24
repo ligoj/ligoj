@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 /** const */
 var REST_MATCH_PATH = 'rest';
 var REST_PATH = REST_MATCH_PATH + '/';

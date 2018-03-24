@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define(['jquery', 'cascade', 'i18n!daterangepicker/nls/daterangepicker-messages', 'l10n.mod', 'bootstrap', 'bootstrap-datepicker.mod',
 	'bootstrap-daterangepicker.core'
 ], function ($, $cascade, messages, locale) {

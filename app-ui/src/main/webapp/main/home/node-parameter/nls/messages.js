@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define({
 	"root": {
 		"secured-untouched": "Value is secured, not empty and cannot be displayed. Click here to enable and override the value in this input.",

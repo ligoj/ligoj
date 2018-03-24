@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 /**
  * The HTML file will be loaded and compiled with Handlebars and i18n messages if loaded.
  * Injected context :

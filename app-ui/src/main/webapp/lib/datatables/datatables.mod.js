@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define([
 	'jquery', 'cascade', 'i18n!datatables/nls/messages', 'datatables.net-buttons-bs', 'datatables.net-filters', 'datatables.net-edit'
 ], function ($, $cascade, dataTablesMessages) {

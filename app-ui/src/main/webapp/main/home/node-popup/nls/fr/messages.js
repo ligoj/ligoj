@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define({
 	'mode-none': 'Aucun',
 	'mode-none-tooltip': 'Aucune souscription ne sera possible. Noeud de configuration uniquement',

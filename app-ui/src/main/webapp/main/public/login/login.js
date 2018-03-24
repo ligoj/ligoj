@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define([
 	'jquery', 'i18n!main/public/login/nls/messages', 'bootstrap', 'material'
 ], function ($, messages) {

@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 /**
  * The JS file will be loaded and "initialize" function if defined will be called. When this
  * function is called, view is already placed in the document, CSS is loaded, and "$current"

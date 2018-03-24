@@ -1,7 +1,5 @@
-/*!
- * Cascade v0.0.2 (https://github.com/fabdouglas/cascadejs)
- * Copyright 2016 Fabrice Daugan.
- * Licensed under the MIT license
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
 define([
 	'jquery', 'hashchange/hashchange'

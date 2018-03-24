@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 /*!
  * Masonry PACKAGED v4.0.0
  * Cascading grid layout library

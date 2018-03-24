@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 /**
  * Prepare generator -> JQuery validator does not manage id selector
  */

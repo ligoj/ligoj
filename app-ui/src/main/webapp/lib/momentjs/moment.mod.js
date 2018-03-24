@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define(['moment', 'l10n.mod','moment/locale/fr'], function (momentjs) {
 	momentManager = {
 		locales: ['fr', 'en'],

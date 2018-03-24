@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define(['l10n.mod', 'i18n!bootstrap-material-datetimepicker/nls/locale', 'bootstrap-material-datetimepicker/bootstrap-material-datetimepicker', 'moment.mod'], function (l10n, messages) {
 	$.fn.bootstrapMaterialDatePicker.defaults = {date: true, time: false, format: 'L', minDate: null, maxDate: null, currentDate: null, lang: l10n.requireLanguage, weekStart: 1, shortTime: false, clearButton: false, nowButton: false, cancelText: messages.cancel, okText: messages.ok, clearText: messages.clear, nowText: messages.now, switchOnClick: true, triggerEvent: 'focus'};
 

@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define({
 	"unknown-id" : "Pas de {{[0]}} avec identifiant {{[1]}}",
 	"already-exist" : "{{[0]}} ({{[1]}}) existe déjà",

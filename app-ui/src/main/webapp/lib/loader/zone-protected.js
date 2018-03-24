@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define(['jquery', 'security.mod', 'cascade', 'error.mod', 'handlebars.mod', 'toastr.mod',
         'plugins/css', 'plugins/partial', 'plugins/i18n', 'plugins/html', 'plugins/js'], function ($, security, $cascade) {
 	function decorate(session) {

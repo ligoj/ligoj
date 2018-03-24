@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 /**
  * The CSS file will be loaded and placed in the head of the document and will be removed
  * during the unload. Unfortuanately, "scoped" attribute is not yet implemented in the major browser.

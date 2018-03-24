@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define(['cascade', 'moment', 'bootstrap-timepicker', 'l10n.mod', 'moment.mod'], function ($cascade, moment) {
 	var timePickerManager = {
 

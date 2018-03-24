@@ -1,12 +1,5 @@
-/*!
- * Timepicker Component for Twitter Bootstrap
- *
- * Copyright 2013 Joris de Wit and bootstrap-timepicker contributors
- *
- * Contributors https://github.com/jdewit/bootstrap-timepicker/graphs/contributors
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
 (function($, window, document) {
   'use strict';

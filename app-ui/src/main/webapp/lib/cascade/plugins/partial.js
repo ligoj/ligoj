@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 /**
  * The HTML file will be loaded, compiled and placed in the context.
  */

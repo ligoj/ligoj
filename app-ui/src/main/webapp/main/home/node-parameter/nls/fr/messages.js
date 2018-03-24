@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define({
 	"secured-untouched": "Valeur protégée, non vide et non affichable. Cliquer ici pour pouvoir modififier la valeur de ce champ.",
 	"secured-touched": "Valeur protégée qui sera remplacée par cette nouvelle valeur.",

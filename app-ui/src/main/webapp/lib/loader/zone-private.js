@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define(['moment.mod', 'zone-protected', 'datatables.mod', 'form',
 	'bootstrap.mod','bootstrap-datepicker.mod', 'bootbox.mod', 'select2',
 	'bootstrap-daterangepicker.mod', 'bootstrap-spinner', 'scroll.mod', 'bootstrap-jasny',

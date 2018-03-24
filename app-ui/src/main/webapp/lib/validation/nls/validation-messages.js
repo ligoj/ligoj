@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define({
 	"root" : {
 		"unknown-id" : "No {{[0]}} with identifier {{[1]}}",

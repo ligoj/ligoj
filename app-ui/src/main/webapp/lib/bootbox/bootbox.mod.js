@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define(['jquery', 'cascade', 'i18n!bootbox/nls/bootbox-messages', 'bootbox/bootbox'], function ($, $cascade, bootMessages, module) {
 	module.addLocale('user', bootMessages);
 	module.setLocale('user');

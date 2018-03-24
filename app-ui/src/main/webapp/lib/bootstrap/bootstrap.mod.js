@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define([
 	'jquery', 'cascade', 'bootstrap'
 ], function ($, $cascade) {

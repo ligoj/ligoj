@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 /**
  * The internationalization files will be loaded and merged with the messages from the parent
  * hierarchy of context using LIFO priority for resolution.

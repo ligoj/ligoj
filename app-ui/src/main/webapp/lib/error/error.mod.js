@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define([
 	'i18n!error/nls/error-messages', 'cascade'
 ], function (errorMessages, $cascade) {

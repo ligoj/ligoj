@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define(['i18n!datepicker/nls/bootstrap-datepicker', 'l10n.mod', 'bootstrap-datepicker.core', 'format.mod'], function (messages, locale) {
 	$.fn.datepicker.dates[locale.requireLocale] = messages;
 	$.fn.datepicker.defaults = $.extend($.extend({}, $.fn.datepicker.defaults), {

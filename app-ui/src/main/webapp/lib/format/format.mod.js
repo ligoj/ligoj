@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($, messages) {
 	formatManager = {
 		messages: null,

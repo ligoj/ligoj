@@ -1,3 +1,6 @@
+/*
+ * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
+ */
 define({
 	"business" : "Erreur métier",
 	"technical" : "Erreur technique contrôlée",
