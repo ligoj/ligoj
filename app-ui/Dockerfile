@@ -36,6 +36,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -Djavax.net.ssl.trustStorePassword=changeit \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
     -Dserver.port="${SERVER_PORT}" \
+    -Djava.net.preferIPv4Stack=true \
     -Djavax.net.ssl.trustStorePassword=changeit \
     -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
 

@@ -56,6 +56,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -Dserver.address="${SERVER_HOST}" \
     -Djava.security.policy="${SERVER_HOME}/ligoj.policy" \
     -Dserver.port="${SERVER_PORT}" \
+    -Djava.net.preferIPv4Stack=true \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
     -Dligoj.home="${LIGOJ_HOME}" \
     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
