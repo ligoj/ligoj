@@ -171,6 +171,14 @@
 			<artifactId>activation</artifactId>
 			<scope>compile</scope>
 		</dependency>
+
+		<!-- Embedded plugin-ui -->
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-ui</artifactId>
+			<version>[0.0.1-SNAPSHOT,)</version>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

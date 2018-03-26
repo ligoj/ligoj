@@ -88,7 +88,7 @@ public class Application extends SpringBootServletInitializer {
 	public ServletRegistrationBean<BackendProxyServlet> pluginProxyServlet() {
 		// Due to the current limitation of BackendProxyServlet
 		System.setProperty("ligoj.endpoint.plugins.url", endpointPlugin);
-		return newBackend("pluginProxy", "ligoj.endpoint.plugins.url", "/main", "/main/service/*", "/main/id/*", "/main/prov/*", "/main/inbox/*");
+		return newBackend("pluginProxy", "ligoj.endpoint.plugins.url", "/main", "/main/*");
 	}
 
 	/**

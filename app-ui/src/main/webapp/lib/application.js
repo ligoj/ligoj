@@ -14,7 +14,7 @@ var applicationManager = {
 	 * Initialize AMD dependencies and configuration.
 	 */
 	initialize: function () {
-		var cache = !this.debug && location.hostname !== 'localhost' && requirejs.s.contexts._.config.urlArgs('', '').substring(1) !== 'bust=${project.version}';
+		var cache = !this.debug && location.hostname !== 'localhost' && requirejs.s.contexts._.config.urlArgs('', '').substring(1) !== 'bust=DEV';
 		var urlArgs = cache ? null : 'bust=' + new Date().getTime();
 		require.config({
 			urlArgs: cache ? requirejs.s.contexts._.config.urlArgs : function (id, url) {

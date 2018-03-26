@@ -42,7 +42,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/rest").authenticated()
 
 				// Unsecured access
-				.requestMatchers(EndpointRequest.to("health")).permitAll().antMatchers("/rest/redirect", "/manage/health").permitAll()
+				.requestMatchers(EndpointRequest.to("health")).permitAll().antMatchers("/rest/redirect", "/manage/health", "/webjars/public/**").permitAll()
 				.antMatchers("/rest/security/login", "/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()
 				.antMatchers("/rest/redirect").permitAll()
 
