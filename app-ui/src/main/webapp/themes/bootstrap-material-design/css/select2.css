@@ -670,6 +670,7 @@ html[dir="rtl"] .select2-container .select2-choice > .select2-chosen {
   content: "\f00d";
   text-align: center;
   color: #606060;
+  font-weight: 600;
 }
 .select2-container .select2-choice abbr:hover {
   text-decoration: none;
