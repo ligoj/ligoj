@@ -3,10 +3,12 @@
  */
 package org.ligoj.app.resource.plugin.repository;
 
+import java.io.Serializable;
+
 /**
  * A Maven artifact.
  */
-public interface Artifact {
+public interface Artifact extends Serializable {
 
 	/**
 	 * Artifact digit version. Not "LATEST",...
