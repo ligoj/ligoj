@@ -24,15 +24,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class NexusRepositoryManager extends AbstractRemoteRepositoryManager {
 
-	private static final String DEFAULT_ARTIFACT_URL = "https://oss.sonatype.org/service/local/repositories/releases/content/org/ligoj/plugin";
-
-	private static final String DEFAULT_SEARCH_URL = "https://oss.sonatype.org/service/local/lucene/search?g=org.ligoj.plugin&collapseresults=true&repositoryId=releases&p=jar&c=sources";
+	private static final String DEFAULT_ARTIFACT_URL = "https://oss.sonatype.org/service/local/repositories/releases/content/";
+	private static final String DEFAULT_GROUP_ID = "org.ligoj.plugin";
+	private static final String DEFAULT_SEARCH_URL = "https://oss.sonatype.org/service/local/lucene/search?collapseresults=true&repositoryId=releases&p=jar&c=sources&g=";
 
 	@Override
 	@CacheResult(cacheName = "plugins-last-version-nexus")
 	public Map<String, Artifact> getLastPluginVersions() throws IOException {
-		final String searchResult = StringUtils.defaultString(new CurlProcessor().get(getSearchUrl(DEFAULT_SEARCH_URL), "Accept:application/json"),
-				"{\"data\":[]}");
+		final String searchResult = StringUtils.defaultString(
+				new CurlProcessor().get(getSearchUrl(DEFAULT_SEARCH_URL + getGroupId(DEFAULT_GROUP_ID)), "Accept:application/json"), "{\"data\":[]}");
 		// Extract artifacts
 		final ObjectMapper jsonMapper = new ObjectMapper();
 		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/data"), NexusSearchResult[].class))
@@ -46,7 +46,7 @@ public class NexusRepositoryManager extends AbstractRemoteRepositoryManager {
 
 	@Override
 	public InputStream getArtifactInputStream(String artifact, String version) throws IOException {
-		return getArtifactInputStream(artifact, version, DEFAULT_ARTIFACT_URL);
+		return getArtifactInputStream(artifact, version, DEFAULT_ARTIFACT_URL + getGroupId(DEFAULT_GROUP_ID).replace('.', '/'));
 	}
 
 	@Override

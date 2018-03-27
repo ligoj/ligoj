@@ -33,6 +33,16 @@ public abstract class AbstractRemoteRepositoryManager implements RepositoryManag
 	protected String getSearchUrl(final String defaultUrl) {
 		return getConfiguration("search.url", defaultUrl);
 	}
+	/**
+	 * Return the plug-ins filtered group-id to query the repository manager.
+	 * 
+	 * @param defaultGroupIp
+	 *            The "groupId".
+	 * @return The "groupId" filter.
+	 */
+	protected String getGroupId(final String defaultGroupIp) {
+		return getConfiguration("groupId", defaultGroupIp);
+	}
 
 	/**
 	 * Return the plug-ins download base URL.
