@@ -12,6 +12,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ArtifactVo implements Artifact {
+	/**
+	 * SID
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private String artifact;
 

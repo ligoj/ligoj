@@ -17,6 +17,11 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CentralSearchResult implements Artifact {
 	/**
+	 * SID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Artifact name (Maven central representation)
 	 */
 	@JsonProperty("a")

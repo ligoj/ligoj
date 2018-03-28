@@ -16,6 +16,10 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NexusSearchResult implements Artifact {
+	/**
+	 * SID
+	 */
+	private static final long serialVersionUID = 1L;
 	@JsonProperty("artifactId")
 	private String artifact;
 

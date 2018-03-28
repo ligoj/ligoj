@@ -16,6 +16,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PluginVo extends NamedBean<String> {
+	/**
+	 * SID
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Related plug-in entity.
