@@ -63,6 +63,9 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+
 /**
  * Test class of {@link PluginResource}
  */
@@ -107,6 +110,10 @@ public class PluginResourceTest extends AbstractServerTest {
 				StandardCharsets.UTF_8.name());
 		FileUtils.deleteQuietly(TEMP_FILE);
 		clearAllCache();
+
+		// See https://github.com/tomakehurst/wiremock/issues/710
+		// TODO Remove with api 2.2.4+
+		httpServer = new WireMockServer(WireMockConfiguration.options().port(MOCK_PORT).jettyStopTimeout(10000L));
 	}
 
 	@Test
@@ -166,10 +173,10 @@ public class PluginResourceTest extends AbstractServerTest {
 		repository.saveAndFlush(pluginId);
 
 		final List<PluginVo> plugins = resource.findAll("central");
-		Assertions.assertEquals(3, plugins.size());
+		Assertions.assertEquals(4, plugins.size());
 
 		// External plug-in service
-		final PluginVo plugin2 = plugins.get(2);
+		final PluginVo plugin2 = plugins.get(3);
 		Assertions.assertEquals("service:sample", plugin2.getId());
 		Assertions.assertEquals("Sample", plugin2.getName());
 		Assertions.assertNull(plugin2.getVendor());
@@ -200,7 +207,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		repository.saveAndFlush(orphanPLugin);
 
 		final List<PluginVo> plugins = resource.findAll("central");
-		Assertions.assertEquals(2, plugins.size());
+		Assertions.assertEquals(3, plugins.size());
 
 		// Plug-in from the API
 		final PluginVo plugin0 = plugins.get(0);
@@ -216,7 +223,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(PluginType.FEATURE, plugin0.getPlugin().getType());
 
 		// Plug-in (feature) embedded in the current project
-		final PluginVo plugin1 = plugins.get(1);
+		final PluginVo plugin1 = plugins.get(2);
 		Assertions.assertEquals("feature:welcome:data-rbac", plugin1.getId());
 		Assertions.assertEquals("Welcome Data RBAC", plugin1.getName());
 		Assertions.assertNull(plugin1.getVendor());
@@ -657,9 +664,9 @@ public class PluginResourceTest extends AbstractServerTest {
 						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 		final Map<String, Artifact> versions = centralRepositoryManager.getLastPluginVersions();
-		Assertions.assertSame(versions, centralRepositoryManager.getLastPluginVersions());
+		Assertions.assertEquals(versions.keySet(), centralRepositoryManager.getLastPluginVersions().keySet());
 		resource.invalidateLastPluginVersions("central");
-		Assertions.assertNotSame(versions, centralRepositoryManager.getLastPluginVersions());
+		Assertions.assertEquals(versions.keySet(), centralRepositoryManager.getLastPluginVersions().keySet());
 	}
 
 	@Test

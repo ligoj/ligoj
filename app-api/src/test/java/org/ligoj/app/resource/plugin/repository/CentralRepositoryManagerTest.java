@@ -57,8 +57,8 @@ public class CentralRepositoryManagerTest extends AbstractServerTest {
 						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 		final Map<String, Artifact> versions = resource.getLastPluginVersions();
-		Assertions.assertSame(versions, resource.getLastPluginVersions());
+		Assertions.assertEquals(versions.keySet(), resource.getLastPluginVersions().keySet());
 		resource.invalidateLastPluginVersions();
-		Assertions.assertNotSame(versions, resource.getLastPluginVersions());
+		Assertions.assertEquals(versions.keySet(), resource.getLastPluginVersions().keySet());
 	}
 }

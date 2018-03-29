@@ -57,10 +57,10 @@ public class NexusRepositoryManagerTest extends AbstractServerTest {
 						IOUtils.toString(new ClassPathResource("mock-server/nexus-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 		final Map<String, Artifact> versions = resource.getLastPluginVersions();
-		Assertions.assertSame(versions, resource.getLastPluginVersions());
+		Assertions.assertEquals(versions.keySet(), resource.getLastPluginVersions().keySet());
 		Assertions.assertEquals(2,versions.size());
 		Assertions.assertEquals("0.0.1",versions.get("plugin-sample").getVersion());
 		resource.invalidateLastPluginVersions();
-		Assertions.assertNotSame(versions, resource.getLastPluginVersions());
+		Assertions.assertEquals(versions.keySet(), resource.getLastPluginVersions().keySet());
 	}
 }
