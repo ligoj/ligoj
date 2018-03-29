@@ -19,8 +19,7 @@ public class SecurityConfigurationTest {
 
 	@Test
 	public void configure() throws Exception {
-		@SuppressWarnings("cast")
-		final ObjectPostProcessor<Object> proc = (ObjectPostProcessor<Object>) Mockito.mock(ObjectPostProcessor.class);
+		final ObjectPostProcessor<Object> proc =  Mockito.mock(ObjectPostProcessor.class);
 		final AuthenticationManagerBuilder builder = new AuthenticationManagerBuilder(proc);
 		final HttpSecurity security = new HttpSecurity(proc, builder, new HashMap<>());
 		final SecurityConfiguration configuration = new SecurityConfiguration();
