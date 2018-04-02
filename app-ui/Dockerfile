@@ -38,6 +38,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -Dserver.port="${SERVER_PORT}" \
     -Djava.net.preferIPv4Stack=true \
     -Djavax.net.ssl.trustStorePassword=changeit \
+    -XX:+PrintFlagsFinal \
     -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \

@@ -26,7 +26,7 @@ ENV CONTEXT_URL="/ligoj-api" \
     SERVER_HOST="0.0.0.0" \
     SERVER_PORT="8081" \
     LIGOJ_HOME=/home/ligoj \
-    JAVA_MEMORY="-Xms712M -Xmx1024M" \
+    JAVA_MEMORY="-Xms712M -Xmx1248M" \
     CUSTOM_OPTS="-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
@@ -57,6 +57,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -Djava.security.policy="${SERVER_HOME}/ligoj.policy" \
     -Dserver.port="${SERVER_PORT}" \
     -Djava.net.preferIPv4Stack=true \
+    -XX:+PrintFlagsFinal \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
     -Dligoj.home="${LIGOJ_HOME}" \
     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
