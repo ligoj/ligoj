@@ -63,9 +63,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-
 /**
  * Test class of {@link PluginResource}
  */
@@ -110,10 +107,6 @@ public class PluginResourceTest extends AbstractServerTest {
 				StandardCharsets.UTF_8.name());
 		FileUtils.deleteQuietly(TEMP_FILE);
 		clearAllCache();
-
-		// See https://github.com/tomakehurst/wiremock/issues/710
-		// TODO Remove with api 2.2.4+
-		httpServer = new WireMockServer(WireMockConfiguration.options().port(MOCK_PORT).jettyStopTimeout(10000L));
 	}
 
 	@Test
