@@ -1300,6 +1300,7 @@
          */
         setRegionHighlight: function (el, x, y) {
             var currentRegion = this.currentRegion,
+                ratio = Object.prototype.hasOwnProperty.call(window,'devicePixelRatio') ? window.devicePixelRatio : 1,
                 highlightEnabled = !this.options.get('disableHighlight'),
                 newRegion;
             // CUSTOM MOD: proper hover detection considering padding as well
@@ -3319,8 +3320,9 @@
             if (fillColor) {
                 context.fill();
             }
+            var ratio = Object.prototype.hasOwnProperty.call(window,'devicePixelRatio') ? window.devicePixelRatio : 1;
             if (this.targetX !== undefined && this.targetY !== undefined &&
-                context.isPointInPath(this.targetX, this.targetY)) {
+                context.isPointInPath(this.targetX * ratio * ratio, this.targetY * ratio * ratio)) {
                 this.currentTargetShapeId = shapeid;
             }
         },
