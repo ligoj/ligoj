@@ -20,7 +20,7 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>2.2.5-SNAPSHOT</api.version>
+		<api.version>2.2.5</api.version>
 		<spring-boot.version>2.0.0.RELEASE</spring-boot.version>
 		<spring-cloud.version>2.0.0.M8</spring-cloud.version>
 		<swagger.version>3.9.3</swagger.version>
@@ -30,6 +30,16 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-web</artifactId>
+				<version>${spring-security.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-config</artifactId>
+				<version>${spring-security.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>javax.xml.ws</groupId>
 				<artifactId>jaxws-api</artifactId>
@@ -163,7 +173,7 @@
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-ui</artifactId>
-			<version>[0.0.3,)</version>
+			<version>[0.0.4,)</version>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
