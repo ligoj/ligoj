@@ -1,0 +1,90 @@
+<div class="navbar navbar-fixed-top navbar-inverse">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<span class="cascade-title"></span>
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#/" title="{{title}}">&nbsp;</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<span class="cascade-title"></span>
+			<ul class="nav navbar-right navbar-nav">
+				<li class="dropdown">
+					<a class="navbar-link" id="_username" data-toggle="dropdown">&nbsp;<b class="caret"></b></a>
+					<ul class="dropdown-menu">
+						<li>
+							<a href="logout">{{menu.logout}}</a>
+						</li>
+						<li>
+							<a href="#/id/user">{{menu.profile}}</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right info">
+				<li class="bs-inbox">
+					<a class="inbox-trigger" data-trigger="manual" data-toggle="popover" data-cascade="true" data-content="&nbsp" data-ajax="/{{$current.$path}}/inbox" data-plugins="i18n,partial,css,js" data-html="html" data-title="<i class='fas fa-sync-alt faa-spin animated in spin fade'></i>" role="button" data-placement="bottom">
+						<i class="fas fa-inbox icon-info" data-container="body" data-toggle="tooltip" title="{{notifications}}" data-placement="bottom"></i>
+						<span class="label label-danger">
+							<span class="count"></span>
+						</span>
+					</a>
+				</li>
+				<li class="dropdown">
+					<a class="navbar-link" data-toggle="dropdown"><i class="fas fa-question-circle icon-info"></i></a>
+					<ul class="dropdown-menu">
+						<li>
+							<a target="blank" href="https://github.com/ligoj/ligoj/issues"><i class="fas fa-bug menu-icon"></i>{{reportBug}}</a>
+						</li>
+						<li>
+							<a href="#/api">{{menu.api}}</a>
+						</li>
+						<li role="separator" class="divider"></li>
+						<li>
+							<a target="blank" href="https://github.com/ligoj/ligoj/releases/tag/0.0.0" id="_version"><i class="fas fa-lock menu-icon"></i>0.0.0</a>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a class="navbar-link" data-toggle="dropdown"><i class="fas fa-cog icon-info"></i></a>
+					<ul class="dropdown-menu">
+						<li class="system">
+							<a href="#/system">{{menu.administration}}</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+			<ul class="nav navbar-nav">
+				<li>
+					<a href="#/">{{menu.home}}</a>
+				</li>
+				<li>
+					<a href="#/id">{{menu.id}}</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<form id="_not-yet-implemented" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="_not-yet-implemented-label">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					×
+				</button>
+				<h4 id="_not-yet-implemented-label" class="modal-title">Pas encore implémentée</h4>
+			</div>
+			<div class="modal-body">
+				<i class="fas fa-frown"></i> Oh non.... cette fonctionnalité n'est pas encore implémentée. Revenez plus tard.
+			</div>
+			<div class="modal-footer">
+				<a href="#" data-dismiss="modal" aria-hidden="true">{{cancel}}</a>
+			</div>
+		</div>
+	</div>
+</form>
+<div class="auto-col" data-cascade-hierarchy="2"></div>

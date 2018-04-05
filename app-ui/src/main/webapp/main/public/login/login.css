@@ -1,0 +1,43 @@
+.show-login, .show-reset, .show-recovery {
+	display: none;
+}
+
+.recovery .show-recovery, .login .show-login, .reset .show-reset {
+	display: table;
+}
+.card .btn-xs {
+	margin-top: 0;
+	padding-top: 0;
+}
+input.form-control:-webkit-autofill:hover, input.form-control:-webkit-autofill:focus, input.form-control:-webkit-autofill:active {
+	-webkit-border-after-color: #9c27b0;
+	-webkit-border-after-width: 2px;
+}
+input.form-control:-webkit-autofill {
+	-webkit-box-shadow: 0 0 0 50px white inset;
+	-webkit-border-after-color: #d2d2d2;
+	-webkit-border-after-style: solid;
+	-webkit-border-after-width: 1px;
+}
+label[for="captcha"] i, label[for="captcha"]~span i {
+	bottom: -10px;
+	position: relative;
+}
+label[for="captcha"]~.form-group {
+	margin-top: 0;
+}
+.card-title i {
+	opacity: .5;
+}
+.btn[type="submit"].loading {
+	opacity: .4;
+	pointer-events: none;
+}
+.btn[type="submit"]:not(.loading) i {
+	display: none;
+}
+.btn[type="submit"]>i {
+	position: absolute;
+	left: 17px;
+	top: 19px;
+}
