@@ -283,12 +283,6 @@
 		"version": "0.5.2",
 		"lastChecked": "2016-03-09"
 	}, {
-		"name": "HighChart",
-		"id": "highchart",
-		"url": "http://www.highcharts.com/products/highcharts/",
-		"sources": "https://github.com/highslide-software/highcharts.com/",
-		"version": "3.1.10"
-	}, {
 		"name": "formatter",
 		"id": "jquery.formatter",
 		"url": "http://firstopinion.github.io/formatter.js",
