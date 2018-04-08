@@ -225,6 +225,8 @@ public class PluginResource {
 	 * 
 	 * @param artifact
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 * @throws IOException
+	 *             When the file cannot be read or deleted from the file system.
 	 */
 	@DELETE
 	@Path("{artifact:[\\w-]+}")
@@ -338,6 +340,8 @@ public class PluginResource {
 	 * 
 	 * @param event
 	 *            The Spring event.
+	 * @throws Exception
+	 *             When the context can not be refreshed because of plugin updates or configurations..
 	 */
 	@EventListener
 	public void refreshPlugins(final ContextRefreshedEvent event) throws Exception {

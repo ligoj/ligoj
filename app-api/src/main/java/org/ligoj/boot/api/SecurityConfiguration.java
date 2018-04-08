@@ -119,7 +119,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 * @return Simple API token.
 	 */
 	@Bean
-	public ApiTokenAuthenticationFilter apiTokenFilter() throws Exception {
+	public ApiTokenAuthenticationFilter apiTokenFilter() throws  {
 		final ApiTokenAuthenticationFilter bean = new ApiTokenAuthenticationFilter();
 		bean.setPrincipalRequestHeader("SM_UNIVERSALID");
 		bean.setCredentialsRequestHeader("X-api-key");
