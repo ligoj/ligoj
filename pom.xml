@@ -21,7 +21,7 @@
 	
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>root</artifactId>
-	<version>1.7.11-SNAPSHOT</version>
+	<version>1.7.11</version>
 	<name>Ligoj - Application</name>
 	<description>Ligoj - Landing page of your team</description>
 	<packaging>pom</packaging>
