@@ -117,9 +117,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 * Simple API token.
 	 * 
 	 * @return Simple API token.
+	 * @throws Exception From {@link #authenticationManager()}
 	 */
 	@Bean
-	public ApiTokenAuthenticationFilter apiTokenFilter() throws  {
+	public ApiTokenAuthenticationFilter apiTokenFilter() throws Exception  {
 		final ApiTokenAuthenticationFilter bean = new ApiTokenAuthenticationFilter();
 		bean.setPrincipalRequestHeader("SM_UNIVERSALID");
 		bean.setCredentialsRequestHeader("X-api-key");
