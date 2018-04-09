@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -56,12 +57,21 @@ import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cloud.context.restart.RestartEndpoint;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.LifecycleService;
+import com.hazelcast.spi.AbstractDistributedObject;
+import com.hazelcast.spi.NodeEngine;
+import com.hazelcast.spi.RemoteService;
 
 /**
  * Test class of {@link PluginResource}
@@ -696,4 +706,39 @@ public class PluginResourceTest extends AbstractServerTest {
 
 		}.isSafeMode());
 	}
+
+	@Test
+	public void onApplicationEvent() {
+		final ContextClosedEvent event = Mockito.mock(ContextClosedEvent.class);
+		final PluginResource resource = new PluginResource();
+		resource.cacheManager = Mockito.mock(CacheManager.class);
+
+		Mockito.when(resource.cacheManager.getCacheNames()).thenReturn(Collections.singletonList("my-cache"));
+		final Cache cache = Mockito.mock(Cache.class);
+		Mockito.when(resource.cacheManager.getCache("my-cache")).thenReturn(cache);
+		final NodeEngine node = Mockito.mock(NodeEngine.class);
+		final RemoteService rservice = Mockito.mock(RemoteService.class);
+		Mockito.when(node.isRunning()).thenReturn(true);
+		final AbstractDistributedObject<RemoteService> cacheProxy = new AbstractDistributedObject<>(node, rservice) {
+
+			@Override
+			public String getName() {
+				return null;
+			}
+
+			@Override
+			public String getServiceName() {
+				return null;
+			}
+		};
+		Mockito.when(cache.getNativeCache()).thenReturn(cacheProxy);
+		final HazelcastInstance instance = Mockito.mock(HazelcastInstance.class);
+		Mockito.when(node.getHazelcastInstance()).thenReturn(instance);
+		final LifecycleService service = Mockito.mock(LifecycleService.class);
+		Mockito.when(instance.getLifecycleService()).thenReturn(service);
+		resource.onApplicationEvent(event);
+		Mockito.verify(service).terminate();
+
+	}
+
 }

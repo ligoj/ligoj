@@ -68,12 +68,18 @@ import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Persistable;
 import org.springframework.stereotype.Component;
+
+import com.hazelcast.spi.AbstractDistributedObject;
+import com.hazelcast.spi.RemoteService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -88,12 +94,15 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Transactional
 @Produces(MediaType.APPLICATION_JSON)
-public class PluginResource {
+public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	private static final RepositoryManager EMPTY_REPOSITORY = new EmptyRepositoryManager();
 
 	@Autowired
 	private NodeRepository nodeRepository;
+
+	@Autowired
+	protected CacheManager cacheManager;
 
 	@Autowired
 	private PluginRepository repository;
@@ -180,8 +189,8 @@ public class PluginResource {
 	 */
 	@GET
 	@Path("search")
-	public List<Artifact> search(@QueryParam("q") @DefaultValue("") final String query, @QueryParam("repository") @DefaultValue("central") final String repository)
-			throws IOException {
+	public List<Artifact> search(@QueryParam("q") @DefaultValue("") final String query,
+			@QueryParam("repository") @DefaultValue("central") final String repository) throws IOException {
 		return getRepositoryManager(repository).getLastPluginVersions().values().stream().filter(a -> a.getArtifact().contains(query))
 				.collect(Collectors.toList());
 	}
@@ -211,6 +220,7 @@ public class PluginResource {
 
 	/**
 	 * Request a reset of plug-in cache meta-data
+	 * 
 	 * @param repository
 	 *            The repository identifier to reset.
 	 */
@@ -316,6 +326,7 @@ public class PluginResource {
 
 	/**
 	 * Return the current plug-in class loader.
+	 * 
 	 * @return The current plug-in class loader.
 	 */
 	protected PluginsClassLoader getPluginClassLoader() {
@@ -703,4 +714,17 @@ public class PluginResource {
 			}
 		});
 	}
+
+	// TODO Remove with Boostrap 2.2.3+
+	@Override
+	public void onApplicationEvent(ContextClosedEvent event) {
+		log.info("Stopping context detected, shutdown the Hazelcast instance");
+		// Get any cache to retrieve the Hazelcast instance
+		final String name = cacheManager.getCacheNames().iterator().next();
+		@SuppressWarnings("unchecked")
+		final AbstractDistributedObject<RemoteService> cache = (AbstractDistributedObject<RemoteService>) cacheManager.getCache(name)
+				.getNativeCache();
+		cache.getNodeEngine().getHazelcastInstance().getLifecycleService().terminate();
+	}
+
 }
