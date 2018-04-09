@@ -3,7 +3,7 @@
 	"description": "Ligoj Administration Portal",
 	"author": "gfi.fr",
 	"keywords": ["bootstrap", "gstack", "SaaS"],
-	"version": "1.7.11",
+	"version": "1.7.12",
 	"homepage": "https://github.com/ligoj/ligoj",
 	"engines": {
 		"jetty": "9.4"
