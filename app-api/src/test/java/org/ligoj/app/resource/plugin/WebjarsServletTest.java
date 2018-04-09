@@ -5,9 +5,13 @@ package org.ligoj.app.resource.plugin;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -68,8 +72,18 @@ public class WebjarsServletTest {
 	public void downloadFile() throws Exception {
 		final HttpServletRequest request = defaultRequest();
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		final ByteArrayOutputStream baos = initializeFileAndResponse(response);
 
+		final ClassLoader classLoader = Mockito.mock(ClassLoader.class);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ServletOutputStream out = new DelegatingServletOutputStream(baos);
+		Mockito.when(response.getOutputStream()).thenReturn(out);
+		final List<URL> urlsAsList = new ArrayList<>();
+		final URL url = Thread.currentThread().getContextClassLoader().getResource("META-INF/resources/webjars/image.png");
+		urlsAsList.add(url);
+		urlsAsList.add(url);
+		final Enumeration<URL> urls = Collections.enumeration(urlsAsList);
+		Mockito.when(classLoader.getResources("META-INF/resources/webjars/image.png")).thenReturn(urls);
+		Thread.currentThread().setContextClassLoader(classLoader);
 		getServlet("false").doGet(request, response);
 		Assertions.assertEquals("image-content", new String(baos.toByteArray(), StandardCharsets.UTF_8));
 		Mockito.verify(response).setContentType("image/x-png");
@@ -79,60 +93,36 @@ public class WebjarsServletTest {
 
 	@Test
 	public void mimeTypeIsNotFound() throws Exception {
-		final HttpServletRequest request = defaultRequest("image.bin");
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		final ByteArrayOutputStream baos = initializeFileAndResponse(response, "image.bin");
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ServletOutputStream out = new DelegatingServletOutputStream(baos);
+		Mockito.when(response.getOutputStream()).thenReturn(out);
 		final WebjarsServlet servlet = getServlet("false");
-
-		servlet.doGet(request, response);
+		servlet.serveFile(response, "image.bin", new ByteArrayInputStream("image-content".getBytes(StandardCharsets.UTF_8)));
 		Assertions.assertEquals("image-content", new String(baos.toByteArray(), StandardCharsets.UTF_8));
 		Mockito.verify(response).setContentType("application/octet-stream");
 	}
 
 	@Test
 	public void mimeTypeIsCustom() throws Exception {
-		final HttpServletRequest request = defaultRequest("image.woff2");
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		final ByteArrayOutputStream baos = initializeFileAndResponse(response, "image.woff2");
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ServletOutputStream out = new DelegatingServletOutputStream(baos);
+		Mockito.when(response.getOutputStream()).thenReturn(out);
 		final WebjarsServlet servlet = getServlet("false");
-
-		servlet.doGet(request, response);
+		servlet.serveFile(response, "image.woff2", new ByteArrayInputStream("image-content".getBytes(StandardCharsets.UTF_8)));
 		Assertions.assertEquals("image-content", new String(baos.toByteArray(), StandardCharsets.UTF_8));
 		Mockito.verify(response).setContentType("font/woff2");
 	}
 
 	@Test
 	public void inputStreamIsClosedAfterException() throws Exception {
-		final HttpServletRequest request = defaultRequest();
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 		final WebjarsServlet servlet = getServlet("false");
-
-		final ClassLoader classLoader = Mockito.mock(ClassLoader.class);
 		final InputStream inputStream = Mockito.mock(InputStream.class);
-		Mockito.when(classLoader.getResourceAsStream("META-INF/resources/webjars/image.png")).thenReturn(inputStream);
-		Mockito.when(inputStream.read(ArgumentMatchers.any())).thenThrow(new TechnicalException(""));
-		Thread.currentThread().setContextClassLoader(classLoader);
-
-		try {
-			servlet.doGet(request, response);
-		} catch (TechnicalException e) {
-			Mockito.verify(inputStream).close();
-		}
-	}
-
-	private ByteArrayOutputStream initializeFileAndResponse(final HttpServletResponse response) throws IOException {
-		return initializeFileAndResponse(response, "image.png");
-	}
-
-	private ByteArrayOutputStream initializeFileAndResponse(final HttpServletResponse response, final String file) throws IOException {
-		final ClassLoader classLoader = Mockito.mock(ClassLoader.class);
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final ServletOutputStream out = new DelegatingServletOutputStream(baos);
-		Mockito.when(response.getOutputStream()).thenReturn(out);
-		Mockito.when(classLoader.getResourceAsStream("META-INF/resources/webjars/" + file))
-				.thenReturn(new ByteArrayInputStream("image-content".getBytes(StandardCharsets.UTF_8)));
-		Thread.currentThread().setContextClassLoader(classLoader);
-		return baos;
+		Mockito.when(inputStream.transferTo(ArgumentMatchers.any())).thenThrow(new TechnicalException(""));
+		Assertions.assertThrows(TechnicalException.class, () -> servlet.serveFile(response, "image.png", inputStream));
+		Mockito.verify(inputStream).close();
 	}
 
 	private HttpServletRequest defaultRequest() {
@@ -141,7 +131,7 @@ public class WebjarsServletTest {
 
 	private HttpServletRequest defaultRequest(final String file) {
 		final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getRequestURI()).thenReturn("/context-path/webjars/"+file);
+		Mockito.when(request.getRequestURI()).thenReturn("/context-path/webjars/" + file);
 		Mockito.when(request.getContextPath()).thenReturn("/context-path");
 		return request;
 	}

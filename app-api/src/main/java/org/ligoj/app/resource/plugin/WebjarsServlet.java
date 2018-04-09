@@ -70,7 +70,7 @@ public class WebjarsServlet extends HttpServlet {
 		// Regular file, use the last resource instead of the first found
 		final Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(webjarsResourceURI);
 		URL webjarsResourceURL = null;
-		while(resources.hasMoreElements()) {
+		while (resources.hasMoreElements()) {
 			webjarsResourceURL = resources.nextElement();
 		}
 		if (webjarsResourceURL == null) {
@@ -82,9 +82,16 @@ public class WebjarsServlet extends HttpServlet {
 	}
 
 	/**
-	 * Copy the file stream to the response using the right mime type
+	 * Copy the file stream to the response using the right mime type.
+	 * 
+	 * @param response
+	 *            Target response.
+	 * @param webjarsResourceURI
+	 *            Source URI used to determine the MIME type.
+	 * @param inputStream
+	 *            The source input stream.
 	 */
-	private void serveFile(final HttpServletResponse response, final String webjarsResourceURI, final InputStream inputStream) throws IOException {
+	protected void serveFile(final HttpServletResponse response, final String webjarsResourceURI, final InputStream inputStream) throws IOException {
 		try {
 			final String filename = getFileName(webjarsResourceURI);
 			response.setContentType(guessMimeType(filename));
