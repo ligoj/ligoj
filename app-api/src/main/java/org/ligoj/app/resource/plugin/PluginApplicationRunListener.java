@@ -66,6 +66,7 @@ public class PluginApplicationRunListener implements SpringApplicationRunListene
 	@Override
 	public void failed(ConfigurableApplicationContext context, Throwable exception) {
 		// Nothing to do
+		log.error("Context failed to start", exception);
 	}
 
 	@Override
