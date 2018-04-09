@@ -5,7 +5,9 @@ package org.ligoj.app.resource.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,13 +67,17 @@ public class WebjarsServlet extends HttpServlet {
 			return;
 		}
 
-		// Regular file
-		final InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(webjarsResourceURI);
-		if (inputStream == null) {
+		// Regular file, use the last resource instead of the first found
+		final Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(webjarsResourceURI);
+		URL webjarsResourceURL = null;
+		while(resources.hasMoreElements()) {
+			webjarsResourceURL = resources.nextElement();
+		}
+		if (webjarsResourceURL == null) {
 			// File not found --> 404
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		} else {
-			serveFile(response, webjarsResourceURI, inputStream);
+			serveFile(response, webjarsResourceURI, webjarsResourceURL.openStream());
 		}
 	}
 
