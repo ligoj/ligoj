@@ -79,7 +79,6 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.stereotype.Component;
 
 import com.hazelcast.spi.AbstractDistributedObject;
-import com.hazelcast.spi.RemoteService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -721,9 +720,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 		log.info("Stopping context detected, shutdown the Hazelcast instance");
 		// Get any cache to retrieve the Hazelcast instance
 		final String name = cacheManager.getCacheNames().iterator().next();
-		@SuppressWarnings("unchecked")
-		final AbstractDistributedObject<RemoteService> cache = (AbstractDistributedObject<RemoteService>) cacheManager.getCache(name)
-				.getNativeCache();
+		final AbstractDistributedObject<?> cache = (AbstractDistributedObject<?>) cacheManager.getCache(name).getNativeCache();
 		cache.getNodeEngine().getHazelcastInstance().getLifecycleService().terminate();
 	}
 
