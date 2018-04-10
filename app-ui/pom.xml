@@ -14,9 +14,6 @@
 	<version>1.7.13-SNAPSHOT</version>
 	<name>Ligoj - UI</name>
 	<properties>
-		<sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
-		<sonar.issue.ignore.multicriteria.e1.ruleKey>Web:BoldAndItalicTagsCheck</sonar.issue.ignore.multicriteria.e1.ruleKey>
-		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/*.html</sonar.issue.ignore.multicriteria.e1.resourceKey>
 		<sonar.sources>src/main/java</sonar.sources>
 		<spring-security.version>5.0.3.RELEASE</spring-security.version>
 	</properties>
