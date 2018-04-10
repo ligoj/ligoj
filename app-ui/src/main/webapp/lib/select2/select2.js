@@ -2290,8 +2290,8 @@ the specific language governing permissions and limitations under the Apache Lic
             }
 
             elementLabel = $("label[for='" + this.opts.element.attr("id") + "']");
-            elementLabel.on('click.select2', this.bind(function () { this.focus(); }));
-            this.opts.element.on('focus.select2', this.bind(function () { this.focus(); }));
+            elementLabel.off('click.select2').on('click.select2', this.bind(function () { this.focus(); }));
+            this.opts.element.off('focus.select2').on('focus.select2', this.bind(function () { this.focus(); }));
 
             this.focusser.prev()
                 .text(elementLabel.text())
@@ -2921,10 +2921,10 @@ the specific language governing permissions and limitations under the Apache Lic
             this.search.prev()
                 .text(elementLabel.text())
                 .attr('for', this.search.attr('id'));
-            elementLabel.on('click.select2', this.bind(function () { this.focus(); }))
-            this.opts.element.on('focus.select2', this.bind(function () { this.focus(); }));
+            elementLabel.off('click.select2').on('click.select2', this.bind(function () { this.focus(); }))
+            this.opts.element.off('focus.select2').on('focus.select2', this.bind(function () { this.focus(); }));
 
-            this.search.on("input paste", this.bind(function() {
+            this.search.off("input paste").on("input paste", this.bind(function() {
                 if (this.search.attr('placeholder') && this.search.val().length == 0) return;
                 if (!this.isInterfaceEnabled()) return;
                 if (!this.opened()) {
