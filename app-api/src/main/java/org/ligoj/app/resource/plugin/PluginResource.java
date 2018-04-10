@@ -255,13 +255,11 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 *            The version to install.
 	 * @param repository
 	 *            The repository identifier to query.
-	 * @throws IOException
-	 *             When the file cannot be read from the repository.
 	 */
 	@POST
 	@Path("{artifact:[\\w-]+}/{version:[\\w-]+}")
 	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version,
-			@QueryParam("repository") @DefaultValue("central") final String repository) throws IOException {
+			@QueryParam("repository") @DefaultValue("central") final String repository) {
 		install(null, artifact, version, repository);
 	}
 
@@ -297,7 +295,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 		} catch (final Exception ioe) {
 			// Installation failed, either download, either FS error
 			log.info("Unable to install plugin {} v{} from {}", artifact, version, repository, ioe);
-			throw new BusinessException(artifact, String.format("Cannot be installed", artifact), ioe);
+			throw new BusinessException(artifact, String.format("Cannot be installed %s", artifact), ioe);
 		}
 	}
 

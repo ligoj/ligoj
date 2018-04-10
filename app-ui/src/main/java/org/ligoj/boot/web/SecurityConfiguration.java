@@ -183,11 +183,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 * Pre-Authentication provider.
 	 * 
 	 * @return Pre-Authentication provider.
-	 * @throws Exception
+	 * @throws ReflectiveOperationException
 	 *             Unable to build the authentication provider
 	 */
 	@Bean
-	public AbstractAuthenticationProvider authenticationProvider() throws Exception {
+	public AbstractAuthenticationProvider authenticationProvider() throws ReflectiveOperationException {
 		final AbstractAuthenticationProvider provider = (AbstractAuthenticationProvider) Class
 				.forName("org.ligoj.app.http.security." + security + "AuthenticationProvider").getConstructors()[0].newInstance();
 		provider.setSsoPostUrl(ssoUrl);

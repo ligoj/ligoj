@@ -3,6 +3,8 @@
  */
 package org.ligoj.app.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -24,7 +26,11 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "LIGOJ_PLUGIN", uniqueConstraints = @UniqueConstraint(columnNames = "key"))
-public class Plugin extends AbstractAudited<Integer> {
+public class Plugin extends AbstractAudited<Integer> implements Serializable {
+	/**
+	 * SID
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The currently installed plug-in version. Should follow the <a href="http://semver.org/">semantic versioning</a>
