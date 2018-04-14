@@ -27,6 +27,7 @@
 		<jaxws.version>2.3.0</jaxws.version>
 		<spring-security-rsa>1.0.5.RELEASE</spring-security-rsa>
 		<spring-security>5.0.4.RELEASE</spring-security>
+		<jetty.version>9.4.9.v20180320</jetty.version>
 	</properties>
 
 	<dependencyManagement>
