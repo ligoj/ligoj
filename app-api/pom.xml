@@ -12,7 +12,7 @@
 	<artifactId>app-api</artifactId>
 	<packaging>war</packaging>
 	<version>1.7.13-SNAPSHOT</version>
-	<name>Ligoj - Business</name>
+	<name>Ligoj - API</name>
 
 	<scm>
 		<connection>scm:git:https://github.com/ligoj/ligoj.git</connection>
@@ -26,8 +26,8 @@
 		<swagger.version>3.9.3</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
 		<spring-security-rsa>1.0.5.RELEASE</spring-security-rsa>
-		<spring-security>5.0.4.RELEASE</spring-security>
-		<jetty.version>9.4.9.v20180320</jetty.version>
+		<resource.delimiter>@</resource.delimiter>
+		<plugin.resources>3.1.0</plugin.resources>
 	</properties>
 
 	<dependencyManagement>
@@ -175,7 +175,7 @@
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-ui</artifactId>
-			<version>[0.0.6,)</version>
+			<version>[0.0.7-SNAPSHOT,)</version>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
