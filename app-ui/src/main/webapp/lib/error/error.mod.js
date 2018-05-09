@@ -341,8 +341,10 @@ define([
 		ignoredRequireModules : {},
 		
 		ignoreRequireModuleError: function(modules) {
-			for (var index = 0; index < modules.length; index++) {
-				current.ignoredRequireModules[modules[index]] = true;
+			if ($.isArray(modules)) {
+				for (var index = 0; index < modules.length; index++) {
+					current.ignoredRequireModules[modules[index]] = true;
+				}
 			}
 		},
 
