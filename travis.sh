@@ -2,27 +2,6 @@
 set -euo pipefail
 
 #
-# A (too) old version of JDK may be installed by default on Travis.
-# This method is preferred over Travis apt installer because
-# JDK is kept in cache. It does not need to be downloaded from Oracle
-# at each build.
-#
-function installJdk {
-  echo "Setup JDK 9.0.4"
-  mkdir -p ~/jvm
-  pushd ~/jvm > /dev/null
-  if [ ! -d "jdk-9.0.4" ]; then
-    echo "Download JDK9"
-    wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/9.0.4+11/c2514751926b4512b076cc82f959763f/jdk-9.0.4_linux-x64_bin.tar.gz"
-    tar xzf jdk-9.0.4_linux-x64_bin.tar.gz
-    rm jdk-9.0.4_linux-x64_bin.tar.gz
-  fi
-  popd > /dev/null
-  export JAVA_HOME=~/jvm/jdk-9.0.4
-  export PATH=$JAVA_HOME/bin:$PATH
-}
-
-#
 # A (too) old version of Maven may be installed by default on Travis.
 # This method is preferred over Travis apt installer because
 # JDK is kept in cache.
@@ -31,15 +10,16 @@ function installMaven {
   echo "Setup Maven"
   mkdir -p ~/maven
   pushd ~/maven > /dev/null
-  if [ ! -d "apache-maven-3.5.2" ]; then
-    echo "Download Maven 3.5.2"
-    curl -sSL http://apache.mirrors.ovh.net/ftp.apache.org/dist/maven/maven-3/3.5.2/binaries/apache-maven-3.5.2-bin.tar.gz | tar zx -C ~/maven
+  if [ ! -d "apache-maven-3.5.3" ]; then
+    echo "Download Maven 3.5.3"
+    curl -sSL http://apache.mirrors.ovh.net/ftp.apache.org/dist/maven/maven-3/3.5.3/binaries/apache-maven-3.5.3-bin.tar.gz | tar zx -C ~/maven
   fi
   popd > /dev/null
-  export M2_HOME=~/maven/apache-maven-3.5.2
+  export M2_HOME=~/maven/apache-maven-3.5.3
   export PATH=$M2_HOME/bin:$PATH
   echo '<settings><profiles><profile><id>spring-milestone</id><repositories>' > $M2_HOME/conf/settings.xml
   echo '<repository><id>spring-milestone</id><url>http://repo.spring.io/milestone/</url></repository>' >> $M2_HOME/conf/settings.xml
+  echo '<repository><id>oss-sonatype</id><url>https://oss.sonatype.org/service/local/repositories/releases/content/</url></repository>' >> $M2_HOME/conf/settings.xml
   echo '</repositories><pluginRepositories>' >> $M2_HOME/conf/settings.xml
   echo '<pluginRepository><id>spring-milestone-p</id><url>http://repo.spring.io/milestone/</url></pluginRepository>' >> $M2_HOME/conf/settings.xml
   echo '</pluginRepositories></profile></profiles><activeProfiles><activeProfile>spring-milestone</activeProfile></activeProfiles></settings>' >> $M2_HOME/conf/settings.xml
@@ -107,7 +87,7 @@ function fixBuildVersion {
 #
 function configureTravis {
   mkdir -p ~/.local
-  curl -sSL https://github.com/SonarSource/travis-utils/tarball/v45 | tar zx --strip-components 1 -C ~/.local
+  curl -sSL https://github.com/SonarSource/travis-utils/tarball/v48 | tar zx --strip-components 1 -C ~/.local
   source ~/.local/bin/install
 }
 configureTravis
@@ -116,12 +96,12 @@ case "$TARGET" in
 
 BUILD)
 
-  installJdk
   installMaven
   fixBuildVersion
 
   # Minimal Maven settings
   export MAVEN_OPTS="-Xmx1G -Xms128m"
+  export DISPLAY=:0.0
   MAVEN_ARGS="-Dmaven.test.redirectTestOutputToFile=false -Djava.net.preferIPv4Stack=true -Dsurefire.useFile=false -B -e -V -DbuildVersion=$BUILD_VERSION -Dskip-sonarsource-repo=true"
 
   if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
