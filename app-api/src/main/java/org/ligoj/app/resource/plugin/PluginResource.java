@@ -44,7 +44,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.ligoj.app.api.FeaturePlugin;
@@ -84,7 +83,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Manage plug-in life-cycle.
- * 
+ *
  * @see <a href="https://repository.sonatype.org/nexus-indexer-lucene-plugin/default/docs/path__lucene_search.html">OSS
  *      lucene_search</a>
  */
@@ -196,7 +195,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Return the {@link RepositoryManager} with the given identifier.
-	 * 
+	 *
 	 * @param repository
 	 *            The repository identifier.
 	 * @return The {@link RepositoryManager} with the given identifier or {@link #EMPTY_REPOSITORY}
@@ -219,7 +218,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Request a reset of plug-in cache meta-data
-	 * 
+	 *
 	 * @param repository
 	 *            The repository identifier to reset.
 	 */
@@ -231,7 +230,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Remove all versions the specified plug-in and the related (by name) plug-ins.
-	 * 
+	 *
 	 * @param artifact
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
 	 * @throws IOException
@@ -248,7 +247,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	/**
 	 * Install the specific version of given plug-in from the remote server. The previous version is not deleted. The
 	 * downloaded version will be used only if it is a most recent version than the locally ones.
-	 * 
+	 *
 	 * @param artifact
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
 	 * @param version
@@ -265,7 +264,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Upload a file of entries to create or update users. The whole entry is replaced.
-	 * 
+	 *
 	 * @param input
 	 *            The Maven artifact file.
 	 * @param pluginId
@@ -301,7 +300,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Install or update to the last available version of given plug-in from the remote server.
-	 * 
+	 *
 	 * @param artifact
 	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
 	 * @param repository
@@ -323,7 +322,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Return the current plug-in class loader.
-	 * 
+	 *
 	 * @return The current plug-in class loader.
 	 */
 	protected PluginsClassLoader getPluginClassLoader() {
@@ -332,7 +331,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Indicate the safe mode is enabled.
-	 * 
+	 *
 	 * @return <code>true</code> when the safe mode is enabled.
 	 */
 	protected boolean isSafeMode() {
@@ -345,7 +344,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 * parents plug-ins are configured first. <br>
 	 * Note the transactional behavior of this process : if one plug-in failed to be configured, then the entire process
 	 * is cancelled. The previously and the not processed discovered plug-ins are not configured.
-	 * 
+	 *
 	 * @param event
 	 *            The Spring event.
 	 * @throws Exception
@@ -421,7 +420,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Returns a plug-in's last modified time.
-	 * 
+	 *
 	 * @param plugin
 	 *            The plug-in class. Will be used to find the related container archive or class file.
 	 * @return a {@code String} representing the time the file was last modified, or a default time stamp to indicate
@@ -442,7 +441,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 * {@link FeaturePlugin#getInstalledEntities()} and related CSV files are load in the data base.</li>
 	 * <li>The entity {@link Plugin} is updated to reflect the new version.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param plugin
 	 *            The newly updated plug-in.
 	 * @param entity
@@ -462,7 +461,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 * at least one {@link Node} records added and related to the plug-in key.</li>
 	 * <li>A new {@link Plugin} is inserted to maintain the validated plug-in and version</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param plugin
 	 *            The newly discovered plug-in.
 	 */
@@ -502,7 +501,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	/**
 	 * Guess the Maven artifactId from plug-in artifact name. Use the key and replace the "service" or "feature" part by
 	 * "plugin".
-	 * 
+	 *
 	 * @param plugin
 	 *            The plugin class.
 	 * @return The Maven "artifactId" as it should be be when naming convention is respected. Required to detect the new
@@ -516,7 +515,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 * Get a file reference for a specific subscription. This file will use the
 	 * subscription as a context to isolate it, and using the related node and
 	 * the subscription's identifier. The parent directory is created as needed.
-	 * 
+	 *
 	 * @param subscription
 	 *            The subscription used a context of the file to create.
 	 * @param fragments
@@ -540,7 +539,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	/**
 	 * Convert a {@link Node} to a {@link Path} inside the given parent
 	 * directory.
-	 * 
+	 *
 	 * @param parent
 	 *            The parent path.
 	 * @param node
@@ -559,7 +558,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 * <li>node = 'service:id:ldap', fragment = 'ldap'</li>
 	 * <li>node = 'service:id', fragment = 'service:id'</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param node
 	 *            The node to convert to a simple fragment String.
 	 * @return The simple fragment.
@@ -570,7 +569,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Determine the plug-in type and check it regarding the contact and the convention.
-	 * 
+	 *
 	 * @param plugin
 	 *            The plug-in resource.
 	 * @return The checked {@link PluginType}
@@ -595,7 +594,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Insert the configuration entities of the plug-in.
-	 * 
+	 *
 	 * @param plugin
 	 *            The related plug-in
 	 * @param csvEntities
@@ -620,7 +619,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Return the file system location corresponding to the given plug-in.
-	 * 
+	 *
 	 * @param plugin
 	 *            The related plug-in
 	 * @return The URL corresponding to the location.
@@ -630,27 +629,23 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	}
 
 	protected void configurePluginEntity(final Stream<URL> csv, final Class<?> entityClass, final String pluginLocation) throws IOException {
-		InputStreamReader input = null;
-		try { // NOSONAR - No Java7 feature because of coverage issues
-				// Accept the CSV file only from the JAR/folder where the plug-in is installed from
-			input = new InputStreamReader(csv.filter(u -> u.getPath().startsWith(pluginLocation) || u.toString().startsWith(pluginLocation))
-					.findFirst()
-					.orElseThrow(() -> new TechnicalException(String.format("Unable to find CSV file for entity %s", entityClass.getSimpleName())))
-					.openStream(), StandardCharsets.UTF_8);
+		// Accept the CSV file only from the JAR/folder where the plug-in is installed from
+		try (InputStreamReader input = new InputStreamReader(csv
+				.filter(u -> u.getPath().startsWith(pluginLocation) || u.toString().startsWith(pluginLocation)).findFirst()
+				.orElseThrow(() -> new TechnicalException(String.format("Unable to find CSV file for entity %s", entityClass.getSimpleName())))
+				.openStream(), StandardCharsets.UTF_8)) {
 
 			// Build and save the entities managed by this plug-in
 			csvForJpa.toJpa(entityClass, input, true, true);
 			em.flush();
 			em.clear();
-		} finally {
-			IOUtils.closeQuietly(input);
 		}
 
 	}
 
 	/**
 	 * Build a new {@link Node} from the given plug-in instance using the naming convention to link the parent.
-	 * 
+	 *
 	 * @param service
 	 *            The service plug-in to add as a node.
 	 * @return The new {@link Node}
@@ -674,7 +669,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Return the parent node from a key. The node entity is retrieved from the data base without cache.
-	 * 
+	 *
 	 * @param key
 	 *            The plug-in key.
 	 * @return the parent node entity or <code>null</code> when this the top most definition. Note if there is an
@@ -693,7 +688,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
 	/**
 	 * Return a fail-safe computed version of the given {@link FeaturePlugin}
-	 * 
+	 *
 	 * @param plugin
 	 *            The plug-in instance
 	 * @return The version from the MANIFEST or the timestamp. <code>?</code> when an error occurs.

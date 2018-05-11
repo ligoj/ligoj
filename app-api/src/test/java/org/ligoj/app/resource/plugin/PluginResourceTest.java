@@ -370,14 +370,10 @@ public class PluginResourceTest extends AbstractServerTest {
 	 */
 	@Test
 	public void refreshFailSafe() throws Exception {
-		ThreadClassLoaderScope scope = null;
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
 		Mockito.when(pluginsClassLoader.isSafeMode()).thenReturn(true);
-		try {
-			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader));
+		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			new PluginResource().refreshPlugins(null);
-		} finally {
-			IOUtils.closeQuietly(scope);
 		}
 	}
 
@@ -524,13 +520,9 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void getPluginClassLoader() {
-		ThreadClassLoaderScope scope = null;
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
-		try {
-			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader));
+		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(resource.getPluginClassLoader());
-		} finally {
-			IOUtils.closeQuietly(scope);
 		}
 	}
 
@@ -553,10 +545,8 @@ public class PluginResourceTest extends AbstractServerTest {
 	}
 
 	private PluginResource newPluginResourceRemove(final String artifact) throws IOException {
-		ThreadClassLoaderScope scope = null;
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
-		try {
-			scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader));
+		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(PluginsClassLoader.getInstance());
 			Mockito.when(pluginsClassLoader.getPluginDirectory())
 					.thenReturn(Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
@@ -570,8 +560,6 @@ public class PluginResourceTest extends AbstractServerTest {
 			applicationContext.getAutowireCapableBeanFactory().autowireBean(pluginResource);
 			pluginResource.remove(artifact);
 			return pluginResource;
-		} finally {
-			IOUtils.closeQuietly(scope);
 		}
 	}
 

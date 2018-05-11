@@ -36,12 +36,14 @@ public class CentralRepositoryManager extends AbstractRemoteRepositoryManager {
 	@Override
 	@CacheResult(cacheName = "plugins-last-version-central")
 	public Map<String, Artifact> getLastPluginVersions() throws IOException {
-		final String searchResult = StringUtils.defaultString(
-				new CurlProcessor().get(getSearchUrl(DEFAULT_SEARCH_URL + getGroupId(DEFAULT_GROUP_ID))), "{\"response\":{\"docs\":[]}}}");
-		// Extract artifacts
-		final ObjectMapper jsonMapper = new ObjectMapper();
-		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), CentralSearchResult[].class))
-				.collect(Collectors.toMap(CentralSearchResult::getArtifact, ArtifactVo::new));
+		try (CurlProcessor processor = new CurlProcessor()) {
+			final String searchResult = StringUtils.defaultString(processor.get(getSearchUrl(DEFAULT_SEARCH_URL + getGroupId(DEFAULT_GROUP_ID))),
+					"{\"response\":{\"docs\":[]}}}");
+			// Extract artifacts
+			final ObjectMapper jsonMapper = new ObjectMapper();
+			return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/response/docs"), CentralSearchResult[].class))
+					.collect(Collectors.toMap(CentralSearchResult::getArtifact, ArtifactVo::new));
+		}
 	}
 
 	@Override

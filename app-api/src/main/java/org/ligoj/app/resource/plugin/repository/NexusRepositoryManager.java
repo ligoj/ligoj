@@ -31,12 +31,14 @@ public class NexusRepositoryManager extends AbstractRemoteRepositoryManager {
 	@Override
 	@CacheResult(cacheName = "plugins-last-version-nexus")
 	public Map<String, Artifact> getLastPluginVersions() throws IOException {
-		final String searchResult = StringUtils.defaultString(
-				new CurlProcessor().get(getSearchUrl(DEFAULT_SEARCH_URL + getGroupId(DEFAULT_GROUP_ID)), "Accept:application/json"), "{\"data\":[]}");
-		// Extract artifacts
-		final ObjectMapper jsonMapper = new ObjectMapper();
-		return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/data"), NexusSearchResult[].class))
-				.collect(Collectors.toMap(NexusSearchResult::getArtifact, ArtifactVo::new, (a1, a2) -> a1));
+		try (CurlProcessor processor = new CurlProcessor()) {
+			final String searchResult = StringUtils.defaultString(
+					processor.get(getSearchUrl(DEFAULT_SEARCH_URL + getGroupId(DEFAULT_GROUP_ID)), "Accept:application/json"), "{\"data\":[]}");
+			// Extract artifacts
+			final ObjectMapper jsonMapper = new ObjectMapper();
+			return Arrays.stream(jsonMapper.treeToValue(jsonMapper.readTree(searchResult).at("/data"), NexusSearchResult[].class))
+					.collect(Collectors.toMap(NexusSearchResult::getArtifact, ArtifactVo::new, (a1, a2) -> a1));
+		}
 	}
 
 	@Override
