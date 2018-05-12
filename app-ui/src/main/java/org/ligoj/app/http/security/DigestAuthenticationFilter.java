@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.CookieSpecs;
@@ -60,23 +59,19 @@ public class DigestAuthenticationFilter extends AbstractAuthenticationProcessing
 			// First get the cookie
 			final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 			clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).build());
-			final CloseableHttpClient httpClient = clientBuilder.build();
 
 			// Do the POST
-			try {
+			try (CloseableHttpClient httpClient = clientBuilder.build()) {
 				final HttpPost httpPost = new HttpPost(getSsoPostUrl());
 				httpPost.setEntity(new StringEntity(token, StandardCharsets.UTF_8.name()));
 				httpPost.setHeader("Content-Type", "application/json");
 				final HttpResponse httpResponse = httpClient.execute(httpPost);
 				if (HttpStatus.SC_OK == httpResponse.getStatusLine().getStatusCode()) {
 					return getAuthenticationManager().authenticate(
-							new UsernamePasswordAuthenticationToken(EntityUtils.toString(httpResponse.getEntity()), "N/A",
-									new ArrayList<>()));
+							new UsernamePasswordAuthenticationToken(EntityUtils.toString(httpResponse.getEntity()), "N/A", new ArrayList<>()));
 				}
 			} catch (final IOException e) {
 				log.warn("Local SSO server is not available", e);
-			} finally {
-				IOUtils.closeQuietly(httpClient);
 			}
 
 		}

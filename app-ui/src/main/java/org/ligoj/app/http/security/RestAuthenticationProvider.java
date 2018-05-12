@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -41,11 +40,10 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 		// First get the cookie
 		final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
-		final CloseableHttpClient httpClient = clientBuilder.build();
 		final HttpPost httpPost = new HttpPost(getSsoPostUrl());
 
 		// Do the POST
-		try {
+		try (CloseableHttpClient httpClient = clientBuilder.build()) {
 			final String content = String.format(getSsoPostContent(), userName, userpassword);
 			httpPost.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
 			httpPost.setHeader("Content-Type", "application/json");
@@ -58,8 +56,6 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 			httpResponse.getEntity().getContent().close();
 		} catch (final IOException e) {
 			log.warn("Remote SSO server is not available", e);
-		} finally {
-			IOUtils.closeQuietly(httpClient);
 		}
 		throw new BadCredentialsException("Invalid user or password");
 	}
