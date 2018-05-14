@@ -134,7 +134,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * Maximum ONE concurrent session. Previous user is logged out.
-	 * 
+	 *
 	 * @return Concurrency configuration.
 	 */
 	@Bean
@@ -155,7 +155,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * Configure {@link AuthenticationProvider}
-	 * 
+	 *
 	 * @param auth
 	 *            The builder.
 	 * @throws Exception
@@ -168,7 +168,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * A 403 JSON management.
-	 * 
+	 *
 	 * @return A 403 JSON management.
 	 */
 	@Bean
@@ -181,7 +181,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * Pre-Authentication provider.
-	 * 
+	 *
 	 * @return Pre-Authentication provider.
 	 * @throws ReflectiveOperationException
 	 *             Unable to build the authentication provider
@@ -209,7 +209,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 
 	@Override
-	public void configure(WebSecurity web) throws Exception {
+	public void configure(WebSecurity web) {
 		web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
 	}
 }
