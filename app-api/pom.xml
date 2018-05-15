@@ -20,7 +20,7 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>2.4.2</api.version>
+		<api.version>2.4.3</api.version>
 		<spring-boot.version>2.0.2.RELEASE</spring-boot.version>
 		<spring-cloud.version>2.0.0.RC1</spring-cloud.version>
 		<swagger.version>3.14.0</swagger.version>
@@ -174,7 +174,7 @@
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-ui</artifactId>
-			<version>[0.0.7,)</version>
+			<version>[0.0.8,)</version>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>

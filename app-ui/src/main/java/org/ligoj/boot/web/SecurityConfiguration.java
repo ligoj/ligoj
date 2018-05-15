@@ -158,11 +158,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 *
 	 * @param auth
 	 *            The builder.
-	 * @throws Exception
+	 * @throws ReflectiveOperationException
 	 *             Unable to build the authentication provider
 	 */
 	@Autowired
-	public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
+	public void configureGlobal(final AuthenticationManagerBuilder auth) throws ReflectiveOperationException {
 		auth.eraseCredentials(true).authenticationProvider(authenticationProvider());
 	}
 
