@@ -23,6 +23,9 @@
 		<api.version>2.4.3</api.version>
 		<spring-boot.version>2.0.2.RELEASE</spring-boot.version>
 		<spring-cloud.version>2.0.0.RC1</spring-cloud.version>
+		<spring-data.version>2.0.7.RELEASE</spring-data.version>
+		<spring.version>5.0.6.RELEASE</spring.version>
+		<spring-security.version>5.0.5.RELEASE</spring-security.version>
 		<swagger.version>3.14.0</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
 		<spring-security-rsa>1.0.5.RELEASE</spring-security-rsa>
