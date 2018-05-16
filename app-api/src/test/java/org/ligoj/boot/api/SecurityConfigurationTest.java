@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 
 /**
  * Test class of {@link SecurityConfiguration}
@@ -31,6 +32,9 @@ public class SecurityConfigurationTest {
 		configuration.authorizingFilter();
 		configuration.authenticationProvider();
 		configuration.configureGlobal(builder);
+
+		final WebSecurity web = new WebSecurity(proc);
+		configuration.configure(web);
 	}
 
 }

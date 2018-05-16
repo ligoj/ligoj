@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -29,6 +30,7 @@ import org.springframework.security.web.firewall.HttpFirewall;
 
 @Configuration
 @EnableWebSecurity
+@Profile("prod")
 @EnableGlobalMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
@@ -42,8 +44,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/rest").authenticated()
 
 				// Unsecured access
-				.requestMatchers(EndpointRequest.to("health")).permitAll().antMatchers("/rest/redirect", "/manage/health", "/webjars/public/**").permitAll()
-				.antMatchers("/rest/security/login", "/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()
+				.requestMatchers(EndpointRequest.to("health")).permitAll().antMatchers("/rest/redirect", "/manage/health", "/webjars/public/**")
+				.permitAll().antMatchers("/rest/security/login", "/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()
 				.antMatchers("/rest/redirect").permitAll()
 
 				// Everything else is authenticated
@@ -60,7 +62,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * Configure {@link AuthenticationProvider}
-	 * 
+	 *
 	 * @param auth
 	 *            The builder.
 	 */
@@ -71,7 +73,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * Authentication service.
-	 * 
+	 *
 	 * @return Authentication service.
 	 */
 	@Bean
@@ -83,7 +85,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * RBAC Authorizing filter.
-	 * 
+	 *
 	 * @return RBAC Authorizing filter.
 	 */
 	@Bean
@@ -93,7 +95,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * A 403 JSON management.
-	 * 
+	 *
 	 * @return A 403 JSON management.
 	 */
 	@Bean
@@ -103,7 +105,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * Pre-Authentication provider.
-	 * 
+	 *
 	 * @return Pre-Authentication provider.
 	 */
 	@Bean
@@ -115,12 +117,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * Simple API token.
-	 * 
+	 *
 	 * @return Simple API token.
-	 * @throws Exception From {@link #authenticationManager()}
+	 * @throws Exception
+	 *             From {@link #authenticationManager()}
 	 */
 	@Bean
-	public ApiTokenAuthenticationFilter apiTokenFilter() throws Exception  {
+	public ApiTokenAuthenticationFilter apiTokenFilter() throws Exception {
 		final ApiTokenAuthenticationFilter bean = new ApiTokenAuthenticationFilter();
 		bean.setPrincipalRequestHeader("SM_UNIVERSALID");
 		bean.setCredentialsRequestHeader("X-api-key");

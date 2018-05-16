@@ -9,7 +9,6 @@ import org.apache.cxf.transport.servlet.CXFServlet;
 import org.ligoj.app.resource.plugin.WebjarsServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapAutoConfiguration;
@@ -30,9 +29,8 @@ import org.springframework.web.filter.DelegatingFilterProxy;
 /**
  * Spring boot application entry point.
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = { LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, DataSourcePoolMetricsAutoConfiguration.class })
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
-@EnableAutoConfiguration(exclude = { LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, DataSourcePoolMetricsAutoConfiguration.class })
 public class Application extends SpringBootServletInitializer {
 
 	@Override
@@ -42,7 +40,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Require main either invoked from IDE, either from the CLI
-	 * 
+	 *
 	 * @param args
 	 *            Application arguments.
 	 */
@@ -52,7 +50,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Plug-in resource servlet.
-	 * 
+	 *
 	 * @return ServletRegistrationBean
 	 */
 	@Bean
@@ -64,7 +62,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * CXF servlet.
-	 * 
+	 *
 	 * @return ServletRegistrationBean
 	 */
 	@Bean
@@ -78,7 +76,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Spring-Security filter
-	 * 
+	 *
 	 * @return FilterRegistrationBean
 	 */
 	@Bean
@@ -93,7 +91,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Request Context holder.
-	 * 
+	 *
 	 * @return RequestContextListener
 	 */
 	@Bean
@@ -111,7 +109,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Error management
-	 * 
+	 *
 	 * @return ErrorPageRegistrar
 	 */
 	@Bean
