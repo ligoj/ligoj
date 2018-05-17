@@ -11,7 +11,7 @@
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-api</artifactId>
 	<packaging>war</packaging>
-	<version>1.8.0-SNAPSHOT</version>
+	<version>1.8.0</version>
 	<name>Ligoj - API</name>
 
 	<scm>
@@ -21,7 +21,7 @@
 	</scm>
 	<properties>
 		<api.version>2.4.3</api.version>
-		<spring-boot.version>2.0.2.RELEASE</spring-boot.version>
+		<spring-boot.version>2.0.0.RELEASE</spring-boot.version>
 		<spring-cloud.version>2.0.0.RC1</spring-cloud.version>
 		<spring-data.version>2.0.7.RELEASE</spring-data.version>
 		<spring.version>5.0.6.RELEASE</spring.version>
@@ -177,7 +177,7 @@
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-ui</artifactId>
-			<version>[0.0.8,)</version>
+			<version>[0.0.9,)</version>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>

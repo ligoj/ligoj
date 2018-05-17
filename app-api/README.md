@@ -19,13 +19,13 @@ Note: you can run this command either from the root module, either from the "app
 # Test the WAR
 
 ```
-java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dapp.safe.mode=true -Djdbc.host=ligoj-db -jar target/app-api-1.7.12.war
+java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.safe.mode=true -Djdbc.host=ligoj-db -jar target/app-api-1.8.0.war
 ```
 
 # Build Docker image
 
 ```
-docker build -t ligoj/ligoj-api:1.7.12 .
+docker build -t ligoj/ligoj-api:1.8.0 .
 ```
 
 ## Custom builds
@@ -33,25 +33,25 @@ docker build -t ligoj/ligoj-api:1.7.12 .
 ### Custom URL
 
 During the build, the WAR file "ligoj-api.war" is not copied from your local FS but from a previously released remote location such as Nexus.
-By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=1.7.12&p=war"
+By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=1.8.0&p=war"
 In case of a custom build you can specify its remote or local location.
 
 Staged OSS build from Sonatype
 
 ```
-docker build -t ligoj/ligoj-api:1.7.12 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/1.7.12/app-api-1.7.12.war" .
+docker build -t ligoj/ligoj-api:1.8.0 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/1.8.0/app-api-1.8.0.war" .
 ```
 
 Private remote build
 
 ```
-docker build -t ligoj/ligoj-api:1.7.12 --build-arg WAR="https://storage.company.com/releases/app-api-1.7.12.war" .
+docker build -t ligoj/ligoj-api:1.8.0 --build-arg WAR="https://storage.company.com/releases/app-api-1.8.0.war" .
 ```
 
 Reuse the local maven package
 
 ```
-docker build -t ligoj/ligoj-api:1.7.12 --build-arg WAR="target/app-api-1.7.12.war" .
+docker build -t ligoj/ligoj-api:1.8.0 --build-arg WAR="target/app-api-1.8.0.war" .
 ```
 
 Note the local WAR path must be relative to the Dockerfile (not the current path), and must be bellow the Dockerfile: do not use "../bar/foo.war"
@@ -72,7 +72,7 @@ docker run -d \
 docker run --rm -it \
   --name ligoj-api \
   -e CUSTOM_OPTS='-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db' \
-  ligoj/ligoj-api:1.7.12 
+  ligoj/ligoj-api:1.8.0 
 ```
 
 ## Start the API container linked to an external database (Option2)
@@ -81,7 +81,7 @@ docker run --rm -it \
 docker run --rm -it \
  --name "ligoj-api" \
  -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password="ligoj" -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138' \
- ligoj/ligoj-api:1.7.12
+ ligoj/ligoj-api:1.8.0
 ```
 
 You can experience network issue with remote database. To validate the link, try this :
@@ -89,7 +89,7 @@ You can experience network issue with remote database. To validate the link, try
 ```
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:1.7.12 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
+ ligoj/ligoj-api:1.8.0 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
 ```
 
 More complex run with crypto, port mapping, disabled schema generation and volume configurations
@@ -98,10 +98,10 @@ More complex run with crypto, port mapping, disabled schema generation and volum
 docker run --rm -it \
  --name "ligoj-api" \
  -e CRYPTO="-Dapp.crypto.file=/home/ligoj/security.key" \
- -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 -Dapp.safe.mode=true" \
+ -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 -Dligoj.safe.mode=true" \
  -v ~/.ligoj:/home/ligoj \
  -p 8680:8081 \
- ligoj/ligoj-api:1.7.12
+ ligoj/ligoj-api:1.8.0
 ```
 
 Note: On Windows host, replace all \ (escape) by ` for multi-line support.
@@ -157,7 +157,7 @@ jdbc.maxPoolSize            = 150
 health.node                 = 0 0 0/1 1/1 * ?
 health.subscription         = 0 0 2 1/1 * ?
 app.crypto.file             = Secret file location
-app.safe.mode               = <[false],true> When true, plug-ins are not loaded and their state is not updated
+ligoj.safe.mode             = <[false],true> When true, plug-ins are not loaded and their state is not updated
 ```
 
 ## Compatibilities
@@ -183,4 +183,5 @@ Compatibility and performance for 10K+ users and 1K+ projects.
 | OpenJDK    | 1.8u121+ | REBUILD | You have to rebuild the binary |
 | Oracle     | 9.0.1+   | OK      | Warning about illegal reflective access [SPR-15859](https://jira.spring.io/browse/SPR-15859) |
 | OpenJDK    | 9.0.1+   | OK      | Warning about illegal reflective access [SPR-15859](https://jira.spring.io/browse/SPR-15859) |
-
+| Oracle     | 10.0+    | KO      | Waiting for ProjectLombok1.6.21 |
+| OpenJDK    | 10.0 +   | KO      | Waiting for ProjectLombok1.6.21 |

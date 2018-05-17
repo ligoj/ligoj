@@ -11,7 +11,7 @@
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-ui</artifactId>
 	<packaging>war</packaging>
-	<version>1.8.0-SNAPSHOT</version>
+	<version>1.8.0</version>
 	<name>Ligoj - UI</name>
 	<properties>
 		<sonar.sources>src/main/java</sonar.sources>

@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +27,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,6 +47,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.ligoj.app.api.FeaturePlugin;
@@ -66,6 +70,7 @@ import org.ligoj.bootstrap.core.SpringUtils;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
+import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.context.restart.RestartEndpoint;
@@ -94,6 +99,18 @@ import lombok.extern.slf4j.Slf4j;
 @Produces(MediaType.APPLICATION_JSON)
 public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 
+	private static final String REPO_CENTRAL = "central";
+
+	/**
+	 * Plug-ins auto update flag.
+	 */
+	private static final String PLUGIN_UPDATE = "ligoj.plugin.update";
+
+	/**
+	 * Plug-ins repository used for auto-update mode.
+	 */
+	private static final String PLUGIN_REPOSITORY = "ligoj.plugin.repository";
+
 	private static final RepositoryManager EMPTY_REPOSITORY = new EmptyRepositoryManager();
 
 	@Autowired
@@ -120,6 +137,9 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	@Autowired
 	private ApplicationContext context;
 
+	@Autowired
+	private ConfigurationResource configuration;
+
 	/**
 	 * Return all plug-ins with details.
 	 *
@@ -130,7 +150,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 *             When the last version index file cannot be be retrieved.
 	 */
 	@GET
-	public List<PluginVo> findAll(@QueryParam("repository") @DefaultValue("central") final String repository) throws IOException {
+	public List<PluginVo> findAll(@QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository) throws IOException {
 		// Get the available plug-ins
 		final Map<String, Artifact> lastVersion = getRepositoryManager(repository).getLastPluginVersions();
 
@@ -188,7 +208,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	@GET
 	@Path("search")
 	public List<Artifact> search(@QueryParam("q") @DefaultValue("") final String query,
-			@QueryParam("repository") @DefaultValue("central") final String repository) throws IOException {
+			@QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository) throws IOException {
 		return getRepositoryManager(repository).getLastPluginVersions().values().stream().filter(a -> a.getArtifact().contains(query))
 				.collect(Collectors.toList());
 	}
@@ -224,7 +244,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 */
 	@PUT
 	@Path("cache")
-	public void invalidateLastPluginVersions(@QueryParam("repository") @DefaultValue("central") final String repository) {
+	public void invalidateLastPluginVersions(@QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository) {
 		getRepositoryManager(repository).invalidateLastPluginVersions();
 	}
 
@@ -258,7 +278,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	@POST
 	@Path("{artifact:[\\w-]+}/{version:[\\w-]+}")
 	public void install(@PathParam("artifact") final String artifact, @PathParam("version") final String version,
-			@QueryParam("repository") @DefaultValue("central") final String repository) {
+			@QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository) {
 		install(null, artifact, version, repository);
 	}
 
@@ -310,7 +330,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 */
 	@POST
 	@Path("{artifact:[\\w-]+}")
-	public void install(@PathParam("artifact") final String artifact, @QueryParam("repository") @DefaultValue("central") final String repository)
+	public void install(@PathParam("artifact") final String artifact, @QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository)
 			throws IOException {
 		final Artifact resultItem = getRepositoryManager(repository).getLastPluginVersions().get(artifact);
 		if (resultItem == null) {
@@ -352,11 +372,35 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 */
 	@EventListener
 	public void refreshPlugins(final ContextRefreshedEvent event) throws Exception {
+		// Auto update plug-ins
+		if (Boolean.valueOf(System.getProperty(PLUGIN_UPDATE, "false"))) {
+			// Update the plug-ins
+			final Map<String, String> plugins = getPlugins();
+			final String repository = configuration.get(PLUGIN_REPOSITORY, REPO_CENTRAL);
+			int counter = 0;
+			for (final Artifact aa : getRepositoryManager(repository)
+					.getLastPluginVersions().values().stream().filter(a -> plugins.containsKey(a.getArtifact())).filter(a -> PluginsClassLoader
+							.toExtendedVersion(a.getVersion()).compareTo(PluginsClassLoader.toExtendedVersion(plugins.get(a.getArtifact()))) > 0)
+					.collect(Collectors.toList())) {
+				install(aa.getArtifact(), repository);
+				counter++;
+			}
+			if (counter > 0) {
+				log.info("{} plug-ins have been updated, context will be restarted");
+				restart();
+				return;
+			}
+		}
+
 		if (isSafeMode()) {
 			// Ignore this refresh
 			log.info("SAFE MODE - Plugins state refresh is disabled");
 			return;
 		}
+		refreshPlugins(event.getApplicationContext());
+	}
+
+	private void refreshPlugins(final ApplicationContext context) throws Exception {
 		// Get the existing plug-in features
 		final Map<String, Plugin> plugins = repository.findAll().stream().collect(Collectors.toMap(Plugin::getKey, Function.identity()));
 
@@ -366,7 +410,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 		final Set<Plugin> removedPlugins = new HashSet<>(plugins.values());
 
 		// Compare with the available plug-in implementing ServicePlugin
-		event.getApplicationContext().getBeansOfType(FeaturePlugin.class).values().stream().forEach(s -> {
+		context.getBeansOfType(FeaturePlugin.class).values().stream().forEach(s -> {
 			final Plugin plugin = plugins.get(s.getKey());
 			if (plugin == null) {
 				// New plug-in case
@@ -537,7 +581,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	}
 
 	/**
-	 * Convert a {@link Node} to a {@link Path} inside the given parent
+	 * Convert a {@link Node} to a {@link java.nio.file.Path} inside the given parent
 	 * directory.
 	 *
 	 * @param parent
@@ -715,6 +759,60 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 		final String name = cacheManager.getCacheNames().iterator().next();
 		final AbstractDistributedObject<?> cache = (AbstractDistributedObject<?>) cacheManager.getCache(name).getNativeCache();
 		cache.getNodeEngine().getHazelcastInstance().getLifecycleService().terminate();
+	}
+
+	/**
+	 * TODO Remove with API 2.4.4+
+	 */
+	private Map<String, String> getPlugins(final Map<String, java.nio.file.Path> versionFileToPath) throws IOException {
+		final Map<String, String> versionFiles = new TreeMap<>();
+		Files.list(PluginsClassLoader.getInstance().getPluginDirectory()).filter(p -> p.toString().endsWith(".jar"))
+				.forEach(path -> addVersionFile(versionFileToPath, versionFiles, path));
+		final Map<String, String> enabledPlugins = new TreeMap<>(Comparator.reverseOrder());
+
+		// Remove old plug-in from the list
+		versionFiles.keySet().stream().sorted(Comparator.reverseOrder()).forEach(p -> enabledPlugins.putIfAbsent(versionFiles.get(p), p));
+		return enabledPlugins;
+	}
+
+	/**
+	 * TODO Remove with API 2.4.4+
+	 * Pattern used to extract the version from a JAR plug-in file name.
+	 */
+	private static final Pattern VERSION_PATTERN = Pattern.compile("(-(\\d[\\da-zA-Z]*(\\.[\\da-zA-Z]+){1,3}(-SNAPSHOT)?))\\.jar$");
+
+	/**
+	 * TODO Remove with API 2.4.4+
+	 */
+	private void addVersionFile(final Map<String, java.nio.file.Path> versionFileToPath, final Map<String, String> versionFiles,
+			final java.nio.file.Path path) {
+		final String file = path.getFileName().toString();
+		final Matcher matcher = VERSION_PATTERN.matcher(file);
+		final String noVersionFile;
+		final String fileWithExtVersion;
+		if (matcher.find()) {
+			// This plug-in has a version, extend the version for the next
+			// natural string ordering
+			noVersionFile = file.substring(0, matcher.start());
+			fileWithExtVersion = noVersionFile + "-" + PluginsClassLoader.toExtendedVersion(matcher.group(1));
+
+		} else {
+			// No version, the file will be kept with the lowest level version
+			// number
+			noVersionFile = FilenameUtils.removeExtension(file);
+			fileWithExtVersion = noVersionFile + "-0";
+		}
+
+		// Store the version files to keep later only the most recent one
+		versionFileToPath.put(fileWithExtVersion, path);
+		versionFiles.put(fileWithExtVersion, noVersionFile);
+	}
+
+	/**
+	 * TODO Remove with API 2.4.4+
+	 */
+	private Map<String, String> getPlugins() throws IOException {
+		return getPlugins(new HashMap<>());
 	}
 
 }

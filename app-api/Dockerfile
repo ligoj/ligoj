@@ -9,7 +9,7 @@ RUN set -xe \
 ARG GROUP_ID="org.ligoj.app"
 ARG ARTIFACT_ID="app-api"
 ARG NEXUS_HOST="oss.sonatype.org"
-ARG VERSION="1.7.12"
+ARG VERSION="1.8.0"
 ARG NEXUS_URL="https://${NEXUS_HOST}"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
@@ -27,7 +27,7 @@ ENV CONTEXT_URL="/ligoj-api" \
     SERVER_PORT="8081" \
     LIGOJ_HOME=/home/ligoj \
     JAVA_MEMORY="-Xms712M -Xmx1248M" \
-    CUSTOM_OPTS="-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db" \
+    CUSTOM_OPTS="-Djdbc.host=ligoj-db" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
     ARTIFACT_ID="${ARTIFACT_ID}" \
