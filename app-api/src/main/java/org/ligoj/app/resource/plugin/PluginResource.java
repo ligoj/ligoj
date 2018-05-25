@@ -306,7 +306,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	private void install(final InputStream input, final String artifact, final String version, final String repository) {
 		final PluginsClassLoader classLoader = getPluginClassLoader();
 		final java.nio.file.Path target = classLoader.getPluginDirectory().resolve(artifact + "-" + version + ".jar");
-		log.info("Download plug-in {} v{ from {}}", artifact, version, repository);
+		log.info("Download plug-in {} v{} from {}", artifact, version, repository);
 		try {
 			// Get the right input
 			final InputStream input2 = input == null ? getRepositoryManager(repository).getArtifactInputStream(artifact, version) : input;
