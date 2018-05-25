@@ -166,6 +166,28 @@ public class PluginResourceTest extends AbstractServerTest {
 		}
 	}
 
+	@Test
+	public void autoUpdate() throws IOException {
+		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.start();
+
+		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
+		Mockito.when(pluginsClassLoader.getHomeDirectory()).thenReturn(Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER));
+		Mockito.when(pluginsClassLoader.getPluginDirectory())
+				.thenReturn(Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
+		final PluginResource pluginResource = new PluginResource() {
+			@Override
+			protected PluginsClassLoader getPluginClassLoader() {
+				return pluginsClassLoader;
+			}
+		};
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(pluginResource);
+
+		Assertions.assertEquals(1, pluginResource.autoUpdate());
+	}
+
 	private PluginVo findAll(final String version) throws IOException {
 		registerSingleton("sampleService", new SampleService());
 		final Plugin pluginId = new Plugin();
@@ -658,41 +680,6 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(versions.keySet(), centralRepositoryManager.getLastPluginVersions().keySet());
 		resource.invalidateLastPluginVersions("central");
 		Assertions.assertEquals(versions.keySet(), centralRepositoryManager.getLastPluginVersions().keySet());
-	}
-
-	@Test
-	public void isSafeModeHeadless() {
-		Assertions.assertFalse(new PluginResource() {
-			@Override
-			protected PluginsClassLoader getPluginClassLoader() {
-				return null;
-			}
-
-		}.isSafeMode());
-	}
-
-	@Test
-	public void isSafeModeNotSafeMode() {
-		Assertions.assertFalse(new PluginResource() {
-			@Override
-			protected PluginsClassLoader getPluginClassLoader() {
-				return Mockito.mock(PluginsClassLoader.class);
-			}
-
-		}.isSafeMode());
-	}
-
-	@Test
-	public void isSafeMode() {
-		PluginsClassLoader classLoader = Mockito.mock(PluginsClassLoader.class);
-		Mockito.doReturn(true).when(classLoader).isSafeMode();
-		Assertions.assertTrue(new PluginResource() {
-			@Override
-			protected PluginsClassLoader getPluginClassLoader() {
-				return classLoader;
-			}
-
-		}.isSafeMode());
 	}
 
 	@Test

@@ -65,9 +65,11 @@ import org.ligoj.app.resource.node.NodeResource;
 import org.ligoj.app.resource.plugin.repository.Artifact;
 import org.ligoj.app.resource.plugin.repository.EmptyRepositoryManager;
 import org.ligoj.app.resource.plugin.repository.RepositoryManager;
+import org.ligoj.bootstrap.core.INamableBean;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.SpringUtils;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
+import org.ligoj.bootstrap.core.model.AbstractBusinessEntity;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
@@ -350,15 +352,6 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	}
 
 	/**
-	 * Indicate the safe mode is enabled.
-	 *
-	 * @return <code>true</code> when the safe mode is enabled.
-	 */
-	protected boolean isSafeMode() {
-		return getPluginClassLoader() != null && getPluginClassLoader().isSafeMode();
-	}
-
-	/**
 	 * Handle the newly installed plug-ins implementing {@link FeaturePlugin}, and that's includes
 	 * {@link ServicePlugin}. Note the plug-ins are installed in a natural order based on their key's name to ensure the
 	 * parents plug-ins are configured first. <br>
@@ -373,31 +366,39 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	@EventListener
 	public void refreshPlugins(final ContextRefreshedEvent event) throws Exception {
 		// Auto update plug-ins
-		if (Boolean.valueOf(System.getProperty(PLUGIN_UPDATE, "false"))) {
+		if (Boolean.valueOf(configuration.get(PLUGIN_UPDATE, "false"))) {
 			// Update the plug-ins
-			final Map<String, String> plugins = getPlugins();
-			final String repository = configuration.get(PLUGIN_REPOSITORY, REPO_CENTRAL);
-			int counter = 0;
-			for (final Artifact aa : getRepositoryManager(repository)
-					.getLastPluginVersions().values().stream().filter(a -> plugins.containsKey(a.getArtifact())).filter(a -> PluginsClassLoader
-							.toExtendedVersion(a.getVersion()).compareTo(PluginsClassLoader.toExtendedVersion(plugins.get(a.getArtifact()))) > 0)
-					.collect(Collectors.toList())) {
-				install(aa.getArtifact(), repository);
-				counter++;
-			}
+			final int counter = autoUpdate();
 			if (counter > 0) {
-				log.info("{} plug-ins have been updated, context will be restarted");
+				log.info("{} plug-ins have been downloaded for update, context will be restarted", counter);
 				restart();
 				return;
 			}
+			log.info("No plug-ins have been automatically downloaded for update");
 		}
 
-		if (isSafeMode()) {
-			// Ignore this refresh
-			log.info("SAFE MODE - Plugins state refresh is disabled");
-			return;
-		}
 		refreshPlugins(event.getApplicationContext());
+	}
+
+	/**
+	 * Auto update the installed plug-ins.
+	 *
+	 * @return The amount of updated plug-ins.
+	 * @throws IOException
+	 *             When plug-ins cannot be updated.
+	 */
+	public int autoUpdate() throws IOException {
+		final Map<String, String> plugins = getPlugins();
+		final String repository = configuration.get(PLUGIN_REPOSITORY, REPO_CENTRAL);
+		int counter = 0;
+		for (final Artifact artifact : getRepositoryManager(repository)
+				.getLastPluginVersions().values().stream().filter(a -> plugins.containsKey(a.getArtifact())).filter(a -> PluginsClassLoader
+						.toExtendedVersion(a.getVersion()).compareTo(PluginsClassLoader.toExtendedVersion(plugins.get(a.getArtifact()))) > 0)
+				.collect(Collectors.toList())) {
+			install(artifact.getArtifact(), repository);
+			counter++;
+		}
+		return counter;
 	}
 
 	private void refreshPlugins(final ApplicationContext context) throws Exception {
@@ -522,19 +523,15 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 			repository.saveAndFlush(entity);
 
 			// Manage disable then re-enable base with double install
-			if (!nodeRepository.existsById(plugin.getKey())) {
+			final List<Class<?>> installedEntities = plugin.getInstalledEntities();
+			if (!nodeRepository.existsById(plugin.getKey()) && entity.getType() != PluginType.FEATURE && !installedEntities.contains(Node.class)) {
 				// This feature has not previously been installed
-
-				// Special process for service plug-ins
-				final List<Class<?>> installedEntities = plugin.getInstalledEntities();
-				if (entity.getType() != PluginType.FEATURE && !installedEntities.contains(Node.class)) {
-					// Persist the partial default node now for the bellow installation process
-					nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
-				}
-
-				// Configure the plug-in entities
-				configurePluginEntities(plugin, installedEntities);
+				// Persist the partial default node now for the bellow installation process
+				nodeRepository.saveAndFlush(newNode((ServicePlugin) plugin));
 			}
+
+			// Configure the plug-in entities
+			configurePluginEntities(plugin, installedEntities);
 		} catch (final Exception e) { // NOSONAR - Catch all to notice every time the failure
 			// Something happened
 			log.error("Installing the new plugin {} v{} failed", plugin.getKey(), newVersion, e);
@@ -637,7 +634,8 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	}
 
 	/**
-	 * Insert the configuration entities of the plug-in.
+	 * Insert the configuration entities of the plug-in. This function can be called multiple times : a check prevent
+	 * duplicate entries.
 	 *
 	 * @param plugin
 	 *            The related plug-in
@@ -672,7 +670,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 		return plugin.getClass().getProtectionDomain().getCodeSource().getLocation();
 	}
 
-	protected void configurePluginEntity(final Stream<URL> csv, final Class<?> entityClass, final String pluginLocation) throws IOException {
+	protected <T> void configurePluginEntity(final Stream<URL> csv, final Class<T> entityClass, final String pluginLocation) throws IOException {
 		// Accept the CSV file only from the JAR/folder where the plug-in is installed from
 		try (InputStreamReader input = new InputStreamReader(csv
 				.filter(u -> u.getPath().startsWith(pluginLocation) || u.toString().startsWith(pluginLocation)).findFirst()
@@ -680,11 +678,37 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 				.openStream(), StandardCharsets.UTF_8)) {
 
 			// Build and save the entities managed by this plug-in
-			csvForJpa.toJpa(entityClass, input, true, true);
+			csvForJpa.toJpa(entityClass, input, true, false, e -> persistAsNeeded(entityClass, e));
 			em.flush();
 			em.clear();
 		}
 
+	}
+
+	/**
+	 * Persist the given entity only if it is not yet persisted. This is not an update mode.
+	 *
+	 * @param entityClass
+	 *            The entity class to persist.
+	 * @param entity
+	 *            The entity read from the CSV, and to persist.
+	 * @param <T>
+	 *            The entity type.
+	 */
+	protected <T> void persistAsNeeded(final Class<T> entityClass, T entity) {
+		if (entity instanceof AbstractBusinessEntity) {
+			// Check for duplicate before the insert
+			if (em.find(entityClass, ((AbstractBusinessEntity<?>) entity).getId()) == null) {
+				em.persist(entity);
+			}
+		} else if (entity instanceof INamableBean) {
+			if (em.createQuery("SELECT 1 FROM " + entityClass.getName() + " WHERE name = :name")
+					.setParameter("name", ((INamableBean<?>) entity).getName()).getResultList().isEmpty()) {
+				em.persist(entity);
+			}
+		} else {
+			em.persist(entity);
+		}
 	}
 
 	/**
@@ -766,7 +790,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	 */
 	private Map<String, String> getPlugins(final Map<String, java.nio.file.Path> versionFileToPath) throws IOException {
 		final Map<String, String> versionFiles = new TreeMap<>();
-		Files.list(PluginsClassLoader.getInstance().getPluginDirectory()).filter(p -> p.toString().endsWith(".jar"))
+		Files.list(getPluginClassLoader().getPluginDirectory()).filter(p -> p.toString().endsWith(".jar"))
 				.forEach(path -> addVersionFile(versionFileToPath, versionFiles, path));
 		final Map<String, String> enabledPlugins = new TreeMap<>(Comparator.reverseOrder());
 
@@ -811,7 +835,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	/**
 	 * TODO Remove with API 2.4.4+
 	 */
-	private Map<String, String> getPlugins() throws IOException {
+	protected Map<String, String> getPlugins() throws IOException {
 		return getPlugins(new HashMap<>());
 	}
 
