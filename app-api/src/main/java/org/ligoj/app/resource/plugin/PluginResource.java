@@ -104,6 +104,11 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	private static final String REPO_CENTRAL = "central";
 
 	/**
+	 * Property identifying an array of plug-ins to ignore.
+	 */
+	private static final String PLUGIN_IGNORE = "ligoj.plugin.ignore";
+
+	/**
 	 * Plug-ins auto update flag.
 	 */
 	private static final String PLUGIN_UPDATE = "ligoj.plugin.update";
@@ -154,7 +159,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	@GET
 	public List<PluginVo> findAll(@QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository) throws IOException {
 		// Get the available plug-ins
-		final Map<String, Artifact> lastVersion = getRepositoryManager(repository).getLastPluginVersions();
+		final Map<String, Artifact> lastVersion = getLastPluginVersions(repository);
 
 		// Get the installed plug-in features
 		return this.repository.findAll().stream()
@@ -211,8 +216,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	@Path("search")
 	public List<Artifact> search(@QueryParam("q") @DefaultValue("") final String query,
 			@QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository) throws IOException {
-		return getRepositoryManager(repository).getLastPluginVersions().values().stream().filter(a -> a.getArtifact().contains(query))
-				.collect(Collectors.toList());
+		return getLastPluginVersions(repository).values().stream().filter(a -> a.getArtifact().contains(query)).collect(Collectors.toList());
 	}
 
 	/**
@@ -334,12 +338,18 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 	@Path("{artifact:[\\w-]+}")
 	public void install(@PathParam("artifact") final String artifact, @QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository)
 			throws IOException {
-		final Artifact resultItem = getRepositoryManager(repository).getLastPluginVersions().get(artifact);
+		final Artifact resultItem = getLastPluginVersions(repository).get(artifact);
 		if (resultItem == null) {
 			// Plug-in not found, or not the last version
 			throw new BusinessException(String.format("No latest version found for plug-in %s on repository %s", artifact, repository));
 		}
 		install(artifact, resultItem.getVersion(), repository);
+	}
+
+	private Map<String, Artifact> getLastPluginVersions(final String repository) throws IOException {
+		final Map<String, Artifact> versions = getRepositoryManager(repository).getLastPluginVersions();
+		Arrays.stream(configuration.get(PLUGIN_IGNORE, "").split(",")).map(String::trim).forEach(versions::remove);
+		return versions;
 	}
 
 	/**
@@ -391,8 +401,7 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 		final Map<String, String> plugins = getPlugins();
 		final String repository = configuration.get(PLUGIN_REPOSITORY, REPO_CENTRAL);
 		int counter = 0;
-		for (final Artifact artifact : getRepositoryManager(repository)
-				.getLastPluginVersions().values().stream().filter(a -> plugins.containsKey(a.getArtifact()))
+		for (final Artifact artifact : getLastPluginVersions(repository).values().stream().filter(a -> plugins.containsKey(a.getArtifact()))
 				.filter(a -> PluginsClassLoader.toExtendedVersion(a.getVersion())
 						.compareTo(StringUtils.removeStart(plugins.get(a.getArtifact()), a.getArtifact() + "-")) > 0)
 				.collect(Collectors.toList())) {
