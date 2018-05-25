@@ -19,7 +19,7 @@ Note: you can run this command either from the root module, either from the "app
 # Test the WAR
 
 ```
-java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.safe.mode=true -Djdbc.host=ligoj-db -jar target/app-api-1.8.0.war
+java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar target/app-api-1.8.0.war
 ```
 
 # Build Docker image
@@ -98,7 +98,7 @@ More complex run with crypto, port mapping, disabled schema generation and volum
 docker run --rm -it \
  --name "ligoj-api" \
  -e CRYPTO="-Dapp.crypto.file=/home/ligoj/security.key" \
- -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 -Dligoj.safe.mode=true" \
+ -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 \
  -v ~/.ligoj:/home/ligoj \
  -p 8680:8081 \
  ligoj/ligoj-api:1.8.0
@@ -157,7 +157,10 @@ jdbc.maxPoolSize            = 150
 health.node                 = 0 0 0/1 1/1 * ?
 health.subscription         = 0 0 2 1/1 * ?
 app.crypto.file             = Secret file location
-ligoj.safe.mode             = <[false],true> When true, plug-ins are not loaded and their state is not updated
+ligoj.plugin.enabled        = <false,[true]> When false, plug-ins are not loaded and their state is not updated
+ligoj.plugin.update         = <[false],true> When true, on startup, the plug-in are updated to the latest available version
+ligoj.plugin.repository     = <[central],nexus> The default repository used to perform the plug-in update
+ligoj.plugin.ignore         = plugin-password-management Plug-in filtered (deprecated,...) for install or update from the repositories
 ```
 
 ## Compatibilities

@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -40,6 +41,7 @@ import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.dao.NodeRepository;
 import org.ligoj.app.dao.PluginRepository;
+import org.ligoj.app.iam.model.CacheUser;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Plugin;
 import org.ligoj.app.model.PluginType;
@@ -52,6 +54,8 @@ import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.model.system.SystemBench;
 import org.ligoj.bootstrap.model.system.SystemConfiguration;
+import org.ligoj.bootstrap.model.system.SystemRole;
+import org.ligoj.bootstrap.model.system.SystemRoleAssignment;
 import org.ligoj.bootstrap.model.system.SystemUser;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.ArgumentMatchers;
@@ -116,6 +120,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		persistEntities("csv", new Class[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class },
 				StandardCharsets.UTF_8.name());
 		FileUtils.deleteQuietly(TEMP_FILE);
+		configuration.put("ligoj.plugin.ignore", " plugin-sample-ignore , any");
 		clearAllCache();
 	}
 
@@ -167,10 +172,24 @@ public class PluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void autoUpdate() throws IOException {
+	public void autoUpdateNoPluginMatch() throws IOException {
+		Assertions.assertEquals(0, mockCentral("search.json").autoUpdate());
+	}
+
+	@Test
+	public void autoUpdateNoNewVersion() throws IOException {
+		Assertions.assertEquals(0, mockCentral("search-foo.json").autoUpdate());
+	}
+
+	@Test
+	public void autoUpdateNewVersion() throws IOException {
+		Assertions.assertEquals(1, mockCentral("search-bar.json").autoUpdate());
+	}
+
+	private PluginResource mockCentral(final String body) throws IOException {
 		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
-						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/search.json").getInputStream(), StandardCharsets.UTF_8))));
+						IOUtils.toString(new ClassPathResource("mock-server/maven-repo/" + body).getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
@@ -182,10 +201,14 @@ public class PluginResourceTest extends AbstractServerTest {
 			protected PluginsClassLoader getPluginClassLoader() {
 				return pluginsClassLoader;
 			}
+
+			@Override
+			public void install(final String artifact, final String repository) {
+				// Ignore
+			}
 		};
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(pluginResource);
-
-		Assertions.assertEquals(1, pluginResource.autoUpdate());
+		return pluginResource;
 	}
 
 	private PluginVo findAll(final String version) throws IOException {
@@ -387,16 +410,48 @@ public class PluginResourceTest extends AbstractServerTest {
 		resource.refreshPlugins(event);
 	}
 
-	/**
-	 * Disable plug-in refresh
-	 */
 	@Test
-	public void refreshFailSafe() throws Exception {
-		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
-		Mockito.when(pluginsClassLoader.isSafeMode()).thenReturn(true);
-		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader))) {
-			new PluginResource().refreshPlugins(null);
-		}
+	public void refreshPluginsAutoUpdate() throws Exception {
+		configuration.put("ligoj.plugin.update", "true");
+		final AtomicBoolean check = new AtomicBoolean(false);
+		final PluginResource resource = new PluginResource() {
+			@Override
+			public int autoUpdate() throws IOException {
+				return 1;
+			}
+
+			@Override
+			public void restart() {
+				check.set(true);
+			}
+		};
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
+		resource.refreshPlugins(null);
+
+		// 1 update, restart needed
+		Assertions.assertTrue(check.get());
+	}
+
+	@Test
+	public void refreshPluginsAutoUpdateNoUpdate() throws Exception {
+		configuration.put("ligoj.plugin.update", "true");
+		final AtomicBoolean check = new AtomicBoolean(false);
+		final PluginResource resource = new PluginResource() {
+			@Override
+			public int autoUpdate() throws IOException {
+				return 0;
+			}
+
+			@Override
+			public void restart() {
+				check.set(true);
+			}
+		};
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
+		resource.refreshPlugins(new ContextRefreshedEvent(applicationContext));
+
+		// No update, no restart needed
+		Assertions.assertFalse(check.get());
 	}
 
 	@Test
@@ -714,6 +769,56 @@ public class PluginResourceTest extends AbstractServerTest {
 		resource.onApplicationEvent(event);
 		Mockito.verify(service).terminate();
 
+	}
+
+	@Test
+	public void persistAsNeeded() {
+		final SystemRole role = new SystemRole();
+		role.setName("any");
+		em.persist(role);
+		final SystemUser user = new SystemUser();
+		user.setLogin("any");
+		em.persist(user);
+		final SystemRoleAssignment entity = new SystemRoleAssignment();
+		entity.setRole(role);
+		entity.setUser(user);
+		resource.persistAsNeeded(SystemRoleAssignment.class, entity);
+		em.flush();
+		Assertions.assertFalse(entity.isNew());
+	}
+
+	@Test
+	public void persistAsNeededNamed() {
+		final Project project = new Project();
+		project.setName("foo");
+		project.setPkey("foo-bar");
+		resource.persistAsNeeded(Project.class, project);
+		final Project project1 = em.find(Project.class, project.getId());
+		Assertions.assertNotNull(project1);
+
+		final Project project2 = new Project();
+		project2.setName("foo");
+		project2.setPkey("foo-bar");
+		resource.persistAsNeeded(Project.class, project2);
+
+		// project2 has not been persisted, duplicate has been prevented
+		Assertions.assertTrue(project2.isNew());
+	}
+
+	@Test
+	public void persistAsBusinessEntity() {
+		final CacheUser user = new CacheUser();
+		user.setId("foo");
+		resource.persistAsNeeded(CacheUser.class, user);
+		final CacheUser user1 = em.find(CacheUser.class, "foo");
+		Assertions.assertNotNull(user1);
+
+		final CacheUser user2 = new CacheUser();
+		user2.setId("foo");
+		resource.persistAsNeeded(CacheUser.class, user2);
+
+		// user2 has not been persisted, duplicate has been prevented
+		Assertions.assertSame(user1, em.find(CacheUser.class, "foo"));
 	}
 
 }

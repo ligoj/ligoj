@@ -392,8 +392,9 @@ public class PluginResource implements ApplicationListener<ContextClosedEvent> {
 		final String repository = configuration.get(PLUGIN_REPOSITORY, REPO_CENTRAL);
 		int counter = 0;
 		for (final Artifact artifact : getRepositoryManager(repository)
-				.getLastPluginVersions().values().stream().filter(a -> plugins.containsKey(a.getArtifact())).filter(a -> PluginsClassLoader
-						.toExtendedVersion(a.getVersion()).compareTo(PluginsClassLoader.toExtendedVersion(plugins.get(a.getArtifact()))) > 0)
+				.getLastPluginVersions().values().stream().filter(a -> plugins.containsKey(a.getArtifact()))
+				.filter(a -> PluginsClassLoader.toExtendedVersion(a.getVersion())
+						.compareTo(StringUtils.removeStart(plugins.get(a.getArtifact()), a.getArtifact() + "-")) > 0)
 				.collect(Collectors.toList())) {
 			install(artifact.getArtifact(), repository);
 			counter++;
