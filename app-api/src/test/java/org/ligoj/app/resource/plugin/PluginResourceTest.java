@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,21 +61,12 @@ import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.cloud.context.restart.RestartEndpoint;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.LifecycleService;
-import com.hazelcast.spi.AbstractDistributedObject;
-import com.hazelcast.spi.NodeEngine;
-import com.hazelcast.spi.RemoteService;
 
 /**
  * Test class of {@link PluginResource}
@@ -196,6 +187,10 @@ public class PluginResourceTest extends AbstractServerTest {
 		Mockito.when(pluginsClassLoader.getHomeDirectory()).thenReturn(Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER));
 		Mockito.when(pluginsClassLoader.getPluginDirectory())
 				.thenReturn(Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
+		final Map<String, String> map = new HashMap<>();
+		map.put("plugin-foo", "plugin-foo-Z0000001Z0000000Z0000001Z0000000");
+		map.put("plugin-bar", "plugin-bar-Z0000001Z0000000Z0000000Z0000000");
+		Mockito.when(pluginsClassLoader.getInstalledPlugins()).thenReturn(map );
 		final PluginResource pluginResource = new PluginResource() {
 			@Override
 			protected PluginsClassLoader getPluginClassLoader() {
@@ -261,7 +256,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		final PluginVo plugin0 = plugins.get(0);
 		Assertions.assertEquals("feature:iam:empty", plugin0.getId());
 		Assertions.assertEquals("IAM Empty", plugin0.getName());
-		Assertions.assertEquals("Gfi Informatique", plugin0.getVendor());
+		Assertions.assertEquals("Ligoj", plugin0.getVendor());
 		Assertions.assertNull(plugin0.getNewVersion());
 		Assertions.assertTrue(plugin0.getLocation().endsWith(".jar"));
 		Assertions.assertNotNull(plugin0.getPlugin().getVersion());
@@ -334,7 +329,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assertions.assertNotNull(repository.findByExpected("key", "service:sample").getVersion());
 
 		// Check the managed entity is persisted
-		Assertions.assertEquals(1, em.createQuery("FROM SystemBench WHERE prfChar=?").setParameter(0, "InitData").getResultList().size());
+		Assertions.assertEquals(1, em.createQuery("FROM SystemBench WHERE prfChar=?1").setParameter(1, "InitData").getResultList().size());
 	}
 
 	@Test
@@ -735,40 +730,6 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(versions.keySet(), centralRepositoryManager.getLastPluginVersions().keySet());
 		resource.invalidateLastPluginVersions("central");
 		Assertions.assertEquals(versions.keySet(), centralRepositoryManager.getLastPluginVersions().keySet());
-	}
-
-	@Test
-	public void onApplicationEvent() {
-		final ContextClosedEvent event = Mockito.mock(ContextClosedEvent.class);
-		final PluginResource resource = new PluginResource();
-		resource.cacheManager = Mockito.mock(CacheManager.class);
-
-		Mockito.when(resource.cacheManager.getCacheNames()).thenReturn(Collections.singletonList("my-cache"));
-		final Cache cache = Mockito.mock(Cache.class);
-		Mockito.when(resource.cacheManager.getCache("my-cache")).thenReturn(cache);
-		final NodeEngine node = Mockito.mock(NodeEngine.class);
-		final RemoteService rservice = Mockito.mock(RemoteService.class);
-		Mockito.when(node.isRunning()).thenReturn(true);
-		final AbstractDistributedObject<RemoteService> cacheProxy = new AbstractDistributedObject<>(node, rservice) {
-
-			@Override
-			public String getName() {
-				return null;
-			}
-
-			@Override
-			public String getServiceName() {
-				return null;
-			}
-		};
-		Mockito.when(cache.getNativeCache()).thenReturn(cacheProxy);
-		final HazelcastInstance instance = Mockito.mock(HazelcastInstance.class);
-		Mockito.when(node.getHazelcastInstance()).thenReturn(instance);
-		final LifecycleService service = Mockito.mock(LifecycleService.class);
-		Mockito.when(instance.getLifecycleService()).thenReturn(service);
-		resource.onApplicationEvent(event);
-		Mockito.verify(service).terminate();
-
 	}
 
 	@Test
