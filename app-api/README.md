@@ -160,14 +160,14 @@ app.crypto.file             = Secret file location
 ligoj.plugin.enabled        = <false,[true]> When false, plug-ins are not loaded and their state is not updated
 ligoj.plugin.update         = <[false],true> When true, on startup, the plug-in are updated to the latest available version
 ligoj.plugin.repository     = <[central],nexus> The default repository used to perform the plug-in update
-ligoj.plugin.ignore         = plugin-password-management Plug-in filtered (deprecated,...) for install or update from the repositories
+ligoj.plugin.ignore         = plugin-password-management Filtered (deprecated, fixed version, ...) plug-ins for install or update from the repositories
 ```
 
 ## Compatibilities
 
 ### Database
 
-Compatibility and performance for 10K+ users and 1K+ projects.
+Tested compatibility and performance for 10K+ users and 1K+ projects.
 
 | Vendor     | Version | Driver   | Dialect     | Status  |
 |------------|---------|----------|-------------|---------|
