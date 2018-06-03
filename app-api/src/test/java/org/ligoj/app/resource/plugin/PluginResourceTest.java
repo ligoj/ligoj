@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -68,6 +69,8 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.google.common.io.Files;
+
 /**
  * Test class of {@link PluginResource}
  */
@@ -85,7 +88,6 @@ public class PluginResourceTest extends AbstractServerTest {
 	private static final File TEMP_FILE = Paths
 			.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR, "plugin-iam-node-test.jar").toFile();
 
-	@Autowired
 	private PluginResource resource;
 
 	@Autowired
@@ -113,6 +115,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		FileUtils.deleteQuietly(TEMP_FILE);
 		configuration.put("ligoj.plugin.ignore", " plugin-sample-ignore , any");
 		clearAllCache();
+		resource = mockCentral("search.json");
 	}
 
 	@Test
@@ -147,6 +150,51 @@ public class PluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
+	public void findAllInstalledNextSameVersion() throws IOException {
+		final PluginResource resource = mockCentral("search.json");
+		final String currentVersion = filter(resource.findAll("central")).stream().filter(p -> "plugin-iam-empty".equals(p.getPlugin().getArtifact()))
+				.findFirst().get().getPlugin().getVersion();
+		resource.getPluginClassLoader().getInstalledPlugins().put("plugin-iam-empty",
+				"plugin-iam-empty-" + PluginsClassLoader.toExtendedVersion(currentVersion));
+
+		final PluginVo pluginVo = filter(resource.findAll("central")).stream().filter(p -> "plugin-iam-empty".equals(p.getPlugin().getArtifact()))
+				.findFirst().get();
+		Assertions.assertNull(pluginVo.getLatestLocalVersion());
+		Assertions.assertEquals(currentVersion, pluginVo.getPlugin().getVersion());
+		Assertions.assertFalse(pluginVo.isDeleted());
+		Assertions.assertNull(pluginVo.getNewVersion());
+		Assertions.assertEquals("IAM Empty", pluginVo.getName());
+	}
+
+	@Test
+	public void findAllInstalledNextNewPlugin() throws IOException {
+		final PluginResource resource = mockCentral("search.json");
+		resource.getPluginClassLoader().getInstalledPlugins().put("plugin-sample", "plugin-sample-Z0000001Z0000002Z0000003Z0000004");
+
+		final PluginVo pluginVo = filter(resource.findAll("central")).stream().filter(p -> "plugin-sample".equals(p.getPlugin().getArtifact()))
+				.findFirst().get();
+		Assertions.assertEquals("1.2.3.4", pluginVo.getLatestLocalVersion());
+		Assertions.assertNull(pluginVo.getPlugin().getVersion());
+		Assertions.assertFalse(pluginVo.isDeleted());
+		Assertions.assertNull(pluginVo.getNewVersion());
+		Assertions.assertEquals("plugin-sample", pluginVo.getName());
+	}
+
+	@Test
+	public void findAllInstalledNextUpdate() throws IOException {
+		final PluginResource resource = mockCentral("search.json");
+		resource.getPluginClassLoader().getInstalledPlugins().put("plugin-iam-empty", "plugin-iam-empty-Z0000123Z0000004Z0000005Z0000000");
+
+		final PluginVo pluginVo = filter(resource.findAll("central")).stream().filter(p -> "plugin-iam-empty".equals(p.getPlugin().getArtifact()))
+				.findFirst().get();
+		Assertions.assertEquals("123.4.5", pluginVo.getLatestLocalVersion());
+		Assertions.assertNotNull(pluginVo.getPlugin().getVersion());
+		Assertions.assertNull(pluginVo.getNewVersion());
+		Assertions.assertFalse(pluginVo.isDeleted());
+		Assertions.assertEquals("IAM Empty", pluginVo.getName());
+	}
+
+	@Test
 	public void findAllSameVersion() throws IOException {
 		httpServer.stubFor(get(urlEqualTo("/solrsearch/select?wt=json&rows=100&q=org.ligoj.plugin"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
@@ -160,6 +208,38 @@ public class PluginResourceTest extends AbstractServerTest {
 			destroySingleton("sampleService");
 			destroySingleton("sampleTool");
 		}
+	}
+
+	@Test
+	public void isDeleted() {
+		final PluginVo plugin = new PluginVo();
+		plugin.setLocation("any");
+		Assertions.assertTrue(resource.isDeleted(plugin));
+	}
+
+	@Test
+	public void isDeletedExist() {
+		final PluginVo plugin = new PluginVo();
+		plugin.setLocation(USER_HOME_DIRECTORY);
+		Assertions.assertFalse(resource.isDeleted(plugin));
+	}
+
+	@Test
+	public void toTrimmedVersion() {
+		Assertions.assertEquals("1.2.3.4", resource.toTrimmedVersion("plugin-sample-Z0000001Z0000002Z0000003Z0000004"));
+		Assertions.assertEquals("1.2.3", resource.toTrimmedVersion("plugin-sample-Z0000001Z0000002Z0000003Z0000000"));
+		Assertions.assertEquals("1.2.3", resource.toTrimmedVersion("plugin-sample-Z0000001Z0000002Z0000003"));
+		Assertions.assertEquals("1.2.3.4", resource.toTrimmedVersion("Z0000001Z0000002Z0000003Z0000004"));
+		Assertions.assertEquals("1.2.3", resource.toTrimmedVersion("Z0000001Z0000002Z0000003Z0000000"));
+		Assertions.assertEquals("1.2.3-SNAPSHOT", resource.toTrimmedVersion("plugin-sample-Z0000001Z0000002Z0000003SNAPSHOT"));
+		Assertions.assertEquals("1.2.3-SNAPSHOT", resource.toTrimmedVersion("1.2.3-SNAPSHOT"));
+		Assertions.assertEquals("1.2.3.4", resource.toTrimmedVersion("1.2.3.4"));
+		Assertions.assertEquals("1.2.30", resource.toTrimmedVersion("1.2.30"));
+		Assertions.assertEquals("1.2.3", resource.toTrimmedVersion("1.2.3.0"));
+		Assertions.assertEquals("1.2.0", resource.toTrimmedVersion("1.2.0"));
+		Assertions.assertEquals("1.2", resource.toTrimmedVersion("1.2"));
+		Assertions.assertEquals("1.2.3", resource.toTrimmedVersion("1.2.3.0"));
+		Assertions.assertEquals("0.2.3", resource.toTrimmedVersion("0000.02.0003."));
 	}
 
 	@Test
@@ -190,7 +270,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		final Map<String, String> map = new HashMap<>();
 		map.put("plugin-foo", "plugin-foo-Z0000001Z0000000Z0000001Z0000000");
 		map.put("plugin-bar", "plugin-bar-Z0000001Z0000000Z0000000Z0000000");
-		Mockito.when(pluginsClassLoader.getInstalledPlugins()).thenReturn(map );
+		Mockito.when(pluginsClassLoader.getInstalledPlugins()).thenReturn(map);
 		final PluginResource pluginResource = new PluginResource() {
 			@Override
 			protected PluginsClassLoader getPluginClassLoader() {
@@ -215,11 +295,11 @@ public class PluginResourceTest extends AbstractServerTest {
 		pluginId.setArtifact("plugin-sample");
 		repository.saveAndFlush(pluginId);
 
-		final List<PluginVo> plugins = resource.findAll("central");
-		Assertions.assertEquals(4, plugins.size());
+		final List<PluginVo> plugins = filter(resource.findAll("central"));
+		Assertions.assertEquals(5, plugins.size());
 
 		// External plug-in service
-		final PluginVo plugin2 = plugins.get(3);
+		final PluginVo plugin2 = plugins.get(4);
 		Assertions.assertEquals("service:sample", plugin2.getId());
 		Assertions.assertEquals("Sample", plugin2.getName());
 		Assertions.assertNull(plugin2.getVendor());
@@ -232,6 +312,13 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(version, plugin2.getPlugin().getVersion());
 		return plugin2;
 
+	}
+
+	/*
+	 * Ignore plugin-ui runtime (issue in Eclipse)
+	 */
+	private List<PluginVo> filter(final List<PluginVo> plugins) {
+		return plugins.stream().filter(p -> !"feature:ui".equals(p.getId())).collect(Collectors.toList());
 	}
 
 	@Test
@@ -249,8 +336,8 @@ public class PluginResourceTest extends AbstractServerTest {
 		orphanPLugin.setVersion("1.1");
 		repository.saveAndFlush(orphanPLugin);
 
-		final List<PluginVo> plugins = resource.findAll("central");
-		Assertions.assertEquals(3, plugins.size());
+		final List<PluginVo> plugins = filter(resource.findAll("central"));
+		Assertions.assertEquals(4, plugins.size());
 
 		// Plug-in from the API
 		final PluginVo plugin0 = plugins.get(0);
@@ -266,7 +353,7 @@ public class PluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(PluginType.FEATURE, plugin0.getPlugin().getType());
 
 		// Plug-in (feature) embedded in the current project
-		final PluginVo plugin1 = plugins.get(2);
+		final PluginVo plugin1 = plugins.get(1);
 		Assertions.assertEquals("feature:welcome:data-rbac", plugin1.getId());
 		Assertions.assertEquals("Welcome Data RBAC", plugin1.getName());
 		Assertions.assertNull(plugin1.getVendor());
@@ -579,7 +666,7 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void getPluginClassLoaderOutOfClassLoader() {
-		Assertions.assertNull(resource.getPluginClassLoader());
+		Assertions.assertNull(new PluginResource().getPluginClassLoader());
 	}
 
 	@Test
@@ -616,22 +703,33 @@ public class PluginResourceTest extends AbstractServerTest {
 		return pluginResource;
 	}
 
-	private PluginResource newPluginResourceRemove(final String artifact) throws IOException {
+	private PluginResource newPluginResourceDelete(final String artifact) throws IOException {
+		final PluginResource pluginResource = newPluginResourceDelete();
+		pluginResource.delete(artifact);
+		return pluginResource;
+	}
+
+	private PluginResource newPluginResourceDelete(final String artifact, final String version) throws IOException {
+		final PluginResource pluginResource = newPluginResourceDelete();
+		pluginResource.delete(artifact, version);
+		return pluginResource;
+	}
+
+	private PluginResource newPluginResourceDelete() {
 		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
 		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(PluginsClassLoader.getInstance());
 			Mockito.when(pluginsClassLoader.getPluginDirectory())
 					.thenReturn(Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
-			final PluginResource pluginResource = new PluginResource() {
+			final PluginResource resource = new PluginResource() {
 				@Override
 				protected PluginsClassLoader getPluginClassLoader() {
 					return pluginsClassLoader;
 				}
 
 			};
-			applicationContext.getAutowireCapableBeanFactory().autowireBean(pluginResource);
-			pluginResource.remove(artifact);
-			return pluginResource;
+			applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
+			return resource;
 		}
 	}
 
@@ -645,7 +743,7 @@ public class PluginResourceTest extends AbstractServerTest {
 	 */
 	@Test
 	public void removeNotExists() throws IOException {
-		newPluginResourceRemove("any");
+		newPluginResourceDelete("any");
 	}
 
 	/**
@@ -655,9 +753,9 @@ public class PluginResourceTest extends AbstractServerTest {
 	@Test
 	public void removeWidest() throws IOException {
 		Assertions.assertFalse(TEMP_FILE.exists());
-		FileUtils.touch(TEMP_FILE);
+		Files.touch(TEMP_FILE);
 		Assertions.assertTrue(TEMP_FILE.exists());
-		newPluginResourceRemove("plugin-iam");
+		newPluginResourceDelete("plugin-iam");
 		Assertions.assertFalse(TEMP_FILE.exists());
 	}
 
@@ -667,9 +765,21 @@ public class PluginResourceTest extends AbstractServerTest {
 	@Test
 	public void removeExact() throws IOException {
 		Assertions.assertFalse(TEMP_FILE.exists());
-		FileUtils.touch(TEMP_FILE);
+		Files.touch(TEMP_FILE);
 		Assertions.assertTrue(TEMP_FILE.exists());
-		newPluginResourceRemove("plugin-iam");
+		newPluginResourceDelete("plugin-iam");
+		Assertions.assertFalse(TEMP_FILE.exists());
+	}
+
+	/**
+	 * Remove the exact plug-in + version, and only it.
+	 */
+	@Test
+	public void removeExactVersion() throws IOException {
+		Assertions.assertFalse(TEMP_FILE.exists());
+		Files.touch(TEMP_FILE);
+		Assertions.assertTrue(TEMP_FILE.exists());
+		newPluginResourceDelete("plugin-iam-node", "test");
 		Assertions.assertFalse(TEMP_FILE.exists());
 	}
 

@@ -50,9 +50,19 @@ public class PluginVo extends NamedBean<String> {
 	 * Location of this plug-in.
 	 */
 	private String location;
-	
+
 	/**
 	 * When not <code>null</code>, a new version of this plug-in is available
 	 */
 	private String newVersion;
+
+	/**
+	 * When not <code>null</code>, corresponds to the version activated on the next reload.
+	 */
+	private String latestLocalVersion;
+
+	/**
+	 * When <code>true</code> is plug-in is locally deleted, and will be uninstalled on the next reload.
+	 */
+	private boolean deleted;
 }

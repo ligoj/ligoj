@@ -152,12 +152,78 @@ public class PluginResource {
 	public List<PluginVo> findAll(@QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository) throws IOException {
 		// Get the available plug-ins
 		final Map<String, Artifact> lastVersion = getLastPluginVersions(repository);
+		final Map<String, FeaturePlugin> enabledFeatures = context.getBeansOfType(FeaturePlugin.class);
 
-		// Get the installed plug-in features
-		return this.repository.findAll().stream()
-				.map(p -> toVo(lastVersion, p, context.getBeansOfType(FeaturePlugin.class).values().stream()
-						.filter(f -> p.getKey().equals(f.getKey())).findFirst().orElse(null)))
-				.filter(Objects::nonNull).sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
+		// Get the enabled plug-in features
+		final Map<String, PluginVo> enabled = this.repository.findAll().stream()
+				.map(p -> toVo(lastVersion, p, enabledFeatures.values().stream().filter(f -> p.getKey().equals(f.getKey())).findFirst().orElse(null)))
+				.filter(Objects::nonNull).collect(Collectors.toMap(p -> p.getPlugin().getArtifact(), Function.identity()));
+
+		// Add pending installation: available but not yet enabled plug-ins
+		getPluginClassLoader().getInstalledPlugins().entrySet().forEach(i -> {
+			enabled.computeIfPresent(i.getKey(), (k, p) -> {
+				// Check if it's an update
+				if (!p.getPlugin().getVersion().equals(toTrimmedVersion(i.getValue()))) {
+					// Corresponds to a different version
+					p.setLatestLocalVersion(toTrimmedVersion(i.getValue()));
+				}
+				p.setDeleted(isDeleted(p));
+				return p;
+			});
+
+			// Add new plug-ins
+			enabled.computeIfAbsent(i.getKey(), k -> {
+				final Plugin plugin = new Plugin();
+				plugin.setArtifact(k);
+				plugin.setKey("?:" + Arrays.stream(k.split("-")).skip(1).collect(Collectors.joining("-")));
+
+				final PluginVo p = new PluginVo();
+				p.setId(k);
+				p.setName(k);
+				p.setPlugin(plugin);
+				p.setLatestLocalVersion(toTrimmedVersion(i.getValue()));
+				return p;
+			});
+		});
+
+		//
+		return enabled.values().stream().sorted(Comparator.comparing(NamedBean::getId)).collect(Collectors.toList());
+	}
+
+	/**
+	 * Indicate the plug-in is deleted or not.
+	 * @param plugin
+	 * @return <true> when the plug-in is deleted locally from the FS.
+	 */
+	protected boolean isDeleted(final PluginVo plugin) {
+		return !new File(plugin.getLocation()).exists();
+	}
+
+	/**
+	 * Convert an extended version to a trim one. Example:
+	 * <ul>
+	 * <li><code>plugin-sample-Z0000001Z0000002Z0000003Z0000004</code> will be <code>1.2.3.4</code></li>
+	 * <li><code>plugin-sample-Z0000001Z0000002Z0000003Z0000000</code> will be <code>1.2.3</code></li>
+	 * <li><code>plugin-sample-Z0000001Z0000002Z0000003SNAPSHOT</code> will be <code>1.2.3-SNAPSHOT</code></li>
+	 * <li><code>plugin-sample-1.2.3.4</code> will be <code>1.2.3.4</code></li>
+	 * <li><code>1.2.3.4</code> will be <code>1.2.3.4</code></li>
+	 * <li><code>1.2.3.4</code> will be <code>1.2.3.4</code></li>
+	 * <li><code>1.2.3.0</code> will be <code>1.2.3</code></li>
+	 * <li><code>0.1.2.3</code> will be <code>0.1.2.3</code></li>
+	 * </ul>
+	 *
+	 * @param extendedVersion
+	 *            The extended version. Trim version is also accepted.
+	 * @return Trim version.
+	 */
+	protected String toTrimmedVersion(final String extendedVersion) {
+		String trim = Arrays.stream(StringUtils.split(extendedVersion, "-Z.")).dropWhile(s -> !s.matches("^(Z?\\d+.*)"))
+				.map(s -> StringUtils.defaultIfBlank(StringUtils.replaceFirst(s, "^0+", ""), "0")).collect(Collectors.joining("."))
+				.replace(".SNAPSHOT", "-SNAPSHOT").replaceFirst("([^-])SNAPSHOT", "$1-SNAPSHOT");
+		if (trim.endsWith(".0") && StringUtils.countMatches(trim, '.') > 2) {
+			trim = StringUtils.removeEnd(trim, ".0");
+		}
+		return trim;
 	}
 
 	/**
@@ -256,10 +322,31 @@ public class PluginResource {
 	 */
 	@DELETE
 	@Path("{artifact:[\\w-]+}")
-	public void remove(@PathParam("artifact") final String artifact) throws IOException {
-		Files.list(getPluginClassLoader().getPluginDirectory()).filter(p -> p.getFileName().toString().matches("^" + artifact + "(-.*)?\\.jar$"))
-				.forEach(p -> p.toFile().delete());
+	public void delete(@PathParam("artifact") final String artifact) throws IOException {
+		removeFilter(artifact, "(-.*)?");
 		log.info("Plugin {} has been deleted, restart is required", artifact);
+	}
+
+	/**
+	 * Remove the specific version of a plug-in.
+	 *
+	 * @param artifact
+	 *            The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 * @param version
+	 *            The specific version.
+	 * @throws IOException
+	 *             When the file cannot be read or deleted from the file system.
+	 */
+	@DELETE
+	@Path("{artifact:[\\w-]+}/{version}")
+	public void delete(@PathParam("artifact") final String artifact, @PathParam("version") final String version) throws IOException {
+		removeFilter(artifact, "-" + version.replace(".", "\\."));
+		log.info("Plugin {} v{} has been deleted, restart is required", artifact, version);
+	}
+
+	private void removeFilter(final String artifact, final String filter) throws IOException {
+		Files.list(getPluginClassLoader().getPluginDirectory()).filter(p -> p.getFileName().toString().matches("^" + artifact + filter + "\\.jar$"))
+				.forEach(p -> p.toFile().delete());
 	}
 
 	/**
