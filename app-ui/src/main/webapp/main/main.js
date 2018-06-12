@@ -202,22 +202,23 @@ define(['cascade'], function ($cascade) {
 		 * @return {string} The full name of given user. 
 		 */
 		getFullName: function (user) {
+			var result;
 			if (user.fullName) {
-				return user.fullName;
+				result = user.fullName;
+			} else if (user.firstName && user.lastName) {
+				result = user.firstName + ' ' + user.lastName;
+			} else if (user.firstName) {
+				result = user.firstName + ' <italic>' + user.id.substring(1) + '</italic>';
+			} else {
+				result = '<italic>' + user.id.substring(0, 1).capitalize() + '</italic>. ';
+				if (user.lastName) {
+					result += user.lastName;
+				} else {
+					// Fail safe rendering based on login
+					result += '<italic>' + (user.id || user || '??').substring(1).capitalize() + '</italic>';
+				}
 			}
-			if (user.firstName && user.lastName) {
-				return user.firstName + ' ' + user.lastName;
-			}
-			if (user.firstName) {
-				return user.firstName + ' <italic>' + user.id.substring(1) + '</italic>';
-			}
-			if (user.lastName) {
-				return '<italic>' + user.id.substring(0, 1).capitalize() + '</italic>. ' + user.lastName;
-			}
-
-			// Fail safe rendering based on login
-			var id = user.id || user || '??';
-			return '<italic>' + id.substring(0, 1).capitalize() + '</italic>. <italic>' + id.substring(1).capitalize() + '</italic>';
+			return result;
 		},
 
 		/**

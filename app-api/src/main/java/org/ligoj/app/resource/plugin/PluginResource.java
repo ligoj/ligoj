@@ -789,16 +789,24 @@ public class PluginResource {
 	 */
 	protected <T> void persistAsNeeded(final Class<T> entityClass, T entity) {
 		if (entity instanceof AbstractBusinessEntity) {
-			// Check for duplicate before the insert
-			if (em.find(entityClass, ((AbstractBusinessEntity<?>) entity).getId()) == null) {
-				em.persist(entity);
-			}
+			persistAsNeeded(entityClass, (AbstractBusinessEntity<?>) entity);
 		} else if (entity instanceof INamableBean) {
-			if (em.createQuery("SELECT 1 FROM " + entityClass.getName() + " WHERE name = :name")
-					.setParameter("name", ((INamableBean<?>) entity).getName()).getResultList().isEmpty()) {
-				em.persist(entity);
-			}
+			persistAsNeeded(entityClass, (INamableBean<?>) entity);
 		} else {
+			em.persist(entity);
+		}
+	}
+
+	private <T> void persistAsNeeded(final Class<T> entityClass, AbstractBusinessEntity<?> entity) {
+		// Check for duplicate before the insert
+		if (em.find(entityClass, entity.getId()) == null) {
+			em.persist(entity);
+		}
+	}
+
+	private <T> void persistAsNeeded(final Class<T> entityClass, INamableBean<?> entity) {
+		if (em.createQuery("SELECT 1 FROM " + entityClass.getName() + " WHERE name = :name").setParameter("name", entity.getName()).getResultList()
+				.isEmpty()) {
 			em.persist(entity);
 		}
 	}

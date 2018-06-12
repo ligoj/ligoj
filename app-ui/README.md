@@ -3,10 +3,12 @@
 # UI (REST+JS) container running a stateful SpringBoot application.
 
 Browser side roles :
+
 - URL security level applied to UI component with hierarchy pruning. Can be overridden
 - i18n
 
 Server side roles :
+
 - REST endpoints proxing
 - White/secured URL
 - Session holder 
@@ -83,10 +85,10 @@ docker run --rm -it \
 
 | Property     | Endpoint | Default |
 |------------|---------|--------------------------|
-| ligoj.endpoint | Default base endpoint URL    | http://localhost:8081/ligoj-api     |
-| ligoj.endpoint.api.url | Core API URL     | ${ligoj.endpoint}/rest     |
-| ligoj.endpoint.manage.url | Health status and management     | ${ligoj.endpoint}/manage     |
-| ligoj.endpoint.plugins.url | Plug-ins API URL     | ${ligoj.endpoint}/webjars     |
+| ligoj.endpoint | Default base endpoint URL    | http://localhost:8081/ligoj-api |
+| ligoj.endpoint.api.url | Core API URL     | ${ligoj.endpoint}/rest |
+| ligoj.endpoint.manage.url | Health status and management| ${ligoj.endpoint}/manage |
+| ligoj.endpoint.plugins.url | Plug-ins API URL | ${ligoj.endpoint}/webjars |
 
 
 ## Run with security disabled

@@ -103,7 +103,7 @@ public class PluginResourceTest extends AbstractServerTest {
 	private RestartEndpoint restartEndpoint;
 
 	@Autowired
-	ConfigurationResource configuration;
+	protected ConfigurationResource configuration;
 
 	@Autowired
 	org.springframework.cache.CacheManager cacheManager;
