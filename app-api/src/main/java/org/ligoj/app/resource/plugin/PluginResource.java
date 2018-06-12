@@ -192,6 +192,7 @@ public class PluginResource {
 
 	/**
 	 * Indicate the plug-in is deleted or not.
+	 *
 	 * @param plugin
 	 * @return <true> when the plug-in is deleted locally from the FS.
 	 */
@@ -478,13 +479,13 @@ public class PluginResource {
 	 */
 	public int autoUpdate() throws IOException {
 		final Map<String, String> plugins = getPluginClassLoader().getInstalledPlugins();
-		final String repository = configuration.get(PLUGIN_REPOSITORY, REPO_CENTRAL);
+		final String repositoryName = configuration.get(PLUGIN_REPOSITORY, REPO_CENTRAL);
 		int counter = 0;
-		for (final Artifact artifact : getLastPluginVersions(repository).values().stream().filter(a -> plugins.containsKey(a.getArtifact()))
+		for (final Artifact artifact : getLastPluginVersions(repositoryName).values().stream().filter(a -> plugins.containsKey(a.getArtifact()))
 				.filter(a -> PluginsClassLoader.toExtendedVersion(a.getVersion())
 						.compareTo(StringUtils.removeStart(plugins.get(a.getArtifact()), a.getArtifact() + "-")) > 0)
 				.collect(Collectors.toList())) {
-			install(artifact.getArtifact(), repository);
+			install(artifact.getArtifact(), repositoryName);
 			counter++;
 		}
 		return counter;
