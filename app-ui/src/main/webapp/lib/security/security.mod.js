@@ -10,14 +10,14 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		/**
 		 * Authorized URL. Undefined when there is no authorization security.
 		 */
-		authorizations: undefined,
-		businessAuthorizations: undefined,
+		uiAuthorizations: undefined,
+		apiAuthorizations: undefined,
 
 		initialize: function () {
 			// Register a filter for all Ajax calls
 			$.ajaxPrefilter(function (options, originalOptions, jqXHR) {
 				var serverUrlSplit = options.url && options.url.split('/');
-				if (serverUrlSplit.length && serverUrlSplit[0].startsWith(REST_MATCH_PATH) && !current.isAllowedBusiness(options.url, options.type)) {
+				if (serverUrlSplit.length && serverUrlSplit[0].startsWith(REST_MATCH_PATH) && !current.isAllowedApi(options.url, options.type)) {
 					// Cancel this before the server tell it
 					traceLog('Not allowed call aborted', options.type + ' ' + options.url);
 					jqXHR.abort();
@@ -29,7 +29,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * Remove given item and the parent if empty.
 		 * @param {Object} item to remove from the DOM.
 		 */
-		_pruneHierarchy: function (item) {
+		pruneHierarchy: function (item) {
 			var parent = item.parent();
 			if (parent.length === 1) {
 				if (item.attr('data-security-on-forbidden') === 'disable') {
@@ -48,7 +48,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 					var childrenSize = parent.children().length;
 					if (childrenSize === 1 || (childrenSize === 2 && parent.children('[data-toggle="dropdown"]').length === 1)) {
 						// Parent will be empty too
-						current._pruneHierarchy(parent);
+						current.pruneHierarchy(parent);
 					} else {
 						item.remove();
 					}
@@ -62,45 +62,38 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @return{Boolean} true when allowed.
 		 */
 		isAllowed: function (url) {
-			return (typeof current.authorizations === 'undefined') || current.authorizations === null || current._isAllowed(url, current.authorizations);
+			return (typeof current.uiAuthorizations === 'undefined') || current.uiAuthorizations === null || current.isAllowed(url, current.uiAuthorizations);
 		},
 
 		/**
-		 * Determine whether requested business URL is allowed.
-		 * @param {String} requested business URL.
-		 * @param {String} requested business method.
-		 * @return{Boolean} true when allowed.
-		 */
-		isAllowedBusiness: function (url, method) {
-			return current.businessAuthorizations === undefined || current.businessAuthorizations === null || current._isAllowedBusiness(url, method, current.businessAuthorizations);
-		},
-
-		/**
-		 * Determine whether requested business URL is allowed.
-		 * @param {String} url				requested business URL.
-		 * @param {String} methods			requested business methods, ',' separated.
-		 * @param {RegEx[]} authorizations	valid authorizations.
+		 * Determine whether requested API URL is allowed.
+		 * @param {String} url				requested API URL.
+		 * @param {String} methods			requested API methods, ',' separated.
 		 * @return {Boolean}				true when allowed.
 		 */
-		_isAllowedBusiness: function (url, methods, authorizations) {
+		isAllowedApi: function (url, methods) {
+			if (current.apiAuthorizations === undefined || current.apiAuthorizations === null) {
+				// No configured authorization
+				return true;
+			}
 			if (url) {
 				// URL matcher
-				return current._isAllowedBusinessUrl(url, methods, authorizations);
+				return current.isAllowedApiUrl(url, methods, current.apiAuthorizations);
 			}
 			if (methods) {
 				// Method only matcher
-				return current._isAllowedBusinessMethod(methods, authorizations);
+				return current.isAllowedApiMethod(methods, current.apiAuthorizations);
 			}
 			return true;
 		},
 
 		/**
-		 * Determine whether requested business method is allowed.
-		 * @param {String} methods			requested business methods, ',' separated.
+		 * Determine whether requested API method is allowed.
+		 * @param {String} methods			requested API methods, ',' separated.
 		 * @param {RegEx[]} authorizations	valid authorizations.
 		 * @return {Boolean}					true when allowed.
 		 */
-		_isAllowedBusinessMethod: function (methods, authorizations) {
+		isAllowedApiMethod: function (methods, authorizations) {
 			var methodsAsArray = (methods ? methods.toLowerCase() : '').split(',');
 			var length = authorizations.length;
 			// Method only matcher
@@ -114,13 +107,13 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		},
 
 		/**
-		 * Determine whether requested business URL is allowed.
-		 * @param {String} url				requested business URL.
-		 * @param {String} methods			requested business methods, ',' separated.
+		 * Determine whether requested API URL is allowed.
+		 * @param {String} url				requested API URL.
+		 * @param {String} methods			requested API methods, ',' separated.
 		 * @param {RegEx[]} authorizations	valid authorizations.
 		 * @return {Boolean}					true when allowed.
 		 */
-		_isAllowedBusinessUrl: function (url, methods, authorizations) {
+		isAllowedApiUrl: function (url, methods, authorizations) {
 			var index;
 			var length = authorizations.length;
 			// URL matcher
@@ -152,7 +145,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @param {RegEx[]} valid authorizations.
 		 * @return{Boolean} true when allowed.
 		 */
-		_isAllowed: function (url, authorizations) {
+		isAllowed: function (url, authorizations) {
 			if (url) {
 				var index;
 				var length;
@@ -173,52 +166,65 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 */
 		applySecurity: function (selector) {
 			selector = selector || _('_main');
+			current.copyContext();
 
 			// UI security filtering
-			var authorizations = current.authorizations = $cascade.session && $cascade.session.authorizations;
+			var uiAuthorizations = current.uiAuthorizations;
 			var index;
 			var length;
-			if (authorizations !== undefined && authorizations && authorizations.length) {
-				for (index = 0, length = authorizations.length; index < length; index++) {
-					authorizations[index] = new RegExp(authorizations[index]);
+			if (uiAuthorizations && uiAuthorizations.length) {
+				for (index = 0, length = uiAuthorizations.length; index < length; index++) {
+					uiAuthorizations[index] = new RegExp(uiAuthorizations[index]);
 				}
 
 				// Remove invalid links
 				// FIX IE7 startsWith(^) -> contains(*)
 				selector.find('[href*="#/"]').each(function () {
 					var $that = $(this);
-					if (!current._isAllowed($that.attr('href').split('#/')[1], authorizations)) {
-						current._pruneHierarchy($that);
+					if (!current.isAllowed($that.attr('href').split('#/')[1], uiAuthorizations)) {
+						current.pruneHierarchy($that);
 					}
 				});
 			}
 
-			// Business security filtering
-			var businessAuthorizations = current.businessAuthorizations = $cascade.session && $cascade.session.businessAuthorizations;
-			if (businessAuthorizations !== undefined && businessAuthorizations && businessAuthorizations.length) {
-				for (index = 0, length = businessAuthorizations.length; index < length; index++) {
-					businessAuthorizations[index].pattern = new RegExp(businessAuthorizations[index].pattern);
+			// API security filtering
+			var apiAuthorizations = current.apiAuthorizations;
+			if (apiAuthorizations && apiAuthorizations.length) {
+				for (index = 0, length = apiAuthorizations.length; index < length; index++) {
+					apiAuthorizations[index].pattern = new RegExp(apiAuthorizations[index].pattern);
 				}
 
 				// Remove invalid content
 				selector.find('[data-secured-service],[data-secured-method]').each(function () {
 					var $that = $(this);
-					if (!current._isAllowedBusiness($that.attr('data-secured-service'), $that.attr('data-secured-method'), businessAuthorizations)) {
-						current._pruneHierarchy($that);
+					if (!current.isAllowedApi($that.attr('data-secured-service'), $that.attr('data-secured-method'))) {
+						current.pruneHierarchy($that);
 					}
 				});
 			}
 
-			// Business security filtering
+			// API security filtering
 			var roles = current.roles = $cascade.session && $cascade.session.roles;
 			if (roles && roles.length) {
 				// Remove invalid content
 				selector.find('[data-secured-role]').each(function () {
 					var $that = $(this);
 					if ($.inArray($that.attr('data-secured-role'), roles) < 0) {
-						current._pruneHierarchy($that);
+						current.pruneHierarchy($that);
 					}
 				});
+			}
+		},
+		
+		copyContext: function() {
+			if ($cascade.session) {
+				if (typeof $cascade.session.authorizations !== 'undefined') {
+					traceLog('Deprecated usage of "authorizations", upgrade bootstrap to 2.4.5+'); 
+					$cascade.session.uiAuthorizations = $cascade.session.authorizations;
+					$cascade.session.apiAuthorizations = $cascade.session.businessAuthorizations;
+				}
+				current.uiAuthorizations = $cascade.session.uiAuthorizations;
+				current.apiAuthorizations = $cascade.session.apiAuthorizations;
 			}
 		}
 	};
