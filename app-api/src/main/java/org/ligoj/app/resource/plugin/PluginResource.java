@@ -66,8 +66,8 @@ import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.SpringUtils;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
 import org.ligoj.bootstrap.core.model.AbstractBusinessEntity;
-import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
+import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -400,7 +400,7 @@ public class PluginResource {
 		} catch (final Exception ioe) {
 			// Installation failed, either download, either FS error
 			log.info("Unable to install plugin {} v{} from {}", artifact, version, repository, ioe);
-			throw new BusinessException(artifact, String.format("Cannot be installed %s", artifact), ioe);
+			throw new ValidationJsonException("artifact", String.format("Cannot be installed"));
 		}
 	}
 
@@ -421,7 +421,7 @@ public class PluginResource {
 		final Artifact resultItem = getLastPluginVersions(repository).get(artifact);
 		if (resultItem == null) {
 			// Plug-in not found, or not the last version
-			throw new BusinessException(String.format("No latest version found for plug-in %s on repository %s", artifact, repository));
+			throw new ValidationJsonException("artifact", String.format("No latest version on repository %s", repository));
 		}
 		install(artifact, resultItem.getVersion(), repository);
 	}

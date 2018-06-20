@@ -38,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.AbstractServerTest;
+import org.ligoj.app.MatcherUtil;
 import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.dao.NodeRepository;
@@ -51,8 +52,8 @@ import org.ligoj.app.model.Subscription;
 import org.ligoj.app.resource.plugin.repository.Artifact;
 import org.ligoj.app.resource.plugin.repository.CentralRepositoryManager;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
-import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
+import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.model.system.SystemBench;
 import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.model.system.SystemRole;
@@ -422,7 +423,7 @@ public class PluginResourceTest extends AbstractServerTest {
 	@Test
 	public void configurePluginInstallError() {
 		final FeaturePlugin service1 = Mockito.mock(FeaturePlugin.class);
-		Mockito.when(service1.getInstalledEntities()).thenThrow(BusinessException.class);
+		Mockito.when(service1.getInstalledEntities()).thenThrow(ValidationJsonException.class);
 		Assertions.assertThrows(TechnicalException.class, () -> {
 			resource.configurePluginInstall(service1);
 		});
@@ -598,16 +599,16 @@ public class PluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void installNotExists() {
-		Assertions.assertThrows(BusinessException.class, () -> {
+		Assertions.assertThrows(ValidationJsonException.class, () -> {
 			newPluginResourceInstall().install("any", "central");
 		});
 	}
 
 	@Test
 	public void installNotExistsVersion() {
-		Assertions.assertEquals("any", Assertions.assertThrows(BusinessException.class, () -> {
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
 			newPluginResourceInstall().install("any", "dummy", "central");
-		}).getMessage());
+		}), "artifact", "Cannot be installed");
 	}
 
 	@Test
