@@ -328,7 +328,7 @@ define([
 					throw err;
 				} else {
 					// Broken page is not the home page, fail-safe redirection
-					notifyManager.notify(Handlebars.compile(errorMessages['error404-redirected-details'])({page: window.location.hash}), Handlebars.compile(errorMessages['error404-redirected'])({icon: '<i class="fas fa-2 fa-map-signs text-danger"></i>&nbsp;'}), 'warning', 'toast-bottom-right');
+					notifyManager.notify(Handlebars.compile(errorMessages['error404-redirected-details'])({page: window.location.hash}), Handlebars.compile(errorMessages['error404-redirected'])({icon: '<i class="fas fa-2 fa-map-signs text-danger"></i>&nbsp;'}), 'warning', 'toast-top-right');
 					window.location.hash = '#/';
 				}
 			} else {

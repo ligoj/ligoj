@@ -259,7 +259,7 @@ define([
 					$alert.append('<br>').append(message);
 				}
 			} else {
-				notifyManager && notifyManager.notify('<b>' + errorManager.getMessages().error400 + '</b><br/>' + message, '.top-right', 'warning');
+				notifyManager && notifyManager.notify(message, errorManager.getMessages().error400, 'warning', 'toast-top-right');
 			}
 		},
 
