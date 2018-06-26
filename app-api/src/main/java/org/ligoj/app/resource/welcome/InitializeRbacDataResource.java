@@ -6,9 +6,9 @@ package org.ligoj.app.resource.welcome;
 import java.util.Arrays;
 import java.util.List;
 
-import org.ligoj.app.api.FeaturePlugin;
 import org.ligoj.app.iam.model.DelegateOrg;
 import org.ligoj.app.model.DelegateNode;
+import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
 import org.ligoj.bootstrap.model.system.SystemAuthorization;
 import org.ligoj.bootstrap.model.system.SystemRole;
 import org.ligoj.bootstrap.model.system.SystemRoleAssignment;

@@ -6,7 +6,7 @@ package org.ligoj.boot.api;
 import java.util.Collections;
 
 import org.apache.cxf.transport.servlet.CXFServlet;
-import org.ligoj.app.resource.plugin.WebjarsServlet;
+import org.ligoj.bootstrap.resource.system.plugin.WebjarsServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

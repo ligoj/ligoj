@@ -4,14 +4,14 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-business-parent</artifactId>
-		<version>2.3.3</version>
+		<version>2.4.1</version>
 		<relativePath />
 	</parent>
 
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-api</artifactId>
 	<packaging>war</packaging>
-	<version>1.8.1-SNAPSHOT</version>
+	<version>2.0.0-SNAPSHOT</version>
 	<name>Ligoj - API</name>
 
 	<scm>
@@ -20,36 +20,18 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>2.4.4</api.version>
-		<spring-boot.version>2.0.2.RELEASE</spring-boot.version>
-		<spring-cloud.version>2.0.0.RC2</spring-cloud.version>
-		<swagger.version>3.14.0</swagger.version>
+		<api.version>3.0.1</api.version>
+		<swagger.version>3.17.1</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
-		<spring-security-rsa>1.0.5.RELEASE</spring-security-rsa>
 		<resource.delimiter>@</resource.delimiter>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-web</artifactId>
-				<version>${spring-security.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-config</artifactId>
-				<version>${spring-security.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>javax.xml.ws</groupId>
 				<artifactId>jaxws-api</artifactId>
 				<version>${jaxws.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-rsa</artifactId>
-				<version>${spring-security-rsa}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -57,6 +39,12 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-rsa</artifactId>
+		</dependency>
+		<!-- JSR-907 -->
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>javax.transaction-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Swagger -->
@@ -105,6 +93,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ligoj.bootstrap</groupId>
+			<artifactId>bootstrap-plugin</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.ligoj.api</groupId>
 			<artifactId>plugin-iam-empty</artifactId>
 			<version>${api.version}</version>
@@ -149,10 +142,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-context</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
@@ -160,13 +149,6 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<!-- JSR-925 -->
-		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
 			<scope>compile</scope>
 		</dependency>
 

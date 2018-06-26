@@ -12,7 +12,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
  * Test using mock http server.
  */
 public abstract class AbstractServerTest {
-	protected static final int MOCK_PORT = 8121;
+	protected static final int MOCK_PORT = 8120;
 
 	protected WireMockServer httpServer;
 

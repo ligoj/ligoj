@@ -4,7 +4,6 @@
 package org.ligoj.app.resource.plugin;
 
 import org.junit.jupiter.api.Test;
-import org.ligoj.app.model.PluginType;
 import org.ligoj.app.resource.security.User;
 import org.ligoj.bootstrap.model.AbstractBusinessEntityTest;
 

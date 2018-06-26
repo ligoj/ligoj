@@ -1,1 +1,1 @@
-org.springframework.boot.SpringApplicationRunListener=org.ligoj.app.resource.plugin.PluginApplicationRunListener
+org.springframework.boot.SpringApplicationRunListener=org.ligoj.bootstrap.resource.system.plugin.PluginApplicationRunListener

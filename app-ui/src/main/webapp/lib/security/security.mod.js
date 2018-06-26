@@ -62,7 +62,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @return{Boolean} true when allowed.
 		 */
 		isAllowed: function (url) {
-			return (typeof current.uiAuthorizations === 'undefined') || current.uiAuthorizations === null || current.isAllowed(url, current.uiAuthorizations);
+			return (typeof current.uiAuthorizations === 'undefined') || current.uiAuthorizations === null || current.isAllowedInternal(url, current.uiAuthorizations);
 		},
 
 		/**
@@ -145,7 +145,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @param {RegEx[]} valid authorizations.
 		 * @return{Boolean} true when allowed.
 		 */
-		isAllowed: function (url, authorizations) {
+		isAllowedInternal: function (url, authorizations) {
 			if (url) {
 				var index;
 				var length;
@@ -181,7 +181,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 				// FIX IE7 startsWith(^) -> contains(*)
 				selector.find('[href*="#/"]').each(function () {
 					var $that = $(this);
-					if (!current.isAllowed($that.attr('href').split('#/')[1], uiAuthorizations)) {
+					if (!current.isAllowedInternal($that.attr('href').split('#/')[1], uiAuthorizations)) {
 						current.pruneHierarchy($that);
 					}
 				});
