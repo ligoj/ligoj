@@ -18,8 +18,9 @@ public class AuthCurlProcessorTest {
 	 */
 	@Test
 	public void coverageDeprecated() {
-		new AuthCurlProcessor("junit", "passwd", null);
-		new AuthCurlProcessor("junit", "passwd");
+		try (AuthCurlProcessor a1 = new AuthCurlProcessor("junit", "passwd", null); AuthCurlProcessor a2 = new AuthCurlProcessor("junit", "passwd")) {
+			// Nothing
+		}
 	}
 
 }

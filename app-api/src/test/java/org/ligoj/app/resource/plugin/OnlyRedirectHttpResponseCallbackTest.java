@@ -15,7 +15,8 @@ public class OnlyRedirectHttpResponseCallbackTest {
 
 	@Test
 	public void coverageDeprecated() {
-		new OnlyRedirectHttpResponseCallback();
+		// Only for coverage for the deprecated method already tested elsewhere
+		new OnlyRedirectHttpResponseCallback().hashCode();
 	}
 
 }

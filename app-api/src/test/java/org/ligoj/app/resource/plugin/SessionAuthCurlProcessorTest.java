@@ -18,7 +18,9 @@ public class SessionAuthCurlProcessorTest {
 	 */
 	@Test
 	public void coverageDeprecated() {
-		new SessionAuthCurlProcessor("junit", "passwd", null);
-		new SessionAuthCurlProcessor("junit", "passwd");
+		try (SessionAuthCurlProcessor s1 = new SessionAuthCurlProcessor("junit", "passwd", null);
+				SessionAuthCurlProcessor s2 = new SessionAuthCurlProcessor("junit", "passwd")) {
+			// Nothing to do
+		}
 	}
 }

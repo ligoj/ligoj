@@ -38,6 +38,7 @@ public class CurlProcessorTest extends org.ligoj.bootstrap.AbstractServerTest {
 	public void coverageDeprecated() {
 		try (CurlProcessor c1 = new CurlProcessor(new DefaultHttpResponseCallback());
 				CurlProcessor c2 = new CurlProcessor(Mockito.mock(HttpResponseCallback.class))) {
+			// Nothing to do
 		}
 	}
 

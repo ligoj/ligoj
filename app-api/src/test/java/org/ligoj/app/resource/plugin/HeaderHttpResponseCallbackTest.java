@@ -15,7 +15,8 @@ public class HeaderHttpResponseCallbackTest {
 
 	@Test
 	public void coverageDeprecated() {
-		new HeaderHttpResponseCallback("");
+		// Only for coverage for the deprecated method already tested elsewhere
+		new HeaderHttpResponseCallback("").hashCode();
 	}
 
 }
