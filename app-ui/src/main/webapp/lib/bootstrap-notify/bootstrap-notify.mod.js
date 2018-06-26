@@ -21,7 +21,7 @@ define(['bootstrap-notify'], function () {
 		typeToIcon: function (type) {
 			type = notifyManager.getTypeFromBusiness(type);
 			if (type === 'danger') {
-				return '<i class="fas fa-meh"></i> ';
+				return '<i class="fas fa-grimace"></i> ';
 			}
 			if (type === 'warning') {
 				return '<i class="fas fa-warning"></i> ';
