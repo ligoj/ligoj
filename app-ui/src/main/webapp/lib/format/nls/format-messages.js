@@ -4,7 +4,7 @@
 define({
 	root : {
 		'shortdateMomentJs' : 'YYYY/MM/DD',
-		'unit-size' : 'o',
+		'byte-size' : 'B',
 		'format-size' : '{{value}}{{{preUnit}}}{{weight}}{{unit}}{{{postUnit}}}',
 		'format-cost' : '{{value}}{{{preUnit}}}{{weight}}{{unit}}{{{postUnit}}}'
 	},

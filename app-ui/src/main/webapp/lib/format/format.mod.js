@@ -105,7 +105,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		 * @return {string}         Human readable string.
 		 */
 		formatSize: function (bytes, digits, clazz) {
-			var unit = messages['unit-size'];
+			var unit = messages['byte-size'];
 			return formatManager.formatUnit(bytes, digits, [unit, 'K' + unit, 'M' + unit, 'G' + unit, 'T' + unit, 'P' + unit], '', 1024, messages['format-size'], clazz);
 		}
 	};
