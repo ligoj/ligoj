@@ -37,23 +37,44 @@ define([
 			var messages = '';
 			for (key in errors) {
 				if ({}.hasOwnProperty.call(errors, key)) {
-					var error = errors[key];
 					hasError = true;
-					if (ui) {
-						if (key.indexOf('[') === -1 || $that.mapping[key]) {
-							// Manage form case
-							$that._validateForm(key, selector, $form, error);
-						} else {
-							// Manage grid case
-							$that._validateGrid(key, selector, $form, error);
+					var error = errors[key];
+					// Only root error properties
+					if (key.indexOf('.') === -1) {
+						// Root property
+						messages += $that.addPropertyMessage(messages, key, selector, $form, error, ui);
+						for (subKey in errors) {
+							if ({}.hasOwnProperty.call(errors, subKey)) {
+								if (subKey.startsWith(key + '.')) {
+									// Nested property
+									var subError = errors[subKey];
+									var nested = subKey.substring(subKey.indexOf('.') + 1);
+									messages += $that.addPropertyMessage(messages, key, selector, $form, subError, ui, nested);
+								}
+							}
 						}
-					} else {
-						messages = (messages ? ',' : '') + $that.deserialize(error);
 					}
 				}
 			}
+
 			if (ui && hasError && $that.notifyOnError) {
 				$that.showGlobalError(undefined, [validationMessages.Global]);
+			}
+			return messages;
+		},
+		
+		addPropertyMessage: function(messages, key, selector, $form, error, ui, nested) {
+			var $that = validationManager;
+			if (ui) {
+				if (key.indexOf('[') === -1 || $that.mapping[key]) {
+					// Manage form case
+					$that._validateForm(key, selector, $form, error, nested);
+				} else {
+					// Manage grid case
+					$that._validateGrid(key, selector, $form, error, nested);
+				}
+			} else {
+				messages = (messages ? ',' : '') + $that.deserialize(error);
 			}
 			return messages;
 		},
@@ -82,17 +103,17 @@ define([
 		/**
 		 * Validate a standard form.
 		 */
-		_validateGrid: function (key, selector, $form, error) {
+		_validateGrid: function (key, selector, $form, error, nested) {
 			var $that = validationManager;
 			// Lookup 'table[row-index].field' or 'table[].field'
 			var directField = $that._getMapping(key, false) || $that._getMapping(key.replace(/\[[0-9]+\]/, '[]'), false);
-			var splittedKey = key.split(/\[|\]\./g);
-			var index = splittedKey[1];
+			var splitKey = key.split(/\[|\]\./g);
+			var index = splitKey[1];
 
 			// Lookup 'table[row-index]' or 'table[]'
-			var fields = (directField || $that._getMapping(splittedKey[0] + '[' + index + ']', false) || $that._getMapping(splittedKey[0] + '[]', false) || splittedKey[0]).split(';');
+			var fields = (directField || $that._getMapping(splitKey[0] + '[' + index + ']', false) || $that._getMapping(splitKey[0] + '[]', false) || splitKey[0]).split(';');
 			var tableName = fields[0];
-			var inputName = $that._getMapping(splittedKey[2], true);
+			var inputName = $that._getMapping(splitKey[2], true);
 			var $field;
 			var $table;
 			if ($that._isQualifiedSelector(tableName)) {
@@ -116,33 +137,30 @@ define([
 
 			if ($that.isVisible($field)) {
 				// Specific error on a visible field or in a non active tab
-				$that.addError($field, error, splittedKey[2]);
+				$that.addError($field, error, splitKey[2], false, nested);
 			} else {
 				// No element found -> global error
-				$that.showGlobalError($form, error, selector);
+				$that.showGlobalError($form, error, selector, nested);
 			}
 		},
 
 		/**
 		 * Manage specific error for multiple fields
 		 */
-		_validateFields: function (key, selector, $form, error, fields) {
+		_validateFields: function (key, selector, $form, error, fieldNames, nested) {
 			var $that = validationManager;
-			var $field;
-			var i;
-			var field;
-			for (i = 0; i < fields.length; i++) {
+			for (var i = 0; i < fieldNames.length; i++) {
 				// The field name
-				field = fields[i];
+				var fieldName = fieldNames[i];
 
 				// Lookup the field using either a $.find by name/id or by a selector
-				$field = $form.find($that._isQualifiedSelector(field) ? field : ('[name="' + field + '"],[id="' + field + '"]'));
+				var $field = $form.find($that._isQualifiedSelector(fieldName) ? fieldName : ('[name="' + fieldName + '"],[id="' + fieldName + '"]'));
 				if ($that.isVisible($field)) {
 					// Specific error on a visible field or in a non active tab
-					$that.addError($field, error, key);
+					$that.addError($field, error, key, false, nested);
 				} else {
 					// No element found -> global error
-					$that.showGlobalError(field, error, selector);
+					$that.showGlobalError(fieldName, error, selector, nested);
 				}
 			}
 		},
@@ -157,14 +175,17 @@ define([
 		/**
 		 * Validate a standard form.
 		 */
-		_validateForm: function (key, selector, $form, error) {
+		_validateForm: function (key, selector, $form, error, nested) {
 			// Key the mapped HTMl element or DEFAULT one if defined
 			var $that = validationManager;
 			var mappedKey = $that.mapping[key] || $that.mapping.DEFAULT || key;
-			var fields = mappedKey.split(';');
+			var fields = mappedKey.split(',');
+			if (fields.length == 0) {
+				fields = mappedKey.split(';');
+			}
 
 			// Mapped specific error for multiple fields
-			$that._validateFields(key, selector, $form, error, fields);
+			$that._validateFields(key, selector, $form, error, fields, nested);
 		},
 
 		reset: function ($selector) {
@@ -238,10 +259,13 @@ define([
 			return key;
 		},
 
-		showGlobalError: function (key, errors, $form) {
+		/**
+		 * @param {String} nested : When defined, name of the prefix corresponding to the nested property.
+		 */
+		showGlobalError: function (key, errors, $form, nested) {
 			$form = ($form && $form.is(':visible')) ? $form : _('_ucDiv').find('form.modal.in:visible');
 			$form = $form.length > 0 ? $form : _('_ucDiv');
-			var message = validationManager.deserialize(errors);
+			var message = (nested ? nested + ': ' : '') + validationManager.deserialize(errors);
 			var $alert;
 			if ($form.length > 0) {
 				// We can display a nice alert in the given form
@@ -276,9 +300,10 @@ define([
 		 * @param {Object} errors : Rules either as array, simple rule, or text.
 		 * @param {Object} key : The related business property.
 		 * @param {Boolean} feedback : When true, a feedback will be added.
+		 * @param {String} nested : When defined, name of the prefix corresponding to the nested property.
 		 */
-		addError: function (field, errors, key, feedback) {
-			validationManager.addMessage(field, 'has-error', errors, key, feedback && 'fas fa-times');
+		addError: function (field, errors, key, feedback, nested) {
+			validationManager.addMessage(field, 'has-error', errors, key, feedback && 'fas fa-times', nested);
 		},
 
 		/**
@@ -315,14 +340,15 @@ define([
 		 * @param {Object} errors : Rules either as array, simple rule, or text.
 		 * @param {Object} key : The related business property.
 		 * @param {Object} feedbackClass : Optional feedback class.
+		 * @param {String} nested : When defined, name of the prefix corresponding to the nested property.
 		 */
-		addMessage: function ($field, containerClass, errors, key, feedbackClass) {
+		addMessage: function ($field, containerClass, errors, key, feedbackClass, nested) {
 			$field.closest('.form-group').length || $field.closest('td').addClass('form-group');
 
 			// Replace the 'title' attribute, and add the 'data-error-property' corresponding to the JSON property
 			// error
 			var $group = $field.closest('.form-group');
-			var error = validationManager.deserialize(errors);
+			var error = (nested ? nested + ': ' : '') + validationManager.deserialize(errors);
 			if (error) {
 				if ($group.attr('data-error-property')) {
 					$group.attr('title', $group.attr('title') + ', ' + error);
