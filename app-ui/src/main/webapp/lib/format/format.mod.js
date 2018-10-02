@@ -38,43 +38,41 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		formatUnit: function (bytes, digits, sizes, unit, pow, format, clazz) {
 			bytes = (Math.round(bytes * pow) / pow) || 0;
 			digits = Math.max(digits || 3, 2);
-			if (bytes) {
-				var s = sizes;
-				var e = Math.max(0, Math.floor(Math.log(bytes) / Math.log(pow)));
-				var decimals;
-				var value;
-				if (e <= 1 && bytes < 10 * pow) { 
-					// No need to format
-					decimals = 0;
-					e = 0;
-					value = bytes;
+			var s = sizes;
+			var e = Math.max(0, Math.floor(Math.log(bytes) / Math.log(pow)));
+			var decimals;
+			var value;
+			if (e <= 1 && bytes < 10 * pow) { 
+				// No need to format
+				decimals = 0;
+				e = 0;
+				value = bytes;
+			} else {
+				value = bytes / Math.pow(pow, e);
+				if (value >= 100 && digits < 3) {
+					// Need to shift to the upper power
+					value /= 1024;
+					e++;
+					decimals = 2;
+				} else if (value >= 100) {
+					decimals = digits - 3;
+				} else if (value >= 10) {
+					decimals = digits - 2;
 				} else {
-					value = bytes / Math.pow(pow, e);
-					if (value >= 100 && digits < 3) {
-						// Need to shift to the upper power
-						value /= 1024;
-						e++;
-						decimals = 2;
-					} else if (value >= 100) {
-						decimals = digits - 3;
-					} else if (value >= 10) {
-						decimals = digits - 2;
-					} else {
-						decimals = digits - 1;
-					}
+					decimals = digits - 1;
 				}
-				value = value.toFixed(decimals).replace(decimals === 1 ? /\.0/ : /\.00/, '');
-				if (typeof format === 'function') {
-					format(value, sizes[e], unit);
-				} else {
-					return Handlebars.compile(format)({
-						value : value,
-						weight: sizes[e],
-						unit: unit,
-						preUnit: clazz ? '<span class="' + clazz +'">' : '',
-						postUnit: clazz ? '</span>' : '',
-					});
-				}
+			}
+			value = value.toFixed(decimals).replace(decimals === 1 ? /\.0/ : /\.00/, '');
+			if (typeof format === 'function') {
+				format(value, sizes[e], unit);
+			} else {
+				return Handlebars.compile(format)({
+					value : value,
+					weight: sizes[e],
+					unit: unit,
+					preUnit: clazz ? '<span class="' + clazz +'">' : '',
+					postUnit: clazz ? '</span>' : '',
+				});
 			}
 			return '';
 		},
