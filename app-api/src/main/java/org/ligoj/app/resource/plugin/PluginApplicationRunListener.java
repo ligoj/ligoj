@@ -29,6 +29,6 @@ public class PluginApplicationRunListener extends org.ligoj.bootstrap.resource.s
 
 	@Override
 	protected void replaceClassLoader() throws IOException {
-		Thread.currentThread().setContextClassLoader(new PluginsClassLoader());
+		Thread.currentThread().setContextClassLoader(new LigojPluginsClassLoader());
 	}
 }

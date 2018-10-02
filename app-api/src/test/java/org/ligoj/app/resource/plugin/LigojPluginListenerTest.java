@@ -200,14 +200,14 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	public void getPluginClassLoader() {
-		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
+		final LigojPluginsClassLoader pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
 		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(resource.getPluginClassLoader());
 		}
 	}
 
 	private LigojPluginListener newPluginResourceInstall() {
-		final PluginsClassLoader pluginsClassLoader = Mockito.mock(PluginsClassLoader.class);
+		final LigojPluginsClassLoader pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
 		final Path directory = Mockito.mock(Path.class);
 		Mockito.when(pluginsClassLoader.getHomeDirectory()).thenReturn(Paths.get(USER_HOME_DIRECTORY));
 		Mockito.when(directory.resolve(ArgumentMatchers.anyString()))
@@ -216,7 +216,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(directory);
 		final LigojPluginListener pluginResource = new LigojPluginListener() {
 			@Override
-			protected PluginsClassLoader getPluginClassLoader() {
+			protected LigojPluginsClassLoader getPluginClassLoader() {
 				return pluginsClassLoader;
 			}
 

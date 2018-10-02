@@ -66,8 +66,8 @@ public class LigojPluginListener implements PluginListener {
 	 *
 	 * @return The current plug-in class loader.
 	 */
-	protected PluginsClassLoader getPluginClassLoader() {
-		return PluginsClassLoader.getInstance();
+	protected LigojPluginsClassLoader getPluginClassLoader() {
+		return LigojPluginsClassLoader.getInstance();
 	}
 
 	/**

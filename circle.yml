@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/circleci-feature9
     docker:
-      - image: maven:3.5.3-jdk-9-slim
+      - image: maven:3.5.4-jdk-10-slim
     steps:
       - checkout
       - restore_cache:
