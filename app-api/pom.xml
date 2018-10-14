@@ -159,18 +159,6 @@
 			<version>[0.0.10,)</version>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-prov-azure</artifactId>
-			<version>1.2.10-SNAPSHOT</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-scm-git</artifactId>
-			<version>1.0.6-SNAPSHOT</version>
-			<scope>runtime</scope>
-		</dependency>
 	</dependencies>
 	<build>
 		<pluginManagement>
