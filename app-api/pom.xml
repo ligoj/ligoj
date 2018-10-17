@@ -23,6 +23,9 @@
 		<api.version>3.1.1</api.version>
 		<swagger.version>3.17.1</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
+		<spring-security.version>5.1.1.RELEASE</spring-security.version>
+		<spring.version>5.1.1.RELEASE</spring.version>
+		<spring-data.version>2.1.1.RELEASE</spring-data.version>
 		<resource.delimiter>@</resource.delimiter>
 	</properties>
 
@@ -32,6 +35,11 @@
 				<groupId>javax.xml.ws</groupId>
 				<artifactId>jaxws-api</artifactId>
 				<version>${jaxws.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-crypto</artifactId>
+				<version>${spring-security.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
