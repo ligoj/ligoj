@@ -111,7 +111,7 @@
 		<dependency>
 			<groupId>org.ligoj.bootstrap</groupId>
 			<artifactId>bootstrap-plugin</artifactId>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ligoj.api</groupId>
