@@ -677,6 +677,19 @@ img.nav-icon {
 		width: 20px;
 	}
 }
+@media (max-width: 1023px) {
+	table.dataTable thead>tr>th.icon-md, .icon-md {
+		padding-left: 0;
+	}
+
+	table.dataTable thead>tr>th.sorting.icon-md {
+		padding-right: 15px;
+	}
+
+	.icon-md {
+		width: 20px;
+	}
+}
 .icon {
 	width: 16px;
 }
@@ -686,7 +699,7 @@ img.nav-icon {
 .icon-x3 {
 	width: 48px;
 }
-.icon-xs .fa, .icon-xs .fas, .icon-xs .far,.icon-xs .fab {
+.icon-xs .fa, .icon-xs .fas, .icon-xs .far,.icon-xs .fab, .icon-md .fa, .icon-md .fas, .icon-md .far, .icon-md .fab, .icon-sm .fa, .icon-sm .fas, .icon-sm .far, .icon-sm .fab {
 	width: 16px;
 }
 
