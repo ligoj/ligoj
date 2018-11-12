@@ -22,7 +22,7 @@
 	</scm>
 	<properties>
 		<api.version>3.1.1</api.version>
-		<swagger.version>3.17.1</swagger.version>
+		<swagger.version>3.19.5</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
 		<spring-security.version>5.1.1.RELEASE</spring-security.version>
 		<spring.version>5.1.1.RELEASE</spring.version>
