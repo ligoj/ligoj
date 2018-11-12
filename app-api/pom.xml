@@ -25,7 +25,7 @@
 		<swagger.version>3.19.5</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
 		<spring-security.version>5.1.1.RELEASE</spring-security.version>
-		<spring.version>5.1.1.RELEASE</spring.version>
+		<spring.version>5.1.2.RELEASE</spring.version>
 		<spring-data.version>2.1.2.RELEASE</spring-data.version>
 		<spring-boot.version>2.1.0.RELEASE</spring-boot.version>
 		<resource.delimiter>@</resource.delimiter>
