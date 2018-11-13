@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.util.thread.ThreadClassLoaderScope;

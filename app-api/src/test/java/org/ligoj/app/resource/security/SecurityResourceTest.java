@@ -5,7 +5,7 @@ package org.ligoj.app.resource.security;
 
 import java.util.Collections;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
