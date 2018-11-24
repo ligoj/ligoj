@@ -80,7 +80,7 @@
 	    "clipboard": "2.0.0",
 	    "handlebars": "4.0.11",
 	    "select2": "3.5.4",
-	    "datatables": "1.10.16",
+	    "datatables": "1.10.18",
 	    "datatable-tabletools": "2.2.20",
 	    "requirejs-cssloader": "2.2.20",
 	    "requirejs-domready": "2.0.1",
@@ -245,8 +245,8 @@
 		"name": "DataTables",
 		"url": "http://datatables.net/ref",
 		"sources": "https://github.com/DataTables/DataTables",
-		"version": "1.10.16",
-		"lastChecked": "2017-09-30"
+		"version": "1.10.18",
+		"lastChecked": "2018-11-24"
 	}, {
 		"name": "TableTools",
 		"url": "http://datatables.net/download/",
