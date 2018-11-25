@@ -2,7 +2,7 @@
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
 define([
-	'jquery', 'cascade', 'i18n!datatables/nls/messages', 'datatables.net-buttons-bs', 'datatables.net-filters', 'datatables.net-edit'
+	'jquery', 'cascade', 'i18n!datatables/nls/messages', 'datatables.net-buttons-bs', 'datatables.net-filters', 'datatables.net-edit', 'datatables.net-buttons-colvis'
 ], function ($, $cascade, dataTablesMessages) {
 	var DataTable = $.fn.dataTable;
 	$.extend(DataTable.defaults.oLanguage, dataTablesMessages);

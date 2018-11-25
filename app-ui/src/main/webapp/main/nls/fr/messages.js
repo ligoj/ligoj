@@ -95,6 +95,7 @@ define({
 	'locked-details': '<i class="fas fa-lock"></i> Verrouillé depuis {{[0]}} par {{[1]}}',
 	'isolated-details': '<i class="fas fa-sign-out"></i> Est également isolé de la société {{this}}',
 	'low-resolution': 'Résolution actuelle non adaptée pour la meilleure expérience, utilisez un appareil plus large',
+	'restore-visibility': 'Restaurer'
 	'menu': {
 		home: 'Accueil',
 		api: 'Api',

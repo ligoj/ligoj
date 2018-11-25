@@ -81,7 +81,8 @@
 	    "handlebars": "4.0.11",
 	    "select2": "3.5.4",
 	    "datatables": "1.10.18",
-	    "datatable-buttons": "1.5.4",
+	    "datatables-buttons": "1.5.4",
+	    "datatables-colvis": "1.5.4",
 	    "requirejs-cssloader": "2.2.20",
 	    "requirejs-domready": "2.0.1",
 	    "requirejs-i18njs": "2.0.6",
@@ -250,6 +251,12 @@
 	}, {
 		"name": "DataTables Buttons",
 		"url": "https://datatables.net/extensions/buttons/",
+		"sources": "https://github.com/DataTables/Buttons",
+		"version": "1.5.4",
+		"lastChecked": "2018-11-24"
+	}, {
+		"name": "DataTables Buttons Colvis",
+		"url": "https://datatables.net/reference/button/colvis/",
 		"sources": "https://github.com/DataTables/Buttons",
 		"version": "1.5.4",
 		"lastChecked": "2018-11-24"

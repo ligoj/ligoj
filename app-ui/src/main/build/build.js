@@ -36,6 +36,7 @@
 		'datatables.net-bs': 'datatables/dataTables.bootstrap',
 		'datatables.net-buttons': 'datatables/dataTables.buttons',
 		'datatables.net-buttons-bs': 'datatables/buttons.bootstrap',
+		'datatables.net-buttons-colvis': 'datatables/buttons.colVis',
 		'datatables.net-edit': 'datatables/datatables.edit',
 		'datatables.net-filters': 'datatables/datatables.filters',
 		'datepicker.core': 'datepicker/bootstrap-datepicker',
