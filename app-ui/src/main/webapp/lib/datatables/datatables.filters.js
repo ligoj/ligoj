@@ -56,7 +56,7 @@ define([
 					op,
 					value = $input.val();
 				if (value !== undefined && value !== null && value !== '') {
-					field = $input.closest('[id]').attr('id').toProperty();
+					field = self.toProperty($input.closest('[id]').attr('id'));
 					if (mapping && (typeof mapping[field]) === 'function') {
 						// A manual mapping is defined
 						mapping[field](masterFilter, value, self);
@@ -91,7 +91,7 @@ define([
 					} else if ($input.parent().is('.input-daterange')) {
 						// Date range
 						op = $input.index() ? 'lte' : 'gte';
-						field = $input.parent().is('[id]') ? $input.parent().attr('id').toProperty() : field;
+						field = $input.parent().is('[id]') ? self.toProperty($input.parent().attr('id')) : field;
 						value = moment(value, formatManager.messages.shortdateMomentJs)[$input.index() ? 'endOf' : 'startOf']('day').valueOf();
 					} else {
 						// Textual value
@@ -100,6 +100,15 @@ define([
 					self.addFilter(masterFilter, field, op, value);
 				}
 			});
+		},
+		
+		/**
+		 * Function transforming "sample-property" to "sampleProperty"
+		 */
+		toProperty: function () {
+			return this.replace(/(?:-|\s)\S/g, function (a) {
+				return a.toUpperCase();
+			}).replace(/[\-\s]/g, '');
 		},
 
 		/**
@@ -112,7 +121,7 @@ define([
 					op,
 					id = $input.attr('id');
 				if (id) {
-					id = id.toProperty();
+					id = self.toProperty(id);
 					if ($input.data('select2')) {
 						$input.select2('data', data[id] || null);
 					} else if ($input.is('select')) {

@@ -97,13 +97,6 @@ function _(id) {
 		});
 	};
 
-	// Function transforming "sample-property" to "sampleProperty"
-	String.prototype.toProperty = function () {
-		return this.replace(/(?:-|\s)\S/g, function (a) {
-			return a.toUpperCase();
-		}).replace(/[\-\s]/g, '');
-	};
-
 	// Function to get the Max value in Array
 	Array.max = function (array) {
 		return Math.max.apply(Math, array);

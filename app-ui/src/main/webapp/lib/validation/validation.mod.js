@@ -180,7 +180,7 @@ define([
 			var $that = validationManager;
 			var mappedKey = $that.mapping[key] || $that.mapping.DEFAULT || key;
 			var fields = mappedKey.split(',');
-			if (fields.length == 0) {
+			if (fields.length === 0) {
 				fields = mappedKey.split(';');
 			}
 
