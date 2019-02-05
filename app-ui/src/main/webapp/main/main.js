@@ -429,29 +429,29 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Escape HTML content. From "<b>Value'&amp;"</b>" gives "&lt;b&gt;Value&#39;&amp;amp;&quot;&gt;/b&gt;"
 		 * @param {string} str  Markup string to protect.
-		 * @return {string}     Protected string.
+		 * @return {string}	 Protected string.
 		 */
 		htmlEscape: function(str) {
-		    return str
-		        .replace(/&/g, '&amp;')
-		        .replace(/"/g, '&quot;')
-		        .replace(/'/g, '&#39;')
-		        .replace(/</g, '&lt;')
-		        .replace(/>/g, '&gt;');
+			return str
+				.replace(/&/g, '&amp;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#39;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;');
 		},
 
 		/**
 		 * Oposite function of "htmlEscape"
 		 * @param {string} str  Protected markup string to retrieve.
-		 * @return {string}     Unprotected string.
+		 * @return {string}	 Unprotected string.
 		 */
 		htmlUnescape: function(str){
-		    return str
-		        .replace(/&quot;/g, '"')
-		        .replace(/&#39;/g, "'")
-		        .replace(/&lt;/g, '<')
-		        .replace(/&gt;/g, '>')
-		        .replace(/&amp;/g, '&');
+			return str
+				.replace(/&quot;/g, '"')
+				.replace(/&#39;/g, "'")
+				.replace(/&lt;/g, '<')
+				.replace(/&gt;/g, '>')
+				.replace(/&amp;/g, '&');
 		}
 	};
 	return current;
