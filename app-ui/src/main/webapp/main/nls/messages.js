@@ -3,8 +3,8 @@
  */
 define({
 	root: {
-		'title': 'Gfi SaaS',
-		'brand': 'Gfi',
+		'title': 'Ligoj',
+		'brand': 'Kloudy',
 		'firstName': 'Firstname',
 		'lastName': 'Lastname',
 		'name': 'Name',

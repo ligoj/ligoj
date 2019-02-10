@@ -2,7 +2,7 @@
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
 define({
-	"title" : "Gfi Delivery Management",
+	"title" : "Ligoj",
 	"username" : "Identifiant",
 	"password" : "Mot de passe",
 	"new-password" : "Nouveau mot de passe",

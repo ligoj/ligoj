@@ -1295,12 +1295,20 @@ footer .pull-center {
 }
 
 .footer a.brand {
-	background-image: url(../img/brand.png);
+	background-image: url(../img/brand-white.png);
 	background-size: cover;
 	color: transparent;
-	height: 28px;
-	width: 42px;
+	height: 18px;
+	width: 18px;
 	display: inline-block;
+    top: 1px;
+    position: relative;
+}
+.footer a.brand:hover {
+	background-image: url(../img/brand.png);
+}
+.footer .heart:hover {
+	color: red;
 }
 
 .ie-old p {

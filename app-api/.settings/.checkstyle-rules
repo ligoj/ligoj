@@ -7,7 +7,7 @@
 <!--
     Checkstyle-Configuration: Maven Local
     Description: 
-Checkstyle configuration from GFI
+Checkstyle configuration
 -->
 <module name="Checker">
   <property name="severity" value="warning"/>

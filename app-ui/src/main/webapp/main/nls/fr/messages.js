@@ -2,8 +2,8 @@
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
 define({
-	'title': 'Gfi SaaS',
-	'brand': 'Gfi',
+	'title': 'Ligoj',
+	'brand': 'Kloudy',
 	'firstName': 'Prénom',
 	'lastName': 'Nom',
 	'name': 'Nom',

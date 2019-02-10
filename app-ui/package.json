@@ -1,8 +1,8 @@
 {
 	"name": "Ligoj",
 	"description": "Ligoj Administration Portal",
-	"author": "gfi.fr",
-	"keywords": ["bootstrap", "gstack", "SaaS"],
+	"author": "kloudy.io",
+	"keywords": ["bootstrap", "ligoj"],
 	"version": "1.8.0",
 	"homepage": "https://github.com/ligoj/ligoj",
 	"engines": {

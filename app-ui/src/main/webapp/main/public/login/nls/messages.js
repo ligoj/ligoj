@@ -3,7 +3,7 @@
  */
 define({
 	"root" : {
-		"title" : "Gfi Delivery Management",
+		"title" : "Ligoj",
 		"username" : "User name",
 		"password" : "Password",
 		"new-password" : "New password",
