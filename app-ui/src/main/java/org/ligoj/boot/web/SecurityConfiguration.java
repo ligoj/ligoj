@@ -70,7 +70,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				// Public static resources
 				.regexMatchers(HttpMethod.GET, "/(\\d+|themes|lib|dist|login|main/public).*").permitAll()
 
-				.antMatchers("/rest/redirect", "/rest/security/login", "/captcha.png").permitAll().antMatchers("/rest/security/login").anonymous()
+				.antMatchers("/rest/redirect", "/rest/security/login", "/captcha.png").permitAll()
 				.antMatchers("/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()
 
 				// Everything else is authenticated
