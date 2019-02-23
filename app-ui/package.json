@@ -70,7 +70,7 @@
 	"dependencies": {
 	    "requirejs": "2.3.5",
 	    "d3": ">=4",
-	    "bootstrap": "3.3.7",
+	    "bootstrap": "3.4.1",
 	    "bootstrap-datepicker": "3.3.6",
 	    "bootstrap-timepicker": "3.3.6",
 	    "bootstrap-daterangepicker": "3.3.6",
@@ -164,9 +164,9 @@
 		"name": "Bootstrap",
 		"url": "http://twitter.github.com/bootstrap/",
 		"sources": "https://github.com/twitter/bootstrap",
-		"version": "3.3.7",
-		"lastVersion": "3.3.7",
-		"lastChecked": "2017-09-30",
+		"version": "3.4.1",
+		"lastVersion": "3.4.1",
+		"lastChecked": "2019-02-23",
 		"known-issues": ["#19192"]
 	}, {
 		"name": "Bootstrap Jasny",
