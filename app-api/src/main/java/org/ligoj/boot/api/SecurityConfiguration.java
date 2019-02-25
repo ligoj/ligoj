@@ -59,6 +59,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.addFilterAfter(authorizingFilter(), SwitchUserFilter.class);
 	}
 
+	@Override
+	public void configure(WebSecurity web) throws Exception {
+		web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
+	}
+
 	/**
 	 * Configure {@link AuthenticationProvider}
 	 *
@@ -137,10 +142,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final DefaultHttpFirewall firewall = new DefaultHttpFirewall();
 		firewall.setAllowUrlEncodedSlash(true);
 		return firewall;
-	}
-
-	@Override
-	public void configure(WebSecurity web) throws Exception {
-		web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
 	}
 }

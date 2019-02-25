@@ -61,6 +61,47 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private ExtendedSecurityExpressionHandler expressionHandler;
 
+	/**
+	 * A 403 JSON management.
+	 *
+	 * @return A 403 JSON management.
+	 */
+	@Bean
+	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint() {
+		final RedirectAuthenticationEntryPoint ep = new RedirectAuthenticationEntryPoint("/login.html");
+		ep.setRedirectUrls(new HashSet<>(Arrays.asList("/", "index.html", "index-prod.html", "login.html", "login-prod.html")));
+		ep.setRedirectStrategy(getRestFailureStrategy());
+		return ep;
+	}
+
+	@Bean
+	public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+		final DefaultHttpFirewall firewall = new DefaultHttpFirewall();
+		firewall.setAllowUrlEncodedSlash(true);
+		return firewall;
+	}
+
+	/**
+	 * Pre-Authentication provider.
+	 *
+	 * @return Pre-Authentication provider.
+	 * @throws ReflectiveOperationException
+	 *             Unable to build the authentication provider
+	 */
+	@Bean
+	public AbstractAuthenticationProvider authenticationProvider() throws ReflectiveOperationException {
+		final AbstractAuthenticationProvider provider = (AbstractAuthenticationProvider) Class
+				.forName("org.ligoj.app.http.security." + security + "AuthenticationProvider").getConstructors()[0].newInstance();
+		provider.setSsoPostUrl(ssoUrl);
+		provider.setSsoPostContent(ssoContent);
+		return provider;
+	}
+
+	@Bean
+	public ConcurrentSessionFilter concurrentSessionFilter() {
+		return new ConcurrentSessionFilter(sessionRegistry(), new SimpleRedirectSessionInformationExpiredStrategy("/login.html?concurrency"));
+	}
+
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
 		http.authorizeRequests().expressionHandler(expressionHandler)
@@ -90,9 +131,22 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.addFilterAfter(concurrentSessionFilter(), ConcurrentSessionFilter.class);
 	}
 
-	@Bean
-	public ConcurrentSessionFilter concurrentSessionFilter() {
-		return new ConcurrentSessionFilter(sessionRegistry(), new SimpleRedirectSessionInformationExpiredStrategy("/login.html?concurrency"));
+	@Override
+	public void configure(WebSecurity web) {
+		web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
+	}
+
+	/**
+	 * Configure {@link AuthenticationProvider}
+	 *
+	 * @param auth
+	 *            The builder.
+	 * @throws ReflectiveOperationException
+	 *             Unable to build the authentication provider
+	 */
+	@Autowired
+	public void configureGlobal(final AuthenticationManagerBuilder auth) throws ReflectiveOperationException {
+		auth.eraseCredentials(true).authenticationProvider(authenticationProvider());
 	}
 
 	@Bean
@@ -155,63 +209,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return new org.springframework.security.core.session.SessionRegistryImpl();
 	}
 
-	/**
-	 * Configure {@link AuthenticationProvider}
-	 *
-	 * @param auth
-	 *            The builder.
-	 * @throws ReflectiveOperationException
-	 *             Unable to build the authentication provider
-	 */
-	@Autowired
-	public void configureGlobal(final AuthenticationManagerBuilder auth) throws ReflectiveOperationException {
-		auth.eraseCredentials(true).authenticationProvider(authenticationProvider());
-	}
-
-	/**
-	 * A 403 JSON management.
-	 *
-	 * @return A 403 JSON management.
-	 */
-	@Bean
-	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint() {
-		final RedirectAuthenticationEntryPoint ep = new RedirectAuthenticationEntryPoint("/login.html");
-		ep.setRedirectUrls(new HashSet<>(Arrays.asList("/", "index.html", "index-prod.html", "login.html", "login-prod.html")));
-		ep.setRedirectStrategy(getRestFailureStrategy());
-		return ep;
-	}
-
-	/**
-	 * Pre-Authentication provider.
-	 *
-	 * @return Pre-Authentication provider.
-	 * @throws ReflectiveOperationException
-	 *             Unable to build the authentication provider
-	 */
-	@Bean
-	public AbstractAuthenticationProvider authenticationProvider() throws ReflectiveOperationException {
-		final AbstractAuthenticationProvider provider = (AbstractAuthenticationProvider) Class
-				.forName("org.ligoj.app.http.security." + security + "AuthenticationProvider").getConstructors()[0].newInstance();
-		provider.setSsoPostUrl(ssoUrl);
-		provider.setSsoPostContent(ssoContent);
-		return provider;
-	}
-
 	@Override
 	@Bean
 	public SimpleUserDetailsService userDetailsServiceBean() {
 		return new SimpleUserDetailsService();
-	}
-
-	@Bean
-	public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
-		final DefaultHttpFirewall firewall = new DefaultHttpFirewall();
-		firewall.setAllowUrlEncodedSlash(true);
-		return firewall;
-	}
-
-	@Override
-	public void configure(WebSecurity web) {
-		web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
 	}
 }
