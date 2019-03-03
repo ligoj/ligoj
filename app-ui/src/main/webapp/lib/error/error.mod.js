@@ -2,7 +2,7 @@
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
 define([
-	'i18n!error/nls/error-messages', 'cascade'
+	'i18n!error/nls/error-messages', 'cascade', 'bootstrap.mod'
 ], function (errorMessages, $cascade) {
 	/* jslint regexp: true */
 	var current = {
