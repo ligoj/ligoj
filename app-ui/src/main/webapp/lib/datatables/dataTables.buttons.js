@@ -1148,10 +1148,7 @@ Buttons.defaults = {
 			className: 'dt-button-collection'
 		},
 		button: {
-			// Flash buttons will not work with `<button>` in IE - it has to be `<a>`
-			tag: 'ActiveXObject' in window ?
-				'a' :
-				'button',
+			tag: 'a',
 			className: 'dt-button',
 			active: 'active',
 			disabled: 'disabled'
