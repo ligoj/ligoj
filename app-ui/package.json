@@ -252,14 +252,14 @@
 		"name": "DataTables Buttons",
 		"url": "https://datatables.net/extensions/buttons/",
 		"sources": "https://github.com/DataTables/Buttons",
-		"version": "1.5.4",
-		"lastChecked": "2018-11-24"
+		"version": "1.5.6",
+		"lastChecked": "2019-04-08"
 	}, {
 		"name": "DataTables Buttons Colvis",
 		"url": "https://datatables.net/reference/button/colvis/",
 		"sources": "https://github.com/DataTables/Buttons",
-		"version": "1.5.4",
-		"lastChecked": "2018-11-24"
+		"version": "1.5.6",
+		"lastChecked": "2019-04-08"
 	}, {
 		"name": "Moment.js",
 		"url": "http://momentjs.com/",
