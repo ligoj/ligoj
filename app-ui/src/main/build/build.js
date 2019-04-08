@@ -71,6 +71,7 @@
 	shim : {
 		'bootbox.core': ['bootstrap'],
 		'bootstrap': ['jquery'],
+		'bootstrap.mod': ['form'],
 		'bootstrap-datepicker.core': ['bootstrap'],
 		'bootstrap-material-datetimepicker.core': ['bootstrap', 'moment.mod'],
 		'bootstrap-daterangepicker.core': ['bootstrap'],
