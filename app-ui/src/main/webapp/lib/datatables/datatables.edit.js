@@ -143,7 +143,7 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 		text: $cascade.$messages["new"],
 		className: "btn-raised",
 		target: "#popup",
-		tag: "button",
+		tag: "a",
 		init: function (_i, $button, oConfig) {
 			$button.attr("data-target", oConfig.target).attr("data-toggle", "modal");
 		}
