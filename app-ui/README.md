@@ -129,9 +129,9 @@ log.http                    = info # When "debug", all HTTP queries are logged. 
 
 | Vendor     | Version  | Status  | Notes |
 |------------|----------|---------|-------|
-| Oracle     | 1.8u121+ | REBUILD | You have to rebuild the binary |
-| OpenJDK    | 1.8u121+ | REBUILD | You have to rebuild the binary |
-| Oracle     | 9.0.1+   | OK      | Warning about illegal reflective access [SPR-15859](https://jira.spring.io/browse/SPR-15859) |
-| OpenJDK    | 9.0.1+   | OK      | Warning about illegal reflective access [SPR-15859](https://jira.spring.io/browse/SPR-15859) |
-| Oracle     | 10.0+    | KO      | Waiting for ProjectLombok1.6.21 |
-| OpenJDK    | 10.0 +   | KO      | Waiting for ProjectLombok1.6.21 |
+| Oracle     | 9.0.1+   | OK      | You have to rebuild from the source |
+| OpenJDK    | 9.0.1+   | OK      | You have to rebuild from the source |
+| Oracle     | 10.0+    | KO      |  |
+| OpenJDK    | 10.0 +   | KO      |  |
+| Oracle     | 11.0+    | KO      |  |
+| OpenJDK    | 11.0 +   | KO      |  |
