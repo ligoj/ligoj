@@ -16,7 +16,7 @@ cache:
     - $HOME/.sonar/cache
     - $HOME/.cache
     - $HOME/maven
-jdk: openjdk10
+jdk: openjdk11
 env: 
   - TARGET=BUILD
 branches:

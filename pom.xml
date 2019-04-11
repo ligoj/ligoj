@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.ligoj.parent</groupId>
 		<artifactId>project</artifactId>
-		<version>11.0.1</version>
+		<version>11.0.5</version>
 		<relativePath />
 	</parent>
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>root</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.1-SNAPSHOT</version>
 	<name>Ligoj - Application</name>
 	<description>Ligoj - Landing page of your team</description>
 	<packaging>pom</packaging>
