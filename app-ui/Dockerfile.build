@@ -1,7 +1,10 @@
 FROM maven:3.6-jdk-11-slim as builder
 RUN apt-get update && \
   rm -rf /var/lib/apt/lists/* && \
-  apt-get install nodejs npm && \
+  curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+  apt-get install -y nodejs && \
+  npm --version && \
+  node --version && \
   npm install clean-css-cli -g
 WORKDIR /build/
 ADD . .
