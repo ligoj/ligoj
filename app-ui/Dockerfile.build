@@ -1,0 +1,48 @@
+FROM maven:3.6-jdk-11-slim as builder
+RUN apt-get update && \
+  rm -rf /var/lib/apt/lists/* && \
+  apt-get install nodejs npm && \
+  npm install clean-css-cli -g
+WORKDIR /build/
+ADD . .
+RUN mvn package -B -q -Dmaven.test.skip=true -Pminify
+
+FROM openjdk:11-jre
+LABEL maintainer "fabrice.daugan@gmail.com"
+
+RUN set -xe \
+  apt-get update && \
+  apt-get update --fix-missing
+
+# ARGS (build)
+ARG ARTIFACT_ID="app-ui"
+ARG SERVER_HOME="/usr/local/ligoj"
+COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
+
+WORKDIR "${SERVER_HOME}"
+
+# ENV (run)
+ENV ENDPOINT="http://ligoj-api:8081/ligoj-api" \
+    CONTEXT_URL="/ligoj" \
+    LIGOJ_HOME=/home/ligoj \
+    JAVA_MEMORY="-Xms128M -Xmx128M" \
+    SERVER_PORT="8080" \
+    CUSTOM_OPTS="" \
+    CRYPTO="-Dapp.crypto.password=public" \
+    SERVER_HOME="${SERVER_HOME}" \
+    ARTIFACT_ID="${ARTIFACT_ID}" \
+    JAVA_OPTIONS="-Dsecurity=Rest"
+
+EXPOSE ${SERVER_PORT}
+CMD mkdir -p "$LIGOJ_HOME" && \
+  java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
+    -Dligoj.endpoint="${ENDPOINT}" \
+    -Djavax.net.ssl.trustStorePassword=changeit \
+    -Dserver.servlet.context-path="${CONTEXT_URL}" \
+    -Dserver.port="${SERVER_PORT}" \
+    -Djava.net.preferIPv4Stack=true \
+    -Djavax.net.ssl.trustStorePassword=changeit \
+    -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
+
+HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
+CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/login.html || exit 1
