@@ -111,6 +111,7 @@ define({
 		'SlaBound': 'Les bornes de SLA ne doivent pas être ignorées',
 		'xls-version': 'Seuls les documents Excel 97-2003 sont supportés',
 		'bad-file-extension': 'Les fichiers exécutables ne sont pas autorisés',
-		'csv-extension': 'Seuls les fichiers csv sont supportés'
+		'csv-extension': 'Seuls les fichiers csv sont supportés',
+        'csv-invalid-entry' : 'Entrée invalide "{{name}}"'
 	}
 });
