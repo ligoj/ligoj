@@ -2,7 +2,7 @@
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
 define([
-	'jquery', 'cascade', 'bootstrap'
+	'jquery', 'cascade', 'bootstrap', 'form'
 ], function ($, $cascade) {
 	// Global handler for better bootstrap implicit experience
 	$('body').popover({selector: '[data-toggle="popover"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body'});
