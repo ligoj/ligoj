@@ -13,6 +13,7 @@ define({
 	'add': 'Ajouter',
 	'close': 'Fermer',
 	'cancel': 'Annuler',
+	'configure': 'Configurer',
 	'back': 'Retour',
 	'save': 'Enregistrer',
 	'remove': 'Retirer',

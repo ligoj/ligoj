@@ -19,6 +19,7 @@ define({
 		'remove': 'Remove',
 		'new': 'New',
 		'create': 'Create',
+		'configure': 'Configure',
 		'delete': 'Delete',
 		'download': 'Download',
 		'validate': 'Validate',
