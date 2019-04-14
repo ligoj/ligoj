@@ -18,7 +18,7 @@
 					"type": "Console",
 					"name": "STDOUT",
 					"PatternLayout": {
-						"pattern": "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%xEx{filters(com.sun.proxy,org.springframework.data.projection,org.springframework.dao.support,org.springframework.transaction,java.lang.Thread,org.apache.cxf,org.eclipse.jetty,org.springframework.web,javax.servlet,org.springframework.aop,org.junit,org.apache.maven,sun.reflect,java.lang.reflect,org.springframework.cglib,org.springframework.security,org.springframework.boot.actuate,jdk.internal.reflect,org.springframework.cache.jcache.interceptor,java.util.stream)}%n"
+						"pattern": "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%xEx{filters(com.sun.proxy,org.springframework.data.projection,org.springframework.dao.support,org.springframework.transaction,java.lang.Thread,org.apache.cxf,org.eclipse.jetty,org.springframework.web,javax.servlet,org.springframework.aop,org.junit,org.apache.maven,sun.reflect,java.lang.reflect,org.springframework.cglib,org.springframework.security,org.springframework.boot.actuate,jdk.internal.reflect,org.springframework.cache.jcache.interceptor,java.util.stream,org.springframework.data.repository.core.support,org.springframework.data.jpa.repository.support,java.util.Iterator.forEachRemaining,java.util.Spliterators$IteratorSpliterator)}%n"
 					}
 				}, {
 					"type": "Console",
