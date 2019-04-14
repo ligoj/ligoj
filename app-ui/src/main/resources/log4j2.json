@@ -50,11 +50,18 @@
 						"ref": "STDOUT"
 					}
 				}, {
-					"name": "org.eclipse.jetty.server.Server",
-					"level": "debug",
+					"name": "org.eclipse.jetty.server.HttpChannel",
+					"level": "${sys:log4j2.jetty.http.level:-warn}",
 					"additivity": "false",
 					"AppenderRef": {
-						"ref": "STDOUT"
+						"ref": "STDOUT_VERBOSE"
+					}
+				}, {
+					"name": "org.eclipse.jetty.server.Server",
+					"level": "${sys:log4j2.jetty.server.level:-debug}",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT_VERBOSE"
 					}
 				}, {
 					"name": "org.eclipse.jetty.webapp.StandardDescriptorProcessor",
@@ -66,7 +73,7 @@
 				}
 			],
 			"root": {
-				"level": "info",
+				"level": "${sys:log4j2.level:-info}",
 				"AppenderRef": {
 					"ref": "STDOUT"
 				}
