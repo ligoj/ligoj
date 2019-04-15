@@ -25,6 +25,7 @@
 		<swagger.version>3.20.5</swagger.version>
 		<jaxws.version>2.3.0</jaxws.version>
 		<resource.delimiter>@</resource.delimiter>
+		<spring-security-rsa>1.0.8.RELEASE</spring-security-rsa>
 	</properties>
 
 	<dependencyManagement>
