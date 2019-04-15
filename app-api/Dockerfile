@@ -36,28 +36,32 @@ ENV CONTEXT_URL="/ligoj-api" \
 EXPOSE ${SERVER_PORT}
 CMD mkdir -p "$LIGOJ_HOME" && \
   java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
-    --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
-    --add-opens java.base/jdk.internal.module=ALL-UNNAMED \
-    --add-opens java.base/jdk.internal.ref=ALL-UNNAMED \
-    --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED \
-    --add-opens java.base/jdk.internal.ref=ALL-UNNAMED \
-    --add-opens java.base/jdk.internal.perf=ALL-UNNAMED \
-    --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED \
-    --add-opens java.base/java.lang=ALL-UNNAMED \
+	--add-modules java.se \
+	--add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
+	--add-opens java.base/jdk.internal.module=ALL-UNNAMED \
+	--add-opens java.base/jdk.internal.ref=ALL-UNNAMED \
+	--add-opens java.base/jdk.internal.perf=ALL-UNNAMED \
+	--add-opens java.base/jdk.internal.reflect=ALL-UNNAMED \ 
+	--add-opens java.base/jdk.internal.math=ALL-UNNAMED \
+	--add-opens java.base/java.lang=ALL-UNNAMED \
+	--add-opens java.base/java.nio=ALL-UNNAMED \
+	--add-opens java.base/java.lang.module=ALL-UNNAMED 
+	--add-opens java.base/java.lang.invoke=ALL-UNNAMED \
     --add-opens java.base/java.lang.package=ALL-UNNAMED \
-    --add-opens java.base/java.lang.module=ALL-UNNAMED \
-    --add-opens java.base/java.util=ALL-UNNAMED \
-    --add-opens java.base/jdk.internal.math=ALL-UNNAMED \
-    --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED \
-    --add-opens java.xml/javax.xml.catalog=ALL-UNNAMED \
-    --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
-    --add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED \
-    -Djavax.net.ssl.trustStorePassword=changeit \
+	--add-opens java.base/java.util=ALL-UNNAMED \
+	--add-opens java.base/java.util.regex=ALL-UNNAMED \
+	--add-opens java.base/sun.nio.ch=ALL-UNNAMED \
+	--add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED \
+	--add-opens java.xml/jdk.xml.internal=ALL-UNNAMED \
+	--add-opens java.xml/javax.xml.catalog=ALL-UNNAMED \
+	--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
+	--add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED\
     -Dserver.address="${SERVER_HOST}" \
-    -Djava.security.policy="${SERVER_HOME}/ligoj.policy" \
     -Dserver.port="${SERVER_PORT}" \
-    -Djava.net.preferIPv4Stack=true \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
+    -Djavax.net.ssl.trustStorePassword=changeit \
+    -Djava.security.policy="${SERVER_HOME}/ligoj.policy" \
+    -Djava.net.preferIPv4Stack=true \
     -Dligoj.home="${LIGOJ_HOME}" \
     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
