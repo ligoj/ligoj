@@ -21,6 +21,7 @@ import org.springframework.boot.web.server.ErrorPageRegistrar;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.HttpStatus;
@@ -40,8 +41,8 @@ import com.samaxes.filter.CacheFilter;
 @EnableAutoConfiguration
 public class Application extends SpringBootServletInitializer {
 
-	private static final String SERVICE_PASSWORD_RECOVERY = "/rest/service/password/recovery/*";
-	private static final String SERVICE_PASSWORD_RESET = "/rest/service/password/reset/*";
+	private static final String SERVICE_RECOVERY = "/rest/service/password/recovery/*";
+	private static final String SERVICE_RESET = "/rest/service/password/reset/*";
 
 	@Value("${ligoj.endpoint.manage.url:http://localhost:8081/ligoj-api/manage}")
 	private String endpointManagement;
@@ -104,7 +105,8 @@ public class Application extends SpringBootServletInitializer {
 	 *            The servlet mapping URL.
 	 * @return {@link ServletRegistrationBean} with a new registered {@link BackendProxyServlet}.
 	 */
-	private ServletRegistrationBean<BackendProxyServlet> newBackend(final String name, final String proxyToKey, final String prefix, final String... mapping) {
+	private ServletRegistrationBean<BackendProxyServlet> newBackend(final String name, final String proxyToKey, final String prefix,
+			final String... mapping) {
 		final Map<String, String> initParameters = new HashMap<>();
 		initParameters.put("proxyToKey", proxyToKey);
 		initParameters.put("prefix", prefix);
@@ -172,7 +174,7 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public FilterRegistrationBean<DoSFilter> doSFilter() {
 		final FilterRegistrationBean<DoSFilter> registrationBean = new FilterRegistrationBean<>(new DoSFilter());
-		registrationBean.addUrlPatterns(SERVICE_PASSWORD_RESET, SERVICE_PASSWORD_RECOVERY, "/captcha.png");
+		registrationBean.addUrlPatterns(SERVICE_RESET, SERVICE_RECOVERY, "/captcha.png");
 		final Map<String, String> initParameters = new HashMap<>();
 		initParameters.put("maxRequestsPerSec", "6");
 		initParameters.put("delayMs", "-1");
@@ -190,13 +192,14 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public FilterRegistrationBean<CaptchaFilter> captchaFilter() {
 		final FilterRegistrationBean<CaptchaFilter> registrationBean = new FilterRegistrationBean<>(new CaptchaFilter());
-		registrationBean.addUrlPatterns(SERVICE_PASSWORD_RESET, SERVICE_PASSWORD_RECOVERY);
+		registrationBean.addUrlPatterns(SERVICE_RESET, SERVICE_RECOVERY);
 		registrationBean.setOrder(100);
 		return registrationBean;
 	}
 
 	/**
 	 * Fix the system environment from "auto" to the guess value.
+	 * 
 	 * @return The computed web environment.
 	 */
 	protected String getEnvironment() {
