@@ -7,10 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.server.ErrorPageRegistry;
 import org.springframework.util.StringUtils;
@@ -22,9 +23,11 @@ public class ApplicationTest {
 
 	private static String oldCp = System.getProperty("java.class.path");
 
-	@AfterClass
+	@AfterAll
 	public static void resetTestEnv() {
 		System.clearProperty("app-env");
+		System.clearProperty("security.pre-auth-principal");
+		System.clearProperty("security.pre-auth-credentials");
 		if (oldCp == null) {
 			System.clearProperty("java.class.path");
 		} else {
@@ -35,12 +38,21 @@ public class ApplicationTest {
 	@Test
 	public void configClassContext() throws Exception {
 		Application.main(getArgs(getClass().getName()));
+		SpringApplication.exit(Application.lastContext);
 	}
 
 	@Test
 	public void configure() throws Exception {
 		new Application().configure(Mockito.mock(SpringApplicationBuilder.class));
 		new Application().containerCustomizer().registerErrorPages(Mockito.mock(ErrorPageRegistry.class));
+	}
+
+	@Test
+	public void configurePreAuthHeader() throws Exception {
+		System.setProperty("security.pre-auth-principal", "HEADER");
+		System.setProperty("security.pre-auth-credentials", "CREDS");
+		Application.main(getArgs(getClass().getName()));
+		SpringApplication.exit(Application.lastContext);
 	}
 
 	@Test

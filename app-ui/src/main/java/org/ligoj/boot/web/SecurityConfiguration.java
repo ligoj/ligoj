@@ -6,8 +6,10 @@ package org.ligoj.boot.web;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.http.security.AbstractAuthenticationProvider;
 import org.ligoj.app.http.security.DigestAuthenticationFilter;
+import org.ligoj.app.http.security.SilentRequestHeaderAuthenticationFilter;
 import org.ligoj.app.http.security.SimpleUserDetailsService;
 import org.ligoj.bootstrap.http.security.ExtendedSecurityExpressionHandler;
 import org.ligoj.bootstrap.http.security.RedirectAuthenticationEntryPoint;
@@ -28,6 +30,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
@@ -37,6 +41,9 @@ import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.session.SimpleRedirectSessionInformationExpiredStrategy;
 
+/**
+ * Spring Boot security configuration.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
@@ -47,7 +54,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	private int maxSession;
 
 	@Value("${security:Rest}")
-	private String security;
+	private String securityProvider;
+
+	@Value("${security.pre-auth-principal:}")
+	protected String securityPreAuthPrincipal;
+
+	@Value("${security.pre-auth-credentials:}")
+	protected String securityPreAuthCredentials;
 
 	@Value("${sso.url}")
 	private String ssoUrl;
@@ -91,7 +104,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Bean
 	public AbstractAuthenticationProvider authenticationProvider() throws ReflectiveOperationException {
 		final AbstractAuthenticationProvider provider = (AbstractAuthenticationProvider) Class
-				.forName("org.ligoj.app.http.security." + security + "AuthenticationProvider").getConstructors()[0].newInstance();
+				.forName("org.ligoj.app.http.security." + securityProvider + "AuthenticationProvider").getConstructors()[0].newInstance();
 		provider.setSsoPostUrl(ssoUrl);
 		provider.setSsoPostContent(ssoContent);
 		return provider;
@@ -104,12 +117,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
-		http.authorizeRequests().expressionHandler(expressionHandler)
+		final HttpSecurity sec = http.authorizeRequests().expressionHandler(expressionHandler)
 				// Login
 				.antMatchers(HttpMethod.POST, "/login").permitAll()
 
 				// Public static resources
-				.regexMatchers(HttpMethod.GET, "/(\\d+|themes|lib|dist|login|main/public).*").permitAll()
+				.regexMatchers(HttpMethod.GET, "/([0-9]{3}|themes|lib|dist|login|main/public).*").permitAll()
 
 				.antMatchers("/rest/redirect", "/rest/security/login", "/captcha.png").permitAll()
 				.antMatchers("/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()
@@ -129,6 +142,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				// Security filters
 				.addFilterAt(digestAuthenticationFilter(), org.springframework.security.web.authentication.www.DigestAuthenticationFilter.class)
 				.addFilterAfter(concurrentSessionFilter(), ConcurrentSessionFilter.class);
+
+		// Activate a pre-auth filter if configured header
+		if (StringUtils.isNoneBlank(securityPreAuthPrincipal)) {
+			final RequestHeaderAuthenticationFilter bean = new SilentRequestHeaderAuthenticationFilter();
+			bean.setPrincipalRequestHeader(securityPreAuthPrincipal);
+			bean.setCredentialsRequestHeader(securityPreAuthCredentials);
+			bean.setAuthenticationManager(authenticationManager());
+			sec.addFilterAt(bean, AbstractPreAuthenticatedProcessingFilter.class);
+		}
 	}
 
 	@Override

@@ -56,6 +56,11 @@ public class Application extends SpringBootServletInitializer {
 	@Value("${app-env:auto}")
 	protected String environmentCode;
 
+	/**
+	 * The last loaded context.
+	 */
+	protected static ConfigurableApplicationContext lastContext;
+
 	@Override
 	protected SpringApplicationBuilder configure(final SpringApplicationBuilder application) {
 		return application.sources(Application.class);
@@ -68,7 +73,7 @@ public class Application extends SpringBootServletInitializer {
 	 *            Application arguments.
 	 */
 	public static void main(final String[] args) {
-		SpringApplication.run(Application.class, args);
+		lastContext = SpringApplication.run(Application.class, args);
 	}
 
 	@Bean
