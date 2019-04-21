@@ -127,11 +127,11 @@ log.http                    = info # When "debug", all HTTP queries are logged. 
 
 ### JSE
 
-| Vendor     | Version  | Status  | Notes |
+| Vendor     | Release  | Status  | Notes |
 |------------|----------|---------|-------|
-| Oracle     | 9.0.1+   | OK      | You have to rebuild from the source |
-| OpenJDK    | 9.0.1+   | OK      | You have to rebuild from the source |
-| Oracle     | 10.0+    | KO      |  |
-| OpenJDK    | 10.0 +   | KO      |  |
-| Oracle     | 11.0+    | KO      |  |
-| OpenJDK    | 11.0 +   | KO      |  |
+| Oracle     | 9        | OK      | You have to rebuild from the source |
+| OpenJDK    | 9        | OK      | You have to rebuild from the source |
+| Oracle     | 10       | OK      | You have to rebuild from the source |
+| OpenJDK    | 10       | OK      | You have to rebuild from the source |
+| Oracle     | 11       | OK      |  |
+| OpenJDK    | 11       | OK      |  |
