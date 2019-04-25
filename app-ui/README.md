@@ -99,6 +99,8 @@ docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj/ligoj-ui:2
 
 ## Relevant variables
 
+Docker environment variables given used to Java process
+
 ```
 CONTEXT      : Context, without starting '/'
 SERVER_HOST  : 0.0.0.0
@@ -126,6 +128,8 @@ log.http                    = info # When "debug", all HTTP queries are logged. 
 ## Compatibilities
 
 ### JSE
+
+The source compatibility is 9 to 11.
 
 | Vendor     | Release  | Status  | Notes |
 |------------|----------|---------|-------|
