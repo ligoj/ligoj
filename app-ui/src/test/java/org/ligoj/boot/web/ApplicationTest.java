@@ -28,6 +28,7 @@ public class ApplicationTest {
 		System.clearProperty("app-env");
 		System.clearProperty("security.pre-auth-principal");
 		System.clearProperty("security.pre-auth-credentials");
+		System.clearProperty("security.pre-auth-logout");
 		if (oldCp == null) {
 			System.clearProperty("java.class.path");
 		} else {
@@ -51,6 +52,15 @@ public class ApplicationTest {
 	public void configurePreAuthHeader() throws Exception {
 		System.setProperty("security.pre-auth-principal", "HEADER");
 		System.setProperty("security.pre-auth-credentials", "CREDS");
+		Application.main(getArgs(getClass().getName()));
+		SpringApplication.exit(Application.lastContext);
+	}
+
+	@Test
+	public void configurePreAuthLogout() throws Exception {
+		System.setProperty("security.pre-auth-principal", "HEADER");
+		System.setProperty("security.pre-auth-credentials", "CREDS");
+		System.setProperty("security.pre-auth-logout", "https://signin.sample.com");
 		Application.main(getArgs(getClass().getName()));
 		SpringApplication.exit(Application.lastContext);
 	}

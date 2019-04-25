@@ -59,6 +59,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Value("${security.pre-auth-principal:}")
 	protected String securityPreAuthPrincipal;
 
+	@Value("${security.pre-auth-logout:}")
+	protected String securityPreAuthLogout;
+
 	@Value("${security.pre-auth-credentials:}")
 	protected String securityPreAuthCredentials;
 
@@ -131,7 +134,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.anyRequest().access("hasParameter('api-key') or hasHeader('x-api-key') or isFullyAuthenticated()").and().exceptionHandling()
 				.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage("/login.html?denied").and()
 
-				.logout().invalidateHttpSession(true).logoutSuccessUrl("/login.html?logout").and()
+				.logout().invalidateHttpSession(true)
+				.logoutSuccessUrl(isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, "/logout.html") : "/login.html?logout").and()
 
 				.formLogin().loginPage("/login.html?denied").loginProcessingUrl("/login").successHandler(getSuccessHandler())
 				.failureHandler(getFailureHandler()).and()
@@ -144,13 +148,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.addFilterAfter(concurrentSessionFilter(), ConcurrentSessionFilter.class);
 
 		// Activate a pre-auth filter if configured header
-		if (StringUtils.isNoneBlank(securityPreAuthPrincipal)) {
+		if (isPreAuth()) {
 			final RequestHeaderAuthenticationFilter bean = new SilentRequestHeaderAuthenticationFilter();
 			bean.setPrincipalRequestHeader(securityPreAuthPrincipal);
 			bean.setCredentialsRequestHeader(securityPreAuthCredentials);
 			bean.setAuthenticationManager(authenticationManager());
 			sec.addFilterAt(bean, AbstractPreAuthenticatedProcessingFilter.class);
 		}
+	}
+
+	private boolean isPreAuth() {
+		return StringUtils.isNotBlank(securityPreAuthPrincipal);
 	}
 
 	@Override

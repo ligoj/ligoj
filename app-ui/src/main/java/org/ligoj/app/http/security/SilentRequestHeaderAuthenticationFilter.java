@@ -12,6 +12,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedCredentialsNotFoundException;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
@@ -35,7 +36,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 		handler.setUseForward(true);
 		setAuthenticationFailureHandler(handler);
 		setExceptionIfHeaderMissing(false);
-		setCheckForPrincipalChanges(true);
+		setCheckForPrincipalChanges(false);
 		setContinueFilterChainOnUnsuccessfulAuthentication(false);
 	}
 
@@ -61,7 +62,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 						new PreAuthenticatedCredentialsNotFoundException(principalHeaderCopy + " header not found in request."));
 			} else if (req.getRequestURI().matches(req.getContextPath() + "/?login.html")) {
 				// In pre-auth mode, "/login" page is not available
-				res.sendRedirect(req.getContextPath());
+				res.sendRedirect(StringUtils.appendIfMissing(req.getContextPath(),"/"));
 			} else {
 				super.doFilter(request, response, chain);
 			}
