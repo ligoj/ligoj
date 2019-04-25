@@ -1,7 +1,7 @@
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
-package org.ligoj.boot.web;
+package org.ligoj.app.http.security;
 
 import java.io.IOException;
 
