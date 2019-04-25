@@ -35,6 +35,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 		handler.setUseForward(true);
 		setAuthenticationFailureHandler(handler);
 		setExceptionIfHeaderMissing(false);
+		setCheckForPrincipalChanges(true);
 		setContinueFilterChainOnUnsuccessfulAuthentication(false);
 	}
 
@@ -48,15 +49,19 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		final HttpServletRequest req = (HttpServletRequest) request;
+		final HttpServletResponse res = (HttpServletResponse) response;
 		if (req.getRequestURI().matches(".*/([0-9]{3}\\.html|themes/.*)")) {
 			// White-list error page
 			chain.doFilter(request, response);
 		} else {
 			final String principal = (String) getPreAuthenticatedPrincipal(req);
-			if (principal == null) {
+			if (principal == null || getPreAuthenticatedCredentials(req) == null) {
 				// We want this header
-				unsuccessfulAuthentication(req, (HttpServletResponse) response,
+				unsuccessfulAuthentication(req, res,
 						new PreAuthenticatedCredentialsNotFoundException(principalHeaderCopy + " header not found in request."));
+			} else if (req.getRequestURI().matches(req.getContextPath() + "/?login.html")) {
+				// In pre-auth mode, "/login" page is not available
+				res.sendRedirect(req.getContextPath());
 			} else {
 				super.doFilter(request, response, chain);
 			}
