@@ -3,9 +3,9 @@
  */
 package org.ligoj.boot.api;
 
+import org.ligoj.app.resource.security.FederatedUserDetailsService;
 import org.ligoj.bootstrap.core.security.ApiTokenAuthenticationFilter;
 import org.ligoj.bootstrap.core.security.AuthorizingFilter;
-import org.ligoj.bootstrap.core.security.RbacUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +28,9 @@ import org.springframework.security.web.authentication.switchuser.SwitchUserFilt
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 
+/**
+ * Security configuration.
+ */
 @Configuration
 @EnableWebSecurity
 @Profile("prod")
@@ -35,7 +38,7 @@ import org.springframework.security.web.firewall.HttpFirewall;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
-	private RbacUserDetailsService userDetailsService;
+	private FederatedUserDetailsService userDetailsService;
 
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
