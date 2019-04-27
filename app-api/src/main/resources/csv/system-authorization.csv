@@ -5,6 +5,7 @@ method;pattern;type;role.name
    ;^rest/session;API;USER
    ;^rest/service/[^/]+/[^/]+/validate/.*;API;USER
    ;^rest/service.*;API;USER
+   ;^rest/security/delegate.*;API;USER
    ;^rest/id/user.*;API;USER
    ;^rest/id/group.*;API;USER
    ;^rest/id/company.*;API;USER
