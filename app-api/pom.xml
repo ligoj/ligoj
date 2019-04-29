@@ -52,6 +52,33 @@
 				<version>${spring-security.version}</version>
 				<scope>compile</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.ligoj.bootstrap</groupId>
+				<artifactId>bootstrap-business</artifactId>
+				<version>${bootstrap.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.spec.javax.rmi</groupId>
+						<artifactId>jboss-rmi-api_1.0_spec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.el</groupId>
+						<artifactId>javax.el-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>javax.enterprise</groupId>
+				<artifactId>cdi-api</artifactId>
+				<scope>provided</scope>
+				<version>1.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.el</groupId>
+						<artifactId>javax.el-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -83,6 +110,10 @@
 					<groupId>javax.activation</groupId>
 					<artifactId>activation</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.jboss.spec.javax.rmi</groupId>
+					<artifactId>jboss-rmi-api_1.0_spec</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -93,6 +124,10 @@
 				<exclusion>
 					<groupId>org.apache.geronimo.specs</groupId>
 					<artifactId>geronimo-jta_1.1_spec</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jboss.spec.javax.rmi</groupId>
+					<artifactId>jboss-rmi-api_1.0_spec</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -172,6 +207,10 @@
 				<exclusion>
 					<groupId>org.eclipse.jetty.websocket</groupId>
 					<artifactId>javax-websocket-server-impl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.mortbay.jasper</groupId>
+					<artifactId>apache-el</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
