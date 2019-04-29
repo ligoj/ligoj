@@ -7,8 +7,6 @@ before_cache:
   - "find $HOME/.m2 -name resolver-status.properties -exec rm {} \\;"
 before_install:
   - "chmod +x ./travis.sh"
-  - rm "${JAVA_HOME}/lib/security/cacerts"
-  - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
 install: java --version 
 cache: 
   directories: 
@@ -17,6 +15,7 @@ cache:
     - $HOME/.cache
     - $HOME/maven
 jdk: openjdk11
+dist: xenial
 env: 
   - TARGET=BUILD
 branches:
