@@ -5,6 +5,7 @@
 /target
 /*/target
 **/.classpath
+**/*.log
 /*.exec
 **/dist/
 **/_.css
