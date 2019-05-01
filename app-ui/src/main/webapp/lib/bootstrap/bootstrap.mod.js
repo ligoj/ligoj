@@ -73,7 +73,8 @@ define([
 			}
 		}
 	}).on('click', '.retract', function () {
-		$(this).closest('.retractable').toggleClass('retracted');
+		var $retractable = $(this).closest('.retractable');
+		$retractable.toggleClass('retracted').trigger('retract:' + ($retractable.hasClass('.retracted') ? 'retracted' : 'expended'));
 	}).on('keypress', 'form:not([method]),[method="get"],form[method="GET"]', function (e) {
 		// Some browser (like Chrome) the first submit is used (hidden or not) and receive a click
 		if ((e.which === 13 || e.keyCode === 13) && !$(e.target).is('textarea')) {
