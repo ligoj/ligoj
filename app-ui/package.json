@@ -3,7 +3,7 @@
 	"description": "Ligoj Administration Portal",
 	"author": "kloudy.io",
 	"keywords": ["bootstrap", "ligoj"],
-	"version": "2.0.0",
+	"version": "3.0.0",
 	"homepage": "https://github.com/ligoj/ligoj",
 	"engines": {
 		"jetty": "9.5"
