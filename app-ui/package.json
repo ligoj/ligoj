@@ -88,6 +88,7 @@
 	    "requirejs-i18njs": "2.0.6",
 	    "requirejs-text": "2.0.15",
 	    "later": "1.2.0",
+	    "masonry": "4.2.2",
 	    "moment": "2.21.0",
 	    "jquery": "3.3.1",
 	    "jqueryui": "1.12.1",
