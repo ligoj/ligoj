@@ -1,5 +1,5 @@
 FROM openjdk:11-jre
-LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
+LABEL maintainer "fabrice.daugan@gmail.com"
 
 RUN set -xe \
   apt-get update && \
@@ -45,7 +45,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
 	--add-opens java.base/jdk.internal.math=ALL-UNNAMED \
 	--add-opens java.base/java.lang=ALL-UNNAMED \
 	--add-opens java.base/java.nio=ALL-UNNAMED \
-	--add-opens java.base/java.lang.module=ALL-UNNAMED 
+	--add-opens java.base/java.lang.module=ALL-UNNAMED \
 	--add-opens java.base/java.lang.invoke=ALL-UNNAMED \
     --add-opens java.base/java.lang.package=ALL-UNNAMED \
 	--add-opens java.base/java.util=ALL-UNNAMED \
