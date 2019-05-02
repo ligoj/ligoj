@@ -180,11 +180,12 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 
 ### JSE
 
-| Vendor     | Version  | Status  | Notes |
+
+| Vendor     | Release  | Status  | Notes |
 |------------|----------|---------|-------|
-| Oracle     | 1.8u121+ | REBUILD | You have to rebuild the binary |
-| OpenJDK    | 1.8u121+ | REBUILD | You have to rebuild the binary |
-| Oracle     | 9.0.1+   | OK      | Warning about illegal reflective access [SPR-15859](https://jira.spring.io/browse/SPR-15859) |
-| OpenJDK    | 9.0.1+   | OK      | Warning about illegal reflective access [SPR-15859](https://jira.spring.io/browse/SPR-15859) |
-| Oracle     | 10.0+    | KO      | Waiting for ProjectLombok1.6.21 |
-| OpenJDK    | 10.0 +   | KO      | Waiting for ProjectLombok1.6.21 |
+| Oracle     | 9        | OK      | You have to rebuild from the source |
+| OpenJDK    | 9        | OK      | You have to rebuild from the source |
+| Oracle     | 10       | OK      | You have to rebuild from the source |
+| OpenJDK    | 10       | OK      | You have to rebuild from the source |
+| Oracle     | 11       | OK      |  |
+| OpenJDK    | 11       | OK      |  |
