@@ -12,8 +12,8 @@ services:
     environment:
       SERVER_HOST: "0.0.0.0"
       SERVER_PORT: "8081"
-      CUSTOM_OPTS: "-Djdbc.host=ligoj-db" \
-      CRYPTO: "-Dapp.crypto.password=public" \
+      CUSTOM_OPTS: "-Djdbc.host=ligoj-db"
+      CRYPTO: "-Dapp.crypto.password=public"
     links:
       - db:ligoj-db
     depends_on: 
