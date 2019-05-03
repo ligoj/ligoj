@@ -30,7 +30,7 @@ public class User {
 
 	@NotBlank
 	@NotNull
-	@Length(max = 250)
+	@Length(max = 4096)
 	private String password;
 
 }
