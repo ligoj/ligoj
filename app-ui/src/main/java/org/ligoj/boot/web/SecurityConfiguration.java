@@ -41,6 +41,8 @@ import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.session.SimpleRedirectSessionInformationExpiredStrategy;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Spring Boot security configuration.
  */
@@ -48,6 +50,7 @@ import org.springframework.security.web.session.SimpleRedirectSessionInformation
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
 @Profile("prod")
+@Slf4j
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Value("${security.max-sessions:1}")
@@ -149,6 +152,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		// Activate a pre-auth filter if configured header
 		if (isPreAuth()) {
+			log.info("Pre-auth filter is enabled with {} and {} ", securityPreAuthPrincipal, securityPreAuthCredentials);
 			final RequestHeaderAuthenticationFilter bean = new SilentRequestHeaderAuthenticationFilter();
 			bean.setPrincipalRequestHeader(securityPreAuthPrincipal);
 			bean.setCredentialsRequestHeader(securityPreAuthCredentials);
