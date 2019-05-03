@@ -26,7 +26,6 @@ ENV CONTEXT_URL="/ligoj-api" \
     SERVER_HOST="0.0.0.0" \
     SERVER_PORT="8081" \
     LIGOJ_HOME=/home/ligoj \
-    JAVA_MEMORY="-Xms712M -Xmx1248M" \
     CUSTOM_OPTS="-Djdbc.host=ligoj-db" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
@@ -35,7 +34,7 @@ ENV CONTEXT_URL="/ligoj-api" \
 
 EXPOSE ${SERVER_PORT}
 CMD mkdir -p "$LIGOJ_HOME" && \
-  java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
+  java $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
 	--add-modules java.se \
 	--add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
 	--add-opens java.base/jdk.internal.module=ALL-UNNAMED \
