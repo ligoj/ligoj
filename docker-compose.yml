@@ -1,6 +1,7 @@
-version: '3'
+version: '3.6'
 services:
   db:
+    container_name: ligoj-db
     image: mysql:5.6
     environment:
       MYSQL_ROOT_PASSWORD: r00t
@@ -8,6 +9,7 @@ services:
       MYSQL_USER: ligoj
       MYSQL_PASSWORD: ligoj
   api:
+    container_name: ligoj-api
     image: ligoj/ligoj-api:3.0.0
     environment:
       SERVER_HOST: "0.0.0.0"
@@ -19,6 +21,7 @@ services:
     depends_on: 
       - db
   ui:
+    container_name: ligoj-ui
     image: ligoj/ligoj-ui:3.0.0
     environment:
       JAVA_OPTIONS: "-Dsecurity=Rest"
