@@ -27,7 +27,6 @@ ENV CONTEXT_URL="/ligoj-api" \
     SERVER_HOST="0.0.0.0" \
     SERVER_PORT="8081" \
     LIGOJ_HOME=/home/ligoj \
-    JAVA_MEMORY="-Xms712M -Xmx1248M" \
     CUSTOM_OPTS="-Djdbc.host=ligoj-db" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
@@ -36,7 +35,7 @@ ENV CONTEXT_URL="/ligoj-api" \
 
 EXPOSE ${SERVER_PORT}
 CMD mkdir -p "$LIGOJ_HOME" && \
-  java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
+  java $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
 	--add-modules java.se \
 	--add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
 	--add-opens java.base/jdk.internal.module=ALL-UNNAMED \
@@ -48,7 +47,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
 	--add-opens java.base/java.nio=ALL-UNNAMED \
 	--add-opens java.base/java.lang.module=ALL-UNNAMED \
 	--add-opens java.base/java.lang.invoke=ALL-UNNAMED \
-    --add-opens java.base/java.lang.package=ALL-UNNAMED \
+  --add-opens java.base/java.lang.package=ALL-UNNAMED \
 	--add-opens java.base/java.util=ALL-UNNAMED \
 	--add-opens java.base/java.util.regex=ALL-UNNAMED \
 	--add-opens java.base/sun.nio.ch=ALL-UNNAMED \
@@ -56,7 +55,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
 	--add-opens java.xml/jdk.xml.internal=ALL-UNNAMED \
 	--add-opens java.xml/javax.xml.catalog=ALL-UNNAMED \
 	--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
-	--add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED\
+	--add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED \
     -Dserver.address="${SERVER_HOST}" \
     -Dserver.port="${SERVER_PORT}" \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \
