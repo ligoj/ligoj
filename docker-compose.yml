@@ -3,11 +3,16 @@ services:
   db:
     container_name: ligoj-db
     image: mysql:5.6
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: r00t
       MYSQL_DATABASE: ligoj
       MYSQL_USER: ligoj
       MYSQL_PASSWORD: ligoj
+    volumes:
+      - ${LIGOJ_DATA:-/var/ligoj/mysql}:/var/lib/mysql
+    networks:
+      - ligoj-network
   api:
     container_name: ligoj-api
     image: ligoj/ligoj-api:3.0.0
@@ -20,6 +25,10 @@ services:
       - db:ligoj-db
     depends_on: 
       - db
+    volumes:
+      - ${LIGOJ_HOME:-/home/ligoj}:/home/ligoj
+    networks:
+      - ligoj-network
   ui:
     container_name: ligoj-ui
     image: ligoj/ligoj-ui:3.0.0
@@ -31,3 +40,7 @@ services:
       - api:ligoj-api
     ports: 
       - "8080:8080"
+    networks:
+      - ligoj-network
+ networks:
+   ligoj-network:
