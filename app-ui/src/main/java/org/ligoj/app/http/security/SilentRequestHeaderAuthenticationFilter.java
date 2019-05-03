@@ -51,7 +51,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		final HttpServletRequest req = (HttpServletRequest) request;
 		final HttpServletResponse res = (HttpServletResponse) response;
-		if (req.getRequestURI().matches(".*/([0-9]{3}\\.html|themes/.*)")) {
+		if (req.getRequestURI().matches(".*/([0-9]{3}\\.html|favicon.ico|themes/.*)")) {
 			// White-list error page
 			chain.doFilter(request, response);
 		} else {
