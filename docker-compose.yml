@@ -42,5 +42,5 @@ services:
       - "8080:8080"
     networks:
       - ligoj-network
- networks:
-   ligoj-network:
+networks:
+  ligoj-network:
