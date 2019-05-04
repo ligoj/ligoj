@@ -31,7 +31,6 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
-import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
@@ -87,7 +86,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint() {
-		final RedirectAuthenticationEntryPoint ep = new RedirectAuthenticationEntryPoint("/login.html");
+		final var ep = new RedirectAuthenticationEntryPoint("/login.html");
 		ep.setRedirectUrls(new HashSet<>(Arrays.asList("/", "index.html", "index-prod.html", "login.html", "login-prod.html")));
 		ep.setRedirectStrategy(getRestFailureStrategy());
 		return ep;
@@ -95,7 +94,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
-		final DefaultHttpFirewall firewall = new DefaultHttpFirewall();
+		final var firewall = new DefaultHttpFirewall();
 		firewall.setAllowUrlEncodedSlash(true);
 		return firewall;
 	}
@@ -109,7 +108,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	public AbstractAuthenticationProvider authenticationProvider() throws ReflectiveOperationException {
-		final AbstractAuthenticationProvider provider = (AbstractAuthenticationProvider) Class
+		final var provider = (AbstractAuthenticationProvider) Class
 				.forName("org.ligoj.app.http.security." + securityProvider + "AuthenticationProvider").getConstructors()[0].newInstance();
 		provider.setSsoPostUrl(ssoUrl);
 		provider.setSsoPostContent(ssoContent);
@@ -123,7 +122,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
-		final HttpSecurity sec = http.authorizeRequests().expressionHandler(expressionHandler)
+		final var logout = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, "/logout.html") : "/login.html?logout";
+		final var sec = http.authorizeRequests().expressionHandler(expressionHandler)
 				// Login
 				.antMatchers(HttpMethod.POST, "/login").permitAll()
 
@@ -137,8 +137,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.anyRequest().access("hasParameter('api-key') or hasHeader('x-api-key') or isFullyAuthenticated()").and().exceptionHandling()
 				.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage("/login.html?denied").and()
 
-				.logout().invalidateHttpSession(true)
-				.logoutSuccessUrl(isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, "/logout.html") : "/login.html?logout").and()
+				.logout().invalidateHttpSession(true).logoutSuccessUrl(logout).and()
 
 				.formLogin().loginPage("/login.html?denied").loginProcessingUrl("/login").successHandler(getSuccessHandler())
 				.failureHandler(getFailureHandler()).and()
@@ -152,8 +151,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		// Activate a pre-auth filter if configured header
 		if (isPreAuth()) {
-			log.info("Pre-auth filter is enabled with {} and {} ", securityPreAuthPrincipal, securityPreAuthCredentials);
-			final RequestHeaderAuthenticationFilter bean = new SilentRequestHeaderAuthenticationFilter();
+			log.info("Pre-auth filter is enabled with {}/{}, logout: ", securityPreAuthPrincipal, securityPreAuthCredentials, logout);
+			final var bean = new SilentRequestHeaderAuthenticationFilter();
 			bean.setPrincipalRequestHeader(securityPreAuthPrincipal);
 			bean.setCredentialsRequestHeader(securityPreAuthCredentials);
 			bean.setAuthenticationManager(authenticationManager());
@@ -185,12 +184,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public DigestAuthenticationFilter digestAuthenticationFilter() {
-		final DigestAuthenticationFilter filter = new DigestAuthenticationFilter();
+		final var filter = new DigestAuthenticationFilter();
 		filter.setSsoPostUrl(apiEndpoint + "/security/sso");
-		final SimpleUrlAuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
+		final var failureHandler = new SimpleUrlAuthenticationFailureHandler();
 		failureHandler.setDefaultFailureUrl("/login.html");
 		filter.setAuthenticationFailureHandler(failureHandler);
-		final SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler();
+		final var successHandler = new SimpleUrlAuthenticationSuccessHandler();
 		successHandler.setTargetUrlParameter("target");
 		filter.setAuthenticationSuccessHandler(successHandler);
 		return filter;
@@ -198,8 +197,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public SimpleUrlAuthenticationFailureHandler getFailureHandler() {
-		final SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler();
-		final RestRedirectStrategy strategy = getRestFailureStrategy();
+		final var handler = new SimpleUrlAuthenticationFailureHandler();
+		final var strategy = getRestFailureStrategy();
 		handler.setRedirectStrategy(strategy);
 		handler.setDefaultFailureUrl("/");
 		return handler;
@@ -207,7 +206,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public RestRedirectStrategy getRestFailureStrategy() {
-		final RestRedirectStrategy strategy = new RestRedirectStrategy();
+		final var strategy = new RestRedirectStrategy();
 		strategy.setSuccess(false);
 		strategy.setStatus(401);
 		return strategy;
@@ -215,8 +214,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public SimpleUrlAuthenticationSuccessHandler getSuccessHandler() {
-		final SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler();
-		final RestRedirectStrategy strategy = new RestRedirectStrategy();
+		final var handler = new SimpleUrlAuthenticationSuccessHandler();
+		final var strategy = new RestRedirectStrategy();
 		strategy.setSuccess(true);
 		handler.setRedirectStrategy(strategy);
 		return handler;
@@ -229,12 +228,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	public CompositeSessionAuthenticationStrategy sessionAuth() {
-		final SessionRegistry registry = sessionRegistry();
-		final ConcurrentSessionControlAuthenticationStrategy sas = new ConcurrentSessionControlAuthenticationStrategy(registry);
+		final var registry = sessionRegistry();
+		final var sas = new ConcurrentSessionControlAuthenticationStrategy(registry);
 		sas.setMaximumSessions(maxSession);
 		sas.setExceptionIfMaximumExceeded(false);
-		final SessionFixationProtectionStrategy sfps = new SessionFixationProtectionStrategy();
-		final RegisterSessionAuthenticationStrategy rsas = new RegisterSessionAuthenticationStrategy(registry);
+		final var sfps = new SessionFixationProtectionStrategy();
+		final var rsas = new RegisterSessionAuthenticationStrategy(registry);
 		return new CompositeSessionAuthenticationStrategy(Arrays.asList(sas, sfps, rsas));
 	}
 
