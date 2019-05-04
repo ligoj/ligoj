@@ -128,7 +128,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.POST, "/login").permitAll()
 
 				// Public static resources
-				.regexMatchers(HttpMethod.GET, "/([0-9]{3}|themes|lib|dist|login|main/public).*").permitAll()
+				.regexMatchers(HttpMethod.GET, "/([0-9]{3}|themes|lib|dist|login|logout|main/public).*",
+						logout.replace("?", "\\?").replace(".", "\\."))
+				.permitAll()
 
 				.antMatchers("/rest/redirect", "/rest/security/login", "/captcha.png").permitAll()
 				.antMatchers("/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()
