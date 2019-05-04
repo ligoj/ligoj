@@ -67,6 +67,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Value("${security.pre-auth-credentials:}")
 	protected String securityPreAuthCredentials;
 
+	@Value("${security.pre-auth-cookies:}")
+	protected String[] securityPreAuthCookies;
+
 	@Value("${sso.url}")
 	private String ssoUrl;
 
@@ -139,7 +142,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.anyRequest().access("hasParameter('api-key') or hasHeader('x-api-key') or isFullyAuthenticated()").and().exceptionHandling()
 				.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage("/login.html?denied").and()
 
-				.logout().invalidateHttpSession(true).logoutSuccessUrl(logout).and()
+				.logout().deleteCookies(securityPreAuthCookies).invalidateHttpSession(true).logoutSuccessUrl(logout).and()
 
 				.formLogin().loginPage("/login.html?denied").loginProcessingUrl("/login").successHandler(getSuccessHandler())
 				.failureHandler(getFailureHandler()).and()
