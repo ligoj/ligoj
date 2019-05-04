@@ -99,8 +99,8 @@
 		"name": "RequireJS",
 		"url": "http://requirejs.org/docs/download.html",
 		"sources": "https://github.com/jrburke/requirejs",
-		"version": "2.3.5",
-		"lastChecked": "2018-03-11",
+		"version": "2.3.6",
+		"lastChecked": "2019-05-04",
 		"note": "require.js?version script references must be updated in the HTML files with along the requirejs version"
 	}, {
 		"name": "Respond.js",
@@ -225,12 +225,6 @@
 		"sources": "https://github.com/CodeSeven/toastr",
 		"version": "2.1.3",
 		"lastChecked": "2016-09-09"
-	}, {
-		"name": "Html5",
-		"url": "http://www.paulirish.com/2011/the-history-of-the-html5-shiv/",
-		"sources": "https://github.com/aFarkas/html5shiv",
-		"version": "3.7.3",
-		"lastChecked": "2016-03-09"
 	}, {
 		"name": "jQuery Form",
 		"url": "http://jquery.malsup.com/form/",
