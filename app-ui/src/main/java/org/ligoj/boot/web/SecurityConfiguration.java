@@ -8,6 +8,7 @@ import java.util.HashSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.http.security.AbstractAuthenticationProvider;
+import org.ligoj.app.http.security.CookieWipingLogoutHandler;
 import org.ligoj.app.http.security.DigestAuthenticationFilter;
 import org.ligoj.app.http.security.SilentRequestHeaderAuthenticationFilter;
 import org.ligoj.app.http.security.SimpleUserDetailsService;
@@ -142,7 +143,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.anyRequest().access("hasParameter('api-key') or hasHeader('x-api-key') or isFullyAuthenticated()").and().exceptionHandling()
 				.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage("/login.html?denied").and()
 
-				.logout().deleteCookies(securityPreAuthCookies).invalidateHttpSession(true).logoutSuccessUrl(logout).and()
+				.logout().addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies)).invalidateHttpSession(true).logoutSuccessUrl(logout)
+				.and()
 
 				.formLogin().loginPage("/login.html?denied").loginProcessingUrl("/login").successHandler(getSuccessHandler())
 				.failureHandler(getFailureHandler()).and()
