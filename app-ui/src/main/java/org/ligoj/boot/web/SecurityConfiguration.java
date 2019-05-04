@@ -151,7 +151,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		// Activate a pre-auth filter if configured header
 		if (isPreAuth()) {
-			log.info("Pre-auth filter is enabled with {}/{}, logout: ", securityPreAuthPrincipal, securityPreAuthCredentials, logout);
+			log.info("Pre-auth filter is enabled with {}/{}, logout: {}", securityPreAuthPrincipal, securityPreAuthCredentials, logout);
 			final var bean = new SilentRequestHeaderAuthenticationFilter();
 			bean.setPrincipalRequestHeader(securityPreAuthPrincipal);
 			bean.setCredentialsRequestHeader(securityPreAuthCredentials);
