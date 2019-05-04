@@ -2,7 +2,7 @@
 <!--[if lt IE 7]>  <html class="ie6 ie-old"> <![endif]-->
 <!--[if IE 7]>     <html class="ie7 ie-old"> <![endif]-->
 <!--[if IE 8]>     <html class="ie8 ie-old"> <![endif]-->
-<!--[if (gt IE 8)|!(IE)]><!--> <html class="modern">    <!--<![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="modern">    <!--<![endif]-->
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -61,8 +61,7 @@
 	<body>
 		<div id="_main" data-cascade-hierarchy="1"></div>
 		<noscript><p>Please enable JavaScript to use this site.</p></noscript>
-		<!--[if lt IE 9]><p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
-		<!--[if IE 9]><script src="lib/es6-shim.js"></script><![endif]-->
+		<!--[if lte IE 9]><p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
 		<!--[if gte IE 9]><!-->
 		<script>var requirejs = { urlArgs: 'bust=0.0.0', cascade: ['css', 'i18n', 'html', 'js'] };</script>
 		<script data-main="lib/application.js" src="lib/requirejs/require-jquery.js?2.3.5"></script>

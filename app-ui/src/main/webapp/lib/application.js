@@ -67,7 +67,6 @@ var applicationManager = {
 				'material': 'material-design/material',
 				'material.mod': 'material-design/material.mod',
 				'moment.mod': 'momentjs/moment.mod',
-				'qunit.mod': 'qunit/qunit.mod',
 				'ripples': 'ripples/ripples',
 				'scroll.mod': 'scroll/scroll.mod',
 				'security.mod': 'security/security.mod',

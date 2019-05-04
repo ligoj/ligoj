@@ -55,7 +55,6 @@
 		'material.mod': 'material-design/material.mod',
 		'moment.mod': 'momentjs/moment.mod',
 		'prettify': 'prettify/prettify',
-		'qunit.mod': 'qunit/qunit.mod',
 		'ripples': 'ripples/ripples',
 		'scroll.mod': 'scroll/scroll.mod',
 		'security.mod': 'security/security.mod',
