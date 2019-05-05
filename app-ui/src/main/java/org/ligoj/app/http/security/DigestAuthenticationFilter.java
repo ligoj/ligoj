@@ -10,13 +10,11 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -51,21 +49,21 @@ public class DigestAuthenticationFilter extends AbstractAuthenticationProcessing
 
 	@Override
 	public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response) {
-		final String token = request.getParameter("token");
+		final var token = request.getParameter("token");
 
 		if (token != null) {
 			// Token is the last part of URL
 
 			// First get the cookie
-			final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+			final var clientBuilder = HttpClientBuilder.create();
 			clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).build());
 
 			// Do the POST
-			try (CloseableHttpClient httpClient = clientBuilder.build()) {
-				final HttpPost httpPost = new HttpPost(getSsoPostUrl());
+			try (var httpClient = clientBuilder.build()) {
+				final var httpPost = new HttpPost(getSsoPostUrl());
 				httpPost.setEntity(new StringEntity(token, StandardCharsets.UTF_8.name()));
 				httpPost.setHeader("Content-Type", "application/json");
-				final HttpResponse httpResponse = httpClient.execute(httpPost);
+				final var httpResponse = httpClient.execute(httpPost);
 				if (HttpStatus.SC_OK == httpResponse.getStatusLine().getStatusCode()) {
 					return getAuthenticationManager().authenticate(
 							new UsernamePasswordAuthenticationToken(EntityUtils.toString(httpResponse.getEntity()), "N/A", new ArrayList<>()));

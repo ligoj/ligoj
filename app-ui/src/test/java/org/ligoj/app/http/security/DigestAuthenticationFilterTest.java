@@ -25,43 +25,37 @@ public class DigestAuthenticationFilterTest extends AbstractServerTest {
 	private DigestAuthenticationFilter filter;
 
 	@Test
-	public void testAuthenticateIOE() {
+	void authenticateIOE() {
 		Assertions.assertThrows(BadCredentialsException.class, () -> {
 			authenticate("der://localhost", "token");
 		});
 	}
 
 	@Test
-	public void testAuthenticateKo1() {
+	void authenticateKo1() {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_MOVED_TEMPORARILY)));
 		httpServer.start();
-		Assertions.assertThrows(BadCredentialsException.class, () -> {
-			authenticate("http://localhost", "token");
-		});
+		Assertions.assertThrows(BadCredentialsException.class, () -> authenticate("http://localhost", "token"));
 	}
 
 	@Test
-	public void testAuthenticateInvalidHost() {
+	void authenticateInvalidHost() {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("")));
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("//OK")));
 		httpServer.start();
 		filter.setAuthenticationManager(authentication -> {
 			throw new IllegalStateException();
 		});
-		Assertions.assertThrows(IllegalStateException.class, () -> {
-			authenticate("http://localhost", "token");
-		});
+		Assertions.assertThrows(IllegalStateException.class, () -> authenticate("http://localhost", "token"));
 	}
 
 	@Test
-	public void testNoToken() {
-		Assertions.assertThrows(BadCredentialsException.class, () -> {
-			authenticate("http://localhost", null);
-		});
+	void authenticateNoToken() {
+		Assertions.assertThrows(BadCredentialsException.class, () -> authenticate("http://localhost", null));
 	}
 
 	@Test
-	public void testAuthenticateOk() {
+	void authenticateOk() {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("")));
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("//OK")));
 		httpServer.start();
@@ -78,7 +72,7 @@ public class DigestAuthenticationFilterTest extends AbstractServerTest {
 	 * Generate a mock authentication/
 	 */
 	private HttpServletRequest newRequest(final String token) {
-		final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+		final var request = Mockito.mock(HttpServletRequest.class);
 		Mockito.when(request.getParameter("token")).thenReturn(token);
 		return request;
 	}
@@ -87,7 +81,7 @@ public class DigestAuthenticationFilterTest extends AbstractServerTest {
 	 * Initialize the mock server.
 	 */
 	@BeforeEach
-	public void init() {
+	void init() {
 		filter = new DigestAuthenticationFilter();
 	}
 

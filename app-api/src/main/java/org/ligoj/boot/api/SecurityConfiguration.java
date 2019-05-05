@@ -85,7 +85,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	public UserDetailsByNameServiceWrapper<PreAuthenticatedAuthenticationToken> authenticationService() {
-		final UserDetailsByNameServiceWrapper<PreAuthenticatedAuthenticationToken> userDetailsServiceW = new UserDetailsByNameServiceWrapper<>();
+		final var userDetailsServiceW = new UserDetailsByNameServiceWrapper<PreAuthenticatedAuthenticationToken>();
 		userDetailsServiceW.setUserDetailsService(userDetailsService);
 		return userDetailsServiceW;
 	}
@@ -117,7 +117,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	public PreAuthenticatedAuthenticationProvider authenticationProvider() {
-		final PreAuthenticatedAuthenticationProvider provider = new PreAuthenticatedAuthenticationProvider();
+		final var provider = new PreAuthenticatedAuthenticationProvider();
 		provider.setPreAuthenticatedUserDetailsService(authenticationService());
 		return provider;
 	}
@@ -131,7 +131,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	public ApiTokenAuthenticationFilter apiTokenFilter() throws Exception {
-		final ApiTokenAuthenticationFilter bean = new ApiTokenAuthenticationFilter();
+		final var bean = new ApiTokenAuthenticationFilter();
 		bean.setPrincipalRequestHeader("SM_UNIVERSALID");
 		bean.setCredentialsRequestHeader("X-api-key");
 		bean.setExceptionIfHeaderMissing(false);
@@ -142,7 +142,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
-		final DefaultHttpFirewall firewall = new DefaultHttpFirewall();
+		final var firewall = new DefaultHttpFirewall();
 		firewall.setAllowUrlEncodedSlash(true);
 		return firewall;
 	}
