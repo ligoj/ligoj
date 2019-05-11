@@ -153,8 +153,8 @@
 		"name": "Font Awesome",
 		"url": "https://fortawesome.github.io",
 		"sources": "https://github.com/FortAwesome/Font-Awesome/",
-		"version": "5.7.2",
-		"lastChecked": "2019-02-23"
+		"version": "5.8.2",
+		"lastChecked": "2019-05-07"
 	}, {
 		"name": "Bootbox",
 		"url": "https://github.com/makeusabrew/bootbox/",
