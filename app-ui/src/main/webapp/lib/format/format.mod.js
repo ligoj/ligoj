@@ -6,6 +6,11 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		messages: null,
 
 		/**
+		 * Handlebars compiled format cache.
+		 */
+		cacheHandlebars = {},
+
+		/**
 		 * Get formated date.
 		 * @param long timestamp. Null is accepted.
 		 */
@@ -66,7 +71,13 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 			if (typeof format === 'function') {
 				format(value, sizes[e], unit);
 			} else {
-				return Handlebars.compile(format)({
+				// Handle cache
+				var compiled = formatManager.cacheHandlebars[format];
+				if (typeof compiled === 'undefined') {
+					compiled = Handlebars.compile(format);
+					cacheHandlebars[format] = compiled;
+				}
+				return compiled({
 					value : value,
 					weight: sizes[e],
 					unit: unit,
