@@ -8,7 +8,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		/**
 		 * Handlebars compiled format cache.
 		 */
-		cacheHandlebars = {},
+		cacheHandlebars: {},
 
 		/**
 		 * Get formated date.
@@ -75,7 +75,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 				var compiled = formatManager.cacheHandlebars[format];
 				if (typeof compiled === 'undefined') {
 					compiled = Handlebars.compile(format);
-					cacheHandlebars[format] = compiled;
+					formatManager.cacheHandlebars[format] = compiled;
 				}
 				return compiled({
 					value : value,
