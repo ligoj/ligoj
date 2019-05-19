@@ -32,7 +32,7 @@ public class DigestAuthenticationFilterTest extends AbstractServerTest {
 	}
 
 	@Test
-	void authenticateKo1() {
+	void authenticateNot200OK() {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_MOVED_TEMPORARILY)));
 		httpServer.start();
 		Assertions.assertThrows(BadCredentialsException.class, () -> authenticate("http://localhost", "token"));
