@@ -4,6 +4,8 @@
 var $ = window.jQuery;
 var applicationManager = {
 	$cascade: null,
+	
+	urlArgs: null,
 
 	/**
 	 * Debug mode. When true, traceDebug is enabled
@@ -15,10 +17,10 @@ var applicationManager = {
 	 */
 	initialize: function () {
 		var cache = !this.debug && location.hostname !== 'localhost' && requirejs.s.contexts._.config.urlArgs('', '').substring(1) !== 'bust=DEV';
-		var urlArgs = cache ? null : 'bust=' + new Date().getTime();
+		applicationManager.urlArgs = cache ? null : 'bust=' + new Date().getTime();
 		require.config({
 			urlArgs: cache ? requirejs.s.contexts._.config.urlArgs : function (id, url) {
-				return (url.indexOf('?') === -1 ? '?' : '&') + urlArgs;
+				return (url.indexOf('?') === -1 ? '?' : '&') + applicationManager.urlArgs;
 			},
 			waitSeconds: 20,
 			packages: [

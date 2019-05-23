@@ -24,6 +24,11 @@ define(['jquery', 'security.mod', 'cascade', 'error.mod', 'handlebars.mod', 'toa
 			});
 			decorate(session);
 			$cascade.session = session;
+
+			// Update the digest version as needed
+			if (session.applicationSettings && session.applicationSettings.digestVersion) {
+				applicationManager.urlArgs = session.applicationSettings.digestVersion;
+			}
 			security.applySecurity(_('_main'));
 			$cascade.trigger('session', _('_main'));
 		}
