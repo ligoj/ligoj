@@ -4,8 +4,9 @@
 var $ = window.jQuery;
 var applicationManager = {
 	$cascade: null,
-	
+
 	urlArgs: null,
+	digestBasedCache: false,
 
 	/**
 	 * Debug mode. When true, traceDebug is enabled
@@ -13,13 +14,25 @@ var applicationManager = {
 	debug: typeof DEBUG_ENABLED !== 'undefined' && DEBUG_ENABLED,
 
 	/**
+	 * Update the new RequireJs args URL. Ignored for no cache mode.
+	 * @param {string} urlArgs 
+	 */
+	updateDigestUrlArgs: function (urlArgs) {
+		if (applicationManager.digestBasedCache) {
+			// Update the new RequireJs args URL
+			applicationManager.urlArgs = urlArgs;
+		}
+	},
+
+	/**
 	 * Initialize AMD dependencies and configuration.
 	 */
 	initialize: function () {
-		var cache = !this.debug && location.hostname !== 'localhost' && requirejs.s.contexts._.config.urlArgs('', '').substring(1) !== 'bust=DEV';
-		applicationManager.urlArgs = cache ? null : 'bust=' + new Date().getTime();
+		var urlArgs = requirejs.s.contexts._.config.urlArgs('', '').substring(1);
+		applicationManager.digestBasedCache = !this.debug && location.hostname !== 'localhost' && urlArgs !== '_=0.0.0';
+		applicationManager.urlArgs = applicationManager.digestBasedCache ? urlArgs : ('_=' + new Date().getTime());
 		require.config({
-			urlArgs: cache ? requirejs.s.contexts._.config.urlArgs : function (id, url) {
+			urlArgs: function (id, url) {
 				return (url.indexOf('?') === -1 ? '?' : '&') + applicationManager.urlArgs;
 			},
 			waitSeconds: 20,
