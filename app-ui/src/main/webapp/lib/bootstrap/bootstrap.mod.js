@@ -8,7 +8,7 @@ define([
 	$('body').popover({selector: '[data-toggle="popover"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body'});
 	$('body').tooltip({selector: '[data-toggle="tooltip"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body', animation: false});
 	
-	var closeTooltips = function() {
+	function closeTooltips() {
 		$('[data-toggle="tooltip"][aria-describedby]').each(function() {
 			$(this).tooltip('hide');
 		});
@@ -28,9 +28,6 @@ define([
 				$('[aria-describedby="' + $(this).attr('id') + '"]').popover('hide');
 			});
 		}
-	}).on('show.bs.tooltip', null, function() {
-		// Close nicely previous tooltips when a new one is displayed
-		closeTooltips();
 	}).on('show.bs.dropdown', null, function(e) {
 		// Close previous dropdowns
 		$('.dropdown-menu.detached').closeDropdown();
@@ -107,7 +104,9 @@ define([
 		});
 		e.preventDefault();
 	}).on('show.bs.modal', '.modal', closeTooltips)
+	.on('show.bs.tooltip', null, closeTooltips)
 	.on('hide.bs.modal', '.modal', closeTooltips)
+	.on('select2-close', null, closeTooltips)
 	.on('show.bs.modal', '.modal[data-ajax]', $cascade.loadPartial);
 
 	$.fn.hideGroup = function () {
