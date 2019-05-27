@@ -33,7 +33,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		trimObject: function (data) {
 			Object.keys(data).forEach(function (key) {
-				if (typeof data[key] === 'undefined' || data[key] === null || data[key] === '') {
+				if (typeof data[key] === 'undefined' || data[key] === null || data[key] === '' || data[key] === false) {
 					delete data[key];
 				}
 			});
