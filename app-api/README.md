@@ -158,7 +158,7 @@ health.node                 = 0 0 0/1 1/1 * ?
 health.subscription         = 0 0 2 1/1 * ?
 app.crypto.file             = Secret file location
 ligoj.plugin.enabled        = <false,[true]> When false, plug-ins are not loaded and their state is not updated
-ligoj.plugin.update         = <[false],true> When true, on startup, the plug-in are updated to the latest available version
+ligoj.plugin.update         = <false,[true]> When true, on startup, the plug-in are updated to the latest available version
 ligoj.plugin.repository     = <[central],nexus> The default repository used to perform the plug-in update
 ligoj.plugin.ignore         = plugin-password-management Filtered (deprecated, fixed version, ...) plug-ins for install or update from the repositories
 ```
