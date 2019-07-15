@@ -15,7 +15,7 @@
 			<ul class="nav navbar-right navbar-nav">
 				<li class="dropdown">
 					<a class="navbar-link" id="_username" data-toggle="dropdown">&nbsp;<b class="caret"></b></a>
-					<ul class="dropdown-menu">
+					<ul class="dropdown-menu menu-user">
 						<li>
 							<a href="logout">{{menu.logout}}</a>
 						</li>
@@ -25,15 +25,7 @@
 					</ul>
 				</li>
 			</ul>
-			<ul class="nav navbar-nav navbar-right info">
-				<li class="bs-inbox">
-					<a class="inbox-trigger" data-trigger="manual" data-toggle="popover" data-cascade="true" data-content="&nbsp" data-ajax="/{{$current.$path}}/inbox" data-plugins="i18n,partial,css,js" data-html="html" data-title="<i class='fas fa-sync-alt faa-spin animated in spin fade'></i>" role="button" data-placement="bottom">
-						<i class="fas fa-inbox icon-info" data-container="body" data-toggle="tooltip" title="{{notifications}}" data-placement="bottom"></i>
-						<span class="label label-danger">
-							<span class="count"></span>
-						</span>
-					</a>
-				</li>
+			<ul class="nav navbar-nav navbar-right info menu-tools">
 				<li class="dropdown">
 					<a class="navbar-link" data-toggle="dropdown"><i class="fas fa-question-circle icon-info"></i></a>
 					<ul class="dropdown-menu">
@@ -58,12 +50,9 @@
 					</ul>
 				</li>
 			</ul>
-			<ul class="nav navbar-nav">
+			<ul class="nav navbar-nav menu-main">
 				<li>
 					<a href="#/">{{menu.home}}</a>
-				</li>
-				<li>
-					<a href="#/id">{{menu.id}}</a>
 				</li>
 			</ul>
 		</div>

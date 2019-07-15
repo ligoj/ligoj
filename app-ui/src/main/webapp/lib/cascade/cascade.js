@@ -175,6 +175,14 @@ define([
 				require(['zone-private'], function () {
 					// Load the remaining context hierarchy
 					$self.loadFragmentRecursive(context.$child || childContext, transaction, fragments, 2, reload);
+
+					// Execute the boostrap code if present
+					if ($self.session.applicationSettings.bootstrapPrivateCode) {
+						// Inject this code for immediate execution
+						var bootstrapCode = document.createElement('script');
+						bootstrapCode.text= Handlebars.compile($self.session.applicationSettings.bootstrapPrivateCode)($self.$messages);
+						document.body.appendChild(bootstrapCode);
+					}
 				});
 			});
 		},
@@ -574,7 +582,7 @@ define([
 		 */
 		initialize: function () {
 			this.isOldIE = $('html.ie-old').length;
-			$.ajaxSetup({cache: false});
+			$.ajaxSetup({ cache: false });
 
 			$self.plugins.default = requirejs.s.contexts._.config.cascade;
 			$.fn.htmlNoStub = $.fn.html;
