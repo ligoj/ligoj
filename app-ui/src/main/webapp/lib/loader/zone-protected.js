@@ -6,11 +6,9 @@ define(['jquery', 'security.mod', 'cascade', 'error.mod', 'handlebars.mod', 'toa
 	function decorate(session) {
 		$('#_username').html(session.userName + '<b class="caret"></b>');
 		var version = session.applicationSettings.buildVersion;
-		var $node = $('#_version');
-		if ($node.length >= 1 && $node.contents().length > 1) {
-			$node.attr('href', ($node.attr('href') || '').replace('0.0.0', version.replace('-SNAPSHOT', '')))
-				.contents()[1].nodeValue = version;
-		}
+		var $node = $('._version');
+		$node.attr('href', ($node.attr('href') || '').replace('0.0.0', version.replace('-SNAPSHOT', '')))
+				.text(version);
 	}
 	$.ajax({
 		type: 'GET',

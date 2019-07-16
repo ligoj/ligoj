@@ -19,9 +19,6 @@
 						<li>
 							<a href="logout">{{menu.logout}}</a>
 						</li>
-						<li>
-							<a href="#/id/user">{{menu.profile}}</a>
-						</li>
 					</ul>
 				</li>
 			</ul>
@@ -37,13 +34,13 @@
 						</li>
 						<li role="separator" class="divider"></li>
 						<li>
-							<a target="blank" href="https://github.com/ligoj/ligoj/releases/tag/0.0.0" id="_version"><i class="fas fa-lock menu-icon"></i>0.0.0</a>
+							<a data-toggle="modal" data-target="#_about">{{menu.about}}</a>
 						</li>
 					</ul>
 				</li>
 				<li class="dropdown">
 					<a class="navbar-link" data-toggle="dropdown"><i class="fas fa-cog icon-info"></i></a>
-					<ul class="dropdown-menu">
+					<ul class="dropdown-menu cascade-menu-system">
 						<li class="system">
 							<a href="#/system">{{menu.administration}}</a>
 						</li>
@@ -58,20 +55,61 @@
 		</div>
 	</div>
 </div>
-<form id="_not-yet-implemented" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="_not-yet-implemented-label">
+<div id="_not-yet-implemented" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="_not-yet-implemented-label">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
 					×
 				</button>
-				<h4 id="_not-yet-implemented-label" class="modal-title">Pas encore implémentée</h4>
+				<h4 id="_not-yet-implemented-label" class="modal-title">Not yet implemented</h4>
 			</div>
 			<div class="modal-body">
-				<i class="fas fa-frown"></i> Oh non.... cette fonctionnalité n'est pas encore implémentée. Revenez plus tard.
+				<i class="fas fa-frown"></i> This feature is not yet implemented.
 			</div>
 			<div class="modal-footer">
-				<a href="#" data-dismiss="modal" aria-hidden="true">{{cancel}}</a>
+				<button class="btn btn-link" data-dismiss="modal" aria-hidden="true" type="button">{{cancel}}</button>
+			</div>
+		</div>
+	</div>
+</div>
+<form id="_about" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="_about-label">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					×
+				</button>
+				<h4 id="_about-label" class="modal-title">About</h4>
+			</div>
+			<div class="modal-body">
+				<p><span class="logo"/>Ligoj <a target="blank" href="https://github.com/ligoj/ligoj/releases/tag/0.0.0" class="_version">v0.0.0</a></p>
+				<p>This product is licensed under MIT License</p>
+				<div class="_license">
+					Copyright (c) 2019 Ligoj
+					<p>
+					Permission is hereby granted, free of charge, to any person obtaining a copy
+					of this software and associated documentation files (the "Software"), to deal
+					in the Software without restriction, including without limitation the rights
+					to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+					copies of the Software, and to permit persons to whom the Software is
+					furnished to do so, subject to the following conditions:
+					</p><p>
+					The above copyright notice and this permission notice shall be included in all
+					copies or substantial portions of the Software.
+					</p><p>
+					THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+					IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+					FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+					AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+					LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+					OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+					SOFTWARE.</p>
+				</div>
+				<p>Enterprise support provided by <a href="https://kloudy.io" class="brand" target="_blank">Kloudy</a></p>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-link" data-dismiss="modal" aria-hidden="true" type="button">{{close}}</button>
 			</div>
 		</div>
 	</div>

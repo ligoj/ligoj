@@ -99,6 +99,7 @@ define({
 	'restore-visibility': 'Restaurer',
 	'menu': {
 		home: 'Accueil',
+		about: 'A propos',
 		api: 'Api',
 		id: 'Identité',
 		administration: 'Administration',
