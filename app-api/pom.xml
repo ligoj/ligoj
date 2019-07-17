@@ -12,7 +12,7 @@
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-api</artifactId>
 	<packaging>war</packaging>
-	<version>3.0.3</version>
+	<version>3.0.4</version>
 	<name>Ligoj - API</name>
 
 	<scm>
