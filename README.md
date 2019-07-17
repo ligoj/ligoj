@@ -39,7 +39,7 @@ You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin
 You can keep your plugins installation by mapping `/usr/local/ligoj` with a volume. The `ligoj-ui` container has no persistent data.
 
 ```
-docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.0.2
+docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.0.3
 ```
 
 ## Dev section
