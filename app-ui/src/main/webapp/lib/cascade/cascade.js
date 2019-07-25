@@ -57,6 +57,11 @@ define([
 		session: null,
 
 		/**
+		 * Registered extension functions
+		 */
+		ext: {},
+
+		/**
 		 * This list is filled by JavaScript modules listening for a module HTML load, and before modules's
 		 * JavaScript
 		 * @type {array}
