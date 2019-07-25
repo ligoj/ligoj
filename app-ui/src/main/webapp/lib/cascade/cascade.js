@@ -180,7 +180,7 @@ define([
 					if ($self.session.applicationSettings.bootstrapPrivateCode) {
 						// Inject this code for immediate execution
 						var bootstrapCode = document.createElement('script');
-						bootstrapCode.text= Handlebars.compile($self.session.applicationSettings.bootstrapPrivateCode)($self.$messages);
+						bootstrapCode.text= '(function(){'+Handlebars.compile($self.session.applicationSettings.bootstrapPrivateCode)($self.$messages)+'}());';
 						document.body.appendChild(bootstrapCode);
 					}
 				});
