@@ -975,21 +975,38 @@ img.nav-icon {
 .dropdown-menu .divider {
 	margin: 5px 0;
 }
-.nav>li>a:hover, .nav>li>a:focus {
-	background-color: rgba(156, 39, 176, .8);
+.nav-pills>li.active>a, 
+.nav-tabs > li.active > a,
+.nav > li.active > a,
+.dropdown-menu li a:active,
+.nav-pills .pill:hover, .nav-pills .pill:focus, .nav-pills>li>a:hover, .nav-pills>li>a:focus, 
+.nav-tabs > li > a:hover, .nav-tabs > li > a:focus, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a, 
+.nav > li > a:hover, .nav > li > a:focus,
+.dropdown-menu li.active a:hover, .dropdown-menu li.active a:focus,.dropdown-menu li a:hover, .dropdown-menu li a:focus, .dropdown-menu li a:active,
+.dropdown-menu li a:active {
 	color: #fff;
 	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgba(156, 39, 176, .4);
 }
+.nav-pills>li.active>a, 
+.nav-tabs > li.active > a,
+.nav > li.active > a,
+.dropdown-menu li a:active {
+	background-color: rgba(156, 39, 176);
+}
+.nav-pills .pill:hover, .nav-pills .pill:focus, .nav-pills>li>a:hover, .nav-pills>li>a:focus, 
+.nav-pills > li.active > a:focus, .nav-pills > li.active > a:hover,
+.nav-tabs > li > a:hover, .nav-tabs > li > a:focus, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus,
+.nav > li > a:hover, .nav > li > a:focus,
+.dropdown-menu li.active a:hover, .dropdown-menu li.active a:focus,.dropdown-menu li a:hover, .dropdown-menu li a:focus, .dropdown-menu li a:active {
+	background-color: rgba(156, 39, 176, .8);
+}
+
 .nav-pills.navbar-inverse > li > a {
 	color : #d8d2d2
 }
 .nav-pills.navbar-inverse > li:hover > a, .nav-pills.navbar-inverse > li.active > a {
 	color: #fff;
-}
-.nav-pills .pill:hover, .nav-pills .pill:focus,.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus, .dropdown-menu li a:hover, .dropdown-menu li a:focus, .dropdown-menu li a:active{
-	background-color: #9c27b0;
-	color: #fff;
-	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgba(156, 39, 176, .4);
 }
 .pagination>li>a:hover, .pagination>li>a:focus, .pagination>li>span:hover, .pagination>li>span:focus {
 	color: #999;
