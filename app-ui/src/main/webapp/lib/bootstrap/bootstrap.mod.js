@@ -85,12 +85,14 @@ define([
 		}
 	}).on('submit', 'form:not([method]),[method="get"],form[method="GET"]', function (e) {
 		e.preventDefault();
-	}).on('show.bs.tab', 'a[data-toggle="tab"]', function () {
+	}).on('click.bs.tab.data-api.ajax', 'a[data-toggle="tab-ajax"][data-ajax]:not([cascade-loaded])', function (e) {
 		// Load active partials for tab
-		var $target = $($(this).attr('href'));
-		if ($target.is('[data-ajax]')) {
-			$.proxy($cascade.loadPartial, $target)();
-		}
+		var $tab = $(this)
+		var $link = $tab.attr('cascade-loaded','true');
+		$.proxy($cascade.loadPartial, $link)(function() {
+			$link.attr('data-toggle', 'tab').trigger('click.bs.tab.data-api');
+		});
+		e.preventDefault();
 	})
 	// Load active partials for collapse
 	.on('show.bs.collapse', '.collapse[data-ajax]', $cascade.loadPartial)
