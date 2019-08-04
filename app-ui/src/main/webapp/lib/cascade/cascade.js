@@ -545,8 +545,13 @@ define([
 					context.$initializeTransaction = transaction;
 					callback && callback(context);
 				});
-			} else {
+			} else if (typeof context !== 'undefined') {
+				// Refresh the initialized context
+				(typeof context.refresh === 'function') && $.proxy(context.refresh, context)(parameters);
 				callback && callback(context);
+			} else {
+				// No context
+				callback && callback();
 			}
 		},
 
