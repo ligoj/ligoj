@@ -185,7 +185,7 @@ define([
 					if ($self.session.applicationSettings.bootstrapPrivateCode) {
 						// Inject this code for immediate execution
 						var bootstrapCode = document.createElement('script');
-						bootstrapCode.text= '(function(){'+Handlebars.compile($self.session.applicationSettings.bootstrapPrivateCode)($self.$messages)+'}());';
+						bootstrapCode.text = '(function(){' + Handlebars.compile($self.session.applicationSettings.bootstrapPrivateCode)($self.$messages) + '}());';
 						document.body.appendChild(bootstrapCode);
 					}
 				});
@@ -437,7 +437,7 @@ define([
 		 * @param {function} callback Optional callback when partial is loaded.
 		 */
 		loadPartial: function (callback) {
-			var $target = $(this);
+			var $target = $(this).first();
 			var context = $self.$current;
 			callback = typeof callback === 'function' ? callback : null;
 
