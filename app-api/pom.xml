@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-business-parent</artifactId>
-		<version>2.7.6</version>
+		<version>2.7.7</version>
 		<relativePath />
 	</parent>
 
@@ -270,7 +270,7 @@
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-ui</artifactId>
-			<version>[1.0.10,)</version>
+			<version>[1.0.11,)</version>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
