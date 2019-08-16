@@ -178,10 +178,9 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 				}
 
 				// Remove invalid links
-				// FIX IE7 startsWith(^) -> contains(*)
-				selector.find('[href*="#/"]').each(function () {
+				selector.find('[href^="#/"]').each(function () {
 					var $that = $(this);
-					if (!current.isAllowedInternal($that.attr('href').split('#/')[1], uiAuthorizations)) {
+					if (!current.isAllowedInternal($that.attr('href').substring(2), uiAuthorizations)) {
 						current.pruneHierarchy($that);
 					}
 				});
