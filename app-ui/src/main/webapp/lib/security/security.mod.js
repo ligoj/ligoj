@@ -213,15 +213,22 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 					}
 				});
 			}
+			
+			// Enabled plug-ins filtering
+			var plugins = current.plugins = $cascade.session && $cascade.session.applicationSettings && $cascade.session.applicationSettings.plugins;
+			if (typeof plugins !== 'undefined') {
+				// Remove invalid content
+				selector.find('[data-enabled-plugin]').each(function () {
+					var $that = $(this);
+					if ($.inArray($that.attr('data-enabled-plugin'), plugins) < 0) {
+						current.pruneHierarchy($that);
+					}
+				});
+			}
 		},
 		
 		copyContext: function() {
 			if ($cascade.session) {
-				if (typeof $cascade.session.authorizations !== 'undefined') {
-					traceLog('Deprecated usage of "authorizations", upgrade bootstrap to 2.4.5+'); 
-					$cascade.session.uiAuthorizations = $cascade.session.authorizations;
-					$cascade.session.apiAuthorizations = $cascade.session.businessAuthorizations;
-				}
 				current.uiAuthorizations = $cascade.session.uiAuthorizations;
 				current.apiAuthorizations = $cascade.session.apiAuthorizations;
 			}
