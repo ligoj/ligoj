@@ -15,7 +15,9 @@ define(['jquery', 'security.mod', 'cascade', 'error.mod', 'handlebars.mod', 'toa
 		url: REST_PATH + 'session',
 		success: function (session) {
 			$cascade.register('html', function (selector) {
-				security.applySecurity(selector);
+				if (!selector.hasClass('select2-chosen') && !selector.hasClass('dataTables_paginate') && !selector.hasClass('dataTables_info')) {
+					security.applySecurity(selector);
+				}
 			});
 			$cascade.register('fragment-main', function () {
 				decorate(session);
