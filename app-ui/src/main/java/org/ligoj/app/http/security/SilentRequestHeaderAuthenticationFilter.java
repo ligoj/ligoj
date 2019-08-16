@@ -51,8 +51,9 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		final HttpServletRequest req = (HttpServletRequest) request;
 		final HttpServletResponse res = (HttpServletResponse) response;
-		if (req.getRequestURI().matches(".*/([0-9]{3}\\.html|favicon.ico|themes/.*)")) {
-			// White-list error page
+		if (req.getRequestURI().matches(".*/([0-9]{3}\\.html|favicon.ico|themes/.*)") || (req.getServletPath().startsWith("/rest")
+				&& (StringUtils.isNotBlank(req.getParameter("api-key")) || StringUtils.isNotBlank(req.getHeader("x-api-key"))))) {
+			// White-list error page and keyed API access
 			chain.doFilter(request, response);
 		} else {
 			final String principal = (String) getPreAuthenticatedPrincipal(req);
@@ -62,7 +63,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 						new PreAuthenticatedCredentialsNotFoundException(principalHeaderCopy + " header not found in request."));
 			} else if (req.getRequestURI().matches(req.getContextPath() + "/?login.html")) {
 				// In pre-auth mode, "/login" page is not available
-				res.sendRedirect(StringUtils.appendIfMissing(req.getContextPath(),"/"));
+				res.sendRedirect(StringUtils.appendIfMissing(req.getContextPath(), "/"));
 			} else {
 				super.doFilter(request, response, chain);
 			}
