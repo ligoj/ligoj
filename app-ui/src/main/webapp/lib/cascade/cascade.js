@@ -100,7 +100,8 @@ define([
 
 			// Unload event for the page and parent
 			context.$page && (typeof context.$page.unload) === 'function' && $.proxy(context.$page.unload, context.$page)(context);
-			context.$parent && (typeof context.$parent.unload) === 'function' && $.proxy(context.$parent.unload, context.$parent)(context);
+			context.$parent && (typeof context.$parent.unloadChild) === 'function' && $.proxy(context.$parent.unloadChild, context.$parent)(context);
+			(typeof context.unload) === 'function' && $.proxy(context.unload, context)();
 
 			// Finally undefine the AMD modules
 			context.$unloaded = true;
