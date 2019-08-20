@@ -768,8 +768,13 @@ img.nav-icon {
 	height: 0;
 	left: 20px;
 	padding: 0;
-	cursor: pointer;
+	opacity: .1;
 }
+.input-help:hover {
+	cursor: pointer;
+	opacity: 1;
+}
+
 .retractable {
 	padding-right: 0;
 	-webkit-transition: 250ms cubic-bezier(.1,.57,.1,1);
