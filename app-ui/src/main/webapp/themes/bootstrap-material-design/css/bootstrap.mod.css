@@ -239,6 +239,15 @@ th.responsive-datetime {
 .alert>h1, .alert>h2, .alert>h3, .alert>h4, .alert>h5, .alert>h6 {
 	margin-top: 0;
 }
+.form-horizontal>.alert {
+	margin-left: -15px;
+	margin-right: -15px;
+	margin-top: -9px;
+}
+.modal-body>.form-horizontal>.alert {
+	margin-left: -24px;
+	margin-right: -24px;
+}
 
 /* nested nav-list */
 
@@ -754,7 +763,7 @@ img.nav-icon {
 }
 .input-help {
 	position: relative;
-	top: -33px;
+	top: -35px;
 	float: right;
 	height: 0;
 	left: 20px;
