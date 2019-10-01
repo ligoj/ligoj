@@ -1123,3 +1123,16 @@ img.nav-icon {
 .xx-small {
 	font-size: 50%;
 }
+
+/* Datatable 1.6.0 regression */
+.dt-button-collection.dropdown-menu li>a {
+	display: block;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    white-space: nowrap;
+}
+.dt-button-collection.dropdown-menu li>a:focus, 
+.dt-button-collection.dropdown-menu li>a:hover {
+    text-decoration: none;
+}

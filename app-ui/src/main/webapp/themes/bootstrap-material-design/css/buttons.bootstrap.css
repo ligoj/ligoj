@@ -58,14 +58,13 @@ div.dt-button-collection-title {
   font-size: 0.9em;
 }
 
+div.dt-button-collection-title:empty {
+  display: none;
+}
+
 ul.dt-button-collection.dropdown-menu {
   display: block;
   z-index: 2002;
-  -webkit-column-gap: 8px;
-  -moz-column-gap: 8px;
-  -ms-column-gap: 8px;
-  -o-column-gap: 8px;
-  column-gap: 8px;
 }
 ul.dt-button-collection.dropdown-menu.fixed {
   position: fixed;
@@ -83,12 +82,21 @@ ul.dt-button-collection.dropdown-menu.fixed.three-column {
 ul.dt-button-collection.dropdown-menu.fixed.four-column {
   margin-left: -300px;
 }
-ul.dt-button-collection.dropdown-menu > * {
+ul.dt-button-collection.dropdown-menu > div:last-child {
+  -webkit-column-gap: 8px;
+  -moz-column-gap: 8px;
+  -ms-column-gap: 8px;
+  -o-column-gap: 8px;
+  column-gap: 8px;
+}
+ul.dt-button-collection.dropdown-menu > div:last-child > * {
   -webkit-column-break-inside: avoid;
   break-inside: avoid;
 }
 ul.dt-button-collection.dropdown-menu.two-column {
   width: 300px;
+}
+ul.dt-button-collection.dropdown-menu.two-column > div:last-child {
   padding-bottom: 1px;
   -webkit-column-count: 2;
   -moz-column-count: 2;
@@ -98,6 +106,8 @@ ul.dt-button-collection.dropdown-menu.two-column {
 }
 ul.dt-button-collection.dropdown-menu.three-column {
   width: 450px;
+}
+ul.dt-button-collection.dropdown-menu.three-column > div:last-child {
   padding-bottom: 1px;
   -webkit-column-count: 3;
   -moz-column-count: 3;
@@ -107,6 +117,8 @@ ul.dt-button-collection.dropdown-menu.three-column {
 }
 ul.dt-button-collection.dropdown-menu.four-column {
   width: 600px;
+}
+ul.dt-button-collection.dropdown-menu.four-column > div:last-child {
   padding-bottom: 1px;
   -webkit-column-count: 4;
   -moz-column-count: 4;
