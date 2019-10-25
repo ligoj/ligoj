@@ -9,7 +9,7 @@ RUN set -xe \
 ARG GROUP_ID="org.ligoj.app"
 ARG ARTIFACT_ID="app-ui"
 ARG NEXUS_HOST="oss.sonatype.org"
-ARG VERSION="3.0.5"
+ARG VERSION="3.0.6"
 ARG NEXUS_URL="https://${NEXUS_HOST}"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
