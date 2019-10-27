@@ -132,7 +132,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.POST, "/login").permitAll()
 				
 				// Health
-				.antMatchers(HttpMethod.POST, "/favicon.ico").permitAll()
+				.antMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
 
 				// Public static resources
 				.regexMatchers(HttpMethod.GET, "/([0-9]{3}|themes|lib|dist|login|logout|main/public).*",
