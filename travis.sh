@@ -54,7 +54,7 @@ function installMaven {
 #
 function fixBuildVersion {
   echo "Create a clean build version ..."
-  export INITIAL_VERSION=$(maven_expression "project.version")
+  export INITIAL_VERSION=$(mvn -q -Dexec.executable="echo" -Dexec.args="\${project.version}" --non-recursive org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
   echo "INITIAL_VERSION : $INITIAL_VERSION"
 
   # remove suffix -SNAPSHOT or -RC
