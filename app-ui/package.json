@@ -86,7 +86,7 @@
 	    "requirejs-cssloader": "2.2.20",
 	    "requirejs-domready": "2.0.1",
 	    "requirejs-i18njs": "2.0.6",
-	    "requirejs-text": "2.0.15",
+	    "requirejs-text": "2.0.16",
 	    "later": "1.2.0",
 	    "masonry": "4.2.2",
 	    "moment": "2.21.0",
