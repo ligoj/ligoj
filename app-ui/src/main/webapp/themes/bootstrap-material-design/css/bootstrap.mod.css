@@ -787,6 +787,7 @@ img.nav-icon {
 	-moz-transform: translate(0px,0) translateZ(0px);
 	-o-transform: translate(0px,0) translateZ(0px);
 	transform: translate(0px,0) translateZ(0px);
+	z-index: 1;
 }
 
 @media (min-width: 992px) {
