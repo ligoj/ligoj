@@ -185,8 +185,8 @@
 		"name": "Handlebars",
 		"url": "http://handlebarsjs.com/",
 		"sources": "https://github.com/wycats/handlebars.js/",
-		"version": "4.1.2",
-		"lastChecked": "2019-05-04"
+		"version": "4.7.3",
+		"lastChecked": "2020-03-23"
 	}, {
 		"name": "text",
 		"url": "http://requirejs.org/docs/api.html#text",
@@ -213,12 +213,6 @@
 		"version": "2.0.1",
 		"lastChecked": "2016-03-09"
 	}, {
-		"name": "google-code-prettify",
-		"url": "http://code.google.com/p/google-code-prettify/",
-		"sources": "http://code.google.com/p/google-code-prettify/downloads/detail?name=prettify-small-1-Jun-2011.tar.bz2&can=2&q=",
-		"lastChecked": "2014-01-06",
-		"version": "2013-03-04"
-	}, {
 		"name": "Toastr",
 		"id": "toastr",
 		"url": "https://github.com/CodeSeven/toastr",
@@ -236,7 +230,7 @@
 		"url": "http://ivaynberg.github.com/select2/index.html",
 		"sources": "https://github.com/fabdouglas/select2",
 		"version": "3.5.4+#1873+#4193",
-		"lastChecked": "2016-04-15"
+		"lastChecked": "2020-03-23"
 	}, {
 		"name": "DataTables",
 		"url": "http://datatables.net/ref",
