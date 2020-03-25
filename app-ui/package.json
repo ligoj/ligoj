@@ -68,7 +68,7 @@
 		"xo": "^0.12.0"
 	},
 	"dependencies": {
-	    "requirejs": "2.3.5",
+	    "requirejs": "2.3.6",
 	    "d3": ">=4",
 	    "bootstrap": "3.4.1",
 	    "bootstrap-datepicker": "3.3.6",
@@ -78,7 +78,7 @@
 	    "bootbox": "4.4.0",
 	    "cascade": "0.0.1",
 	    "clipboard": "2.0.0",
-	    "handlebars": "4.1.2",
+	    "handlebars": "4.7.3",
 	    "select2": "3.5.4",
 	    "datatables": "1.10.20",
 	    "datatables-buttons": "1.6.0",
