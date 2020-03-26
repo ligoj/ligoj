@@ -19,13 +19,13 @@ Note: you can run this command either from the root module, either from the "app
 # Test the WAR
 
 ```
-java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar target/app-api-3.0.6.war
+java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar target/app-api-3.0.7.war
 ```
 
 # Build Docker image
 
 ```
-docker build -t ligoj/ligoj-api:3.0.6 .
+docker build -t ligoj/ligoj-api:3.0.7 .
 ```
 
 ## Custom builds
@@ -33,25 +33,25 @@ docker build -t ligoj/ligoj-api:3.0.6 .
 ### Custom URL
 
 During the build, the WAR file "ligoj-api.war" is not copied from your local FS but from a previously released remote location such as Nexus.
-By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=3.0.6&p=war"
+By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=3.0.7&p=war"
 In case of a custom build you can specify its remote or local location.
 
 Staged OSS build from Sonatype
 
 ```
-docker build -t ligoj/ligoj-api:3.0.6 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/3.0.6/app-api-3.0.6.war" .
+docker build -t ligoj/ligoj-api:3.0.7 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/3.0.7/app-api-3.0.7.war" .
 ```
 
 Private remote build
 
 ```
-docker build -t ligoj/ligoj-api:3.0.6 --build-arg WAR="https://storage.company.com/releases/app-api-3.0.6.war" .
+docker build -t ligoj/ligoj-api:3.0.7 --build-arg WAR="https://storage.company.com/releases/app-api-3.0.7.war" .
 ```
 
 Reuse the local maven package
 
 ```
-docker build -t ligoj/ligoj-api:3.0.6 --build-arg WAR="target/app-api-3.0.6.war" .
+docker build -t ligoj/ligoj-api:3.0.7 --build-arg WAR="target/app-api-3.0.7.war" .
 ```
 
 Note the local WAR path must be relative to the Dockerfile (not the current path), and must be bellow the Dockerfile: do not use "../bar/foo.war"
@@ -72,7 +72,7 @@ docker run -d \
 docker run --rm -it \
   --name ligoj-api \
   -e CUSTOM_OPTS='-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db' \
-  ligoj/ligoj-api:3.0.6 
+  ligoj/ligoj-api:3.0.7 
 ```
 
 ## Start the API container linked to an external database (Option2)
@@ -81,7 +81,7 @@ docker run --rm -it \
 docker run --rm -it \
  --name "ligoj-api" \
  -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password="ligoj" -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138' \
- ligoj/ligoj-api:3.0.6
+ ligoj/ligoj-api:3.0.7
 ```
 
 You can experience network issue with remote database. To validate the link, try this :
@@ -89,7 +89,7 @@ You can experience network issue with remote database. To validate the link, try
 ```
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:3.0.6 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
+ ligoj/ligoj-api:3.0.7 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
 ```
 
 More complex run with crypto, port mapping, disabled schema generation and volume configurations
@@ -101,7 +101,7 @@ docker run --rm -it \
  -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 \
  -v ~/.ligoj:/home/ligoj \
  -p 8680:8081 \
- ligoj/ligoj-api:3.0.6
+ ligoj/ligoj-api:3.0.7
 ```
 
 Note: On Windows host, replace all \ (escape) by ` for multi-line support.
