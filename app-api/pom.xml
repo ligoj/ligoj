@@ -270,7 +270,7 @@
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-ui</artifactId>
-			<version>[1.0.12,)</version>
+			<version>[1.0.13,)</version>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
