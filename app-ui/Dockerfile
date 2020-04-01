@@ -1,4 +1,4 @@
-FROM openjdk:11-jre
+FROM openjdk:13-jdk
 LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
 
 RUN set -xe \

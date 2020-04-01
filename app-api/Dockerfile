@@ -1,4 +1,4 @@
-FROM openjdk:11-jre
+FROM openjdk:13-jdk
 LABEL maintainer "fabrice.daugan@gmail.com"
 
 RUN set -xe \
@@ -54,7 +54,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
 	--add-opens java.xml/jdk.xml.internal=ALL-UNNAMED \
 	--add-opens java.xml/javax.xml.catalog=ALL-UNNAMED \
 	--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
-	--add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED\
+	--add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED \
     -Dserver.address="${SERVER_HOST}" \
     -Dserver.port="${SERVER_PORT}" \
     -Dserver.servlet.context-path="${CONTEXT_URL}" \

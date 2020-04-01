@@ -10,7 +10,7 @@ WORKDIR /build/
 ADD . .
 RUN mvn package -B -q -Dmaven.test.skip=true -Pminify
 
-FROM openjdk:11-jre
+FROM openjdk:13-jdk
 LABEL maintainer "fabrice.daugan@gmail.com"
 
 RUN set -xe \
