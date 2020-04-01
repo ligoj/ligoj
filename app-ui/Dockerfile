@@ -1,9 +1,5 @@
-FROM openjdk:13-jdk
+FROM openjdk:14-jdk-alpine
 LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
-
-RUN set -xe \
-  apt-get update && \
-  apt-get update --fix-missing
 
 # ARGS (build)
 ARG GROUP_ID="org.ligoj.app"
