@@ -129,13 +129,13 @@ log.http                    = info # When "debug", all HTTP queries are logged. 
 
 ### JSE
 
-The source compatibility is 9 to 11.
+The source compatibility is 11 to 13.
 
 | Vendor     | Release  | Status  | Notes |
 |------------|----------|---------|-------|
-| Oracle     | 9        | OK      | You have to rebuild from the source |
-| OpenJDK    | 9        | OK      | You have to rebuild from the source |
-| Oracle     | 10       | OK      | You have to rebuild from the source |
-| OpenJDK    | 10       | OK      | You have to rebuild from the source |
-| Oracle     | 11       | OK      |  |
-| OpenJDK    | 11       | OK      |  |
+| Oracle     | 11       | OK      | You have to rebuild from the source |
+| OpenJDK    | 11       | OK      | You have to rebuild from the source |
+| Oracle     | 12       | OK      | You have to rebuild from the source |
+| OpenJDK    | 12       | OK      | You have to rebuild from the source |
+| Oracle     | 13       | OK      |  |
+| OpenJDK    | 13       | OK      |  |
