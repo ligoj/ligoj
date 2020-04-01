@@ -15,7 +15,7 @@ services:
       - ligoj-network
   api:
     container_name: ligoj-api
-    image: ligoj/ligoj-api:3.0.7
+    image: ligoj/ligoj-api:3.0.8
     restart: always
     environment:
       SERVER_HOST: "0.0.0.0"
@@ -32,7 +32,7 @@ services:
       - ligoj-network
   ui:
     container_name: ligoj-ui
-    image: ligoj/ligoj-ui:3.0.7
+    image: ligoj/ligoj-ui:3.0.8
     restart: always
     environment:
       JAVA_OPTIONS: "-Dsecurity=Rest"
