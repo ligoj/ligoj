@@ -40,7 +40,7 @@ public class HtmlProxyFilter extends OncePerRequestFilter {
 		response.setHeader("Expires", "0");
 
 		// Forward to the real resource : orientation and optimization according to the current environment
-		final String baseName = getBaseName(request);
+		final var baseName = getBaseName(request);
 		request.getRequestDispatcher("/" + baseName + getOptimizedSuffix(baseName) + ".html").forward(request, response);
 	}
 
@@ -48,8 +48,8 @@ public class HtmlProxyFilter extends OncePerRequestFilter {
 	 * Return the base name of resource from the request.
 	 */
 	private String getBaseName(final ServletRequest request) {
-		final String servletPath = ((HttpServletRequest) request).getServletPath();
-		final String base = StringUtils.removeStart(servletPath, "/");
+		final var servletPath = ((HttpServletRequest) request).getServletPath();
+		final var base = StringUtils.removeStart(servletPath, "/");
 		return getBaseName(base.isEmpty() ? "index.html" : base);
 	}
 

@@ -14,7 +14,7 @@ public class TrustedAuthenticationProvider extends AbstractAuthenticationProvide
 
 	@Override
 	public Authentication authenticate(final Authentication authentication) {
-		final String userName = StringUtils.lowerCase(authentication.getPrincipal().toString());
+		final var userName = StringUtils.lowerCase(authentication.getPrincipal().toString());
 		return new UsernamePasswordAuthenticationToken(userName, "N/A", authentication.getAuthorities());
 	}
 

@@ -48,8 +48,8 @@ public class LigojPluginListener implements PluginListener {
 		// Node statistics only for nodes
 		if (!"FEATURE".equals(entity.getType())) {
 			// This is a node (service or tool) add statistics and details
-			final LigojPluginVo lvo = (LigojPluginVo) vo;
-			final String key = entity.getKey();
+			final var lvo = (LigojPluginVo) vo;
+			final var key = entity.getKey();
 			lvo.setNodes(nodeRepository.countByRefined(key));
 			lvo.setSubscriptions(subscriptionRepository.countByNode(key));
 			lvo.setNode(NodeResource.toVo(nodeRepository.findOne(key)));
@@ -135,7 +135,7 @@ public class LigojPluginListener implements PluginListener {
 	 */
 	protected PluginType determinePluginType(final ServicePlugin plugin) {
 		// Determine the type from the key by convention
-		final PluginType result = PluginType.values()[StringUtils.countMatches(plugin.getKey(), ':')];
+		final var result = PluginType.values()[StringUtils.countMatches(plugin.getKey(), ':')];
 
 		// Double check the convention with related interface
 		final PluginType interfaceType;
@@ -159,7 +159,7 @@ public class LigojPluginListener implements PluginListener {
 	 * @return The new {@link Node}
 	 */
 	protected Node newNode(final ServicePlugin service) {
-		final Node node = new Node();
+		final var node = new Node();
 		node.setId(service.getKey());
 		node.setName(service.getName());
 
@@ -184,7 +184,7 @@ public class LigojPluginListener implements PluginListener {
 	 *         expected parent by convention, and the parent is not found, an error will be raised.
 	 */
 	protected Node getParentNode(final String key) {
-		final String parentKey = key.substring(0, key.lastIndexOf(':'));
+		final var parentKey = key.substring(0, key.lastIndexOf(':'));
 		if (parentKey.indexOf(':') == -1) {
 			// Was already the top most parent
 			return null;
@@ -196,7 +196,7 @@ public class LigojPluginListener implements PluginListener {
 
 	@Override
 	public void configure(FeaturePlugin plugin, SystemPlugin entity) {
-		final PluginType type = plugin instanceof ServicePlugin ? determinePluginType((ServicePlugin) plugin) : PluginType.FEATURE;
+		final var type = plugin instanceof ServicePlugin ? determinePluginType((ServicePlugin) plugin) : PluginType.FEATURE;
 		entity.setType(type.name());
 
 		// Manage disable then re-enable base with double install

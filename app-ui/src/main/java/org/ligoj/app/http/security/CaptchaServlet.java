@@ -47,8 +47,8 @@ public class CaptchaServlet extends HttpServlet {
 	@Override
 	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 
-		final ColoredEdgesWordRenderer wordRenderer = new ColoredEdgesWordRenderer(COLORS, FONTS, 2F);
-		final Captcha captcha = new Captcha.Builder(250, 50).gimp(new FishEyeGimpyRenderer()).addText(wordRenderer)
+		final var wordRenderer = new ColoredEdgesWordRenderer(COLORS, FONTS, 2F);
+		final var captcha = new Captcha.Builder(250, 50).gimp(new FishEyeGimpyRenderer()).addText(wordRenderer)
 				.addBackground(new GradiatedBackgroundProducer()).addNoise().addNoise(new StraightLineNoiseProducer(Color.BLUE, 2)).build();
 
 		// Store the expected answer

@@ -31,7 +31,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	 * Simple constructor using a forward to "401" page on error.
 	 */
 	public SilentRequestHeaderAuthenticationFilter() {
-		final SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler();
+		final var handler = new SimpleUrlAuthenticationFailureHandler();
 		handler.setDefaultFailureUrl("/401.html");
 		handler.setUseForward(true);
 		setAuthenticationFailureHandler(handler);
@@ -49,14 +49,14 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		final HttpServletRequest req = (HttpServletRequest) request;
-		final HttpServletResponse res = (HttpServletResponse) response;
+		final var req = (HttpServletRequest) request;
+		final var res = (HttpServletResponse) response;
 		if (req.getRequestURI().matches(".*/([0-9]{3}\\.html|favicon.ico|themes/.*)") || (req.getServletPath().startsWith("/rest")
 				&& (StringUtils.isNotBlank(req.getParameter("api-key")) || StringUtils.isNotBlank(req.getHeader("x-api-key"))))) {
 			// White-list error page and keyed API access
 			chain.doFilter(request, response);
 		} else {
-			final String principal = (String) getPreAuthenticatedPrincipal(req);
+			final var principal = (String) getPreAuthenticatedPrincipal(req);
 			if (principal == null || getPreAuthenticatedCredentials(req) == null) {
 				// We want this header
 				unsuccessfulAuthentication(req, res,

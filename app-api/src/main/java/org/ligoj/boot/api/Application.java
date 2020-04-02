@@ -55,7 +55,7 @@ public class Application extends SpringBootServletInitializer {
 	 */
 	@Bean
 	public ServletRegistrationBean<WebjarsServlet> webjarsServlet() {
-		final ServletRegistrationBean<WebjarsServlet> registrationBean = new ServletRegistrationBean<>(new WebjarsServlet(), "/webjars/*");
+		final var registrationBean = new ServletRegistrationBean<>(new WebjarsServlet(), "/webjars/*");
 		registrationBean.setName("Webjars");
 		return registrationBean;
 	}
@@ -67,7 +67,7 @@ public class Application extends SpringBootServletInitializer {
 	 */
 	@Bean
 	public ServletRegistrationBean<CXFServlet> cxfServlet() {
-		final ServletRegistrationBean<CXFServlet> registrationBean = new ServletRegistrationBean<>(new CXFServlet(), "/rest/*");
+		final var registrationBean = new ServletRegistrationBean<>(new CXFServlet(), "/rest/*");
 		registrationBean.setName("CXFServlet");
 		registrationBean.setInitParameters(Collections.singletonMap("service-list-path", "web-services"));
 		registrationBean.setOrder(10);
@@ -81,9 +81,9 @@ public class Application extends SpringBootServletInitializer {
 	 */
 	@Bean
 	public FilterRegistrationBean<DelegatingFilterProxy> securityFilterChainRegistration() {
-		final DelegatingFilterProxy delegatingFilterProxy = new DelegatingFilterProxy();
+		final var delegatingFilterProxy = new DelegatingFilterProxy();
 		delegatingFilterProxy.setTargetBeanName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
-		final FilterRegistrationBean<DelegatingFilterProxy> registrationBean = new FilterRegistrationBean<>(delegatingFilterProxy);
+		final var registrationBean = new FilterRegistrationBean<>(delegatingFilterProxy);
 		registrationBean.setName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
 		registrationBean.addUrlPatterns("/rest/*", "/manage/*");
 		return registrationBean;

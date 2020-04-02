@@ -21,10 +21,10 @@ public class SecurityConfigurationTest {
 	@Test
 	public void configure() throws Exception {
 		final ObjectPostProcessor<Object> proc =  Mockito.mock(ObjectPostProcessor.class);
-		final AuthenticationManagerBuilder builder = new AuthenticationManagerBuilder(proc);
-		final HttpSecurity security = new HttpSecurity(proc, builder, new HashMap<>());
-		final SecurityConfiguration configuration = new SecurityConfiguration();
-		final AuthenticationConfiguration authenticationConfiguration = Mockito.mock(AuthenticationConfiguration.class);
+		final var builder = new AuthenticationManagerBuilder(proc);
+		final var security = new HttpSecurity(proc, builder, new HashMap<>());
+		final var configuration = new SecurityConfiguration();
+		final var authenticationConfiguration = Mockito.mock(AuthenticationConfiguration.class);
 		configuration.setAuthenticationConfiguration(authenticationConfiguration);
 		configuration.configure(security);
 		configuration.apiTokenFilter();

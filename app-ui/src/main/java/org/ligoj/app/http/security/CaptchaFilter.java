@@ -14,7 +14,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,9 +34,9 @@ public class CaptchaFilter implements Filter {
 
 	@Override
 	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
-		final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-		final HttpSession session = httpServletRequest.getSession(false);
-		final Captcha captcha = session == null ? null : (Captcha) session.getAttribute(Captcha.NAME);
+		final var httpServletRequest = (HttpServletRequest) request;
+		final var session = httpServletRequest.getSession(false);
+		final var captcha = session == null ? null : (Captcha) session.getAttribute(Captcha.NAME);
 		if (captcha == null) {
 			// No session -> no CAPTCHA to match
 			log.info("No configured for this session");
@@ -59,7 +58,7 @@ public class CaptchaFilter implements Filter {
 	 * Catch security failed somewhere.
 	 */
 	private void fail(final ServletResponse response, final String key, final String value) throws IOException {
-		final HttpServletResponse httpResponse = (HttpServletResponse) response;
+		final var httpResponse = (HttpServletResponse) response;
 		httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		httpResponse.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		httpResponse.setContentType("application/json");

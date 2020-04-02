@@ -4,7 +4,6 @@
 package org.ligoj.boot.web;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.jetty.servlets.DoSFilter;
 import org.ligoj.app.http.proxy.HtmlProxyFilter;
@@ -112,7 +111,7 @@ public class Application extends SpringBootServletInitializer {
 	 */
 	private ServletRegistrationBean<BackendProxyServlet> newBackend(final String name, final String proxyToKey, final String prefix,
 			final String... mapping) {
-		final Map<String, String> initParameters = new HashMap<>();
+		final var initParameters = new HashMap<String, String>();
 		initParameters.put("proxyToKey", proxyToKey);
 		initParameters.put("prefix", prefix);
 		initParameters.put("idleTimeout", "120000");
@@ -120,7 +119,7 @@ public class Application extends SpringBootServletInitializer {
 		initParameters.put("timeout", "0");
 		initParameters.put("apiKeyParameter", "api-key");
 		initParameters.put("apiKeyHeader", "x-api-key");
-		final ServletRegistrationBean<BackendProxyServlet> registrationBean = new ServletRegistrationBean<>(new BackendProxyServlet(), mapping);
+		final var registrationBean = new ServletRegistrationBean<>(new BackendProxyServlet(), mapping);
 		registrationBean.setInitParameters(initParameters);
 		registrationBean.setName(name);
 		return registrationBean;
@@ -133,9 +132,9 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public FilterRegistrationBean<DelegatingFilterProxy> securityFilterChainRegistration() {
-		final DelegatingFilterProxy filter = new DelegatingFilterProxy();
+		final var filter = new DelegatingFilterProxy();
 		filter.setTargetBeanName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
-		final FilterRegistrationBean<DelegatingFilterProxy> registrationBean = new FilterRegistrationBean<>(filter);
+		final var registrationBean = new FilterRegistrationBean<>(filter);
 		registrationBean.setName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
 		registrationBean.addUrlPatterns("/*");
 		registrationBean.setOrder(1);
@@ -144,9 +143,9 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public FilterRegistrationBean<CharacterEncodingFilter> characterEncodingFilter() {
-		final FilterRegistrationBean<CharacterEncodingFilter> registrationBean = new FilterRegistrationBean<>(new CharacterEncodingFilter());
+		final var registrationBean = new FilterRegistrationBean<>(new CharacterEncodingFilter());
 		registrationBean.addUrlPatterns("*.html", "*.js", "/");
-		final Map<String, String> initParameters = new HashMap<>();
+		final var initParameters = new HashMap<String, String>();
 		initParameters.put("encoding", "UTF-8");
 		registrationBean.setInitParameters(initParameters);
 		registrationBean.setOrder(5);
@@ -155,9 +154,9 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public FilterRegistrationBean<HtmlProxyFilter> htmlProxyFilter() {
-		final HtmlProxyFilter proxyFilter = new HtmlProxyFilter();
+		final var proxyFilter = new HtmlProxyFilter();
 		proxyFilter.setSuffix(getEnvironment());
-		final FilterRegistrationBean<HtmlProxyFilter> registrationBean = new FilterRegistrationBean<>(proxyFilter);
+		final var registrationBean = new FilterRegistrationBean<>(proxyFilter);
 		registrationBean.addUrlPatterns("/index.html", "/", "/login.html");
 		registrationBean.setOrder(10);
 		return registrationBean;
@@ -165,9 +164,9 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public FilterRegistrationBean<CacheFilter> cacheFilter() {
-		final FilterRegistrationBean<CacheFilter> registrationBean = new FilterRegistrationBean<>(new CacheFilter());
+		final var registrationBean = new FilterRegistrationBean<>(new CacheFilter());
 		registrationBean.addUrlPatterns("/dist/*", "/img/*", "/main/*", "/themes/*");
-		final Map<String, String> initParameters = new HashMap<>();
+		final var initParameters = new HashMap<String, String>();
 		initParameters.put("privacy", "public");
 		initParameters.put("static", "true");
 		initParameters.put("expiration", "31556926");
@@ -178,9 +177,9 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public FilterRegistrationBean<DoSFilter> doSFilter() {
-		final FilterRegistrationBean<DoSFilter> registrationBean = new FilterRegistrationBean<>(new DoSFilter());
+		final var registrationBean = new FilterRegistrationBean<>(new DoSFilter());
 		registrationBean.addUrlPatterns(SERVICE_RESET, SERVICE_RECOVERY, "/captcha.png");
-		final Map<String, String> initParameters = new HashMap<>();
+		final var initParameters = new HashMap<String, String>();
 		initParameters.put("maxRequestsPerSec", "6");
 		initParameters.put("delayMs", "-1");
 		initParameters.put("maxWaitMs", "1");
@@ -196,7 +195,7 @@ public class Application extends SpringBootServletInitializer {
 
 	@Bean
 	public FilterRegistrationBean<CaptchaFilter> captchaFilter() {
-		final FilterRegistrationBean<CaptchaFilter> registrationBean = new FilterRegistrationBean<>(new CaptchaFilter());
+		final var registrationBean = new FilterRegistrationBean<>(new CaptchaFilter());
 		registrationBean.addUrlPatterns(SERVICE_RESET, SERVICE_RECOVERY);
 		registrationBean.setOrder(100);
 		return registrationBean;

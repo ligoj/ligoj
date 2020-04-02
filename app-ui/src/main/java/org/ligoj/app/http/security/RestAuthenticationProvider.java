@@ -47,7 +47,7 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 
 		// Do the POST
 		try (var httpClient = clientBuilder.build()) {
-			final String content = String.format(getSsoPostContent(), username, credential);
+			final var content = String.format(getSsoPostContent(), username, credential.replace("\\", "\\\\").replace("\"", "\\\""));
 			httpPost.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
 			httpPost.setHeader("Content-Type", "application/json");
 			final var httpResponse = httpClient.execute(httpPost);

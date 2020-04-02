@@ -90,9 +90,9 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	public void fillVoIsFeature() {
-		final SystemPlugin p = new SystemPlugin();
+		final var p = new SystemPlugin();
 		p.setType("FEATURE");
-		final LigojPluginVo vo = new LigojPluginVo();
+		final var vo = new LigojPluginVo();
 		resource.fillVo(p, null, vo);
 		Assertions.assertEquals(0, vo.getNodes());
 		Assertions.assertEquals(0, vo.getSubscriptions());
@@ -101,10 +101,10 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	public void fillVoIsNotFeature() {
-		final SystemPlugin entity = new SystemPlugin();
+		final var entity = new SystemPlugin();
 		entity.setType("SERVICE");
 		entity.setKey("service:sample:tool");
-		final LigojPluginVo vo = new LigojPluginVo();
+		final var vo = new LigojPluginVo();
 		resource.fillVo(entity, null, vo);
 		Assertions.assertEquals(2, vo.getNodes());
 		Assertions.assertEquals(3, vo.getSubscriptions());
@@ -123,8 +123,8 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	public void configure() {
-		final SampleService service1 = new SampleService();
-		final SystemPlugin entity = new SystemPlugin();
+		final var service1 = new SampleService();
+		final var entity = new SystemPlugin();
 
 		// Configure, but is already installed
 		resource.configure(service1, entity);
@@ -132,7 +132,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 		Assertions.assertEquals("SERVICE", entity.getType());
 
 		// Configure, but is already installed
-		final SampleTool1 service2 = new SampleTool1();
+		final var service2 = new SampleTool1();
 		resource.configure(service2, entity);
 		Assertions.assertEquals("TOOL", entity.getType());
 
@@ -146,15 +146,15 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	public void configureFeature() {
-		final FeaturePlugin service1 = Mockito.mock(FeaturePlugin.class);
-		final SystemPlugin entity = new SystemPlugin();
+		final var service1 = Mockito.mock(FeaturePlugin.class);
+		final var entity = new SystemPlugin();
 		resource.configure(service1, entity);
 		Assertions.assertEquals("FEATURE", entity.getType());
 	}
 
 	@Test
 	public void configureWithImplicitNode() {
-		final ServicePlugin service1 = new SampleService() {
+		final var service1 = new SampleService() {
 			@Override
 			public List<Class<?>> getInstalledEntities() {
 				return Arrays.asList(SystemBench.class); // "Node" class is not included
@@ -162,7 +162,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 		};
 		em.createQuery("DELETE Subscription").executeUpdate();
 		em.createQuery("DELETE Node").executeUpdate();
-		final SystemPlugin entity = new SystemPlugin();
+		final var entity = new SystemPlugin();
 
 		resource.configure(service1, entity);
 		Assertions.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
@@ -171,13 +171,13 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	public void configureWithExplicitNode() {
-		final ServicePlugin service1 = new SampleService() {
+		final var service1 = new SampleService() {
 			@Override
 			public List<Class<?>> getInstalledEntities() {
 				return Arrays.asList(Node.class); // "Node" class is included
 			}
 		};
-		final SystemPlugin entity = new SystemPlugin();
+		final var entity = new SystemPlugin();
 		resource.configure(service1, entity); // No implicit Node install for this plug-in
 		Assertions.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
 		Assertions.assertEquals("SERVICE", entity.getType());
@@ -191,7 +191,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	public void determinePluginTypeError() {
-		final ServicePlugin service1 = Mockito.mock(ServicePlugin.class);
+		final var service1 = Mockito.mock(ServicePlugin.class);
 		Mockito.when(service1.getKey()).thenReturn("service:sample:tool");
 		Assertions.assertThrows(TechnicalException.class, () -> {
 			resource.determinePluginType(service1);
@@ -200,21 +200,21 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	public void getPluginClassLoader() {
-		final LigojPluginsClassLoader pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
+		final var pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
 		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(resource.getPluginClassLoader());
 		}
 	}
 
 	private LigojPluginListener newPluginResourceInstall() {
-		final LigojPluginsClassLoader pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
-		final Path directory = Mockito.mock(Path.class);
+		final var pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
+		final var directory = Mockito.mock(Path.class);
 		Mockito.when(pluginsClassLoader.getHomeDirectory()).thenReturn(Paths.get(USER_HOME_DIRECTORY));
 		Mockito.when(directory.resolve(ArgumentMatchers.anyString()))
 				.thenReturn(Paths.get(USER_HOME_DIRECTORY, org.ligoj.bootstrap.core.plugin.PluginsClassLoader.HOME_DIR_FOLDER,
 						org.ligoj.bootstrap.core.plugin.PluginsClassLoader.PLUGINS_DIR).resolve("plugin-iam-node-test.jar"));
 		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(directory);
-		final LigojPluginListener pluginResource = new LigojPluginListener() {
+		final var pluginResource = new LigojPluginListener() {
 			@Override
 			protected LigojPluginsClassLoader getPluginClassLoader() {
 				return pluginsClassLoader;
@@ -227,16 +227,16 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	public void toFile() throws IOException {
-		final Subscription subscription = new Subscription();
-		final Node service = new Node();
+		final var subscription = new Subscription();
+		final var service = new Node();
 		service.setId("service:s1");
-		final Node tool = new Node();
+		final var tool = new Node();
 		tool.setId("service:s1:t1");
 		tool.setRefined(service);
 		subscription.setNode(tool);
 		subscription.setId(99);
-		final String[] fragments = new String[] { "sub-dir" };
-		final File file = newPluginResourceInstall().toFile(subscription, fragments);
+		final var fragments = new String[] { "sub-dir" };
+		final var file = newPluginResourceInstall().toFile(subscription, fragments);
 		Assertions.assertNotNull(USER_HOME_DIRECTORY + "/service-s1/t1/99/sub-dir", file.toString());
 	}
 
