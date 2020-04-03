@@ -527,8 +527,11 @@ define([
 		propagateTransaction: function (context, transaction) {
 			context.$parent && $self.propagateTransaction(context.$parent, transaction);
 			context.$transaction = transaction;
+			context.$isSameTransaction = function() {
+				return context.$transaction == $self.transaction;
+			};
 		},
-
+		
 		/**
 		 * Initialize the given context by calling the optional 'initialize' function if provided, and with
 		 * given parameters.
