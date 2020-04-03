@@ -140,7 +140,7 @@ server.address              = ${SERVER_HOST}
 server.servlet.context-path = /${CONTEXT}
 management.context-path     = /manage
 management.security.roles   = USER
-jpa.hbm2ddl                 = <[update],none,validate>. With "update", the server takes up to 30s to start
+jpa.hbm2ddl                 = <[update],none,validate> # With "update", the server takes up to 30s to start
 jdbc.vendor                 = <[mysql],postgresql,mariadb>
 jdbc.port                   = 3306
 jdbc.database               = ligoj
@@ -157,10 +157,11 @@ jdbc.maxPoolSize            = 150
 health.node                 = 0 0 0/1 1/1 * ?
 health.subscription         = 0 0 2 1/1 * ?
 app.crypto.file             = Secret file location
-ligoj.plugin.enabled        = <false,[true]> When false, plug-ins are not loaded and their state is not updated
-ligoj.plugin.update         = <false,[true]> When true, on startup, the plug-in are updated to the latest available version
-ligoj.plugin.repository     = <[central],nexus> The default repository used to perform the plug-in update
-ligoj.plugin.ignore         = plugin-password-management Filtered (deprecated, fixed version, ...) plug-ins for install or update from the repositories
+ligoj.plugin.enabled        = <false,[true]> # When false, plug-ins are not loaded and their state is not updated
+ligoj.plugin.update         = <false,[true]> # When true, on startup, the plug-in are updated to the latest available version
+ligoj.plugin.repository     = <[central],nexus> # The default repository used to perform the plug-in update/install
+ligoj.plugin.ignore         = plugin-password-management # Filtered (deprecated, fixed version, ...) plug-ins for install or update from the repositories
+ligoj.plugin.install        = # Comma separated plug-ins  to install on startup. Update are performed according to "ligoj.plugin.update" option
 ```
 
 ## Compatibilities
