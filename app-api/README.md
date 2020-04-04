@@ -188,5 +188,7 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 | OpenJDK    | 11       | OK      | You have to rebuild from the source |
 | Oracle     | 12       | OK      | You have to rebuild from the source |
 | OpenJDK    | 12       | OK      | You have to rebuild from the source |
-| Oracle     | 13       | OK      |  |
-| OpenJDK    | 13       | OK      |  |
+| Oracle     | 13       | OK      | You have to rebuild from the source |
+| OpenJDK    | 13       | OK      | You have to rebuild from the source |
+| Oracle     | 14       | OK      |  |
+| OpenJDK    | 14       | OK      |  |
