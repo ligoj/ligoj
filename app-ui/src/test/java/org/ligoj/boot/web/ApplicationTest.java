@@ -3,10 +3,6 @@
  */
 package org.ligoj.boot.web;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -67,7 +63,7 @@ public class ApplicationTest {
 
 	@Test
 	public void getEnvironment() {
-		final Application application = new Application();
+		final var application = new Application();
 		application.environmentCode = "auto";
 		Assertions.assertEquals("", application.getEnvironment());
 		application.environmentCode = "any";
@@ -78,12 +74,8 @@ public class ApplicationTest {
 	}
 
 	protected String[] getArgs(String... args) {
-		final List<String> list = new ArrayList<>(
-				Arrays.asList("--spring.main.webEnvironment=false", "--spring.main.showBanner=OFF", "--spring.main.registerShutdownHook=false"));
-		if (args.length > 0) {
-			list.add("--spring.main.sources=" + StringUtils.arrayToCommaDelimitedString(args));
-		}
-		return list.toArray(new String[list.size()]);
+		return new String[] { "--spring.main.webEnvironment=false", "--spring.main.showBanner=OFF", "--spring.main.registerShutdownHook=false",
+				"--spring.main.sources=" + StringUtils.arrayToCommaDelimitedString(args) };
 	}
 
 }

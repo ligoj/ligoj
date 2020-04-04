@@ -5,8 +5,8 @@ package org.ligoj.boot.web;
 
 import java.util.HashMap;
 
-import org.eclipse.jetty.servlets.DoSFilter;
 import org.ligoj.app.http.proxy.HtmlProxyFilter;
+import org.ligoj.app.http.security.CacheBustingFilter;
 import org.ligoj.app.http.security.CaptchaFilter;
 import org.ligoj.app.http.security.CaptchaServlet;
 import org.ligoj.bootstrap.http.proxy.BackendProxyServlet;
@@ -29,8 +29,6 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.DelegatingFilterProxy;
-
-import com.samaxes.filter.CacheFilter;
 
 /**
  * Application entry point.
@@ -163,33 +161,15 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	@Bean
-	public FilterRegistrationBean<CacheFilter> cacheFilter() {
-		final var registrationBean = new FilterRegistrationBean<>(new CacheFilter());
-		registrationBean.addUrlPatterns("/dist/*", "/img/*", "/main/*", "/themes/*");
+	public FilterRegistrationBean<CacheBustingFilter> cacheFilter() {
+		final var registrationBean = new FilterRegistrationBean<>(new CacheBustingFilter());
+		registrationBean.addUrlPatterns("/dist/*", "/img/*", "/main/*", "/themes/*", "/favicon.ico");
 		final var initParameters = new HashMap<String, String>();
 		initParameters.put("privacy", "public");
 		initParameters.put("static", "true");
 		initParameters.put("expiration", "31556926");
 		registrationBean.setInitParameters(initParameters);
 		registrationBean.setOrder(15);
-		return registrationBean;
-	}
-
-	@Bean
-	public FilterRegistrationBean<DoSFilter> doSFilter() {
-		final var registrationBean = new FilterRegistrationBean<>(new DoSFilter());
-		registrationBean.addUrlPatterns(SERVICE_RESET, SERVICE_RECOVERY, "/captcha.png");
-		final var initParameters = new HashMap<String, String>();
-		initParameters.put("maxRequestsPerSec", "6");
-		initParameters.put("delayMs", "-1");
-		initParameters.put("maxWaitMs", "1");
-		initParameters.put("throttledRequests", "6");
-		initParameters.put("throttleMs", "1000");
-		initParameters.put("maxRequestMs", "2000");
-		initParameters.put("maxIdleTrackerMs", "5000");
-		initParameters.put("trackSessions", "true");
-		registrationBean.setInitParameters(initParameters);
-		registrationBean.setOrder(20);
 		return registrationBean;
 	}
 
