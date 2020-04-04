@@ -23,6 +23,10 @@ import org.springframework.security.web.authentication.preauth.RequestHeaderAuth
 public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthenticationFilter {
 
 	/**
+	 * Common whitelist pattern.
+	 */
+	public static final String WHITE_LIST_PATTERN = "/(([0-9]{3}|logout)\\.html|favicon.ico|logout|(themes|lib|dist|main/public)/.*)";
+	/**
 	 * Only there because of visibility of "principalRequestHeader" of {@link RequestHeaderAuthenticationFilter}
 	 */
 	private String principalHeaderCopy;
@@ -51,7 +55,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		final var req = (HttpServletRequest) request;
 		final var res = (HttpServletResponse) response;
-		if (req.getRequestURI().matches(".*/([0-9]{3}\\.html|favicon.ico|themes/.*)") || (req.getServletPath().startsWith("/rest")
+		if (req.getServletPath().matches(WHITE_LIST_PATTERN) || (req.getServletPath().startsWith("/rest")
 				&& (StringUtils.isNotBlank(req.getParameter("api-key")) || StringUtils.isNotBlank(req.getHeader("x-api-key"))))) {
 			// White-list error page and keyed API access
 			chain.doFilter(request, response);

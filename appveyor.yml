@@ -1,0 +1,36 @@
+version: '{build}'
+install:
+  - ps: |
+      Add-Type -AssemblyName System.IO.Compression.FileSystem
+      if ((Test-Path -Path "C:\maven" )) {
+        Remove-Item -Recurse -Force "C:\maven"
+      }
+            
+      (new-object System.Net.WebClient).DownloadFile(
+        'http://www.us.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.zip',
+        'C:\maven-bin.zip'
+      )
+      [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\maven-bin.zip", "C:\maven")
+  - ps: |
+     $env:JAVA_HOME="c:/Program Files/Java/jdk14"
+  - cmd: SET    
+  - cmd: SET PATH=C:\maven\apache-maven-3.6.3\bin;%PATH%
+  - cmd: SET M2_HOME=C:\maven\apache-maven-3.6.3
+  - cmd: SET MAVEN_OPTS=-Xmx2g
+  - cmd: SET MAVEN_HOME=C:\maven\apache-maven-3.6.3
+  - cmd: SET
+
+build_script:
+  - mkdir C:\WINDOWS\system32\config\systemprofile\AppData\Local\Temp
+  - dir
+  - mvn -B -V -e clean package -DskipTest
+test_script:
+  - mvn -B -V -e clean install
+cache:
+  - C:\maven\
+  - C:\Users\appveyor\.m2
+artifacts:
+  - path: 'target\**\*.war'
+on_failure:
+  - ps: Get-ChildItem target\surefire-reports\*.txt | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem *.log | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }

@@ -27,8 +27,8 @@ public class CaptchaFilterTest {
 
 	@Test
 	void testJavax() throws ServletException {
-		new CacheBustingFilter().init(null);
-		new CacheBustingFilter().destroy();
+		new CaptchaFilter().init(null);
+		new CaptchaFilter().destroy();
 	}
 
 	@Test

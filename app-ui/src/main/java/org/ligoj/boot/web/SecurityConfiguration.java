@@ -130,14 +130,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		final var sec = http.authorizeRequests().expressionHandler(expressionHandler)
 				// Login
 				.antMatchers(HttpMethod.POST, "/login").permitAll()
-				
-				// Health
-				.antMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
 
 				// Public static resources
-				.regexMatchers(HttpMethod.GET, "/([0-9]{3}|themes|lib|dist|login|logout|main/public).*",
-						logout.replace("?", "\\?").replace(".", "\\."))
-				.permitAll()
+				.regexMatchers(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PATTERN).permitAll()
 
 				.antMatchers("/rest/redirect", "/rest/security/login", "/captcha.png").permitAll()
 				.antMatchers("/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()

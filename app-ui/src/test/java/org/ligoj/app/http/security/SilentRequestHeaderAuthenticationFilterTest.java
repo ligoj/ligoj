@@ -25,7 +25,8 @@ public class SilentRequestHeaderAuthenticationFilterTest {
 	void doFilterWhitelist() throws IOException, ServletException {
 		final var filter = newFilter();
 		final var request = Mockito.mock(HttpServletRequest.class);
-		Mockito.doReturn("/path/to/500.html").when(request).getRequestURI();
+		Mockito.doReturn("/path/500.html").when(request).getRequestURI();
+		Mockito.doReturn("/500.html").when(request).getServletPath();
 		final var response = Mockito.mock(HttpServletResponse.class);
 		final var chain = Mockito.mock(FilterChain.class);
 		filter.doFilter(request, response, chain);
