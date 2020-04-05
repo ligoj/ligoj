@@ -20,6 +20,7 @@ install:
   - cmd: SET MAVEN_HOME=C:\maven\apache-maven-3.6.3
   - cmd: SET
 
+image: Visual Studio 2019
 build_script:
   - mkdir C:\WINDOWS\system32\config\systemprofile\AppData\Local\Temp
   - dir
