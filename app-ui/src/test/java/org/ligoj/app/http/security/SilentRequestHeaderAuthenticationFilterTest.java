@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 
@@ -37,14 +38,12 @@ public class SilentRequestHeaderAuthenticationFilterTest {
 	void doFilterRestNoPrincipal() throws IOException, ServletException {
 		final var filter = new SilentRequestHeaderAuthenticationFilter();
 		final var request = Mockito.mock(HttpServletRequest.class);
-		final var dis = Mockito.mock(RequestDispatcher.class);
 		Mockito.doReturn("/context/rest/service").when(request).getRequestURI();
 		Mockito.doReturn("/rest/service").when(request).getServletPath();
-		Mockito.doReturn(dis).when(request).getRequestDispatcher("/401.html");
 		final var response = Mockito.mock(HttpServletResponse.class);
 		final var chain = Mockito.mock(FilterChain.class);
 		filter.doFilter(request, response, chain);
-		Mockito.verify(dis).forward(request, response);
+		Mockito.verify(response).sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
 	}
 
 	@Test
@@ -81,29 +80,25 @@ public class SilentRequestHeaderAuthenticationFilterTest {
 	void doFilterNoPrincipal() throws IOException, ServletException {
 		final var filter = new SilentRequestHeaderAuthenticationFilter();
 		final var request = Mockito.mock(HttpServletRequest.class);
-		final var dis = Mockito.mock(RequestDispatcher.class);
 		Mockito.doReturn("/path/to").when(request).getRequestURI();
 		Mockito.doReturn("/").when(request).getServletPath();
-		Mockito.doReturn(dis).when(request).getRequestDispatcher("/401.html");
 		final var response = Mockito.mock(HttpServletResponse.class);
 		final var chain = Mockito.mock(FilterChain.class);
 		filter.doFilter(request, response, chain);
-		Mockito.verify(dis).forward(request, response);
+		Mockito.verify(response).sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
 	}
 
 	@Test
 	void doFilterNoCredentials() throws IOException, ServletException {
 		final var filter = newFilter();
 		final var request = Mockito.mock(HttpServletRequest.class);
-		final RequestDispatcher dis = Mockito.mock(RequestDispatcher.class);
 		Mockito.doReturn("/path/to").when(request).getRequestURI();
 		Mockito.doReturn("/").when(request).getServletPath();
 		Mockito.doReturn("PRINCIPAL").when(request).getHeader("MY_HEADER_P");
-		Mockito.doReturn(dis).when(request).getRequestDispatcher("/401.html");
 		final var response = Mockito.mock(HttpServletResponse.class);
 		final var chain = Mockito.mock(FilterChain.class);
 		filter.doFilter(request, response, chain);
-		Mockito.verify(dis).forward(request, response);
+		Mockito.verify(response).sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
 	}
 
 	@Test

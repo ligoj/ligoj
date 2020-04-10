@@ -36,7 +36,6 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	 */
 	public SilentRequestHeaderAuthenticationFilter() {
 		final var handler = new SimpleUrlAuthenticationFailureHandler();
-		handler.setDefaultFailureUrl("/401.html");
 		handler.setUseForward(true);
 		setAuthenticationFailureHandler(handler);
 		setExceptionIfHeaderMissing(false);
