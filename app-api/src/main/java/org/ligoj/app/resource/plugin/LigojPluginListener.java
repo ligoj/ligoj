@@ -84,12 +84,12 @@ public class LigojPluginListener implements PluginListener {
 	 *             When the file creation failed.
 	 */
 	public File toFile(final Subscription subscription, final String... fragments) throws IOException {
-		java.nio.file.Path parent = toPath(getPluginClassLoader().getHomeDirectory(), subscription.getNode());
+		var parent = toPath(getPluginClassLoader().getHomeDirectory(), subscription.getNode());
 		parent = parent.resolve(String.valueOf(subscription.getId()));
 
 		// Ensure the t
-		for (int i = 0; i < fragments.length; i++) {
-			parent = parent.resolve(fragments[i]);
+		for (var fragment : fragments) {
+			parent = parent.resolve(fragment);
 		}
 		FileUtils.forceMkdir(parent.getParent().toFile());
 		return parent.toFile();

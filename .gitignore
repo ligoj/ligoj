@@ -10,3 +10,5 @@
 **/dist/
 **/_.css
 **/_login.css
+/app-ui/UI (COGNITO).launch
+/app-ui/UI (TRUSTED) (PROD).launch

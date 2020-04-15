@@ -74,9 +74,9 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 		// Get the optional real user name if provided
 		final var realUserName = Optional.ofNullable(httpResponse.getFirstHeader("X-Real-User")).map(Header::getValue).orElse(username);
 		if (realUserName.equals(username)) {
-			log.info("Success authentication of {}[{}]", realUserName, credentials.length(), realUserName);
+			log.info("Success authentication of {}[{}]", realUserName, credentials.length());
 		} else {
-			log.info("Success authentication of {}[{}] using login {}", realUserName, credentials.length(), 0, username);
+			log.info("Success authentication of {}[{}] using login {}", realUserName, credentials.length(), username);
 		}
 
 		// Return the authentication token
