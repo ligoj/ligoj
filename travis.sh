@@ -18,10 +18,10 @@ function installMaven {
   export M2_HOME=~/maven/apache-maven-3.6.3
   export PATH=$M2_HOME/bin:$PATH
   echo '<settings><profiles><profile><id>spring-milestone</id><repositories>' > $M2_HOME/conf/settings.xml
-  echo '<repository><id>spring-milestone</id><url>http://repo.spring.io/milestone/</url></repository>' >> $M2_HOME/conf/settings.xml
+  echo '<repository><id>spring-milestone</id><url>https://repo.spring.io/milestone/</url></repository>' >> $M2_HOME/conf/settings.xml
   echo '<repository><id>oss-sonatype</id><url>https://oss.sonatype.org/service/local/repositories/releases/content/</url></repository>' >> $M2_HOME/conf/settings.xml
   echo '</repositories><pluginRepositories>' >> $M2_HOME/conf/settings.xml
-  echo '<pluginRepository><id>spring-milestone-p</id><url>http://repo.spring.io/milestone/</url></pluginRepository>' >> $M2_HOME/conf/settings.xml
+  echo '<pluginRepository><id>spring-milestone-p</id><url>https://repo.spring.io/milestone/</url></pluginRepository>' >> $M2_HOME/conf/settings.xml
   echo '</pluginRepositories></profile></profiles><activeProfiles><activeProfile>spring-milestone</activeProfile></activeProfiles></settings>' >> $M2_HOME/conf/settings.xml
 }
 
