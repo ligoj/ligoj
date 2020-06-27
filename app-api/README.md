@@ -7,6 +7,13 @@ Roles :
 - Resource security level (most complex) giving to users, groups and companies an access (read, write, +grant) to nodes, users, groups, companies
 - Plug-in runtime and life-cycle management
 
+
+# Test the application
+
+```
+mvn spring-boot:run -Dspring-boot.run.arguments=--user.timezone=UTC,--jpa.hbm2ddl=none,--ligoj.plugin.enabled=false,--jdbc.host=ligoj-db
+```
+
 # Packaging (with Maven)
 Compile Java sources and produce the WAR file.
 
