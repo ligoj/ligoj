@@ -24,6 +24,7 @@
 		<api.version>3.2.5</api.version>
 		<swagger.version>3.22.0</swagger.version>
 		<spring-boot.version>2.3.1.RELEASE</spring-boot.version>
+		<spring.version>5.2.7.RELEASE</spring.version>
 		<jaxws.version>2.3.0</jaxws.version>
 		<resource.delimiter>@</resource.delimiter>
 		<jdk.version>14</jdk.version>
