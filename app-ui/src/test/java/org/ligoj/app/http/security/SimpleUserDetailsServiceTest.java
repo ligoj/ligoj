@@ -10,10 +10,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 /**
  * User details service test.
  */
-public class SimpleUserDetailsServiceTest {
+class SimpleUserDetailsServiceTest {
 
 	@Test
-	public void testLoadByUserName() {
+	void testLoadByUserName() {
 		final UserDetails userDetails = new SimpleUserDetailsService().loadUserByUsername("JUNIT");
 		Assertions.assertEquals("JUNIT", userDetails.getUsername());
 	}

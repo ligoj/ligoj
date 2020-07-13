@@ -20,7 +20,7 @@ import org.springframework.security.core.Authentication;
 /**
  * Test class of {@link SilentRequestHeaderAuthenticationFilter}
  */
-public class SilentRequestHeaderAuthenticationFilterTest {
+class SilentRequestHeaderAuthenticationFilterTest {
 
 	@Test
 	void doFilterWhitelist() throws IOException, ServletException {

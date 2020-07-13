@@ -49,7 +49,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class LigojPluginListenerTest extends AbstractServerTest {
+class LigojPluginListenerTest extends AbstractServerTest {
 
 	protected static final String USER_HOME_DIRECTORY = "target/test-classes/home-test";
 
@@ -72,24 +72,24 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	protected ConfigurationResource configuration;
 
 	@BeforeEach
-	public void prepareData() throws IOException {
+	void prepareData() throws IOException {
 		persistEntities("csv", new Class[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class },
 				StandardCharsets.UTF_8.name());
 		FileUtils.deleteQuietly(TEMP_FILE);
 	}
 
 	@AfterEach
-	public void cleanArtifacts() {
+	void cleanArtifacts() {
 		FileUtils.deleteQuietly(TEMP_FILE);
 	}
 
 	@Test
-	public void toVo() {
+	void toVo() {
 		Assertions.assertTrue(resource.toVo().get() instanceof LigojPluginVo);
 	}
 
 	@Test
-	public void fillVoIsFeature() {
+	void fillVoIsFeature() {
 		final var p = new SystemPlugin();
 		p.setType("FEATURE");
 		final var vo = new LigojPluginVo();
@@ -100,7 +100,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void fillVoIsNotFeature() {
+	void fillVoIsNotFeature() {
 		final var entity = new SystemPlugin();
 		entity.setType("SERVICE");
 		entity.setKey("service:sample:tool");
@@ -112,17 +112,17 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void installExists() {
+	void installExists() {
 		Assertions.assertFalse(resource.install(new SampleService()));
 	}
 
 	@Test
-	public void installNotExists() {
+	void installNotExists() {
 		Assertions.assertTrue(resource.install(new SampleTool1()));
 	}
 
 	@Test
-	public void configure() {
+	void configure() {
 		final var service1 = new SampleService();
 		final var entity = new SystemPlugin();
 
@@ -145,7 +145,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void configureFeature() {
+	void configureFeature() {
 		final var service1 = Mockito.mock(FeaturePlugin.class);
 		final var entity = new SystemPlugin();
 		resource.configure(service1, entity);
@@ -153,7 +153,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void configureWithImplicitNode() {
+	void configureWithImplicitNode() {
 		final var service1 = new SampleService() {
 			@Override
 			public List<Class<?>> getInstalledEntities() {
@@ -170,7 +170,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void configureWithExplicitNode() {
+	void configureWithExplicitNode() {
 		final var service1 = new SampleService() {
 			@Override
 			public List<Class<?>> getInstalledEntities() {
@@ -184,13 +184,13 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void determinePluginType() {
+	void determinePluginType() {
 		Assertions.assertEquals(PluginType.SERVICE, resource.determinePluginType(new SampleService()));
 		Assertions.assertEquals(PluginType.TOOL, resource.determinePluginType(new SampleTool1()));
 	}
 
 	@Test
-	public void determinePluginTypeError() {
+	void determinePluginTypeError() {
 		final var service1 = Mockito.mock(ServicePlugin.class);
 		Mockito.when(service1.getKey()).thenReturn("service:sample:tool");
 		Assertions.assertThrows(TechnicalException.class, () -> {
@@ -199,7 +199,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void getPluginClassLoader() {
+	void getPluginClassLoader() {
 		final var pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
 		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(resource.getPluginClassLoader());
@@ -226,7 +226,7 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void toFile() throws IOException {
+	void toFile() throws IOException {
 		final var subscription = new Subscription();
 		final var service = new Node();
 		service.setId("service:s1");
@@ -241,12 +241,12 @@ public class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void getParentNode() {
+	void getParentNode() {
 		Assertions.assertEquals("service:sample", newPluginResourceInstall().getParentNode("service:sample:tool1").getId());
 	}
 
 	@Test
-	public void getParentNodeRoot() {
+	void getParentNodeRoot() {
 		Assertions.assertNull(newPluginResourceInstall().getParentNode("service:sample"));
 	}
 

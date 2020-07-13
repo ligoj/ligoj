@@ -10,10 +10,10 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
 
-public class PasswordGeneration {
+class PasswordGeneration {
 
 	@Test
-	public void test() throws NoSuchAlgorithmException {
+	void test() throws NoSuchAlgorithmException {
 		final MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		digest.reset();
 

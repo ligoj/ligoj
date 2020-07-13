@@ -9,6 +9,7 @@ import java.net.URLClassLoader;
 import java.security.NoSuchAlgorithmException;
 
 import org.eclipse.jetty.util.thread.ThreadClassLoaderScope;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.SpringApplication;
@@ -16,13 +17,13 @@ import org.springframework.boot.SpringApplication;
 /**
  * Test class of {@link PluginApplicationRunListener}
  */
-public class PluginApplicationRunListenerTest {
+class PluginApplicationRunListenerTest {
 
 	@Test
-	public void noPluginClassLoader() throws IOException, NoSuchAlgorithmException {
-		final ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0]));
+	void noPluginClassLoader() throws IOException, NoSuchAlgorithmException {
+		final var scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0]));
 		try {
-			new PluginApplicationRunListener(Mockito.mock(SpringApplication.class), new String[0]).starting();
+			Assertions.assertEquals(-10, new PluginApplicationRunListener(Mockito.mock(SpringApplication.class), new String[0]).getOrder());
 		} finally {
 			scope.close();
 		}

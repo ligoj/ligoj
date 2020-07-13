@@ -8,7 +8,10 @@ import java.util.Map;
 import org.ligoj.app.api.SubscriptionStatusWithData;
 import org.ligoj.app.api.ToolPlugin;
 
-public class SampleTool2 implements ToolPlugin {
+/**
+ * Mock tool.
+ */
+class SampleTool2 implements ToolPlugin {
 
 	@Override
 	public String getKey() {

@@ -19,7 +19,7 @@ import org.springframework.mock.web.DelegatingServletOutputStream;
 /**
  * Test class of {@link CacheBustingFilter}
  */
-public class CacheBustingFilterTest {
+class CacheBustingFilterTest {
 
 	@Test
 	void javax() throws ServletException {

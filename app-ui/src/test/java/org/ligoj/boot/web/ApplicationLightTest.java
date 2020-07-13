@@ -17,10 +17,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-public class ApplicationLightTest {
+class ApplicationLightTest {
 
 	@Test
-	public void main() throws Exception {
+	void main() throws Exception {
 		Application.main(getArgs());
 	}
 

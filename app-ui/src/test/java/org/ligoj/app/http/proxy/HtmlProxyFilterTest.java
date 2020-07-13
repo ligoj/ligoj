@@ -16,13 +16,13 @@ import org.mockito.Mockito;
 /**
  * HTML proxying test of {@link HtmlProxyFilter} class ..
  */
-public class HtmlProxyFilterTest {
+class HtmlProxyFilterTest {
 
 	/**
 	 * Test forward without locale.
 	 */
 	@Test
-	public void testUseCaseForwardNoLocale() throws IOException, ServletException {
+	void testUseCaseForwardNoLocale() throws IOException, ServletException {
 		checkForwardTo("/index.html", "/index.html", "");
 	}
 
@@ -30,7 +30,7 @@ public class HtmlProxyFilterTest {
 	 * Test forward from root URL.
 	 */
 	@Test
-	public void testUseCaseForwardRoot() throws IOException, ServletException {
+	void testUseCaseForwardRoot() throws IOException, ServletException {
 		checkForwardTo("/", "/index.html", "");
 	}
 
@@ -38,7 +38,7 @@ public class HtmlProxyFilterTest {
 	 * Test forward from not index/login URL.
 	 */
 	@Test
-	public void testUseCaseForwardNotRoot() throws IOException, ServletException {
+	void testUseCaseForwardNotRoot() throws IOException, ServletException {
 		checkForwardTo("/any.html", "/any.html", "");
 	}
 
@@ -46,7 +46,7 @@ public class HtmlProxyFilterTest {
 	 * Test forward from login URL.
 	 */
 	@Test
-	public void testUseCaseForwardLogin() throws IOException, ServletException {
+	void testUseCaseForwardLogin() throws IOException, ServletException {
 		checkForwardTo("/login.html", "/login.html", "");
 	}
 
@@ -54,7 +54,7 @@ public class HtmlProxyFilterTest {
 	 * Test forward from root, without context URL.
 	 */
 	@Test
-	public void testUseCaseForwardRoot2() throws IOException, ServletException {
+	void testUseCaseForwardRoot2() throws IOException, ServletException {
 		checkForwardTo("", "/index.html", "");
 	}
 

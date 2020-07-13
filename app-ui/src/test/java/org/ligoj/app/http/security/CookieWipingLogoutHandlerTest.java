@@ -14,10 +14,10 @@ import org.mockito.internal.verification.Times;
 /**
  * Test class of {@link CookieWipingLogoutHandler}
  */
-public class CookieWipingLogoutHandlerTest {
+class CookieWipingLogoutHandlerTest {
 
 	@Test
-	public void logout() {
+	void logout() {
 		var handler = new CookieWipingLogoutHandler(new String[] { "JSESSIONID" });
 		final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);

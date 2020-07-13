@@ -5,6 +5,9 @@ package org.ligoj.app.resource.plugin;
 
 import org.ligoj.app.api.ServicePlugin;
 
+/**
+ * Mock service.
+ */
 public class SampleService implements ServicePlugin {
 
 	@Override

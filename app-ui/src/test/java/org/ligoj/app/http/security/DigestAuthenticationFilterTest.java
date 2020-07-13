@@ -20,7 +20,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 /**
  * Test class of {@link DigestAuthenticationFilter}
  */
-public class DigestAuthenticationFilterTest extends AbstractServerTest {
+class DigestAuthenticationFilterTest extends AbstractServerTest {
 
 	private DigestAuthenticationFilter filter;
 

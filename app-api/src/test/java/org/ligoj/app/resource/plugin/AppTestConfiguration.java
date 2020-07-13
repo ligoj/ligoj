@@ -12,10 +12,10 @@ import org.springframework.context.annotation.Bean;
  * Test configuration for some boot components.
  */
 @TestConfiguration
-public class AppTestConfiguration {
+class AppTestConfiguration {
 
 	@Bean
-	public RestartEndpoint mockRestartEndpoint() {
+	RestartEndpoint mockRestartEndpoint() {
 		return Mockito.mock(RestartEndpoint.class);
 	}
 }

@@ -23,7 +23,7 @@ import cn.apiclub.captcha.Captcha;
 /**
  * Test class of {@link CaptchaFilter}
  */
-public class CaptchaFilterTest {
+class CaptchaFilterTest {
 
 	@Test
 	void testJavax() throws ServletException {

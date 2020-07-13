@@ -20,12 +20,12 @@ import org.springframework.security.core.Authentication;
 /**
  * Check the SSO authentication {@link RestAuthenticationProvider} provider.
  */
-public class RestAuthenticationProviderTest extends AbstractServerTest {
+class RestAuthenticationProviderTest extends AbstractServerTest {
 
 	private RestAuthenticationProvider authenticationProvider;
 
 	@Test
-	public void authenticate() {
+	void authenticate() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NO_CONTENT)));
 		httpServer.start();
 		final Authentication authentication = authenticate("http://localhost");
@@ -47,7 +47,7 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void authenticateInvalidException() {
+	void authenticateInvalidException() {
 		authenticationProvider.setSsoPostUrl("");
 		authenticationProvider.setSsoWelcome("");
 		authenticationProvider.setSsoPostContent("%d%d");
@@ -64,7 +64,7 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void authenticateIOE() {
+	void authenticateIOE() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("//OK")));
 		httpServer.start();
 		Assertions.assertThrows(BadCredentialsException.class, () -> {
@@ -73,7 +73,7 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void authenticateKo1() {
+	void authenticateKo1() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_UNAUTHORIZED)));
 		httpServer.start();
 		Assertions.assertThrows(BadCredentialsException.class, () -> {
@@ -82,7 +82,7 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void authenticateMixedCase() {
+	void authenticateMixedCase() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NO_CONTENT)));
 		httpServer.start();
 		final Authentication authentication = authenticate("http://localhost", "jUniT");
@@ -92,7 +92,7 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void authenticateOverrideDifferentUser() {
+	void authenticateOverrideDifferentUser() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NO_CONTENT).withHeader("X-Real-User", "other")));
 		httpServer.start();
 		final Authentication authentication = authenticate("http://localhost");
@@ -102,7 +102,7 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void authenticateOverrideSameUser() {
+	void authenticateOverrideSameUser() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NO_CONTENT).withHeader("X-Real-User", "junit")));
 		httpServer.start();
 		final Authentication authentication = authenticate("http://localhost");
@@ -115,7 +115,7 @@ public class RestAuthenticationProviderTest extends AbstractServerTest {
 	 * Initialize the mock server.
 	 */
 	@BeforeEach
-	public void init() {
+	void init() {
 		authenticationProvider = new RestAuthenticationProvider();
 		authenticationProvider.setSsoPostContent("");
 	}

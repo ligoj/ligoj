@@ -17,10 +17,10 @@ import org.mockito.Mockito;
 /**
  * Test class of {@link CaptchaServlet}
  */
-public class CaptchaServletTest {
+class CaptchaServletTest {
 
 	@Test
-	public void testDoGet() throws ServletException, IOException {
+	void testDoGet() throws ServletException, IOException {
 		final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
 		final HttpSession session = Mockito.mock(HttpSession.class);
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);

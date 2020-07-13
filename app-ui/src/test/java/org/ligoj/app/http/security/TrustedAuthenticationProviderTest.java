@@ -13,10 +13,10 @@ import org.springframework.security.core.Authentication;
 /**
  * Check the SSO authentication provider.
  */
-public class TrustedAuthenticationProviderTest {
+class TrustedAuthenticationProviderTest {
 
 	@Test
-	public void testAuthenticate() {
+	void testAuthenticate() {
 		final Authentication authentication = Mockito.mock(Authentication.class);
 		final Principal principal = Mockito.mock(Principal.class);
 		Mockito.when(principal.toString()).thenReturn("junit");
@@ -26,7 +26,7 @@ public class TrustedAuthenticationProviderTest {
 	}
 
 	@Test
-	public void testAuthenticateMixedCase() {
+	void testAuthenticateMixedCase() {
 		final Authentication authentication = Mockito.mock(Authentication.class);
 		final Principal principal = Mockito.mock(Principal.class);
 		Mockito.when(principal.toString()).thenReturn("jUniT");

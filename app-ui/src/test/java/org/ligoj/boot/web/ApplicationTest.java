@@ -15,12 +15,12 @@ import org.springframework.util.StringUtils;
 /**
  * Test class of {@link Application}
  */
-public class ApplicationTest {
+class ApplicationTest {
 
 	private static String oldCp = System.getProperty("java.class.path");
 
 	@AfterAll
-	public static void resetTestEnv() {
+	static void resetTestEnv() {
 		System.clearProperty("app-env");
 		System.clearProperty("security.pre-auth-principal");
 		System.clearProperty("security.pre-auth-credentials");
@@ -33,19 +33,19 @@ public class ApplicationTest {
 	}
 
 	@Test
-	public void configClassContext() throws Exception {
+	void configClassContext() throws Exception {
 		Application.main(getArgs(getClass().getName()));
 		SpringApplication.exit(Application.lastContext);
 	}
 
 	@Test
-	public void configure() throws Exception {
+	void configure() throws Exception {
 		new Application().configure(Mockito.mock(SpringApplicationBuilder.class));
 		new Application().containerCustomizer().registerErrorPages(Mockito.mock(ErrorPageRegistry.class));
 	}
 
 	@Test
-	public void configurePreAuthHeader() throws Exception {
+	void configurePreAuthHeader() throws Exception {
 		System.setProperty("security.pre-auth-principal", "HEADER");
 		System.setProperty("security.pre-auth-credentials", "CREDS");
 		Application.main(getArgs(getClass().getName()));
@@ -53,7 +53,7 @@ public class ApplicationTest {
 	}
 
 	@Test
-	public void configurePreAuthLogout() throws Exception {
+	void configurePreAuthLogout() throws Exception {
 		System.setProperty("security.pre-auth-principal", "HEADER");
 		System.setProperty("security.pre-auth-credentials", "CREDS");
 		System.setProperty("security.pre-auth-logout", "https://signin.sample.com");
@@ -62,7 +62,7 @@ public class ApplicationTest {
 	}
 
 	@Test
-	public void getEnvironment() {
+	void getEnvironment() {
 		final var application = new Application();
 		application.environmentCode = "auto";
 		Assertions.assertEquals("", application.getEnvironment());
