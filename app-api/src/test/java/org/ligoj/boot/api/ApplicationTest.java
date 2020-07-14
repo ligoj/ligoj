@@ -12,10 +12,10 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 /**
  * Test class of {@link Application}
  */
-public class ApplicationTest extends SpringBootServletInitializer {
+class ApplicationTest extends SpringBootServletInitializer {
 
 	@Test
-	public void configure() throws Exception {
+	void configure() throws Exception {
 		new Application().configure(Mockito.mock(SpringApplicationBuilder.class));
 		new Application().webjarsServlet();
 		new Application().cxfServlet();

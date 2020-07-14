@@ -16,10 +16,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 /**
  * Test of {@link FederatedUserDetailsService}
  */
-public class FederatedUserDetailsServiceTest {
+class FederatedUserDetailsServiceTest {
 
 	@Test
-	public void loadUserByUsername() {
+	void loadUserByUsername() {
 		final var service = new FederatedUserDetailsService();
 		final var federated = Mockito.mock(RbacUserDetailsService.class);
 		service.federated = federated;
@@ -38,7 +38,7 @@ public class FederatedUserDetailsServiceTest {
 	}
 
 	@Test
-	public void loadUserByUsernameNotFederated() {
+	void loadUserByUsernameNotFederated() {
 		final var service = new FederatedUserDetailsService();
 		final var federated = Mockito.mock(RbacUserDetailsService.class);
 		service.federated = federated;

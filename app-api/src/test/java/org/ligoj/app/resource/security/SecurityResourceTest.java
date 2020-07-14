@@ -30,10 +30,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Transactional
 @Rollback
-public class SecurityResourceTest extends AbstractServerTest {
+class SecurityResourceTest extends AbstractServerTest {
 
 	@Test
-	public void loginUnknownUser() throws Exception {
+	void loginUnknownUser() throws Exception {
 		final User user = new User();
 		user.setName("any");
 		user.setPassword("any");
@@ -48,7 +48,7 @@ public class SecurityResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void login() throws Exception {
+	void login() throws Exception {
 
 		// Mock the authentication
 		final IamProvider iamProvider = Mockito.mock(IamProvider.class);

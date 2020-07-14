@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 /**
  * Test class of {@link Application}
  */
-public class ApplicationLightTest {
+class ApplicationLightTest {
 
 	@Test
-	public void main() throws Exception {
+	void main() throws Exception {
 		Application.main(getArgs());
 	}
 

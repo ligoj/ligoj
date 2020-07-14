@@ -21,23 +21,23 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class InitializeRbacDataResourceTest extends AbstractServerTest {
+class InitializeRbacDataResourceTest extends AbstractServerTest {
 
 	@Autowired
 	private InitializeRbacDataResource resource;
 
 	@Test
-	public void getInstalledEntities() {
+	void getInstalledEntities() {
 		Assertions.assertTrue(resource.getInstalledEntities().contains(SystemUser.class));
 	}
 
 	@Test
-	public void getKey() {
+	void getKey() {
 		Assertions.assertEquals("feature:welcome:data-rbac", resource.getKey());
 	}
 
 	@Test
-	public void getName() {
+	void getName() {
 		Assertions.assertEquals("Welcome Data RBAC", resource.getName());
 	}
 }

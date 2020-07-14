@@ -16,10 +16,10 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 /**
  * Test class of {@link SecurityConfiguration}
  */
-public class SecurityConfigurationTest {
+class SecurityConfigurationTest {
 
 	@Test
-	public void configure() throws Exception {
+	void configure() throws Exception {
 		final ObjectPostProcessor<Object> proc =  Mockito.mock(ObjectPostProcessor.class);
 		final var builder = new AuthenticationManagerBuilder(proc);
 		final var security = new HttpSecurity(proc, builder, new HashMap<>());
