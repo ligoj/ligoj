@@ -184,7 +184,7 @@ public class LigojPluginListener implements PluginListener {
 	 *         expected parent by convention, and the parent is not found, an error will be raised.
 	 */
 	protected Node getParentNode(final String key) {
-		final var parentKey = key.substring(0, key.lastIndexOf(':'));
+		final var parentKey = StringUtils.substringBefore(key, ":");
 		if (parentKey.indexOf(':') == -1) {
 			// Was already the top most parent
 			return null;
