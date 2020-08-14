@@ -34,11 +34,12 @@
 	</issueManagement>
 	<profiles>
 		<profile>
-			<id>bintray</id>
+			<id>github</id>
 			<distributionManagement>
 				<repository>
-					<id>bintray-ligoj-maven-repo</id>
-					<url>https://api.bintray.com/maven/ligoj/maven-repo/ligoj/;publish=1</url>
+					<id>github-ligoj</id>
+					<name>GitHub Packages</name>
+					<url>https://maven.pkg.github.com/ligoj/ligoj</url>
 				</repository>
 			</distributionManagement>
 		</profile>
