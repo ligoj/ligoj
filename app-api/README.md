@@ -180,10 +180,11 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 | Vendor     | Version | Driver   | Dialect     | Status  |
 |------------|---------|----------|-------------|---------|
 | [MySQL](https://www.mysql.com)  | 5.5 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | A bit slow in plugin-id |
-| [MySQL](https://www.mysql.com)  | 5.6 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | OK                      |
+| [MySQL](https://www.mysql.com)  | 5.6 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | OK|
 | [MySQL](https://www.mysql.com)  | 5.7 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | Slow in plugin-id       |
+| [MySQL](https://www.mysql.com)  | 8.0 | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL8InnoDBUtf8Dialect | OK|
 | [MariaDB](https://mariadb.org/) | 10.1| com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | Slow in plugin-id       |
-| [MariaDB](https://mariadb.org/) | 10.1| org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | ?                       |
+| [MariaDB](https://mariadb.org/) | 10.1| org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect | ? |
 | [PostGreSQL](https://www.postgresql.org/) | 9.6 | org.postgresql.Driver | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
 
 ### JSE
