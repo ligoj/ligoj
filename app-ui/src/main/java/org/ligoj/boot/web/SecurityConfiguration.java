@@ -138,7 +138,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()
 
 				// Everything else is authenticated
-				.anyRequest().access("hasParameter('api-key') or hasHeader('x-api-key') or isFullyAuthenticated()").and().exceptionHandling()
+				.anyRequest().access("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()").and().exceptionHandling()
 				.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage("/login.html?denied").and()
 
 				.logout().addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies)).invalidateHttpSession(true).logoutSuccessUrl(logout)

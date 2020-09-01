@@ -55,7 +55,8 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 		final var req = (HttpServletRequest) request;
 		final var res = (HttpServletResponse) response;
 		if (req.getServletPath().matches(WHITE_LIST_PATTERN) || (req.getServletPath().startsWith("/rest")
-				&& (StringUtils.isNotBlank(req.getParameter("api-key")) || StringUtils.isNotBlank(req.getHeader("x-api-key"))))) {
+				&& (StringUtils.isNotBlank(req.getParameter("api-key")) || StringUtils.isNotBlank(req.getHeader("x-api-key")))
+				&& (StringUtils.isNotBlank(req.getParameter("api-user")) || StringUtils.isNotBlank(req.getHeader("x-api-user"))))) {
 			// White-list error page and keyed API access
 			chain.doFilter(request, response);
 		} else {
