@@ -256,6 +256,18 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-prov</artifactId>
+			<version>2.3.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ligoj.plugin</groupId>
+			<artifactId>plugin-prov-aws</artifactId>
+			<version>1.4.16-SNAPSHOT</version>
+		</dependency>
+
+
 		<!-- Embedded plugin-ui -->
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>

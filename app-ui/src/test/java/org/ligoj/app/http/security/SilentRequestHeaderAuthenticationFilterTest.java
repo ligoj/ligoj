@@ -5,6 +5,7 @@ package org.ligoj.app.http.security;
 
 import java.io.IOException;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -27,6 +28,7 @@ class SilentRequestHeaderAuthenticationFilterTest {
 		final var filter = newFilter();
 		final var request = Mockito.mock(HttpServletRequest.class);
 		Mockito.doReturn("/path/500.html").when(request).getRequestURI();
+		Mockito.doReturn(DispatcherType.REQUEST).when(request).getDispatcherType();
 		Mockito.doReturn("/500.html").when(request).getServletPath();
 		final var response = Mockito.mock(HttpServletResponse.class);
 		final var chain = Mockito.mock(FilterChain.class);
@@ -47,12 +49,30 @@ class SilentRequestHeaderAuthenticationFilterTest {
 	}
 
 	@Test
-	void doFilterRestApiKey1() throws IOException, ServletException {
+	void doFilterRestApiKeyNoUser() throws IOException, ServletException {
 		final var filter = new SilentRequestHeaderAuthenticationFilter();
 		final var request = Mockito.mock(HttpServletRequest.class);
 		final var dis = Mockito.mock(RequestDispatcher.class);
 		Mockito.doReturn("/context/rest/service").when(request).getRequestURI();
+		Mockito.doReturn(DispatcherType.REQUEST).when(request).getDispatcherType();
 		Mockito.doReturn("SOME_API_KEY").when(request).getParameter("api-key");
+		Mockito.doReturn("/rest/service").when(request).getServletPath();
+		Mockito.doReturn(dis).when(request).getRequestDispatcher("/401.html");
+		final var response = Mockito.mock(HttpServletResponse.class);
+		final var chain = Mockito.mock(FilterChain.class);
+		filter.doFilter(request, response, chain);
+		Mockito.verify(response).sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
+	}
+
+	@Test
+	void doFilterRestApiKey2NoUser() throws IOException, ServletException {
+		final var filter = new SilentRequestHeaderAuthenticationFilter();
+		final var request = Mockito.mock(HttpServletRequest.class);
+		final var dis = Mockito.mock(RequestDispatcher.class);
+		Mockito.doReturn("/context/rest/service").when(request).getRequestURI();
+		Mockito.doReturn(DispatcherType.REQUEST).when(request).getDispatcherType();
+		Mockito.doReturn("SOME_API_KEY").when(request).getHeader("x-api-key");
+		Mockito.doReturn("SOME_API_USER").when(request).getHeader("x-api-user");
 		Mockito.doReturn("/rest/service").when(request).getServletPath();
 		Mockito.doReturn(dis).when(request).getRequestDispatcher("/401.html");
 		final var response = Mockito.mock(HttpServletResponse.class);
@@ -62,12 +82,14 @@ class SilentRequestHeaderAuthenticationFilterTest {
 	}
 
 	@Test
-	void doFilterRestApiKey2() throws IOException, ServletException {
+	void doFilterRestApiKey2NoUser2() throws IOException, ServletException {
 		final var filter = new SilentRequestHeaderAuthenticationFilter();
 		final var request = Mockito.mock(HttpServletRequest.class);
 		final var dis = Mockito.mock(RequestDispatcher.class);
 		Mockito.doReturn("/context/rest/service").when(request).getRequestURI();
+		Mockito.doReturn(DispatcherType.REQUEST).when(request).getDispatcherType();
 		Mockito.doReturn("SOME_API_KEY").when(request).getHeader("x-api-key");
+		Mockito.doReturn("SOME_API_USER").when(request).getParameter("api-user");
 		Mockito.doReturn("/rest/service").when(request).getServletPath();
 		Mockito.doReturn(dis).when(request).getRequestDispatcher("/401.html");
 		final var response = Mockito.mock(HttpServletResponse.class);
@@ -107,6 +129,7 @@ class SilentRequestHeaderAuthenticationFilterTest {
 		final var dis = Mockito.mock(RequestDispatcher.class);
 		final var filter = newFilter();
 		Mockito.doReturn("/path/to/rest").when(request).getRequestURI();
+		Mockito.doReturn(DispatcherType.REQUEST).when(request).getDispatcherType();
 		Mockito.doReturn("/").when(request).getContextPath();
 		Mockito.doReturn("/").when(request).getServletPath();
 		Mockito.doReturn(dis).when(request).getRequestDispatcher("/401.html");
@@ -122,6 +145,7 @@ class SilentRequestHeaderAuthenticationFilterTest {
 		final var dis = Mockito.mock(RequestDispatcher.class);
 		final var filter = newFilter();
 		Mockito.doReturn("/context/login.html").when(request).getRequestURI();
+		Mockito.doReturn(DispatcherType.REQUEST).when(request).getDispatcherType();
 		Mockito.doReturn("/context").when(request).getContextPath();
 		Mockito.doReturn("/").when(request).getServletPath();
 		Mockito.doReturn(dis).when(request).getRequestDispatcher("/401.html");

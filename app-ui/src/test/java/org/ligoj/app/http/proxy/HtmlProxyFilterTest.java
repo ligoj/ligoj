@@ -5,6 +5,7 @@ package org.ligoj.app.http.proxy;
 
 import java.io.IOException;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -70,6 +71,7 @@ class HtmlProxyFilterTest {
 		Mockito.when(request.getServletPath()).thenReturn(from);
 		final RequestDispatcher requestDispatcher = Mockito.mock(RequestDispatcher.class);
 		Mockito.when(request.getRequestDispatcher(to)).thenReturn(requestDispatcher);
+		Mockito.when(request.getDispatcherType()).thenReturn(DispatcherType.REQUEST);
 		htmlProxyFilter.doFilter(request, response, null);
 		Mockito.verify(requestDispatcher, Mockito.atLeastOnce()).forward(request, response);
 		Mockito.validateMockitoUsage();
