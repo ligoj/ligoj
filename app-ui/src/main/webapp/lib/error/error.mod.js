@@ -97,10 +97,10 @@ define([
 					$('body').first().append(Handlebars.compile(html)(messages));
 					var $popup = _('_login');
 					$cascade.trigger('html', $popup);
-					$popup.on('show', function () {
+					$popup.on('shown.bs.modal', function () {
 						$('.modal').not($popup).modal('hide');
 						_('_login_msgbox').removeClass('label-important').removeClass('label-info').hide();
-					}).on('shown', function () {
+					}).on('shown.bs.modal', function () {
 						_('_login_username').trigger('focus');
 					}).on('hidden', function () {
 						_('_login').remove();
