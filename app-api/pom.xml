@@ -256,17 +256,6 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-prov</artifactId>
-			<version>2.3.2-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ligoj.plugin</groupId>
-			<artifactId>plugin-prov-aws</artifactId>
-			<version>1.4.16-SNAPSHOT</version>
-		</dependency>
-
 
 		<!-- Embedded plugin-ui -->
 		<dependency>
@@ -360,13 +349,19 @@
 
 	<profiles>
 		<profile>
-			<id>bintray</id>
-			<distributionManagement>
-				<repository>
-					<id>bintray-ligoj-maven-repo</id>
-					<url>https://api.bintray.com/maven/ligoj/maven-repo/ligoj/;publish=1</url>
-				</repository>
-			</distributionManagement>
+			<id>eclipse-prov</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-prov</artifactId>
+					<version>2.3.2-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-prov-aws</artifactId>
+					<version>1.4.16-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 </project>
