@@ -110,6 +110,20 @@ define([
 	.on('hide.bs.modal', '.modal', closeTooltips)
 	.on('select2-close', null, closeTooltips)
 	.on('show.bs.modal', '.modal[data-ajax]', $cascade.loadPartial);
+	
+	// Placeholder patch for Select2
+	$.fn.select2Placeholder = function(placeholder) {
+		let data = $(this).data('select2');
+		if (typeof placeholder === 'string') {
+			data.opts.placeholder = placeholder;
+			if ($(this).select2('data') === null) {
+				data.container.find('.select2-chosen').html(placeholder);
+			}
+			return this;
+		}
+		// Return the current Select2 value
+		return data.opts.placeholder;
+	};
 
 	$.fn.hideGroup = function () {
 		$(this).closest('.form-group').addClass('hidden');
