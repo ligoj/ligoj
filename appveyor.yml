@@ -7,17 +7,17 @@ install:
       }
             
       (new-object System.Net.WebClient).DownloadFile(
-        'http://www.us.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.zip',
+        'http://www.us.apache.org/dist/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.zip',
         'C:\maven-bin.zip'
       )
       [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\maven-bin.zip", "C:\maven")
   - ps: |
      $env:JAVA_HOME="c:/Program Files/Java/jdk14"
   - cmd: SET    
-  - cmd: SET PATH=C:\maven\apache-maven-3.6.3\bin;%PATH%
-  - cmd: SET M2_HOME=C:\maven\apache-maven-3.6.3
+  - cmd: SET PATH=C:\maven\apache-maven-3.8.1\bin;%PATH%
+  - cmd: SET M2_HOME=C:\maven\apache-maven-3.8.1
   - cmd: SET MAVEN_OPTS=-Xmx2g
-  - cmd: SET MAVEN_HOME=C:\maven\apache-maven-3.6.3
+  - cmd: SET MAVEN_HOME=C:\maven\apache-maven-3.8.1
   - cmd: SET
 
 image: Visual Studio 2019

@@ -1,6 +1,6 @@
-FROM maven:3.6-jdk-14 as builder
+FROM maven:3.8.1-openjdk-15 as builder
 RUN touch ~/.bash_profile && \
-  curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash && \
+  curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash && \
   export NVM_DIR="$HOME/.nvm" && \
   [ -s "$NVM_DIR/nvm.sh" ] && \
   \. "$NVM_DIR/nvm.sh" && \
@@ -15,7 +15,7 @@ ADD . .
 RUN source /root/.bash_profile && \
     mvn clean package -B -q -Dmaven.test.skip=true -Pminify
 
-FROM openjdk:14-jdk-alpine
+FROM openjdk:15-jdk-alpine
 LABEL maintainer "fabrice.daugan@gmail.com"
 
 # ARGS (build)

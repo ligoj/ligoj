@@ -1,4 +1,4 @@
-FROM openjdk:14-jdk-alpine
+FROM openjdk:15-jdk-alpine
 LABEL maintainer "fabrice.daugan@gmail.com"
 
 # ARGS (build)
