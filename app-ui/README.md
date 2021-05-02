@@ -46,19 +46,19 @@ In case of a custom build you can specify its remote or local location.
 ## Staged OSS build from Sonatype
 
 ```
-docker build -t ligoj/ligoj-ui:3.2.0 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-ui/3.1.0/app-ui-3.1.2.war" .
+docker build -t ligoj/ligoj-ui:3.2.0 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-ui/3.1.0/app-ui-3.2.0.war" .
 ```
 
 ## Private remote build
 
 ```
-docker build -t ligoj/ligoj-ui:3.2.0 --build-arg WAR="https://storage.company.com/releases/app-ui-3.1.2.war" .
+docker build -t ligoj/ligoj-ui:3.2.0 --build-arg WAR="https://storage.company.com/releases/app-ui-3.2.0.war" .
 ```
 
 ## Local maven package
 
 ```
-docker build -t ligoj/ligoj-ui:3.2.0 --build-arg WAR="target/app-ui-3.1.2.war" .
+docker build -t ligoj/ligoj-ui:3.2.0 --build-arg WAR="target/app-ui-3.2.0.war" .
 ```
 
 Note the local WAR path must be relative to the Dockerfile (not the current path), and must be below the Dockerfile: do not use "../bar/foo.war"
