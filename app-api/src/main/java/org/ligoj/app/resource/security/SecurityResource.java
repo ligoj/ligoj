@@ -28,9 +28,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Produces(MediaType.APPLICATION_JSON)
 public class SecurityResource {
 
+	/**
+	 * Federated user details service
+	 */
 	@Autowired
 	protected ApplicationContext applicationContext;
 
+	/**
+	 * Resolved IAM providers
+	 */
 	@Autowired
 	protected IamProvider[] iamProvider;
 
