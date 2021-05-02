@@ -1,6 +1,6 @@
 **/.DS_Store
 .project
-.settings
+**/.settings
 **/.project
 /target
 /*/target
