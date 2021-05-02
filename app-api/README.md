@@ -40,13 +40,13 @@ docker build -t ligoj/ligoj-api:3.1.2 .
 ### Custom URL
 
 During the build, the WAR file "ligoj-api.war" is not copied from your local FS but from a previously released remote location such as Nexus.
-By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=3.1.0&p=war"
+By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-api&v=3.1.2&p=war"
 In case of a custom build you can specify its remote or local location.
 
 Staged OSS build from Sonatype
 
 ```
-docker build -t ligoj/ligoj-api:3.1.2 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/3.1.0/app-api-3.1.2.war" .
+docker build -t ligoj/ligoj-api:3.1.2 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-api/3.1.2/app-api-3.1.2.war" .
 ```
 
 Private remote build
@@ -61,7 +61,7 @@ Reuse the local maven package
 docker build -t ligoj/ligoj-api:3.1.2 --build-arg WAR="target/app-api-3.1.2.war" .
 ```
 
-Note the local WAR path must be relative to the Dockerfile (not the current path), and must be bellow the Dockerfile: do not use "../bar/foo.war"
+Note the local WAR path must be relative to the `Dockerfile` (not the current path), and must be bellow the `Dockerfile`: do not use `../bar/foo.war`
 
 # Run Docker image
 
