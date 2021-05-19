@@ -69,7 +69,7 @@
 	},
 	"dependencies": {
 	    "requirejs": "2.3.6",
-	    "d3": ">=4",
+	    "d3": "6.7.0",
 	    "bootstrap": "3.4.1",
 	    "bootstrap-datepicker": "3.3.6",
 	    "bootstrap-timepicker": "3.3.6",
