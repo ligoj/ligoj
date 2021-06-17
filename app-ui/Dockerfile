@@ -1,11 +1,11 @@
-FROM openjdk:14-jdk-alpine
+FROM openjdk:15-jdk-alpine
 LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
 
 # ARGS (build)
 ARG GROUP_ID="org.ligoj.app"
 ARG ARTIFACT_ID="app-ui"
 ARG NEXUS_HOST="oss.sonatype.org"
-ARG VERSION="3.1.2"
+ARG VERSION="3.2.0"
 ARG NEXUS_URL="https://${NEXUS_HOST}"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"

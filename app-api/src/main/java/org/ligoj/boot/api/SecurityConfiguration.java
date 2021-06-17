@@ -140,6 +140,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return bean;
 	}
 
+	/**
+	 * Configure the firewall.
+	 * @return Firewall configuration.
+	 */
 	@Bean
 	public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
 		final var firewall = new DefaultHttpFirewall();

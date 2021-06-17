@@ -73,6 +73,11 @@ public class Application extends SpringBootServletInitializer {
 		lastContext = SpringApplication.run(Application.class, args);
 	}
 
+	/**
+	 * Configure management servlet.
+	 * 
+	 * @return management servlet configuration.
+	 */
 	@Bean
 	public ServletRegistrationBean<BackendProxyServlet> managementServlet() {
 		// Due to the current limitation of BackendProxyServlet
@@ -80,6 +85,11 @@ public class Application extends SpringBootServletInitializer {
 		return newBackend("managementProxy", "ligoj.endpoint.manage.url", "/manage", "/manage/*");
 	}
 
+	/**
+	 * Configure API proxy servlet.
+	 * 
+	 * @return API proxy servlet configuration.
+	 */
 	@Bean
 	public ServletRegistrationBean<BackendProxyServlet> apiProxyServlet() {
 		// Due to the current limitation of BackendProxyServlet
@@ -87,6 +97,11 @@ public class Application extends SpringBootServletInitializer {
 		return newBackend("apiProxy", "ligoj.endpoint.api.url", "/rest", "/rest/*");
 	}
 
+	/**
+	 * Configure plugin proxy servlet.
+	 * 
+	 * @return plugin servlet configuration.
+	 */
 	@Bean
 	public ServletRegistrationBean<BackendProxyServlet> pluginProxyServlet() {
 		// Due to the current limitation of BackendProxyServlet
@@ -123,11 +138,21 @@ public class Application extends SpringBootServletInitializer {
 		return registrationBean;
 	}
 
+	/**
+	 * Configure captcha servlet.
+	 * 
+	 * @return captcha configuration.
+	 */
 	@Bean
 	public ServletRegistrationBean<CaptchaServlet> captchaServlet() {
 		return new ServletRegistrationBean<>(new CaptchaServlet(), "/captcha.png");
 	}
 
+	/**
+	 * Configure security filter.
+	 * 
+	 * @return security filter configuration.
+	 */
 	@Bean
 	public FilterRegistrationBean<DelegatingFilterProxy> securityFilterChainRegistration() {
 		final var filter = new DelegatingFilterProxy();
@@ -139,6 +164,11 @@ public class Application extends SpringBootServletInitializer {
 		return registrationBean;
 	}
 
+	/**
+	 * Configure charset filter.
+	 * 
+	 * @return charset filter configuration.
+	 */
 	@Bean
 	public FilterRegistrationBean<CharacterEncodingFilter> characterEncodingFilter() {
 		final var registrationBean = new FilterRegistrationBean<>(new CharacterEncodingFilter());
@@ -150,6 +180,11 @@ public class Application extends SpringBootServletInitializer {
 		return registrationBean;
 	}
 
+	/**
+	 * Configure html proxy filter.
+	 * 
+	 * @return html proxy filter configuration.
+	 */
 	@Bean
 	public FilterRegistrationBean<HtmlProxyFilter> htmlProxyFilter() {
 		final var proxyFilter = new HtmlProxyFilter();
@@ -160,6 +195,11 @@ public class Application extends SpringBootServletInitializer {
 		return registrationBean;
 	}
 
+	/**
+	 * Configure cache filter.
+	 * 
+	 * @return cache filter configuration.
+	 */
 	@Bean
 	public FilterRegistrationBean<CacheBustingFilter> cacheFilter() {
 		final var registrationBean = new FilterRegistrationBean<>(new CacheBustingFilter());
@@ -173,6 +213,11 @@ public class Application extends SpringBootServletInitializer {
 		return registrationBean;
 	}
 
+	/**
+	 * Configure CAPTCHA filter.
+	 * 
+	 * @return CAPTCHA filter configuration.
+	 */
 	@Bean
 	public FilterRegistrationBean<CaptchaFilter> captchaFilter() {
 		final var registrationBean = new FilterRegistrationBean<>(new CaptchaFilter());
@@ -198,16 +243,31 @@ public class Application extends SpringBootServletInitializer {
 		return environmentCode;
 	}
 
+	/**
+	 * Configure request context listener.
+	 * 
+	 * @return request context listener configuration.
+	 */
 	@Bean
 	public RequestContextListener requestContextListener() {
 		return new RequestContextListener();
 	}
 
+	/**
+	 * Configure session manager.
+	 * 
+	 * @return session manager configuration.
+	 */
 	@Bean
 	public HttpSessionEventPublisher httpSessionEventPublisher() {
 		return new HttpSessionEventPublisher();
 	}
 
+	/**
+	 * Configure error mapper.
+	 * 
+	 * @return error mapper configuration.
+	 */
 	@Bean
 	public ErrorPageRegistrar containerCustomizer() {
 		return registry -> registry.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"),

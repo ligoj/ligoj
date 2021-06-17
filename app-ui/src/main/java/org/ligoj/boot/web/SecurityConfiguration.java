@@ -96,6 +96,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return ep;
 	}
 
+	/**
+	 * Configure firewall.
+	 * 
+	 * @return firewall configuration.
+	 */
 	@Bean
 	public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
 		final var firewall = new DefaultHttpFirewall();
@@ -119,6 +124,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return provider;
 	}
 
+	/**
+	 * Configure session management filter.
+	 * 
+	 * @return session management configuration.
+	 */
 	@Bean
 	public ConcurrentSessionFilter concurrentSessionFilter() {
 		return new ConcurrentSessionFilter(sessionRegistry(), new SimpleRedirectSessionInformationExpiredStrategy("/login.html?concurrency"));
@@ -138,8 +148,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()
 
 				// Everything else is authenticated
-				.anyRequest().access("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()").and().exceptionHandling()
-				.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage("/login.html?denied").and()
+				.anyRequest()
+				.access("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()")
+				.and().exceptionHandling().authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage("/login.html?denied").and()
 
 				.logout().addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies)).invalidateHttpSession(true).logoutSuccessUrl(logout)
 				.and()
@@ -187,6 +198,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		auth.eraseCredentials(true).authenticationProvider(authenticationProvider());
 	}
 
+	/**
+	 * Configure digest based authentication.
+	 * 
+	 * @return digest based authentication configuration.
+	 */
 	@Bean
 	public DigestAuthenticationFilter digestAuthenticationFilter() {
 		final var filter = new DigestAuthenticationFilter();
@@ -200,6 +216,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return filter;
 	}
 
+	/**
+	 * Configure failure URL.
+	 * 
+	 * @return authentication failure configuration.
+	 */
 	@Bean
 	public SimpleUrlAuthenticationFailureHandler getFailureHandler() {
 		final var handler = new SimpleUrlAuthenticationFailureHandler();
@@ -209,6 +230,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return handler;
 	}
 
+	/**
+	 * Configure REST failure URL.
+	 * 
+	 * @return REST failure configuration.
+	 */
 	@Bean
 	public RestRedirectStrategy getRestFailureStrategy() {
 		final var strategy = new RestRedirectStrategy();
@@ -217,6 +243,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return strategy;
 	}
 
+	/**
+	 * Configure success URL.
+	 * 
+	 * @return authentication success configuration.
+	 */
 	@Bean
 	public SimpleUrlAuthenticationSuccessHandler getSuccessHandler() {
 		final var handler = new SimpleUrlAuthenticationSuccessHandler();
@@ -242,6 +273,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return new CompositeSessionAuthenticationStrategy(Arrays.asList(sas, sfps, rsas));
 	}
 
+	/**
+	 * Configure session registry.
+	 * 
+	 * @return session registry configuration.
+	 */
 	@Bean
 	public SessionRegistry sessionRegistry() {
 		return new org.springframework.security.core.session.SessionRegistryImpl();

@@ -28,11 +28,13 @@ public final class CookieWipingLogoutHandler implements LogoutHandler {
 			var cookie = new Cookie(c, null);
 			cookie.setPath(request.getContextPath() + "/");
 			cookie.setMaxAge(0);
+			cookie.setHttpOnly(true);
 			response.addCookie(cookie);
 
 			var cookie2 = new Cookie(c, null);
 			cookie2.setPath("/");
 			cookie2.setMaxAge(0);
+			cookie2.setHttpOnly(true);
 			response.addCookie(cookie2);
 		});
 	}

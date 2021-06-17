@@ -22,9 +22,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class FederatedUserDetailsService implements UserDetailsService {
 
+	/**
+	 * Federated user details service
+	 */
 	@Autowired
 	protected RbacUserDetailsService federated;
 
+	/**
+	 * Resolved IAM providers
+	 */
 	@Autowired
 	protected IamProvider[] iamProvider;
 

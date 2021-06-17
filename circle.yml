@@ -3,7 +3,10 @@ jobs:
   build:
     working_directory: ~/circleci-feature9
     docker:
-      - image: maven:3.6.3-jdk-14
+      - image: maven:3.8.1-openjdk-15
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
       - restore_cache:
