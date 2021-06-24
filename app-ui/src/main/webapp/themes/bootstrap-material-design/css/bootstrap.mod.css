@@ -790,6 +790,66 @@ img.nav-icon {
 	z-index: 1;
 }
 
+
+@media (min-width: 1px) {
+	.retractable .nav-pills>.active {
+		margin-right: -1px;
+	}
+	
+	.retractable.retracted+[class*="col-"] {
+		margin-left: 0;
+		width: 100%;
+		padding-left: 40px;
+	}
+
+	.retractable .nav-pills li>a {
+		border-radius: 0;
+	}
+	
+	.retract {
+		filter: alpha(opacity=20);
+		opacity: .2;
+		right: -1px;
+		border-bottom-right-radius: 0;
+		border-top-right-radius: 0;
+		position: absolute;
+		cursor: pointer;
+		background-color: #3f51b5;
+		color: #fff;
+		border-bottom: 1px solid #302f2f;
+		padding: 7px;
+		transition: all .1s linear 0s;
+	}
+	
+	.retracted .retract {
+		border-bottom-left-radius: 0;
+		border-top-left-radius: 0;
+	}
+
+	.retract i {
+		display: none;
+		line-height: 1;
+	}
+
+	.retract:hover {
+		filter: alpha(opacity=100);
+		opacity: 1;
+		padding-right: 12px;
+	}
+
+	.retractable.retracted .nav-stacked li {
+		white-space: nowrap;
+	}
+
+	.retractable.retracted .retract i.retract-open, .retractable:not(.retracted) .retract i.retract-close {
+		display: block;
+	}
+
+	.retractable.retracted .hidden-retracted, .retractable:not(.retracted) .visible-retracted {
+		display: none;
+	}	
+}
+
 @media (min-width: 992px) {
 	.retractable {
 		height: 100%;
