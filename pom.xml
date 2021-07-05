@@ -30,7 +30,7 @@
 	</issueManagement>
 	<ciManagement>
 		<system>Travis</system>
-		<url>https://travis-ci.org/ligoj/ligoj</url>
+		<url>https://travis-ci.com/ligoj/ligoj</url>
 	</ciManagement>
 	<profiles>
 		<profile>
