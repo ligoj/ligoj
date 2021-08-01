@@ -51,7 +51,7 @@ define([
 		},
 
 		login: function () {
-			_('_login_save').disable().off('click');
+			_('_login_save').disable();
 			_('_login_msgbox').removeClass('label-important').addClass('label-info').text(current.loginMessages.validating).show();
 			$.ajax({
 				type: 'POST',
@@ -73,9 +73,7 @@ define([
 				error: function () {
 					_('_login_msgbox').removeClass('label-info').addClass('label-important').text(current.loginMessages['error-login']);
 					_('_login_password').trigger('focus');
-				},
-				complete: function () {
-					_('_login_save').enable().on('click', current.login);
+					_('_login_save').enable();
 				}
 			});
 		},
@@ -97,15 +95,16 @@ define([
 					$('body').first().append(Handlebars.compile(html)(messages));
 					var $popup = _('_login');
 					$cascade.trigger('html', $popup);
-					$popup.on('shown.bs.modal', function () {
+					$popup.on('show.bs.modal', function () {
 						$('.modal').not($popup).modal('hide');
+						_('_login').off('submit').on('submit', current.login);
+						_('_login_save').enable();
 						_('_login_msgbox').removeClass('label-important').removeClass('label-info').hide();
 					}).on('shown.bs.modal', function () {
 						_('_login_username').trigger('focus');
 					}).on('hidden', function () {
 						_('_login').remove();
 					});
-					_('_login_save').enable().on('click', current.login);
 					notifyManager.notify(errorMessages['error401-details'], errorMessages.error401, 'error', 'toast-top-right', -1);
 				});
 			}
