@@ -45,7 +45,10 @@
 	padding: 9px 10px;
 	font-size: 16px;
 }
-
+div .select2-results .select2-result-label {
+	padding: 17px 14px;
+	font-size: 15px;
+}
 .select2-dropdown-open .select2-choice {
 	background-color: transparent;
 }
