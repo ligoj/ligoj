@@ -15,7 +15,7 @@ cache:
     - $HOME/.sonar/cache
     - $HOME/.cache
     - $HOME/maven
-jdk: openjdk15
+jdk: openjdk16
 node_js:
   - "14"
 dist: xenial

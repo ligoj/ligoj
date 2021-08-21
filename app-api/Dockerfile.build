@@ -1,4 +1,4 @@
-FROM maven:3.8.1-openjdk-15 as builder
+FROM maven:3.8.1-openjdk-16 as builder
 WORKDIR /build/
 ADD . .
 RUN mvn clean package -B -q -Dmaven.test.skip=true

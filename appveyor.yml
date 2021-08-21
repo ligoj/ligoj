@@ -12,8 +12,8 @@ install:
       )
       [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\maven-bin.zip", "C:\maven")
   - ps: |
-     $env:JAVA_HOME="c:/Program Files/Java/jdk15"
-     Set-Variable -Name env:JAVA_HOME -Value "c:/Program Files/Java/jdk15"
+     $env:JAVA_HOME="c:/Program Files/Java/jdk16"
+     Set-Variable -Name env:JAVA_HOME -Value "c:/Program Files/Java/jdk16"
   - cmd: SET    
   - cmd: SET PATH=C:\maven\apache-maven-3.8.1\bin;%PATH%
   - cmd: SET M2_HOME=C:\maven\apache-maven-3.8.1

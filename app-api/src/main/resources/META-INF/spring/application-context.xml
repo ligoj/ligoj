@@ -13,16 +13,16 @@
 
 
 	<!-- CXF Swagger2Feature -->
-	<bean id="swagger2Feature" class="org.apache.cxf.jaxrs.swagger.Swagger2Feature">
-		<property name="scanAllResources" value="true"/>
-		<property name="supportSwaggerUi" value="true"/>
-		<property name="license" value="MIT"/>
-		<property name="licenseUrl" value="https://gus.mit-license.org/"/>
+<!-- 	<bean id="swagger2Feature" class="org.apache.cxf.jaxrs.swagger.Swagger2Feature"> -->
+<!-- 		<property name="scanAllResources" value="true"/> -->
+<!-- 		<property name="supportSwaggerUi" value="true"/> -->
+<!-- 		<property name="license" value="MIT"/> -->
+<!-- 		<property name="licenseUrl" value="https://gus.mit-license.org/"/> -->
 		
-		<property name="title" value="Ligoj"/>
-		<property name="version" value="${project.version}"/>
-		<property name="description" value="Stateless Ligo API container, includes core and plugins' API"/>
-		<property name="contact" value="fabrice.daugan@gmail.com"/>
-	</bean>
-	<bean id="swaggerToOpenApiConversionFilter" class="org.apache.cxf.jaxrs.swagger.openapi.SwaggerToOpenApiConversionFilter"/>
+<!-- 		<property name="title" value="Ligoj"/> -->
+<!-- 		<property name="version" value="${project.version}"/> -->
+<!-- 		<property name="description" value="Stateless Ligo API container, includes core and plugins' API"/> -->
+<!-- 		<property name="contact" value="fabrice.daugan@gmail.com"/> -->
+<!-- 	</bean> -->
+<!-- 	<bean id="swaggerToOpenApiConversionFilter" class="org.apache.cxf.jaxrs.swagger.openapi.SwaggerToOpenApiConversionFilter"/> -->
 </beans>

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-business-parent</artifactId>
-		<version>2.8.6</version>
+		<version>2.8.8-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 
@@ -21,9 +21,9 @@
 		<url>https://github.com/ligoj/ligoj</url>
 	</scm>
 	<properties>
-		<api.version>3.2.10</api.version>
+		<api.version>3.2.11</api.version>
 		<swagger.version>3.22.0</swagger.version>
-		<jaxws.version>2.3.1</jaxws.version>
+		<!-- <jaxws.version>2.3.1</jaxws.version> -->
 		<resource.delimiter>@</resource.delimiter>
 	</properties>
 
@@ -41,16 +41,10 @@
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
-				<groupId>javax.enterprise</groupId>
-				<artifactId>cdi-api</artifactId>
+				<groupId>jakarta.enterprise</groupId>
+				<artifactId>jakarta.enterprise.cdi-api</artifactId>
 				<scope>provided</scope>
-				<version>1.2</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.el</groupId>
-						<artifactId>javax.el-api</artifactId>
-					</exclusion>
-				</exclusions>
+				<version>2.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.tomakehurst</groupId>
@@ -136,12 +130,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 			<version>${spring-boot.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>jakarta.annotation</groupId>
-					<artifactId>jakarta.annotation-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Database -->
@@ -250,7 +238,7 @@
 		<!-- JSR-919 -->
 		<dependency>
 			<groupId>com.sun.mail</groupId>
-			<artifactId>javax.mail</artifactId>
+			<artifactId>jakarta.mail</artifactId>
 			<scope>compile</scope>
 		</dependency>
 
@@ -299,40 +287,12 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
-				<excludes>
-					<exclude>**/*.csv</exclude>
-					<exclude>**/*.xls</exclude>
-				</excludes>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>false</filtering>
-				<includes>
-					<include>**/*.csv</include>
-					<include>**/*.xls</include>
-				</includes>
 			</resource>
 		</resources>
 		<testResources>
 			<testResource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
-				<excludes>
-					<exclude>**/*.jar</exclude>
-					<exclude>**/*.txt</exclude>
-					<exclude>**/*.csv</exclude>
-					<exclude>**/*.xls</exclude>
-				</excludes>
-			</testResource>
-			<testResource>
-				<directory>src/test/resources</directory>
-				<filtering>false</filtering>
-				<includes>
-					<include>**/*.jar</include>
-					<include>**/*.txt</include>
-					<include>**/*.csv</include>
-					<include>**/*.xls</include>
-				</includes>
 			</testResource>
 		</testResources>
 	</build>
