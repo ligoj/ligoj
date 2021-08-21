@@ -169,6 +169,7 @@ ligoj.plugin.update         = <false,[true]> # When true, on startup, the plug-i
 ligoj.plugin.repository     = <[central],nexus> # The default repository used to perform the plug-in update/install
 ligoj.plugin.ignore         = plugin-password-management # Filtered (deprecated, fixed version, ...) plug-ins for install or update from the repositories
 ligoj.plugin.install        = # Comma separated plug-ins  to install on startup. Update are performed according to "ligoj.plugin.update" option
+cache.location              = classpath:META-INF/hazelcast-local.xml # Custom Hazelcast configuration file location.
 ```
 
 ## Compatibilities
