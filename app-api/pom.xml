@@ -22,7 +22,6 @@
 	</scm>
 	<properties>
 		<api.version>3.2.11</api.version>
-		<swagger.version>3.22.0</swagger.version>
 		<!-- <jaxws.version>2.3.1</jaxws.version> -->
 		<resource.delimiter>@</resource.delimiter>
 	</properties>
@@ -72,56 +71,6 @@
 				<exclusion>
 					<groupId>org.bouncycastle</groupId>
 					<artifactId>bcpkix-jdk15on</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<!-- Swagger -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>swagger-ui</artifactId>
-			<version>${swagger.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-rs-json-basic</artifactId>
-			<version>${cxf.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.geronimo.specs</groupId>
-					<artifactId>geronimo-jta_1.1_spec</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>activation</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jboss.spec.javax.rmi</groupId>
-					<artifactId>jboss-rmi-api_1.0_spec</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.glassfish.jaxb</groupId>
-					<artifactId>jaxb-xjc</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-rs-service-description-swagger</artifactId>
-			<version>${cxf.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.geronimo.specs</groupId>
-					<artifactId>geronimo-jta_1.1_spec</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jboss.spec.javax.rmi</groupId>
-					<artifactId>jboss-rmi-api_1.0_spec</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.validation</groupId>
-					<artifactId>validation-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
