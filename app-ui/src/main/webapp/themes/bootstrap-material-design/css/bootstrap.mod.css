@@ -954,10 +954,6 @@ img.nav-icon {
 	width: 100%;
 	margin-left: 0;
 }
-
-.form-group {
-	margin-top: 0;
-}
 .form-group.has-error[data-error-property]+.tooltip>.tooltip-arrow, .form-group.has-error[data-error-property]+.tooltip>.tooltip-inner {
 	background-color: #f00;
 }

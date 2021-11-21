@@ -2010,10 +2010,6 @@ label.control-label {
   margin-top: 0;
   font-size: 12px;
 }
-.form-group {
-  padding-bottom: 7px;
-  margin: 28px 0 0 0;
-}
 .form-group .form-control {
   margin-bottom: 7px;
 }
