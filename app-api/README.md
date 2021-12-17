@@ -35,6 +35,14 @@ java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=fal
 docker build -t ligoj/ligoj-api:3.2.0 .
 ```
 
+## Build with Docker builder
+
+With this mode, no build tools (kava, Maven,...) are required to build the image.
+
+```
+docker build -t ligoj/ligoj-api:3.2.0 -f Dockerfile.build .
+```
+
 ## Custom builds
 
 ### Custom URL

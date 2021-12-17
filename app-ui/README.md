@@ -43,6 +43,15 @@ During the Docker build, the WAR file "ligoj-ui.war" is not copied from your loc
 By default, the location is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-ui&v=3.2.0&p=war"
 In case of a custom build you can specify its remote or local location.
 
+
+## Build with Docker builder
+
+With this mode, no build tools (kava, Maven,...) are required to build the image.
+
+```
+docker build -t ligoj/ligoj-ui:3.2.0 -f Dockerfile.build .
+```
+
 ## Staged OSS build from Sonatype
 
 ```
