@@ -12,3 +12,5 @@
 **/_login.css
 /app-ui/UI (COGNITO).launch
 /app-ui/UI (TRUSTED) (PROD).launch
+**/UI Cognito.launch
+**/API (no SQL log).launch
