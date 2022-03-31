@@ -11,7 +11,7 @@
 
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-api</artifactId>
-	<version>3.2.2-SNAPSHOT</version>
+	<version>3.2.2</version>
 	<packaging>war</packaging>
 	<name>Ligoj - API</name>
 
