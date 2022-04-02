@@ -20,6 +20,7 @@ class SecurityConfigurationTest {
 
 	@Test
 	void configure() throws Exception {
+		@SuppressWarnings("unchecked")
 		final ObjectPostProcessor<Object> proc =  Mockito.mock(ObjectPostProcessor.class);
 		final var builder = new AuthenticationManagerBuilder(proc);
 		final var security = new HttpSecurity(proc, builder, new HashMap<>());
