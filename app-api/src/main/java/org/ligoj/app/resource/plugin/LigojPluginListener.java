@@ -196,7 +196,7 @@ public class LigojPluginListener implements PluginListener {
 
 	@Override
 	public void configure(FeaturePlugin plugin, SystemPlugin entity) {
-		final var type = plugin instanceof ServicePlugin ? determinePluginType((ServicePlugin) plugin) : PluginType.FEATURE;
+		final var type = plugin instanceof ServicePlugin p ? determinePluginType(p) : PluginType.FEATURE;
 		entity.setType(type.name());
 
 		// Manage disable then re-enable base with double install
