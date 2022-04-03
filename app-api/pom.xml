@@ -24,6 +24,8 @@
 		<api.version>3.2.14</api.version>
 		<!-- <jaxws.version>2.3.1</jaxws.version> -->
 		<resource.delimiter>@</resource.delimiter>
+		<jackson.version>2.13.2</jackson.version>
+		<jackson.databind.version>2.13.2.2</jackson.databind.version>
 	</properties>
 
 	<dependencyManagement>
