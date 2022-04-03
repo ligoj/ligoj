@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -69,7 +68,7 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 	private Authentication newAuthentication(final String username, final String credentials,
 			final Collection<? extends GrantedAuthority> authorities, final HttpResponse httpResponse) {
 		final var cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> "set-cookie".equals(header.getName())).map(Header::getValue)
-				.collect(Collectors.toList());
+				.toList();
 
 		// Get the optional real user name if provided
 		final var realUserName = Optional.ofNullable(httpResponse.getFirstHeader("X-Real-User")).map(Header::getValue).orElse(username);
