@@ -10,12 +10,12 @@ function installMaven {
   echo "Setup Maven"
   mkdir -p ~/maven
   pushd ~/maven > /dev/null
-  if [ ! -d "apache-maven-3.8.1" ]; then
-    echo "Download Maven 3.8.1"
-    curl -sSL http://apache.mirrors.ovh.net/ftp.apache.org/dist/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz | tar zx -C ~/maven
+  if [ ! -d "apache-maven-3.8.5" ]; then
+    echo "Download Maven 3.8.5"
+    curl -sSL http://apache.mirrors.ovh.net/ftp.apache.org/dist/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz | tar zx -C ~/maven
   fi
   popd > /dev/null
-  export M2_HOME=~/maven/apache-maven-3.8.1
+  export M2_HOME=~/maven/apache-maven-3.8.5
   export PATH=$M2_HOME/bin:$PATH
   echo '<settings><profiles><profile><id>spring-milestone</id><repositories>' > $M2_HOME/conf/settings.xml
   echo '<repository><id>spring-milestone</id><url>https://repo.spring.io/milestone/</url></repository>' >> $M2_HOME/conf/settings.xml

@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/circleci-feature9
     docker:
-      - image: maven:3.8.1-openjdk-16
+      - image: maven:3.8.5-openjdk-17
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PASSWORD

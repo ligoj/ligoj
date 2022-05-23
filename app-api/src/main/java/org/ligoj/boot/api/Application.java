@@ -40,7 +40,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Require main either invoked from IDE, either from the CLI
-	 *
+	 * 
 	 * @param args
 	 *            Application arguments.
 	 */
@@ -90,9 +90,9 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	/**
-	 * Request Context holder.
-	 *
-	 * @return RequestContextListener
+	 * Configure request context listener.
+	 * 
+	 * @return request context listener configuration.
 	 */
 	@Bean
 	public RequestContextListener requestContextListener() {
@@ -100,7 +100,9 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	/**
-	 * @return HttpSessionEventPublisher
+	 * Configure session manager.
+	 * 
+	 * @return Session manager configuration.
 	 */
 	@Bean
 	public HttpSessionEventPublisher httpSessionEventPublisher() {
