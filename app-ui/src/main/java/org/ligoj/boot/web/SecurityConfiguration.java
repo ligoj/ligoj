@@ -21,14 +21,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
@@ -51,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 @EnableGlobalMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
 @Profile("prod")
 @Slf4j
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration {
 
 	@Value("${security.max-sessions:1}")
 	private int maxSession;
@@ -134,8 +135,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return new ConcurrentSessionFilter(sessionRegistry(), new SimpleRedirectSessionInformationExpiredStrategy("/login.html?concurrency"));
 	}
 
-	@Override
-	protected void configure(final HttpSecurity http) throws Exception {
+	@Bean
+	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
+		final var authenticationManager = http.getSharedObject(AuthenticationManager.class);
 		final var logout = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, "/logout.html") : "/login.html?logout";
 		final var sec = http.authorizeRequests().expressionHandler(expressionHandler)
 				// Login
@@ -171,18 +173,19 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			final var bean = new SilentRequestHeaderAuthenticationFilter();
 			bean.setPrincipalRequestHeader(securityPreAuthPrincipal);
 			bean.setCredentialsRequestHeader(securityPreAuthCredentials);
-			bean.setAuthenticationManager(authenticationManager());
+			bean.setAuthenticationManager(authenticationManager);
 			sec.addFilterAt(bean, AbstractPreAuthenticatedProcessingFilter.class);
 		}
+		return http.build();
 	}
 
 	private boolean isPreAuth() {
 		return StringUtils.isNotBlank(securityPreAuthPrincipal);
 	}
 
-	@Override
-	public void configure(WebSecurity web) {
-		web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
+	@Bean
+	public WebSecurityCustomizer webSecurityCustomizer() {
+		return (web) -> web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
 	}
 
 	/**
@@ -283,7 +286,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return new org.springframework.security.core.session.SessionRegistryImpl();
 	}
 
-	@Override
 	@Bean
 	public SimpleUserDetailsService userDetailsServiceBean() {
 		return new SimpleUserDetailsService();

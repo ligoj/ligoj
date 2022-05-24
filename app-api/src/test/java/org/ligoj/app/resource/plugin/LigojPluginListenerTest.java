@@ -26,6 +26,7 @@ import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.api.ServicePlugin;
 import org.ligoj.app.dao.NodeRepository;
 import org.ligoj.app.model.Node;
+import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
 import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
@@ -56,8 +57,10 @@ class LigojPluginListenerTest extends AbstractServerTest {
 	/**
 	 * File used to be created when a plug-in is downloaded from this test class
 	 */
-	private static final File TEMP_FILE = Paths.get(USER_HOME_DIRECTORY, org.ligoj.bootstrap.core.plugin.PluginsClassLoader.HOME_DIR_FOLDER,
-			org.ligoj.bootstrap.core.plugin.PluginsClassLoader.PLUGINS_DIR, "plugin-iam-node-test.jar").toFile();
+	private static final File TEMP_FILE = Paths
+			.get(USER_HOME_DIRECTORY, org.ligoj.bootstrap.core.plugin.PluginsClassLoader.HOME_DIR_FOLDER,
+					org.ligoj.bootstrap.core.plugin.PluginsClassLoader.PLUGINS_DIR, "plugin-iam-node-test.jar")
+			.toFile();
 
 	@Autowired
 	private LigojPluginListener resource;
@@ -73,8 +76,8 @@ class LigojPluginListenerTest extends AbstractServerTest {
 
 	@BeforeEach
 	void prepareData() throws IOException {
-		persistEntities("csv", new Class[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class },
-				StandardCharsets.UTF_8.name());
+		persistEntities("csv", new Class[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class,
+				Parameter.class }, StandardCharsets.UTF_8.name());
 		FileUtils.deleteQuietly(TEMP_FILE);
 	}
 
@@ -201,7 +204,8 @@ class LigojPluginListenerTest extends AbstractServerTest {
 	@Test
 	void getPluginClassLoader() {
 		final var pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
-		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0], pluginsClassLoader))) {
+		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(
+				new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(resource.getPluginClassLoader());
 		}
 	}
@@ -211,8 +215,10 @@ class LigojPluginListenerTest extends AbstractServerTest {
 		final var directory = Mockito.mock(Path.class);
 		Mockito.when(pluginsClassLoader.getHomeDirectory()).thenReturn(Paths.get(USER_HOME_DIRECTORY));
 		Mockito.when(directory.resolve(ArgumentMatchers.anyString()))
-				.thenReturn(Paths.get(USER_HOME_DIRECTORY, org.ligoj.bootstrap.core.plugin.PluginsClassLoader.HOME_DIR_FOLDER,
-						org.ligoj.bootstrap.core.plugin.PluginsClassLoader.PLUGINS_DIR).resolve("plugin-iam-node-test.jar"));
+				.thenReturn(Paths
+						.get(USER_HOME_DIRECTORY, org.ligoj.bootstrap.core.plugin.PluginsClassLoader.HOME_DIR_FOLDER,
+								org.ligoj.bootstrap.core.plugin.PluginsClassLoader.PLUGINS_DIR)
+						.resolve("plugin-iam-node-test.jar"));
 		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(directory);
 		final var pluginResource = new LigojPluginListener() {
 			@Override
@@ -242,7 +248,8 @@ class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	void getParentNode() {
-		Assertions.assertEquals("service:sample", newPluginResourceInstall().getParentNode("service:sample:tool1").getId());
+		Assertions.assertEquals("service:sample",
+				newPluginResourceInstall().getParentNode("service:sample:tool1").getId());
 	}
 
 	@Test
