@@ -33,16 +33,6 @@ User/password for administrator role : `ligoj-admin` and `ligoj-user` for a regu
 
 You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin-id-ldap-embedded
 
-# Deeper
-
-## Make Ligoj home persistent
-
-You can keep your plugins installation by mapping `/usr/local/ligoj` with a volume. The `ligoj-ui` container has no persistent data.
-
-```
-docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.2.2
-```
-
 ## Dev section
 
 See [Wiki page](https://github.com/ligoj/ligoj/wiki/Dev-Setup)
@@ -52,3 +42,33 @@ See each container [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fligoj%2Fligoj.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fligoj%2Fligoj?ref=badge_large)
+
+## Installation guides
+
+### One script rebuild and run
+
+Docker, compose and git install, then build, then run.
+
+``` bash
+sudo yum install docker git
+sudo pip3 install docker-compose
+sudo usermod -a -G docker ec2-user
+sudo systemctl enable docker.service
+sudo systemctl start docker.service
+git clone https://github.com/ligoj/ligoj.git
+cd ligoj
+bash -c "app-api && docker build -t ligoj/ligoj-api:3.2.2 -f Dockerfile.build ."
+bash -c "app-ui && docker build -t ligoj/ligoj-ui:3.2.2 -f Dockerfile.build ."
+/usr/local/bin/docker-compose up
+open http://localhost:8080/ligoj
+```
+
+
+## Make Ligoj home persistent
+
+By default with Docker compose, the home is persistent, keeping your plugins installation by mapping `/usr/local/ligoj` with a volume. The `ligoj-ui` container has no persistent data.
+
+```
+docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.2.2
+```
+
