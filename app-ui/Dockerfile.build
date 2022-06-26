@@ -1,4 +1,4 @@
-FROM maven:3.8.5-openjdk-17 as builder
+FROM --platform=linux/amd64 maven:3.8.5-openjdk-17 as builder
 RUN touch ~/.bash_profile && \
   curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash && \
   export NVM_DIR="$HOME/.nvm" && \
@@ -15,7 +15,7 @@ ADD . .
 RUN source /root/.bash_profile && \
     mvn clean package -B -q -Dmaven.test.skip=true -Pminify
 
-FROM openjdk:15-jdk-alpine
+FROM --platform=linux/amd64 openjdk:17-jdk-alpine
 LABEL maintainer "fabrice.daugan@gmail.com"
 
 # ARGS (build)
@@ -49,4 +49,4 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
-CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico || exit 1
+CMD curl --fail -s http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico || exit 1

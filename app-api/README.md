@@ -35,9 +35,9 @@ java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=fal
 docker build -t ligoj/ligoj-api:3.2.2 .
 ```
 
-## Build with Docker builder
+## Build with Docker builder (recommended)
 
-With this mode, no build tools (kava, Maven,...) are required to build the image.
+With this mode, no build tools (java, Maven,...) are required to build the image.
 
 ```
 docker build -t ligoj/ligoj-api:3.2.2 -f Dockerfile.build .
@@ -201,7 +201,5 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 
 | Vendor     | Release  | Status  | Notes |
 |------------|----------|---------|-------|
-| Oracle     | 13       | OK      | You have to rebuild from the source |
-| OpenJDK    | 13       | OK      | You have to rebuild from the source |
-| Oracle     | 14       | OK      |  |
-| OpenJDK    | 14       | OK      |  |
+| Oracle     | 17       | OK      |  |
+| OpenJDK    | 17       | OK      |  |

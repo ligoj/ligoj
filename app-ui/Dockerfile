@@ -1,4 +1,4 @@
-FROM openjdk:15-jdk-alpine
+FROM --platform=linux/amd64 openjdk:17-jdk-alpine
 LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
 
 # ARGS (build)
@@ -37,4 +37,4 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
-CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico || exit 1
+CMD curl --fail -s http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico || exit 1

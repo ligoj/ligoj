@@ -1,4 +1,4 @@
-FROM openjdk:15-jdk-alpine
+FROM --platform=linux/amd64  openjdk:17-jdk-alpine
 LABEL maintainer "fabrice.daugan@gmail.com"
 
 # ARGS (build)
@@ -42,7 +42,6 @@ CMD mkdir -p "$LIGOJ_HOME" && \
 	--add-opens java.base/java.nio=ALL-UNNAMED \
 	--add-opens java.base/java.lang.module=ALL-UNNAMED \
 	--add-opens java.base/java.lang.invoke=ALL-UNNAMED \
-    --add-opens java.base/java.lang.package=ALL-UNNAMED \
 	--add-opens java.base/java.util=ALL-UNNAMED \
 	--add-opens java.base/java.util.regex=ALL-UNNAMED \
 	--add-opens java.base/sun.nio.ch=ALL-UNNAMED \
@@ -62,5 +61,5 @@ CMD mkdir -p "$LIGOJ_HOME" && \
     -Dligoj.home="${LIGOJ_HOME}" \
     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
-HEALTHCHECK --interval=10s --timeout=1s --retries=5 --start-period=30s \
+HEALTHCHECK --interval=10s --timeout=2s --retries=5 --start-period=30s \
 CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health || exit 1

@@ -44,7 +44,7 @@ By default, the location is "https://oss.sonatype.org/service/local/artifact/mav
 In case of a custom build you can specify its remote or local location.
 
 
-## Build with Docker builder
+## Build with Docker builder (recommended)
 
 With this mode, no build tools (kava, Maven,...) are required to build the image.
 
@@ -138,13 +138,9 @@ log.http                    = info # When "debug", all HTTP queries are logged. 
 
 ### JSE
 
-The source compatibility is 13 to 15.
+The source compatibility is 17.
 
 | Vendor     | Release  | Status  | Notes |
 |------------|----------|---------|-------|
-| Oracle     | 13       | OK      | You have to rebuild from the source |
-| OpenJDK    | 13       | OK      | You have to rebuild from the source |
-| Oracle     | 14       | OK      | You have to rebuild from the source |
-| OpenJDK    | 14       | OK      | You have to rebuild from the source |
-| Oracle     | 15       | OK      |  |
-| OpenJDK    | 15       | OK      |  |
+| Oracle     | 17       | OK      |  |
+| OpenJDK    | 17       | OK      |  |
