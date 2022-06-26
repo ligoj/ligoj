@@ -140,7 +140,7 @@ public class SecurityConfiguration {
 	 * Simple API token.
 	 *
 	 * @return Simple API token.
-	 * @throws Exception From {@link #authenticationManager()}
+	 * @throws Exception From {@link #authenticationManager(AuthenticationConfiguration)}
 	 */
 	@Bean
 	public ApiTokenAuthenticationFilter apiTokenFilter(final AuthenticationManager authenticationManager)
