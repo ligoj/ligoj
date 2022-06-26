@@ -57,8 +57,8 @@ sudo systemctl enable docker.service
 sudo systemctl start docker.service
 git clone https://github.com/ligoj/ligoj.git
 cd ligoj
-bash -c "app-api && docker build -t ligoj/ligoj-api:3.2.2 -f Dockerfile.build ."
-bash -c "app-ui && docker build -t ligoj/ligoj-ui:3.2.2 -f Dockerfile.build ."
+bash -c "app-api && docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile.build ."
+bash -c "app-ui && docker build -t ligoj/ligoj-ui:3.2.3 -f Dockerfile.build ."
 /usr/local/bin/docker-compose up
 open http://localhost:8080/ligoj
 ```
@@ -69,6 +69,6 @@ open http://localhost:8080/ligoj
 By default with Docker compose, the home is persistent, keeping your plugins installation by mapping `/usr/local/ligoj` with a volume. The `ligoj-ui` container has no persistent data.
 
 ```
-docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.2.2
+docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.2.3
 ```
 
