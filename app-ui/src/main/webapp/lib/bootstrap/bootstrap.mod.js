@@ -113,7 +113,7 @@ define([
 	
 	// Placeholder patch for Select2
 	$.fn.select2Placeholder = function(placeholder) {
-		let data = $(this).data('select2');
+		var data = $(this).data('select2');
 		if (typeof placeholder === 'string') {
 			data.opts.placeholder = placeholder;
 			if ($(this).select2('data') === null) {
