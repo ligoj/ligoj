@@ -137,8 +137,8 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
-		final var authenticationManager = http.getSharedObject(AuthenticationManager.class);
 		final var logout = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, "/logout.html") : "/login.html?logout";
+		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
 		final var sec = http.authorizeRequests().expressionHandler(expressionHandler)
 				// Login
 				.antMatchers(HttpMethod.POST, "/login").permitAll()
@@ -170,13 +170,17 @@ public class SecurityConfiguration {
 		// Activate a pre-auth filter if configured header
 		if (isPreAuth()) {
 			log.info("Pre-auth filter is enabled with {}/{}, logout: {}", securityPreAuthPrincipal, securityPreAuthCredentials, logout);
-			final var bean = new SilentRequestHeaderAuthenticationFilter();
-			bean.setPrincipalRequestHeader(securityPreAuthPrincipal);
-			bean.setCredentialsRequestHeader(securityPreAuthCredentials);
-			bean.setAuthenticationManager(authenticationManager);
-			sec.addFilterAt(bean, AbstractPreAuthenticatedProcessingFilter.class);
+			preAuthBean = new SilentRequestHeaderAuthenticationFilter();
+			preAuthBean.setPrincipalRequestHeader(securityPreAuthPrincipal);
+			preAuthBean.setCredentialsRequestHeader(securityPreAuthCredentials);
+			sec.addFilterAt(preAuthBean, AbstractPreAuthenticatedProcessingFilter.class);
 		}
-		return http.build();
+		final var chain = http.build();
+		if (preAuthBean != null) {
+			var authenticationManager = http.getSharedObject(AuthenticationManager.class);
+			preAuthBean.setAuthenticationManager(authenticationManager);
+		}
+		return chain;
 	}
 
 	private boolean isPreAuth() {
