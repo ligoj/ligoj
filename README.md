@@ -50,15 +50,15 @@ See each container [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api
 Docker, compose and git install, then build, then run.
 
 ``` bash
-sudo yum install docker git
+sudo yum install -y docker git
 sudo pip3 install docker-compose
 sudo usermod -a -G docker ec2-user
 sudo systemctl enable docker.service
 sudo systemctl start docker.service
 git clone https://github.com/ligoj/ligoj.git
 cd ligoj
-bash -c "app-api && docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile.build ."
-bash -c "app-ui && docker build -t ligoj/ligoj-ui:3.2.3 -f Dockerfile.build ."
+bash -c "cd app-api && docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile.build ."
+bash -c "cd app-ui && docker build -t ligoj/ligoj-ui:3.2.3 -f Dockerfile.build ."
 /usr/local/bin/docker-compose up
 open http://localhost:8080/ligoj
 ```
