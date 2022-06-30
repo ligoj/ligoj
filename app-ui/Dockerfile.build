@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 maven:3.8.5-openjdk-17 as builder
 RUN touch ~/.bash_profile && \
-  curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash && \
+  curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
   export NVM_DIR="$HOME/.nvm" && \
   [ -s "$NVM_DIR/nvm.sh" ] && \
   \. "$NVM_DIR/nvm.sh" && \
