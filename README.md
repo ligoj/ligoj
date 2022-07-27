@@ -66,14 +66,14 @@ open http://localhost:8080/ligoj
 ## Publish to AWS ECR
 
 ``` bash
-AWS_ACCOUNT=123456789012
-AWS_REGION=eu-west-1
+AWS_ACCOUNT="$(aws sts get-caller-identity --query "Account" --output text)"
+AWS_REGION="$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')"
 ECR_REGISTRY=$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com
 docker image tag ligoj/ligoj-api:3.2.3 $ECR_REGISTRY/ligoj/ligoj-api:3.2.3
 docker image tag ligoj/ligoj-ui:3.2.3 $ECR_REGISTRY/ligoj/ligoj-ui:3.2.3
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-docker image push $ECR_REGISTRY/ligoj/ligoj-api:3.2.3
-docker image push $ECR_REGISTRY/ligoj/ligoj-ui:3.2.3
+docker push $ECR_REGISTRY/ligoj/ligoj-api:3.2.3
+docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.2.3
 ```
 
 ## Make Ligoj home persistent
