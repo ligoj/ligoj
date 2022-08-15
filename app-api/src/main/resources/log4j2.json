@@ -57,6 +57,20 @@
 						"ref": "STDOUT"
 					}
 				}, {
+					"name": "com.hazelcast",
+					"level": "${sys:log.hazelcast:-warn}",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
+					"name": "org.quartz",
+					"level": "${sys:log.quartz:-warn}",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}, {
 					"name": "org.apache.cxf.phase.PhaseInterceptorChain",
 					"level": "error",
 					"additivity": "false",
