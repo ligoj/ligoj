@@ -4,7 +4,7 @@
 define([
 	'jquery', 'hashchange/hashchange'
 ], function ($) {
-	var $self = {
+	const $self = {
 
 		/**
 		 * Protected, and also injected properties inside the contexts.
@@ -73,9 +73,9 @@ define([
 		 * @param  {context}  Context to undefine modules
 		 */
 		undefModules: function (context) {
-			for (var index = context.$plugins.length; index-- > 0;) {
-				var plugin = context.$plugins[index];
-				var configuration = $self.plugins[plugin].unload;
+			for (let index = context.$plugins.length; index-- > 0;) {
+				const plugin = context.$plugins[index];
+				const configuration = $self.plugins[plugin].unload;
 				// Call the unload controller if defined for this plugin
 				configuration && configuration.controller && configuration.controller(context.$require[plugin], context);
 			}
@@ -88,9 +88,7 @@ define([
 		unload: function (context) {
 			// First, unload children
 			if (context.$siblings) {
-				for (var index = 0; index < context.$siblings.length; index++) {
-					$self.unload(context.$siblings[index]);
-				}
+				context.$siblings.forEach($self.unload);
 				delete context.$siblings;
 			}
 			if (context.$child) {
@@ -104,6 +102,7 @@ define([
 			(typeof context.unload) === 'function' && $.proxy(context.unload, context)();
 
 			// Finally undefine the AMD modules
+			delete $self.$current.$initializeTransaction
 			context.$unloaded = true;
 			$self.undefModules(context);
 			return context.$parent;
@@ -115,7 +114,7 @@ define([
 		 * @return {array}          The context chain from root to the leaf.
 		 */
 		getContextHierarchy: function (context) {
-			var result = [];
+			const result = [];
 			while (context) {
 				result.unshift(context);
 				context = context.$parent;
@@ -142,13 +141,13 @@ define([
 				// Stop the navigation
 				return;
 			}
-			var fragments = url ? url.split('/') : [];
+			const fragments = url ? url.split('/') : [];
 			// Add implicit 'main' and root fragments
 			fragments.unshift('main');
 			fragments.unshift('root');
 
 			// Prepare the context
-			var context = $self.$current || {
+			const context = $self.$current || {
 				$view: $('body'),
 				$path: '',
 				$url: '#/',
@@ -159,38 +158,49 @@ define([
 			};
 
 			// Create a new transaction
-			var transaction = $self.newTransaction();
+			const transaction = $self.newTransaction();
 
 			// Protected zone
 			require(['zone-protected'], function () {
 				// First load, ensure the first level is loaded before the private/public zone
 				if ($self.session) {
-					$self.securedZoneLoader(context, transaction, fragments, reload);
+					$self.securedZoneLoader(context, transaction, fragments, reload, url);
 				} else {
 					$self.appendSpin($('[data-cascade-hierarchy="1"]').off().empty(), 'fa-3x');
 					$self.off('session').register('session', function () {
-						$self.securedZoneLoader(context, transaction, fragments, reload);
+						$self.securedZoneLoader(context, transaction, fragments, reload, url);
 					});
 				}
 			});
 		},
 
-		securedZoneLoader: function (context, transaction, fragments, reload) {
-			$self.loadFragmentRecursive(context, transaction, fragments, 1, reload, function (childContext) {
+		securedZoneLoader: function (context, transaction, fragments, reload, url) {
+			$self.loadFragmentRecursive(context, transaction, fragments, 1, reload, url, function (childContext) {
 				// Private zone and modules
 				require(['zone-private'], function () {
 					// Load the remaining context hierarchy
-					$self.loadFragmentRecursive(context.$child || childContext, transaction, fragments, 2, reload);
+					$self.loadFragmentRecursive(context.$child || childContext, transaction, fragments, 2, reload, url);
 
-					// Execute the boostrap code if present
+					// Execute the bootstrap code if present
 					if ($self.session.applicationSettings.bootstrapPrivateCode) {
 						// Inject this code for immediate execution
-						var bootstrapCode = document.createElement('script');
+						const bootstrapCode = document.createElement('script');
 						bootstrapCode.text = '(function(){' + Handlebars.compile($self.session.applicationSettings.bootstrapPrivateCode)($self.$messages) + '}());';
 						document.body.appendChild(bootstrapCode);
 					}
 				});
 			});
+		},
+
+		checkRestrictedHash: function (url) {
+			const resolvedUrl = `#/${url}`;
+			if (typeof $self.session?.userSettings['restricted-hash'] === 'string' && resolvedUrl !== $self.session.userSettings['restricted-hash']) {
+				// Redirect to restricted hash
+				$self.unload($self.$current);
+				delete $self.$current;
+				location.hash = $self.session.userSettings['restricted-hash'];
+				return true;
+			}
 		},
 
 		/**
@@ -210,16 +220,16 @@ define([
 		 *                              - hindex : Incremented (+1) parameter value.
 		 *                              - callback : undefined.
 		 */
-		loadFragmentRecursive: function (context, transaction, fragments, hindex, reload, callback) {
+		loadFragmentRecursive: function (context, transaction, fragments, hindex, reload, url, callback) {
 			/* We need to check the delta to compute the parts to load/unload by comparing : the fragment of context at a specific position of the
 			 * hierarchy and the URL fragment at the same position.
 			 * There is a difference when :
 			 * - fragment is defined and different from the defined one of compared context
 			 * - fragment is not defined, but the defined one of compared context does not correspond to the home context of the parent
 			 */
-			var hierarchy = $self.getContextHierarchy(context);
-			var parent = hierarchy[hindex - 1];
-			var sharedContext = hierarchy[hindex];
+			const hierarchy = $self.getContextHierarchy(context);
+			const parent = hierarchy[hindex - 1];
+			const sharedContext = hierarchy[hindex];
 			if (sharedContext) {
 				if (sharedContext.$fragment && sharedContext.$fragment !== fragments[hindex] && ((typeof fragments[hindex] !== 'undefined') || sharedContext.$fragment !== (sharedContext.$parent.$home || 'home'))) {
 					// Different context root, recursively unload all related contexts and move context its parent
@@ -230,13 +240,17 @@ define([
 						// Add fragment from the validated and yet not explicitly
 						fragments.push(sharedContext.$fragment);
 					}
-					$self.loadFragmentRecursive(context, transaction, fragments, hindex + 1, reload);
+					$self.loadFragmentRecursive(context, transaction, fragments, hindex + 1, reload, url);
 					return;
 				}
 			}
 
+			if (hindex > 1 && $self.checkRestrictedHash(url)) {
+				return;
+			}
+
 			// Build the remaining fragments and considered as parameters
-			var parameters = fragments.slice(hindex).join('/');
+			const parameters = fragments.slice(hindex).join('/');
 
 			// Check the cursor
 			if (hindex >= fragments.length) {
@@ -253,7 +267,7 @@ define([
 			}
 
 			// At least one fragment need to be loaded
-			var id = fragments[hindex];
+			const id = fragments[hindex];
 
 			$self.loadFragment(parent, transaction, ((parent.$path || '') + '/').replace(/^\//, '') + id, id, {
 				fragment: id,
@@ -261,7 +275,7 @@ define([
 				hindex: hindex,
 				parameters: fragments.slice(hindex + 1).join('/'),
 				callback: callback || function (childContext) {
-					$self.loadFragmentRecursive(context.$child || childContext, transaction, fragments, hindex + 1, reload);
+					$self.loadFragmentRecursive(context.$child || childContext, transaction, fragments, hindex + 1, reload, url);
 				}
 			});
 		},
@@ -274,23 +288,22 @@ define([
 		},
 
 		loadPlugins: function (plugins, callback) {
-			var requiredPath = [];
-			var requiredNames = [];
-			for (var index = 0; index < plugins.length; index++) {
-				var plugin = plugins[index];
+			const requiredPath = [];
+			const requiredNames = [];
+			plugins.forEach(plugin => {
 				if (typeof $self.plugins[plugin] === 'undefined') {
 					// This plugin has not yet been loaded
 					requiredPath.push('plugins/' + plugin);
 					requiredNames.push(plugin);
 				}
-			}
+			});
 			if (requiredPath.length) {
 				require(requiredPath, function () {
-					for (var index = 0; index < requiredPath.length; index++) {
-						var $plugin = arguments[index];
+					for (let index = 0; index < requiredPath.length; index++) {
+						let $plugin = arguments[index];
 						$plugin.$cascade = $self;
 						$self.plugins[requiredNames[index]] = $plugin;
-						$plugin.intialize && $plugin.initialize();
+						$plugin.initialize && $plugin.initialize();
 					}
 					callback && callback();
 				});
@@ -314,7 +327,7 @@ define([
 		 *                                                       element and will be used as "$parentElement".
 		 *                                                       May also be useful for CSS selectors to change the display of component
 		 *                                                       depending the placement inside the hierarchy.
-		 *                                                       The CSS selector (where X corresponds to hdindex) used to resolve this parent
+		 *                                                       The CSS selector (where X corresponds to hindex) used to resolve this parent
 		 *                                                       will be: #_hierarchy-X,[data-cascade-hierarchy=X],.data-cascade-hierarchy-X
 		 *                            - {object} data            Data to save in the new context inside "$data".
 		 *                            - {string} parameters      Parameters as string to pass to the controller during the initialization.
@@ -326,11 +339,8 @@ define([
 			options.context = context;
 
 			// Build the required modules
-			var requireJsModules = [];
-			for (var index = 0; index < options.plugins.length; index++) {
-				var plugin = $self.plugins[options.plugins[index]];
-				requireJsModules.push(plugin.load.require(options));
-			}
+			const requireJsModules = [];
+			options.plugins.forEach(pluginName => requireJsModules.push($self.plugins[pluginName].load.require(options)));
 
 			// Load with AMD the resources
 			require(requireJsModules, function () {
@@ -338,21 +348,22 @@ define([
 				if (!$self.isSameTransaction(transaction)) {
 					return;
 				}
+				const requireArguments = arguments;
 
 				// Build the trimmed URL by removing the root path (main)
-				var url = home.split('/');
+				const url = home.split('/');
 				url.shift();
 
 				// Associate the requireJs module to the load plugin
-				var resolved = {};
-				var $require = {};
-				for (var index2 = 0; index2 < options.plugins.length; index2++) {
+				const resolved = {};
+				const $require = {};
+				for (let index2 = 0; index2 < options.plugins.length; index2++) {
 					$require[options.plugins[index2]] = requireJsModules[index2];
-					resolved[options.plugins[index2]] = arguments[index2];
+					resolved[options.plugins[index2]] = requireArguments[index2];
 				}
 
 				// Configure the new context
-				var $current = $.extend($self.failSafeContext(resolved.js || {}, context, transaction), {
+				const $current = $.extend($self.failSafeContext(resolved.js || {}, context, transaction), {
 					$path: home,
 					$cascade: $self,
 					$url: '#/' + url.join('/'),
@@ -366,9 +377,9 @@ define([
 				$self.copyAPI($current);
 
 				// Process each plugin
-				var skipContext = false;
-				for (var index3 = 0; index3 < options.plugins.length; index3++) {
-					skipContext |= ($self.plugins[options.plugins[index3]].load.controller || $.noop)(arguments[index3], options, $current);
+				let skipContext = false;
+				for (let index3 = 0; index3 < options.plugins.length; index3++) {
+					skipContext |= ($self.plugins[options.plugins[index3]].load.controller || $.noop)(requireArguments[index3], options, $current);
 				}
 				if (skipContext) {
 					return true;
@@ -398,10 +409,7 @@ define([
 		 * @param  {context} $context Target context.
 		 */
 		copyAPI: function ($context) {
-			for (var index = 0; index < $self.apiFunctions.length; index++) {
-				var api = $self.apiFunctions[index];
-				$context['$' + api] = $self.proxy($context, $self[api]);
-			}
+			$self.apiFunctions.forEach(api => $context['$' + api] = $self.proxy($context, $self[api]));
 		},
 
 		/**
@@ -412,19 +420,19 @@ define([
 		 */
 		proxy: function ($context, func) {
 			return function () {
-				var args = Array.prototype.slice.call(arguments);
+				const args = Array.prototype.slice.call(arguments);
 				args.unshift($context);
 				return func.apply($context, args);
 			};
 		},
 
 		/**
-		 * Share context of "from" with the formal "to object. All injectected CascadeJS properties are copied, and only these ones.
+		 * Share context of "from" with the formal "to object. All injected CascadeJS properties are copied, and only these ones.
 		 * @param  {object} from Source context containing injected properties.
 		 * @param  {object} to   Target context to fill.
 		 */
 		shareContext: function (from, to) {
-			for (var index = 0; index < $self.protected.length; index++) {
+			for (let index = 0; index < $self.protected.length; index++) {
 				to[$self.protected[index]] = from[$self.protected[index]];
 			}
 			to.$page = from;
@@ -438,18 +446,18 @@ define([
 		 * @param {function} callback Optional callback when partial is loaded.
 		 */
 		loadPartial: function (callback) {
-			var $target = $(this).first();
-			var context = $self.$current;
+			const $target = $(this).first();
+			let context = $self.$current;
 			callback = typeof callback === 'function' ? callback : null;
 
 			// Get the resource to load : HTML, CSS, JS, i28N ? By default the HTML is loaded
-			var plugins = ($target.attr('data-plugins') || 'html').split(',');
-			var id = $target.attr('data-ajax');
-			var home = context.$path;
-			var $parent;
+			const plugins = ($target.attr('data-plugins') || 'html').split(',');
+			let id = $target.attr('data-ajax');
+			let home = context.$path;
+			let $parent;
 			if (id.charAt(0) === '/') {
 				// Absolute path for home
-				var index = id.lastIndexOf('/');
+				const index = id.lastIndexOf('/');
 				home = id.substr(1, index - 1);
 				id = id.substr(index + 1);
 				while (context && context.$path !== home) {
@@ -527,11 +535,11 @@ define([
 		propagateTransaction: function (context, transaction) {
 			context.$parent && $self.propagateTransaction(context.$parent, transaction);
 			context.$transaction = transaction;
-			context.$isSameTransaction = function() {
+			context.$isSameTransaction = function () {
 				return context.$transaction == $self.transaction;
 			};
 		},
-		
+
 		/**
 		 * Initialize the given context by calling the optional 'initialize' function if provided, and with
 		 * given parameters.
@@ -562,12 +570,12 @@ define([
 		/**
 		 * Add a spin. Return the target element.
 		 * @param $to Target container.
-		 * @param sizeClass Optional Fontawesome size icon class such as : 'fa-3x'
+		 * @param sizeClass Optional FontAwesome size icon class such as : 'fa-3x'
 		 * @param iconClass Optional icon class. If not defined, will be 'fas fa-spin fa-circle-notch'
 		 * @return "$to" parameter.
 		 */
 		appendSpin: function ($to, sizeClass, iconClass) {
-			var $spin = $('<i class="' + (iconClass || 'far fa-circle faa-burst animated') + ' spin fade ' + (sizeClass || '') + '"></i>');
+			const $spin = $('<i class="' + (iconClass || 'far fa-circle faa-burst animated') + ' spin fade ' + (sizeClass || '') + '"></i>');
 			$to.append($spin);
 			setTimeout(function () {
 				$spin.addClass('in');
@@ -601,15 +609,15 @@ define([
 			$self.plugins.default = requirejs.s.contexts._.config.cascade;
 			$.fn.htmlNoStub = $.fn.html;
 			// Stub the HTML update to complete DOM with post-actions
-			var originalHtmlMethod = $.fn.html;
+			const originalHtmlMethod = $.fn.html;
 			$.fn.extend({
 				html: function () {
 					if (arguments.length === 1) {
 						// proceed only for identified parent to manage correctly the selector
-						var id = this.attr('id');
+						const id = this.attr('id');
 						if ((id && id.substr(0, 2) !== 'jq') || this.is('[data-cascade-hierarchy]')) {
 							applicationManager.debug && traceDebug('Html content updated for ' + id);
-							var result = originalHtmlMethod.apply(this, arguments);
+							const result = originalHtmlMethod.apply(this, arguments);
 							$self.trigger('html', this);
 							return result;
 						}
@@ -620,8 +628,8 @@ define([
 
 			// We can register the fragment listener now
 			$(function () {
-				var handleHash = function () {
-					var hash = location.hash;
+				const handleHash = function () {
+					const hash = location.hash;
 					if (hash === '') {
 						$self.load('');
 					} else if (hash && hash.indexOf('#/') === 0) {
@@ -646,7 +654,7 @@ define([
 		 * @return {object}         The first defined property or function in the hierarchy.
 		 */
 		closest: function (context, item) {
-			var property = context[item];
+			const property = context[item];
 			if (property && property instanceof jQuery) {
 				// Non empty jQuery object
 				return property.length ? property : $self.super(context, item);
@@ -655,16 +663,16 @@ define([
 		},
 		closestFrom: function (context, item) {
 			if (context) {
-				var owner = $self.closest(context, item);
+				const owner = $self.closest(context, item);
 				if (typeof owner === 'undefined' && context.$siblings) {
-					owner = $self.closestFromSiblings(context.$siblings, item);
+					return $self.closestFromSiblings(context.$siblings, item);
 				}
 				return owner;
 			}
 		},
 		closestFromSiblings: function (siblings, item) {
-			for (var index = 0; index < siblings.length; index++) {
-				var owner = $self.closest(siblings[index], item);
+			for (let index = 0; index < siblings.length; index++) {
+				const owner = $self.closest(siblings[index], item);
 				if (typeof owner !== 'undefined') {
 					return owner;
 				}
@@ -721,8 +729,8 @@ define([
 		 */
 		trigger: function (event, data, context) {
 			applicationManager.debug && traceDebug('Trigger event', event);
-			var callbacks = $self.callbacks[event] || [];
-			for (var index = 0; index < callbacks.length; index++) {
+			const callbacks = $self.callbacks[event] || [];
+			for (let index = 0; index < callbacks.length; index++) {
 				if (typeof callbacks[index] === 'function') {
 					callbacks[index](data || (context || $self.$context).$view, context);
 				} else {
