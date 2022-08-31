@@ -116,6 +116,19 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		formatSize: function (bytes, digits, clazz) {
 			var unit = messages['byte-size'];
 			return formatManager.formatUnit(bytes, digits, [unit, 'K' + unit, 'M' + unit, 'G' + unit, 'T' + unit, 'P' + unit], '', 1024, messages['format-size'], clazz);
+		},
+
+		/**
+		 * Weight to human readable string. Trailing decimal '0' are removed
+		 * @param {number} bytes    The amount of bytes.
+		 * @param {number} digits   Amount of digit. Default is 3 : When value is 3, you can get "6.23MB",  "62.2MB" or  "623MB".
+		 *                          When value is 2 (minimal value), you can get "6.2MB", "62MB" or "0.6MB".
+		 *                          When value is 4, you can get "6.234MB", "62.34MB" or "623.4MB".
+		 * @param {string} clazz    Optional class to apply to unit. ay be null.
+		 * @return {string}         Human readable string.
+		 */
+		formatWeight: function (bytes, digits, unit, clazz, format) {
+			return formatManager.formatUnit(bytes, digits, [unit, 'k'+unit, 'T', 'kT'], '', 1000, format || messages['format-size'], clazz);
 		}
 	};
 
