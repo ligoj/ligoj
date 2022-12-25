@@ -4,7 +4,7 @@
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fligoj%2Fligoj.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fligoj%2Fligoj?ref=badge_shield)
 
 A web application to centralize the related tools of your projects, a 21th century links management with security and data collection.
-More technical details can be found in the sub directories [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api) and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
+More technical details can be found in the subdirectories [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api) and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 
 [![Build Status](https://app.travis-ci.com/github/ligoj/ligoj.svg?branch=master)](https://app.travis-ci.com/github/ligoj/ligoj)
@@ -78,7 +78,7 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.2.3
 
 ## Make Ligoj home persistent
 
-By default with Docker compose, the home is persistent, keeping your plugins installation by mapping `/usr/local/ligoj` with a volume. The `ligoj-ui` container has no persistent data.
+By default, with Docker compose, the home is persistent, keeping your plugins installation by mapping `/usr/local/ligoj` with a volume. The `ligoj-ui` container has no persistent data.
 
 ```
 docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.2.3
