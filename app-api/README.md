@@ -69,7 +69,7 @@ Reuse the local maven package
 docker build -t ligoj/ligoj-api:3.2.3 --build-arg WAR="target/app-api-3.2.3.war" .
 ```
 
-Note the local WAR path must be relative to the `Dockerfile` (not the current path), and must be bellow the `Dockerfile`: do not use `../bar/foo.war`
+Note the local WAR path must be relative to the `Dockerfile` (not the current path), and must be below the `Dockerfile`: do not use `../bar/foo.war`
 
 # Run Docker image
 

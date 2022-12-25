@@ -51,7 +51,7 @@ public class SecurityResource {
 	@Path("login")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response login(final User user) {
-		// The authenticate the user
+		// The authenticated the user
 		final var authentication = authenticate(user.getName(), user.getPassword());
 
 		// Delegate the final response to the authentication contributors

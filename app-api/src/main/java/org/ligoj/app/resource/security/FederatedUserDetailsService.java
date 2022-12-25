@@ -17,7 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 /**
- * Federated user details service resolving the right user name corresponding the authenticated local ID.
+ * Federated user details service resolving the right username corresponding the authenticated local ID.
  */
 @Component
 public class FederatedUserDetailsService implements UserDetailsService {

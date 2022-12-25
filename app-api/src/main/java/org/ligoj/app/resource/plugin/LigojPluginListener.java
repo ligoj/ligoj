@@ -137,7 +137,7 @@ public class LigojPluginListener implements PluginListener {
 		// Determine the type from the key by convention
 		final var result = PluginType.values()[StringUtils.countMatches(plugin.getKey(), ':')];
 
-		// Double check the convention with related interface
+		// Double-check the convention with related interface
 		final PluginType interfaceType;
 		if (plugin instanceof ToolPlugin) {
 			interfaceType = PluginType.TOOL;
@@ -176,7 +176,7 @@ public class LigojPluginListener implements PluginListener {
 	}
 
 	/**
-	 * Return the parent node from a key. The node entity is retrieved from the data base without cache.
+	 * Return the parent node from a key. The node entity is retrieved from the database without cache.
 	 *
 	 * @param key
 	 *            The plug-in key.
