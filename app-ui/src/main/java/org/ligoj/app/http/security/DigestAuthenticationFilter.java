@@ -27,7 +27,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Listen "/oauth/token?target=anypath", extract token, and send it to business to validate it.
+ * Listen "/oauth/token?target=path", extract token, and send it to business to validate it.
  */
 @Slf4j
 public class DigestAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
@@ -65,8 +65,7 @@ public class DigestAuthenticationFilter extends AbstractAuthenticationProcessing
 				httpPost.setHeader("Content-Type", "application/json");
 				final var httpResponse = httpClient.execute(httpPost);
 				if (HttpStatus.SC_OK == httpResponse.getStatusLine().getStatusCode()) {
-					return getAuthenticationManager().authenticate(
-							new UsernamePasswordAuthenticationToken(EntityUtils.toString(httpResponse.getEntity()), "N/A", new ArrayList<>()));
+					return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(EntityUtils.toString(httpResponse.getEntity()), "N/A", new ArrayList<>()));
 				}
 			} catch (final IOException e) {
 				log.warn("Local SSO server is not available", e);

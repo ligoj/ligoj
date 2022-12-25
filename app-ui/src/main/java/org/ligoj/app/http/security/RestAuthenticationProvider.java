@@ -63,14 +63,14 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 	}
 
 	/**
-	 * Return a new authentication with the the real use name.
+	 * Return a new authentication with the real use name.
 	 */
 	private Authentication newAuthentication(final String username, final String credentials,
 			final Collection<? extends GrantedAuthority> authorities, final HttpResponse httpResponse) {
 		final var cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> "set-cookie".equals(header.getName())).map(Header::getValue)
 				.toList();
 
-		// Get the optional real user name if provided
+		// Get the optional real username if provided
 		final var realUserName = Optional.ofNullable(httpResponse.getFirstHeader("X-Real-User")).map(Header::getValue).orElse(username);
 		if (realUserName.equals(username)) {
 			log.info("Success authentication of {}[{}]", realUserName, credentials.length());

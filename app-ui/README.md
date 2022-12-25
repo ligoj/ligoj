@@ -92,12 +92,12 @@ docker run --rm -it \
 
 ## Endpoints
 
-| Property     | Endpoint | Default |
-|------------|---------|--------------------------|
-| ligoj.endpoint | Default base endpoint URL    | http://localhost:8081/ligoj-api |
-| ligoj.endpoint.api.url | Core API URL     | ${ligoj.endpoint}/rest |
-| ligoj.endpoint.manage.url | Health status and management| ${ligoj.endpoint}/manage |
-| ligoj.endpoint.plugins.url | Plug-ins API URL | ${ligoj.endpoint}/webjars |
+| Property                   | Endpoint                     | Default                         |
+|----------------------------|------------------------------|---------------------------------|
+| ligoj.endpoint             | Default base endpoint URL    | http://localhost:8081/ligoj-api |
+| ligoj.endpoint.api.url     | Core API URL                 | ${ligoj.endpoint}/rest          |
+| ligoj.endpoint.manage.url  | Health status and management | ${ligoj.endpoint}/manage        |
+| ligoj.endpoint.plugins.url | Plug-ins API URL             | ${ligoj.endpoint}/webjars       |
 
 
 ## Run with security disabled
@@ -140,7 +140,7 @@ log.http                    = info # When "debug", all HTTP queries are logged. 
 
 The source compatibility is 17.
 
-| Vendor     | Release  | Status  | Notes |
-|------------|----------|---------|-------|
-| Oracle     | 17       | OK      |  |
-| OpenJDK    | 17       | OK      |  |
+| Vendor  | Release | Status | Notes |
+|---------|---------|--------|-------|
+| Oracle  | 17      | OK     |       |
+| OpenJDK | 17      | OK     |       |

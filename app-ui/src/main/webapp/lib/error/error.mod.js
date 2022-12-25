@@ -9,7 +9,7 @@ define([
 		lastAjaxReceive: {},
 		lastAjaxSend: {},
 		loginMessages: null,
-		isLoginPrompBeingDisplayed: false,
+		isLoginPromptBeingDisplayed: false,
 
 		/**
 		 * Return error messages.
@@ -65,7 +65,7 @@ define([
 					if (data.success) {
 						_('_login').modal('hide').remove();
 						notifyManager.clear();
-						current.isLoginPrompBeingDisplayed = false;
+						current.isLoginPromptBeingDisplayed = false;
 						notifyManager.notify(current.loginMessages['success-login']);
 						location.reload();
 					}
@@ -79,7 +79,7 @@ define([
 		},
 
 		isLoginPrompDisplayed: function () {
-			return (_('_login').length !== 0 && $('button[data-target="#_login"]').length !== 0) || current.isLoginPrompBeingDisplayed;
+			return (_('_login').length !== 0 && $('button[data-target="#_login"]').length !== 0) || current.isLoginPromptBeingDisplayed;
 		},
 
 		/**
@@ -87,7 +87,7 @@ define([
 		 */
 		showAuthenticationAlert: function () {
 			if (!current.isLoginPrompDisplayed()) {
-				current.isLoginPrompBeingDisplayed = true;
+				current.isLoginPromptBeingDisplayed = true;
 				require([
 					'text!main/public/login/login-popup.html', 'i18n!main/public/login/nls/messages'
 				], function (html, messages) {
@@ -182,8 +182,8 @@ define([
 			} else if (xhr.status === 500) {
 				// Business side error issue
 				if (current.isJsonText(xhr.responseText)) {
-					// A JSON formated response from business server
-					current.manageBusinesSideError(JSON.parse(xhr.responseText), true);
+					// A JSON formatted response from business server
+					current.manageBusinessSideError(JSON.parse(xhr.responseText), true);
 				} else {
 					// An unknown business/web server error
 					notifyManager.notify(errorMessages.error500, null, 'error');
@@ -192,7 +192,7 @@ define([
 				// Server resource issue
 				// A required resource cause the service unavailable
 				if (current.isJsonText(xhr.responseText)) {
-					// A JSON formated response from business server
+					// A JSON formatted response from business server
 					errorObj = JSON.parse(xhr.responseText);
 					notifyManager.notifyDanger(errorMessages[errorObj.code] + current.getTechnicalCause(errorObj.cause), errorMessages.error503);
 				} else {
@@ -227,7 +227,7 @@ define([
 				var jsonError = JSON.parse(text);
 				if (jsonError.code) {
 					// A technical bad request
-					return current.manageBusinesSideError(jsonError, notify, ui);
+					return current.manageBusinessSideError(jsonError, notify, ui);
 				}
 				// A true JSR303 Validation Error with UI
 				return validationManager.validate(jsonError.errors, notify, ui);
@@ -242,7 +242,7 @@ define([
 		 * @param {boolean} notify When true, the message will be displayed in the UI.
 		 * @return The localized message.
 		 */
-		manageBusinesSideError: function (errorObj, notify) {
+		manageBusinessSideError: function (errorObj, notify) {
 			var alertType = notifyManager.getTypeFromBusiness(errorObj.code);
 
 			// First translate from user's scope

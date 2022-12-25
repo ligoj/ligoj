@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
- * HTML proxying test of {@link HtmlProxyFilter} class ..
+ * HTML proxying test of {@link HtmlProxyFilter} class.
  */
 class HtmlProxyFilterTest {
 
