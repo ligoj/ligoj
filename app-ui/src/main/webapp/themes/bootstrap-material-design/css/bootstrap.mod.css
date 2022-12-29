@@ -768,9 +768,11 @@ img.nav-icon {
 	height: 0;
 	left: 20px;
 	padding: 0;
+}
+.input-help > i {
 	opacity: .1;
 }
-.input-help:hover {
+.input-help > i:hover {
 	cursor: pointer;
 	opacity: 1;
 }
