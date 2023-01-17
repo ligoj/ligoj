@@ -175,6 +175,14 @@ define([
 		return this;
 	};
 	/**
+	 * $ shortcut to apply read-only mode.
+	 */
+	$.fn.readOnly = function () {
+		var yes = (arguments.length === 0 || arguments[0]) && 'readonly';
+		$(this)[yes ? 'attr' : 'removeAttr']('readonly', 'readonly').prop('readonly', yes)[yes ? 'addClass' : 'removeClass']('readonly');
+		return this;
+	};
+	/**
 	 * $ shortcut to apply enabled mode.
 	 */
 	$.fn.enable = function () {
