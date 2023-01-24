@@ -182,6 +182,8 @@ define([
 		$(this)[yes ? 'attr' : 'removeAttr']('readonly', 'readonly').prop('readonly', yes)[yes ? 'addClass' : 'removeClass']('readonly');
 		return this;
 	};
+	$.fn.readonly = $.fn.readOnly;
+
 	/**
 	 * $ shortcut to apply enabled mode.
 	 */
