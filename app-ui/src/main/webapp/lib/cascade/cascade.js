@@ -194,7 +194,7 @@ define([
 
 		checkRestrictedHash: function (url) {
 			const resolvedUrl = `#/${url}`;
-			if (typeof $self.session?.userSettings['restricted-hash'] === 'string' && resolvedUrl !== $self.session.userSettings['restricted-hash']) {
+			if ($self.session && typeof $self.session.userSettings['restricted-hash'] === 'string' && resolvedUrl !== $self.session.userSettings['restricted-hash']) {
 				// Redirect to restricted hash
 				$self.unload($self.$current);
 				delete $self.$current;
