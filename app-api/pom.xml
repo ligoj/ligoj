@@ -296,13 +296,13 @@
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-id-ldap</artifactId>
-					<version>1.2.3-SNAPSHOT</version>
+					<version>1.3.0-SNAPSHOT</version>
 				</dependency>
-				<dependency>
-					<groupId>org.ligoj.plugin</groupId>
-					<artifactId>plugin-id-ldap-embedded</artifactId>
-					<version>1.0.2-SNAPSHOT</version>
-				</dependency>
+<!--				<dependency>-->
+<!--					<groupId>org.ligoj.plugin</groupId>-->
+<!--					<artifactId>plugin-id-ldap-embedded</artifactId>-->
+<!--					<version>1.0.2-SNAPSHOT</version>-->
+<!--				</dependency>-->
 			</dependencies>
 		</profile>
 
