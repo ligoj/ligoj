@@ -99,13 +99,24 @@ docker run --rm -it \
  ligoj/ligoj-api:3.2.3
 ```
 
+### Troubleshoot database access
 You can experience network issue with remote database. To validate the link, try this :
 
+#### MySQL
 ```
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:3.2.3 bash -c "apt-get install -y mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
+ ligoj/ligoj-api:3.2.3 sh -c "apk add mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
 ```
+
+#### PostgreSQL
+```
+docker run --rm -it \
+ --name "ligoj-api" \
+ ligoj/ligoj-api:3.2.3 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"
+```
+
+### Column level crypto in database
 
 More complex run with crypto, port mapping, disabled schema generation and volume configurations
 
