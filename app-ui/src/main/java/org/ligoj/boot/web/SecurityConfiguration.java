@@ -3,15 +3,9 @@
  */
 package org.ligoj.boot.web;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.http.security.AbstractAuthenticationProvider;
-import org.ligoj.app.http.security.CookieWipingLogoutHandler;
-import org.ligoj.app.http.security.DigestAuthenticationFilter;
-import org.ligoj.app.http.security.SilentRequestHeaderAuthenticationFilter;
-import org.ligoj.app.http.security.SimpleUserDetailsService;
+import org.ligoj.app.http.security.*;
 import org.ligoj.bootstrap.http.security.ExtendedSecurityExpressionHandler;
 import org.ligoj.bootstrap.http.security.RedirectAuthenticationEntryPoint;
 import org.ligoj.bootstrap.http.security.RestRedirectStrategy;
@@ -41,8 +35,11 @@ import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.session.SimpleRedirectSessionInformationExpiredStrategy;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Spring Boot security configuration.
@@ -141,13 +138,15 @@ public class SecurityConfiguration {
 		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
 		final var sec = http.authorizeRequests().expressionHandler(expressionHandler)
 				// Login
-				.antMatchers(HttpMethod.POST, "/login").permitAll()
+				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/login")).permitAll()
 
 				// Public static resources
-				.regexMatchers(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PATTERN).permitAll()
+				.requestMatchers(RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PATTERN)).permitAll()
 
-				.antMatchers("/rest/redirect", "/rest/security/login", "/captcha.png").permitAll()
-				.antMatchers("/rest/service/password/reset/**", "/rest/service/password/recovery/**").anonymous()
+				.requestMatchers("/rest/redirect", "/rest/security/login", "/captcha.png").permitAll()
+				.requestMatchers(
+						AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
+						AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**")).anonymous()
 
 				// Everything else is authenticated
 				.anyRequest()

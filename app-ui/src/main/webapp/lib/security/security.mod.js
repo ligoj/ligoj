@@ -94,16 +94,8 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @return {Boolean}					true when allowed.
 		 */
 		isAllowedApiMethod: function (methods, authorizations) {
-			var methodsAsArray = (methods ? methods.toLowerCase() : '').split(',');
-			var length = authorizations.length;
-			// Method only matcher
-			for (var index = 0; index < length; index++) {
-				var method = authorizations[index].method;
-				if (method === undefined || $.inArray(method, methodsAsArray) >= 0) {
-					return true;
-				}
-			}
-			return false;
+			const methodsAsArray = methods ? methods.toUpperCase().split(',') : [];
+			return authorizations.find(a=> typeof a.method === 'undefined' || methodsAsArray.includes(a.method));
 		},
 
 		/**
@@ -114,50 +106,27 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @return {Boolean}					true when allowed.
 		 */
 		isAllowedApiUrl: function (url, methods, authorizations) {
-			var index;
-			var length = authorizations.length;
+            const methodsAsArray = methods ? methods.toUpperCase().split(',') : [];
 			// URL matcher
-			if (methods) {
-				// URL + method matcher
-				var methodsAsArray = methods.toLowerCase().split(',');
-				for (index = 0; index < length; index++) {
-					var authorization = authorizations[index];
-					var method = authorization.method;
-					if (authorization.pattern.test(url) && (method === undefined || $.inArray(method, methodsAsArray) >= 0)) {
-						return true;
-					}
-				}
-			} else {
-				// URL only matcher
-				for (index = 0; index < length; index++) {
-					if (authorizations[index].pattern.test(url)) {
-						return true;
-					}
-				}
+			const access = authorizations.find(a=> a.pattern.test(url) && (methodsAsArray.length === 0 || a.method === 'undefined' || methodsAsArray.includes(a.method)));
+			if (!access) {
+			    traceDebug('Remove access to', url);
 			}
-			traceDebug('Remove access to', url);
-			return false;
+			return access;
 		},
 
 		/**
 		 * Determine whether requested URL is allowed.
-		 * @param {String} requested URL.
-		 * @param {RegEx[]} valid authorizations.
-		 * @return{Boolean} true when allowed.
+		 * @param {String}  url      Requested URL.
+		 * @param {RegEx[]} patterns Valid authorizations.
+		 * @return{Boolean}          true when allowed.
 		 */
-		isAllowedInternal: function (url, authorizations) {
-			if (url) {
-				var index;
-				var length;
-				for (index = 0, length = authorizations.length; index < length; index++) {
-					if (authorizations[index].test(url)) {
-						return true;
-					}
-				}
-				traceDebug('Remove access to', url);
-				return false;
-			}
-			return true;
+		isAllowedInternal: function (url, patterns) {
+            const access = typeof url !== 'string' || patterns.find(p=> p.test(url));
+            if (!access) {
+                traceDebug('Remove access to', url);
+            }
+            return access;
 		},
 
 		/**

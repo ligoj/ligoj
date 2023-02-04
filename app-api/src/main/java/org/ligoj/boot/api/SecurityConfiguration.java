@@ -29,6 +29,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * Security configuration.
@@ -45,15 +46,20 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 		final var authenticationManager = http.getSharedObject(AuthenticationManager.class);
-		http.authorizeRequests()
+		http.authorizeHttpRequests()
 				// WADL access
-				.antMatchers("/rest").authenticated()
+				.requestMatchers(AntPathRequestMatcher.antMatcher("/rest")).authenticated()
 
 				// Unsecured access
 				.requestMatchers(EndpointRequest.to("health")).permitAll()
-				.antMatchers("/rest/redirect", "/manage/health", "/webjars/public/**").permitAll()
-				.antMatchers("/rest/security/login", "/rest/service/password/reset/**",
-						"/rest/service/password/recovery/**")
+				.requestMatchers(
+						AntPathRequestMatcher.antMatcher("/rest/redirect"),
+						AntPathRequestMatcher.antMatcher("/manage/health"),
+						AntPathRequestMatcher.antMatcher("/webjars/public/**")).permitAll()
+				.requestMatchers(
+						AntPathRequestMatcher.antMatcher("/rest/security/login"),
+						AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
+						AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**"))
 				.anonymous()
 
 				// Everything else is authenticated
@@ -156,7 +162,7 @@ public class SecurityConfiguration {
 
 	/**
 	 * Configure the firewall.
-	 * 
+	 *
 	 * @return Firewall configuration.
 	 */
 	@Bean
