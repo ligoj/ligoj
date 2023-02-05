@@ -6,6 +6,5 @@
 
 	<context:spring-configured />
 	<context:annotation-config />
-	<context:component-scan base-package="org.ligoj.app.hhtp" />
 	<context:component-scan base-package="org.ligoj.bootstrap.http.security" />
 </beans>

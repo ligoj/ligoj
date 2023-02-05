@@ -37,13 +37,11 @@ class CacheBustingFilterTest {
 
 	private void newFilter(final HttpServletResponse response) throws ServletException, IOException {
 		final var request = Mockito.mock(HttpServletRequest.class);
-		final var filter = new CacheBustingFilter();
+		final var filter = new CacheBustingFilter(1);
 		final var filterConfig = Mockito.mock(FilterConfig.class);
 		final var baos = new ByteArrayOutputStream();
 		final var out = new DelegatingServletOutputStream(baos);
 		Mockito.when(response.getOutputStream()).thenReturn(out);
-		Mockito.doReturn("1").when(filterConfig).getInitParameter("expiration");
-		filter.init(filterConfig);
 		filter.doFilter(request, response, Mockito.mock(FilterChain.class));
 	}
 
