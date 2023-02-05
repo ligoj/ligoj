@@ -3,8 +3,6 @@
  */
 package org.ligoj.boot.web;
 
-import java.util.HashMap;
-
 import org.ligoj.app.http.proxy.HtmlProxyFilter;
 import org.ligoj.app.http.security.CacheBustingFilter;
 import org.ligoj.app.http.security.CaptchaFilter;
@@ -29,6 +27,8 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.DelegatingFilterProxy;
+
+import java.util.HashMap;
 
 /**
  * Application entry point.
@@ -202,13 +202,8 @@ public class Application extends SpringBootServletInitializer {
 	 */
 	@Bean
 	public FilterRegistrationBean<CacheBustingFilter> cacheFilter() {
-		final var registrationBean = new FilterRegistrationBean<>(new CacheBustingFilter());
+		final var registrationBean = new FilterRegistrationBean<>(new CacheBustingFilter(31556926));
 		registrationBean.addUrlPatterns("/dist/*", "/img/*", "/main/*", "/themes/*", "/favicon.ico");
-		final var initParameters = new HashMap<String, String>();
-		initParameters.put("privacy", "public");
-		initParameters.put("static", "true");
-		initParameters.put("expiration", "31556926");
-		registrationBean.setInitParameters(initParameters);
 		registrationBean.setOrder(15);
 		return registrationBean;
 	}
