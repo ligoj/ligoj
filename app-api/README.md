@@ -211,7 +211,8 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 ### JSE
 
 
-| Vendor     | Release  | Status  | Notes |
-|------------|----------|---------|-------|
-| Oracle     | 17       | OK      |  |
-| OpenJDK    | 17       | OK      |  |
+| Vendor     | Release | Status   | Notes  |
+|------------|---------|----------|--------|
+| Oracle     | 17      | OK       |        |
+| OpenJDK    | 17      | OK       |        |
+| OpenJDK    | 18      | OK       |        |
