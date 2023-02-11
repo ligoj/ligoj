@@ -52,6 +52,7 @@ CMD mkdir -p "$LIGOJ_HOME" && \
 	--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
 	--add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED \
 	--add-exports java.base/jdk.internal.ref=ALL-UNNAMED \
+	--add-exports java.naming/com.sun.jndi.ldap=ALL-UNNAMED \
 	--add-opens java.management/sun.management=ALL-UNNAMED \
     -Dserver.address="${SERVER_HOST}" \
     -Dserver.port="${SERVER_PORT}" \
