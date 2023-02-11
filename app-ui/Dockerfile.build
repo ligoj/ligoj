@@ -13,7 +13,7 @@ RUN touch ~/.bash_profile && \
 WORKDIR /build/
 ADD . .
 RUN source /root/.bash_profile && \
-    mvn clean package -B -q -Dmaven.test.skip=true -Pminify2
+    mvn clean package -B -q -Dmaven.test.skip=true -Pminify2 -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 FROM --platform=linux/amd64 openjdk:17-jdk-alpine
 LABEL maintainer "fabrice.daugan@gmail.com"
