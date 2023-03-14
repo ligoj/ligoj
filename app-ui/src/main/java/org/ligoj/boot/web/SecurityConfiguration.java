@@ -39,7 +39,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Spring Boot security configuration.
@@ -89,7 +89,11 @@ public class SecurityConfiguration {
 	@Bean
 	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint() {
 		final var ep = new RedirectAuthenticationEntryPoint("/login.html");
-		ep.setRedirectUrls(new HashSet<>(Arrays.asList("/", "index.html", "index-prod.html", "login.html", "login-prod.html")));
+		ep.setRedirectUrls(Set.of("/",
+				"index.html", "index-prod.html", "login.html", "login-prod.html",
+				"/ligoj/index.html", "/ligoj/index-prod.html", "/ligoj/login.html", "/ligoj/login-prod.html",
+				"ligoj/index.html", "ligoj/index-prod.html", "ligoj/login.html", "ligoj/login-prod.html",
+				"/index.html", "/index-prod.html", "/login.html", "/login-prod.html"));
 		ep.setRedirectStrategy(getRestFailureStrategy());
 		return ep;
 	}

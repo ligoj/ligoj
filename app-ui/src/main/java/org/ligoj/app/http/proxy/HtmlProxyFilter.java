@@ -11,6 +11,8 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.XSlf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,6 +22,7 @@ import lombok.Setter;
 /**
  * Filter able to mask the HTML extension from the URL, and forward to the master HTML file as necessary.
  */
+@Slf4j
 public class HtmlProxyFilter extends OncePerRequestFilter {
 
 	/**
@@ -41,7 +44,9 @@ public class HtmlProxyFilter extends OncePerRequestFilter {
 
 		// Forward to the real resource : orientation and optimization according to the current environment
 		final var baseName = getBaseName(request);
-		request.getRequestDispatcher("/" + baseName + getOptimizedSuffix(baseName) + ".html").forward(request, response);
+		final var optimizedUrl = "/" + baseName + getOptimizedSuffix(baseName) + ".html";
+		log.debug("Forward to {}", optimizedUrl);
+		request.getRequestDispatcher(optimizedUrl).forward(request, response);
 	}
 
 	/**
