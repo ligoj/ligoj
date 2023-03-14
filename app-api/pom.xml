@@ -9,7 +9,7 @@
 
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-api</artifactId>
-	<version>3.2.4-SNAPSHOT</version>
+	<version>3.3.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Ligoj - API</name>
 
@@ -91,7 +91,7 @@
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
-			<version>2.7.1</version>
+			<version>3.1.2</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -286,7 +286,7 @@
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-id</artifactId>
-					<version>2.0.1-SNAPSHOT</version>
+					<version>2.0.2-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
