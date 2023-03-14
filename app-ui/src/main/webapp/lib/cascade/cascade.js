@@ -729,6 +729,7 @@ define([
 		 */
 		trigger: function (event, data, context) {
 			applicationManager.debug && traceDebug('Trigger event', event);
+			var callbacks = $self.callbacks[event] || [];
 			for (var index = 0; index < callbacks.length; index++) {
 				if (typeof callbacks[index] === 'function') {
 					callbacks[index](data || (context || $self.$context).$view, context);
