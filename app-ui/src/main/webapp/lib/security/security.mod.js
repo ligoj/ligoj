@@ -94,8 +94,8 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @return {Boolean}					true when allowed.
 		 */
 		isAllowedApiMethod: function (methods, authorizations) {
-			const methodsAsArray = methods ? methods.toUpperCase().split(',') : [];
-			return authorizations.find(a=> typeof a.method === 'undefined' || methodsAsArray.includes(a.method));
+			var methodsAsArray = methods ? methods.toUpperCase().split(',') : [];
+			return authorizations.find(function(a) { return typeof a.method === 'undefined' || methodsAsArray.includes(a.method);});
 		},
 
 		/**
@@ -106,9 +106,9 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @return {Boolean}					true when allowed.
 		 */
 		isAllowedApiUrl: function (url, methods, authorizations) {
-            const methodsAsArray = methods ? methods.toUpperCase().split(',') : [];
+            var methodsAsArray = methods ? methods.toUpperCase().split(',') : [];
 			// URL matcher
-			const access = authorizations.find(a=> a.pattern.test(url) && (methodsAsArray.length === 0 || a.method === 'undefined' || methodsAsArray.includes(a.method)));
+			var access = authorizations.find(function(a) { a.pattern.test(url) && (methodsAsArray.length === 0 || a.method === 'undefined' || methodsAsArray.includes(a.method));});
 			if (!access) {
 			    traceDebug('Remove access to', url);
 			}
@@ -122,7 +122,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @return{Boolean}          true when allowed.
 		 */
 		isAllowedInternal: function (url, patterns) {
-            const access = typeof url !== 'string' || patterns.find(p=> p.test(url));
+            var access = typeof url !== 'string' || patterns.find(function(p) { return p.test(url);});
             if (!access) {
                 traceDebug('Remove access to', url);
             }
