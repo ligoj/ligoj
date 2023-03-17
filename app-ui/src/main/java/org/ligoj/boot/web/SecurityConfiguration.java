@@ -89,12 +89,9 @@ public class SecurityConfiguration {
 	@Bean
 	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint() {
 		final var ep = new RedirectAuthenticationEntryPoint("/login.html");
-		ep.setRedirectUrls(Set.of("/",
-				"index.html", "index-prod.html", "login.html", "login-prod.html",
-				"/ligoj/index.html", "/ligoj/index-prod.html", "/ligoj/login.html", "/ligoj/login-prod.html",
-				"ligoj/index.html", "ligoj/index-prod.html", "ligoj/login.html", "ligoj/login-prod.html",
-				"/index.html", "/index-prod.html", "/login.html", "/login-prod.html"));
+		ep.setRedirectUrls(Set.of("/", "", "/index.html", "/index-prod.html", "/login.html", "/login-prod.html"));
 		ep.setRedirectStrategy(getRestFailureStrategy());
+
 		return ep;
 	}
 
