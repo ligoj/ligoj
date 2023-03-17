@@ -49,7 +49,7 @@ In case of a custom build you can specify its remote or local location.
 With this mode, no build tools (kava, Maven,...) are required to build the image.
 
 ```
-docker build -t ligoj/ligoj-ui:3.2.3 -f Dockerfile.build .
+docker build -t ligoj/ligoj-ui:3.2.3 --progress=plain -f Dockerfile.build .
 ```
 
 ## Staged OSS build from Sonatype
@@ -132,6 +132,7 @@ sso.url                     = ${ligoj.endpoint.api.url}/security/login # Authent
 sso.content                 = {"name":"%s","password":"%s"}
 app-env                     = auto # Suffix for index and login HTML files, maybe "-prod", "auto" or empty. When "auto", the suffix is guessed from the way the application is started
 log.http                    = info # When "debug", all HTTP queries are logged. Increase log files.
+log4j2.level                = info # Configure log verbositoy of all internal components: Spring and Jetty
 ```
 
 ## Compatibilities
