@@ -1,16 +1,35 @@
-FROM --platform=linux/amd64 openjdk:17-jdk-alpine
-LABEL maintainer "fabrice.daugan@gmail.com,alocquet@gmail.com"
+FROM maven:3.8.5-openjdk-17 as builder
+RUN touch ~/.bash_profile && \
+  curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
+  export NVM_DIR="$HOME/.nvm" && \
+  [ -s "$NVM_DIR/nvm.sh" ] && \
+  \. "$NVM_DIR/nvm.sh" && \
+  nvm install 16 && \
+  nvm use 16 && \
+  npm --version && \
+  node --version && \
+  npm install clean-css-cli@5.6.0 --location=global
+WORKDIR /build/
+RUN mkdir -p src/main/build && mkdir -p src/main/webapp
+ADD pom.xml .
+ADD src/main/build src/main/build
+ADD src/main/webapp src/main/webapp
+RUN mvn clean compile -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+
+ADD . .
+RUN chmod +x src/main/build/minify.sh && src/main/build/minify.sh
+
+RUN source /root/.bash_profile  && \
+    mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+
+FROM openjdk:17-jdk
+LABEL maintainer "fabrice.daugan@gmail.com"
 
 # ARGS (build)
-ARG GROUP_ID="org.ligoj.app"
 ARG ARTIFACT_ID="app-ui"
-ARG NEXUS_HOST="oss.sonatype.org"
-ARG VERSION="3.2.3"
-ARG NEXUS_URL="https://${NEXUS_HOST}"
 ARG SERVER_HOME="/usr/local/ligoj"
-ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
+COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
 
-ADD ${WAR} "${SERVER_HOME}/${ARTIFACT_ID}.war"
 WORKDIR "${SERVER_HOME}"
 
 # ENV (run)

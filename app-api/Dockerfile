@@ -1,16 +1,18 @@
-FROM --platform=linux/amd64  openjdk:17-jdk-alpine
+FROM maven:3.8.5-openjdk-17 as builder
+
+WORKDIR /build/
+ADD . .
+RUN mvn clean package -B -q -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+
+FROM openjdk:17-jdk
+
 LABEL maintainer "fabrice.daugan@gmail.com"
 
 # ARGS (build)
-ARG GROUP_ID="org.ligoj.app"
 ARG ARTIFACT_ID="app-api"
-ARG NEXUS_HOST="oss.sonatype.org"
-ARG VERSION="3.2.3"
-ARG NEXUS_URL="https://${NEXUS_HOST}"
 ARG SERVER_HOME="/usr/local/ligoj"
-ARG WAR="${NEXUS_URL}/service/local/artifact/maven/redirect?r=public&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&p=war"
 
-ADD ${WAR} "${SERVER_HOME}/${ARTIFACT_ID}.war"
+COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
 
 # Policy file for JMX
 ADD src/test/resources/ligoj.policy "${SERVER_HOME}/ligoj.policy"

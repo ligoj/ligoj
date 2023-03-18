@@ -31,16 +31,18 @@ java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=fal
 
 # Build Docker image
 
-```
-docker build -t ligoj/ligoj-api:3.2.3 .
-```
-
 ## Build with Docker builder (recommended)
 
 With this mode, no build tools (java, Maven,...) are required to build the image.
 
-```
+``` bash
 docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile.build .
+```
+
+Also, compatible with `podman`, and multiple target architecture:
+
+``` bash
+podman build --platform linux/arm64 --platform linux/amd64 --manifest $MANIFEST_NAME -t ligoj/ligoj-api:3.2.3 -f Dockerfile.build .
 ```
 
 ## Custom builds
@@ -161,11 +163,10 @@ log.http      = info # When "debug", all HTTP queries are logged. Increase log f
 Spring-Boot properties (injected in CUSTOM_OPTS):
 
 ```
-server.port                 = ${SERVER_PORT}
-server.address              = ${SERVER_HOST}
-server.servlet.context-path = /${CONTEXT}
-management.context-path     = /manage
-management.security.roles   = USER
+app.crypto.file             = Secret file location
+cache.location              = classpath:META-INF/hazelcast-local.xml # Custom Hazelcast configuration file location.
+health.node                 = 0 0 0/1 1/1 * ?
+health.subscription         = 0 0 2 1/1 * ?
 jpa.hbm2ddl                 = <[update],none,validate> # With "update", the server takes up to 30s to start
 jdbc.vendor                 = <[mysql],postgresql,mariadb>
 jdbc.port                   = 3306
@@ -180,15 +181,17 @@ jdbc.url                    = jdbc:${jdbc.vendor}://${jdbc.host}:${jdbc.port}/${
 jdbc.validationQuery        = select 1;
 jdbc.maxIdleTime            = 180000
 jdbc.maxPoolSize            = 150
-health.node                 = 0 0 0/1 1/1 * ?
-health.subscription         = 0 0 2 1/1 * ?
-app.crypto.file             = Secret file location
 ligoj.plugin.enabled        = <false,[true]> # When false, plug-ins are not loaded and their state is not updated
 ligoj.plugin.update         = <false,[true]> # When true, on startup, the plug-in are updated to the latest available version
 ligoj.plugin.repository     = <[central],nexus> # The default repository used to perform the plug-in update/install
 ligoj.plugin.ignore         = plugin-password-management # Filtered (deprecated, fixed version, ...) plug-ins for install or update from the repositories
 ligoj.plugin.install        = # Comma separated plug-ins  to install on startup. Update are performed according to "ligoj.plugin.update" option
-cache.location              = classpath:META-INF/hazelcast-local.xml # Custom Hazelcast configuration file location.
+log4j2.level                = info # Configure log verbositoy of all internal components: Spring, Jetty, Hibernate,...
+management.context-path     = /manage
+management.security.roles   = USER
+server.port                 = ${SERVER_PORT}
+server.address              = ${SERVER_HOST}
+server.servlet.context-path = /${CONTEXT}
 ```
 
 ## Compatibilities

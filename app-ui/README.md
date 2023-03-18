@@ -48,8 +48,14 @@ In case of a custom build you can specify its remote or local location.
 
 With this mode, no build tools (kava, Maven,...) are required to build the image.
 
-```
+``` bash
 docker build -t ligoj/ligoj-ui:3.2.3 --progress=plain -f Dockerfile.build .
+```
+
+Also, compatible with `podman`, and multiple target architecture:
+
+``` bash
+podman build --platform linux/arm64 --platform linux/amd64 --manifest $MANIFEST_NAME -t ligoj/ligoj-ui:3.2.3 -f Dockerfile.build .
 ```
 
 ## Staged OSS build from Sonatype
