@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 maven:3.8.5-openjdk-17 as builder
+FROM maven:3.8.5-openjdk-17 as builder
 RUN touch ~/.bash_profile && \
   curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
   export NVM_DIR="$HOME/.nvm" && \
@@ -14,15 +14,15 @@ RUN mkdir -p src/main/build && mkdir -p src/main/webapp
 ADD pom.xml .
 ADD src/main/build src/main/build
 ADD src/main/webapp src/main/webapp
-RUN mvn clean compile -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+RUN mvn clean compile -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 ADD . .
-RUN chmod +x minify.sh && ./minify.sh
+RUN chmod +x src/main/build/minify.sh && src/main/build/minify.sh
 
 RUN source /root/.bash_profile  && \
-    mvn package -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+    mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
-FROM --platform=linux/amd64 openjdk:17-jdk-alpine
+FROM openjdk:17-jdk
 LABEL maintainer "fabrice.daugan@gmail.com"
 
 # ARGS (build)
