@@ -108,7 +108,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		isAllowedApiUrl: function (url, methods, authorizations) {
             var methodsAsArray = methods ? methods.toUpperCase().split(',') : [];
 			// URL matcher
-			var access = authorizations.find(function(a) { a.pattern.test(url) && (methodsAsArray.length === 0 || a.method === 'undefined' || methodsAsArray.includes(a.method));});
+			var access = authorizations.find(function(a) { return a.pattern.test(url) && (methodsAsArray.length === 0 || a.method === 'undefined' || methodsAsArray.includes(a.method));});
 			if (!access) {
 			    traceDebug('Remove access to', url);
 			}
@@ -133,8 +133,8 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * Apply the security to the given jQuery selector.
 		 * @param {Object} selector as constraint.
 		 */
-		applySecurity: function (selector) {
-			selector = selector || _('_main');
+		applySecurity: function ($selector) {
+			$selector = selector || _('_main');
 			current.copyContext();
 
 			// UI security filtering
@@ -147,7 +147,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 				}
 
 				// Remove invalid links
-				selector.find('[href^="#/"]').each(function () {
+				$selector.find('[href^="#/"]').each(function () {
 					var $that = $(this);
 					if (!current.isAllowedInternal($that.attr('href').substring(2), uiAuthorizations)) {
 						current.pruneHierarchy($that);
@@ -163,7 +163,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 				}
 
 				// Remove invalid content
-				selector.find('[data-secured-service],[data-secured-method]').each(function () {
+				$selector.find('[data-secured-service],[data-secured-method]').each(function () {
 					var $that = $(this);
 					if (!current.isAllowedApi($that.attr('data-secured-service'), $that.attr('data-secured-method'))) {
 						current.pruneHierarchy($that);
@@ -175,7 +175,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 			var roles = current.roles = $cascade.session && $cascade.session.roles;
 			if (roles && roles.length) {
 				// Remove invalid content
-				selector.find('[data-secured-role]').each(function () {
+				$selector.find('[data-secured-role]').each(function () {
 					var $that = $(this);
 					if ($.inArray($that.attr('data-secured-role'), roles) < 0) {
 						current.pruneHierarchy($that);
@@ -187,7 +187,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 			var plugins = current.plugins = $cascade.session && $cascade.session.applicationSettings && $cascade.session.applicationSettings.plugins;
 			if (typeof plugins !== 'undefined') {
 				// Remove invalid content
-				selector.find('[data-enabled-plugin]').each(function () {
+				$selector.find('[data-enabled-plugin]').each(function () {
 					var $that = $(this);
 					if ($.inArray($that.attr('data-enabled-plugin'), plugins) < 0) {
 						current.pruneHierarchy($that);
