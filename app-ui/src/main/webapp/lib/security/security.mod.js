@@ -134,7 +134,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 		 * @param {Object} selector as constraint.
 		 */
 		applySecurity: function ($selector) {
-			$selector = selector || _('_main');
+			$selector = $selector || _('_main');
 			current.copyContext();
 
 			// UI security filtering
