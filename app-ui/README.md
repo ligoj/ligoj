@@ -49,43 +49,24 @@ In case of a custom build you can specify its remote or local location.
 With this mode, no build tools (kava, Maven,...) are required to build the image.
 
 ``` bash
-docker build -t ligoj/ligoj-ui:3.2.3 --progress=plain -f Dockerfile.build .
+docker build -t ligoj/ligoj-ui:3.2.3 --progress=plain -f Dockerfile .
 ```
 
 Also, compatible with `podman`, and multiple target architecture:
 
 ``` bash
-podman build --platform linux/arm64 --platform linux/amd64 --manifest $MANIFEST_NAME -t ligoj/ligoj-ui:3.2.3 -f Dockerfile.build .
+podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-ui -t ligoj/ligoj-ui:3.2.3 -f Dockerfile .
 ```
-
-## Staged OSS build from Sonatype
-
-```
-docker build -t ligoj/ligoj-ui:3.2.3 --build-arg WAR="https://oss.sonatype.org/service/local/repositories/orgligoj-1087/content/org/ligoj/app/app-ui/3.2.3/app-ui-3.2.3.war" .
-```
-
-## Private remote build
-
-```
-docker build -t ligoj/ligoj-ui:3.2.3 --build-arg WAR="https://storage.company.com/releases/app-ui-3.2.3.war" .
-```
-
-## Local maven package
-
-```
-docker build -t ligoj/ligoj-ui:3.2.3 --build-arg WAR="target/app-ui-3.2.3.war" .
-```
-
-Note the local WAR path must be relative to the Dockerfile (not the current path), and must be below the Dockerfile: do not use "../bar/foo.war"
 
 # Run Docker image
 
 ```
-docker run --rm -it \
+podman run --rm -it \
   --name ligoj-ui \
   -e ENDPOINT='http://192.168.4.138:8680/ligoj-api' \
+  -e CUSTOM_OPTS='-Dsecurity=Trusted -Dlog4j2.level=info' \
   -p 8080:8080 \
-  ligoj/ligoj-ui:3.2.3 
+  ligoj/ligoj-ui:3.2.3
 ```
 
 You can experience network issue with remote API. To validate the link, try this :
