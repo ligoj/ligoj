@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-business-parent</artifactId>
-		<version>3.0.2</version>
+		<version>3.0.3</version>
 		<relativePath />
 	</parent>
 
@@ -286,12 +286,12 @@
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-id</artifactId>
-					<version>2.0.2-SNAPSHOT</version>
+					<version>2.0.4-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.ligoj.plugin</groupId>
 					<artifactId>plugin-id-ldap</artifactId>
-					<version>2.0.1-SNAPSHOT</version>
+					<version>2.0.3-SNAPSHOT</version>
 				</dependency>
 <!--				<dependency>-->
 <!--					<groupId>org.ligoj.plugin</groupId>-->
