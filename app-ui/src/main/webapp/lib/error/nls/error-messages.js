@@ -6,7 +6,7 @@ define({
 		"business" : "Business error",
 		"technical" : "Managed technical error",
 		"internal" : "Technical error",
-		"errorxxx" : "A technical error has occurred, please contact the support team",
+		"errorUnknownCode" : "A technical error has occurred, please contact the support team",
 		"error0" : "Offline mode, no business server available",
 		"error400" : "Validation error",
 		"error401" : "Authentication required",

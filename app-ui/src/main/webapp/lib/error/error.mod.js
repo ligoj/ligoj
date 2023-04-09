@@ -78,7 +78,7 @@ define([
 			});
 		},
 
-		isLoginPrompDisplayed: function () {
+		isLoginPromptDisplayed: function () {
 			return (_('_login').length !== 0 && $('button[data-target="#_login"]').length !== 0) || current.isLoginPromptBeingDisplayed;
 		},
 
@@ -86,7 +86,7 @@ define([
 		 * Show the authentication requirement and load the login form for the popup.
 		 */
 		showAuthenticationAlert: function () {
-			if (!current.isLoginPrompDisplayed()) {
+			if (!current.isLoginPromptDisplayed()) {
 				current.isLoginPromptBeingDisplayed = true;
 				require([
 					'text!main/public/login/login-popup.html', 'i18n!main/public/login/nls/messages'
@@ -146,7 +146,7 @@ define([
 				current.showAuthenticationAlert();
 			} else if (xhr.status === 404) {
 				if (current.isJsonText(xhr.responseText)) {
-					// A JSON formated response from business server
+					// A JSON formatted response from business server
 					errorObj = JSON.parse(xhr.responseText);
 					if (errorObj.code === 'entity') {
 						notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-entity'])(errorObj.message), errorMessages['error404-data-title']);
@@ -167,7 +167,7 @@ define([
 				errorObj = JSON.parse(xhr.responseText);
 				var integrityMessage = errorObj.message.split('/');
 				if (errorObj.code === 'integrity-foreign') {
-					// `assignment`, CONSTRAINT `FK3D2B86CDAF555D0B`
+					// `assignment`, CONSTRAINT `FK...`
 					// FOREIGN KEY (`project`)
 					notifyManager.notify(Handlebars.compile(errorMessages['error412-foreign-details'])({from: integrityMessage[0], to: integrityMessage[1]}), errorMessages.error412, 'warning');
 				} else if (errorObj.code === 'integrity-unicity') {
@@ -212,11 +212,11 @@ define([
 				}
 			} else if (xhr.responseText) {
 				// Technical error from business server
-				notifyManager.notifyDanger(errorMessages.message + '&nbsp;:&nbsp;' + xhr.responseText, errorMessages.errorxxx + ' (' + xhr.status + ')');
+				notifyManager.notifyDanger(errorMessages.message + '&nbsp;:&nbsp;' + xhr.responseText, errorMessages.errorUnknownCode + ' (' + xhr.status + ')');
 				traceLog('Unexpected error (' + xhr.status + ') : ' + xhr.responseText, errorThrown);
 			} else {
 				// Unexpected error : connection issue for sure...
-				notifyManager.notifyDanger(errorMessages['business-down'], errorMessages.errorxxx + ' (' + xhr.status + ')');
+				notifyManager.notifyDanger(errorMessages['business-down'], errorMessages.errorUnknownCode + ' (' + xhr.status + ')');
 				traceLog('Network issue (' + xhr.status + ') : ' + xhr.responseText, errorThrown);
 			}
 		},
@@ -246,7 +246,7 @@ define([
 			var alertType = notifyManager.getTypeFromBusiness(errorObj.code);
 
 			// First translate from user's scope
-			var i18nMessage = (errorObj.message && ($cascade.$messages.error[errorObj.message] || errorMessages[errorObj.message] || errorObj.message)) || errorMessages.errorxxx;
+			var i18nMessage = (errorObj.message && ($cascade.$messages.error[errorObj.message] || errorMessages[errorObj.message] || errorObj.message)) || errorMessages.errorUnknownCode;
 			if (i18nMessage && errorObj.parameters && errorObj.parameters.length && i18nMessage.indexOf('{{') !== -1) {
 				for (var index = 0; index < errorObj.parameters.length; index++) {
 					var parameterKey = errorObj.parameters[index];
@@ -312,11 +312,11 @@ define([
 			if (err.xhr && err.xhr.status === 401) {
 				current.showAuthenticationAlert();
 			} else if (err.requireType === 'timeout' && err.requireModules) {
-				if (!current.isLoginPrompDisplayed()) {
+				if (!current.isLoginPromptDisplayed()) {
 					notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-timeout-details'])(err.requireModules[0]), errorMessages['error404-timeout']);
 				}
 			} else if (err.requireType === 'scripterror' && err.requireModules) {
-				if (!current.isLoginPrompDisplayed()) {
+				if (!current.isLoginPromptDisplayed()) {
 					notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-scripterror-details'])(err.requireModules[0]), errorMessages['error404-scripterror']);
 				}
 			} else if (err.requireModules && err.requireModules[0] && err.requireModules[0].startsWith('text!') && err.requireModules[0].endsWith('.html')) {
