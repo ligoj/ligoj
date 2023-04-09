@@ -76,6 +76,7 @@ define([
 					_('_login_save').enable();
 				}
 			});
+			return false;
 		},
 
 		isLoginPromptDisplayed: function () {
