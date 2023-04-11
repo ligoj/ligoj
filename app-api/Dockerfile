@@ -6,7 +6,21 @@ RUN mvn clean package -B -q -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecu
 
 FROM openjdk:17-jdk
 
-LABEL maintainer "fabrice.daugan@gmail.com"
+LABEL name="Ligoj API server" \
+      maintainer="Kloudy <fdaugan@kloudy.io>" \
+      vendor="Kloudy" \
+      version="3.3.0-SNAPSHOT" \
+      release="3.3.0-SNAPSHOT" \
+      url="https://ligoj.io" \
+      summary="The REST API server of Ligoj." \
+      description="The REST API server of Ligoj." \
+      run="docker run -d --name NAME -p 8081:8081 IMAGE" \
+      stop="docker stop NAME" \
+      com.sonatype.license="MIT" \
+      io.k8s.description="The REST API server of Ligoj." \
+      io.k8s.display-name="Ligoj API server" \
+      io.openshift.expose-services="8081:8081" \
+      io.openshift.tags="Ligoj,API"
 
 # ARGS (build)
 ARG ARTIFACT_ID="app-api"

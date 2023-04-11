@@ -23,7 +23,21 @@ RUN source /root/.bash_profile  && \
     mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 FROM openjdk:17-jdk
-LABEL maintainer "fabrice.daugan@gmail.com"
+LABEL name="Ligoj UI server" \
+      maintainer="Kloudy <fdaugan@kloudy.io>" \
+      vendor="Kloudy" \
+      version="3.3.0-SNAPSHOT" \
+      release="3.3.0-SNAPSHOT" \
+      url="https://ligoj.io" \
+      summary="The UI server of Ligoj." \
+      description="The UI server of Ligoj." \
+      run="docker run -d --name NAME -p 8081:8081 IMAGE" \
+      stop="docker stop NAME" \
+      com.sonatype.license="MIT" \
+      io.k8s.description="The UI server of Ligoj." \
+      io.k8s.display-name="Ligoj UI server" \
+      io.openshift.expose-services="8080:8080" \
+      io.openshift.tags="Ligoj,UI"
 
 # ARGS (build)
 ARG ARTIFACT_ID="app-ui"
