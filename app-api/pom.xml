@@ -293,6 +293,11 @@
 					<artifactId>plugin-id-ldap</artifactId>
 					<version>2.0.3-SNAPSHOT</version>
 				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-password</artifactId>
+					<version>1.1.1-SNAPSHOT</version>
+				</dependency>
 <!--				<dependency>-->
 <!--					<groupId>org.ligoj.plugin</groupId>-->
 <!--					<artifactId>plugin-id-ldap-embedded</artifactId>-->
