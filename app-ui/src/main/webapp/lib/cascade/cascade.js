@@ -174,6 +174,11 @@ define([
 			});
 		},
 
+		setTitle: function(title) {
+			document.title = title;
+			$('.cascade-title').text(title);
+		},
+
 		securedZoneLoader: function (context, transaction, fragments, reload, url) {
 			$self.loadFragmentRecursive(context, transaction, fragments, 1, reload, url, function (childContext) {
 				// Private zone and modules
