@@ -10,7 +10,7 @@ define({
 	"error400" : "Erreur de validation",
 	"error401" : "Authentification requise",
 	"error401-details" : "Votre session a expiré, vous devez vous reconnecter<br/><button class='btn btn-primary btn-raised' data-toggle='modal' data-target='#_login'>Connexion</button>",
-	"error403" : "Permission requise",
+	"error403" : "Autorisation requise",
 	"error403-details" : "Vous n'avez pas les autorisations requises pour cette action",
 	"error404" : "Service métier non existant",
 	"error404-details" : "Le service métier demandé '{{this}}' n'existe pas.<br/>Rafraichissez votre navigateur ou contactez votre administrateur",

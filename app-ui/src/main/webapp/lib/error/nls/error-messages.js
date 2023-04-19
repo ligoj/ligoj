@@ -11,7 +11,7 @@ define({
 		"error400" : "Validation error",
 		"error401" : "Authentication required",
 		"error401-details" : "Your session has expired, you have to login<br/><button class='btn btn-primary btn-raised' data-toggle='modal' data-target='#_login'>Connection</button>",
-		"error403" : "Permission required",
+		"error403" : "Authorization required",
 		"error403-details" : "You don't have the authorizations to perform this action",
 		"error404" : "Business service not available",
 		"error404-details" : "The requested business service '{{this}}' does not exist<br/>Refresh the cache of your browser or contact your administrator",
