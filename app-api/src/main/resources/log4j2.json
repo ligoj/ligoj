@@ -133,7 +133,14 @@
 					"AppenderRef": {
 						"ref": "STDOUT"
 					}
-				}				
+				}, {
+					"name": "org.springframework.cloud.context.restart.RestartEndpoint",
+					"level": "debug",
+					"additivity": "false",
+					"AppenderRef": {
+						"ref": "STDOUT"
+					}
+				}
 			],
 			"root": {
 				"level": "${sys:log4j2.level:-info}",
