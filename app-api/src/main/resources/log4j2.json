@@ -136,7 +136,7 @@
 				}				
 			],
 			"root": {
-				"level": "info",
+				"level": "${sys:log4j2.level:-info}",
 				"AppenderRef": {
 					"ref": "STDOUT"
 				}
