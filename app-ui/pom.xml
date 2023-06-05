@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-web-parent</artifactId>
-		<version>3.0.3</version>
+		<version>3.0.4</version>
 		<relativePath />
 	</parent>
 
@@ -86,16 +86,6 @@
 					<artifactId>httpcore5</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
