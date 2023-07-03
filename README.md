@@ -55,8 +55,8 @@ sudo systemctl enable docker.service
 sudo systemctl start docker.service
 git clone https://github.com/ligoj/ligoj.git
 cd ligoj
-bash -c "cd app-api && docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile.build ."
-bash -c "cd app-ui && docker build -t ligoj/ligoj-ui:3.2.3 -f Dockerfile.build ."
+bash -c "cd app-api && docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile ."
+bash -c "cd app-ui && docker build -t ligoj/ligoj-ui:3.2.3 -f Dockerfile ."
 /usr/local/bin/docker-compose up
 open http://localhost:8080/ligoj
 ```

@@ -36,7 +36,7 @@ java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=fal
 With this mode, no build tools (java, Maven,...) are required to build the image.
 
 ``` bash
-docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile.build .
+docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile .
 ```
 
 Also, compatible with `podman`, and multiple target architectures:
