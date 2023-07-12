@@ -63,7 +63,7 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Icon of corresponding tool.
-		 * @param {Object|string} node The node : tool, service ... The priorit is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
+		 * @param {Object|string} node The node : tool, service ... The priority is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
 		 * @param {string} suffix For URL icon, the suffix to add to the path.
 		 * @param {boolean} dataSrc When defined, the resolved "img" source ("src") is also stored to "data-src". It permits a reset to the original src image after alter.
 		 * @param {array} fragments Identifier fragments built from the node.
@@ -93,7 +93,7 @@ define(['cascade'], function ($cascade) {
 		 * @return A link with icon depending on the target, title and text.
 		 */
 		getResourceLink: function (target, type) {
-			return '<i class="' + current.targetTypeClass[type] + '" title="' + current.getResourceName(target, type) + '" data-toggle="tooltip"></i> ' + current['get' + type.capitalize() + 'Link'](target);
+			return `<i class="${current.targetTypeClass[type]} fa-fw" title="<strong>${current.$messages[type]}</strong> ${current.getResourceName(target, type)}" data-toggle="tooltip"></i> ${current['get' + type.capitalize() + 'Link'](target)}`;
 		},
 
 		/**
@@ -158,7 +158,7 @@ define(['cascade'], function ($cascade) {
 		 * Return a link targeting the user page. Display the full name in the link.
 		 * When there are not enough data to build it, no first name or no last name, then the first later of the login and the the remaining are used to build the full name.
 		 * For sample 'aeinstein' will be display as fail-safe value : 'A. Einstein'.
-		 * @param {Object|string} user The user data : login, fullname, etc... The identifier is required, either in 'id' attribute, either as a string.
+		 * @param {Object|string} user The user data : login, full name, etc... The identifier is required, either in 'id' attribute, either as a string.
 		 * @param {string} text The optional text to display. When empty, full name is used.
 		 * @return {string} The user link markup.
 		 */
@@ -252,7 +252,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		fillAuditData: function (data) {
 			if (data && (data.createdBy || data.lastModifiedDate || data.lastModifiedBy || data.createdDate)) {
-				_('detail-audit').html(Handlebars.compile(current.$messages.audit)([
+				$('.project-name').attr('title', Handlebars.compile(current.$messages.audit)([
 					current.getUserLink(data.createdBy),
 					moment(data.createdDate).format(formatManager.messages.shortdateMomentJs),
 					current.getUserLink(data.lastModifiedBy),
@@ -425,27 +425,27 @@ define(['cascade'], function ($cascade) {
 			tree: 'resource fas fa-code-branch fa-rotate-90',
 			node: 'resource fas fa-wrench'
 		},
-		
+
 		/**
 		 * Escape HTML content. From "<b>Value'&amp;"</b>" gives "&lt;b&gt;Value&#39;&amp;amp;&quot;&gt;/b&gt;"
 		 * @param {string} str  Markup string to protect.
-		 * @return {string}	 Protected string.
+		 * @return {string}     Protected string.
 		 */
-		htmlEscape: function(str) {
-			return str
+		htmlEscape: function (str) {
+			return typeof str === 'string' ? str
 				.replace(/&/g, '&amp;')
 				.replace(/"/g, '&quot;')
 				.replace(/'/g, '&#39;')
 				.replace(/</g, '&lt;')
-				.replace(/>/g, '&gt;');
+				.replace(/>/g, '&gt;') : '';
 		},
 
 		/**
 		 * Oposite function of "htmlEscape"
 		 * @param {string} str  Protected markup string to retrieve.
-		 * @return {string}	 Unprotected string.
+		 * @return {string}     Unprotected string.
 		 */
-		htmlUnescape: function(str){
+		htmlUnescape: function (str) {
 			return str
 				.replace(/&quot;/g, '"')
 				.replace(/&#39;/g, "'")
