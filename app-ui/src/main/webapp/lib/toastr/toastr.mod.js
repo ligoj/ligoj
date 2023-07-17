@@ -14,7 +14,7 @@ define(['toastr'], function (toastr) {
 		},
 
 		/**
- 		 * Remove  all notificaions
+ 		 * Remove  all notifications
  		 */
 		clear: function () {
 			toastr.clear();
