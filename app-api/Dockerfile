@@ -2,6 +2,9 @@ FROM maven:3.8.5-openjdk-17 as builder
 
 WORKDIR /build/
 ADD . .
+
+# Uncomment and configure you custom settings.xml Maven file
+# COPY ./settings.xml /root/.m2/settings.xml
 RUN mvn clean package -B -q -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 FROM openjdk:17-jdk
