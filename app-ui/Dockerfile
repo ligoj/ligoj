@@ -14,6 +14,8 @@ RUN mkdir -p src/main/build && mkdir -p src/main/webapp
 ADD pom.xml .
 ADD src/main/build src/main/build
 ADD src/main/webapp src/main/webapp
+# Uncomment and configure you custom settings.xml Maven file
+# COPY ./settings.xml /root/.m2/settings.xml
 RUN mvn clean compile -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 ADD . .
