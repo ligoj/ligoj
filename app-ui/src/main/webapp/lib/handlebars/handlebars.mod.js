@@ -9,11 +9,11 @@ define(["handlebars/handlebars"], function(handlebars) {
 		return assignments.length;
 	});
 	var SIMPLE_FORMATS  = {
-        YYYY : d => new Date().getFullYear(),
-        MM : d => new Date().getMonths()+1,
-        dd : d => new Date().getDate(),
-        HH : d => new Date().getHours(),
-        mm : d => new Date().getMinutes()
+        YYYY : function(d) { return new Date().getFullYear();},
+        MM : function(d) { return new Date().getMonths()+1;},
+        dd : function(d) { return new Date().getDate();},
+        HH : function(d) { return new Date().getHours();},
+        mm : function(d) { return new Date().getMinutes();}
 	};
 	Handlebars.registerHelper('date', function(format) {
         return (format && moment)
