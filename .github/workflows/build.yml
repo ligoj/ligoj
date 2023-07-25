@@ -1,0 +1,67 @@
+name: SonarCloud
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  build:
+    name: Build and analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v21
+        with:
+          repositories: '[
+                  { "id": "spring-milestone", "url": "https://repo.spring.io/milestone/"},
+                  { "id": "oss-sonatype", "url": "https://oss.sonatype.org/service/local/repositories/releases/content/"}
+                ]'
+          plugin_repositories: '[{ "id": "spring-milestone", "url": "https://repo.spring.io/milestone/"}]'
+          active_profiles: '["github"]'
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Extract Maven project version
+        run: |
+          echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+      - name: Show extracted Maven project version
+        run: |
+          echo "RELEASE_VERSION: ${{ env.RELEASE_VERSION}}"
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B -e -V clean package jacoco:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          -Dmaven.test.redirectTestOutputToFile=false
+          -Djava.net.preferIPv4Stack=true
+          -Dsurefire.useFile=false
+          -DbuildVersion=${{ env.RELEASE_VERSION }}
+          -Dskip-sonarsource-repo=true
+          -Pjacoco -Djacoco.includes="org.ligoj.app.*:org.ligoj.boot.*"
+          -Dsonar.projectKey="org.ligoj.app:root"
+          -Dsonar.javascript.exclusions="node_modules,dist"
+          -Dsonar.host.url="https://sonarcloud.io"
+          -Dsonar.organization=ligoj-github
+          -Dsonar.projectVersion=${{ steps.version.outputs.version }}
+          -Dmaven.javadoc.skip=true
+          -Dmaven.ut.reuseForks=true -Dmaven.it.reuseForks=false
+          -Djava.awt.headless=true
