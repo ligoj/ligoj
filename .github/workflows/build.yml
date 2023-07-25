@@ -57,7 +57,7 @@ jobs:
           -DbuildVersion=${{ env.RELEASE_VERSION }}
           -Dskip-sonarsource-repo=true
           -Pjacoco -Djacoco.includes="org.ligoj.app.*:org.ligoj.boot.*"
-          -Dsonar.projectKey="org.ligoj.app:root"
+          -Dsonar.projectKey="ligoj_ligoj"
           -Dsonar.javascript.exclusions="node_modules,dist"
           -Dsonar.host.url="https://sonarcloud.io"
           -Dsonar.organization=ligoj-github
