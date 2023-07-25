@@ -52,6 +52,7 @@ With this mode, no build tools (Java, Maven,...) are required to build the image
 
 ``` bash
 docker build -t ligoj/ligoj-ui:3.2.3 --progress=plain -f Dockerfile .
+podman build -t ligoj/ligoj-ui:3.2.3 --progress=plain -f Dockerfile .
 ```
 
 Also, compatible with `podman`, and multiple target architectures:
