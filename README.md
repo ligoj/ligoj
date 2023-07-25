@@ -55,8 +55,8 @@ sudo systemctl enable docker.service
 sudo systemctl start docker.service
 git clone https://github.com/ligoj/ligoj.git
 cd ligoj
-bash -c "cd app-api && docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile ."
-bash -c "cd app-ui && docker build -t ligoj/ligoj-ui:3.2.3 -f Dockerfile ."
+bash -c "cd app-api && docker build -t ligoj/ligoj-api:3.3.0 -f Dockerfile ."
+bash -c "cd app-ui && docker build -t ligoj/ligoj-ui:3.3.0 -f Dockerfile ."
 /usr/local/bin/docker-compose up
 open http://localhost:8080/ligoj
 ```
@@ -67,11 +67,11 @@ open http://localhost:8080/ligoj
 AWS_ACCOUNT="$(aws sts get-caller-identity --query "Account" --output text)"
 AWS_REGION="$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')"
 ECR_REGISTRY=$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com
-docker image tag ligoj/ligoj-api:3.2.3 $ECR_REGISTRY/ligoj/ligoj-api:3.2.3
-docker image tag ligoj/ligoj-ui:3.2.3 $ECR_REGISTRY/ligoj/ligoj-ui:3.2.3
+docker image tag ligoj/ligoj-api:3.3.0 $ECR_REGISTRY/ligoj/ligoj-api:3.3.0
+docker image tag ligoj/ligoj-ui:3.3.0 $ECR_REGISTRY/ligoj/ligoj-ui:3.3.0
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-docker push $ECR_REGISTRY/ligoj/ligoj-api:3.2.3
-docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.2.3
+docker push $ECR_REGISTRY/ligoj/ligoj-api:3.3.0
+docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.3.0
 ```
 
 ## Make Ligoj home persistent
@@ -79,7 +79,7 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.2.3
 By default, with Docker compose, the home is persistent, keeping your plugins installation by mapping `/usr/local/ligoj` with a volume. The `ligoj-ui` container has no persistent data.
 
 ```
-docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.2.3
+docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.3.0
 ```
 
 

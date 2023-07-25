@@ -31,7 +31,7 @@ minify" profile `minify`.
 # Test the WAR
 
 ``` bash
-java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar target/app-api-3.2.3.war
+java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar target/app-api-3.3.0.war
 ```
 
 # Build Docker image
@@ -41,14 +41,14 @@ java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=fal
 With this mode, no build tools (java, Maven,...) are required to build the image.
 
 ``` bash
-docker build -t ligoj/ligoj-api:3.2.3 -f Dockerfile .
-podman build -t ligoj/ligoj-api:3.2.3 -f Dockerfile .
+docker build -t ligoj/ligoj-api:3.3.0 -f Dockerfile .
+podman build -t ligoj/ligoj-api:3.3.0 -f Dockerfile .
 ```
 
 Also, compatible with `podman`, and multiple target architectures:
 
 ``` bash
-podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-api -t ligoj/ligoj-api:3.2.3 -f Dockerfile .
+podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-api -t ligoj/ligoj-api:3.3.0 -f Dockerfile .
 ```
 
 ## Custom Maven proxy
@@ -119,7 +119,7 @@ GRANT ALL ON SCHEMA public TO ligoj;
 docker run --rm -it \
   --name ligoj-api \
   -e CUSTOM_OPTS='-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db' \
-  ligoj/ligoj-api:3.2.3 
+  ligoj/ligoj-api:3.3.0 
 ```
 
 ## Start the API container linked to an external database (Option2)
@@ -128,7 +128,7 @@ docker run --rm -it \
 docker run --rm -it \
  --name "ligoj-api" \
  -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password="ligoj" -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138' \
- ligoj/ligoj-api:3.2.3
+ ligoj/ligoj-api:3.3.0
 ```
 
 ## More options
@@ -144,7 +144,7 @@ docker run --rm -it \
  -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 \
  -v ~/.ligoj:/home/ligoj \
  -p 8680:8081 \
- ligoj/ligoj-api:3.2.3
+ ligoj/ligoj-api:3.3.0
 ```
 
 Explanations:
@@ -172,7 +172,7 @@ docker run --rm \
 -e SERVER_PORT=8088 \
 -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=update -Djdbc.host=127.0.0.1 -Djdbc.vendor=postgresql -Djdbc.port=5432 -Djpa.dialect=org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect -Djdbc.driverClassName=org.postgresql.Driver -Dcom.sun.jndi.ldap.connect.pool.initsize=1 -Dcom.sun.jndi.ldap.connect.pool.maxsize=1 -Dcom.sun.jndi.ldap.connect.pool.prefsize=1 -Dcom.sun.jndi.ldap.connect.pool.debug=all' \
 -v /var/lib/instance_datas/ligoj:/home/ligoj \
- ligoj/ligoj-api:3.2.3
+ ligoj/ligoj-api:3.3.0
 ```
 
 Note: There is an uncovered Hibernate issue with schema generation `update` mode. The configured database user must see
@@ -189,7 +189,7 @@ You can experience network issue with remote database. To validate the link, try
 ``` bash
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:3.2.3 sh -c "apk add mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
+ ligoj/ligoj-api:3.3.0 sh -c "apk add mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
 ```
 
 #### PostgreSQL
@@ -197,7 +197,7 @@ docker run --rm -it \
 ``` bash
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:3.2.3 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"
+ ligoj/ligoj-api:3.3.0 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"
 ```
 
 ## Relevant variables
