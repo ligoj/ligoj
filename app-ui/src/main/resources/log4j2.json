@@ -6,7 +6,7 @@
 		"properties": {
 			"property": {
 				"name": "filename",
-				"value": "target/rolling.log"
+				"value": "${sys:ligoj.home:-target}/ui-rolling.log"
 			}
 		},
 		"ThresholdFilter": {
