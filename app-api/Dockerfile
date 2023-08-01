@@ -5,7 +5,7 @@ ADD . .
 
 # Uncomment and configure you custom settings.xml Maven file
 # COPY ./settings.xml /root/.m2/settings.xml
-RUN mvn clean package -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+RUN mvn clean package -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon
 
 FROM openjdk:17-jdk
 
