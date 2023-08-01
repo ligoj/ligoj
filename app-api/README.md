@@ -42,7 +42,6 @@ With this mode, no build tools (java, Maven,...) are required to build the image
 
 ``` bash
 docker build -t ligoj/ligoj-api:3.3.0 -f Dockerfile .
-podman build -t ligoj/ligoj-api:3.3.0 -f Dockerfile .
 ```
 
 Also, compatible with `podman`, and multiple target architectures:
