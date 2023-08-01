@@ -8,6 +8,11 @@ services:
   api:
     container_name: ligoj-api
     image: ligoj/ligoj-api:3.3.0
+    build:
+      context: app-api
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
     restart: always
     environment:
       SERVER_HOST: "0.0.0.0"
@@ -25,6 +30,11 @@ services:
   ui:
     container_name: ligoj-ui
     image: ligoj/ligoj-ui:3.3.0
+    build:
+      context: app-ui
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
     restart: always
     environment:
       JAVA_OPTIONS: "-Dsecurity=Rest"

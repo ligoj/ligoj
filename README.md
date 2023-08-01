@@ -56,12 +56,10 @@ sudo systemctl enable docker.service
 sudo systemctl start docker.service
 git clone https://github.com/ligoj/ligoj.git
 cd ligoj
-bash -c "cd app-api && docker build -t ligoj/ligoj-api:3.3.0 -f Dockerfile ."
-bash -c "cd app-ui && docker build -t ligoj/ligoj-ui:3.3.0 -f Dockerfile ."
 mkdir -p "$(pwd)/.ligoj"
 echo "LIGOJ_HOME=$(pwd)/.ligoj
 PODMAN_USERNS=keep-id" > .env
-docker-compose -p ligoj --env-file .env up -d
+docker-compose -p ligoj up -d --build
 open http://localhost:8080/ligoj
 ```
 
@@ -102,6 +100,7 @@ By default, the Docker compose overrides is loaded from `compose.override.yml` a
 For PostgreSQL, the docker-compose command is:
 
 ``` bash
+podman-compose -p ligoj build
 podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml up -d
 podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml down
 ```
