@@ -16,8 +16,9 @@ define(["handlebars/handlebars"], function(handlebars) {
         mm : function(d) { return new Date().getMinutes();}
 	};
 	Handlebars.registerHelper('date', function(format) {
-        return (format && moment)
-        ? moment(new Date()).format(format)
-        : (format && SIMPLE_FORMATS[format](new Date()) || new Date().toISOString());
-	});
+        if (typeof format === 'string') {
+            return (moment && moment(new Date()).format(format)) || (SIMPLE_FORMATS[format] && SIMPLE_FORMATS[format](new Date())) || new Date().toISOString();
+        }
+        return new Date().toISOString();
+    });
 });
