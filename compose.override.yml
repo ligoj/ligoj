@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  db:
+    container_name: ligoj-db
+    image: mysql:8.0.34
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: yes
+      MYSQL_DATABASE: ligoj
+      MYSQL_USER: ligoj
+      MYSQL_PASSWORD: ligoj
+    volumes:
+      - ${LIGOJ_HOME:-/home/ligoj}/mysql:/var/lib/mysql
+  api:
+    container_name: ligoj-api
+    environment:
+      CUSTOM_OPTS: "-Djdbc.host=ligoj-db -Dcom.sun.jndi.ldap.connect.pool.initsize=1 -Dcom.sun.jndi.ldap.connect.pool.maxsize=1 -Dcom.sun.jndi.ldap.connect.pool.prefsize=1 -Dcom.sun.jndi.ldap.connect.pool.debug=all"

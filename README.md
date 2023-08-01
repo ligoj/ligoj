@@ -58,7 +58,10 @@ git clone https://github.com/ligoj/ligoj.git
 cd ligoj
 bash -c "cd app-api && docker build -t ligoj/ligoj-api:3.3.0 -f Dockerfile ."
 bash -c "cd app-ui && docker build -t ligoj/ligoj-ui:3.3.0 -f Dockerfile ."
-/usr/local/bin/docker-compose up
+mkdir -p "$(pwd)/.ligoj"
+echo "LIGOJ_HOME=$(pwd)/.ligoj
+PODMAN_USERNS=keep-id" > .env
+docker-compose -p ligoj --env-file .env up -d
 open http://localhost:8080/ligoj
 ```
 
@@ -75,12 +78,30 @@ docker push $ECR_REGISTRY/ligoj/ligoj-api:3.3.0
 docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.3.0
 ```
 
-## Make Ligoj home persistent
+# Advanced deployments with compose
 
-By default, with Docker compose, the home is persistent, keeping your plugins installation by mapping `/usr/local/ligoj` with a volume. The `ligoj-ui` container has no persistent data.
+## Persistent Ligoj home and podman
 
+By default, with Docker compose, the home is persistent it contains:
+- plugins installation
+- logs of containers
+- database data
+
+Default mapped host directory is `/home/ligoj`, and can be overridden with `LIGOJ_HOME` variable.
+
+``` bash
+mkdir -p "$(pwd)/.ligoj"
+echo "LIGOJ_HOME=$(pwd)/.ligoj
+PODMAN_USERNS=keep-id" > .env
 ```
-docker run -d --name ligoj-api --link ligoj-db:db -v ~/.ligoj:/usr/local/ligoj ligoj/ligoj-api:3.3.0
+
+## Use MySQL or PostgreSQL databases
+
+By default, the Docker compose overrides is loaded from `compose.override.yml` and contains MySQL configuration.
+
+For PostgreSQL, the docker-compose command is:
+
+``` bash
+podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml up -d
+podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml down
 ```
-
-
