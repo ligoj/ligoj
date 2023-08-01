@@ -28,7 +28,7 @@ RUN export NVM_DIR="$HOME/.nvm" && \
       node --version && \
       chmod +x src/main/build/minify.sh && src/main/build/minify.sh
 
-RUN mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+RUN mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon
 
 FROM openjdk:17-jdk
 LABEL name="Ligoj UI server" \
