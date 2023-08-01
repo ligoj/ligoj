@@ -100,6 +100,7 @@ By default, the Docker compose overrides is loaded from `compose.override.yml` a
 For PostgreSQL, the docker-compose command is:
 
 ``` bash
+export BUILDAH_FORMAT=docker
 podman-compose -p ligoj build
 podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml up -d
 podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml down

@@ -1,14 +1,15 @@
-FROM maven:3.8.5-openjdk-17 as builder
+FROM maven:3.9.3-eclipse-temurin-17 as builder
 RUN touch ~/.bash_profile && \
-  curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
+  curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash && \
   export NVM_DIR="$HOME/.nvm" && \
   [ -s "$NVM_DIR/nvm.sh" ] && \
   \. "$NVM_DIR/nvm.sh" && \
   nvm install 16 && \
+  npm install -g npm@9.8.1 && \
   nvm use 16 && \
   npm --version && \
   node --version && \
-  npm install clean-css-cli@5.6.0 --location=global
+  npm install clean-css-cli@5.6.2 --location=global
 WORKDIR /build/
 RUN mkdir -p src/main/build && mkdir -p src/main/webapp
 ADD pom.xml .
@@ -19,10 +20,15 @@ ADD src/main/webapp src/main/webapp
 RUN mvn clean compile -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 ADD . .
-RUN chmod +x src/main/build/minify.sh && src/main/build/minify.sh
+RUN export NVM_DIR="$HOME/.nvm" && \
+      [ -s "$NVM_DIR/nvm.sh" ] && \
+      \. "$NVM_DIR/nvm.sh" && \
+      nvm use 16 && \
+      npm --version && \
+      node --version && \
+      chmod +x src/main/build/minify.sh && src/main/build/minify.sh
 
-RUN source /root/.bash_profile  && \
-    mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+RUN mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 FROM openjdk:17-jdk
 LABEL name="Ligoj UI server" \
