@@ -28,7 +28,6 @@ LABEL name="Ligoj API server" \
 # ARGS (build)
 ARG ARTIFACT_ID="app-api"
 ARG SERVER_HOME="/usr/local/ligoj"
-
 COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
 
 # Policy file for JMX
@@ -48,7 +47,7 @@ ENV CONTEXT_URL="/ligoj-api" \
     JAVA_OPTIONS="-Duser.timezone=UTC"
 
 EXPOSE ${SERVER_PORT}
-CMD mkdir -p "$LIGOJ_HOME" && \
+CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
   java $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
 	--add-modules java.se \
 	--add-opens java.base/jdk.internal.loader=ALL-UNNAMED \

@@ -53,23 +53,25 @@ ENV ENDPOINT="http://ligoj-api:8081/ligoj-api" \
     CONTEXT_URL="/ligoj" \
     LIGOJ_HOME=/home/ligoj \
     JAVA_MEMORY="-Xms128M -Xmx128M" \
+    SERVER_HOST="0.0.0.0" \
     SERVER_PORT="8080" \
     CUSTOM_OPTS="" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
     ARTIFACT_ID="${ARTIFACT_ID}" \
-    JAVA_OPTIONS="-Dsecurity=Rest"
+    JAVA_OPTIONS="-Duser.timezone=UTC -Dsecurity=Rest"
 
 EXPOSE ${SERVER_PORT}
-CMD mkdir -p "$LIGOJ_HOME" && \
+CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
   java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
     -Dligoj.endpoint="${ENDPOINT}" \
-    -Djavax.net.ssl.trustStorePassword=changeit \
-    -Dserver.servlet.context-path="${CONTEXT_URL}" \
+    -Dserver.address="${SERVER_HOST}" \
     -Dserver.port="${SERVER_PORT}" \
-    -Djava.net.preferIPv4Stack=true \
+    -Dserver.servlet.context-path="${CONTEXT_URL}" \
     -Djavax.net.ssl.trustStorePassword=changeit \
-    -jar ${SERVER_HOME}/${ARTIFACT_ID}.war
+    -Djava.net.preferIPv4Stack=true \
+    -Dligoj.home="${LIGOJ_HOME}" \
+    -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
 CMD curl --fail -s http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico || exit 1
