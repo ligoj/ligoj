@@ -16,3 +16,4 @@ bin/
 **/.idea
 /.env
 /.ligoj
+/package-lock.json
