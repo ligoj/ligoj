@@ -267,6 +267,21 @@
 		</profile>
 
 		<profile>
+			<id>eclipse-qa</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-qa</artifactId>
+					<version>[1.1.1-SNAPSHOT,1.2.0)</version>
+				</dependency>
+				<dependency>
+					<groupId>org.ligoj.plugin</groupId>
+					<artifactId>plugin-qa-sonarqube</artifactId>
+					<version>[1.1.1-SNAPSHOT,1.2.0)</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
 			<id>eclipse-id</id>
 			<dependencyManagement>
 				<dependencies>
