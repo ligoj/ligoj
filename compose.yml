@@ -20,7 +20,7 @@ services:
       PREPARE_RUN: ${LIGOJ_API_PREPARE_RUN:-echo "No PREPARE_RUN"}
     links:
       - db:ligoj-db
-    depends_on: 
+    depends_on:
       - db
     volumes:
       - ${LIGOJ_HOME:-/home/ligoj}:/home/ligoj
@@ -44,7 +44,7 @@ services:
       PREPARE_RUN: ${LIGOJ_WEB_PREPARE_RUN:-echo "No PREPARE_RUN"}
     links:
       - api:ligoj-api
-    ports: 
+    ports:
       - "${LIGOJ_PORT:-8080}:${LIGOJ_WEB_PORT:-8080}"
     volumes:
       - ${LIGOJ_HOME:-/home/ligoj}:/home/ligoj
