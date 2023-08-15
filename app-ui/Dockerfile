@@ -1,40 +1,27 @@
-FROM maven:3.9.3-eclipse-temurin-17 as builder
-ARG PREPARE_BUILD="echo 'No defined prepare build instruction, set PREPARE_BUILD to insert HTTP_PROXY instructions for sample.'"
-SHELL ["/bin/bash", "-c"]
+FROM --platform=${BUILDPLATFORM} node:16.20-bookworm-slim as builder_node
+ARG BUILDPLATFORM
 WORKDIR /build/
-ADD pom.xml .
 ADD src/main/build src/main/build
 ADD src/main/webapp src/main/webapp
-COPY Dockerfile ./*settings.xml /root/.m2/
+COPY Dockerfile ./*prepare-build.sh ./
 RUN touch ~/.bash_profile && \
-    export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
-    echo $'#!/bin/bash\n'${PREPARE_BUILD}'' > PREPARE_BUILD.sh && \
-    source PREPARE_BUILD.sh & \
-    curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash && \
-    export NVM_DIR="$HOME/.nvm" && \
-    [ -s "$NVM_DIR/nvm.sh" ] && \
-    \. "$NVM_DIR/nvm.sh" && \
-    nvm install 16 && \
-    npm install -g npm@9.8.1 && \
-    nvm use 16 && \
-    npm --version && \
-    node --version && \
-    npm install clean-css-cli@5.6.2 --location=global &&\
+    { [ -f "prepare-build.sh" ] && chmod +x "prepare-build.sh" && "".prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
+    npm install -g clean-css-cli@5.6.2 && \
     mkdir -p src/main/build && mkdir -p src/main/webapp && \
-    mvn clean package -B
+    chmod +x src/main/build/minify.sh && src/main/build/minify.sh
 
+FROM --platform=${BUILDPLATFORM} maven:3.9.3-eclipse-temurin-17 as builder
+ARG BUILDPLATFORM
+WORKDIR /build/
 ADD . .
-RUN source PREPARE_BUILD.sh && \
-    export NVM_DIR="$HOME/.nvm" && \
-    [ -s "$NVM_DIR/nvm.sh" ] && \
-    \. "$NVM_DIR/nvm.sh" && \
-    nvm use 16 && \
-    npm --version && \
-    node --version && \
-    chmod +x src/main/build/minify.sh && src/main/build/minify.sh && \
+COPY Dockerfile ./*settings.xml /root/.m2/
+COPY --from=builder_node /build/src/main/webapp src/main/webapp
+RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
+    { [ -f "prepare-build.sh" ] && chmod +x "prepare-build.sh" && "".prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon
 
-FROM openjdk:17-jdk
+FROM --platform=${TARGETPLATFORM} openjdk:17-jdk
+ARG TARGETPLATFORM
 LABEL name="Ligoj UI server" \
       maintainer="Kloudy <fdaugan@kloudy.io>" \
       vendor="Kloudy" \
@@ -55,6 +42,7 @@ LABEL name="Ligoj UI server" \
 ARG ARTIFACT_ID="app-ui"
 ARG SERVER_HOME="/usr/local/ligoj"
 COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
+COPY Dockerfile ./*prepare-run.sh ./
 
 WORKDIR "${SERVER_HOME}"
 
@@ -74,7 +62,7 @@ ENV ENDPOINT="http://ligoj-api:8081/ligoj-api" \
 
 EXPOSE ${SERVER_PORT}
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; }  && ${PREPARE_RUN} && \
-    echo $'#!/bin/bash\n'${PREPARE_RUN}'' > PREPARE_RUN.sh && source PREPARE_RUN.sh && \
+    { [ -f "prepare-run.sh" ] && chmod +x "prepare-run.sh" && "".prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
     java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
      -Dligoj.endpoint="${ENDPOINT}" \
      -Dserver.address="${SERVER_HOST}" \

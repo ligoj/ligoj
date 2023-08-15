@@ -1,19 +1,14 @@
-FROM maven:3.9.3-eclipse-temurin-17 as builder
-ARG PREPARE_BUILD="echo 'No defined prepare build instruction, set PREPARE_BUILD to insert HTTP_PROXY instructions for sample.'"
-
+FROM --platform=${BUILDPLATFORM} maven:3.9.3-eclipse-temurin-17 as builder
+ARG BUILDPLATFORM
 WORKDIR /build/
 ADD . .
-
 COPY Dockerfile ./*settings.xml /root/.m2/
-SHELL ["/bin/bash", "-c"]
-RUN touch ~/.bash_profile && \
-    export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
-    echo $'#!/bin/bash\n'${PREPARE_BUILD}'' > PREPARE_BUILD.sh && \
-    source PREPARE_BUILD.sh && \
+RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
+    { [ -f "prepare-build.sh" ] && chmod +x "prepare-build.sh" && "".prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn clean package -B
 
-FROM openjdk:17-jdk
-
+FROM --platform=${TARGETPLATFORM} openjdk:17-jdk
+ARG TARGETPLATFORM
 LABEL name="Ligoj API server" \
       maintainer="Kloudy <fdaugan@kloudy.io>" \
       vendor="Kloudy" \
@@ -34,6 +29,7 @@ LABEL name="Ligoj API server" \
 ARG ARTIFACT_ID="app-api"
 ARG SERVER_HOME="/usr/local/ligoj"
 COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
+COPY Dockerfile ./*prepare-run.sh ./
 
 # Policy file for JMX
 ADD src/test/resources/ligoj.policy "${SERVER_HOME}/ligoj.policy"
@@ -54,7 +50,7 @@ ENV CONTEXT_URL="/ligoj-api" \
 
 EXPOSE ${SERVER_PORT}
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
-    echo $'#!/bin/bash\n'${PREPARE_RUN}'' > PREPARE_RUN.sh && source PREPARE_RUN.sh && \
+    { [ -f "prepare-run.sh" ] && chmod +x "prepare-run.sh" && "".prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
     java $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
 	 --add-modules java.se \
 	 --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
