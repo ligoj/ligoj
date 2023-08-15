@@ -81,14 +81,21 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.3.0
 
 ## Custom Docker Compose variables
 
-| Variable       | Default                  | Note                     |
-|----------------|--------------------------|--------------------------|
-| LIGOJ_HOME     | `/home/ligoj`            | To map a persistent home |
-| LIGOJ_REGISTRY |                          | To push to your registry | 
-| LIGOJ_VERSION  | (version of application) |                          |
-| LIGOJ_API_PORT | 8081                     | Internal API port        |
-| LIGOJ_WEB_PORT | 8080                     | Internal WEB port        |
-| LIGOJ_PORT     | 8080                     | Exposed port             |
+| Variable               | Service | Phase | Default                               | Note                                                                                                                                                                                                                                 |
+|------------------------|---------|-------|---------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| LIGOJ_HOME             | api     | RUN   | `/home/ligoj`                         | To map a persistent home                                                                                                                                                                                                             |
+| LIGOJ_REGISTRY         | *       | BUILD |                                       | To push to your registry                                                                                                                                                                                                             |
+| LIGOJ_VERSION          | app-*   | BUILD | (version of application)              |                                                                                                                                                                                                                                      |
+| LIGOJ_WEB_PORT         | web     | RUN   | `8080`                                | Internal WEB port                                                                                                                                                                                                                    |
+| LIGOJ_PORT             | web     | RUN   | `8080`                                | Exposed port                                                                                                                                                                                                                         |
+| LIGOJ_PLATFORM_1       | app-*   | BUILD | `linux/amd64`                         | Target image platform.                                                                                                                                                                                                               |
+| LIGOJ_PLATFORM_2       | app-*   | BUILD | `linux/arm64`                         | Target image platform.                                                                                                                                                                                                               |
+| LIGOJ_API_JAVA_OPTIONS | api     | RUN   | `-Duser.timezone=UTC`                 |                                                                                                                                                                                                                                      |
+| LIGOJ_WEB_JAVA_OPTIONS | web     | RUN   | `-Duser.timezone=UTC -Dsecurity=Rest` |                                                                                                                                                                                                                                      |
+| LIGOJ_API_CRYPTO       | api     | RUN   | `-Dapp.crypto.password=public`        | Double encryption feature, see [core-context-common.xml](https://github.com/ligoj/bootstrap/blob/5e23ac71c48bb89c8c44433bb4a89a30cbb4700c/bootstrap-core/src/main/resources/META-INF/spring/core-context-common.xml#L16C101-L16C101) |
+| LIGOJ_WEB_CRYPTO       | web     | RUN   | `-Dapp.crypto.password=public`        | Double encryption feature, see [core-context-common.xml](https://github.com/ligoj/bootstrap/blob/5e23ac71c48bb89c8c44433bb4a89a30cbb4700c/bootstrap-core/src/main/resources/META-INF/spring/core-context-common.xml#L16C101-L16C101) |
+| LIGOJ_API_CUSTOM_OPTS  | api     | RUN   | ``                                    | AdditionalJava properties  `LIGOJ_API_JAVA_OPTIONS`                                                                                                                                                                                  |
+| LIGOJ_WEB_CUSTOM_OPTS  | eb      | RUN   | ``                                    | AdditionalJava properties, merged with `LIGOJ_WEB_JAVA_OPTIONS`                                                                                                                                                                      |
 
 ## Persistent Ligoj home
 

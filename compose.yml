@@ -10,14 +10,13 @@ services:
     build:
       context: app-api
       platforms:
-        - "linux/amd64"
-        - "linux/arm64"
+        - ${LIGOJ_PLATFORM_1:-linux/amd64}
+        - ${LIGOJ_PLATFORM_2:-linux/arm64}
     restart: always
     environment:
-      SERVER_HOST: "0.0.0.0"
-      SERVER_PORT: ${LIGOJ_API_PORT:-8081}
-      CUSTOM_OPTS: "-Djdbc.host=ligoj-db"
-      CRYPTO: "-Dapp.crypto.password=public"
+      JAVA_OPTIONS: ${LIGOJ_API_JAVA_OPTIONS:--Duser.timezone=UTC}
+      CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db}
+      CRYPTO: ${LIGOJ_API_CRYPTO:--Dapp.crypto.password=public}
     links:
       - db:ligoj-db
     depends_on: 
@@ -32,13 +31,15 @@ services:
     build:
       context: app-ui
       platforms:
-        - "linux/amd64"
-        - "linux/arm64"
+        - ${LIGOJ_PLATFORM_1:-linux/amd64}
+        - ${LIGOJ_PLATFORM_2:-linux/arm64}
     restart: always
     environment:
-      JAVA_OPTIONS: "-Dsecurity=Rest"
       SERVER_PORT: ${LIGOJ_WEB_PORT:-8080}
-      CUSTOM_OPTS: ""
+      CONTEXT_URL: ${LIGOJ_WEB_CONTEXT_URL:-/ligoj}
+      JAVA_OPTIONS: ${LIGOJ_WEB_JAVA_OPTIONS:--Duser.timezone=UTC -Dsecurity=Rest}"
+      CUSTOM_OPTS: ${LIGOJ_WEB_CUSTOM_OPTS:-}
+      CRYPTO: ${LIGOJ_WEB_CRYPTO:--Dapp.crypto.password=public}
     links:
       - api:ligoj-api
     ports: 
