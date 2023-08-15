@@ -133,7 +133,7 @@ docker run --rm -it \
 
 ## More options
 
-### MySQL sample
+### MySQL and crypto sample
 
 More complex run with crypto, port mapping, disabled schema generation and volume configurations
 
