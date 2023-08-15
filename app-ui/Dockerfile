@@ -1,4 +1,4 @@
-FROM maven:3.9.3-eclipse-temurin-17 as builder
+FROM maven:3.9.4-eclipse-temurin-17 as builder
 RUN touch ~/.bash_profile && \
   curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash && \
   export NVM_DIR="$HOME/.nvm" && \
