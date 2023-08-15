@@ -5,7 +5,7 @@ ADD src/main/build src/main/build
 ADD src/main/webapp src/main/webapp
 COPY Dockerfile ./*prepare-build.sh ./
 RUN touch ~/.bash_profile && \
-    { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
+    { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     npm install -g clean-css-cli@5.6.2 && \
     mkdir -p src/main/build && mkdir -p src/main/webapp && \
     chmod +x src/main/build/minify.sh && src/main/build/minify.sh
@@ -17,7 +17,7 @@ ADD . .
 COPY Dockerfile ./*settings.xml /root/.m2/
 COPY --from=builder_node /build/src/main/webapp src/main/webapp
 RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
-    { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
+    { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon
 
 ARG TARGETPLATFORM
@@ -62,7 +62,7 @@ ENV ENDPOINT="http://ligoj-api:8081/ligoj-api" \
 
 EXPOSE ${SERVER_PORT}
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; }  && ${PREPARE_RUN} && \
-    { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
+    { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
     java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
      -Dligoj.endpoint="${ENDPOINT}" \
      -Dserver.address="${SERVER_HOST}" \
