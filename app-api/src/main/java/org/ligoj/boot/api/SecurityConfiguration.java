@@ -13,11 +13,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -39,7 +37,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @EnableWebSecurity
 @Profile("prod")
-@EnableMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
+@EnableGlobalMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
 public class SecurityConfiguration {
 
 	@Autowired
@@ -48,35 +46,34 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 		final var authenticationManager = http.getSharedObject(AuthenticationManager.class);
-		http.authorizeHttpRequests(authorize ->
+		http.authorizeHttpRequests()
 				// WADL access
-				authorize.requestMatchers(AntPathRequestMatcher.antMatcher("/rest")).authenticated()
+				.requestMatchers(AntPathRequestMatcher.antMatcher("/rest")).authenticated()
 
-						// Unsecured access
-						.requestMatchers(EndpointRequest.to("health")).permitAll()
-						.requestMatchers(
-								AntPathRequestMatcher.antMatcher("/rest/redirect"),
-								AntPathRequestMatcher.antMatcher("/manage/health"),
-								AntPathRequestMatcher.antMatcher("/webjars/public/**")).permitAll()
-						.requestMatchers(
-								AntPathRequestMatcher.antMatcher("/rest/security/login"),
-								AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
-								AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**"))
-						.anonymous()
+				// Unsecured access
+				.requestMatchers(EndpointRequest.to("health")).permitAll()
+				.requestMatchers(
+						AntPathRequestMatcher.antMatcher("/rest/redirect"),
+						AntPathRequestMatcher.antMatcher("/manage/health"),
+						AntPathRequestMatcher.antMatcher("/webjars/public/**")).permitAll()
+				.requestMatchers(
+						AntPathRequestMatcher.antMatcher("/rest/security/login"),
+						AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
+						AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**"))
+				.anonymous()
 
-						// Everything else is authenticated
-						.anyRequest().fullyAuthenticated().and()
+				// Everything else is authenticated
+				.anyRequest().fullyAuthenticated().and()
 
-						// REST only
-						.requestCache(a -> a.disable())
-						.csrf(a -> a.disable())
-						.sessionManagement(a -> a.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).and().securityContext().and()
-						.exceptionHandling().authenticationEntryPoint(http403ForbiddenEntryPoint()).and()
+				// REST only
+				.requestCache().disable().csrf().disable().sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().securityContext().and()
+				.exceptionHandling().authenticationEntryPoint(http403ForbiddenEntryPoint()).and()
 
-						// Security filters
-						.addFilterAt(apiTokenFilter(authenticationManager), AbstractPreAuthenticatedProcessingFilter.class)
-						.addFilterAfter(authorizingFilter(), SwitchUserFilter.class)
-		);
+				// Security filters
+				.addFilterAt(apiTokenFilter(authenticationManager), AbstractPreAuthenticatedProcessingFilter.class)
+				.addFilterAfter(authorizingFilter(), SwitchUserFilter.class);
+
 		return http.build();
 	}
 
