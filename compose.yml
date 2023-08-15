@@ -9,6 +9,8 @@ services:
     image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-api:${LIGOJ_VERSION:-3.3.0}
     build:
       context: app-api
+      args:
+        PREPARE_BUILD: ${LIGOJ_API_PREPARE_BUILD:-echo "No PREPARE_BUILD"}
       platforms:
         - ${LIGOJ_PLATFORM_1:-linux/amd64}
         - ${LIGOJ_PLATFORM_2:-linux/arm64}
@@ -17,6 +19,7 @@ services:
       JAVA_OPTIONS: ${LIGOJ_API_JAVA_OPTIONS:--Duser.timezone=UTC}
       CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db}
       CRYPTO: ${LIGOJ_API_CRYPTO:--Dapp.crypto.password=public}
+      PREPARE_RUN: ${LIGOJ_API_PREPARE_RUN:-echo "No PREPARE_RUN"}
     links:
       - db:ligoj-db
     depends_on: 
@@ -30,6 +33,8 @@ services:
     image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-ui:${LIGOJ_VERSION:-3.3.0}
     build:
       context: app-ui
+      args:
+        PREPARE_BUILD: ${LIGOJ_WEB_PREPARE_BUILD:-echo "No PREPARE_BUILD"}
       platforms:
         - ${LIGOJ_PLATFORM_1:-linux/amd64}
         - ${LIGOJ_PLATFORM_2:-linux/arm64}
@@ -40,6 +45,7 @@ services:
       JAVA_OPTIONS: ${LIGOJ_WEB_JAVA_OPTIONS:--Duser.timezone=UTC -Dsecurity=Rest}"
       CUSTOM_OPTS: ${LIGOJ_WEB_CUSTOM_OPTS:-}
       CRYPTO: ${LIGOJ_WEB_CRYPTO:--Dapp.crypto.password=public}
+      PREPARE_RUN: ${LIGOJ_WEB_PREPARE_RUN:-echo "No PREPARE_RUN"}
     links:
       - api:ligoj-api
     ports: 

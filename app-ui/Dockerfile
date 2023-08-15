@@ -1,33 +1,38 @@
-FROM maven:3.9.4-eclipse-temurin-17 as builder
-RUN touch ~/.bash_profile && \
-  curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash && \
-  export NVM_DIR="$HOME/.nvm" && \
-  [ -s "$NVM_DIR/nvm.sh" ] && \
-  \. "$NVM_DIR/nvm.sh" && \
-  nvm install 16 && \
-  npm install -g npm@9.8.1 && \
-  nvm use 16 && \
-  npm --version && \
-  node --version && \
-  npm install clean-css-cli@5.6.2 --location=global
+FROM maven:3.9.3-eclipse-temurin-17 as builder
+ARG PREPARE_BUILD="echo 'No defined prepare build instruction, set PREPARE_BUILD to insert HTTP_PROXY instructions for sample.'"
+SHELL ["/bin/bash", "-c"]
 WORKDIR /build/
-RUN mkdir -p src/main/build && mkdir -p src/main/webapp
 ADD pom.xml .
 ADD src/main/build src/main/build
 ADD src/main/webapp src/main/webapp
-COPY ./settings.xml Dockerfile /root/.m2/
-RUN mvn clean compile -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon
+COPY Dockerfile ./*settings.xml /root/.m2/
+RUN touch ~/.bash_profile && \
+    export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
+    echo $'#!/bin/bash\n'${PREPARE_BUILD}'' > PREPARE_BUILD.sh && \
+    source PREPARE_BUILD.sh & \
+    curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash && \
+    export NVM_DIR="$HOME/.nvm" && \
+    [ -s "$NVM_DIR/nvm.sh" ] && \
+    \. "$NVM_DIR/nvm.sh" && \
+    nvm install 16 && \
+    npm install -g npm@9.8.1 && \
+    nvm use 16 && \
+    npm --version && \
+    node --version && \
+    npm install clean-css-cli@5.6.2 --location=global &&\
+    mkdir -p src/main/build && mkdir -p src/main/webapp && \
+    mvn clean package -B
 
 ADD . .
-RUN export NVM_DIR="$HOME/.nvm" && \
-      [ -s "$NVM_DIR/nvm.sh" ] && \
-      \. "$NVM_DIR/nvm.sh" && \
-      nvm use 16 && \
-      npm --version && \
-      node --version && \
-      chmod +x src/main/build/minify.sh && src/main/build/minify.sh
-
-RUN mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon
+RUN source PREPARE_BUILD.sh && \
+    export NVM_DIR="$HOME/.nvm" && \
+    [ -s "$NVM_DIR/nvm.sh" ] && \
+    \. "$NVM_DIR/nvm.sh" && \
+    nvm use 16 && \
+    npm --version && \
+    node --version && \
+    chmod +x src/main/build/minify.sh && src/main/build/minify.sh && \
+    mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon
 
 FROM openjdk:17-jdk
 LABEL name="Ligoj UI server" \
@@ -64,19 +69,21 @@ ENV ENDPOINT="http://ligoj-api:8081/ligoj-api" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
     ARTIFACT_ID="${ARTIFACT_ID}" \
+    PREPARE_RUN="echo 'No defined prepare run instruction, set PREPARE_RUN to insert HTTP_PROXY instructions for sample.'" \
     JAVA_OPTIONS="-Duser.timezone=UTC -Dsecurity=Rest"
 
 EXPOSE ${SERVER_PORT}
-CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
-  java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
-    -Dligoj.endpoint="${ENDPOINT}" \
-    -Dserver.address="${SERVER_HOST}" \
-    -Dserver.port="${SERVER_PORT}" \
-    -Dserver.servlet.context-path="${CONTEXT_URL}" \
-    -Djavax.net.ssl.trustStorePassword=changeit \
-    -Djava.net.preferIPv4Stack=true \
-    -Dligoj.home="${LIGOJ_HOME}" \
-    -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
+CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; }  && ${PREPARE_RUN} && \
+    echo $'#!/bin/bash\n'${PREPARE_RUN}'' > PREPARE_RUN.sh && source PREPARE_RUN.sh && \
+    java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
+     -Dligoj.endpoint="${ENDPOINT}" \
+     -Dserver.address="${SERVER_HOST}" \
+     -Dserver.port="${SERVER_PORT}" \
+     -Dserver.servlet.context-path="${CONTEXT_URL}" \
+     -Djavax.net.ssl.trustStorePassword=changeit \
+     -Djava.net.preferIPv4Stack=true \
+     -Dligoj.home="${LIGOJ_HOME}" \
+     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
 CMD curl --fail -s http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico || exit 1
