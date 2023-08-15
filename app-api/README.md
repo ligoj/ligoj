@@ -52,10 +52,11 @@ podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligo
 
 ## Custom Maven proxy
 
-When Maven dependencies from Internet are not reachable, custom Maven setting with proxy must be provided to Maven.
+To use a custom Maven configuration (proxy, mirror,...), copy your `settings.xml` Maven file at the base of this project.
+It will be copied at build time with a Docker `COPY` instruction.
+The same applies to [app-ui](../app-ui/Dockerfile)
 
-1. Create a `settings.xml` file
-2. Uncomment the `COPY` command in `Dockerfile` (the same applies to [app-ui](../app-ui/Dockerfile)
+*Note* This file will be in the final Docker image, only in the builder image.
 
 # Prepare database
 

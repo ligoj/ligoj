@@ -6,7 +6,7 @@ services:
       - ligoj-network
   api:
     container_name: ligoj-api
-    image: ligoj/ligoj-api:3.3.0
+    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-api:${LIGOJ_VERSION:-3.3.0}
     build:
       context: app-api
       platforms:
@@ -15,7 +15,7 @@ services:
     restart: always
     environment:
       SERVER_HOST: "0.0.0.0"
-      SERVER_PORT: "8081"
+      SERVER_PORT: ${LIGOJ_API_PORT:-8081}
       CUSTOM_OPTS: "-Djdbc.host=ligoj-db"
       CRYPTO: "-Dapp.crypto.password=public"
     links:
@@ -28,7 +28,7 @@ services:
       - ligoj-network
   ui:
     container_name: ligoj-ui
-    image: ligoj/ligoj-ui:3.3.0
+    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-ui:${LIGOJ_VERSION:-3.3.0}
     build:
       context: app-ui
       platforms:
@@ -37,12 +37,12 @@ services:
     restart: always
     environment:
       JAVA_OPTIONS: "-Dsecurity=Rest"
-      SERVER_PORT: "8080"
+      SERVER_PORT: ${LIGOJ_WEB_PORT:-8080}
       CUSTOM_OPTS: ""
     links:
       - api:ligoj-api
     ports: 
-      - "8080:8080"
+      - "${LIGOJ_PORT:-8080}:${LIGOJ_WEB_PORT:-8080}"
     volumes:
       - ${LIGOJ_HOME:-/home/ligoj}:/home/ligoj
     networks:
