@@ -4,7 +4,7 @@ WORKDIR /build/
 ADD . .
 COPY Dockerfile ./*settings.xml /root/.m2/
 RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
-    { [ -f "prepare-build.sh" ] && chmod +x "prepare-build.sh" && "".prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
+    { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn clean package -B
 
 ARG TARGETPLATFORM
@@ -50,7 +50,7 @@ ENV CONTEXT_URL="/ligoj-api" \
 
 EXPOSE ${SERVER_PORT}
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
-    { [ -f "prepare-run.sh" ] && chmod +x "prepare-run.sh" && "".prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
+    { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
     java $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
 	 --add-modules java.se \
 	 --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
