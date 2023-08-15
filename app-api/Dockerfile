@@ -1,5 +1,5 @@
-FROM --platform=${BUILDPLATFORM} maven:3.9.3-eclipse-temurin-17 as builder
 ARG BUILDPLATFORM
+FROM --platform=${BUILDPLATFORM} maven:3.9.3-eclipse-temurin-17 as builder
 WORKDIR /build/
 ADD . .
 COPY Dockerfile ./*settings.xml /root/.m2/
@@ -7,8 +7,8 @@ RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=tr
     { [ -f "prepare-build.sh" ] && chmod +x "prepare-build.sh" && "".prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn clean package -B
 
-FROM --platform=${TARGETPLATFORM} openjdk:17-jdk
 ARG TARGETPLATFORM
+FROM --platform=${TARGETPLATFORM} openjdk:17-jdk
 LABEL name="Ligoj API server" \
       maintainer="Kloudy <fdaugan@kloudy.io>" \
       vendor="Kloudy" \
