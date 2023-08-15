@@ -10,7 +10,8 @@ services:
     build:
       context: app-api
       args:
-        PREPARE_BUILD: ${LIGOJ_API_PREPARE_BUILD:-echo "No PREPARE_BUILD"}
+        BUILDPLATFORM: ${LIGOJ_BUILD_PLATFORM:-linux/amd64"}
+        TARGETPLATFORM: ${LIGOJ_TARGET_PLATFORM:-linux/amd64"}
     restart: always
     environment:
       JAVA_OPTIONS: ${LIGOJ_API_JAVA_OPTIONS:--Duser.timezone=UTC}
@@ -31,7 +32,8 @@ services:
     build:
       context: app-ui
       args:
-        PREPARE_BUILD: ${LIGOJ_WEB_PREPARE_BUILD:-echo "No PREPARE_BUILD"}
+        BUILDPLATFORM: ${LIGOJ_BUILD_PLATFORM:-linux/amd64"}
+        TARGETPLATFORM: ${LIGOJ_TARGET_PLATFORM:-linux/amd64"}
     restart: always
     environment:
       SERVER_PORT: ${LIGOJ_WEB_PORT:-8080}
