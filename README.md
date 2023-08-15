@@ -84,7 +84,7 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.3.0
 | Variable               | Service | Phase | Default                               | Note                                                                                                                                                                                                                                 |
 |------------------------|---------|-------|---------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | LIGOJ_HOME             | api     | RUN   | `/home/ligoj`                         | To map a persistent home                                                                                                                                                                                                             |
-| LIGOJ_REGISTRY         | *       | BUILD |                                       | To push to your registry                                                                                                                                                                                                             |
+| LIGOJ_REGISTRY         | *       | BUILD |                                       | To push to your registry. When provided, must ends with `/`.                                                                                                                                                                         |
 | LIGOJ_VERSION          | app-*   | BUILD | (version of application)              |                                                                                                                                                                                                                                      |
 | LIGOJ_WEB_PORT         | web     | RUN   | `8080`                                | Internal WEB port                                                                                                                                                                                                                    |
 | LIGOJ_PORT             | web     | RUN   | `8080`                                | Exposed port                                                                                                                                                                                                                         |
@@ -103,6 +103,7 @@ Sample `.env` file:
 LIGOJ_HOME=/var/data/ligoj
 PODMAN_USERNS=keep-id
 LIGOJ_BUILD_PLATFORM=linux/arm64
+LIGOJ_REGISTRY=nexus.sample.local/
 LIGOJ_API_PREPARE_BUILD='export HTTP_PROXY=192.168.0.254:8000 && export HTTPS_PROXY=192.168.0.254:8000'
 ```
 
