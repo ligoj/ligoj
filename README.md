@@ -95,7 +95,7 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.3.0
 | LIGOJ_API_CUSTOM_OPTS  | api     | RUN   | ``                                    | Additional Java properties  `LIGOJ_API_JAVA_OPTIONS`                                                                                                                                                                                 |
 | LIGOJ_WEB_CUSTOM_OPTS  | web     | RUN   | ``                                    | Additional Java properties, merged with `LIGOJ_WEB_JAVA_OPTIONS`                                                                                                                                                                     |
 | LIGOJ_BUILD_PLATFORM   | app-*   | BUILD | `linux/amd64`                         | Docker build platform.                                                                                                                                                                                                               |
-| LIGOJ_RUN_PLATFORM     | app-*   | BUILD | `linux/amd64`                         | Docker run platform.                                                                                                                                                                                                                 |
+| LIGOJ_TARGET_PLATFORM  | app-*   | BUILD | `linux/amd64`                         | Docker run platform.                                                                                                                                                                                                                 |
 
 Sample `.env` file:
 
