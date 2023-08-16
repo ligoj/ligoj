@@ -50,14 +50,14 @@ In case of a custom build you can specify its remote or local location.
 
 With this mode, no build tools (Java, Maven,...) are required to build the image.
 
-``` bash
+```bash
 docker build -t ligoj/ligoj-ui:3.3.0 --progress=plain -f Dockerfile .
 podman build -t ligoj/ligoj-ui:3.3.0 --progress=plain -f Dockerfile .
 ```
 
 Also, compatible with `podman`, and multiple target architectures:
 
-``` bash
+```bash
 podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-ui -t ligoj/ligoj-ui:3.3.0 -f Dockerfile .
 ```
 
@@ -95,7 +95,7 @@ Explanations:
 
 You can experience network issue with remote/local API. To validate the link, try this :
 
-``` bash
+```bash
 docker run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
