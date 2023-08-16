@@ -6,7 +6,7 @@ package org.ligoj.boot.web;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.http.security.*;
-import org.ligoj.bootstrap.http.security.ExtendedSecurityExpressionHandler;
+import org.ligoj.bootstrap.http.security.ExtendedWebSecurityExpressionHandler;
 import org.ligoj.bootstrap.http.security.RedirectAuthenticationEntryPoint;
 import org.ligoj.bootstrap.http.security.RestRedirectStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +17,20 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
@@ -40,13 +47,14 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Spring Boot security configuration.
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
+@EnableMethodSecurity(jsr250Enabled = true, securedEnabled = true)
 @Profile("prod")
 @Slf4j
 public class SecurityConfiguration {
@@ -79,7 +87,7 @@ public class SecurityConfiguration {
 	private String apiEndpoint;
 
 	@Autowired
-	private ExtendedSecurityExpressionHandler expressionHandler;
+	private ExtendedWebSecurityExpressionHandler expressionWebHandler;
 
 	/**
 	 * A 403 JSON management.
@@ -97,7 +105,7 @@ public class SecurityConfiguration {
 
 	/**
 	 * Configure firewall.
-	 * 
+	 *
 	 * @return firewall configuration.
 	 */
 	@Bean
@@ -111,8 +119,7 @@ public class SecurityConfiguration {
 	 * Pre-Authentication provider.
 	 *
 	 * @return Pre-Authentication provider.
-	 * @throws ReflectiveOperationException
-	 *             Unable to build the authentication provider
+	 * @throws ReflectiveOperationException Unable to build the authentication provider
 	 */
 	@Bean
 	public AbstractAuthenticationProvider authenticationProvider() throws ReflectiveOperationException {
@@ -125,7 +132,7 @@ public class SecurityConfiguration {
 
 	/**
 	 * Configure session management filter.
-	 * 
+	 *
 	 * @return session management configuration.
 	 */
 	@Bean
@@ -137,31 +144,37 @@ public class SecurityConfiguration {
 	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 		final var logout = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, "/logout.html") : "/login.html?logout";
 		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
-		final var sec = http.authorizeRequests().expressionHandler(expressionHandler)
-				// Login
-				.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/login")).permitAll()
 
-				// Public static resources
-				.requestMatchers(RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PATTERN)).permitAll()
+		WebExpressionAuthorizationManager authorization = new WebExpressionAuthorizationManager("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()");
+		authorization.setExpressionHandler(expressionWebHandler);
+		final var sec = http.authorizeHttpRequests(authorize ->
+						authorize.requestMatchers(
+										// Login
+										AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/login"),
+										// Public static resources
+										RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PATTERN),
+										AntPathRequestMatcher.antMatcher("/rest/redirect"),
+										AntPathRequestMatcher.antMatcher("/rest/security/login"),
+										AntPathRequestMatcher.antMatcher("/captcha.png")).permitAll()
+								.requestMatchers(
+										AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
+										AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**")).anonymous()
 
-				.requestMatchers("/rest/redirect", "/rest/security/login", "/captcha.png").permitAll()
-				.requestMatchers(
-						AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
-						AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**")).anonymous()
+								// Everything else must be authenticated
+								.anyRequest()
+								.access(authorization)
+				)
+				.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage("/login.html?denied"))
 
-				// Everything else is authenticated
-				.anyRequest()
-				.access("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()")
-				.and().exceptionHandling().authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage("/login.html?denied").and()
+				.logout(a -> a.addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies)).invalidateHttpSession(true).logoutSuccessUrl(logout))
 
-				.logout().addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies)).invalidateHttpSession(true).logoutSuccessUrl(logout)
-				.and()
-
-				.formLogin().loginPage("/login.html?denied").loginProcessingUrl("/login").successHandler(getSuccessHandler())
-				.failureHandler(getFailureHandler()).and()
+				.formLogin(a -> a.loginPage("/login.html?denied").loginProcessingUrl("/login").successHandler(getSuccessHandler())
+						.failureHandler(getFailureHandler()))
 
 				// Stateful session
-				.csrf().disable().sessionManagement().sessionAuthenticationStrategy(sessionAuth()).and().securityContext().and()
+				.csrf(AbstractHttpConfigurer::disable)
+				.sessionManagement(a -> a.sessionAuthenticationStrategy(sessionAuth()))
+				.securityContext(Customizer.withDefaults())
 
 				// Security filters
 				.addFilterAt(digestAuthenticationFilter(), org.springframework.security.web.authentication.www.DigestAuthenticationFilter.class)
@@ -195,10 +208,8 @@ public class SecurityConfiguration {
 	/**
 	 * Configure {@link AuthenticationProvider}
 	 *
-	 * @param auth
-	 *            The builder.
-	 * @throws ReflectiveOperationException
-	 *             Unable to build the authentication provider
+	 * @param auth The builder.
+	 * @throws ReflectiveOperationException Unable to build the authentication provider
 	 */
 	@Autowired
 	public void configureGlobal(final AuthenticationManagerBuilder auth) throws ReflectiveOperationException {
@@ -207,7 +218,7 @@ public class SecurityConfiguration {
 
 	/**
 	 * Configure digest based authentication.
-	 * 
+	 *
 	 * @return digest based authentication configuration.
 	 */
 	@Bean
@@ -225,7 +236,7 @@ public class SecurityConfiguration {
 
 	/**
 	 * Configure failure URL.
-	 * 
+	 *
 	 * @return authentication failure configuration.
 	 */
 	@Bean
@@ -239,7 +250,7 @@ public class SecurityConfiguration {
 
 	/**
 	 * Configure REST failure URL.
-	 * 
+	 *
 	 * @return REST failure configuration.
 	 */
 	@Bean
@@ -252,7 +263,7 @@ public class SecurityConfiguration {
 
 	/**
 	 * Configure success URL.
-	 * 
+	 *
 	 * @return authentication success configuration.
 	 */
 	@Bean
@@ -272,17 +283,17 @@ public class SecurityConfiguration {
 	@Bean
 	public CompositeSessionAuthenticationStrategy sessionAuth() {
 		final var registry = sessionRegistry();
-		final var sas = new ConcurrentSessionControlAuthenticationStrategy(registry);
-		sas.setMaximumSessions(maxSession);
-		sas.setExceptionIfMaximumExceeded(false);
-		final var sfps = new SessionFixationProtectionStrategy();
-		final var rsas = new RegisterSessionAuthenticationStrategy(registry);
-		return new CompositeSessionAuthenticationStrategy(Arrays.asList(sas, sfps, rsas));
+		final var concurrentStrategy = new ConcurrentSessionControlAuthenticationStrategy(registry);
+		concurrentStrategy.setMaximumSessions(maxSession);
+		concurrentStrategy.setExceptionIfMaximumExceeded(false);
+		final var fixStrategy = new SessionFixationProtectionStrategy();
+		final var registerStrategy = new RegisterSessionAuthenticationStrategy(registry);
+		return new CompositeSessionAuthenticationStrategy(Arrays.asList(concurrentStrategy, fixStrategy, registerStrategy));
 	}
 
 	/**
 	 * Configure session registry.
-	 * 
+	 *
 	 * @return session registry configuration.
 	 */
 	@Bean
