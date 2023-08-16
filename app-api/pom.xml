@@ -20,11 +20,22 @@
 	</scm>
 	<properties>
 		<api.version>4.0.4</api.version>
+		<swagger-ui.version>5.3.1</swagger-ui.version>
 		<resource.delimiter>@</resource.delimiter>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>swagger-ui</artifactId>
+				<version>${swagger-ui.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-spring-boot-starter-jaxrs</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-crypto</artifactId>
@@ -52,9 +63,12 @@
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>swagger-ui</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-spring-boot-starter-jaxrs</artifactId>
-			<version>${cxf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -117,13 +131,6 @@
 			<groupId>org.ligoj.api</groupId>
 			<artifactId>plugin-core</artifactId>
 			<version>${api.version}</version>
-		</dependency>
-
-		<!-- JSR-154 -->
-		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>

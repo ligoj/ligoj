@@ -1,6 +1,6 @@
 ## :link: Ligoj - API [![Docker API](https://img.shields.io/docker/v/ligoj/ligoj-api)](https://hub.docker.com/r/ligoj/ligoj-api) - UI [![Docker UI](https://img.shields.io/docker/v/ligoj/ligoj-ui)](https://hub.docker.com/r/ligoj/ligoj-ui)
 
-![alt text](https://github.com/ligoj/ligoj/raw/master/docs/assets/img/home-multi-project.png "Simple home page")
+![alt text](https://github.com/ligoj/ligoj/raw/master/docs/assets/img/home-multi-project.png "Home page")
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fligoj%2Fligoj.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fligoj%2Fligoj?ref=badge_shield)
 
 A web application to centralize the related tools of your projects, a 21th century links management with security and
@@ -49,7 +49,7 @@ and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 Docker, compose and git install, then build, then run.
 
-``` bash
+```bash
 sudo yum install -y docker git
 sudo pip3 install docker-compose
 sudo usermod -a -G docker ec2-user
@@ -66,7 +66,7 @@ open http://localhost:8080/ligoj
 
 ## Publish to AWS ECR
 
-``` bash
+```bash
 AWS_ACCOUNT="$(aws sts get-caller-identity --query "Account" --output text)"
 AWS_REGION="$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')"
 ECR_REGISTRY=$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com
@@ -99,7 +99,7 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.3.0
 
 Sample `.env` file:
 
-``` ini
+```ini
 LIGOJ_HOME=/var/data/ligoj
 PODMAN_USERNS=keep-id
 LIGOJ_BUILD_PLATFORM=linux/arm64
@@ -117,7 +117,7 @@ LIGOJ_API_PREPARE_BUILD='export HTTP_PROXY=192.168.0.254:8000 && export HTTPS_PR
 
 Sample `prepare-build.sh` file:
 
-``` ini
+```ini
 export http_proxy=192.168.0.254:8000
 export https_proxy=192.168.0.254:8000
 ```
@@ -130,7 +130,7 @@ By default, with Docker compose, the home is persistent it contains:
 - logs of containers
 - database data
 
-``` bash
+```bash
 mkdir -p "$(pwd)/.ligoj"
 echo "LIGOJ_HOME=$(pwd)/.ligoj
 PODMAN_USERNS=keep-id" > .env
@@ -142,9 +142,85 @@ By default, the Docker compose overrides is loaded from `compose.override.yml` a
 
 For PostgreSQL, the docker-compose command is:
 
-``` bash
+```bash
 export BUILDAH_FORMAT=docker
 podman-compose -p ligoj build
 podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml up -d
 podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml down
+```
+
+# API Description
+
+API is only available from a valid session.
+
+### Swagger UI
+
+UI page: [Swagger UI](http://localhost:8080/ligoj/rest/api-docs?url=openapi.json)
+
+### OpenAPI
+
+```bash
+curl 'http://localhost:8080/ligoj/rest/openapi.json' -H '**cookies, jwt,...***'
+```
+
+Sample result
+
+```json
+{
+    "openapi": "3.0.1",
+    "servers": [
+        {
+            "url": "http://localhost:8081/ligoj-api/rest"
+        }
+    ],
+    "paths": {
+        "/service/id/company": {
+            "get": {
+                "operationId": "findAll_20",
+                "responses": {
+                    "default": {
+                        "description": "default response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TableItemContainerCountVo"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### WADL
+
+WADL format currently output only XML format.
+
+```bash
+curl 'http://localhost:8080/ligoj/rest?_wadl' -H '**cookies, jwt,...***'
+```
+
+Sample result
+
+```xml
+<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <grammars></grammars>
+    <resources base="http://localhost:8081/ligoj-api/rest/">
+        <resource path="/security">
+            <resource path="/login">
+                <method name="POST">
+                    <request>
+                        <representation mediaType="application/json" />
+                    </request>
+                    <response>
+                        <representation mediaType="application/json" />
+                    </response>
+                </method>
+            </resource>
+        </resource>
+    </resources>
+</application>
 ```
