@@ -11,26 +11,24 @@ import lombok.Setter;
 /**
  * Base implementation of very basic SSO implementation.
  */
+@Setter
 public abstract class AbstractAuthenticationProvider implements AuthenticationProvider {
 
 	/**
 	 * SSO post URL.
 	 */
-	@Setter
 	@Getter
 	private String ssoPostUrl;
 
 	/**
 	 * SSO post content format.
 	 */
-	@Setter
 	@Getter
 	private String ssoPostContent;
 
 	/**
 	 * SSO get format.
 	 */
-	@Setter
 	private String ssoWelcome;
 
 	/**

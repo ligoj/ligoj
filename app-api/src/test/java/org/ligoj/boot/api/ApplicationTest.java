@@ -3,6 +3,7 @@
  */
 package org.ligoj.boot.api;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -15,9 +16,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 class ApplicationTest extends SpringBootServletInitializer {
 
 	@Test
-	void configure() throws Exception {
+	void configure() {
 		new Application().configure(Mockito.mock(SpringApplicationBuilder.class));
-		new Application().webjarsServlet();
+		Assertions.assertNotNull(new Application().webjarsServlet());
 		new Application().cxfServlet();
 		new Application().securityFilterChainRegistration();
 		new Application().requestContextListener();

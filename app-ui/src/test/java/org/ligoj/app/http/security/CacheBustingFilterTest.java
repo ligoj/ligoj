@@ -3,18 +3,17 @@
  */
 package org.ligoj.app.http.security;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import org.apache.hc.core5.http.HttpHeaders;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.DelegatingServletOutputStream;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * Test class of {@link CacheBustingFilter}
@@ -22,27 +21,33 @@ import org.springframework.mock.web.DelegatingServletOutputStream;
 class CacheBustingFilterTest {
 
 	@Test
-	void javax() throws ServletException {
-		new CaptchaFilter().init(null);
-		new CaptchaFilter().destroy();
-	}
-
-	@Test
 	void test302() throws ServletException, IOException {
 		final var response = Mockito.mock(HttpServletResponse.class);
 		Mockito.when(response.getStatus()).thenReturn(302);
 		newFilter(response);
-		Mockito.verify(response).setHeader("Pragma", "no-cache");
+		Mockito.verify(response).setHeader(HttpHeaders.PRAGMA, "no-cache");
 	}
 
 	private void newFilter(final HttpServletResponse response) throws ServletException, IOException {
 		final var request = Mockito.mock(HttpServletRequest.class);
 		final var filter = new CacheBustingFilter(1);
-		final var filterConfig = Mockito.mock(FilterConfig.class);
-		final var baos = new ByteArrayOutputStream();
-		final var out = new DelegatingServletOutputStream(baos);
+		final var out = new DelegatingServletOutputStream(new ByteArrayOutputStream());
 		Mockito.when(response.getOutputStream()).thenReturn(out);
 		filter.doFilter(request, response, Mockito.mock(FilterChain.class));
+	}
+
+	@Test
+	void testIgnorePragmaResponseWrapper() {
+		final var response = Mockito.mock(HttpServletResponse.class);
+		final var wrapper = new CacheBustingFilter.IgnorePragmaResponseWrapper(response);
+		wrapper.addHeader(HttpHeaders.EXPIRES, "Value1");
+		wrapper.addHeader(HttpHeaders.PRAGMA, "Value2");
+		wrapper.setHeader(HttpHeaders.EXPIRES, "Value1");
+		wrapper.setHeader(HttpHeaders.PRAGMA, "Value2");
+		Mockito.verify(response, Mockito.atLeastOnce()).setHeader(HttpHeaders.EXPIRES, "Value1");
+		Mockito.verify(response, Mockito.never()).setHeader(HttpHeaders.PRAGMA, "Value2");
+		Mockito.verify(response, Mockito.atLeastOnce()).addHeader(HttpHeaders.EXPIRES, "Value1");
+		Mockito.verify(response, Mockito.never()).addHeader(HttpHeaders.PRAGMA, "Value2");
 	}
 
 	@Test
@@ -50,7 +55,6 @@ class CacheBustingFilterTest {
 		final var response = Mockito.mock(HttpServletResponse.class);
 		Mockito.when(response.getStatus()).thenReturn(204);
 		newFilter(response);
-		Mockito.verify(response, Mockito.never()).setHeader("Pragma", "no-cache");
+		Mockito.verify(response, Mockito.never()).setHeader(HttpHeaders.PRAGMA, "no-cache");
 	}
-
 }

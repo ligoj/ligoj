@@ -46,6 +46,13 @@ public class SecurityConfiguration {
 	@Autowired
 	private FederatedUserDetailsService userDetailsService;
 
+	/**
+	 * Filter security chain
+	 *
+	 * @param http HTTP security bean.
+	 * @return The built bean.
+	 * @throws Exception from the build.
+	 */
 	@Bean
 	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 		final var authenticationManager = http.getSharedObject(AuthenticationManager.class);
@@ -81,9 +88,14 @@ public class SecurityConfiguration {
 				.build();
 	}
 
+	/**
+	 * Return {@link WebSecurityCustomizer} bean
+	 *
+	 * @return {@link WebSecurityCustomizer} bean.
+	 */
 	@Bean
 	public WebSecurityCustomizer webSecurityCustomizer() {
-		return (web) -> web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
+		return web -> web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
 	}
 
 	/**
@@ -96,6 +108,13 @@ public class SecurityConfiguration {
 		auth.eraseCredentials(true).authenticationProvider(authenticationProvider());
 	}
 
+	/**
+	 * Simple bean unwrapping authentication manager from its configuration.
+	 *
+	 * @param authenticationConfiguration The configuration wrapper.
+	 * @return Simple bean unwrapping authentication manager from its configuration.
+	 * @throws Exception From the authentication builder.
+	 */
 	@Bean
 	public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration)
 			throws Exception {
@@ -149,6 +168,7 @@ public class SecurityConfiguration {
 	/**
 	 * Simple API token.
 	 *
+	 * @param authenticationManager Authentication manager.
 	 * @return Simple API token.
 	 */
 	@Bean

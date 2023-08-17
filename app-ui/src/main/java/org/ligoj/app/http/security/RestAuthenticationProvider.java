@@ -3,12 +3,7 @@
  */
 package org.ligoj.app.http.security;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -23,7 +18,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * REST authenticated provider.
@@ -34,7 +34,7 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 	@Override
 	public Authentication authenticate(final Authentication authentication) {
 		return authenticate(StringUtils.lowerCase(authentication.getPrincipal().toString()),
-				StringUtils.defaultString(authentication.getCredentials().toString(), ""), authentication.getAuthorities());
+				Objects.toString(authentication.getCredentials().toString(), ""), authentication.getAuthorities());
 	}
 
 	protected Authentication authenticate(final String username, final String credential, final Collection<? extends GrantedAuthority> authorities) {

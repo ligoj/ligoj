@@ -30,13 +30,13 @@ import lombok.extern.slf4j.Slf4j;
  * Listen "/oauth/token?target=path", extract token, and send it to business to validate it.
  */
 @Slf4j
+@Setter
+@Getter
 public class DigestAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
 	/**
 	 * SSO post URL.
 	 */
-	@Setter
-	@Getter
 	private String ssoPostUrl;
 
 	/**

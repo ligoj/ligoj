@@ -1,10 +1,10 @@
 targetType;target;value;createdDate
 USER;junit;Message1;2016/08/10
 USER;user1;MessageF1;2016/08/11
-GROUP;ligoj-gstack;Message2;2016/08/12
+GROUP;ligoj-jupiter;Message2;2016/08/12
 NODE;service:bt;Message3;2016/08/13
 NODE;service:build:jenkins:bpr;Message4;2016/08/14
-PROJECT;ligoj-gstack;Message0;2016/08/15
+PROJECT;ligoj-jupiter;Message0;2016/08/15
 NODE;service:build:jenkins;Message5;2016/08/16
 COMPANY;ligoj;Message6;2016/08/17
 USER;fdaugan;Message7;2016/08/18

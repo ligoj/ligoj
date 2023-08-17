@@ -191,7 +191,7 @@ public class Application extends SpringBootServletInitializer {
 		final var proxyFilter = new HtmlProxyFilter();
 		proxyFilter.setSuffix(getEnvironment());
 		final var registrationBean = new FilterRegistrationBean<>(proxyFilter);
-		registrationBean.addUrlPatterns("/index.html", "/", "/login.html");
+		registrationBean.addUrlPatterns(SecurityConfiguration.INDEX_HTML, "/",  SecurityConfiguration.LOGIN_HTML);
 		registrationBean.setOrder(10);
 		return registrationBean;
 	}

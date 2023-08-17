@@ -4,6 +4,7 @@
 package org.ligoj.app.http.security;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,7 +26,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	/**
 	 * Common whitelist pattern.
 	 */
-	public static final String WHITE_LIST_PATTERN = "/(([0-9]{3}|logout|login)(-prod)?\\.html(\\?.*)?|favicon.ico|logout|(themes|lib|dist|main/public)/.*)";
+	public static final Pattern WHITE_LIST_PATTERN = Pattern.compile("/((\\d{3}|logout|login)(-prod)?\\.html(\\?.*)?|favicon.ico|logout|(themes|lib|dist|main/public)/.*)");
 	/**
 	 * Only there because of visibility of "principalRequestHeader" of {@link RequestHeaderAuthenticationFilter}
 	 */
@@ -54,7 +55,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		final var req = (HttpServletRequest) request;
 		final var res = (HttpServletResponse) response;
-		if (req.getServletPath().matches(WHITE_LIST_PATTERN) || (req.getServletPath().startsWith("/rest")
+		if (WHITE_LIST_PATTERN.matcher(req.getServletPath()).matches() || (req.getServletPath().startsWith("/rest")
 				&& (StringUtils.isNotBlank(req.getParameter("api-key")) || StringUtils.isNotBlank(req.getHeader("x-api-key")))
 				&& (StringUtils.isNotBlank(req.getParameter("api-user")) || StringUtils.isNotBlank(req.getHeader("x-api-user"))))) {
 			// White-list error page and keyed API access

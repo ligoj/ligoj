@@ -3,11 +3,10 @@
  */
 package org.ligoj.boot.api;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 /**
  * Test class of {@link Application}
@@ -15,14 +14,14 @@ import org.junit.jupiter.api.Test;
 class ApplicationLightTest {
 
 	@Test
-	void main() throws Exception {
+	void testMain() {
 		Application.main(getArgs());
 	}
 
 	private String[] getArgs() {
-		List<String> list = new ArrayList<>(Arrays.asList("--spring.main.banner-mode=OFF", "--spring.main.registerShutdownHook=false",
+		final var list = new ArrayList<>(Arrays.asList("--spring.main.banner-mode=OFF", "--spring.main.registerShutdownHook=false",
 				"--spring.main.web-application-type=NONE", "--spring.profiles.active=test"));
-		return list.toArray(new String[list.size()]);
+		return list.toArray(new String[0]);
 	}
 
 }

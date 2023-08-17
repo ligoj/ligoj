@@ -3,34 +3,26 @@
  */
 package org.ligoj.app.http.security;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import jakarta.servlet.Filter;
+import cn.apiclub.captcha.Captcha;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-
-import cn.apiclub.captcha.Captcha;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.filter.GenericFilterBean;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Filter checking the CAPTCHA data provided in the "captcha" parameter.
  */
 @Slf4j
-public class CaptchaFilter implements Filter {
+public class CaptchaFilter extends GenericFilterBean {
 	public static final String CAPTCHA_HEADER = "captcha";
-
-	@Override
-	public void init(final FilterConfig filterConfig) throws ServletException {
-		// Nothing to do
-	}
 
 	@Override
 	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
@@ -63,11 +55,6 @@ public class CaptchaFilter implements Filter {
 		httpResponse.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		httpResponse.setContentType("application/json");
 		httpResponse.getOutputStream().write((String.format("{\"errors\":{\"%s\":\"%s\"}}", key, value)).getBytes(StandardCharsets.UTF_8));
-	}
-
-	@Override
-	public void destroy() {
-		// Nothing to do
 	}
 
 }

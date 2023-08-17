@@ -3,6 +3,7 @@
  */
 package org.ligoj.app.resource.plugin;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.ligoj.app.resource.security.User;
 import org.ligoj.bootstrap.model.AbstractBusinessEntityTest;
@@ -22,6 +23,6 @@ class BeanTest extends AbstractBusinessEntityTest {
 
 	@Test
 	void testPluginType() {
-		PluginType.valueOf(PluginType.values()[PluginType.FEATURE.ordinal()].name());
+		Assertions.assertEquals("FEATURE", PluginType.valueOf(PluginType.values()[PluginType.FEATURE.ordinal()].name()).name());
 	}
 }

@@ -3,19 +3,21 @@
  */
 package org.ligoj.app.http.security;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-
 import jakarta.servlet.http.HttpServletRequest;
-
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.exceptions.base.MockitoException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+
+import java.io.IOException;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 /**
  * Test class of {@link DigestAuthenticationFilter}
@@ -26,8 +28,20 @@ class DigestAuthenticationFilterTest extends AbstractServerTest {
 
 	@Test
 	void authenticateIOE() {
-		Assertions.assertThrows(BadCredentialsException.class, () -> {
-			authenticate("der://localhost", "token");
+		Assertions.assertThrows(BadCredentialsException.class, () -> authenticate("der://localhost", "token"));
+	}
+
+	@Test
+	void authenticateIOE2() {
+		Assertions.assertThrows(MockitoException.class, () -> {
+			filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
+			filter.afterPropertiesSet();
+			final var authenticationManager = Mockito.mock(AuthenticationManager.class);
+			filter.setAuthenticationManager(authenticationManager);
+			final var ioe = Mockito.mock(IOException.class);
+			Mockito.doThrow(ioe).when(authenticationManager).authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class));
+			Mockito.doThrow(new IOException()).when(ioe).toString();
+			filter.attemptAuthentication(newRequest("token"), null);
 		});
 	}
 
@@ -59,13 +73,13 @@ class DigestAuthenticationFilterTest extends AbstractServerTest {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("")));
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("//OK")));
 		httpServer.start();
-		authenticate("http://localhost", "token");
+		Assertions.assertEquals("//OK", authenticate("http://localhost", "token").getPrincipal());
 	}
 
-	private void authenticate(final String host, final String token) {
+	private Authentication authenticate(final String host, final String token) {
 		filter.setSsoPostUrl(host + ":" + MOCK_PORT);
 		filter.afterPropertiesSet();
-		filter.attemptAuthentication(newRequest(token), null);
+		return filter.attemptAuthentication(newRequest(token), null);
 	}
 
 	/**

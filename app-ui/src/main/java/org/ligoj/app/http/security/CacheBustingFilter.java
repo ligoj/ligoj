@@ -6,50 +6,55 @@ package org.ligoj.app.http.security;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import lombok.AllArgsConstructor;
+import org.apache.hc.core5.http.HttpHeaders;
 
 import java.io.IOException;
 
 /**
  * Cache that does not enable cache for non 2xx codes.
  */
+@AllArgsConstructor
 public class CacheBustingFilter implements Filter {
 
 	private final long expiration;
-
-	public CacheBustingFilter(final long expiration) {
-		this.expiration = expiration;
-	}
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
 		final var httpResp = (HttpServletResponse) resp;
 		if (httpResp.getStatus() / 100 != 2) {
-			httpResp.setHeader("Cache-Control", "must-revalidate,no-cache,no-store");
-			httpResp.setHeader("Pragma", "no-cache");
-			httpResp.setDateHeader("Expires", 0);
+			httpResp.setHeader(HttpHeaders.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
+			httpResp.setHeader(HttpHeaders.PRAGMA, "no-cache");
+			httpResp.setDateHeader(HttpHeaders.EXPIRES, 0);
 		} else {
 			// Set cache directives
-			httpResp.setHeader("Cache-Control", "public, max-age=" + expiration);
-			httpResp.setDateHeader("Expires", System.currentTimeMillis() + expiration * 1000L);
+			httpResp.setHeader(HttpHeaders.CACHE_CONTROL, "public, max-age=" + expiration);
+			httpResp.setDateHeader(HttpHeaders.EXPIRES, System.currentTimeMillis() + expiration * 1000L);
 		}
 		/*
 		 * By default, some servers (e.g. Tomcat) will set headers on any SSL content to deny caching. Omitting the
 		 * Pragma header takes care of user-agents implementing HTTP/1.0.
 		 */
-		chain.doFilter(req, new HttpServletResponseWrapper(httpResp) {
-			@Override
-			public void addHeader(String name, String value) {
-				if (!"Pragma".equalsIgnoreCase(name)) {
-					super.addHeader(name, value);
-				}
-			}
+		chain.doFilter(req, new IgnorePragmaResponseWrapper(httpResp));
+	}
 
-			@Override
-			public void setHeader(String name, String value) {
-				if (!"Pragma".equalsIgnoreCase(name)) {
-					super.setHeader(name, value);
-				}
+	static class IgnorePragmaResponseWrapper extends HttpServletResponseWrapper {
+		public IgnorePragmaResponseWrapper(HttpServletResponse httpResp) {
+			super(httpResp);
+		}
+
+		@Override
+		public void addHeader(String name, String value) {
+			if (!HttpHeaders.PRAGMA.equalsIgnoreCase(name)) {
+				super.addHeader(name, value);
 			}
-		});
+		}
+
+		@Override
+		public void setHeader(String name, String value) {
+			if (!HttpHeaders.PRAGMA.equalsIgnoreCase(name)) {
+				super.setHeader(name, value);
+			}
+		}
 	}
 }

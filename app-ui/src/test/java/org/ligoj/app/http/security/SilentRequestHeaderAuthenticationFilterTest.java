@@ -137,6 +137,7 @@ class SilentRequestHeaderAuthenticationFilterTest {
 		final var response = Mockito.mock(HttpServletResponse.class);
 		final var chain = Mockito.mock(FilterChain.class);
 		filter.doFilter(request, response, chain);
+		Mockito.verify(chain).doFilter(request, response);
 	}
 
 	@Test

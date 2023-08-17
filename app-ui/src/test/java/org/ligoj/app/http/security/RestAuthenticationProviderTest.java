@@ -3,19 +3,21 @@
  */
 package org.ligoj.app.http.security;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-
-import java.util.IllegalFormatConversionException;
-
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.exceptions.base.MockitoException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.IllegalFormatConversionException;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 /**
  * Check the SSO authentication {@link RestAuthenticationProvider} provider.
@@ -58,17 +60,26 @@ class RestAuthenticationProviderTest extends AbstractServerTest {
 		Mockito.when(principal.toString()).thenReturn(null);
 		Mockito.when(authentication.getCredentials()).thenReturn(credential);
 		Mockito.when(authentication.getPrincipal()).thenReturn(principal);
-		Assertions.assertThrows(IllegalFormatConversionException.class, () -> {
-			authenticationProvider.authenticate(authentication);
-		});
+		Assertions.assertThrows(IllegalFormatConversionException.class, () -> authenticationProvider.authenticate(authentication));
 	}
 
 	@Test
 	void authenticateIOE() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("//OK")));
 		httpServer.start();
-		Assertions.assertThrows(BadCredentialsException.class, () -> {
-			authenticate("der://localhost");
+		Assertions.assertThrows(BadCredentialsException.class, () -> authenticate("der://localhost"));
+	}
+
+	@Test
+	void authenticateOther() {
+		Assertions.assertThrows(MockitoException.class, () -> {
+			final var filter = new RestAuthenticationProvider();
+			filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
+			@SuppressWarnings("unchecked") final Collection<? extends GrantedAuthority> authorities = Mockito.mock(Collection.class);
+			final var ioe = Mockito.mock(RuntimeException.class);
+			Mockito.doThrow(new IOException()).when(ioe).toString();
+			Mockito.doThrow(ioe).when(authorities).iterator();
+			filter.authenticate("", "", authorities);
 		});
 	}
 
@@ -76,9 +87,7 @@ class RestAuthenticationProviderTest extends AbstractServerTest {
 	void authenticateKo1() {
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_UNAUTHORIZED)));
 		httpServer.start();
-		Assertions.assertThrows(BadCredentialsException.class, () -> {
-			authenticate("http://localhost");
-		});
+		Assertions.assertThrows(BadCredentialsException.class, () -> authenticate("http://localhost"));
 	}
 
 	@Test
