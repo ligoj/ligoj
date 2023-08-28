@@ -3,6 +3,7 @@
  */
 package org.ligoj.boot.web;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ class ApplicationLightTest {
 	@Test
 	void testMain() {
 		Application.main(getArgs());
+		Assertions.assertNotNull(Application.lastContext);
 	}
 
 	private String[] getArgs() {

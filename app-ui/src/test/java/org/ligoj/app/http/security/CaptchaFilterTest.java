@@ -34,12 +34,12 @@ class CaptchaFilterTest {
 	void testDoFilterNoSession() throws ServletException, IOException {
 		final var request = Mockito.mock(HttpServletRequest.class);
 		final var response = Mockito.mock(HttpServletResponse.class);
-		final var baos = new ByteArrayOutputStream();
-		final var out = new DelegatingServletOutputStream(baos);
+		final var stream = new ByteArrayOutputStream();
+		final var out = new DelegatingServletOutputStream(stream);
 		Mockito.when(response.getOutputStream()).thenReturn(out);
 		new CaptchaFilter().doFilter(request, response, null);
 		Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", baos.toString(StandardCharsets.UTF_8));
+		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", stream.toString(StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -47,13 +47,13 @@ class CaptchaFilterTest {
 		final var request = Mockito.mock(HttpServletRequest.class);
 		final var session = Mockito.mock(HttpSession.class);
 		final var response = Mockito.mock(HttpServletResponse.class);
-		final var baos = new ByteArrayOutputStream();
-		final var out = new DelegatingServletOutputStream(baos);
+		final var stream = new ByteArrayOutputStream();
+		final var out = new DelegatingServletOutputStream(stream);
 		Mockito.when(response.getOutputStream()).thenReturn(out);
 		Mockito.when(request.getSession(false)).thenReturn(session);
 		new CaptchaFilter().doFilter(request, response, null);
 		Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", baos.toString(StandardCharsets.UTF_8));
+		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", stream.toString(StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -61,8 +61,8 @@ class CaptchaFilterTest {
 		final var request = Mockito.mock(HttpServletRequest.class);
 		final var session = Mockito.mock(HttpSession.class);
 		final var response = Mockito.mock(HttpServletResponse.class);
-		final var baos = new ByteArrayOutputStream();
-		final var out = new DelegatingServletOutputStream(baos);
+		final var stream = new ByteArrayOutputStream();
+		final var out = new DelegatingServletOutputStream(stream);
 		Mockito.when(response.getOutputStream()).thenReturn(out);
 		Mockito.when(request.getSession(false)).thenReturn(session);
 		Mockito.when(request.getHeader(CaptchaFilter.CAPTCHA_HEADER)).thenReturn("some");
@@ -70,7 +70,7 @@ class CaptchaFilterTest {
 		Mockito.when(session.getAttribute(Captcha.NAME)).thenReturn(captcha);
 		new CaptchaFilter().doFilter(request, response, null);
 		Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		Assertions.assertEquals("{\"errors\":{\"captcha\":\"invalid\"}}", baos.toString(StandardCharsets.UTF_8));
+		Assertions.assertEquals("{\"errors\":{\"captcha\":\"invalid\"}}", stream.toString(StandardCharsets.UTF_8));
 	}
 
 	@Test

@@ -33,16 +33,15 @@ class DigestAuthenticationFilterTest extends AbstractServerTest {
 
 	@Test
 	void authenticateIOE2() {
-		Assertions.assertThrows(MockitoException.class, () -> {
-			filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
-			filter.afterPropertiesSet();
-			final var authenticationManager = Mockito.mock(AuthenticationManager.class);
-			filter.setAuthenticationManager(authenticationManager);
-			final var ioe = Mockito.mock(IOException.class);
-			Mockito.doThrow(ioe).when(authenticationManager).authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class));
-			Mockito.doThrow(new IOException()).when(ioe).toString();
-			filter.attemptAuthentication(newRequest("token"), null);
-		});
+		filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
+		filter.afterPropertiesSet();
+		final var authenticationManager = Mockito.mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		final var ioe = Mockito.mock(IOException.class);
+		Mockito.doThrow(ioe).when(authenticationManager).authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class));
+		Mockito.doThrow(new IOException()).when(ioe).toString();
+		final var req = newRequest("token");
+		Assertions.assertThrows(MockitoException.class, () -> filter.attemptAuthentication(req, null));
 	}
 
 	@Test

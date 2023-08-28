@@ -34,7 +34,6 @@ class RestAuthenticationProviderTest extends AbstractServerTest {
 		Assertions.assertNotNull(authentication);
 		Assertions.assertEquals("junit", authentication.getName());
 		Assertions.assertEquals("junit", authentication.getPrincipal().toString());
-
 		Assertions.assertTrue(authenticationProvider.supports(Object.class));
 	}
 
@@ -72,15 +71,13 @@ class RestAuthenticationProviderTest extends AbstractServerTest {
 
 	@Test
 	void authenticateOther() {
-		Assertions.assertThrows(MockitoException.class, () -> {
-			final var filter = new RestAuthenticationProvider();
-			filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
-			@SuppressWarnings("unchecked") final Collection<? extends GrantedAuthority> authorities = Mockito.mock(Collection.class);
-			final var ioe = Mockito.mock(RuntimeException.class);
-			Mockito.doThrow(new IOException()).when(ioe).toString();
-			Mockito.doThrow(ioe).when(authorities).iterator();
-			filter.authenticate("", "", authorities);
-		});
+		final var filter = new RestAuthenticationProvider();
+		filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
+		@SuppressWarnings("unchecked") final Collection<? extends GrantedAuthority> authorities = Mockito.mock(Collection.class);
+		final var ioe = Mockito.mock(RuntimeException.class);
+		Mockito.doThrow(new IOException()).when(ioe).toString();
+		Mockito.doThrow(ioe).when(authorities).iterator();
+		Assertions.assertThrows(MockitoException.class, () -> filter.authenticate("", "", authorities));
 	}
 
 	@Test
