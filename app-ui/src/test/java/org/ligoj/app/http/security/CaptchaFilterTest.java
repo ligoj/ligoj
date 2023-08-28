@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +20,7 @@ import org.mockito.Mockito;
 import org.springframework.mock.web.DelegatingServletOutputStream;
 
 import cn.apiclub.captcha.Captcha;
+import org.springframework.mock.web.MockFilterConfig;
 
 /**
  * Test class of {@link CaptchaFilter}
@@ -27,7 +29,7 @@ class CaptchaFilterTest {
 
 	@Test
 	void testJavax() throws ServletException {
-		new CaptchaFilter().init(null);
+		new CaptchaFilter().init(new MockFilterConfig());
 		new CaptchaFilter().destroy();
 	}
 
