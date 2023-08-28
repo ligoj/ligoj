@@ -3,24 +3,21 @@
  */
 package org.ligoj.app.http.security;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
+import cn.apiclub.captcha.Captcha;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.DelegatingServletOutputStream;
-
-import cn.apiclub.captcha.Captcha;
 import org.springframework.mock.web.MockFilterConfig;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Test class of {@link CaptchaFilter}
@@ -42,7 +39,7 @@ class CaptchaFilterTest {
 		Mockito.when(response.getOutputStream()).thenReturn(out);
 		new CaptchaFilter().doFilter(request, response, null);
 		Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", new String(baos.toByteArray(), StandardCharsets.UTF_8));
+		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", baos.toString(StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -56,7 +53,7 @@ class CaptchaFilterTest {
 		Mockito.when(request.getSession(false)).thenReturn(session);
 		new CaptchaFilter().doFilter(request, response, null);
 		Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", new String(baos.toByteArray(), StandardCharsets.UTF_8));
+		Assertions.assertEquals("{\"errors\":{\"session\":\"null\"}}", baos.toString(StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -73,7 +70,7 @@ class CaptchaFilterTest {
 		Mockito.when(session.getAttribute(Captcha.NAME)).thenReturn(captcha);
 		new CaptchaFilter().doFilter(request, response, null);
 		Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		Assertions.assertEquals("{\"errors\":{\"captcha\":\"invalid\"}}", new String(baos.toByteArray(), StandardCharsets.UTF_8));
+		Assertions.assertEquals("{\"errors\":{\"captcha\":\"invalid\"}}", baos.toString(StandardCharsets.UTF_8));
 	}
 
 	@Test
