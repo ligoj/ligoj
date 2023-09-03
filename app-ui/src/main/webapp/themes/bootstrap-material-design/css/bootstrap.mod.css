@@ -355,6 +355,8 @@ table td>a, table td>.btn-group, table td>.btn, table td>.dropdown-toggle, table
 }
 table td>a:not(:first-child), table td>.btn-group:not(:first-child), table td>.btn:not(:first-child), table td>.dropdown-toggle:not(:first-child), table td>.btn-link:not(:first-child) {
 	padding-left: 4px;
+	padding-top: 0;
+    padding-bottom: 0;
 }
 body {
 	padding-top: 70px;
