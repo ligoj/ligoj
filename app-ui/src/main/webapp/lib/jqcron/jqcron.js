@@ -49,7 +49,7 @@ define(['jquery'], function($) {
 			if($.isPlainObject(src[i])) {
 				dst[i] = extend(dst[i] && $.isPlainObject(dst[i]) ? dst[i] : {}, src[i]);
 			}
-			else if($.isArray(src[i])) {
+			else if(Array.isArray(src[i])) {
 				dst[i] = src[i].slice(0);
 			}
 			else if(src[i] !== undefined) {
@@ -696,7 +696,7 @@ define(['jquery'], function($) {
 		// set the selected value(s) of the list
 		this.setValue = function(keys){
 			var i, newKeys = [], saved = _value.join(' ');
-			if(!$.isArray(keys)) keys = [keys];
+			if(!Array.isArray(keys)) keys = [keys];
 			_$list.find('li').removeClass('selected');
 			keys = array_unique(keys);
 			keys.sort(function(a, b){
