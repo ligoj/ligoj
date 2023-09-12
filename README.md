@@ -206,8 +206,7 @@ curl 'http://localhost:8080/ligoj/rest?_wadl' -H '**cookies, jwt,...***'
 Sample result
 
 ```xml
-<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-    <grammars></grammars>
+<application xmlns="http://wadl.dev.java.net/2009/02">
     <resources base="http://localhost:8081/ligoj-api/rest/">
         <resource path="/security">
             <resource path="/login">
