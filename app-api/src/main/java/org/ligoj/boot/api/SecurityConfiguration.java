@@ -75,7 +75,7 @@ public class SecurityConfiguration {
 								.anonymous()
 
 								.requestMatchers(
-										AntPathRequestMatcher.antMatcher("/manage/**")).hasRole("ADMIN")
+										AntPathRequestMatcher.antMatcher("/manage/**")).hasAuthority("ADMIN")
 
 								// Everything else is authenticated
 								.anyRequest().fullyAuthenticated())
