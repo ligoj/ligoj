@@ -62,8 +62,7 @@ curl 'http://localhost:8081/ligoj-api/rest?_wadl' -H 'SM_UniversalID: ligoj-admi
 Sample result
 
 ```xml
-<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-    <grammars></grammars>
+<application xmlns="http://wadl.dev.java.net/2009/02">
     <resources base="http://localhost:8081/ligoj-api/rest/">
         <resource path="/security">
             <resource path="/login">
@@ -421,3 +420,45 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 | Oracle  | 17      | OK     |       |
 | OpenJDK | 17      | OK     |       |
 | OpenJDK | 18      | OK     |       |
+
+# Management endpoints
+
+Following commands are only available in development mode, with exposed API:
+
+```bash
+curl -H "SM_UniversalID:ligoj-admin" http://localhost:8081/ligoj-api/manage/info
+```
+
+```json
+{
+  "app": {
+    "name": "Ligoj - API",
+    "description": "Ligoj API container",
+    "version": "3.3.1-SNAPSHOT",
+    "groupId": "org.ligoj.app",
+    "artifactId": "app-api"
+  },
+  "java": {
+    "version": "17.0.3",
+    "vendor": {
+      "name": "Eclipse Adoptium",
+      "version": "Temurin-17.0.3+7"
+    },
+    "runtime": {
+      "name": "OpenJDK Runtime Environment",
+      "version": "17.0.3+7"
+    },
+    "jvm": {
+      "name": "OpenJDK 64-Bit Server VM",
+      "vendor": "Eclipse Adoptium",
+      "version": "17.0.3+7"
+    }
+  },
+  "os": {
+    "name": "Mac OS X",
+    "version": "13.5.2",
+    "arch": "aarch64"
+  }
+}
+```
+
