@@ -74,6 +74,9 @@ public class SecurityConfiguration {
 										AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**"))
 								.anonymous()
 
+								.requestMatchers(
+										AntPathRequestMatcher.antMatcher("/manage/**")).hasRole("ADMIN")
+
 								// Everything else is authenticated
 								.anyRequest().fullyAuthenticated())
 
