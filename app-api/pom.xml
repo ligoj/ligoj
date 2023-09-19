@@ -23,6 +23,8 @@
         <api.version>4.0.5</api.version>
         <swagger-ui.version>5.3.1</swagger-ui.version>
         <resource.delimiter>@</resource.delimiter>
+        <junit.platform.version>1.7.2</junit.platform.version>
+        <junit.jupiter.version>5.7.2</junit.jupiter.version>
     </properties>
 
     <dependencyManagement>
