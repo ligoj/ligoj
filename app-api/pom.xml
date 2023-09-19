@@ -25,6 +25,8 @@
         <resource.delimiter>@</resource.delimiter>
         <junit.platform.version>1.7.2</junit.platform.version>
         <junit.jupiter.version>5.7.2</junit.jupiter.version>
+        <plugin.surefire>3.0.0-M8</plugin.surefire>             <!-- http://maven.apache.org/surefire/summary.html -->
+        <plugin.surefire.report>3.0.0-M8</plugin.surefire.report><!--http://maven.apache.org/surefire/maven-surefire-report-plugin/summary.html -->
     </properties>
 
     <dependencyManagement>
