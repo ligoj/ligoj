@@ -37,7 +37,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 /**
  * Security configuration.
  */
-@Configuration
+@Configuration(proxyBeanMethods=false)
 @EnableWebSecurity
 @Profile("prod")
 @EnableMethodSecurity(jsr250Enabled = true, securedEnabled = true)
