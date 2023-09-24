@@ -47,7 +47,7 @@ import java.util.Set;
 /**
  * Spring Boot security configuration.
  */
-@Configuration(proxyBeanMethods=false)
+@Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(jsr250Enabled = true, securedEnabled = true)
 @Profile("prod")
