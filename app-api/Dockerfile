@@ -1,5 +1,5 @@
 ARG BUILDPLATFORM
-FROM --platform=${BUILDPLATFORM} maven:3.9.3-eclipse-temurin-17 as builder
+FROM --platform=${BUILDPLATFORM} maven:3.9.4-amazoncorretto-21-debian-bookworm as builder
 WORKDIR /build/
 ADD . .
 COPY Dockerfile ./*settings.xml /root/.m2/
@@ -8,7 +8,7 @@ RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=tr
     mvn clean package -B
 
 ARG TARGETPLATFORM
-FROM --platform=${TARGETPLATFORM} openjdk:17-jdk
+FROM --platform=${TARGETPLATFORM} openjdk:21-jdk
 LABEL name="Ligoj API server" \
       maintainer="Kloudy <fdaugan@kloudy.io>" \
       vendor="Kloudy" \

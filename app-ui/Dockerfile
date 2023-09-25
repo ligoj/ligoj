@@ -11,7 +11,7 @@ RUN touch ~/.bash_profile && \
     chmod +x src/main/build/minify.sh && src/main/build/minify.sh
 
 ARG BUILDPLATFORM
-FROM --platform=${BUILDPLATFORM} maven:3.9.3-eclipse-temurin-17 as builder
+FROM --platform=${BUILDPLATFORM} maven:3.9.4-amazoncorretto-21-debian-bookworm as builder
 WORKDIR /build/
 ADD . .
 COPY Dockerfile ./*settings.xml /root/.m2/
@@ -21,7 +21,7 @@ RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=tr
     mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon
 
 ARG TARGETPLATFORM
-FROM --platform=${TARGETPLATFORM} openjdk:17-jdk
+FROM --platform=${TARGETPLATFORM} openjdk:21-jdk
 LABEL name="Ligoj UI server" \
       maintainer="Kloudy <fdaugan@kloudy.io>" \
       vendor="Kloudy" \
