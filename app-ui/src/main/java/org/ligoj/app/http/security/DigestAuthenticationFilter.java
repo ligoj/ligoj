@@ -13,8 +13,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -53,17 +55,12 @@ public class DigestAuthenticationFilter extends AbstractAuthenticationProcessing
 
 		if (token != null) {
 			// Token is the last part of URL
-
 			// First get the cookie
 			final var clientBuilder = HttpClientBuilder.create();
 			clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).build());
-
 			// Do the POST
 			try (var httpClient = clientBuilder.build()) {
-				final var httpPost = new HttpPost(getSsoPostUrl());
-				httpPost.setEntity(new StringEntity(token, StandardCharsets.UTF_8.name()));
-				httpPost.setHeader("Content-Type", "application/json");
-				final var httpResponse = httpClient.execute(httpPost);
+				final var httpResponse = doLogin(httpClient, token);
 				if (HttpStatus.SC_OK == httpResponse.getStatusLine().getStatusCode()) {
 					return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(EntityUtils.toString(httpResponse.getEntity()), "N/A", new ArrayList<>()));
 				}
@@ -75,4 +72,18 @@ public class DigestAuthenticationFilter extends AbstractAuthenticationProcessing
 		throw new BadCredentialsException("Invalid user or password");
 	}
 
+	/**
+	 * Perform the login
+	 *
+	 * @param httpClient The client
+	 * @param token      the SSO token
+	 * @return The {@link CloseableHttpResponse} response.
+	 * @throws IOException When execution failed
+	 */
+	protected CloseableHttpResponse doLogin(final CloseableHttpClient httpClient, final String token) throws IOException {
+		final var httpPost = new HttpPost(getSsoPostUrl());
+		httpPost.setEntity(new StringEntity(token, StandardCharsets.UTF_8));
+		httpPost.setHeader("Content-Type", "application/json");
+		return httpClient.execute(httpPost);
+	}
 }

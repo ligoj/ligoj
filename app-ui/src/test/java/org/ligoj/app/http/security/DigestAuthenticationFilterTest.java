@@ -5,14 +5,14 @@ package org.ligoj.app.http.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.exceptions.base.MockitoException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
 import java.io.IOException;
@@ -33,15 +33,25 @@ class DigestAuthenticationFilterTest extends AbstractServerTest {
 
 	@Test
 	void authenticateIOE2() {
+		final var ioe = new IOException() {
+			@Override
+			public java.lang.String toString() {
+				throw new RuntimeException();
+			}
+		};
+
+		filter = new DigestAuthenticationFilter() {
+			@Override
+			protected CloseableHttpResponse doLogin(final CloseableHttpClient httpClient, final String token) throws IOException {
+				throw ioe;
+			}
+		};
 		filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
 		filter.afterPropertiesSet();
 		final var authenticationManager = Mockito.mock(AuthenticationManager.class);
 		filter.setAuthenticationManager(authenticationManager);
-		final var ioe = Mockito.mock(IOException.class);
-		Mockito.doThrow(ioe).when(authenticationManager).authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class));
-		Mockito.doThrow(new IOException()).when(ioe).toString();
 		final var req = newRequest("token");
-		Assertions.assertThrows(MockitoException.class, () -> filter.attemptAuthentication(req, null));
+		Assertions.assertThrows(RuntimeException.class, () -> filter.attemptAuthentication(req, null));
 	}
 
 	@Test

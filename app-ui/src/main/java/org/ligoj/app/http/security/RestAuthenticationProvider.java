@@ -10,8 +10,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.ligoj.bootstrap.http.security.CookieUsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -42,14 +44,10 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 		// First get the cookie
 		final var clientBuilder = HttpClientBuilder.create();
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
-		final var httpPost = new HttpPost(getSsoPostUrl());
 
 		// Do the POST
 		try (var httpClient = clientBuilder.build()) {
-			final var content = String.format(getSsoPostContent(), username, credential.replace("\\", "\\\\").replace("\"", "\\\""));
-			httpPost.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
-			httpPost.setHeader("Content-Type", "application/json");
-			final var httpResponse = httpClient.execute(httpPost);
+			final var httpResponse = doLogin(httpClient, username, credential);
 			if (HttpStatus.SC_NO_CONTENT == httpResponse.getStatusLine().getStatusCode()) {
 				// Succeed authentication, save the cookies data inside the authentication
 				return newAuthentication(username, credential, authorities, httpResponse);
@@ -81,5 +79,22 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 		// Return the authentication token
 		return new CookieUsernamePasswordAuthenticationToken(realUserName, credentials, authorities, cookies);
 
+	}
+
+	/**
+	 * Perform the login
+	 *
+	 * @param httpClient The client
+	 * @param username   the basic username.
+	 * @param credential the basic password.
+	 * @return The {@link CloseableHttpResponse} response.
+	 * @throws IOException When execution failed
+	 */
+	protected CloseableHttpResponse doLogin(final CloseableHttpClient httpClient, final String username, final String credential) throws IOException {
+		final var httpPost = new HttpPost(getSsoPostUrl());
+		final var content = String.format(getSsoPostContent(), username, credential.replace("\\", "\\\\").replace("\"", "\\\""));
+		httpPost.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
+		httpPost.setHeader("Content-Type", "application/json");
+		return httpClient.execute(httpPost);
 	}
 }

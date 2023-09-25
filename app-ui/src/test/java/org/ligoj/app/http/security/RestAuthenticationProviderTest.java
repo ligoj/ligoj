@@ -4,11 +4,12 @@
 package org.ligoj.app.http.security;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.exceptions.base.MockitoException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -71,13 +72,23 @@ class RestAuthenticationProviderTest extends AbstractServerTest {
 
 	@Test
 	void authenticateOther() {
-		final var filter = new RestAuthenticationProvider();
+		final var ioe = new IOException() {
+			@Override
+			public java.lang.String toString() {
+				throw new RuntimeException();
+			}
+		};
+
+		final var filter = new RestAuthenticationProvider() {
+			@Override
+			protected CloseableHttpResponse doLogin(final CloseableHttpClient httpClient, final String username, final String credential) throws IOException {
+				throw ioe;
+			}
+		};
+
 		filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
 		@SuppressWarnings("unchecked") final Collection<? extends GrantedAuthority> authorities = Mockito.mock(Collection.class);
-		final var ioe = Mockito.mock(RuntimeException.class);
-		Mockito.doThrow(new IOException()).when(ioe).toString();
-		Mockito.doThrow(ioe).when(authorities).iterator();
-		Assertions.assertThrows(MockitoException.class, () -> filter.authenticate("", "", authorities));
+		Assertions.assertThrows(RuntimeException.class, () -> filter.authenticate("", "", authorities));
 	}
 
 	@Test
