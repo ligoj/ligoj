@@ -3,18 +3,6 @@
  */
 package org.ligoj.app.resource.plugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-
-import org.springframework.transaction.annotation.Transactional;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.util.thread.ThreadClassLoaderScope;
 import org.junit.jupiter.api.AfterEach;
@@ -42,6 +30,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Test class of {@link LigojPluginListener}
@@ -76,8 +74,8 @@ class LigojPluginListenerTest extends AbstractServerTest {
 
 	@BeforeEach
 	void prepareData() throws IOException {
-		persistEntities("csv", new Class[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class,
-				Parameter.class }, StandardCharsets.UTF_8.name());
+		persistEntities("csv", new Class<?>[] { SystemConfiguration.class, Node.class, Project.class, Subscription.class,
+				Parameter.class }, StandardCharsets.UTF_8);
 		FileUtils.deleteQuietly(TEMP_FILE);
 	}
 
@@ -160,7 +158,7 @@ class LigojPluginListenerTest extends AbstractServerTest {
 		final var service1 = new SampleService() {
 			@Override
 			public List<Class<?>> getInstalledEntities() {
-				return Arrays.asList(SystemBench.class); // "Node" class is not included
+				return List.of(SystemBench.class); // "Node" class is not included
 			}
 		};
 		em.createQuery("DELETE Subscription").executeUpdate();
@@ -177,7 +175,7 @@ class LigojPluginListenerTest extends AbstractServerTest {
 		final var service1 = new SampleService() {
 			@Override
 			public List<Class<?>> getInstalledEntities() {
-				return Arrays.asList(Node.class); // "Node" class is included
+				return List.of(Node.class); // "Node" class is included
 			}
 		};
 		final var entity = new SystemPlugin();
@@ -196,15 +194,13 @@ class LigojPluginListenerTest extends AbstractServerTest {
 	void determinePluginTypeError() {
 		final var service1 = Mockito.mock(ServicePlugin.class);
 		Mockito.when(service1.getKey()).thenReturn("service:sample:tool");
-		Assertions.assertThrows(TechnicalException.class, () -> {
-			resource.determinePluginType(service1);
-		});
+		Assertions.assertThrows(TechnicalException.class, () -> resource.determinePluginType(service1));
 	}
 
 	@Test
 	void getPluginClassLoader() {
 		final var pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
-		try (ThreadClassLoaderScope scope = new ThreadClassLoaderScope(
+		try (var ignored = new ThreadClassLoaderScope(
 				new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(resource.getPluginClassLoader());
 		}
@@ -243,7 +239,7 @@ class LigojPluginListenerTest extends AbstractServerTest {
 		subscription.setId(99);
 		final var fragments = new String[] { "sub-dir" };
 		final var file = newPluginResourceInstall().toFile(subscription, fragments);
-		Assertions.assertNotNull(USER_HOME_DIRECTORY + "/service-s1/t1/99/sub-dir", file.toString());
+		Assertions.assertEquals(USER_HOME_DIRECTORY + "/service-s1/t1/99/sub-dir", file.toString());
 	}
 
 	@Test
