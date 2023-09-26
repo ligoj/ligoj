@@ -263,6 +263,9 @@
     <profiles>
         <profile>
             <id>db-postgresql</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <dependencies>
                 <dependency>
                     <groupId>org.postgresql</groupId>
@@ -273,6 +276,9 @@
         </profile>
         <profile>
             <id>db-mysql</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <dependencies>
                 <dependency>
                     <groupId>com.mysql</groupId>
@@ -284,6 +290,9 @@
         </profile>
         <profile>
             <id>db-mariadb</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <dependencies>
                 <dependency>
                     <groupId>org.mariadb.jdbc</groupId>
