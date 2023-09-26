@@ -75,7 +75,7 @@ The same applies to [app-api](../app-api/Dockerfile)
 docker run --rm -it \
   --name ligoj-ui \
   --network="host" \
-  -e CUSTOM_OPTS='-Dsecurity=Trusted -Dlog4j2.level=info' \
+  -e CUSTOM_OPTS='-Dsecurity=Trusted -Dlog.level=info' \
   -e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
   -e SERVER_PORT=8089 \
   ligoj/ligoj-ui:3.3.0
@@ -144,7 +144,7 @@ Spring-Boot properties, injected in CUSTOM_OPTS
 | sso.content                 | `{"name":"%s","password":"%s"}`            | SSO payload template.                                                                                                                             |
 | app-env                     | `auto`                                     | Suffix for index and login HTML files, maybe `-prod`, `auto` or empty. When `auto`, the suffix is guessed from the way the application is started |
 | log.http                    | `info`                                     | When `debug`, all HTTP queries are logged. Increase log files.                                                                                    |
-| log4j2.level                | `info`                                     | Configure log verbosity of all internal components: Spring and Jetty                                                                              |
+| log.level                   | `info`                                     | Configure log verbosity of all internal components: Spring and Jetty                                                                              |
 
 ## Compatibilities
 

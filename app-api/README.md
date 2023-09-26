@@ -23,31 +23,31 @@ Sample result
 
 ```json
 {
-    "openapi": "3.0.1",
-    "servers": [
-        {
-            "url": "http://localhost:8081/ligoj-api/rest"
-        }
-    ],
-    "paths": {
-        "/service/id/company": {
-            "get": {
-                "operationId": "findAll_20",
-                "responses": {
-                    "default": {
-                        "description": "default response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/TableItemContainerCountVo"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+  "openapi": "3.0.1",
+  "servers": [
+    {
+      "url": "http://localhost:8081/ligoj-api/rest"
     }
+  ],
+  "paths": {
+    "/service/id/company": {
+      "get": {
+        "operationId": "findAll_20",
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableItemContainerCountVo"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -62,16 +62,17 @@ curl 'http://localhost:8081/ligoj-api/rest?_wadl' -H 'SM_UniversalID: ligoj-admi
 Sample result
 
 ```xml
+
 <application xmlns="http://wadl.dev.java.net/2009/02">
     <resources base="http://localhost:8081/ligoj-api/rest/">
         <resource path="/security">
             <resource path="/login">
                 <method name="POST">
                     <request>
-                        <representation mediaType="application/json" />
+                        <representation mediaType="application/json"/>
                     </request>
                     <response>
-                        <representation mediaType="application/json" />
+                        <representation mediaType="application/json"/>
                     </response>
                 </method>
             </resource>
@@ -293,107 +294,55 @@ Java properties (injected in CUSTOM_OPTS with -Dxxx=yyyy):
 | user.timezone | `UTC`         |                                                                |
 | log.sql       | `info`        | When `debug`, all SQL queries are logged. Increase log files.  |
 | log.http      | `info`        | When `debug`, all HTTP queries are logged. Increase log files. |
+| log.hazelcast | `warn`        |                                                                |
+| log.quartz    | `warn`        |                                                                |
+| log.level     | `info`        | When `debug`, all HTTP queries are logged. Increase log files. |
 
 Spring-Boot properties (can be injected in `CUSTOM_OPTS`) and can be dynamically modified from the administration
 console:
-q
-| Name | Default value | Note |
-|-------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| app.crypto.file | | Secret file location |
-|
-cache.location | `classpath:META-INF/hazelcast-local.xml`                                                                                                                     |
-Custom Hazelcast configuration file location |                                                                    
-|
-health.node | `0 0 0/1 1/1 * ?`                                                                                                                                            |
-CRON expression to refresh the health of the nodes |
-|
-health.subscription | `0 0 2 1/1 * ?`                                                                                                                                              |
-CRON expression to refresh the health of the subscriptions |
-|
-jpa.hbm2ddl | `update`                                                                                                                                                     |
-update, none, validate. With "update", the server takes up to 30s to start |
-|
-jdbc.vendor | `mysql`                                                                                                                                                      |
-Database
-type: `mysql`, `postgresql`, `mariadb`                                                                                                                                                                                   |
-|
-jdbc.port | `3306`                                                                                                                                                       | |
-|
-jdbc.database | `ligoj`                                                                                                                                                      | |
-|
-jdbc.username | `ligoj`                                                                                                                                                      | |
-|
-jdbc.password | `ligoj`                                                                                                                                                      | |
-|
-jdbc.host | `localhost`                                                                                                                                                  | |
-|
-jpa.dialect | `org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect`                                                                                                       |
-Java class name of the dialect: org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect |
-|
-jdbc.driverClassName | `com.mysql.cj.jdbc.Driver`                                                                                                                                   |
-Java class name of the
-driver: `org.postgresql.Driver`                                                                                                                                                                            |
-|
-jdbc.urlparam | `?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC` |
-JDBC URL parameters for the connection. |
-|
-jdbc.url | `jdbc:${jdbc.vendor}://${jdbc.host}:${jdbc.port}/${jdbc.database}${jdbc.urlparam:}`                                                                          | |
-|
-jdbc.validationQuery | `select 1;`                                                                                                                                                  | |
-|
-jdbc.maxIdleTime | `180000`                                                                                                                                                     | |
-|
-jdbc.maxPoolSize | `150`                                                                                                                                                        | |
-|
-ligoj.plugin.enabled | `true`                                                                                                                                                       |
-When false, plugins are not loaded and their state is not updated |
-|
-ligoj.plugin.update | `true`                                                                                                                                                       |
-When true, on startup, the plugin are updated to the latest available version |
-|
-ligoj.plugin.repository | `central`                                                                                                                                                    |
-central,nexus. The default repository used to perform the plugin update/install |
-|
-ligoj.plugin.ignore | `plugin-password-management`                                                                                                                                 |
-Filtered (deprecated, fixed version, ...) plugins for install or update from the repositories |
-| ligoj.plugin.install | | Comma separated plugins to install on startup. Update are performed according to "
-ligoj.plugin.update" option |
-|
-log4j2.level | `info`                                                                                                                                                       |
-Configure log verbosity of all internal components: Spring, Jetty, Hibernate,... |
-|
-management.context-path | `/manage`                                                                                                                                                    | |
-|
-management.security.roles | `USER`                                                                                                                                                       |
-Default RBAC role assigned to new user. |
-|
-server.port | `${SERVER_PORT}`                                                                                                                                             | |
-|
-server.address | `${SERVER_HOST}`                                                                                                                                             | |
-|
-server.servlet.context-path | `/${CONTEXT}`                                                                                                                                                | |
-| cache.${cache_name}.ttl | | For each cache, built-in default TTL can be adjusted. The identifier
-replacing `${cache_name}` can be listed from the administration page |
-|
-ligoj.plugin.install | ``                                                                                                                                                           | List plugin identifiers to install: `plugin1,plugin2,...`. These plugins are automatically installed at boot time. |
-| ligoj.plugin.update | `false`                                                                                                                                                      | When `true`, the plugins are installed automatically at boot time. |
-| ligoj.plugin.repository | `central`                                                                                                                                                    | Repository identifier used to query plugin install or update. |                                                                            
-| feature:iam:node:primary | `empty`                                                                                                                                                      | Ligoj `plugin-id` node's identifier used as primary IAM provider. See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node) for more information. `empty` provider is a read-only provider accepting all authentications. |
-| feature:iam:node:secondary | `secondary`                                                                                                                                                  | Ligoj `plugin-id` node's identifier used as secondary IAM provider. See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node) for more information. `empty` provider is a read-only provider accepting all authentications. |
-| global.tools.external | ``                                                                                                                                                           |
-Ligoj `plugin-id` node's identifiers globaly available for external users. |
-|
-global.tools.internal | ``                                                                                                                                                           |
-Ligoj `plugin-id` node's globaly available for internal users. |
-| plugins.repository-manager.${repository}.search.url | (depends on
-repository)                                                                                                                                      |
-URL template to discover plugins. |
-| plugins.repository-manager.${repository}.artifact.url | (depends on
-repository)                                                                                                                                      |
-URL template to download plugins. |
-|
-plugins.repository-manager.${repository}.groupId | `org.ligoj.plugin`                                                                                                                                           |
-Maven `groupId` to filter the Ligoj plugins |
+
+| Name                                                  | Default value                                                                                                                                                                 | Note                                                                                                                                                                                                                              |
+|-------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| app.crypto.file                                       |                                                                                                                                                                               | Secret file location                                                                                                                                                                                                              |
+| cache.location                                        | `classpath:META-INF/hazelcast-local.xml`                                                                                                                                      | Custom Hazelcast configuration file location                                                                                                                                                                                      |                                                                    
+| health.node                                           | `0 0 0/1 1/1 * ?`                                                                                                                                                             | CRON expression to refresh the health of the nodes                                                                                                                                                                                |
+| health.subscription                                   | `0 0 2 1/1 * ?`                                                                                                                                                               | CRON expression to refresh the health of the subscriptions                                                                                                                                                                        |
+| jpa.hbm2ddl                                           | `update`                                                                                                                                                                      | update, none, validate. With "update", the server takes up to 30s to start                                                                                                                                                        |
+| jdbc.vendor                                           | `mysql`                                                                                                                                                                       | Database type: `mysql`, `postgresql`, `mariadb`                                                                                                                                                                                   |
+| jdbc.port                                             | `3306`                                                                                                                                                                        |                                                                                                                                                                                                                                   |
+| jdbc.database                                         | `ligoj`                                                                                                                                                                       |                                                                                                                                                                                                                                   |
+| jdbc.username                                         | `ligoj`                                                                                                                                                                       |                                                                                                                                                                                                                                   |
+| jdbc.password                                         | `ligoj`                                                                                                                                                                       |                                                                                                                                                                                                                                   |
+| jdbc.host                                             | `localhost`                                                                                                                                                                   |                                                                                                                                                                                                                                   |
+| jpa.dialect                                           | `org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect`                                                                                                                        | Java class name of the dialect: org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect                                                                                                                                          |
+| jdbc.driverClassName                                  | `com.mysql.cj.jdbc.Driver`                                                                                                                                                    | Java class name of the driver: `org.postgresql.Driver`                                                                                                                                                                            |
+| jdbc.urlparam                                         | [JDBC URL Params](?useColumnNamesInFindColumn=true&useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&maxReconnects=10&useLegacyDatetimeCode=false&serverTimezone=UTC) | JDBC URL parameters for the connection.                                                                                                                                                                                           |
+| jdbc.url                                              | [JDBC URL](jdbc:${jdbc.vendor}://${jdbc.host}:${jdbc.port}/${jdbc.database}${jdbc.urlparam:})                                                                                 |                                                                                                                                                                                                                                   |
+| jdbc.validationQuery                                  | `select 1;`                                                                                                                                                                   |                                                                                                                                                                                                                                   |
+| jdbc.maxIdleTime                                      | `180000`                                                                                                                                                                      |                                                                                                                                                                                                                                   |
+| jdbc.maxPoolSize                                      | `150`                                                                                                                                                                         |                                                                                                                                                                                                                                   |
+| ligoj.plugin.enabled                                  | `true`                                                                                                                                                                        | When false, plugins are not loaded and their state is not updated                                                                                                                                                                 |
+| ligoj.plugin.update                                   | `true`                                                                                                                                                                        | When true, on startup, the plugin are updated to the latest available version                                                                                                                                                     |
+| ligoj.plugin.repository                               | `central`                                                                                                                                                                     | central,nexus. The default repository used to perform the plugin update/install                                                                                                                                                   |
+| ligoj.plugin.ignore                                   | `plugin-password-management`                                                                                                                                                  | Filtered (deprecated, fixed version, ...) plugins for install or update from the repositories                                                                                                                                     |
+| ligoj.plugin.install                                  |                                                                                                                                                                               | Comma separated plugins to install on startup. Update are performed according to "ligoj.plugin.update" option                                                                                                                     |
+| log.level                                             | `info`                                                                                                                                                                        | Configure log verbosity of all internal components: Spring, Jetty, Hibernate,...                                                                                                                                                  |
+| management.context-path                               | `/manage`                                                                                                                                                                     |                                                                                                                                                                                                                                   |
+| management.security.roles                             | `USER`                                                                                                                                                                        | Default RBAC role assigned to new user.                                                                                                                                                                                           |
+| server.port                                           | `${SERVER_PORT}`                                                                                                                                                              |                                                                                                                                                                                                                                   |
+| server.address                                        | `${SERVER_HOST}`                                                                                                                                                              |                                                                                                                                                                                                                                   |
+| server.servlet.context-path                           | `/${CONTEXT}`                                                                                                                                                                 |                                                                                                                                                                                                                                   |
+| cache.${cache_name}.ttl                               |                                                                                                                                                                               | For each cache, built-in default TTL can be adjusted. The identifier replacing `${cache_name}` can be listed from the administration page                                                                                         |
+| ligoj.plugin.install                                  | ``                                                                                                                                                                            | List plugin identifiers to install: `plugin1,plugin2,...`. These plugins are automatically installed at boot time.                                                                                                                |
+| ligoj.plugin.update                                   | `false`                                                                                                                                                                       | When `true`, the plugins are installed automatically at boot time.                                                                                                                                                                |
+| ligoj.plugin.repository                               | `central`                                                                                                                                                                     | Repository identifier used to query plugin install or update.                                                                                                                                                                     |                                                                            
+| feature:iam:node:primary                              | `empty`                                                                                                                                                                       | Ligoj `plugin-id` node's identifier used as primary IAM provider. See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node) for more information. `empty` provider is a read-only provider accepting all authentications.   |
+| feature:iam:node:secondary                            | `secondary`                                                                                                                                                                   | Ligoj `plugin-id` node's identifier used as secondary IAM provider. See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node) for more information. `empty` provider is a read-only provider accepting all authentications. |
+| global.tools.external                                 | ``                                                                                                                                                                            | Ligoj `plugin-id` node's identifiers globally available for external users.                                                                                                                                                       |
+| global.tools.internal                                 | ``                                                                                                                                                                            | Ligoj `plugin-id` node's globally available for internal users.                                                                                                                                                                   |
+| plugins.repository-manager.${repository}.search.url   | (depends on repository)                                                                                                                                                       | URL template to discover plugins.                                                                                                                                                                                                 |
+| plugins.repository-manager.${repository}.artifact.url | (depends on repository)                                                                                                                                                       | URL template to download plugins.                                                                                                                                                                                                 |
+| plugins.repository-manager.${repository}.groupId      | `org.ligoj.plugin`                                                                                                                                                            | Maven `groupId` to filter the Ligoj plugins                                                                                                                                                                                       |
 
 ## Compatibilities
 
@@ -415,11 +364,12 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 
 ### JSE
 
-| Vendor  | Release | Status | Notes |
-|---------|---------|--------|-------|
-| Oracle  | 17      | OK     |       |
-| OpenJDK | 17      | OK     |       |
-| OpenJDK | 18      | OK     |       |
+| Vendor  | Release | Status | Notes       |
+|---------|---------|--------|-------------|
+| Oracle  | 17      | OK     | 3.x version |
+| OpenJDK | 17      | OK     | 3.x version |
+| OpenJDK | 18      | OK     | 3.x version |
+| OpenJDK | 21      | OK     | 4.x version |
 
 # Management endpoints
 
