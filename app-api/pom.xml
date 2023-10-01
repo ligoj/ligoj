@@ -20,7 +20,7 @@
         <url>https://github.com/ligoj/ligoj</url>
     </scm>
     <properties>
-        <api.version>4.0.7</api.version>
+        <api.version>4.0.8</api.version>
         <swagger-ui.version>5.7.2</swagger-ui.version>
         <resource.delimiter>@</resource.delimiter>
     </properties>
