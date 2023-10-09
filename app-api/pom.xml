@@ -10,7 +10,7 @@
 
     <groupId>org.ligoj.app</groupId>
     <artifactId>app-api</artifactId>
-    <version>3.3.1-SNAPSHOT</version>
+    <version>3.3.1</version>
     <packaging>war</packaging>
     <name>Ligoj - API</name>
 
@@ -20,7 +20,7 @@
         <url>https://github.com/ligoj/ligoj</url>
     </scm>
     <properties>
-        <api.version>4.0.8</api.version>
+        <api.version>4.1.0-SNAPSHOT</api.version>
         <swagger-ui.version>5.7.2</swagger-ui.version>
         <resource.delimiter>@</resource.delimiter>
     </properties>
