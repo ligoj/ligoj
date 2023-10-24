@@ -3,6 +3,7 @@
  */
 package org.ligoj.app.resource.security;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -31,6 +32,7 @@ public class User {
 	@NotBlank
 	@NotNull
 	@Length(max = 4096)
+	@Column(length = 4096)
 	private String password;
 
 }
