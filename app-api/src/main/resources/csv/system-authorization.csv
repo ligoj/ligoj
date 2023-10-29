@@ -28,3 +28,4 @@ GET;^webjars/.*;API;USER
 ;^id/delegate.*;UI;USER
 ;^id/container/group.*;UI;USER
 ;^id/container/company.*;UI;USER
+;^$;UI;USER

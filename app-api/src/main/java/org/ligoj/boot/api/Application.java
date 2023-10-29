@@ -3,12 +3,11 @@
  */
 package org.ligoj.boot.api;
 
-import java.util.Collections;
-
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.ligoj.bootstrap.resource.system.plugin.WebjarsServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.metrics.web.jetty.JettyMetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapAutoConfiguration;
@@ -26,10 +25,12 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
+import java.util.Collections;
+
 /**
  * Spring boot application entry point.
  */
-@SpringBootApplication(exclude = { LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, DataSourcePoolMetricsAutoConfiguration.class })
+@SpringBootApplication(exclude = {JettyMetricsAutoConfiguration.class, LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, DataSourcePoolMetricsAutoConfiguration.class})
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
 public class Application extends SpringBootServletInitializer {
 
@@ -40,9 +41,8 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Require main either invoked from IDE, either from the CLI
-	 * 
-	 * @param args
-	 *            Application arguments.
+	 *
+	 * @param args Application arguments.
 	 */
 	public static void main(final String[] args) {
 		SpringApplication.run(Application.class, args);
@@ -91,7 +91,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure request context listener.
-	 * 
+	 *
 	 * @return request context listener configuration.
 	 */
 	@Bean
@@ -101,7 +101,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure session manager.
-	 * 
+	 *
 	 * @return Session manager configuration.
 	 */
 	@Bean
