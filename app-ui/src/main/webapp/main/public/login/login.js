@@ -24,11 +24,11 @@ define([
 				},
 				data: data,
 				cache: false,
-				success: function (data) {
+				success: function (result) {
 					current.success();
-					if (data && data.success && data.redirect) {
+					if (result && result.success && result.redirect) {
 						// Success login, use the provided redirection URL
-						window.location.replace('//' + location.host + data.redirect + (current.target || '#/'));
+						window.location.replace('//' + location.host + result.redirect + (current.target || '#/'));
 					} else {
 						window.location.replace('?' + mode);
 					}
@@ -116,7 +116,7 @@ define([
 		refreshCaptcha: function () {
 			return $('#captcha_img').attr('src', 'captcha.png?' + new Date().getTime());
 		},
-		switchMode: function (mode, oldMode) {
+		switchMode: function (oldMode) {
 			$('.card-title').text(messages['title-' + mode]);
 			var message = messages['message-' + mode];
 			if (message) {
@@ -219,7 +219,7 @@ define([
 				var oldMode = mode;
 				mode = 'recovery';
 				window.location = '//' + location.host + location.pathname + '#recovery' + ($('#username').val() ? '=' + $('#username').val() : '');
-				window.location.search || current.switchMode(mode, oldMode);
+				window.location.search || current.switchMode(oldMode);
 			});
 
 			$('#captcha_img').on('load', function () {
@@ -238,7 +238,6 @@ define([
 			});
 
 			// Configure the current mode
-			var oldMode = mode;
 			if (window.location.hash.match(current.resetMatcher)) {
 				current.target = null;
 				mode = 'reset';
@@ -249,7 +248,7 @@ define([
 				current.target = window.location.hash;
 				mode = 'login';
 			}
-			current.switchMode(mode, oldMode);
+			current.switchMode('login');
 		}
 	};
 	current.initialize();

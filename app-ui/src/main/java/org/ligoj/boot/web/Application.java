@@ -30,13 +30,14 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Application entry point.
  */
 @SpringBootApplication
 @ImportResource("classpath:/META-INF/spring/application.xml")
-@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 public class Application extends SpringBootServletInitializer {
 
 	private static final String SERVICE_RECOVERY = "/rest/service/password/recovery/*";
@@ -66,9 +67,8 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Require main either invoked from IDE, either from the CLI
-	 * 
-	 * @param args
-	 *            Application arguments.
+	 *
+	 * @param args Application arguments.
 	 */
 	public static void main(final String[] args) {
 		lastContext = SpringApplication.run(Application.class, args);
@@ -76,72 +76,80 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure management servlet.
-	 * 
+	 *
 	 * @return management servlet configuration.
 	 */
 	@Bean
 	public ServletRegistrationBean<BackendProxyServlet> managementServlet() {
 		// Due to the current limitation of BackendProxyServlet
 		System.setProperty("ligoj.endpoint.manage.url", endpointManagement);
-		return newBackend("managementProxy", "ligoj.endpoint.manage.url", "/manage", "/manage/*");
+		return newBackend("managementProxy", "ligoj.endpoint.manage", "/manage", "/manage/*");
 	}
 
 	/**
 	 * Configure API proxy servlet.
-	 * 
+	 *
 	 * @return API proxy servlet configuration.
 	 */
 	@Bean
 	public ServletRegistrationBean<BackendProxyServlet> apiProxyServlet() {
 		// Due to the current limitation of BackendProxyServlet
 		System.setProperty("ligoj.endpoint.api.url", endpointApi);
-		return newBackend("apiProxy", "ligoj.endpoint.api.url", "/rest", "/rest/*");
+		return newBackend("apiProxy", "ligoj.endpoint.api", "/rest", "/rest/*");
 	}
 
 	/**
 	 * Configure plugin proxy servlet.
-	 * 
+	 *
 	 * @return plugin servlet configuration.
 	 */
 	@Bean
 	public ServletRegistrationBean<BackendProxyServlet> pluginProxyServlet() {
 		// Due to the current limitation of BackendProxyServlet
 		System.setProperty("ligoj.endpoint.plugins.url", endpointPlugin);
-		return newBackend("pluginProxy", "ligoj.endpoint.plugins.url", "/main", "/main/*");
+		return newBackend("pluginProxy", "ligoj.endpoint.plugins", "/main", "/main/*");
 	}
 
 	/**
 	 * Create a new {@link BackendProxyServlet} servlet.
-	 * 
-	 * @param name
-	 *            The servlet name.
-	 * @param proxyToKey
-	 *            The end-point system property.
-	 * @param prefix
-	 *            The servlet prefix.
-	 * @param mapping
-	 *            The servlet mapping URL.
+	 *
+	 * @param name             The servlet name.
+	 * @param configurationKey The end-point system property prefix.
+	 * @param prefix           The servlet prefix.
+	 * @param mapping          The servlet mapping URL.
 	 * @return {@link ServletRegistrationBean} with a new registered {@link BackendProxyServlet}.
 	 */
-	private ServletRegistrationBean<BackendProxyServlet> newBackend(final String name, final String proxyToKey, final String prefix,
+	private ServletRegistrationBean<BackendProxyServlet> newBackend(final String name, final String configurationKey, final String prefix,
 			final String... mapping) {
 		final var initParameters = new HashMap<String, String>();
-		initParameters.put("proxyToKey", proxyToKey);
-		initParameters.put("prefix", prefix);
-		initParameters.put("idleTimeout", "120000");
-		initParameters.put("maxThreads", "50");
-		initParameters.put("timeout", "0");
-		initParameters.put("apiKeyParameter", "api-key");
-		initParameters.put("apiKeyHeader", "x-api-key");
+		configureServletParameter(initParameters, configurationKey, "prefix", prefix);
+		configureServletParameter(initParameters, configurationKey, "url", null);
+		configureServletParameter(initParameters, configurationKey, "proxyTo", System.getProperty(configurationKey + ".url"));
+		configureServletParameter(initParameters, configurationKey, "idleTimeout", "120000");
+		configureServletParameter(initParameters, configurationKey, "maxThreads", "50");
+		configureServletParameter(initParameters, configurationKey, "timeout", "0");
+		configureServletParameter(initParameters, configurationKey, "apiKeyParameter", "api-key");
+		configureServletParameter(initParameters, configurationKey, "apiKeyHeader", "x-api-key");
+		configureServletParameter(initParameters, configurationKey, "apiUserParameter", "api-user");
+		configureServletParameter(initParameters, configurationKey, "apiUserHeader", "x-api-user");
+		configureServletParameter(initParameters, configurationKey, "responseBufferSize", String.valueOf(16 * 1024));
+		configureServletParameter(initParameters, configurationKey, "requestBufferSize", String.valueOf(4 * 1024));
+		configureServletParameter(initParameters, configurationKey, "maxConnections", "512");
+		configureServletParameter(initParameters, configurationKey, "cors-origin", "*");
+		configureServletParameter(initParameters, configurationKey, "cors-vary", "Origin");
 		final var registrationBean = new ServletRegistrationBean<>(new BackendProxyServlet(), mapping);
 		registrationBean.setInitParameters(initParameters);
 		registrationBean.setName(name);
 		return registrationBean;
 	}
 
+	private void configureServletParameter(final Map<String, String> config, final String configurationKey, final String name, final String defaultValue) {
+		config.put(name, System.getProperty(configurationKey + "." + name, defaultValue));
+	}
+
 	/**
 	 * Configure captcha servlet.
-	 * 
+	 *
 	 * @return captcha configuration.
 	 */
 	@Bean
@@ -151,7 +159,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure security filter.
-	 * 
+	 *
 	 * @return security filter configuration.
 	 */
 	@Bean
@@ -167,7 +175,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure charset filter.
-	 * 
+	 *
 	 * @return charset filter configuration.
 	 */
 	@Bean
@@ -183,7 +191,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure html proxy filter.
-	 * 
+	 *
 	 * @return html proxy filter configuration.
 	 */
 	@Bean
@@ -191,14 +199,14 @@ public class Application extends SpringBootServletInitializer {
 		final var proxyFilter = new HtmlProxyFilter();
 		proxyFilter.setSuffix(getEnvironment());
 		final var registrationBean = new FilterRegistrationBean<>(proxyFilter);
-		registrationBean.addUrlPatterns(SecurityConfiguration.INDEX_HTML, "/",  SecurityConfiguration.LOGIN_HTML);
+		registrationBean.addUrlPatterns(SecurityConfiguration.INDEX_HTML, "/", SecurityConfiguration.LOGIN_HTML);
 		registrationBean.setOrder(10);
 		return registrationBean;
 	}
 
 	/**
 	 * Configure cache filter.
-	 * 
+	 *
 	 * @return cache filter configuration.
 	 */
 	@Bean
@@ -211,7 +219,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure CAPTCHA filter.
-	 * 
+	 *
 	 * @return CAPTCHA filter configuration.
 	 */
 	@Bean
@@ -224,7 +232,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Fix the system environment from "auto" to the guess value.
-	 * 
+	 *
 	 * @return The computed web environment.
 	 */
 	protected String getEnvironment() {
@@ -241,7 +249,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure request context listener.
-	 * 
+	 *
 	 * @return request context listener configuration.
 	 */
 	@Bean
@@ -251,7 +259,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure session manager.
-	 * 
+	 *
 	 * @return session manager configuration.
 	 */
 	@Bean
@@ -261,7 +269,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure error mapper.
-	 * 
+	 *
 	 * @return error mapper configuration.
 	 */
 	@Bean

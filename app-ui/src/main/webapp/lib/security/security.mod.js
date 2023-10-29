@@ -50,6 +50,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 						// Parent will be empty too
 						current.pruneHierarchy(parent);
 					} else {
+					debugger;
 						item.remove();
 					}
 				}
