@@ -18,7 +18,7 @@ COPY Dockerfile ./*settings.xml /root/.m2/
 COPY --from=builder_node /build/src/main/webapp src/main/webapp
 RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
     { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
-    mvn package -q -B -Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon
+    mvn clean package -B
 
 ARG TARGETPLATFORM
 FROM --platform=${TARGETPLATFORM} openjdk:21-jdk
