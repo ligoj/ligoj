@@ -103,6 +103,7 @@ Sample `.env` file:
 LIGOJ_HOME=/var/data/ligoj
 PODMAN_USERNS=keep-id
 LIGOJ_BUILD_PLATFORM=linux/arm64
+LIGOJ_TARGET_PLATFORM=linux/arm64
 LIGOJ_REGISTRY=nexus.sample.local/
 LIGOJ_API_PREPARE_BUILD='export HTTP_PROXY=192.168.0.254:8000 && export HTTPS_PROXY=192.168.0.254:8000'
 ```
@@ -139,6 +140,15 @@ PODMAN_USERNS=keep-id" > .env
 ## Use MySQL or PostgreSQL databases
 
 By default, the Docker compose overrides is loaded from `compose.override.yml` and contains MySQL configuration.
+
+For MySQL, the docker-compose command is:
+
+```bash
+export BUILDAH_FORMAT=docker
+podman-compose -p ligoj build
+podman-compose -p ligoj -f compose.yml  -f compose.override.yml up -d
+podman-compose -p ligoj down
+```
 
 For PostgreSQL, the docker-compose command is:
 
