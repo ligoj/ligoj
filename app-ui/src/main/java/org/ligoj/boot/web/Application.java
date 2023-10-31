@@ -13,6 +13,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.boot.web.server.ErrorPageRegistrar;
@@ -37,7 +38,7 @@ import java.util.Map;
  */
 @SpringBootApplication
 @ImportResource("classpath:/META-INF/spring/application.xml")
-@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, WebSocketServletAutoConfiguration.class})
 public class Application extends SpringBootServletInitializer {
 
 	private static final String SERVICE_RECOVERY = "/rest/service/password/recovery/*";

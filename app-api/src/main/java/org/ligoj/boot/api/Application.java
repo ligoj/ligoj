@@ -11,6 +11,7 @@ import org.springframework.boot.actuate.autoconfigure.metrics.web.jetty.JettyMet
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapAutoConfiguration;
+import org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.boot.web.server.ErrorPageRegistrar;
@@ -30,7 +31,8 @@ import java.util.Collections;
 /**
  * Spring boot application entry point.
  */
-@SpringBootApplication(exclude = {JettyMetricsAutoConfiguration.class, LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, DataSourcePoolMetricsAutoConfiguration.class})
+@SpringBootApplication(exclude = {JettyMetricsAutoConfiguration.class, WebSocketServletAutoConfiguration.class,
+		LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, DataSourcePoolMetricsAutoConfiguration.class})
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
 public class Application extends SpringBootServletInitializer {
 
