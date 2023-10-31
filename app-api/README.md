@@ -143,7 +143,7 @@ docker run -d \
 -e MYSQL_DATABASE=ligoj \
 -e MYSQL_USER=ligoj \
 -e MYSQL_PASSWORD=ligoj \
-mysql:5.6
+mysql:8.0.35
 ```
 
 ## Existing MySQL server
@@ -191,7 +191,7 @@ GRANT ALL ON SCHEMA public TO ligoj;
 ```bash
 docker run --rm -it \
   --name ligoj-api \
-  -e CUSTOM_OPTS='-Djpa.hbm2ddl=update -Djdbc.host=ligoj-db' \
+  -e CUSTOM_OPTS='-Djpa.hbm2ddl=update -Djdbc.port=3307 -Djdbc.host=ligoj-db' \
   ligoj/ligoj-api:3.3.0 
 ```
 
@@ -200,7 +200,8 @@ docker run --rm -it \
 ```bash
 docker run --rm -it \
  --name "ligoj-api" \
- -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password="ligoj" -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138' \
+ --network "host" \
+ -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.port=3307 -Djdbc.host=localhost' \
  ligoj/ligoj-api:3.3.0
 ```
 
@@ -213,8 +214,9 @@ More complex run with crypto, port mapping, disabled schema generation and volum
 ```bash
 docker run --rm -it \
  --name "ligoj-api" \
+ --network "host" \
  -e CRYPTO="-Dapp.crypto.file=/home/ligoj/security.key" \
- -e CUSTOM_OPTS="-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=192.168.4.138 \
+ -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=localhost' \
  -v ~/.ligoj:/home/ligoj \
  -p 8680:8081 \
  ligoj/ligoj-api:3.3.0
@@ -262,7 +264,7 @@ You can experience network issue with remote database. To validate the link, try
 ```bash
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:3.3.0 sh -c "apk add mysql-client && mysql -h 192.168.4.138 --user=ligoj --password=ligoj ligoj"
+ ligoj/ligoj-api:3.3.0 sh -c "apk add mysql-client && mysql -h 192.168.1.16 --user=ligoj --password=ligoj ligoj"
 ```
 
 #### PostgreSQL
