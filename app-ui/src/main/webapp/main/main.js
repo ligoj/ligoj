@@ -93,7 +93,7 @@ define(['cascade'], function ($cascade) {
 		 * @return A link with icon depending on the target, title and text.
 		 */
 		getResourceLink: function (target, type) {
-			return `<i class="${current.targetTypeClass[type]} fa-fw" title="<strong>${current.$messages[type]}</strong> ${current.getResourceName(target, type)}" data-toggle="tooltip"></i> ${current['get' + type.capitalize() + 'Link'](target)}`;
+			return '<i class="' + current.targetTypeClass[type] + ' fa-fw" title="<strong>' + current.$messages[type] +'</strong> ' + current.getResourceName(target, type) + '" data-toggle="tooltip"></i> ' + current['get' + type.capitalize() + 'Link'](target);
 		},
 
 		/**
