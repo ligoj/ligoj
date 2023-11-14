@@ -60,6 +60,7 @@ public class SecurityConfiguration {
 						authorize.requestMatchers(
 										AntPathRequestMatcher.antMatcher("/rest"),
 										AntPathRequestMatcher.antMatcher("/rest/api-docs"),
+										AntPathRequestMatcher.antMatcher("/manage/info"),
 										AntPathRequestMatcher.antMatcher("/rest/openapi.json")).authenticated()
 
 								// Unsecured access
