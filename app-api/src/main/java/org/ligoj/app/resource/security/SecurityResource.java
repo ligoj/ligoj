@@ -56,6 +56,7 @@ public class SecurityResource {
 
 		// Delegate the final response to the authentication contributors
 		final var response = Response.noContent();
+		response.header("X-Real-User", authentication.getName());
 		applicationContext.getBeansOfType(IAuthenticationContributor.class).values().forEach(l -> l.accept(response, authentication));
 		return response.build();
 	}

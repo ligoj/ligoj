@@ -70,6 +70,7 @@ class SecurityResourceTest extends AbstractServerTest {
 		// Check the response
 		Assertions.assertNotNull(login);
 		Assertions.assertEquals(204, login.getStatus());
+		Assertions.assertEquals("fdauganA", login.getHeaderString("X-Real-User"));
 
 		// Check the contributor has been involed
 		Mockito.verify(contributor).accept(ArgumentMatchers.any(), ArgumentMatchers.any());
