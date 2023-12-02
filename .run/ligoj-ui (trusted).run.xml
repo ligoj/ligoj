@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ligoj-ui (trusted)" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="21" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
+    <option name="MAIN_CLASS_NAME" value="org.ligoj.boot.web.Application" />
+    <module name="app-ui" />
+    <option name="VM_PARAMETERS" value="-Dsecurity=Trusted" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/app-ui" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
