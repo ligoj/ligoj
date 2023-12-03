@@ -12,7 +12,7 @@ services:
       args:
         BUILDPLATFORM: ${LIGOJ_BUILD_PLATFORM:-linux/amd64}
         TARGETPLATFORM: ${LIGOJ_TARGET_PLATFORM:-linux/amd64}
-        JAVA_VERSION: ${JAVA_VERSION:-21-jdk"}
+        JAVA_VERSION: ${JAVA_VERSION:-21-jdk}
         MAVEN_VERSION: ${MAVEN_VERSION:-3.9.5-amazoncorretto-21-debian-bookworm}
     restart: always
     environment:
@@ -36,8 +36,8 @@ services:
       args:
         BUILDPLATFORM: ${LIGOJ_BUILD_PLATFORM:-linux/amd64}
         TARGETPLATFORM: ${LIGOJ_TARGET_PLATFORM:-linux/amd64}
-        JAVA_VERSION: ${JAVA_VERSION:-21-jdk"}
-        NODE_VERSION: ${NODE_VERSION:-16.20-bookworm-slim"}
+        JAVA_VERSION: ${JAVA_VERSION:-21-jdk}
+        NODE_VERSION: ${NODE_VERSION:-16.20-bookworm-slim}
         MAVEN_VERSION: ${MAVEN_VERSION:-3.9.5-amazoncorretto-21-debian-bookworm}
     restart: always
     environment:
