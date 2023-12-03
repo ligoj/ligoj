@@ -1,4 +1,6 @@
 ARG BUILDPLATFORM
+ARG TARGETPLATFORM
+
 FROM --platform=${BUILDPLATFORM} node:16.20-bookworm-slim as builder_node
 WORKDIR /build/
 ADD src/main/build src/main/build
@@ -10,7 +12,6 @@ RUN touch ~/.bash_profile && \
     mkdir -p src/main/build && mkdir -p src/main/webapp && \
     chmod +x src/main/build/minify.sh && src/main/build/minify.sh
 
-ARG BUILDPLATFORM
 FROM --platform=${BUILDPLATFORM} maven:3.9.4-amazoncorretto-21-debian-bookworm as builder
 WORKDIR /build/
 ADD . .
@@ -20,7 +21,6 @@ RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=tr
     { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn clean package -B
 
-ARG TARGETPLATFORM
 FROM --platform=${TARGETPLATFORM} openjdk:21-jdk
 LABEL name="Ligoj UI server" \
       maintainer="Kloudy <fdaugan@kloudy.io>" \
