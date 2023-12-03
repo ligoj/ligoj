@@ -1,7 +1,7 @@
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 ARG JAVA_VERSION="21-jdk"
-ARG MAVEN_VERSION="3.9.4-amazoncorretto-21-debian-bookworm"
+ARG MAVEN_VERSION="3.9.5-amazoncorretto-21-debian-bookworm"
 
 FROM --platform=${BUILDPLATFORM} maven:${MAVEN_VERSION} as builder
 WORKDIR /build/
@@ -12,11 +12,17 @@ RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=tr
     mvn clean package -B
 
 FROM --platform=${TARGETPLATFORM} openjdk:${JAVA_VERSION}
+ARG VERSION="3.3.0-SNAPSHOT"
+ARG ARTIFACT_ID="app-api"
+ARG SERVER_HOME="/usr/local/ligoj"
+ARG GIT_COMMIT=0
+
 LABEL name="Ligoj API server" \
       maintainer="Kloudy <fdaugan@kloudy.io>" \
       vendor="Kloudy" \
-      version="3.3.0-SNAPSHOT" \
-      release="3.3.0-SNAPSHOT" \
+      version="${VERSION}" \
+      release="${VERSION}" \
+      git.commit="${GIT_COMMIT}" \
       url="https://ligoj.io" \
       summary="The REST API server of Ligoj." \
       description="The REST API server of Ligoj." \
@@ -28,9 +34,6 @@ LABEL name="Ligoj API server" \
       io.openshift.expose-services="8081:8081" \
       io.openshift.tags="Ligoj,API"
 
-# ARGS (build)
-ARG ARTIFACT_ID="app-api"
-ARG SERVER_HOME="/usr/local/ligoj"
 COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
 COPY Dockerfile ./*prepare-run.sh ./
 

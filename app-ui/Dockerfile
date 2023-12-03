@@ -2,7 +2,7 @@ ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 ARG JAVA_VERSION="21-jdk"
 ARG NODE_VERSION="16.20-bookworm-slim"
-ARG MAVEN_VERSION="3.9.4-amazoncorretto-21-debian-bookworm"
+ARG MAVEN_VERSION="3.9.5-amazoncorretto-21-debian-bookworm"
 
 FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION} as builder_node
 WORKDIR /build/
@@ -25,11 +25,18 @@ RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=tr
     mvn clean package -B
 
 FROM --platform=${TARGETPLATFORM} openjdk:${JAVA_VERSION}
+ARG VERSION="3.3.0-SNAPSHOT"
+ARG ARTIFACT_ID="app-ui"
+ARG SERVER_HOME="/usr/local/ligoj"
+ARG GIT_COMMIT=0
+
 LABEL name="Ligoj UI server" \
       maintainer="Kloudy <fdaugan@kloudy.io>" \
       vendor="Kloudy" \
-      version="3.3.0-SNAPSHOT" \
-      release="3.3.0-SNAPSHOT" \
+      version="${VERSION}" \
+      release="${VERSION}" \
+      release="${VERSION}" \
+      git.commit="${GIT_COMMIT}" \
       url="https://ligoj.io" \
       summary="The UI server of Ligoj." \
       description="The UI server of Ligoj." \
@@ -41,9 +48,6 @@ LABEL name="Ligoj UI server" \
       io.openshift.expose-services="8080:8080" \
       io.openshift.tags="Ligoj,UI"
 
-# ARGS (build)
-ARG ARTIFACT_ID="app-ui"
-ARG SERVER_HOME="/usr/local/ligoj"
 COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
 COPY Dockerfile ./*prepare-run.sh ./
 
