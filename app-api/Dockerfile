@@ -35,7 +35,7 @@ LABEL name="Ligoj API server" \
       io.openshift.tags="Ligoj,API"
 
 COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
-COPY Dockerfile ./*prepare-run.sh ./
+COPY Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
 
 # Policy file for JMX
 ADD src/test/resources/ligoj.policy "${SERVER_HOME}/ligoj.policy"
@@ -55,8 +55,11 @@ ENV CONTEXT_URL="/ligoj-api" \
     JAVA_OPTIONS="-Duser.timezone=UTC"
 
 EXPOSE ${SERVER_PORT}
+
+RUN { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to add custom packages before main RUN."; }
+
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
-    { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
+    { [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || echo "No defined prepare cmd instruction, create a prepare-cmd.sh script to prepare http_proxy or other custom configurations."; } && \
     java $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
 	 --add-modules java.se \
 	 --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \

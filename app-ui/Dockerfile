@@ -49,7 +49,7 @@ LABEL name="Ligoj UI server" \
       io.openshift.tags="Ligoj,UI"
 
 COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
-COPY Dockerfile ./*prepare-run.sh ./
+COPY Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
 
 WORKDIR "${SERVER_HOME}"
 
@@ -68,8 +68,9 @@ ENV ENDPOINT="http://ligoj-api:8081/ligoj-api" \
     JAVA_OPTIONS="-Duser.timezone=UTC -Dsecurity=Rest"
 
 EXPOSE ${SERVER_PORT}
+RUN { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to add custom packages before main RUN."; }
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; }  && ${PREPARE_RUN} && \
-    { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
+    { [ -f prepare-run.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
     java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
      -Dligoj.endpoint="${ENDPOINT}" \
      -Dserver.address="${SERVER_HOST}" \
