@@ -67,9 +67,9 @@ ENV ENDPOINT="http://ligoj-api:8081/ligoj-api" \
     JAVA_OPTIONS="-Duser.timezone=UTC -Dsecurity=Rest"
 
 EXPOSE ${SERVER_PORT}
-RUN { [ -f prepare-run.sh ] && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to add custom packages before main RUN."; }
+RUN { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to add custom packages before main RUN."; }
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
-    { [ -f prepare-cmd.sh ] && . ./prepare-cmd.sh || echo "No defined prepare cmd instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
+    { [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || echo "No defined prepare cmd instruction, create a prepare-run.sh script to prepare http_proxy or other custom configurations."; } && \
     java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
      -Dligoj.endpoint="${ENDPOINT}" \
      -Dserver.address="${SERVER_HOST}" \
