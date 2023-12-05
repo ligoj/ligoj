@@ -51,7 +51,7 @@ LABEL name="Ligoj UI server" \
 WORKDIR "${SERVER_HOME}"
 
 COPY --from=builder /build/target/*.war ${ARTIFACT_ID}.war
-COPY --chmod=+x Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
+COPY Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
 
 # ENV (run)
 ENV ENDPOINT="http://ligoj-api:8081/ligoj-api" \
