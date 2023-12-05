@@ -51,7 +51,6 @@ ENV CONTEXT_URL="/ligoj-api" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
     ARTIFACT_ID="${ARTIFACT_ID}" \
-    PREPARE_RUN="echo 'No defined prepare run instruction, set PREPARE_RUN to insert HTTP_PROXY instructions for sample.'" \
     JAVA_OPTIONS="-Duser.timezone=UTC"
 
 EXPOSE ${SERVER_PORT}
