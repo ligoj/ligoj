@@ -34,13 +34,13 @@ LABEL name="Ligoj API server" \
       io.openshift.expose-services="8081:8081" \
       io.openshift.tags="Ligoj,API"
 
-COPY --from=builder /build/target/*.war ${SERVER_HOME}/${ARTIFACT_ID}.war
-COPY Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
+WORKDIR "${SERVER_HOME}"
+
+COPY --from=builder /build/target/*.war ${ARTIFACT_ID}.war
+COPY --chmod=+x Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
 
 # Policy file for JMX
 ADD src/test/resources/ligoj.policy "${SERVER_HOME}/ligoj.policy"
-
-WORKDIR "${SERVER_HOME}"
 
 # ENV (run)
 ENV CONTEXT_URL="/ligoj-api" \
@@ -55,10 +55,10 @@ ENV CONTEXT_URL="/ligoj-api" \
 
 EXPOSE ${SERVER_PORT}
 
-RUN { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to add custom packages before main RUN."; }
+RUN { [ -f prepare-run.sh ] && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to add custom packages before main RUN."; }
 
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
-    { [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || echo "No defined prepare cmd instruction, create a prepare-cmd.sh script to prepare http_proxy or other custom configurations."; } && \
+    { [ -f prepare-cmd.sh ] && . ./prepare-cmd.sh || echo "No defined prepare cmd instruction, create a prepare-cmd.sh script to prepare http_proxy or other custom configurations."; } && \
     java $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
 	 --add-modules java.se \
 	 --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
@@ -89,7 +89,7 @@ CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
      -Djava.security.policy="${SERVER_HOME}/ligoj.policy" \
      -Djava.net.preferIPv4Stack=true \
      -Dligoj.home="${LIGOJ_HOME}" \
-     -jar "${SERVER_HOME}/${ARTIFACT_ID}.war"
+     -jar "${ARTIFACT_ID}.war"
 
 HEALTHCHECK --interval=10s --timeout=2s --retries=5 --start-period=30s \
 CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health || exit 1
