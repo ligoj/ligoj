@@ -72,11 +72,9 @@ define([
 						if (data.opts && data.opts.multiple && value.indexOf(',') !== -1) {
 							// Multiple joins with OR
 							var orFilter = self.addGroupFilter(masterFilter, 'or');
-							var values = value.split(','),
-								index;
-							for (index = 0; index < values.length; index++) {
-								orFilter.rules.push({op: 'eq', data: values[index], field: field});
-							}
+							value.split(',').forEach(function(v) {
+								orFilter.rules.push({op: 'eq', data: v, field: field});
+							});
 							return;
 						}
 						// Join
@@ -105,8 +103,8 @@ define([
 		/**
 		 * Function transforming "sample-property" to "sampleProperty"
 		 */
-		toProperty: function () {
-			return this.replace(/(?:-|\s)\S/g, function (a) {
+		toProperty: function (id) {
+			return id.replace(/(?:-|\s)\S/g, function (a) {
 				return a.toUpperCase();
 			}).replace(/[\-\s]/g, '');
 		},
