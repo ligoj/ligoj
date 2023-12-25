@@ -179,7 +179,7 @@ public class SecurityConfiguration {
 	public ApiTokenAuthenticationFilter apiTokenFilter(final AuthenticationManager authenticationManager) {
 		final var bean = new ApiTokenAuthenticationFilter();
 		bean.setPrincipalRequestHeader("SM_UNIVERSALID");
-		bean.setCredentialsRequestHeader("X-api-key");
+		bean.setCredentialsRequestHeader("x-api-key");
 		bean.setExceptionIfHeaderMissing(false);
 		bean.setContinueFilterChainOnUnsuccessfulAuthentication(false);
 		bean.setAuthenticationManager(authenticationManager);
