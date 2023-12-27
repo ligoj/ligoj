@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-web-parent</artifactId>
-		<version>3.1.8</version>
+		<version>3.1.10</version>
 		<relativePath />
 	</parent>
 
