@@ -3,7 +3,9 @@
  */
 package org.ligoj.boot.api;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.ligoj.bootstrap.core.plugin.PluginsClassLoader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +18,7 @@ class ApplicationLightTest {
 	@Test
 	void testMain() {
 		Application.main(getArgs());
+		Assertions.assertNotNull(PluginsClassLoader.getInstance());
 	}
 
 	private String[] getArgs() {

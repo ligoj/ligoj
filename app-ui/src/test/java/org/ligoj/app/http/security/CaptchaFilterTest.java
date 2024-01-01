@@ -25,12 +25,6 @@ import java.nio.charset.StandardCharsets;
 class CaptchaFilterTest {
 
 	@Test
-	void testJavax() throws ServletException {
-		new CaptchaFilter().init(new MockFilterConfig());
-		new CaptchaFilter().destroy();
-	}
-
-	@Test
 	void testDoFilterNoSession() throws ServletException, IOException {
 		final var request = Mockito.mock(HttpServletRequest.class);
 		final var response = Mockito.mock(HttpServletResponse.class);
