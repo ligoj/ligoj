@@ -5,7 +5,6 @@ package org.ligoj.app.http.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +41,7 @@ class DigestAuthenticationFilterTest extends AbstractServerTest {
 
 		filter = new DigestAuthenticationFilter() {
 			@Override
-			protected CloseableHttpResponse doLogin(final CloseableHttpClient httpClient, final String token) throws IOException {
+			protected Authentication doLogin(final CloseableHttpClient httpClient, final String token) throws IOException {
 				throw ioe;
 			}
 		};
@@ -62,7 +61,7 @@ class DigestAuthenticationFilterTest extends AbstractServerTest {
 	}
 
 	@Test
-	void authenticateInvalidHost() {
+	void authenticateRE() {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("")));
 		httpServer.stubFor(post(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("//OK")));
 		httpServer.start();

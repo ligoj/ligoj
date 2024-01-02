@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.DelegatingServletOutputStream;
-import org.springframework.mock.web.MockFilterConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
