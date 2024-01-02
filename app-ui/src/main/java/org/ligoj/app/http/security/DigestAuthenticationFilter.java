@@ -47,7 +47,6 @@ public class DigestAuthenticationFilter extends AbstractAuthenticationProcessing
 		setAuthenticationManager(authentication -> authentication);
 	}
 
-
 	/**
 	 * Return a new {@link HttpClientBuilder} instance.
 	 *

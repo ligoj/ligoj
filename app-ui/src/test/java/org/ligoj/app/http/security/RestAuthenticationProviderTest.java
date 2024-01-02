@@ -4,7 +4,6 @@
 package org.ligoj.app.http.security;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,7 +80,7 @@ class RestAuthenticationProviderTest extends AbstractServerTest {
 
 		final var filter = new RestAuthenticationProvider() {
 			@Override
-			protected CloseableHttpResponse doLogin(final CloseableHttpClient httpClient, final String username, final String credential) throws IOException {
+			protected Authentication doLogin(final CloseableHttpClient httpClient, final String username, final String credential, final Collection<? extends GrantedAuthority> authorities) throws IOException {
 				throw ioe;
 			}
 		};

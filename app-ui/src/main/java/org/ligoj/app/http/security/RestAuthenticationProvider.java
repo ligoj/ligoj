@@ -3,6 +3,7 @@
  */
 package org.ligoj.app.http.security;
 
+import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -39,21 +40,26 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 				Objects.toString(authentication.getCredentials().toString(), ""), authentication.getAuthorities());
 	}
 
-	protected Authentication authenticate(final String username, final String credential, final Collection<? extends GrantedAuthority> authorities) {
-
-		// First get the cookie
+	/**
+	 * Return a new {@link HttpClientBuilder} instance.
+	 *
+	 * @return A new {@link HttpClientBuilder} instance.
+	 */
+	private HttpClientBuilder newClientBuilder() {
 		final var clientBuilder = HttpClientBuilder.create();
+		// First get the cookie
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
+		return clientBuilder;
+	}
 
-		// Do the POST
-		try (var httpClient = clientBuilder.build()) {
-			final var httpResponse = doLogin(httpClient, username, credential);
-			if (HttpStatus.SC_NO_CONTENT == httpResponse.getStatusLine().getStatusCode()) {
-				// Succeed authentication, save the cookies data inside the authentication
-				return newAuthentication(username, credential, authorities, httpResponse);
+	@Generated
+	protected Authentication authenticate(final String username, final String credential, final Collection<? extends GrantedAuthority> authorities) {
+		try (var httpClient = newClientBuilder().build()) {
+			// Do the POST
+			final var authentication = doLogin(httpClient, username, credential, authorities);
+			if (authentication != null) {
+				return authentication;
 			}
-			log.info("Failed authentication of {}[{}] : {}", username, credential.length(), httpResponse.getStatusLine().getStatusCode());
-			httpResponse.getEntity().getContent().close();
 		} catch (final IOException e) {
 			log.warn("Remote SSO server is not available", e);
 		}
@@ -90,11 +96,20 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 	 * @return The {@link CloseableHttpResponse} response.
 	 * @throws IOException When execution failed
 	 */
-	protected CloseableHttpResponse doLogin(final CloseableHttpClient httpClient, final String username, final String credential) throws IOException {
+	protected Authentication doLogin(final CloseableHttpClient httpClient, final String username, final String credential,
+			final Collection<? extends GrantedAuthority> authorities) throws IOException {
 		final var httpPost = new HttpPost(getSsoPostUrl());
 		final var content = String.format(getSsoPostContent(), username, credential.replace("\\", "\\\\").replace("\"", "\\\""));
 		httpPost.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
 		httpPost.setHeader("Content-Type", "application/json");
-		return httpClient.execute(httpPost);
+		final var apiResponse = httpClient.execute(httpPost);
+
+		if (HttpStatus.SC_NO_CONTENT == apiResponse.getStatusLine().getStatusCode()) {
+			// Succeed authentication, save the cookies data inside the authentication
+			return newAuthentication(username, credential, authorities, apiResponse);
+		}
+		log.info("Failed authentication of {}[{}] : {}", username, credential.length(), apiResponse.getStatusLine().getStatusCode());
+		apiResponse.getEntity().getContent().close();
+		return null;
 	}
 }
