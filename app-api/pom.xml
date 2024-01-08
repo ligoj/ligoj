@@ -241,6 +241,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <loaderImplementation>CLASSIC</loaderImplementation>
                     <mainClass>org.ligoj.boot.api.Application</mainClass>
                     <excludeGroupIds>org.projectlombok,org.eclipse.jetty.websocket</excludeGroupIds>
                 </configuration>
@@ -378,7 +379,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-iam-node</artifactId>
-                    <version>[1.2.1-SNAPSHOT,)</version>
+                    <version>[1.2.1,)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
