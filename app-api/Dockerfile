@@ -6,7 +6,7 @@ ARG MAVEN_VERSION="3.9.5-amazoncorretto-21-debian-bookworm"
 FROM --platform=${BUILDPLATFORM} maven:${MAVEN_VERSION} as builder
 WORKDIR /build/
 ADD . .
-COPY Dockerfile ./*settings.xml /root/.m2/
+COPY Dockerfile ./*.m2 /root/.m2/
 RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
     { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn clean package -B

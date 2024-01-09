@@ -114,7 +114,7 @@ LIGOJ_API_PREPARE_BUILD='export HTTP_PROXY=192.168.0.254:8000 && export HTTPS_PR
 |--------------------|---------|--------------|-------|----------------------------------------------------------------------------------------------------|
 | `prepare-build.sh` | app-*   | `WORKDIR`    | BUILD | Additional Bash commands executed inside the builder , before `mvn` but after `MAVEN_OPTS` is set. |
 | `prepare-run.sh`   | app-*   | `WORKDIR`    | RUN   | Additional Bash commands executed inside the final image, before `java`                            |
-| `settings.xml`     | app-*   | `/root/.m2/` | BUILD | Custom Maven configuration: proxy, mirror,...                                                      |
+| `.m2/`             | app-*   | `/root/.m2/` | BUILD | Custom Maven configuration: proxy, mirror, dependencies,...                                        |
 
 Sample `prepare-build.sh` file:
 
@@ -177,31 +177,31 @@ Sample result
 
 ```json
 {
-    "openapi": "3.0.1",
-    "servers": [
-        {
-            "url": "http://localhost:8081/ligoj-api/rest"
-        }
-    ],
-    "paths": {
-        "/service/id/company": {
-            "get": {
-                "operationId": "findAll_20",
-                "responses": {
-                    "default": {
-                        "description": "default response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/TableItemContainerCountVo"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+  "openapi": "3.0.1",
+  "servers": [
+    {
+      "url": "http://localhost:8081/ligoj-api/rest"
     }
+  ],
+  "paths": {
+    "/service/id/company": {
+      "get": {
+        "operationId": "findAll_20",
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableItemContainerCountVo"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -216,16 +216,17 @@ curl 'http://localhost:8080/ligoj/rest?_wadl' -H '**cookies, jwt,...***'
 Sample result
 
 ```xml
+
 <application xmlns="http://wadl.dev.java.net/2009/02">
     <resources base="http://localhost:8081/ligoj-api/rest/">
         <resource path="/security">
             <resource path="/login">
                 <method name="POST">
                     <request>
-                        <representation mediaType="application/json" />
+                        <representation mediaType="application/json"/>
                     </request>
                     <response>
-                        <representation mediaType="application/json" />
+                        <representation mediaType="application/json"/>
                     </response>
                 </method>
             </resource>

@@ -63,8 +63,9 @@ podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligo
 
 ## Custom Maven proxy
 
-To use a custom Maven configuration (proxy, mirror,...), copy your `settings.xml` Maven file at the base of this project.
-It will be copied at build time with a Docker `COPY` instruction.
+To use a custom Maven configuration (proxy, mirror,...), copy your `settings.xml` Maven file in `.m2/` directory.
+
+Content will be copied at build time with a Docker `COPY` instruction.
 The same applies to [app-api](../app-api/Dockerfile)
 
 *Note* This file will be in the final Docker image, only in the builder image.
