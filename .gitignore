@@ -17,5 +17,4 @@ bin/
 /.env
 /.ligoj
 /package-lock.json
-/app-ui/settings.xml
-/app-api/settings.xml
+/app-api/.m2/
