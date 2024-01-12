@@ -103,12 +103,13 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 		httpPost.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
 		httpPost.setHeader("Content-Type", "application/json");
 		final var apiResponse = httpClient.execute(httpPost);
+		final var statusCode = apiResponse.getStatusLine().getStatusCode();
 
-		if (HttpStatus.SC_NO_CONTENT == apiResponse.getStatusLine().getStatusCode()) {
+		if (HttpStatus.SC_NO_CONTENT == statusCode) {
 			// Succeed authentication, save the cookies data inside the authentication
 			return newAuthentication(username, credential, authorities, apiResponse);
 		}
-		log.info("Failed authentication of {}[{}] : {}", username, credential.length(), apiResponse.getStatusLine().getStatusCode());
+		log.info("Failed authentication of {}[{}] : {}", username, credential.length(), statusCode);
 		apiResponse.getEntity().getContent().close();
 		return null;
 	}
