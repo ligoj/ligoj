@@ -4,7 +4,19 @@
 define(['jquery', 'security.mod', 'cascade', 'error.mod', 'handlebars.mod', 'toastr.mod',
         'plugins/css', 'plugins/partial', 'plugins/i18n', 'plugins/html', 'plugins/js'], function ($, security, $cascade) {
 	function decorate(session) {
-		$('#_username').html(session.userName + '<b class="caret"></b>');
+	    var displayMode = session.applicationSettings && session.applicationSettings.data && session.applicationSettings.data['service:id:user-display'];
+        var displayName = session.userName;
+        if ((displayMode === 'mail' || displayMode == 'mail-short') &&
+                session.userSettings && session.userSettings.userDetails && session.userSettings.userDetails.mails && session.userSettings.userDetails.mails[0]) {
+            var mail = session.userSettings.userDetails.mails[0];
+            if (displayMode === 'mail') {
+                displayName = mail;
+            } else {
+                displayName = mail.split('@')[0];
+            }
+        }
+        $('#_username').html(displayName + '<b class="caret"></b>');
+
 		var version = session.applicationSettings.buildVersion;
 		var $node = $('._version');
 		$node.attr('href', ($node.attr('href') || '').replace('0.0.0', version.replace('-SNAPSHOT', '')))
