@@ -6,13 +6,13 @@ define(['jquery', 'security.mod', 'cascade', 'error.mod', 'handlebars.mod', 'toa
 	function decorate(session) {
 	    var displayMode = session.applicationSettings && session.applicationSettings.data && session.applicationSettings.data['service:id:user-display'];
         var displayName = session.userName;
-        if ((displayMode === 'mail' || displayMode == 'mail-short') &&
+        if ((displayMode === 'mail' || displayMode == 'mail-no-domain') &&
                 session.userSettings && session.userSettings.userDetails && session.userSettings.userDetails.mails && session.userSettings.userDetails.mails[0]) {
             var mail = session.userSettings.userDetails.mails[0];
-            if (displayMode === 'mail') {
-                displayName = mail;
-            } else {
+            if (displayMode === 'mail-no-domain') {
                 displayName = mail.split('@')[0];
+            } else {
+                displayName = mail;
             }
         }
         $('#_username').html(displayName + '<b class="caret"></b>');
