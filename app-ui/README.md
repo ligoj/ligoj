@@ -31,19 +31,19 @@ module, both WAR (app-api and app-ui) will be created.
 Test the integration with a running API end-point
 
 ```
-java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar target/app-ui-3.3.0.war
+java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar target/app-ui-4.0.0.war
 ```
 
 # Build Docker image
 
 ```
-docker build -t ligoj/ligoj-ui:3.3.0 .
+docker build -t ligoj/ligoj-ui:4.0.0 .
 ```
 
 During the Docker build, the WAR file "ligoj-ui.war" is not copied from your local FS but from a previously released
 remote location such as Nexus.
 By default, the location
-is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-ui&v=3.3.0&p=war"
+is "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=public&g=org.ligoj.app&a=app-ui&v=4.0.0&p=war"
 In case of a custom build you can specify its remote or local location.
 
 ## Build with Docker builder (recommended)
@@ -51,14 +51,14 @@ In case of a custom build you can specify its remote or local location.
 With this mode, no build tools (Java, Maven,...) are required to build the image.
 
 ```bash
-docker build -t ligoj/ligoj-ui:3.3.0 --progress=plain -f Dockerfile .
-podman build -t ligoj/ligoj-ui:3.3.0 --progress=plain -f Dockerfile .
+docker build -t ligoj/ligoj-ui:4.0.0 --progress=plain -f Dockerfile .
+podman build -t ligoj/ligoj-ui:4.0.0 --progress=plain -f Dockerfile .
 ```
 
 Also, compatible with `podman`, and multiple target architectures:
 
 ```bash
-podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-ui -t ligoj/ligoj-ui:3.3.0 -f Dockerfile .
+podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-ui -t ligoj/ligoj-ui:4.0.0 -f Dockerfile .
 ```
 
 ## Custom Maven proxy
@@ -79,7 +79,7 @@ docker run --rm -it \
   -e CUSTOM_OPTS='-Dsecurity=Trusted -Dlog.level=info' \
   -e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
   -e SERVER_PORT=8089 \
-  ligoj/ligoj-ui:3.3.0
+  ligoj/ligoj-ui:4.0.0
 ```
 
 Explanations:
@@ -100,7 +100,7 @@ You can experience network issue with remote/local API. To validate the link, tr
 docker run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
-ligoj/ligoj-ui:3.3.0 sh -c "curl http://127.0.0.1:8088/ligoj-api/manage/health"
+ligoj/ligoj-ui:4.0.0 sh -c "curl http://127.0.0.1:8088/ligoj-api/manage/health"
 ```
 
 ## Endpoints
@@ -115,7 +115,7 @@ ligoj/ligoj-ui:3.3.0 sh -c "curl http://127.0.0.1:8088/ligoj-api/manage/health"
 ## Run with security disabled
 
 ```
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj/ligoj-ui:3.3.0 
+docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj/ligoj-ui:4.0.0
 ```
 
 ## Relevant variables

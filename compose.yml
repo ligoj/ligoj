@@ -6,7 +6,7 @@ services:
       - ligoj-network
   api:
     container_name: ligoj-api
-    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-api:${LIGOJ_VERSION:-3.3.0}
+    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-api:${LIGOJ_VERSION:-4.0.0}
     build:
       context: app-api
       args:
@@ -30,7 +30,7 @@ services:
       - ligoj-network
   ui:
     container_name: ligoj-ui
-    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-ui:${LIGOJ_VERSION:-3.3.0}
+    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-ui:${LIGOJ_VERSION:-4.0.0}
     build:
       context: app-ui
       args:

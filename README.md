@@ -70,11 +70,11 @@ open http://localhost:8080/ligoj
 AWS_ACCOUNT="$(aws sts get-caller-identity --query "Account" --output text)"
 AWS_REGION="$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')"
 ECR_REGISTRY=$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com
-docker image tag ligoj/ligoj-api:3.3.0 $ECR_REGISTRY/ligoj/ligoj-api:3.3.0
-docker image tag ligoj/ligoj-ui:3.3.0 $ECR_REGISTRY/ligoj/ligoj-ui:3.3.0
+docker image tag ligoj/ligoj-api:4.0.0 $ECR_REGISTRY/ligoj/ligoj-api:4.0.0
+docker image tag ligoj/ligoj-ui:4.0.0 $ECR_REGISTRY/ligoj/ligoj-ui:4.0.0
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-docker push $ECR_REGISTRY/ligoj/ligoj-api:3.3.0
-docker push $ECR_REGISTRY/ligoj/ligoj-ui:3.3.0
+docker push $ECR_REGISTRY/ligoj/ligoj-api:4.0.0
+docker push $ECR_REGISTRY/ligoj/ligoj-ui:4.0.0
 ```
 
 # Advanced deployments with compose

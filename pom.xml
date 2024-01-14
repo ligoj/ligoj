@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>root</artifactId>
-	<version>3.3.1-SNAPSHOT</version>
+	<version>4.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Ligoj - Application</name>
 	<description>Ligoj - Landing page of your team</description>

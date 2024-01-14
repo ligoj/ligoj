@@ -103,7 +103,7 @@ minify" profile `minify`.
 # Test the WAR
 
 ```bash
-java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar target/app-api-3.3.0.war
+java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar target/app-api-4.0.0.war
 ```
 
 # Build Docker image
@@ -113,13 +113,13 @@ java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=fal
 With this mode, no build tools (java, Maven,...) are required to build the image.
 
 ```bash
-docker build -t ligoj/ligoj-api:3.3.0 -f Dockerfile .
+docker build -t ligoj/ligoj-api:4.0.0 -f Dockerfile .
 ```
 
 Also, compatible with `podman`, and multiple target architectures:
 
 ```bash
-podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-api -t ligoj/ligoj-api:3.3.0 -f Dockerfile .
+podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-api -t ligoj/ligoj-api:4.0.0 -f Dockerfile .
 ```
 
 ## Custom Maven proxy
@@ -192,7 +192,7 @@ GRANT ALL ON SCHEMA public TO ligoj;
 docker run --rm -it \
   --name ligoj-api \
   -e CUSTOM_OPTS='-Djpa.hbm2ddl=update -Djdbc.port=3307 -Djdbc.host=ligoj-db' \
-  ligoj/ligoj-api:3.3.0 
+  ligoj/ligoj-api:4.0.0
 ```
 
 ## Start the API container linked to an external database (Option2)
@@ -202,7 +202,7 @@ docker run --rm -it \
  --name "ligoj-api" \
  --network "host" \
  -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.port=3307 -Djdbc.host=localhost' \
- ligoj/ligoj-api:3.3.0
+ ligoj/ligoj-api:4.0.0
 ```
 
 ## More options
@@ -219,7 +219,7 @@ docker run --rm -it \
  -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=none -Djdbc.host=localhost' \
  -v ~/.ligoj:/home/ligoj \
  -p 8680:8081 \
- ligoj/ligoj-api:3.3.0
+ ligoj/ligoj-api:4.0.0
 ```
 
 Explanations:
@@ -247,7 +247,7 @@ docker run --rm \
 -e SERVER_PORT=8088 \
 -e CUSTOM_OPTS='-Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djpa.hbm2ddl=update -Djdbc.host=127.0.0.1 -Djdbc.vendor=postgresql -Djdbc.port=5432 -Djpa.dialect=org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect -Djdbc.driverClassName=org.postgresql.Driver -Dcom.sun.jndi.ldap.connect.pool.initsize=1 -Dcom.sun.jndi.ldap.connect.pool.maxsize=1 -Dcom.sun.jndi.ldap.connect.pool.prefsize=1 -Dcom.sun.jndi.ldap.connect.pool.debug=all' \
 -v /var/lib/instance_datas/ligoj:/home/ligoj \
- ligoj/ligoj-api:3.3.0
+ ligoj/ligoj-api:4.0.0
 ```
 
 Note: There is an uncovered Hibernate issue with schema generation `update` mode. The configured database user must see
@@ -264,7 +264,7 @@ You can experience network issue with remote database. To validate the link, try
 ```bash
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:3.3.0 sh -c "apk add mysql-client && mysql -h 192.168.1.16 --user=ligoj --password=ligoj ligoj"
+ ligoj/ligoj-api:4.0.0 sh -c "apk add mysql-client && mysql -h 192.168.1.16 --user=ligoj --password=ligoj ligoj"
 ```
 
 #### PostgreSQL
@@ -272,7 +272,7 @@ docker run --rm -it \
 ```bash
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:3.3.0 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"
+ ligoj/ligoj-api:4.0.0 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"
 ```
 
 ## Relevant variables
@@ -350,18 +350,20 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 | [MySQL](https://www.mysql.com)            | 8.0     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL8InnoDBUtf8Dialect     | OK                      |
 | [MariaDB](https://mariadb.org/)           | 10.1    | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | Slow in plugin-id       |
 | [MariaDB](https://mariadb.org/)           | 10.1    | org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK, unknown performance |
-| [PostGreSQL](https://www.postgresql.org/) | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
-| [PostGreSQL](https://www.postgresql.org/) | 10.21   | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
-| [PostGreSQL](https://www.postgresql.org/) | 15.1    | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | A bit slow in plugin-id |
+| [PostGreSQL](https://www.postgresql.org/) | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+| [PostGreSQL](https://www.postgresql.org/) | 10.21   | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+| [PostGreSQL](https://www.postgresql.org/) | 15.1    | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
 
 ### JSE
 
-| Vendor  | Release | Status | Notes       |
-|---------|---------|--------|-------------|
-| Oracle  | 17      | OK     | 3.x version |
-| OpenJDK | 17      | OK     | 3.x version |
-| OpenJDK | 18      | OK     | 3.x version |
-| OpenJDK | 21      | OK     | 4.x version |
+| Vendor    | Release | Compatibility |
+|-----------|---------|---------------|
+| Oracle    | 17      | 3.x version   |
+| OpenJDK   | 18      | 3.x version   |
+| OracleJDK | 17      | 3.x version   |
+| OpenJDK   | 18      | 3.x version   |
+| OracleJDK | 21      | 4.x version   |
+| OpenJDK   | 21      | 4.x version   |
 
 # Management endpoints
 
@@ -376,7 +378,7 @@ curl -H "SM_UniversalID:ligoj-admin" http://localhost:8081/ligoj-api/manage/info
   "app": {
     "name": "Ligoj - API",
     "description": "Ligoj API container",
-    "version": "3.3.1-SNAPSHOT",
+    "version": "4.0.0",
     "groupId": "org.ligoj.app",
     "artifactId": "app-api"
   },

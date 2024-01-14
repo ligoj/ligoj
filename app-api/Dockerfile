@@ -12,7 +12,7 @@ RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=tr
     mvn clean package -B
 
 FROM --platform=${TARGETPLATFORM} openjdk:${JAVA_VERSION}
-ARG VERSION="3.3.0-SNAPSHOT"
+ARG VERSION="4.0.1-SNAPSHOT"
 ARG ARTIFACT_ID="app-api"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG GIT_COMMIT=0

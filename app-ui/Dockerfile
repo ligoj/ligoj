@@ -18,14 +18,14 @@ RUN touch ~/.bash_profile && \
 FROM --platform=${BUILDPLATFORM} maven:${MAVEN_VERSION} as builder
 WORKDIR /build/
 ADD . .
-COPY Dockerfile ./*settings.xml /root/.m2/
+COPY Dockerfile ./*.m2 /root/.m2/
 COPY --from=builder_node /build/src/main/webapp src/main/webapp
 RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
     { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn clean package -B
 
 FROM --platform=${TARGETPLATFORM} openjdk:${JAVA_VERSION}
-ARG VERSION="3.3.0-SNAPSHOT"
+ARG VERSION="4.0.1-SNAPSHOT"
 ARG ARTIFACT_ID="app-ui"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG GIT_COMMIT=0
