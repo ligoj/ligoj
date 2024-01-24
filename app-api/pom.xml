@@ -21,7 +21,7 @@
     </scm>
     <properties>
         <api.version>4.1.4</api.version>
-        <swagger-ui.version>5.7.2</swagger-ui.version>
+        <swagger-ui.version>5.10.3</swagger-ui.version>
         <resource.delimiter>@</resource.delimiter>
     </properties>
 
