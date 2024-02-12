@@ -3,11 +3,7 @@
  */
 package org.ligoj.app.resource.security;
 
-import java.util.Collections;
-
-import org.springframework.transaction.annotation.Transactional;
 import jakarta.ws.rs.core.Response;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +18,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 
 /**
  * Test of {@link SecurityResource}
@@ -33,7 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 class SecurityResourceTest extends AbstractServerTest {
 
 	@Test
-	void loginUnknownUser() throws Exception {
+	void loginUnknownUser() {
 		final User user = new User();
 		user.setName("any");
 		user.setPassword("any");
@@ -42,13 +41,11 @@ class SecurityResourceTest extends AbstractServerTest {
 		final SecurityResource resource = new SecurityResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
 		resource.iamProvider = new IamProvider[] { iamProvider };
-		Assertions.assertThrows(BadCredentialsException.class, () -> {
-			resource.login(user);
-		});
+		Assertions.assertThrows(BadCredentialsException.class, () -> resource.login(user));
 	}
 
 	@Test
-	void login() throws Exception {
+	void login() {
 
 		// Mock the authentication
 		final IamProvider iamProvider = Mockito.mock(IamProvider.class);
@@ -65,14 +62,14 @@ class SecurityResourceTest extends AbstractServerTest {
 		resource.applicationContext = applicationContext;
 
 		// Perform the login
-		final Response login = resource.login(new User("fdauganA", "Azerty01"));
+		final Response login = resource.login(new User("fdauganA", "Secret01"));
 
 		// Check the response
 		Assertions.assertNotNull(login);
 		Assertions.assertEquals(204, login.getStatus());
 		Assertions.assertEquals("fdauganA", login.getHeaderString("X-Real-User"));
 
-		// Check the contributor has been involed
+		// Check the contributor has been involved
 		Mockito.verify(contributor).accept(ArgumentMatchers.any(), ArgumentMatchers.any());
 	}
 
