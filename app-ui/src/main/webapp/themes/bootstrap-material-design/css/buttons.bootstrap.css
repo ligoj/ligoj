@@ -65,6 +65,7 @@ div.dt-button-collection-title:empty {
 ul.dt-button-collection.dropdown-menu {
   display: block;
   z-index: 2002;
+  padding-top: 4px;
 }
 ul.dt-button-collection.dropdown-menu.fixed {
   position: fixed;
