@@ -7,6 +7,8 @@ services:
       POSTGRES_USER: ligoj
       POSTGRES_PASSWORD: ligoj
       PGDATA: /var/lib/postgresql/data/pgdata
+    expose:
+      - 5432
     volumes:
       - ${LIGOJ_HOME:-/home/ligoj}/postgres:/var/lib/postgresql/data
   api:

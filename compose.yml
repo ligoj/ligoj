@@ -3,7 +3,10 @@ services:
     container_name: ligoj-db
     restart: always
     networks:
-      - ligoj-network
+      ligoj-network:
+        aliases:
+          - db
+
   api:
     container_name: ligoj-api
     image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-api:${LIGOJ_VERSION:-4.0.0}
@@ -20,14 +23,16 @@ services:
       CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db}
       CRYPTO: ${LIGOJ_API_CRYPTO:--Dapp.crypto.password=public}
       PREPARE_RUN: ${LIGOJ_API_PREPARE_RUN:-echo "No PREPARE_RUN"}
-    links:
-      - db:ligoj-db
     depends_on:
       - db
+    expose:
+      - 8081
     volumes:
       - ${LIGOJ_HOME:-/home/ligoj}:/home/ligoj
     networks:
-      - ligoj-network
+      ligoj-network:
+        aliases:
+          - api
   ui:
     container_name: ligoj-ui
     image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-ui:${LIGOJ_VERSION:-4.0.0}
@@ -43,17 +48,17 @@ services:
     environment:
       SERVER_PORT: ${LIGOJ_WEB_PORT:-8080}
       CONTEXT_URL: ${LIGOJ_WEB_CONTEXT_URL:-/ligoj}
-      JAVA_OPTIONS: ${LIGOJ_WEB_JAVA_OPTIONS:--Duser.timezone=UTC -Dsecurity=Rest}"
+      JAVA_OPTIONS: ${LIGOJ_WEB_JAVA_OPTIONS:--Duser.timezone=UTC -Dsecurity=Rest}
       CUSTOM_OPTS: ${LIGOJ_WEB_CUSTOM_OPTS:-}
       CRYPTO: ${LIGOJ_WEB_CRYPTO:--Dapp.crypto.password=public}
       PREPARE_RUN: ${LIGOJ_WEB_PREPARE_RUN:-echo "No PREPARE_RUN"}
-    links:
-      - api:ligoj-api
     ports:
       - "${LIGOJ_PORT:-8080}:${LIGOJ_WEB_PORT:-8080}"
     volumes:
       - ${LIGOJ_HOME:-/home/ligoj}:/home/ligoj
     networks:
-      - ligoj-network
+      ligoj-network:
+        aliases:
+          - ui
 networks:
   ligoj-network:
