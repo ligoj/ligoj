@@ -1,7 +1,7 @@
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 ARG JAVA_VERSION="21-jdk"
-ARG MAVEN_VERSION="3.9.5-amazoncorretto-21-debian-bookworm"
+ARG MAVEN_VERSION="3.9.6-amazoncorretto-21-debian-bookworm"
 
 FROM --platform=${BUILDPLATFORM} maven:${MAVEN_VERSION} as builder
 WORKDIR /build/
