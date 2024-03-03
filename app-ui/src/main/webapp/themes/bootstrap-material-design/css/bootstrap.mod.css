@@ -970,7 +970,7 @@ img.nav-icon {
 .form-horizontal .form-group:not(.label-floating) label.control-label {
 	font-size: 16px;
 	line-height: 1.42857143;
-	margin: 2px 0 0;
+	margin: 0 0 0;
 }
 .popover-title {
 	background-color: inherit;
