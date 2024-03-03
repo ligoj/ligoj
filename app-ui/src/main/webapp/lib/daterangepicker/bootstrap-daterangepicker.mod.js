@@ -12,7 +12,7 @@ define(['jquery', 'cascade', 'i18n!daterangepicker/nls/daterangepicker-messages'
 			dateRangePickerManager.options = {
 				ranges: {},
 				showWeekNumbers: true,
-				format: formatManager.messages.shortdateMomentJs,
+				format: formatManager.messages.shortDateMomentJs,
 				locale: {
 					applyLabel: messages.apply,
 					clearLabel: messages.clear,

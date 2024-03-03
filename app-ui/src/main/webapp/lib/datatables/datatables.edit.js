@@ -69,7 +69,7 @@ define(["jquery", "cascade", "datatables.net-buttons", "datatables.net-buttons-b
 				if (this.name) {
 					// Automatically format date
 					if ($(this).is('.date')) {
-						row[this.name] = this.value && this.value.length > 0 ? moment(this.value, formatManager.messages.shortdateMomentJs).valueOf() : null;
+						row[this.name] = this.value && this.value.length > 0 ? moment(this.value, formatManager.messages.shortDateMomentJs).valueOf() : null;
 					} else {
 						row[this.name] = this.value;
 					}

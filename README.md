@@ -3,10 +3,10 @@
 ![alt text](https://github.com/ligoj/ligoj/raw/master/docs/assets/img/home-multi-project.png "Home page")
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fligoj%2Fligoj.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fligoj%2Fligoj?ref=badge_shield)
 
-A web application to centralize the related tools of your projects, a 21th century links management with security and
+A web application to centralize the related tools of your projects, a dynamic connection management with security and
 data collection.
-More technical details can be found in the subdirectories [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api)
-and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
+More technical details can be found in the subdirectories [ligoj-api](https://github.com/ligoj/ligoj/tree/master/app-api)
+and [ligoj-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ligoj_ligoj&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ligoj_ligoj)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/abf810c094e44c0691f71174c707d6ed)](https://www.codacy.com/gh/ligoj/ligoj?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/ligoj&amp;utm_campaign=Badge_Grade)
@@ -36,8 +36,8 @@ You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin
 
 See [Wiki page](https://github.com/ligoj/ligoj/wiki/Dev-Setup)
 
-See each container [ligo-api](https://github.com/ligoj/ligoj/tree/master/app-api)
-and [ligo-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
+See each container [ligoj-api](https://github.com/ligoj/ligoj/tree/master/app-api)
+and [ligoj-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 ## License
 

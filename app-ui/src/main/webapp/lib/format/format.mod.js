@@ -11,7 +11,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		cacheHandlebars: {},
 
 		/**
-		 * Get formated date.
+		 * Get formatted date.
 		 * @param long timestamp. Null is accepted.
 		 */
 		formatDate: function (timestamp) {
@@ -19,7 +19,7 @@ define(['jquery', 'i18n!format/nls/format-messages', 'moment.mod'], function ($,
 		},
 
 		/**
-		 * Get formated date time.
+		 * Get formatted date time.
 		 * @param long timestamp. Null is accepted.
 		 */
 		formatDateTime: function (timestamp) {

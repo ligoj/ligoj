@@ -28,7 +28,7 @@ define({
 	"help-captcha" : "Caractères apparaissant dans l'image du dessus",
 	"help-username" : "Votre identifiant",
 	"help-password" : "Votre mot de passe, 8 ou plus majuscules, minuscules et chiffres",
-	"help-password-confirm" : "Saissisez à nouveau votre mot de passe",
+	"help-password-confirm" : "Saisissez à nouveau votre mot de passe",
 	"help-mail" : "Votre adresse mail",
 
 	"validating" : "Validation ...",
@@ -43,7 +43,7 @@ define({
 		"mail" : "Mail non envoyé",
 		"concurrency" : "Compte utilisé ailleurs en ce moment",
 		"reset" : "Jeton expiré",
-		"connected" : "Vous devez d'abbord vous <a class='logout' href='logout'>déconnecter</a>",
+		"connected" : "Vous devez d'abord vous <a class='logout' href='logout'>déconnecter</a>",
 		"captcha" : "CAPTCHA non concordant",
 		"cookie" : "Les Cookies doivent être acceptés pour ce site"
 	},

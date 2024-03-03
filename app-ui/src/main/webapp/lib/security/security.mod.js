@@ -41,7 +41,7 @@ define(['jquery', 'cascade'], function ($, $cascade) {
 					}
 				} else if (parent[0].tagName.toLowerCase() === 'td') {
 					// Add IE7 fix, replace empty by space
-					parent.html('&nbsp');
+					parent.html('&nbsp;');
 				} else if (item.closest('.panel').length === 1) {
 					item.closest('.panel').remove();
 				} else {

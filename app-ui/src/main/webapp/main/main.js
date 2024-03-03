@@ -170,7 +170,7 @@ define(['cascade'], function ($cascade) {
 				content += user.company ? current.$messages.company + ' : ' + user.company + '<br>' : '';
 				content += current.$messages.identifier + ' : ' + user.id;
 				content += user.locked ? '<br>' + Handlebars.compile(current.$messages['locked-details'])([
-					moment(user.locked).format(formatManager.messages.shortdateMomentJs),
+					moment(user.locked).format(formatManager.messages.shortDateMomentJs),
 					user.lockedBy
 				]) : '';
 				content += user.isolated ? '<br>' + Handlebars.compile(current.$messages['isolated-details'])(user.previousCompany) : '';
@@ -254,9 +254,9 @@ define(['cascade'], function ($cascade) {
 			if (data && (data.createdBy || data.lastModifiedDate || data.lastModifiedBy || data.createdDate)) {
 				$('.project-name').attr('title', Handlebars.compile(current.$messages.audit)([
 					current.getUserLink(data.createdBy),
-					moment(data.createdDate).format(formatManager.messages.shortdateMomentJs),
+					moment(data.createdDate).format(formatManager.messages.shortDateMomentJs),
 					current.getUserLink(data.lastModifiedBy),
-					moment(data.lastModifiedDate).format(formatManager.messages.shortdateMomentJs)
+					moment(data.lastModifiedDate).format(formatManager.messages.shortDateMomentJs)
 				])).removeClass('hidden');
 			} else {
 				_('detail-audit').addClass('hidden');
@@ -441,7 +441,7 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Oposite function of "htmlEscape"
+		 * Opposite function of "htmlEscape"
 		 * @param {string} str  Protected markup string to retrieve.
 		 * @return {string}     Unprotected string.
 		 */

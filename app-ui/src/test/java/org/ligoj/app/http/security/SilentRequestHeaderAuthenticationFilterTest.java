@@ -173,6 +173,6 @@ class SilentRequestHeaderAuthenticationFilterTest {
 
 	private void addHeaders(final HttpServletRequest request) {
 		Mockito.doReturn("PRINCIPAL").when(request).getHeader("MY_HEADER_P");
-		Mockito.doReturn("CREDS").when(request).getHeader("MY_HEADER_C");
+		Mockito.doReturn("CREDENTIALS").when(request).getHeader("MY_HEADER_C");
 	}
 }

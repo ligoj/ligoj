@@ -85,12 +85,12 @@ define([
 					} else if ($input.parent().is('.date')) {
 						// Date, minimal date
 						op = 'eq';
-						value = moment(value, formatManager.messages.shortdateMomentJs).startOf('day').valueOf();
+						value = moment(value, formatManager.messages.shortDateMomentJs).startOf('day').valueOf();
 					} else if ($input.parent().is('.input-daterange')) {
 						// Date range
 						op = $input.index() ? 'lte' : 'gte';
 						field = $input.parent().is('[id]') ? self.toProperty($input.parent().attr('id')) : field;
-						value = moment(value, formatManager.messages.shortdateMomentJs)[$input.index() ? 'endOf' : 'startOf']('day').valueOf();
+						value = moment(value, formatManager.messages.shortDateMomentJs)[$input.index() ? 'endOf' : 'startOf']('day').valueOf();
 					} else {
 						// Textual value
 						op = 'cn';
@@ -131,7 +131,7 @@ define([
 							$input.val(data[id].id);
 						}
 					} else if ($input.is('.date') || $input.parent().is('.date')) {
-						$input.val(moment(data[id]).format(formatManager.messages.shortdateMomentJs));
+						$input.val(moment(data[id]).format(formatManager.messages.shortDateMomentJs));
 					} else {
 						$input.val(data[id]);
 					}
