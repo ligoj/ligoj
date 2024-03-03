@@ -1197,3 +1197,8 @@ img.nav-icon {
 .dt-button-collection.dropdown-menu li>a:hover {
     text-decoration: none;
 }
+
+.panel-title > a {
+    width: 100%;
+    display: inline-block;
+}
