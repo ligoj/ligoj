@@ -28,10 +28,6 @@
 		<system>GitHub Issues</system>
 		<url>https://github.com/ligoj/ligoj</url>
 	</issueManagement>
-	<ciManagement>
-		<system>Travis</system>
-		<url>https://travis-ci.com/ligoj/ligoj</url>
-	</ciManagement>
 	<profiles>
 		<profile>
 			<id>github</id>
