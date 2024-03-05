@@ -5,6 +5,7 @@
 
 A web application to centralize the related tools of your projects, a dynamic connection management with security and
 data collection.
+
 More technical details can be found in the subdirectories [ligoj-api](https://github.com/ligoj/ligoj/tree/master/app-api)
 and [ligoj-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
@@ -163,74 +164,14 @@ podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml down
 
 API is only available from a valid session.
 
-### Swagger UI
+- [Swagger UI](http://localhost:8080/ligoj/#/api) page
+- [WADL](http://localhost:8080/ligoj/rest/?_wadl)
 
-UI page: [Swagger UI](http://localhost:8080/ligoj/rest/api-docs?url=openapi.json)
+# Plugin management
 
-### OpenAPI
+Ligoj is massively based on plugin management.
 
-```bash
-curl 'http://localhost:8080/ligoj/rest/openapi.json' -H '**cookies, jwt,...***'
-```
+All plugins are deployed in [Maven central](https://mvnrepository.com/artifact/org.ligoj.plugin)
 
-Sample result
+To build and deploy a plugin, more information are available in [plugin-api](https://github.com/ligoj/plugin-api) repository.
 
-```json
-{
-  "openapi": "3.0.1",
-  "servers": [
-    {
-      "url": "http://localhost:8081/ligoj-api/rest"
-    }
-  ],
-  "paths": {
-    "/service/id/company": {
-      "get": {
-        "operationId": "findAll_20",
-        "responses": {
-          "default": {
-            "description": "default response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TableItemContainerCountVo"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-### WADL
-
-WADL format currently output only XML format.
-
-```bash
-curl 'http://localhost:8080/ligoj/rest?_wadl' -H '**cookies, jwt,...***'
-```
-
-Sample result
-
-```xml
-
-<application xmlns="http://wadl.dev.java.net/2009/02">
-    <resources base="http://localhost:8081/ligoj-api/rest/">
-        <resource path="/security">
-            <resource path="/login">
-                <method name="POST">
-                    <request>
-                        <representation mediaType="application/json"/>
-                    </request>
-                    <response>
-                        <representation mediaType="application/json"/>
-                    </response>
-                </method>
-            </resource>
-        </resource>
-    </resources>
-</application>
-```
