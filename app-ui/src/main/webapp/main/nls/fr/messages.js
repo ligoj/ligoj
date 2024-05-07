@@ -45,7 +45,7 @@ define({
 	'required': 'Requis',
 	'optional': 'Optionnel',
 	'audit': 'Créé par {{{[0]}}} le {{[1]}}, mis à jour par {{{[2]}}} le {{[3]}}',
-	'resetok': 'La liste a été reconstruite',
+	'reset-ok': 'La liste a été reconstruite',
 	'hour': 'Heure',
 	'hours': 'Heures',
 	'day': 'Jour',

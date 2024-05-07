@@ -46,7 +46,7 @@ define({
 		'required': 'Required',
 		'optional': 'Optional',
 		'audit': 'Created by {{{[0]}}} {{[1]}}, updated by {{{[2]}}} {{[3]}}',
-		'resetok': 'List has been rebuilt',
+		'reset-ok': 'List has been rebuilt',
 		'hour': 'Hour',
 		'hours': 'Hours',
 		'day': 'Day',

@@ -3,11 +3,11 @@
  */
 package org.ligoj.app.resource.plugin;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Application listener able to alter the class loader to the plug-in class-loader.
@@ -21,12 +21,8 @@ public class PluginApplicationRunListener extends org.ligoj.bootstrap.resource.s
 	 *            The current application.
 	 * @param args
 	 *            The application arguments.
-	 * @throws IOException
-	 *             When reading plug-ins directory
-	 * @throws NoSuchAlgorithmException
-	 *             MD5 digest is unavailable for version ciphering.
 	 */
-	public PluginApplicationRunListener(final SpringApplication application, final String... args) throws IOException, NoSuchAlgorithmException {
+	public PluginApplicationRunListener(final SpringApplication application, final String... args) {
 		super(application, args);
 	}
 

@@ -3,23 +3,19 @@
  */
 package org.ligoj.app.http.security;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import cn.apiclub.captcha.Captcha;
 import cn.apiclub.captcha.backgrounds.GradiatedBackgroundProducer;
 import cn.apiclub.captcha.gimpy.FishEyeGimpyRenderer;
 import cn.apiclub.captcha.noise.StraightLineNoiseProducer;
 import cn.apiclub.captcha.servlet.CaptchaServletUtil;
 import cn.apiclub.captcha.text.renderer.ColoredEdgesWordRenderer;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Servlet generating CAPTCHA image.
@@ -45,7 +41,7 @@ public class CaptchaServlet extends HttpServlet {
 	}
 
 	@Override
-	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
 
 		final var wordRenderer = new ColoredEdgesWordRenderer(COLORS, FONTS, 2F);
 		final var captcha = new Captcha.Builder(250, 50).gimp(new FishEyeGimpyRenderer()).addText(wordRenderer)

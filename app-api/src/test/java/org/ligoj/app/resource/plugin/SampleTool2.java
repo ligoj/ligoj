@@ -3,10 +3,10 @@
  */
 package org.ligoj.app.resource.plugin;
 
-import java.util.Map;
-
 import org.ligoj.app.api.SubscriptionStatusWithData;
 import org.ligoj.app.api.ToolPlugin;
+
+import java.util.Map;
 
 /**
  * Mock tool.
@@ -19,12 +19,12 @@ class SampleTool2 implements ToolPlugin {
 	}
 
 	@Override
-	public boolean checkStatus(String node, Map<String, String> parameters) throws Exception {
+	public boolean checkStatus(String node, Map<String, String> parameters) {
 		return false;
 	}
 
 	@Override
-	public SubscriptionStatusWithData checkSubscriptionStatus(String node, Map<String, String> parameters) throws Exception {
+	public SubscriptionStatusWithData checkSubscriptionStatus(String node, Map<String, String> parameters) {
 		return null;
 	}
 
