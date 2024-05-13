@@ -175,3 +175,16 @@ All plugins are deployed in [Maven central](https://mvnrepository.com/artifact/o
 
 To build and deploy a plugin, more information are available in [plugin-api](https://github.com/ligoj/plugin-api) repository.
 
+# Custom UI
+
+Ligoj comes with a modular approach. For custom UI, the solutions are:
+- Rebuild [plugin-ui](https://github.com/ligoj/plugin-ui), with specific assets, and deploy this plugin in a custom Maven repository, or upload it with `/system/plugin/{artifact}/{version}` API
+- Create your own plugin `plugin-ui-company`, with you specific assets: overrides and additions. Then install this plugin as above solution
+- Copy you specific assets in the Ligoj home directory such as `/home/ligoj/META-INF/resources/webjars`, `$(pwd)/.ligoj/META-INF/resources/webjars`, depending on your runtime. For sample:
+    ```bash
+    # With Ligoj CLI
+    ligoj file put --from /path/to/icon.png  --path "META-INF/resources/webjars/home/img/logo.png"
+  
+    # With local access of Ligoj home folder
+    mkdir -p "${LIGOJ_HOME}/META-INF/resources/webjars/home/img" && cp /path/to/icon.png "$_/logo.png"
+    ```
