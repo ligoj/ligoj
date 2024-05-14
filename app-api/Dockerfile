@@ -89,7 +89,8 @@ CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
      -Djava.security.policy="${SERVER_HOME}/ligoj.policy" \
      -Djava.net.preferIPv4Stack=true \
      -Dligoj.home="${LIGOJ_HOME}" \
-     -jar "${ARTIFACT_ID}.war"
+     -cp "${LIGOJ_HOME}:${ARTIFACT_ID}.war" \
+     "org.ligoj.boot.api.Application"
 
 HEALTHCHECK --interval=10s --timeout=2s --retries=5 --start-period=30s \
 CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health || exit 1
