@@ -4,7 +4,6 @@
 package org.ligoj.boot.api;
 
 import org.apache.cxf.transport.servlet.CXFServlet;
-import org.ligoj.bootstrap.resource.system.plugin.WebjarsServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.web.jetty.JettyMetricsAutoConfiguration;
