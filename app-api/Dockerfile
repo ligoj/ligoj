@@ -90,7 +90,7 @@ CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
      -Djava.net.preferIPv4Stack=true \
      -Dligoj.home="${LIGOJ_HOME}" \
      -cp "${LIGOJ_HOME}:${ARTIFACT_ID}.war" \
-     "org.ligoj.boot.api.Application"
+     "org.springframework.boot.loader.launch.WarLauncher"
 
 HEALTHCHECK --interval=10s --timeout=2s --retries=5 --start-period=30s \
 CMD curl --fail http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health || exit 1
