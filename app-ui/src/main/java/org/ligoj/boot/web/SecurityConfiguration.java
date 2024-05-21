@@ -72,10 +72,10 @@ public class SecurityConfiguration {
 	@Value("${security.pre-auth-cookies:}")
 	protected String[] securityPreAuthCookies;
 
-	@Value("${sso.url}")
+	@Value("${ligoj.sso.url}")
 	private String ssoUrl;
 
-	@Value("${sso.content}")
+	@Value("${ligoj.sso.content}")
 	private String ssoContent;
 
 	@Value("${ligoj.endpoint.api.url}")

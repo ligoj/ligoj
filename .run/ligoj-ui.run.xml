@@ -2,6 +2,9 @@
   <configuration default="false" name="ligoj-ui" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="21" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <envs>
+      <env name="ligoj.home" value="$USER_HOME$/.ligoj" />
+    </envs>
     <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
     <option name="MAIN_CLASS_NAME" value="org.ligoj.boot.web.Application" />
     <module name="app-ui" />

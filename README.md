@@ -183,8 +183,11 @@ Ligoj comes with a modular approach. For custom UI, the solutions are:
 - Copy you specific assets in the Ligoj home directory such as `/home/ligoj/META-INF/resources/webjars`, `$(pwd)/.ligoj/META-INF/resources/webjars`, depending on your runtime. For sample:
     ```bash
     # With Ligoj CLI
+    ligoj configuration set --id "ligoj.file.path" --value "^/home/ligoj/META-INF/resources/webjars/.*,^/home/ligoj/statics/themes/*"
     ligoj file put --from /path/to/icon.png  --path "META-INF/resources/webjars/home/img/logo.png"
+    ligoj file put --from /path/to/bg1.jpg  --path "statics/themes/bootstrap-material-design/img/bg1.jpg"
   
     # With local access of Ligoj home folder
     mkdir -p "${LIGOJ_HOME}/META-INF/resources/webjars/home/img" && cp /path/to/icon.png "$_/logo.png"
+    mkdir -p "${LIGOJ_HOME}/statics/themes/bootstrap-material-design/img" && cp /path/to/bg1.jpg "$_/bg1.jpg"
     ```
