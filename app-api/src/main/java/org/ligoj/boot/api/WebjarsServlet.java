@@ -3,22 +3,19 @@
  */
 package org.ligoj.boot.api;
 
+import jakarta.activation.FileTypeMap;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-
-import jakarta.activation.FileTypeMap;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.FilenameUtils;
-
-import lombok.extern.slf4j.Slf4j;
-import org.ligoj.app.resource.plugin.LigojPluginsClassLoader;
 
 /**
  * <p>
@@ -69,17 +66,16 @@ public class WebjarsServlet extends HttpServlet {
 		}
 
 		// Regular file, use the last resource instead of the first found
-		log.info("Current classloader: {}", Thread.currentThread().getContextClassLoader());
-		log.info("Ligoj ClassLoader: {}", LigojPluginsClassLoader.getInstance());
-		var resources = LigojPluginsClassLoader.getInstance().getResources(webjarsResourceURI);
+		var resources = Thread.currentThread().getContextClassLoader().getResources(webjarsResourceURI);
 		URL webjarsResourceURL = null;
 		if (resources.hasMoreElements()) {
 			webjarsResourceURL = resources.nextElement();
-		} else {
-			log.info("No webjars resolved resources from LigojPluginsClassLoader, trying application ClasLoader...");
-			resources = Thread.currentThread().getContextClassLoader().getResources(webjarsResourceURI);
-			if (resources.hasMoreElements()) {
-				webjarsResourceURL = resources.nextElement();
+		}
+		if (resources.hasMoreElements()) {
+			var webjarsResourceFileUrl = resources.nextElement();
+			if (webjarsResourceFileUrl.toString().startsWith("file:")) {
+				// Highest priority for local files
+				webjarsResourceURL = webjarsResourceFileUrl;
 			}
 		}
 
