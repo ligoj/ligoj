@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FilenameUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.ligoj.app.resource.plugin.LigojPluginsClassLoader;
 
 /**
  * <p>
@@ -68,11 +69,17 @@ public class WebjarsServlet extends HttpServlet {
 		}
 
 		// Regular file, use the last resource instead of the first found
-		final var resources = Thread.currentThread().getContextClassLoader().getResources(webjarsResourceURI);
+		var resources = LigojPluginsClassLoader.getInstance().getResources(webjarsResourceURI);
 		URL webjarsResourceURL = null;
 		if (resources.hasMoreElements()) {
 			webjarsResourceURL = resources.nextElement();
+		} else {
+			resources = Thread.currentThread().getContextClassLoader().getResources(webjarsResourceURI);
+			if (resources.hasMoreElements()) {
+				webjarsResourceURL = resources.nextElement();
+			}
 		}
+
 		if (webjarsResourceURL == null) {
 			// File not found --> 404
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -80,7 +87,7 @@ public class WebjarsServlet extends HttpServlet {
 			log.info("Webjars resolved resource: {}", webjarsResourceURL);
 			log.info("Current classloader: {}", Thread.currentThread().getContextClassLoader());
 
-			while(resources.hasMoreElements()) {
+			while (resources.hasMoreElements()) {
 				log.info("Webjars resolved resource (ignored): {}", resources.nextElement());
 			}
 			serveFile(response, webjarsResourceURI, webjarsResourceURL.openStream());
