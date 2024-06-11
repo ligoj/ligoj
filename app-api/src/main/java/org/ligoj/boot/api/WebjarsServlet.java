@@ -69,11 +69,14 @@ public class WebjarsServlet extends HttpServlet {
 		}
 
 		// Regular file, use the last resource instead of the first found
+		log.info("Current classloader: {}", Thread.currentThread().getContextClassLoader());
+		log.info("Ligoj ClassLoader: {}", LigojPluginsClassLoader.getInstance());
 		var resources = LigojPluginsClassLoader.getInstance().getResources(webjarsResourceURI);
 		URL webjarsResourceURL = null;
 		if (resources.hasMoreElements()) {
 			webjarsResourceURL = resources.nextElement();
 		} else {
+			log.info("No webjars resolved resources from LigojPluginsClassLoader, trying application ClasLoader...");
 			resources = Thread.currentThread().getContextClassLoader().getResources(webjarsResourceURI);
 			if (resources.hasMoreElements()) {
 				webjarsResourceURL = resources.nextElement();
@@ -85,8 +88,6 @@ public class WebjarsServlet extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		} else {
 			log.info("Webjars resolved resource: {}", webjarsResourceURL);
-			log.info("Current classloader: {}", Thread.currentThread().getContextClassLoader());
-
 			while (resources.hasMoreElements()) {
 				log.info("Webjars resolved resource (ignored): {}", resources.nextElement());
 			}
