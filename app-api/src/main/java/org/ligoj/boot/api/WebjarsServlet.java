@@ -59,7 +59,7 @@ public class WebjarsServlet extends HttpServlet {
 			throws IOException {
 		final var webjarsResourceURI = "META-INF/resources"
 				+ request.getRequestURI().replaceFirst(request.getContextPath(), "");
-		log.debug("Webjars resource requested: {}", webjarsResourceURI);
+		log.debug("Webjars requested resource: {}", webjarsResourceURI);
 
 		if (isDirectoryRequest(webjarsResourceURI)) {
 			// Directory listing is forbidden, but act as a 404 for security purpose.
@@ -77,6 +77,12 @@ public class WebjarsServlet extends HttpServlet {
 			// File not found --> 404
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		} else {
+			log.info("Webjars resolved resource: {}", webjarsResourceURL);
+			log.info("Current classloader: {}", Thread.currentThread().getContextClassLoader());
+
+			while(resources.hasMoreElements()) {
+				log.info("Webjars resolved resource (ignored): {}", resources.nextElement());
+			}
 			serveFile(response, webjarsResourceURI, webjarsResourceURL.openStream());
 		}
 	}
