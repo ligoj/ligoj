@@ -83,9 +83,9 @@ public class WebjarsServlet extends HttpServlet {
 			// File not found --> 404
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		} else {
-			log.info("Webjars resolved resource: {}", webjarsResourceURL);
+			log.debug("Webjars resolved resource: {}", webjarsResourceURL);
 			while (resources.hasMoreElements()) {
-				log.info("Webjars resolved resource (ignored): {}", resources.nextElement());
+				log.debug("Webjars resolved resource (ignored): {}", resources.nextElement());
 			}
 			serveFile(response, webjarsResourceURI, webjarsResourceURL.openStream());
 		}
