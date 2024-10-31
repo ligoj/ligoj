@@ -10,7 +10,7 @@
 
     <groupId>org.ligoj.app</groupId>
     <artifactId>app-api</artifactId>
-    <version>4.0.1</version>
+    <version>4.0.2-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Ligoj - API</name>
 
