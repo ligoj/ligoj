@@ -60,6 +60,7 @@ RUN { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || 
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
     { [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || echo "No defined prepare cmd instruction, create a prepare-cmd.sh script to prepare http_proxy or other custom configurations."; } && \
     java $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
+	 --enable-preview \
 	 --add-modules java.se \
 	 --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
 	 --add-opens java.base/jdk.internal.module=ALL-UNNAMED \
