@@ -3,11 +3,6 @@
  */
 package org.ligoj.app.resource.plugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.function.Supplier;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.api.ServicePlugin;
@@ -17,7 +12,7 @@ import org.ligoj.app.dao.NodeRepository;
 import org.ligoj.app.dao.SubscriptionRepository;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Subscription;
-import org.ligoj.app.resource.node.NodeResource;
+import org.ligoj.app.resource.node.NodeHelper;
 import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
 import org.ligoj.bootstrap.core.plugin.PluginListener;
 import org.ligoj.bootstrap.core.plugin.PluginVo;
@@ -25,6 +20,11 @@ import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.model.system.SystemPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.function.Supplier;
 
 /**
  * Plug-in life-cycle extension for Ligoj.
@@ -52,7 +52,7 @@ public class LigojPluginListener implements PluginListener {
 			final var key = entity.getKey();
 			lvo.setNodes(nodeRepository.countByRefined(key));
 			lvo.setSubscriptions(subscriptionRepository.countByNode(key));
-			lvo.setNode(NodeResource.toVo(nodeRepository.findOne(key)));
+			lvo.setNode(NodeHelper.toVo(nodeRepository.findOne(key)));
 		}
 	}
 
