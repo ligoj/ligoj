@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>  <html class="ie6 ie-old"> <![endif]-->
-<!--[if IE 7]>     <html class="ie7 ie-old"> <![endif]-->
-<!--[if IE 8]>     <html class="ie8 ie-old"> <![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!--> <html>    <!--<![endif]-->
+<html>
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -25,8 +22,6 @@
 		<link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/_login.css?${project.version}" />
 	</head>
 	<body class="login-page">
-		<!--[if lt IE 9]><p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
-		<!--[if gte IE 9]><!-->
 		<div class="page-header header-filter login" style="background-image: url('themes/bootstrap-material-design/img/bg1.jpg'); background-size: cover; background-position: top center;">
 			<div class="container">
 				<div class="row">
@@ -101,17 +96,14 @@
 				</div>
 			</div>
 			<footer class="footer">
-		        <div class="container">
-		            <div class="copyright pull-right">
-		                &copy; <script>document.write(new Date().getFullYear())</script>, made with <i class="fas fa-heart heart"></i> by <a href="https://kloudy.io" class="brand" target="_blank">Kloudy</a>
-		            </div>
-		        </div>
-		    </footer>
-			<!--<![endif]-->
+				<div class="container">
+					<div class="copyright pull-right">
+						&copy; <script>document.write(new Date().getFullYear())</script>, made with <i class="fas fa-heart heart"></i> by <a href="https://kloudy.io" class="brand" target="_blank">Kloudy</a>
+					</div>
+				</div>
+			</footer>
 		</div>
 		<noscript><p>Please enable JavaScript to use this site.</p></noscript>
-		<!--[if lt IE 9]><p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
-		<!--[if gte IE 9]><!-->
 		<script>var requirejs = { urlArgs: '_=${project.version}' };</script>
 		<script data-main="dist/application-login.js" src="dist/requirejs/require.js?3.4.1"></script>
 		<!--<![endif]-->

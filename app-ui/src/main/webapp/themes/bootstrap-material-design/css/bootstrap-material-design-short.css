@@ -1234,6 +1234,12 @@ footer .pull-center {
 .login-page .footer .copyright, .login-page .footer a {
 	color: #fff;
 }
+.login-page footer {
+    position: fixed;
+    width: 100%;
+    margin-top: -60px;
+    z-index: 2;
+}
 
 @media (max-width: 768px) {
 	.footer .copyright {
