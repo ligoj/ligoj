@@ -8,6 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.web.jetty.JettyMetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizationAutoConfiguration;
@@ -33,7 +34,7 @@ import java.util.Collections;
  */
 @SpringBootApplication(exclude = {JettyMetricsAutoConfiguration.class, WebSocketServletAutoConfiguration.class,
 		LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, TransactionManagerCustomizationAutoConfiguration.class,
-		DataSourcePoolMetricsAutoConfiguration.class})
+		DataSourcePoolMetricsAutoConfiguration.class,  SpringDataWebAutoConfiguration.class})
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
 public class Application extends SpringBootServletInitializer {
 
