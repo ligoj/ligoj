@@ -56,6 +56,12 @@ public class Application extends SpringBootServletInitializer {
 	@Value("${app-env:auto}")
 	protected String environmentCode;
 
+	@Value("${ligoj.security.oauth2.username-attribute:email}")
+	protected String usernameOAuth2Attribute;
+
+	@Value("${ligoj.security.login.url:/login.html}")
+	private String loginUrl;
+
 	/**
 	 * The last loaded context.
 	 */
@@ -138,6 +144,8 @@ public class Application extends SpringBootServletInitializer {
 		configureServletParameter(initParameters, configurationKey, "maxConnections", "512");
 		configureServletParameter(initParameters, configurationKey, "cors-origin", "*");
 		configureServletParameter(initParameters, configurationKey, "cors-vary", "Origin");
+		configureServletParameter(initParameters, configurationKey, "usernameOAuth2Attribute", usernameOAuth2Attribute);
+
 		final var registrationBean = new ServletRegistrationBean<>(new BackendProxyServlet(), mapping);
 		registrationBean.setInitParameters(initParameters);
 		registrationBean.setName(name);
@@ -200,7 +208,7 @@ public class Application extends SpringBootServletInitializer {
 		final var proxyFilter = new HtmlProxyFilter();
 		proxyFilter.setSuffix(getEnvironment());
 		final var registrationBean = new FilterRegistrationBean<>(proxyFilter);
-		registrationBean.addUrlPatterns(SecurityConfiguration.INDEX_HTML, "/", SecurityConfiguration.LOGIN_HTML);
+		registrationBean.addUrlPatterns(SecurityConfiguration.INDEX_HTML, "/", loginUrl);
 		registrationBean.setOrder(10);
 		return registrationBean;
 	}

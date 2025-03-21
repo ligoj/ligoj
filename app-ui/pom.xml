@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-web-parent</artifactId>
-		<version>3.1.23</version>
+		<version>3.1.25-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 
@@ -35,6 +35,11 @@
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-config</artifactId>
 				<version>${spring-security.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-oauth2-client</artifactId>
+				<version>${spring-boot.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -90,6 +95,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

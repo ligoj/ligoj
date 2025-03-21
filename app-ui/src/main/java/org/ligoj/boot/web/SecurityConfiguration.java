@@ -5,7 +5,10 @@ package org.ligoj.boot.web;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.http.security.*;
+import org.ligoj.app.http.security.AbstractAuthenticationProvider;
+import org.ligoj.app.http.security.DigestAuthenticationFilter;
+import org.ligoj.app.http.security.SilentRequestHeaderAuthenticationFilter;
+import org.ligoj.app.http.security.SimpleUserDetailsService;
 import org.ligoj.bootstrap.http.security.ExtendedWebSecurityExpressionHandler;
 import org.ligoj.bootstrap.http.security.RedirectAuthenticationEntryPoint;
 import org.ligoj.bootstrap.http.security.RestRedirectStrategy;
@@ -25,6 +28,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -81,7 +85,12 @@ public class SecurityConfiguration {
 	@Value("${ligoj.endpoint.api.url}")
 	private String apiEndpoint;
 
-	static final String LOGIN_HTML = "/login.html";
+	@Value("${ligoj.security.login.url:/login.html}")
+	private String loginUrl;
+
+	@Value("${ligoj.security.login.url-prd:/login-prod.html}")
+	private String loginProdUrl;
+
 	static final String LOGIN_API = "/login";
 	static final String LOGOUT_HTML = "/logout.html";
 	static final String INDEX_HTML = "/index.html";
@@ -93,8 +102,8 @@ public class SecurityConfiguration {
 	 */
 	@Bean
 	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint() {
-		final var ep = new RedirectAuthenticationEntryPoint(LOGIN_HTML);
-		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, "/index-prod.html", LOGIN_HTML, "/login-prod.html"));
+		final var ep = new RedirectAuthenticationEntryPoint(loginUrl);
+		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, "/index-prod.html", "/login.html", "/login-prd.html"));
 		ep.setRedirectStrategy(getRestFailureStrategy());
 
 		return ep;
@@ -134,7 +143,7 @@ public class SecurityConfiguration {
 	 */
 	@Bean
 	public ConcurrentSessionFilter concurrentSessionFilter() {
-		return new ConcurrentSessionFilter(sessionRegistry(), new SimpleRedirectSessionInformationExpiredStrategy(LOGIN_HTML + "?concurrency"));
+		return new ConcurrentSessionFilter(sessionRegistry(), new SimpleRedirectSessionInformationExpiredStrategy(loginUrl + "?concurrency"));
 	}
 
 	/**
@@ -146,51 +155,57 @@ public class SecurityConfiguration {
 	 * @throws Exception from the build.
 	 */
 	@Bean
-	public SecurityFilterChain filterChain(final HttpSecurity http, final ExtendedWebSecurityExpressionHandler expressionWebHandler) throws Exception {
-		final var logout = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, LOGOUT_HTML) : LOGIN_HTML + "?logout";
+	public SecurityFilterChain filterChain(final HttpSecurity http,
+			final ExtendedWebSecurityExpressionHandler expressionWebHandler,
+			final ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+		final var logoutUrl = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, LOGOUT_HTML) : loginUrl + "?logout";
 		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
-		WebExpressionAuthorizationManager authorization = new WebExpressionAuthorizationManager("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()");
+		final var provider = authenticationProvider();
+		final var authorization = new WebExpressionAuthorizationManager("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()");
 		authorization.setExpressionHandler(expressionWebHandler);
-		final var sec = http.authorizeHttpRequests(authorize ->
-						authorize.requestMatchers(
-										// Login
-										AntPathRequestMatcher.antMatcher(HttpMethod.POST, LOGIN_API),
-										// Public static resources
-										RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PATTERN.pattern()),
-										AntPathRequestMatcher.antMatcher("/rest/redirect"),
-										AntPathRequestMatcher.antMatcher("/rest/security/login"),
-										AntPathRequestMatcher.antMatcher("/captcha.png")).permitAll()
-								.requestMatchers(
-										AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
-										AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**")).anonymous()
 
-								// Everything else must be authenticated
-								.anyRequest()
-								.access(authorization)
-				)
-				.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage(LOGIN_HTML + "?denied"))
+		http.authorizeHttpRequests(authorize -> authorize
+				.requestMatchers(
+						// Login
+						AntPathRequestMatcher.antMatcher(HttpMethod.POST, LOGIN_API),
+						// Public static resources
+						RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PATTERN.pattern()),
+						AntPathRequestMatcher.antMatcher("/rest/redirect"),
+						AntPathRequestMatcher.antMatcher("/rest/security/login"),
+						AntPathRequestMatcher.antMatcher("/captcha.png")).permitAll()
+				.requestMatchers(
+						AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
+						AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**")).anonymous()
 
-				.logout(a -> a.addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies)).invalidateHttpSession(true).logoutSuccessUrl(logout))
+				// Everything else must be authenticated
+				.anyRequest()
+				.access(authorization)
+		);
 
-				.formLogin(a -> a.loginPage(LOGIN_HTML + "?denied").loginProcessingUrl(LOGIN_API).successHandler(getSuccessHandler())
-						.failureHandler(getFailureHandler()))
+		final var loginDeniedUrl = loginUrl + "?denied";
+		http.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage(loginDeniedUrl));
+		provider.configureLogout(http, clientRegistrationRepository, logoutUrl, securityPreAuthCookies);
 
-				// Stateful session
-				.csrf(AbstractHttpConfigurer::disable)
-				.sessionManagement(a -> a.sessionAuthenticationStrategy(sessionAuth()))
-				.securityContext(Customizer.withDefaults())
+		final var loginSuccessHandler = getSuccessHandler();
+		final var loginFailureHandler = getFailureHandler();
+		provider.configureLogin(http, loginDeniedUrl, LOGIN_API, loginSuccessHandler, loginFailureHandler);
 
-				// Security filters
-				.addFilterAt(digestAuthenticationFilter(), org.springframework.security.web.authentication.www.DigestAuthenticationFilter.class)
-				.addFilterAfter(concurrentSessionFilter(), ConcurrentSessionFilter.class);
+		// Stateful session
+		http.csrf(AbstractHttpConfigurer::disable);
+		http.sessionManagement(a -> a.sessionAuthenticationStrategy(sessionAuth()));
+		http.securityContext(Customizer.withDefaults());
+
+		// Security filters
+		http.addFilterAt(digestAuthenticationFilter(), org.springframework.security.web.authentication.www.DigestAuthenticationFilter.class);
+		http.addFilterAfter(concurrentSessionFilter(), ConcurrentSessionFilter.class);
 
 		// Activate a pre-auth filter if configured header
 		if (isPreAuth()) {
-			log.info("Pre-auth filter is enabled with {}/{}, logout: {}", securityPreAuthPrincipal, securityPreAuthCredentials, logout);
+			log.info("Pre-auth filter is enabled with {}/{}, logout: {}", securityPreAuthPrincipal, securityPreAuthCredentials, logoutUrl);
 			preAuthBean = new SilentRequestHeaderAuthenticationFilter();
 			preAuthBean.setPrincipalRequestHeader(securityPreAuthPrincipal);
 			preAuthBean.setCredentialsRequestHeader(securityPreAuthCredentials);
-			sec.addFilterAt(preAuthBean, AbstractPreAuthenticatedProcessingFilter.class);
+			http.addFilterAt(preAuthBean, AbstractPreAuthenticatedProcessingFilter.class);
 		}
 		final var chain = http.build();
 		if (preAuthBean != null) {
@@ -235,7 +250,7 @@ public class SecurityConfiguration {
 		final var filter = new DigestAuthenticationFilter();
 		filter.setSsoPostUrl(apiEndpoint + "/security/sso");
 		final var failureHandler = new SimpleUrlAuthenticationFailureHandler();
-		failureHandler.setDefaultFailureUrl(LOGIN_HTML);
+		failureHandler.setDefaultFailureUrl(loginUrl);
 		filter.setAuthenticationFailureHandler(failureHandler);
 		final var successHandler = new SimpleUrlAuthenticationSuccessHandler();
 		successHandler.setTargetUrlParameter("target");
