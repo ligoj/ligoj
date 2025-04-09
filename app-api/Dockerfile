@@ -17,18 +17,18 @@ ARG ARTIFACT_ID="app-api"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG GIT_COMMIT=0
 
-LABEL name="Ligoj API server" \
-      maintainer="Kloudy <fdaugan@kloudy.io>" \
+LABEL maintainer="Kloudy <fdaugan@kloudy.io>" \
       vendor="Kloudy" \
       version="${VERSION}" \
       release="${VERSION}" \
       git.commit="${GIT_COMMIT}" \
       url="https://ligoj.io" \
-      summary="The REST API server of Ligoj." \
-      description="The REST API server of Ligoj." \
       run="docker run -d --name NAME -p 8081:8081 IMAGE" \
       stop="docker stop NAME" \
       com.sonatype.license="MIT" \
+      name="Ligoj API server" \
+      summary="The REST API server of Ligoj." \
+      description="The REST API server of Ligoj." \
       io.k8s.description="The REST API server of Ligoj." \
       io.k8s.display-name="Ligoj API server" \
       io.openshift.expose-services="8081:8081" \
@@ -51,6 +51,7 @@ ENV CONTEXT_URL="/ligoj-api" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
     ARTIFACT_ID="${ARTIFACT_ID}" \
+    JAVA_MEMORY="" \
     JAVA_OPTIONS="-Duser.timezone=UTC"
 
 EXPOSE ${SERVER_PORT}
@@ -59,7 +60,7 @@ RUN { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || 
 
 CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
     { [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || echo "No defined prepare cmd instruction, create a prepare-cmd.sh script to prepare http_proxy or other custom configurations."; } && \
-    java $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
+    java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
 	 --enable-preview \
 	 --add-modules java.se \
 	 --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
@@ -83,11 +84,11 @@ CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
 	 --add-exports java.base/jdk.internal.ref=ALL-UNNAMED \
 	 --add-exports java.naming/com.sun.jndi.ldap=ALL-UNNAMED \
 	 --add-opens java.management/sun.management=ALL-UNNAMED \
+     -Djava.security.policy="${SERVER_HOME}/ligoj.policy" \
      -Dserver.address="${SERVER_HOST}" \
      -Dserver.port="${SERVER_PORT}" \
      -Dserver.servlet.context-path="${CONTEXT_URL}" \
      -Djavax.net.ssl.trustStorePassword=changeit \
-     -Djava.security.policy="${SERVER_HOME}/ligoj.policy" \
      -Djava.net.preferIPv4Stack=true \
      -Dligoj.home="${LIGOJ_HOME}" \
      -jar "${ARTIFACT_ID}.war"
