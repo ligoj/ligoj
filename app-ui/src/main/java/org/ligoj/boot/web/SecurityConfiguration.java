@@ -88,9 +88,6 @@ public class SecurityConfiguration {
 	@Value("${ligoj.security.login.url:/login.html}")
 	private String loginUrl;
 
-	@Value("${ligoj.security.login.url-prd:/login-prod.html}")
-	private String loginProdUrl;
-
 	static final String LOGIN_API = "/login";
 	static final String LOGOUT_HTML = "/logout.html";
 	static final String INDEX_HTML = "/index.html";
@@ -101,11 +98,11 @@ public class SecurityConfiguration {
 	 * @return A 403 JSON management.
 	 */
 	@Bean
-	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint() {
+	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint(AbstractAuthenticationProvider provider) {
 		final var ep = new RedirectAuthenticationEntryPoint(loginUrl);
 		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, "/index-prod.html", "/login.html", "/login-prd.html"));
 		ep.setRedirectStrategy(getRestFailureStrategy());
-
+		ep.setForceRedirectUrl(provider.isForceRedirect());
 		return ep;
 	}
 
@@ -183,7 +180,7 @@ public class SecurityConfiguration {
 		);
 
 		final var loginDeniedUrl = loginUrl + "?denied";
-		http.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint()).accessDeniedPage(loginDeniedUrl));
+		http.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint(provider)).accessDeniedPage(loginDeniedUrl));
 		provider.configureLogout(http, clientRegistrationRepository, logoutUrl, securityPreAuthCookies);
 
 		final var loginSuccessHandler = getSuccessHandler();

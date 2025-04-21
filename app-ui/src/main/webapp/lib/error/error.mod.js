@@ -83,6 +83,14 @@ define([
 			return (_('_login').length !== 0 && $('button[data-target="#_login"]').length !== 0) || current.isLoginPromptBeingDisplayed;
 		},
 
+		handleRedirect(redirect) {
+            if (redirect === 'local') {
+                current.showAuthenticationAlert();
+            } else if (redirect) {
+                window.location.href = window.location.protocol + '//'+window.location.host + redirect;
+            }
+        },
+
 		/**
 		 * Show the authentication requirement and load the login form for the popup.
 		 */
@@ -137,6 +145,11 @@ define([
 				return;
 			}
 			var errorObj;
+            var redirect = xhr && xhr.getResponseHeader("x-redirect");
+            if (redirect) {
+                current.handleRedirect(redirect);
+                return;
+            }
 			if (xhr.status === 400) {
 				current.manageBadRequestError(xhr.responseText, false, true);
 			} else if (xhr.status === 403) {
@@ -284,7 +297,12 @@ define([
 					xhr: xhr,
 					settings: settings
 				};
-			}).ajaxError(function (event, xhr, textStatus, errorThrown) {
+                var redirect = xhr && xhr.getResponseHeader("x-redirect");
+                if (redirect) {
+                    current.handleRedirect(redirect);
+                    return;
+                }
+            }).ajaxError(function (event, xhr, textStatus, errorThrown) {
 				current.manageAjaxError(event, xhr, textStatus, errorThrown);
 			}).ajaxStart(function () {
 				// Add loading indicator
@@ -311,7 +329,8 @@ define([
 				}
 			}
 			if (err.xhr && err.xhr.status === 401) {
-				current.showAuthenticationAlert();
+                var redirect = xhr && xhr.getResponseHeader("x-redirect");
+                current.handleRedirect(redirect || 'local');
 			} else if (err.requireType === 'timeout' && err.requireModules) {
 				if (!current.isLoginPromptDisplayed()) {
 					notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-timeout-details'])(err.requireModules[0]), errorMessages['error404-timeout']);

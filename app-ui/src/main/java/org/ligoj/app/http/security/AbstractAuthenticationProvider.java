@@ -30,6 +30,12 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 	private String ssoPostContent;
 
 	/**
+	 * When true, redirects must be followed for login/logout responses.
+	 */
+	@Getter
+	private boolean forceRedirect;
+
+	/**
 	 * SSO get format.
 	 */
 	private String ssoWelcome;

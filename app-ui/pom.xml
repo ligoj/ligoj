@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>bootstrap-web-parent</artifactId>
-		<version>3.1.24</version>
+		<version>3.1.25</version>
 		<relativePath />
 	</parent>
 
@@ -144,7 +144,9 @@
 					</execution>
 				</executions>
 				<configuration>
+					<loaderImplementation>CLASSIC</loaderImplementation>
 					<mainClass>org.ligoj.boot.web.Application</mainClass>
+					<excludeGroupIds>org.projectlombok,org.eclipse.jetty.websocket</excludeGroupIds>
 				</configuration>
 			</plugin>
         </plugins>
