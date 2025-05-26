@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -52,7 +51,6 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 	}
 
 	public HttpSecurity configureLogout(HttpSecurity http,
-			final ClientRegistrationRepository clientRegistrationRepository,
 			final String logoutUrl, final String[] securityPreAuthCookies) throws Exception {
 		return http.logout(a ->
 				a.addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies))

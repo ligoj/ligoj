@@ -14,6 +14,7 @@ import org.ligoj.bootstrap.http.security.RedirectAuthenticationEntryPoint;
 import org.ligoj.bootstrap.http.security.RestRedirectStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -28,7 +29,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -88,6 +88,9 @@ public class SecurityConfiguration {
 	@Value("${ligoj.security.login.url:/login.html}")
 	private String loginUrl;
 
+	@Autowired
+	private ApplicationContext applicationContext;
+
 	static final String LOGIN_API = "/login";
 	static final String LOGOUT_HTML = "/logout.html";
 	static final String INDEX_HTML = "/index.html";
@@ -128,6 +131,7 @@ public class SecurityConfiguration {
 	public AbstractAuthenticationProvider authenticationProvider() throws ReflectiveOperationException {
 		final var provider = (AbstractAuthenticationProvider) Class
 				.forName("org.ligoj.app.http.security." + securityProvider + "AuthenticationProvider").getConstructors()[0].newInstance();
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);
 		provider.setSsoPostUrl(ssoUrl);
 		provider.setSsoPostContent(ssoContent);
 		return provider;
@@ -153,8 +157,7 @@ public class SecurityConfiguration {
 	 */
 	@Bean
 	public SecurityFilterChain filterChain(final HttpSecurity http,
-			final ExtendedWebSecurityExpressionHandler expressionWebHandler,
-			final ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+			final ExtendedWebSecurityExpressionHandler expressionWebHandler) throws Exception {
 		final var logoutUrl = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, LOGOUT_HTML) : loginUrl + "?logout";
 		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
 		final var provider = authenticationProvider();
@@ -181,7 +184,7 @@ public class SecurityConfiguration {
 
 		final var loginDeniedUrl = loginUrl + "?denied";
 		http.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint(provider)).accessDeniedPage(loginDeniedUrl));
-		provider.configureLogout(http, clientRegistrationRepository, logoutUrl, securityPreAuthCookies);
+		provider.configureLogout(http, logoutUrl, securityPreAuthCookies);
 
 		final var loginSuccessHandler = getSuccessHandler();
 		final var loginFailureHandler = getFailureHandler();
@@ -212,6 +215,10 @@ public class SecurityConfiguration {
 		return chain;
 	}
 
+	public void configureLogout() {
+
+	}
+
 	private boolean isPreAuth() {
 		return StringUtils.isNotBlank(securityPreAuthPrincipal);
 	}
@@ -233,8 +240,8 @@ public class SecurityConfiguration {
 	 * @throws ReflectiveOperationException Unable to build the authentication provider
 	 */
 	@Autowired
-	public void configureGlobal(final AuthenticationManagerBuilder auth) throws ReflectiveOperationException {
-		auth.eraseCredentials(true).authenticationProvider(authenticationProvider());
+	public void configureGlobal(final AuthenticationManagerBuilder auth, AbstractAuthenticationProvider provider) throws ReflectiveOperationException {
+		auth.eraseCredentials(true).authenticationProvider(provider);
 	}
 
 	/**

@@ -4,6 +4,7 @@
 package org.ligoj.app.http.security;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,9 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @Slf4j
 public class OAuth2BffAuthenticationProvider extends AbstractAuthenticationProvider {
 
+	@Autowired
+	ClientRegistrationRepository clientRegistrationRepository;
+
 	public OAuth2BffAuthenticationProvider() {
 		this.setForceRedirect(true);
 	}
@@ -28,7 +32,7 @@ public class OAuth2BffAuthenticationProvider extends AbstractAuthenticationProvi
 	}
 
 	@Override
-	public HttpSecurity configureLogout(HttpSecurity http, final ClientRegistrationRepository clientRegistrationRepository, final String logoutUrl, final String[] securityPreAuthCookies) throws Exception {
+	public HttpSecurity configureLogout(HttpSecurity http, final String logoutUrl, final String[] securityPreAuthCookies) throws Exception {
 		return http.logout(a -> {
 			final var logoutSuccessHandler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
 			logoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}" + logoutUrl);

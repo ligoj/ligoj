@@ -35,12 +35,13 @@ class OAuthBffAuthenticationProviderTest extends AbstractServerTest {
 		var http = Mockito.mock(HttpSecurity.class);
 		var clientRegistrationRepository = Mockito.mock(ClientRegistrationRepository.class);
 		var configurer = Mockito.mock(LogoutConfigurer.class);
+		authenticationProvider.clientRegistrationRepository = clientRegistrationRepository;
 
 		Mockito.doAnswer(invocation -> {
 			((Customizer) invocation.getArgument(0)).customize(configurer);
 			return null;
 		}).when(http).logout(Mockito.any(Customizer.class));
-		Assertions.assertNull(authenticationProvider.configureLogout(http, clientRegistrationRepository, null, null));
+		Assertions.assertNull(authenticationProvider.configureLogout(http, null, null));
 		Mockito.verify(configurer).logoutSuccessHandler(Mockito.any(OidcClientInitiatedLogoutSuccessHandler.class));
 	}
 
