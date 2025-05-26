@@ -215,10 +215,6 @@ public class SecurityConfiguration {
 		return chain;
 	}
 
-	public void configureLogout() {
-
-	}
-
 	private boolean isPreAuth() {
 		return StringUtils.isNotBlank(securityPreAuthPrincipal);
 	}
@@ -237,10 +233,9 @@ public class SecurityConfiguration {
 	 * Configure {@link AuthenticationProvider}
 	 *
 	 * @param auth The builder.
-	 * @throws ReflectiveOperationException Unable to build the authentication provider
 	 */
 	@Autowired
-	public void configureGlobal(final AuthenticationManagerBuilder auth, AbstractAuthenticationProvider provider) throws ReflectiveOperationException {
+	public void configureGlobal(final AuthenticationManagerBuilder auth, AbstractAuthenticationProvider provider) {
 		auth.eraseCredentials(true).authenticationProvider(provider);
 	}
 

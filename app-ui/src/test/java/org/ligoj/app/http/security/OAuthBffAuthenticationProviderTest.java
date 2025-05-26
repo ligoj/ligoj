@@ -26,7 +26,7 @@ class OAuthBffAuthenticationProviderTest extends AbstractServerTest {
 	}
 
 	@Test
-	void authenticate() throws Exception {
+	void authenticate() {
 		Assertions.assertNull(authenticationProvider.authenticate(null));
 	}
 
