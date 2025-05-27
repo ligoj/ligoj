@@ -26,7 +26,7 @@ define([
 				cache: false,
 				success: function (result) {
 					current.success();
-					if (result && result.success && result.redirect) {
+					if (result && result.success && result.redirect && result.redirect !== 'local') {
 						// Success login, use the provided redirection URL
 						window.location.replace('//' + location.host + result.redirect + (current.target || '#/'));
 					} else {
