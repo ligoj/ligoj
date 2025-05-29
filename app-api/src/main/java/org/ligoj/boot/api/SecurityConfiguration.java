@@ -32,7 +32,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 /**
  * Security configuration.
@@ -56,27 +56,28 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 		final var authenticationManager = http.getSharedObject(AuthenticationManager.class);
+		final var matcher = PathPatternRequestMatcher.withDefaults();
 		return http.authorizeHttpRequests(authorize ->
 						authorize.requestMatchers(
-										AntPathRequestMatcher.antMatcher("/rest"),
-										AntPathRequestMatcher.antMatcher("/rest/api-docs"),
-										AntPathRequestMatcher.antMatcher("/manage/info"),
-										AntPathRequestMatcher.antMatcher("/rest/openapi.json")).authenticated()
+										matcher.matcher("/rest"),
+										matcher.matcher("/rest/api-docs"),
+										matcher.matcher("/manage/info"),
+										matcher.matcher("/rest/openapi.json")).authenticated()
 
 								// Unsecured access
 								.requestMatchers(
 										EndpointRequest.to("health"),
-										AntPathRequestMatcher.antMatcher("/rest/redirect"),
-										AntPathRequestMatcher.antMatcher("/manage/health"),
-										AntPathRequestMatcher.antMatcher("/webjars/public/**")).permitAll()
+										matcher.matcher("/rest/redirect"),
+										matcher.matcher("/manage/health"),
+										matcher.matcher("/webjars/public/**")).permitAll()
 								.requestMatchers(
-										AntPathRequestMatcher.antMatcher("/rest/security/login"),
-										AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
-										AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**"))
+										matcher.matcher("/rest/security/login"),
+										matcher.matcher("/rest/service/password/reset/**"),
+										matcher.matcher("/rest/service/password/recovery/**"))
 								.anonymous()
 
 								.requestMatchers(
-										AntPathRequestMatcher.antMatcher("/manage/**")).hasAuthority("ADMIN")
+										matcher.matcher("/manage/**")).hasAuthority("ADMIN")
 
 								// Everything else is authenticated
 								.anyRequest().fullyAuthenticated())

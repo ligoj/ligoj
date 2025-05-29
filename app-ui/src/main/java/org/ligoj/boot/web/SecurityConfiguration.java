@@ -40,9 +40,9 @@ import org.springframework.security.web.authentication.session.RegisterSessionAu
 import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.session.SimpleRedirectSessionInformationExpiredStrategy;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 import java.util.Arrays;
@@ -164,18 +164,19 @@ public class SecurityConfiguration {
 		final var authorization = new WebExpressionAuthorizationManager("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()");
 		authorization.setExpressionHandler(expressionWebHandler);
 
+		final var matcher = PathPatternRequestMatcher.withDefaults();
 		http.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers(
 						// Login
-						AntPathRequestMatcher.antMatcher(HttpMethod.POST, LOGIN_API),
+						matcher.matcher(HttpMethod.POST, LOGIN_API),
 						// Public static resources
 						RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PATTERN.pattern()),
-						AntPathRequestMatcher.antMatcher("/rest/redirect"),
-						AntPathRequestMatcher.antMatcher("/rest/security/login"),
-						AntPathRequestMatcher.antMatcher("/captcha.png")).permitAll()
+						matcher.matcher("/rest/redirect"),
+						matcher.matcher("/rest/security/login"),
+						matcher.matcher("/captcha.png")).permitAll()
 				.requestMatchers(
-						AntPathRequestMatcher.antMatcher("/rest/service/password/reset/**"),
-						AntPathRequestMatcher.antMatcher("/rest/service/password/recovery/**")).anonymous()
+						matcher.matcher("/rest/service/password/reset/**"),
+						matcher.matcher("/rest/service/password/recovery/**")).anonymous()
 
 				// Everything else must be authenticated
 				.anyRequest()
