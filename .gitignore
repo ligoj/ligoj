@@ -18,3 +18,4 @@ bin/
 /.ligoj
 /package-lock.json
 /app-api/.m2/
+/app-api/settings.xml
