@@ -4,8 +4,8 @@
 
 ## Roles
 
-- URL security level, with RBAC : User / Role / Permission for a URL pattern supporting dynamic configuration
-- Resource security level (most complex) giving to users, groups and companies an access (read, write, +grant) to nodes,
+- URL security level, with RBAC: User / Role / Permission for a URL pattern supporting dynamic configuration
+- Resource security level (most complex) gives to users, groups and companies can access (read, write, +grant) to nodes,
   users, groups, companies
 - plugin runtime and life-cycle management
 
@@ -53,7 +53,7 @@ Sample result
 
 ### WADL
 
-WADL format currently output only XML format.
+WADL format currently outputs only XML.
 
 ```bash
 curl 'http://localhost:8081/ligoj-api/rest?_wadl' -H 'SM_UniversalID: ligoj-admin'
@@ -97,8 +97,7 @@ mvn clean package -DskipTests=true
 
 Note: you can run this command either from the root module, either from the `app-api` module. When executed from the
 root module, both WAR (`app-api` and `app-ui`) will be created. But if you want to produce production binaries, enable
-the "
-minify" profile `minify`.
+the "minify" profile `minify`.
 
 # Test the WAR
 
@@ -110,7 +109,7 @@ java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=fal
 
 ## Build with Docker builder
 
-With this mode, no build tools (java, Maven,...) are required to build the image.
+With this mode, no build tools (java, Maven, ...) are required to build the image.
 
 ```bash
 docker build -t ligoj/ligoj-api:4.0.0 -f Dockerfile .
@@ -124,7 +123,7 @@ podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligo
 
 ## Custom Maven proxy
 
-To use a custom Maven configuration (proxy, mirror,...), copy your `settings.xml` Maven file in `.m2/` directory.
+To use a custom Maven configuration (proxy, mirror, ...), copy your `settings.xml` Maven file in `.m2/` directory.
 
 Content will be copied at build time with a Docker `COPY` instruction.
 The same applies to [app-ui](../app-ui/Dockerfile)
@@ -225,7 +224,7 @@ docker run --rm -it \
 Explanations:
 
 - `-e CRYPTO="-Dapp.crypto.file=/home/ligoj/security.key"`: Specify the SQL column cryptographic DES secret file. More
-  information available
+  information is available
   there: [core-context-common.xml](https://github.com/ligoj/bootstrap/blob/5e23ac71c48bb89c8c44433bb4a89a30cbb4700c/bootstrap-core/src/main/resources/META-INF/spring/core-context-common.xml#L16C101-L16C101)
 - `-e CUSTOM_OPTS="..."`: Options related to database, and other application features,
   see [Relevant variables](#relevant-variables)
@@ -257,7 +256,7 @@ schema update when some tables are already existing in a database different from
 
 ### Troubleshoot database access
 
-You can experience network issue with remote database. To validate the link, try this :
+You can experience network issue with a remote database. To validate the link, try this :
 
 #### MySQL
 
@@ -366,7 +365,7 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 
 # Management endpoints
 
-Following commands are only available in development mode, with exposed API:
+The following commands are only available in development mode, with exposed API:
 
 ```bash
 curl -H "SM_UniversalID:ligoj-admin" http://localhost:8081/ligoj-api/manage/info
