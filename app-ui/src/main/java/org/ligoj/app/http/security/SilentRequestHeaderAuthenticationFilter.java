@@ -3,20 +3,20 @@
  */
 package org.ligoj.app.http.security;
 
-import java.io.IOException;
-import java.util.regex.Pattern;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedCredentialsNotFoundException;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
+
+import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * Security filter enabled when a required header is used for pre-authentication.
@@ -72,7 +72,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 						new PreAuthenticatedCredentialsNotFoundException(principalHeaderCopy + " header not found in request."));
 			} else if (req.getRequestURI().matches(req.getContextPath() + "/?login.html")) {
 				// In pre-auth mode, "/login" page is not available
-				res.sendRedirect(StringUtils.appendIfMissing(req.getContextPath(), "/"));
+				res.sendRedirect(Strings.CS.appendIfMissing(req.getContextPath(), "/"));
 			} else {
 				super.doFilter(request, response, chain);
 			}

@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class HtmlProxyFilter extends OncePerRequestFilter {
 	 */
 	private String getBaseName(final ServletRequest request) {
 		final var servletPath = ((HttpServletRequest) request).getServletPath();
-		final var base = StringUtils.removeStart(servletPath, "/");
+		final var base = Strings.CS.removeStart(servletPath, "/");
 		return getBaseName(base.isEmpty() ? "index.html" : base);
 	}
 
