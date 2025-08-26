@@ -140,12 +140,23 @@ Spring-Boot properties, injected in CUSTOM_OPTS
 | server.address              | `${SERVER_HOST}`                           | IP of the listening socket.                                                                                                                       |
 | server.servlet.context-path | `/${CONTEXT}`                              | Context, starting '/'                                                                                                                             |
 | security.max-sessions       | `1`                                        | Max concurrent session for one user, "-1" unlimited                                                                                               |
-| security                    | `Rest`                                     | `Trusted`, `Rest` or `OAuth2Bff`. See [Security](https://github.com/ligoj/ligoj/wiki/Security)                                                     |
+| security                    | `Rest`                                     | `Trusted`, `Rest` or `OAuth2Bff`. See [Security](https://github.com/ligoj/ligoj/wiki/Security)                                                    |
 | ligoj.sso.url               | `${ligoj.endpoint.api.url}/security/login` | Authentication end-point URL                                                                                                                      |
 | ligoj.sso.content           | `{"name":"%s","password":"%s"}`            | SSO payload template.                                                                                                                             |
 | app-env                     | `auto`                                     | Suffix for index and login HTML files, maybe `-prod`, `auto` or empty. When `auto`, the suffix is guessed from the way the application is started |
 | log.http                    | `info`                                     | When `debug`, all HTTP queries are logged. Increase log files.                                                                                    |
 | log.level                   | `info`                                     | Configure log verbosity of all internal components: Spring and Jetty                                                                              |
+
+### System level-only variables
+
+These variables are only relevant when set as Java System property.
+For sample `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
+
+| Name                   | Default value      | Note                               |
+|------------------------|--------------------|------------------------------------|
+| ligoj.log.file.name    | `./ui-rolling.log` | File inside `LIGOJ_HOME` directory |
+| ligoj.log.file.size    | `10 MB`            | Max log file size                  |
+| ligoj.log.file.enabled | `true`             | Enablement of log file             |
 
 ## Compatibilities
 

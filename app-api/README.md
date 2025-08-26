@@ -338,6 +338,17 @@ console:
 | server.address                                        | `${SERVER_HOST}`                                                                                                                                                              |                                                                                                                                                                                                                                   |
 | server.servlet.context-path                           | `/${CONTEXT}`                                                                                                                                                                 |                                                                                                                                                                                                                                   |
 
+### System level-only variables
+
+These variables are only relevant when set as Java System property.
+For sample `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
+
+| Name                   | Default value       | Note                               |
+|------------------------|---------------------|------------------------------------|
+| ligoj.log.file.name    | `./api-rolling.log` | File inside `LIGOJ_HOME` directory |
+| ligoj.log.file.size    | `10 MB`             | Max log file size                  |
+| ligoj.log.file.enabled | `true`              | Enablement of log file             |
+
 ## Compatibilities
 
 ### Database
