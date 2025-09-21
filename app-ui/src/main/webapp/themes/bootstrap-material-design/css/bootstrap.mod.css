@@ -30,7 +30,7 @@ tr.selected>td {
 }
 table.dataTable thead .sorting:after {
 	display: inline-block;
-	font-family: 'Font Awesome 5 Free';
+	font-family: 'Font Awesome 7 Free';
     	font-size: inherit;
 	text-rendering: auto;
 	-webkit-font-smoothing: antialiased;
@@ -42,18 +42,20 @@ table.dataTable thead .sorting:hover:after {
 }
 table.dataTable thead .sorting_asc:after {
 	display: inline-block;
-	font-family: 'Font Awesome 5 Free';
+	font-family: 'Font Awesome 7 Free';
 	font-size: inherit;
 	text-rendering: auto;
 	-webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 	content: "\f160";
 }
 table.dataTable thead .sorting_desc:after {
 	display: inline-block;
-	font-family: 'Font Awesome 5 Free';
+	font-family: 'Font Awesome 7 Free';
 	font-size: inherit;
 	text-rendering: auto;
 	-webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 	content: "\f161";
 }
 
@@ -304,7 +306,7 @@ a:hover {
 	margin-left: 2px;
 	margin-top: 1px;
 	position: absolute;
-	font-family: "Font Awesome 5 Free";
+	font-family: "Font Awesome 7 Free";
 	font-weight: 900;
 	font-size: 7px;
 	content: "\f069";
