@@ -28,10 +28,10 @@ Cross-browser Testing Platform and Open Source <3 Provided by [Sauce Labs][homep
 curl https://raw.githubusercontent.com/ligoj/ligoj/master/docker-compose.yml -o docker-compose.yml -s && docker-compose up
 ```
 
-Open your browser at : [Ligoj Home](http://localhost:8080/ligoj)
-User/password for administrator role : `ligoj-admin` and `ligoj-user` for a regular user
+Open your browser at: [Ligoj Home](http://localhost:8080/ligoj)
+User/password for the administrator role: `ligoj-admin` and `ligoj-user` for a regular user
 
-You can install the plug-ins for RBAC security : plugin-id,plugin-id-ldap,plugin-id-ldap-embedded
+You can install the plug-ins for RBAC security: plugin-id,plugin-id-ldap,plugin-id-ldap-embedded
 
 ## Dev section
 
@@ -78,7 +78,7 @@ docker push $ECR_REGISTRY/ligoj/ligoj-api:4.0.0
 docker push $ECR_REGISTRY/ligoj/ligoj-ui:4.0.0
 ```
 
-# Advanced deployments with compose
+# Advanced deployments with Docker Compose
 
 ## Custom Docker Compose variables
 
@@ -173,14 +173,14 @@ Ligoj is massively based on plugin management.
 
 All plugins are deployed in [Maven central](https://mvnrepository.com/artifact/org.ligoj.plugin)
 
-To build and deploy a plugin, more information are available in [plugin-api](https://github.com/ligoj/plugin-api) repository.
+To build and deploy a plugin, more information is available in the [plugin-api](https://github.com/ligoj/plugin-api) repository.
 
 # Custom UI
 
 Ligoj comes with a modular approach. For custom UI, the solutions are:
 - Rebuild [plugin-ui](https://github.com/ligoj/plugin-ui), with specific assets, and deploy this plugin in a custom Maven repository, or upload it with `/system/plugin/{artifact}/{version}` API
-- Create your own plugin `plugin-ui-company`, with you specific assets: overrides and additions. Then install this plugin as above solution
-- Copy you specific assets in the Ligoj home directory such as `/home/ligoj/META-INF/resources/webjars`, `$(pwd)/.ligoj/META-INF/resources/webjars`, depending on your runtime. For sample:
+- Create your own plugin `plugin-ui-company`, with your specific assets: overrides and additions. Then install this plugin as the above solution
+- Copy you specific assets in the Ligoj home directory such as `/home/ligoj/META-INF/resources/webjars`, `$(pwd)/.ligoj/META-INF/resources/webjars`, depending on your runtime. For a sample:
     ```bash
     # With Ligoj CLI
     ligoj configuration set --id "ligoj.file.path" --value "^/home/ligoj/META-INF/resources/webjars/.*,^/home/ligoj/statics/themes/.*"
