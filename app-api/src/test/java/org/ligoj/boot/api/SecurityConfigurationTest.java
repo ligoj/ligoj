@@ -3,17 +3,22 @@
  */
 package org.ligoj.boot.api;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 
 import java.util.Map;
 
@@ -22,6 +27,7 @@ import java.util.Map;
  */
 class SecurityConfigurationTest {
 
+	@SuppressWarnings("unchecked")
 	@Test
 	void configure() throws Exception {
 		@SuppressWarnings("unchecked") final ObjectPostProcessor<Object> processor = Mockito.mock(ObjectPostProcessor.class);
@@ -35,6 +41,14 @@ class SecurityConfigurationTest {
 		final var security = new HttpSecurity(processor, builder, Map.of(ApplicationContext.class, applicationContext, AuthenticationManager.class, authenticationManager));
 		security.authenticationManager(authenticationManager);
 		final var configuration = new SecurityConfiguration();
+
+		final var beanProvider = Mockito.mock(ObjectProvider.class);
+		Mockito.when(applicationContext.getBeanProvider(Mockito.any(ResolvableType.class))).thenReturn(beanProvider);
+		final var beanProvider2 = Mockito.mock(SecurityContextHolderStrategy.class);
+
+		final var beanProvider3 = Mockito.mock(ObjectProvider.class);
+		Mockito.when(applicationContext.getBeanProvider(SecurityContextHolderStrategy.class)).thenReturn(beanProvider3);
+		Mockito.when(beanProvider3.getIfUnique(Mockito.any())).thenReturn(beanProvider2);
 
 		Assertions.assertNotNull(configuration.filterChain(security));
 		configuration.apiTokenFilter(authenticationManager);
