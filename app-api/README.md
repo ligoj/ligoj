@@ -254,7 +254,6 @@ only the target database. If there are several visible databases by this user, t
 tables of all visible tables, including the ones of the not targeted database. This strategy may produce an empty SQL
 schema update when some tables are already existing in a database different from the target one.
 
-
 ### Administrator user reinitialisation
 
 By default, the user `ligoj-admin` is created at the first start assigned to the role `ADMIN`, and this behavior can be configured with `ligoj.initial.user.*` properties.
@@ -262,12 +261,14 @@ By default, the user `ligoj-admin` is created at the first start assigned to the
 #### Scenario #1
 
 Constraints:
+
 - Instead of the user `ligoj-admin`, create `some-user`.
 - Assign this user to a role `Administrators`
 - Create an API token named `init_token`
 - Print this token value in the console only on the first start
 
 Options to set:
+
 - `ligoj.initial.user.name`: `some-user`
 - `ligoj.initial.user.action`: `init`
 - `ligoj.initial.user.role`: `Administrators`
@@ -276,18 +277,19 @@ Options to set:
 #### Scenario #2
 
 Constraints:
+
 - Instead of the user `ligoj-admin`, create `some-user`.
 - Assign this user to a role `Administrators`
 - Create an API token named `init_token`
 - Replace this token by a value `SECRET` (this value will not be printed)
 
 Options to set:
+
 - `ligoj.initial.user.name`: `some-user`
 - `ligoj.initial.user.action`: `reset`
 - `ligoj.initial.user.role`: `Administrators`
 - `ligoj.initial.user.token.name`: `init_token`
 - `ligoj.initial.user.token.value`: `SECRET`
-
 
 ### Troubleshoot database access
 
@@ -313,15 +315,15 @@ docker run --rm -it \
 
 Docker environment variables
 
-| Docker env   | Default value       | Note                                                                             |
-|--------------|---------------------|----------------------------------------------------------------------------------|
-| CRYPTO       |                     | Secret AES file location for secured application data                            |
-| CONTEXT      | `ligoj`             | Context, without starting '/'                                                    |
-| SERVER_HOST  | `0.0.0.0`           | IP of the listening socket.                                                      |
-| SERVER_PORT  | `8081`              | Passed to server listening port and exposed port.                                |
-| JAVA_MEMORY  | `-Xms128M -Xmx128M` | JVM Memory                                                                       |
-| CUSTOM_OPTS  |                     | Additional JVM options, like -D...                                               |
-| JAVA_OPTIONS |                     | Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties |
+| Docker env   | Default value                  | Note                                                                             |
+|--------------|--------------------------------|----------------------------------------------------------------------------------|
+| CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration. See                                                    |
+| CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
+| SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
+| SERVER_PORT  | `8081`                         | Passed to server listening port and exposed port.                                |
+| JAVA_MEMORY  | `-Xms128M -Xmx128M`            | JVM Memory                                                                       |
+| CUSTOM_OPTS  |                                | Additional JVM options, like -D...                                               |
+| JAVA_OPTIONS |                                | Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties |
 
 Java properties (injected in CUSTOM_OPTS with -Dxxx=yyyy) and Spring-Boot properties (can be injected in `CUSTOM_OPTS`)
 and can be dynamically modified from the administration
@@ -329,7 +331,8 @@ console:
 
 | Name                                                  | Default value                                                                                                                                                                 | Note                                                                                                                                                                                                                              |
 |-------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| app.crypto.file                                       |                                                                                                                                                                               | Secret file location                                                                                                                                                                                                              |
+| app.crypto.file                                       |                                                                                                                                                                               | Secret file location. Can also be defined in `APP_CRYPTO_FILE`environment variable.                                                                                                                                               |
+| app.crypto.password                                   |                                                                                                                                                                               | Secret value. Can also be defined in `APP_CRYPTO_PASSWORD`environment variable.                                                                                                                                                   |
 | cache.location                                        | `classpath:META-INF/hazelcast-local.xml`                                                                                                                                      | Custom Hazelcast configuration file location                                                                                                                                                                                      |                                                                    
 | cache.${cache_name}.ttl                               |                                                                                                                                                                               | For each cache, built-in default TTL can be adjusted. The identifier replacing `${cache_name}` can be listed from the administration page                                                                                         |
 | feature:iam:node:primary                              | `empty`                                                                                                                                                                       | Ligoj `plugin-id` node's identifier used as primary IAM provider. See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node) for more information. `empty` provider is a read-only provider accepting all authentications.   |
