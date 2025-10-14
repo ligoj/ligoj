@@ -254,6 +254,41 @@ only the target database. If there are several visible databases by this user, t
 tables of all visible tables, including the ones of the not targeted database. This strategy may produce an empty SQL
 schema update when some tables are already existing in a database different from the target one.
 
+
+### Administrator user reinitialisation
+
+By default, the user `ligoj-admin` is created at the first start assigned to the role `ADMIN`, and this behavior can be configured with `ligoj.initial.user.*` properties.
+
+#### Scenario #1
+
+Constraints:
+- Instead of the user `ligoj-admin`, create `some-user`.
+- Assign this user to a role `Administrators`
+- Create an API token named `init_token`
+- Print this token value in the console only on the first start
+
+Options to set:
+- `ligoj.initial.user.name`: `some-user`
+- `ligoj.initial.user.action`: `init`
+- `ligoj.initial.user.role`: `Administrators`
+- `ligoj.initial.user.token.name`: `init_token`
+
+#### Scenario #2
+
+Constraints:
+- Instead of the user `ligoj-admin`, create `some-user`.
+- Assign this user to a role `Administrators`
+- Create an API token named `init_token`
+- Replace this token by a value `SECRET` (this value will not be printed)
+
+Options to set:
+- `ligoj.initial.user.name`: `some-user`
+- `ligoj.initial.user.action`: `reset`
+- `ligoj.initial.user.role`: `Administrators`
+- `ligoj.initial.user.token.name`: `init_token`
+- `ligoj.initial.user.token.value`: `SECRET`
+
+
 ### Troubleshoot database access
 
 You can experience network issue with a remote database. To validate the link, try this :
@@ -321,11 +356,11 @@ console:
 | jpa.generate_statistics                               | `false`                                                                                                                                                                       | When `true` Hibernate statistics are logged.                                                                                                                                                                                      |
 | management.context-path                               | `/manage`                                                                                                                                                                     |                                                                                                                                                                                                                                   |
 | management.security.roles                             | `USER`                                                                                                                                                                        | Default RBAC role assigned to new user.                                                                                                                                                                                           |
+| ligoj.initial.user.action                             | ``                                                                                                                                                                            | When `init`, the initialization is executed once. When `reset`, its execution is forced.                                                                                                                                          |
 | ligoj.initial.user.name                               | `ligoj-admin`                                                                                                                                                                 | The initial user name.                                                                                                                                                                                                            |
 | ligoj.initial.user.role                               | `ADMIN`                                                                                                                                                                       | The initial role name to associate to the initial user.                                                                                                                                                                           |
 | ligoj.initial.user.token.name                         | `auto-install`                                                                                                                                                                | The API token name to associate to the initial user.                                                                                                                                                                              |
 | ligoj.initial.user.token.value                        | ``                                                                                                                                                                            | When defined, the API token value is forced to the given value, and not printed. Otherwise, a generated value is set and printed in log: `[INIT] Token '..' has been set for initial user '..' to value: ..`                      |
-| ligoj.initial.user.action                             | ``                                                                                                                                                                            | When `init`, the initialization is executed once. When `reset`, its execution is forced.                                                                                                                                          |
 | ligoj.hook.path                                       | `^$`                                                                                                                                                                          | Hook (`/system/hook`) commands must match with one of the path of this list. Comma separated RegEx. Checked at creation and execution time.                                                                                       |
 | ligoj.file.path                                       | `^$`                                                                                                                                                                          | File (`/system/file`) paths must match with one of the path of this list. Comma separated RegEx. Checked at download and upload time.                                                                                             |
 | ligoj.plugin.enabled                                  | `true`                                                                                                                                                                        | When false, plugins are not loaded and their state is not updated                                                                                                                                                                 |
