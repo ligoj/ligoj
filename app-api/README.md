@@ -225,7 +225,7 @@ Explanations:
 
 - `-e CRYPTO="-Dapp.crypto.file=/home/ligoj/security.key"`: Specify the SQL column cryptographic DES secret file. More
   information is available
-  there: [core-context-common.xml](https://github.com/ligoj/bootstrap/blob/5e23ac71c48bb89c8c44433bb4a89a30cbb4700c/bootstrap-core/src/main/resources/META-INF/spring/core-context-common.xml#L16C101-L16C101)
+  there: [core-context-common.xml](https://github.com/ligoj/bootstrap/tree/master/bootstrap-core/src/main/resources/META-INF/spring/core-context-common.xml#L16C101-L16C101)
 - `-e CUSTOM_OPTS="..."`: Options related to database, and other application features,
   see [Relevant variables](#relevant-variables)
 - `-v ~/.ligoj:/home/ligoj \`: External persistent volume for plugins and other data.
