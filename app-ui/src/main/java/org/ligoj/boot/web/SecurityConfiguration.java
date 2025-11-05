@@ -157,10 +157,9 @@ public class SecurityConfiguration {
 	 */
 	@Bean
 	public SecurityFilterChain filterChain(final HttpSecurity http,
-			final ExtendedWebSecurityExpressionHandler expressionWebHandler) throws Exception {
+			final ExtendedWebSecurityExpressionHandler expressionWebHandler, AbstractAuthenticationProvider provider) throws Exception {
 		final var logoutUrl = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, LOGOUT_HTML) : loginUrl + "?logout";
 		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
-		final var provider = authenticationProvider();
 		final var authorization = new WebExpressionAuthorizationManager("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()");
 		authorization.setExpressionHandler(expressionWebHandler);
 
