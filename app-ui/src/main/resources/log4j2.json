@@ -59,12 +59,12 @@
 		"loggers": {
           "logger": [
                 {
-                  "name": "org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer",
-                  "level": "error",
-                  "additivity": "false",
-                  "AppenderRef": {
-                    "ref": "STDOUT"
-                  }
+                    "name": "org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer",
+                    "level": "error",
+                    "additivity": "false",
+                    "AppenderRef": {
+                      "ref": "STDOUT"
+                    }
                 }, {
 					"name": "org.springframework.security",
 					"level": "warn",
