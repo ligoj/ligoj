@@ -649,7 +649,7 @@ define([
 		},
 
 		super: function (context, item) {
-			return $self.closestFrom(context.$page, item) || $self.closestFrom(context.$parent, item);
+			return $self.closestFrom(context.$page, item) || (context.$parent !== context.$page && $self.closestFrom(context.$parent, item));
 		},
 
 		/**
@@ -670,17 +670,20 @@ define([
 			if (context) {
 				var owner = $self.closest(context, item);
 				if (typeof owner === 'undefined' && context.$siblings) {
-					return $self.closestFromSiblings(context.$siblings, item);
+					return $self.closestFromSiblings(context.$siblings, item, context);
 				}
 				return owner;
 			}
 		},
-		closestFromSiblings: function (siblings, item) {
+		closestFromSiblings: function (siblings, item, requestContext) {
 			for (var index = 0; index < siblings.length; index++) {
-				var owner = $self.closest(siblings[index], item);
-				if (typeof owner !== 'undefined') {
-					return owner;
-				}
+			    var sibling = siblings[index];
+			    if (requestContext !== sibling) { // Prevent recursive loop
+                    var owner = $self.closest(siblings[index], item);
+                    if (typeof owner !== 'undefined') {
+                        return owner;
+                    }
+               }
 			}
 		},
 
