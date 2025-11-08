@@ -147,8 +147,8 @@ For MySQL, the docker-compose command is:
 ```bash
 export BUILDAH_FORMAT=docker
 podman-compose -p ligoj build
-podman-compose -p ligoj -f compose.yml  -f compose.override.yml up -d
-podman-compose -p ligoj down
+podman-compose -p ligoj -f compose.yml  -f compose-mysql.yml up -d
+podman-compose -p ligoj -f compose.yml  -f compose-mysql.yml down
 ```
 
 For PostgreSQL, the docker-compose command is:
