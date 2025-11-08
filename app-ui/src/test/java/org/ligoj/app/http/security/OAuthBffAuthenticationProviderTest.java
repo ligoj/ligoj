@@ -37,8 +37,10 @@ class OAuthBffAuthenticationProviderTest extends AbstractServerTest {
 		var configurer = Mockito.mock(LogoutConfigurer.class);
 		authenticationProvider.clientRegistrationRepository = clientRegistrationRepository;
 
+		//noinspection unchecked
 		Mockito.doAnswer(invocation -> {
-			((Customizer) invocation.getArgument(0)).customize(configurer);
+			//noinspection unchecked
+			((Customizer<Object>) invocation.getArgument(0)).customize(configurer);
 			return null;
 		}).when(http).logout(Mockito.any(Customizer.class));
 		Assertions.assertNull(authenticationProvider.configureLogout(http, null, null));
