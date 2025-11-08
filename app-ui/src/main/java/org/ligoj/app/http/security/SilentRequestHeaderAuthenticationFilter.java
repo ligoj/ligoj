@@ -24,9 +24,13 @@ import java.util.regex.Pattern;
 public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthenticationFilter {
 
 	/**
-	 * Common whitelist pattern.
+	 * Static pages
 	 */
-	public static final Pattern WHITE_LIST_PATTERN = Pattern.compile("/((\\d{3}|logout|login)(-prod)?\\.html(\\?.*)?|favicon.ico|logout|(themes|lib|dist|main/public)/.*)");
+	public static final Pattern WHITE_LIST_PAGES = Pattern.compile("/(\\d{3}|logout|login)(-prod)?\\.html(\\?.*)?");
+	/**
+	 * Static assets
+	 */
+	public static final Pattern WHITE_LIST_ASSETS = Pattern.compile("/(favicon.ico|logout|(themes|lib|dist|main/public)/.*)");
 	/**
 	 * Only there because of visibility of "principalRequestHeader" of {@link RequestHeaderAuthenticationFilter}
 	 */
@@ -55,13 +59,18 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 		return StringUtils.isNotBlank(req.getParameter(name)) || StringUtils.isNotBlank(req.getHeader("x-" + name));
 	}
 
+	private boolean isAllowed(HttpServletRequest req) {
+		return WHITE_LIST_PAGES.matcher(req.getServletPath()).matches() ||
+				WHITE_LIST_ASSETS.matcher(req.getServletPath()).matches() || (req.getServletPath().startsWith("/rest")
+				&& isAuthDatPresent(req, "api-key")
+				&& isAuthDatPresent(req, "api-user"));
+	}
+
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		final var req = (HttpServletRequest) request;
 		final var res = (HttpServletResponse) response;
-		if (WHITE_LIST_PATTERN.matcher(req.getServletPath()).matches() || (req.getServletPath().startsWith("/rest")
-				&& isAuthDatPresent(req, "api-key")
-				&& isAuthDatPresent(req, "api-user"))) {
+		if (isAllowed(req)) {
 			// White-list error page and keyed API access
 			chain.doFilter(request, response);
 		} else {

@@ -31,6 +31,9 @@ import java.security.GeneralSecurityException;
 @Transactional
 class InitializeRbacDataResourceTest extends AbstractServerTest {
 
+	private static final String NEW_ROLE = "NEW_ROLE";
+	private static final String NEW_USER = "NEW_USER";
+
 	@Autowired
 	private InitializeRbacDataResource resource;
 
@@ -72,42 +75,49 @@ class InitializeRbacDataResourceTest extends AbstractServerTest {
 
 	@Test
 	void installInit() throws GeneralSecurityException {
+		Assertions.assertNull(roleRepository.findByName(NEW_ROLE));
+		Assertions.assertNull(userRepository.findOne(NEW_USER));
 		configuration.put("ligoj.initial.user.action", "init");
+		configuration.put("ligoj.initial.user.role", NEW_ROLE);
+		configuration.put("ligoj.initial.user.name", NEW_USER);
+		configuration.put("ligoj.initial.user.token.name", "TOKEN_NAME");
 		resource.install();
+		Assertions.assertNotNull(roleRepository.findByName(NEW_ROLE));
+		Assertions.assertNotNull(userRepository.findOne(NEW_USER));
 	}
 
 	@Test
 	void installReset() throws GeneralSecurityException {
 		configuration.put("ligoj.initial.user.action", "reset");
-		configuration.put("ligoj.initial.user.role", "NEW_ROLE");
-		configuration.put("ligoj.initial.user.name", "NEW_USER");
+		configuration.put("ligoj.initial.user.role", NEW_ROLE);
+		configuration.put("ligoj.initial.user.name", NEW_USER);
 		configuration.put("ligoj.initial.user.token.name", "TOKEN_NAME");
 
 		resource.install();
 
-		var newRole = roleRepository.findByName("NEW_ROLE");
+		var newRole = roleRepository.findByName(NEW_ROLE);
 		Assertions.assertNotNull(newRole);
-		var uiAuth = authorizationRepository.findAllByLogin("NEW_USER", SystemAuthorization.AuthorizationType.UI);
-		var apiAuth = authorizationRepository.findAllByLogin("NEW_USER", SystemAuthorization.AuthorizationType.UI);
+		var uiAuth = authorizationRepository.findAllByLogin(NEW_USER, SystemAuthorization.AuthorizationType.UI);
+		var apiAuth = authorizationRepository.findAllByLogin(NEW_USER, SystemAuthorization.AuthorizationType.UI);
 		Assertions.assertEquals(".*", uiAuth.getFirst().getPattern());
 		Assertions.assertEquals(".*", apiAuth.getFirst().getPattern());
 
 		// Init again, with forced token value
 		configuration.put("ligoj.initial.user.token.value", "RANDOM_TEST");
 		resource.install();
-		Assertions.assertEquals("RANDOM_TEST", tokenResource.getToken("TOKEN_NAME", "NEW_USER"));
+		Assertions.assertEquals("RANDOM_TEST", tokenResource.getToken("TOKEN_NAME", NEW_USER));
 
 		// Init again, with another token mode
 		configuration.put("ligoj.initial.user.token.name", "TOKEN_NAME2");
 		configuration.put("ligoj.initial.user.token.value", "RANDOM_TEST2");
 		resource.install();
-		Assertions.assertEquals("RANDOM_TEST2", tokenResource.getToken("TOKEN_NAME2", "NEW_USER"));
+		Assertions.assertEquals("RANDOM_TEST2", tokenResource.getToken("TOKEN_NAME2", NEW_USER));
 
 		// Init again, with created role and updated token value to be generated
 		configuration.put("ligoj.initial.user.token.name", "TOKEN_NAME");
 		configuration.put("ligoj.initial.user.token.value", null);
 		resource.install();
-		var newTokenValue = tokenResource.getToken("TOKEN_NAME", "NEW_USER");
+		var newTokenValue = tokenResource.getToken("TOKEN_NAME", NEW_USER);
 		Assertions.assertNotEquals("RANDOM_TEST", newTokenValue);
 
 		// Init again, with init mode
@@ -115,9 +125,9 @@ class InitializeRbacDataResourceTest extends AbstractServerTest {
 		configuration.put("ligoj.initial.user.role", "NEW_ROLE2");
 		em.flush();
 		em.clear();
-		userRepository.findOne("NEW_USER");
+		userRepository.findOne(NEW_USER);
 		resource.install();
-		Assertions.assertEquals(newTokenValue, tokenResource.getToken("TOKEN_NAME", "NEW_USER"));
+		Assertions.assertEquals(newTokenValue, tokenResource.getToken("TOKEN_NAME", NEW_USER));
 	}
 
 }

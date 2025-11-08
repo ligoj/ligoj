@@ -3,7 +3,6 @@
  */
 package org.ligoj.app.http.security;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +18,7 @@ import java.io.IOException;
 class CaptchaServletTest {
 
 	@Test
-	void testDoGet() throws ServletException, IOException {
+	void testDoGet() throws IOException {
 		final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
 		final HttpSession session = Mockito.mock(HttpSession.class);
 		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);

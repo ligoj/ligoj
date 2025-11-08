@@ -22,6 +22,9 @@ public class OAuth2BffAuthenticationProvider extends AbstractAuthenticationProvi
 	@Autowired
 	ClientRegistrationRepository clientRegistrationRepository;
 
+	/**
+	 * Default constructor.
+	 */
 	public OAuth2BffAuthenticationProvider() {
 		this.setForceRedirect(true);
 	}

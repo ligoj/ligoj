@@ -98,6 +98,7 @@ public class SecurityConfiguration {
 	/**
 	 * A 403 JSON management.
 	 *
+	 * @param provider Authentication provider bean.
 	 * @return A 403 JSON management.
 	 */
 	@Bean
@@ -152,6 +153,7 @@ public class SecurityConfiguration {
 	 *
 	 * @param http                 HTTP security bean.
 	 * @param expressionWebHandler Custom expression handler.
+	 * @param provider             Authentication provider bean.
 	 * @return The built bean.
 	 * @throws Exception from the build.
 	 */
@@ -169,7 +171,8 @@ public class SecurityConfiguration {
 						// Login
 						matcher.matcher(HttpMethod.POST, LOGIN_API),
 						// Public static resources
-						RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PATTERN.pattern()),
+						RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PAGES.pattern()),
+						RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_ASSETS.pattern()),
 						matcher.matcher("/rest/redirect"),
 						matcher.matcher("/rest/security/login"),
 						matcher.matcher("/captcha.png")).permitAll()
@@ -232,7 +235,8 @@ public class SecurityConfiguration {
 	/**
 	 * Configure {@link AuthenticationProvider}
 	 *
-	 * @param auth The builder.
+	 * @param auth     The builder.
+	 * @param provider Authentication provider bean.
 	 */
 	@Autowired
 	public void configureGlobal(final AuthenticationManagerBuilder auth, AbstractAuthenticationProvider provider) {

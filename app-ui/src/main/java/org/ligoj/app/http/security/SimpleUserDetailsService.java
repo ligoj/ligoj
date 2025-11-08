@@ -18,7 +18,7 @@ public class SimpleUserDetailsService implements org.springframework.security.co
 
 	@Override
 	public UserDetails loadUserByUsername(final String username) {
-		return new User(username, "N/A", new ArrayList<>());
+		return new User(username, "", new ArrayList<>());
 	}
 
 }
