@@ -88,9 +88,6 @@ public class SecurityConfiguration {
 	@Value("${ligoj.security.login.url:/login.html}")
 	private String loginUrl;
 
-	@Autowired
-	private ApplicationContext applicationContext;
-
 	static final String LOGIN_API = "/login";
 	static final String LOGOUT_HTML = "/logout.html";
 	static final String INDEX_HTML = "/index.html";
@@ -125,11 +122,12 @@ public class SecurityConfiguration {
 	/**
 	 * Pre-Authentication provider.
 	 *
+	 * @param applicationContext Current application context.
 	 * @return Pre-Authentication provider.
 	 * @throws ReflectiveOperationException Unable to build the authentication provider
 	 */
 	@Bean
-	public AbstractAuthenticationProvider authenticationProvider() throws ReflectiveOperationException {
+	public AbstractAuthenticationProvider authenticationProvider(ApplicationContext applicationContext) throws ReflectiveOperationException {
 		final var provider = (AbstractAuthenticationProvider) Class
 				.forName("org.ligoj.app.http.security." + securityProvider + "AuthenticationProvider").getConstructors()[0].newInstance();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);

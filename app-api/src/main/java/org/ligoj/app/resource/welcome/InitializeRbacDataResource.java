@@ -90,18 +90,21 @@ public class InitializeRbacDataResource implements FeaturePlugin {
 		return "Welcome Data RBAC";
 	}
 
-	@Override
-	public void install() throws GeneralSecurityException {
-		var customUser = configuration.get(INITIAL_USER_NAME_PROPERTY, DEFAULT_USER_NAME);
-		var customRole = configuration.get(INITIAL_ROLE_NAME_PROPERTY, DEFAULT_ROLE_NAME);
-		var tokenName = configuration.get(INITIAL_TOKEN_NAME_PROPERTY, DEFAULT_TOKEN_NAME);
-		var tokenValue = configuration.get(INITIAL_TOKEN_VALUE_PROPERTY);
-		var action = configuration.get(INITIAL_USER_ACTION_PROPERTY);
-		if (!INITIAL_USER_ACTION_INIT.equals(action) && !INITIAL_USER_ACTION_RESET.equals(action)) {
-			return;
+	private void createUser(String customUser, String customRole, Integer roleId) throws GeneralSecurityException {
+		var user = userRepository.findOne(customUser);
+		final var userVo = new SystemUserEditionVo();
+		userVo.setLogin(customUser);
+		userVo.setRoles(Set.of(roleId));
+		if (user == null) {
+			userResource.create(userVo);
+			log.info("[INIT] User '{}' has been created with role '{}'", customUser, customRole);
+		} else if (user.getRoles().stream().noneMatch(a -> a.getRole().getId() == roleId.intValue())) {
+			userResource.create(userVo);
+			log.info("[INIT] User '{}' has received role '{}'", customUser, customRole);
 		}
+	}
 
-		// Create the role as needed
+	private Integer createRole(String customRole) {
 		var role = roleRepository.findByName(customRole);
 		final int roleId;
 		if (role == null) {
@@ -122,21 +125,12 @@ public class InitializeRbacDataResource implements FeaturePlugin {
 		} else {
 			roleId = role.getId();
 		}
+		return roleId;
+	}
 
-		// Create the user as needed
-		var user = userRepository.findOne(customUser);
-		final var userVo = new SystemUserEditionVo();
-		userVo.setLogin(customUser);
-		userVo.setRoles(Set.of(roleId));
-		if (user == null) {
-			userResource.create(userVo);
-			log.info("[INIT] User '{}' has been created with role '{}'", customUser, customRole);
-		} else if (user.getRoles().stream().noneMatch(a -> a.getRole().getId() == roleId)) {
-			userResource.create(userVo);
-			log.info("[INIT] User '{}' has received role '{}'", customUser, customRole);
-		}
-
-		// Create the user token as needed
+	private void createToken(String action, String customUser) throws GeneralSecurityException {
+		var tokenName = configuration.get(INITIAL_TOKEN_NAME_PROPERTY, DEFAULT_TOKEN_NAME);
+		var tokenValue = configuration.get(INITIAL_TOKEN_VALUE_PROPERTY);
 		var token = apiTokenRepository.findByUserAndName(customUser, tokenName);
 		String newTokenValue = null;
 		if (token == null) {
@@ -164,7 +158,25 @@ public class InitializeRbacDataResource implements FeaturePlugin {
 		} else {
 			log.info("[INIT] Token '{}' has been set for initial user '{}' to value: {}", tokenName, customUser, newTokenValue);
 		}
+	}
 
+	@Override
+	public void install() throws GeneralSecurityException {
+		var customUser = configuration.get(INITIAL_USER_NAME_PROPERTY, DEFAULT_USER_NAME);
+		var customRole = configuration.get(INITIAL_ROLE_NAME_PROPERTY, DEFAULT_ROLE_NAME);
+		var action = configuration.get(INITIAL_USER_ACTION_PROPERTY);
+		if (!INITIAL_USER_ACTION_INIT.equals(action) && !INITIAL_USER_ACTION_RESET.equals(action)) {
+			return;
+		}
+
+		// Create the role as needed
+		final int roleId = createRole(customRole);
+
+		// Create the user as needed
+		createUser(customUser, customRole, roleId);
+
+		// Create the user token as needed
+		createToken(action, customUser);
 	}
 
 }

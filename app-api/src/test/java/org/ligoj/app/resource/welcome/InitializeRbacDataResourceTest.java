@@ -71,7 +71,9 @@ class InitializeRbacDataResourceTest extends AbstractServerTest {
 	@Test
 	void installWithoutInitialization() throws GeneralSecurityException {
 		resource.install();
+		Assertions.assertNotNull(roleRepository.findByName("ADMIN"));
 	}
+
 
 	@Test
 	void installInit() throws GeneralSecurityException {

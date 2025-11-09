@@ -3,7 +3,10 @@
  */
 package org.ligoj.boot.api;
 
+import com.hazelcast.spring.HazelcastObjectExtractionConfiguration;
+import org.apache.cxf.spring.boot.autoconfigure.openapi.OpenApiAutoConfiguration;
 import org.apache.cxf.transport.servlet.CXFServlet;
+import org.ligoj.bootstrap.resource.system.plugin.WebjarsServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.web.jetty.JettyMetricsAutoConfiguration;
@@ -34,7 +37,7 @@ import java.util.Collections;
  */
 @SpringBootApplication(exclude = {JettyMetricsAutoConfiguration.class, WebSocketServletAutoConfiguration.class,
 		LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, TransactionManagerCustomizationAutoConfiguration.class,
-		DataSourcePoolMetricsAutoConfiguration.class,  SpringDataWebAutoConfiguration.class})
+		DataSourcePoolMetricsAutoConfiguration.class, SpringDataWebAutoConfiguration.class, OpenApiAutoConfiguration.class, HazelcastObjectExtractionConfiguration.class})
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
 public class Application extends SpringBootServletInitializer {
 
