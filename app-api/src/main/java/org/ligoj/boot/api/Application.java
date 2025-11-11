@@ -10,11 +10,15 @@ import org.ligoj.bootstrap.resource.system.plugin.WebjarsServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.web.jetty.JettyMetricsAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.ssl.SslHealthContributorAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration;
+import org.springframework.boot.autoconfigure.hazelcast.HazelcastAutoConfiguration;
+import org.springframework.boot.autoconfigure.hazelcast.HazelcastJpaDependencyAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizationAutoConfiguration;
+import org.springframework.boot.autoconfigure.transaction.jta.JtaAutoConfiguration;
 import org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.server.ErrorPage;
@@ -37,7 +41,13 @@ import java.util.Collections;
  */
 @SpringBootApplication(exclude = {JettyMetricsAutoConfiguration.class, WebSocketServletAutoConfiguration.class,
 		LdapAutoConfiguration.class, EmbeddedLdapAutoConfiguration.class, TransactionManagerCustomizationAutoConfiguration.class,
-		DataSourcePoolMetricsAutoConfiguration.class, SpringDataWebAutoConfiguration.class, OpenApiAutoConfiguration.class, HazelcastObjectExtractionConfiguration.class})
+		DataSourcePoolMetricsAutoConfiguration.class, SpringDataWebAutoConfiguration.class, OpenApiAutoConfiguration.class,
+		HazelcastObjectExtractionConfiguration.class,
+		SslHealthContributorAutoConfiguration.class,
+		JtaAutoConfiguration.class,
+		HazelcastJpaDependencyAutoConfiguration.class,
+		HazelcastAutoConfiguration.class
+})
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
 public class Application extends SpringBootServletInitializer {
 
