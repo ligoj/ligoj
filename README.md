@@ -191,3 +191,7 @@ Ligoj comes with a modular approach. For custom UI, the solutions are:
     mkdir -p "${LIGOJ_HOME}/META-INF/resources/webjars/home/img" && cp /path/to/icon.png "$_/logo.png"
     mkdir -p "${LIGOJ_HOME}/statics/themes/bootstrap-material-design/img" && cp /path/to/bg1.jpg "$_/bg1.jpg"
     ```
+  
+# Software Bill of Materials (SBOM)
+
+SBOM content is exposed thanks to Spring Actuator at this endpoint `http://localhost:8080/ligoj/manage/sbom`
