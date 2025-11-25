@@ -156,8 +156,8 @@ For PostgreSQL, the docker-compose command is:
 ```bash
 export BUILDAH_FORMAT=docker
 podman-compose -p ligoj build
-podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml up -d
-podman-compose -p ligoj -f compose.yml  -f compose-postgres.yml down
+podman-compose -p ligoj -f compose.yml  -f compose-override.yml up -d
+podman-compose -p ligoj -f compose.yml  -f compose-override.yml down
 ```
 
 # API Description
