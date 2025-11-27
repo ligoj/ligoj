@@ -415,6 +415,217 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
+		 * Return the tool identifier part from a node identifier. It's the first level of refinement, just
+		 * after service. This corresponds to the first implementation of a service.
+		 */
+		getToolFromId: function (id) {
+			// Pattern is : service:{service name}:{tool name}(:whatever)
+			const data = id.split(':');
+			return data.length > 2 && data.slice(0, 3).join('-');
+		},
+
+		/**
+		 * Return the identifier of each hierarchy nodes until the service.
+		 */
+		getHierarchyId: function (id) {
+			// Pattern is : service:{service name}:{tool name}(:whatever)
+			const data = id.split(':');
+			let index;
+			let result = '';
+			for (index = 2; index <= data.length; index++) {
+				result += ' ' + data.slice(0, index).join('-');
+			}
+			return result;
+		},
+
+		/**
+		 * Return the service identifier part from a node identifier.
+		 */
+		getServiceFromId: function (id) {
+			// Pattern is : service:{service name}:{tool name}(:whatever)
+			const data = id.split(':');
+			return data.length > 1 && data.slice(0, 2).join('-');
+		},
+
+		/**
+		 * Return the service simple name part from a node identifier.
+		 */
+		getServiceNameFromId: function (id) {
+			// Pattern is : service:{service name}:{tool name}(:whatever)
+			return id.split(':')[1];
+		},
+
+		/**
+		 * Return the service simple name part from a node identifier.
+		 */
+		getToolNameFromId: function (id) {
+			// Pattern is : service:{service name}:{tool name}(:whatever)
+			return id.split(':')[2];
+		},
+
+		/**
+		 * Icon of corresponding tool, and entity's "name".
+		 */
+		toIconNameTool: function (node) {
+			return current.toIcon(node) + '<span class="hidden-xs"' + (node.description ? ' title="' + node.description + '"' : '') + '> ' + current.getNodeName(node) + '</span>';
+		},
+
+		toToolBaseIcon: function (node) {
+			const fragments = node.split(':');
+			return 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2];
+		},
+
+		/**
+		 * Return the root of refinement. This corresponds to the basic service. The result will be cached.
+		 */
+		getService: function (node) {
+			if (node.service) {
+				return node.service;
+			}
+			node.service = (node.refined && this.getService(node.refined)) || node;
+			return node.service;
+		},
+
+		/**
+		 * Return the first level of refinement, just after root. This corresponds to the first implementation
+		 * of a service. The result will be
+		 * cached.
+		 */
+		getTool: function (node) {
+			if (node.tool) {
+				return node.tool;
+			}
+			if (node.refined) {
+				if (node.refined.refined) {
+					node.tool = this.getTool(node.refined);
+				} else {
+					node.tool = node;
+				}
+			} else {
+				return null;
+			}
+			return node.tool;
+		},
+
+		/**
+		 * Load dependencies of given node identifier, and call given callback when :
+		 * <ul>
+		 * <li>HTML is integrated inside the current view if was not</li>
+		 * <li>CSS is loaded and loaded</li>
+		 * <li>JavaScript is loaded, injected and initialized</li>
+		 * </ul>
+		 * @param {object} context Context requesting this service.
+		 * @param node Node identifier to prepare dependencies.
+		 * @param callback Optional function to call when all dependencies are loaded and initialized.
+		 * Parameter will be the controller of the service.
+		 */
+		requireService: function (context, node, callback) {
+			// Check the plugin is enabled
+			if (node && typeof securityManager.plugins !== 'undefined' && $.inArray(node.split(':').slice(0, 2).join(':'), securityManager.plugins) < 0) {
+				callback && callback();
+				return;
+			}
+
+			const service = current.getServiceNameFromId(node);
+			const path = 'main/service/' + service + '/';
+			if (path === context.$path) {
+				// Current context is loaded
+				return callback && callback(context);
+			}
+			$cascade.loadFragment(context, context.$transaction, path, service, {
+				callback: function ($context) {
+					$context.node = 'service:' + service;
+					callback && callback($context);
+				},
+				errorCallback: function (err) {
+					errorManager.ignoreRequireModuleError(err.requireModules);
+					errorManager.ignoreRequireModuleError(['main/service/' + service + '/nls/messages']);
+					callback && callback();
+				},
+				plugins: ['css', 'i18n', 'partial', 'js']
+			});
+		},
+
+		/**
+		 * Load dependencies of given node identifier, and call given callback when :
+		 * <ul>
+		 * <li>HTML is integrated inside the service's view if was not</li>
+		 * <li>CSS is loaded and loaded</li>
+		 * <li>JavaScript is loaded, injected and initialized</li>
+		 * <li>All above dependencies for service and for tool, and in this order</li>
+		 * </ul>
+		 * @param {object} context Context requesting this service.
+		 * @param node Node identifier to prepare dependencies.
+		 * @param callback Optional function to call when all dependencies are loaded and initialized.
+		 * Parameter will be the controller of the tool.
+		 */
+		requireTool: function (context, node, callback) {
+			// First, load service dependencies
+			const transaction = context.$transaction;
+
+			// Check the plugin is enabled
+			if (node && typeof securityManager.plugins !== 'undefined' && $.inArray(node.split(':').slice(0, 3).join(':'), securityManager.plugins) < 0) {
+				callback && callback();
+				return;
+			}
+			current.requireService(context, node, function ($service) {
+				if (typeof $service === 'undefined') {
+					callback && callback();
+					return;
+				}
+
+				// Then, load tool dependencies
+				const service = current.getServiceNameFromId(node);
+				const tool = current.getToolNameFromId(node);
+				const path = 'main/service/' + service + '/' + tool;
+				if (path === context.$path) {
+					// Current context is loaded
+					return callback && callback(context);
+				}
+				$cascade.loadFragment($service, transaction, path, tool, {
+					callback: function ($tool) {
+						$tool.node = 'service:' + service + ':' + ':' + tool;
+						callback && callback($tool, $service);
+					},
+					errorCallback: function (err) {
+						errorManager.ignoreRequireModuleError(err.requireModules);
+						errorManager.ignoreRequireModuleError(['main/service/' + service + '/' + tool + '/nls/messages']);
+						callback && callback(null, $service);
+					},
+					plugins: ['css', 'i18n', 'partial', 'js']
+				});
+			});
+		},
+
+		/**
+		 * Return the "name" of the given entity
+		 */
+		toName: function (object) {
+			return object.name;
+		},
+
+		/**
+		 * Return the given entity
+		 */
+		toIdentity: function (object) {
+			return object;
+		},
+
+		/**
+		 * Return the "text" of the given entity
+		 */
+		toText: function (object) {
+			return object.text;
+		},
+
+		/**
+		 * Return the "description" of the given entity
+		 */
+		toDescription: function (object) {
+			return object.description;
+		},
+
+		/**
 		 * Object type to class mapping.
 		 */
 		targetTypeClass: {
