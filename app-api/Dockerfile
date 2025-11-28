@@ -47,7 +47,7 @@ ENV CONTEXT_URL="/ligoj-api" \
     SERVER_HOST="0.0.0.0" \
     SERVER_PORT="8081" \
     LIGOJ_HOME=/home/ligoj \
-    CUSTOM_OPTS="-Djdbc.host=ligoj-db" \
+    CUSTOM_OPTS="-Djdbc.host=ligoj-db -Dmanagement.endpoint.sbom.application.location=classpath:bom.json" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
     ARTIFACT_ID="${ARTIFACT_ID}" \

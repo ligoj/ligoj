@@ -316,7 +316,7 @@ docker run --rm -it \
 Docker environment variables
 
 | Docker env   | Default value                  | Note                                                                             |
-|--------------|--------------------------------|----------------------------------------------------------------------------------|
+| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
 | CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration. See                                                    |
 | CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
 | SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
@@ -330,10 +330,10 @@ and can be dynamically modified from the administration
 console:
 
 | Name                                                  | Default value                                                                                                                                                                 | Note                                                                                                                                                                                                                              |
-|-------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | app.crypto.file                                       |                                                                                                                                                                               | Secret file location. Can also be defined in `APP_CRYPTO_FILE`environment variable.                                                                                                                                               |
 | app.crypto.password                                   |                                                                                                                                                                               | Secret value. Can also be defined in `APP_CRYPTO_PASSWORD`environment variable.                                                                                                                                                   |
-| cache.location                                        | `classpath:META-INF/hazelcast-local.xml`                                                                                                                                      | Custom Hazelcast configuration file location                                                                                                                                                                                      |                                                                    
+| cache.location                                        | `classpath:META-INF/hazelcast-local.xml`                                                                                                                                      | Custom Hazelcast configuration file location                                                                                                                                                                                      |
 | cache.${cache_name}.ttl                               |                                                                                                                                                                               | For each cache, built-in default TTL can be adjusted. The identifier replacing `${cache_name}` can be listed from the administration page                                                                                         |
 | feature:iam:node:primary                              | `empty`                                                                                                                                                                       | Ligoj `plugin-id` node's identifier used as primary IAM provider. See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node) for more information. `empty` provider is a read-only provider accepting all authentications.   |
 | feature:iam:node:secondary                            | `secondary`                                                                                                                                                                   | Ligoj `plugin-id` node's identifier used as secondary IAM provider. See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node) for more information. `empty` provider is a read-only provider accepting all authentications. |
@@ -370,7 +370,7 @@ console:
 | ligoj.plugin.ignore                                   | `plugin-password-management`                                                                                                                                                  | Filtered (deprecated, fixed version, ...) plugins for install or update from the repositories                                                                                                                                     |
 | ligoj.plugin.install                                  | ``                                                                                                                                                                            | List plugin identifiers to install: `plugin1,plugin2,...`. These plugins are automatically installed at boot time. Update are performed according to "ligoj.plugin.update" option                                                 |
 | ligoj.plugin.update                                   | `false`                                                                                                                                                                       | When `true`, the plugins are updated automatically at boot time to the latest available version.                                                                                                                                  |
-| ligoj.plugin.repository                               | `central`                                                                                                                                                                     | Repository identifier used to query plugin install or update.  May be `central`, `nexus`                                                                                                                                          |                                                                            
+| ligoj.plugin.repository                               | `central`                                                                                                                                                                     | Repository identifier used to query plugin install or update.  May be `central`, `nexus`                                                                                                                                          |
 | ligoj.sslVerify                                       | `true`                                                                                                                                                                        | When `false`, the standards SSL verification suf as domain name, certifications chain and validity are disabled. Useful for self-signed certificates.                                                                             |
 | logging.level.root                                    | `info`                                                                                                                                                                        | Configure default log verbosity of all internal components: Spring, Jetty, Hibernate,...                                                                                                                                          |
 | logging.level.<category>                              | *vary*                                                                                                                                                                        | Configure default log verbosity a specific category                                                                                                                                                                               |
@@ -387,7 +387,7 @@ These variables are only relevant when set as Java System property.
 For sample `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 
 | Name                   | Default value       | Note                               |
-|------------------------|---------------------|------------------------------------|
+| ---------------------- | ------------------- | ---------------------------------- |
 | ligoj.log.file.name    | `./api-rolling.log` | File inside `LIGOJ_HOME` directory |
 | ligoj.log.file.size    | `10 MB`             | Max log file size                  |
 | ligoj.log.file.enabled | `true`              | Enablement of log file             |
@@ -399,7 +399,7 @@ For sample `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 Tested compatibility and performance for 10K+ users and 1K+ projects.
 
 | Vendor                                    | Version | Driver                   | Dialect                                                  | Status                  |
-|-------------------------------------------|---------|--------------------------|----------------------------------------------------------|-------------------------|
+| ----------------------------------------- | ------- | ------------------------ | -------------------------------------------------------- | ----------------------- |
 | [MySQL](https://www.mysql.com)            | 5.5     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
 | [MySQL](https://www.mysql.com)            | 5.6     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
 | [MySQL](https://www.mysql.com)            | 5.7     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
@@ -413,10 +413,12 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 
 ### JSE
 
-| Vendor    | Release | Compatibility |
-|-----------|---------|---------------|
-| OracleJDK | 21      | 4.x version   |
-| OpenJDK   | 21      | 4.x version   |
+The source compatibility is 21 without preview features.
+
+| Vendor  | Release | OS              |
+| ------- | ------- | --------------- |
+| Oracle  | 21      | Linux and MacOS |
+| OpenJDK | 21      | Linux and MacOS |
 
 # Management endpoints
 

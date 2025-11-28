@@ -76,8 +76,8 @@ class ApplicationTest {
 	}
 
 	protected String[] getArgs(String... args) {
-		return new String[]{"--spring.main.webEnvironment=false", "--spring.main.showBanner=OFF", "--spring.main.registerShutdownHook=false",
-				"--spring.main.sources=" + StringUtils.arrayToCommaDelimitedString(args)};
+		return new String[] { "--spring.main.webEnvironment=false", "--spring.main.showBanner=OFF", "--spring.main.registerShutdownHook=false",
+				"--server.port=0", "--spring.main.sources=" + StringUtils.arrayToCommaDelimitedString(args) };
 	}
 
 }

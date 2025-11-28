@@ -5,7 +5,6 @@ package org.ligoj.app.http.security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
@@ -46,7 +45,8 @@ public class OAuth2BffAuthenticationProvider extends AbstractAuthenticationProvi
 	@Override
 	public HttpSecurity configureLogin(HttpSecurity http, final String loginUrlDenied, final String loginApiUrl,
 			final AuthenticationSuccessHandler successHandler,
-			final AuthenticationFailureHandler failureHandler) throws Exception {
-		return http.oauth2Login(Customizer.withDefaults());
+			final AuthenticationFailureHandler failureHandler) {
+		// Nothing to do
+		return http;
 	}
 }

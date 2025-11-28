@@ -22,7 +22,7 @@ class OAuthBffAuthenticationProviderTest extends AbstractServerTest {
 
 	@Test
 	void configureLogin() throws Exception {
-		Assertions.assertNull(authenticationProvider.configureLogin(Mockito.mock(HttpSecurity.class), null, null, null, null));
+		Assertions.assertNotNull(authenticationProvider.configureLogin(Mockito.mock(HttpSecurity.class), null, null, null, null));
 	}
 
 	@Test
@@ -37,9 +37,9 @@ class OAuthBffAuthenticationProviderTest extends AbstractServerTest {
 		var configurer = Mockito.mock(LogoutConfigurer.class);
 		authenticationProvider.clientRegistrationRepository = clientRegistrationRepository;
 
-		//noinspection unchecked
+		// noinspection unchecked
 		Mockito.doAnswer(invocation -> {
-			//noinspection unchecked
+			// noinspection unchecked
 			((Customizer<Object>) invocation.getArgument(0)).customize(configurer);
 			return null;
 		}).when(http).logout(Mockito.any(Customizer.class));

@@ -6,21 +6,22 @@ package org.ligoj.boot.web;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.http.security.AbstractAuthenticationProvider;
+import org.ligoj.app.http.security.ApiKeyLoginFilter;
 import org.ligoj.app.http.security.DigestAuthenticationFilter;
+import org.ligoj.app.http.security.OAuth2BffAuthenticationProvider;
 import org.ligoj.app.http.security.SilentRequestHeaderAuthenticationFilter;
 import org.ligoj.app.http.security.SimpleUserDetailsService;
 import org.ligoj.bootstrap.http.security.ExtendedWebSecurityExpressionHandler;
 import org.ligoj.bootstrap.http.security.RedirectAuthenticationEntryPoint;
 import org.ligoj.bootstrap.http.security.RestRedirectStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -88,7 +89,11 @@ public class SecurityConfiguration {
 	@Value("${ligoj.security.login.url:/login.html}")
 	private String loginUrl;
 
+	@Value("${ligoj.security.login-by-api-key:false}")
+	private boolean enableLoginByApiKey;
+
 	static final String LOGIN_API = "/login";
+	static final String LOGIN_BY_API_KEY_API = "/login-by-api-key";
 	static final String LOGOUT_HTML = "/logout.html";
 	static final String INDEX_HTML = "/index.html";
 
@@ -128,8 +133,8 @@ public class SecurityConfiguration {
 	 */
 	@Bean
 	public AbstractAuthenticationProvider authenticationProvider(ApplicationContext applicationContext) throws ReflectiveOperationException {
-		final var provider = (AbstractAuthenticationProvider) Class
-				.forName("org.ligoj.app.http.security." + securityProvider + "AuthenticationProvider").getConstructors()[0].newInstance();
+		final var provider = (AbstractAuthenticationProvider) Class.forName("org.ligoj.app.http.security." + securityProvider + "AuthenticationProvider")
+				.getConstructors()[0].newInstance();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(provider);
 		provider.setSsoPostUrl(ssoUrl);
 		provider.setSsoPostContent(ssoContent);
@@ -146,6 +151,15 @@ public class SecurityConfiguration {
 		return new ConcurrentSessionFilter(sessionRegistry(), new SimpleRedirectSessionInformationExpiredStrategy(loginUrl + "?concurrency"));
 	}
 
+	@Bean
+	@Order(1)
+	public SecurityFilterChain apiKeyFilterChain(HttpSecurity http, ApiKeyLoginFilter apiKeyFilter) throws Exception {
+		http.securityMatcher(LOGIN_BY_API_KEY_API).authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+				.addFilterAt(apiKeyFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+				.sessionManagement(a -> a.sessionAuthenticationStrategy(sessionAuth())).csrf(AbstractHttpConfigurer::disable);
+		return http.build();
+	}
+
 	/**
 	 * Filter security chain
 	 *
@@ -156,32 +170,27 @@ public class SecurityConfiguration {
 	 * @throws Exception from the build.
 	 */
 	@Bean
-	public SecurityFilterChain filterChain(final HttpSecurity http,
-			final ExtendedWebSecurityExpressionHandler expressionWebHandler, AbstractAuthenticationProvider provider) throws Exception {
+	@Order(2)
+	public SecurityFilterChain filterChain(final HttpSecurity http, final ExtendedWebSecurityExpressionHandler expressionWebHandler,
+			AbstractAuthenticationProvider provider) throws Exception {
 		final var logoutUrl = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, LOGOUT_HTML) : loginUrl + "?logout";
 		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
-		final var authorization = new WebExpressionAuthorizationManager("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()");
+		final var authorization = new WebExpressionAuthorizationManager(
+				"((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()");
 		authorization.setExpressionHandler(expressionWebHandler);
 
 		final var matcher = PathPatternRequestMatcher.withDefaults();
-		http.authorizeHttpRequests(authorize -> authorize
-				.requestMatchers(
-						// Login
-						matcher.matcher(HttpMethod.POST, LOGIN_API),
-						// Public static resources
-						RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PAGES.pattern()),
-						RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_ASSETS.pattern()),
-						matcher.matcher("/rest/redirect"),
-						matcher.matcher("/rest/security/login"),
-						matcher.matcher("/captcha.png")).permitAll()
-				.requestMatchers(
-						matcher.matcher("/rest/service/password/reset/**"),
-						matcher.matcher("/rest/service/password/recovery/**")).anonymous()
+		http.authorizeHttpRequests(authorize -> authorize.requestMatchers(
+				// Login
+				matcher.matcher(HttpMethod.POST, LOGIN_API),
+				// Public static resources
+				RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PAGES.pattern()),
+				RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_ASSETS.pattern()),
+				matcher.matcher("/rest/redirect"), matcher.matcher("/rest/security/login"), matcher.matcher("/captcha.png")).permitAll()
+				.requestMatchers(matcher.matcher("/rest/service/password/reset/**"), matcher.matcher("/rest/service/password/recovery/**")).anonymous()
 
 				// Everything else must be authenticated
-				.anyRequest()
-				.access(authorization)
-		);
+				.anyRequest().access(authorization));
 
 		final var loginDeniedUrl = loginUrl + "?denied";
 		http.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint(provider)).accessDeniedPage(loginDeniedUrl));
@@ -189,7 +198,11 @@ public class SecurityConfiguration {
 
 		final var loginSuccessHandler = getSuccessHandler();
 		final var loginFailureHandler = getFailureHandler();
-		provider.configureLogin(http, loginDeniedUrl, LOGIN_API, loginSuccessHandler, loginFailureHandler);
+		if (provider instanceof OAuth2BffAuthenticationProvider) {
+			http.oauth2Login(Customizer.withDefaults());
+		} else {
+			provider.configureLogin(http, loginDeniedUrl, LOGIN_API, loginSuccessHandler, loginFailureHandler);
+		}
 
 		// Stateful session
 		http.csrf(AbstractHttpConfigurer::disable);
@@ -209,6 +222,7 @@ public class SecurityConfiguration {
 			http.addFilterAt(preAuthBean, AbstractPreAuthenticatedProcessingFilter.class);
 		}
 		final var chain = http.build();
+
 		if (preAuthBean != null) {
 			var authenticationManager = http.getSharedObject(AuthenticationManager.class);
 			preAuthBean.setAuthenticationManager(authenticationManager);
@@ -230,15 +244,29 @@ public class SecurityConfiguration {
 		return web -> web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
 	}
 
+	@Bean
+	public AuthenticationManager authenticationManager(HttpSecurity http, AbstractAuthenticationProvider provider) throws Exception {
+		return http.getSharedObject(AuthenticationManagerBuilder.class).authenticationProvider(provider).build();
+	}
+
 	/**
-	 * Configure {@link AuthenticationProvider}
+	 * Configure API key login filter.
 	 *
-	 * @param auth     The builder.
-	 * @param provider Authentication provider bean.
+	 * @return API key login filter configuration.
 	 */
-	@Autowired
-	public void configureGlobal(final AuthenticationManagerBuilder auth, AbstractAuthenticationProvider provider) {
-		auth.eraseCredentials(true).authenticationProvider(provider);
+	@Bean
+	public ApiKeyLoginFilter apiKeyLoginFilter(AuthenticationManager authenticationManager) {
+		final var filter = new ApiKeyLoginFilter(LOGIN_BY_API_KEY_API, enableLoginByApiKey);
+		final var failureHandler = new SimpleUrlAuthenticationFailureHandler();
+		failureHandler.setDefaultFailureUrl(loginUrl);
+		filter.setAuthenticationFailureHandler(failureHandler);
+		final var successHandler = new SimpleUrlAuthenticationSuccessHandler();
+		successHandler.setTargetUrlParameter("target");
+		filter.setAuthenticationSuccessHandler(successHandler);
+		filter.setSessionAuthenticationStrategy(sessionAuth());
+		filter.setAuthenticationManager(authenticationManager);
+		filter.setSecurityContextRepository(new org.springframework.security.web.context.HttpSessionSecurityContextRepository());
+		return filter;
 	}
 
 	/**

@@ -18,7 +18,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -26,19 +29,22 @@ import java.util.Optional;
  * authenticates users using api-key and api-user parameters (or headers).
  */
 @Slf4j
-@Setter
 public class ApiKeyLoginFilter extends AbstractAuthenticationProcessingFilter {
 
-    @Setter
+	@Setter
     private RestTemplate restTemplate = new RestTemplate();
+
+    private final boolean enableLoginByApiKey;
 
     /**
      * Constructor defining the filtering path.
+     *
+     * @param filterProcessesUrl The login URL.
      */
-    public ApiKeyLoginFilter() {
-        super("/login-by-api-key");
-        // Token is already authenticated by CookieUsernamePasswordAuthenticationToken constructor
+    public ApiKeyLoginFilter(final String filterProcessesUrl, final boolean enableLoginByApiKey) {
+        super(filterProcessesUrl);
         setAuthenticationManager(authentication -> authentication);
+        this.enableLoginByApiKey = enableLoginByApiKey;
     }
 
     /**
@@ -71,14 +77,17 @@ public class ApiKeyLoginFilter extends AbstractAuthenticationProcessingFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        if (!enableLoginByApiKey) {
+            // Feature is disabled
+            return null;
+        }
 
         final var apiKey = getApiKey(request);
         final var apiUser = getApiUser(request);
 
         if (StringUtils.isBlank(apiKey) || StringUtils.isBlank(apiUser)) {
             log.warn("Missing api-key or api-user in request to /login-by-api-key");
-            throw new AuthenticationException("Missing api-key or api-user") {
-            };
+            return null;
         }
 
         log.info("Attempting API key authentication for user: {}", apiUser);
@@ -102,26 +111,24 @@ public class ApiKeyLoginFilter extends AbstractAuthenticationProcessingFilter {
 
             // Check if credentials are valid (200 = authenticated)
             if (sessionResponse.getStatusCode().is2xxSuccessful()) {
+                log.info("API key validation successful for user: {}, content: {}", apiUser, sessionResponse.getBody());
+
+                // Convert JSON to map
+                final var map = new ObjectMapper().readValue(sessionResponse.getBody(), Map.class);
+                log.info("API key validation successful for user: {}, content: {}", apiUser, map);
+
                 // Credentials are valid - get real username if provided
-                final var realUserName = Optional.ofNullable(sessionResponse.getHeaders().getFirst("X-Real-User")).orElse(apiUser);
+                final var realUserName = Optional.ofNullable(map.get("user")).orElse(apiUser);
 
                 log.info("API key validation successful for user: {}", realUserName);
 
                 // Create authentication - Spring Security will create its own session
-                final var authRequest = new CookieUsernamePasswordAuthenticationToken(realUserName, apiKey, List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                        List.of() // No cookies - let Spring Security manage the session
-                );
-                return getAuthenticationManager().authenticate(authRequest);
-            } else {
-                log.warn("API key validation failed - status: {}", sessionResponse.getStatusCode());
-                throw new AuthenticationException("API key authentication failed") {
-                };
+                return new CookieUsernamePasswordAuthenticationToken(realUserName, apiKey, List.of(new SimpleGrantedAuthority("ROLE_USER")), List.of());
             }
-
+            return null;
         } catch (Exception e) {
             log.error("Error validating credentials via /rest/session", e);
-            throw new AuthenticationException("Authentication failed: " + e.getMessage()) {
-            };
+            return null;
         }
     }
 }
