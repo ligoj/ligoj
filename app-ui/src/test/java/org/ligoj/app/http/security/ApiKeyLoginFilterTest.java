@@ -26,7 +26,7 @@ class ApiKeyLoginFilterTest {
     @Test
     void authenticateWithParameters() {
         final var request = newRequest("myApiKey", "myUser", null, null);
-        mockSessionResponse(HttpStatus.OK, "myUser");
+        mockSessionResponseAdmin(HttpStatus.OK, "myUser");
 
         final var result = filter.attemptAuthentication(request, null);
 
@@ -39,7 +39,7 @@ class ApiKeyLoginFilterTest {
     @Test
     void authenticateWithHeaders() {
         final var request = newRequest(null, null, "myApiKey", "myUser");
-        mockSessionResponse(HttpStatus.OK, "myUser");
+        mockSessionResponseAdmin(HttpStatus.OK, "myUser");
 
         final var result = filter.attemptAuthentication(request, null);
 
@@ -47,6 +47,22 @@ class ApiKeyLoginFilterTest {
         Assertions.assertEquals("myUser", result.getPrincipal());
         Assertions.assertEquals("myApiKey", result.getCredentials());
         Assertions.assertTrue(result.isAuthenticated());
+    }
+
+    @Test
+    void authenticateWithHeadersNotAdmin() {
+        final var request = newRequest(null, null, "myApiKey", "myUser");
+        mockSessionResponseNotAdmin(HttpStatus.OK);
+        final var result = filter.attemptAuthentication(request, null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    void authenticateWithHeadersNotAdminGET() {
+        final var request = newRequest(null, null, "myApiKey", "myUser");
+        mockSessionResponseNotAdmin2(HttpStatus.OK);
+        final var result = filter.attemptAuthentication(request, null);
+        Assertions.assertNull(result);
     }
 
     @Test
@@ -70,7 +86,7 @@ class ApiKeyLoginFilterTest {
     @Test
     void authenticateFailure() {
         final var request = newRequest("myApiKey", "myUser", null, null);
-        mockSessionResponse(HttpStatus.UNAUTHORIZED, null);
+        mockSessionResponseAdmin(HttpStatus.UNAUTHORIZED, null);
         Assertions.assertNull(filter.attemptAuthentication(request, null));
     }
 
@@ -78,7 +94,7 @@ class ApiKeyLoginFilterTest {
     void authenticateWithMixedParametersAndHeaders() {
         // Parameter takes precedence over header
         final var request = newRequest("paramApiKey", "paramUser", "headerApiKey", "headerUser");
-        mockSessionResponse(HttpStatus.OK, "paramUser");
+        mockSessionResponseAdmin(HttpStatus.OK, "paramUser");
 
         final var result = filter.attemptAuthentication(request, null);
 
@@ -108,11 +124,25 @@ class ApiKeyLoginFilterTest {
         return request;
     }
 
-    private void mockSessionResponse(HttpStatus status, String realUser) {
+    private void mockSessionResponseAdmin(HttpStatus status, String realUser) {
         String body = null;
         if (realUser != null) {
-            body = "{\"user\": \"" + realUser + "\"}";
+            body = "{\"userName\": \"" + realUser + "\", \"apiAuthorizations\": [{\"method\": \"DELETE\", \"pattern\": \".*\"}]}";
         }
+        final var responseEntity = new ResponseEntity<String>(body, status);
+        Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.eq(HttpMethod.GET), Mockito.any(), Mockito.eq(String.class)))
+                .thenReturn(responseEntity);
+    }
+
+    private void mockSessionResponseNotAdmin(HttpStatus status) {
+        final var body = "{\"apiAuthorizations\": [{\"method\": \"DELETE\", \"pattern\": \"somePattern\"}]}";
+        final var responseEntity = new ResponseEntity<String>(body, status);
+        Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.eq(HttpMethod.GET), Mockito.any(), Mockito.eq(String.class)))
+                .thenReturn(responseEntity);
+    }
+
+    private void mockSessionResponseNotAdmin2(HttpStatus status) {
+        final var body = "{\"apiAuthorizations\": [{\"method\": \"GET\", \"pattern\": \".*\"}]}";
         final var responseEntity = new ResponseEntity<String>(body, status);
         Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.eq(HttpMethod.GET), Mockito.any(), Mockito.eq(String.class)))
                 .thenReturn(responseEntity);
