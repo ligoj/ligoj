@@ -134,18 +134,19 @@ Docker environment variables
 Spring-Boot properties, injected in CUSTOM_OPTS
 (In addition of endpoint properties)
 
-| Name                        | Default value                              | Note                                                                                                                                              |
-| --------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| server.port                 | `${SERVER_PORT}`                           | Server listening port inside the container.                                                                                                       |
-| server.address              | `${SERVER_HOST}`                           | IP of the listening socket.                                                                                                                       |
-| server.servlet.context-path | `/${CONTEXT}`                              | Context, starting '/'                                                                                                                             |
-| security.max-sessions       | `1`                                        | Max concurrent session for one user, "-1" unlimited                                                                                               |
-| security                    | `Rest`                                     | `Trusted`, `Rest` or `OAuth2Bff`. See [Security](https://github.com/ligoj/ligoj/wiki/Security)                                                    |
-| ligoj.sso.url               | `${ligoj.endpoint.api.url}/security/login` | Authentication end-point URL                                                                                                                      |
-| ligoj.sso.content           | `{"name":"%s","password":"%s"}`            | SSO payload template.                                                                                                                             |
-| app-env                     | `auto`                                     | Suffix for index and login HTML files, maybe `-prod`, `auto` or empty. When `auto`, the suffix is guessed from the way the application is started |
-| log.http                    | `info`                                     | When `debug`, all HTTP queries are logged. Increase log files.                                                                                    |
-| log.level                   | `info`                                     | Configure log verbosity of all internal components: Spring and Jetty                                                                              |
+| Name                            | Default value                              | Note                                                                                                                                              |
+| ------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| server.port                     | `${SERVER_PORT}`                           | Server listening port inside the container.                                                                                                       |
+| server.address                  | `${SERVER_HOST}`                           | IP of the listening socket.                                                                                                                       |
+| server.servlet.context-path     | `/${CONTEXT}`                              | Context, starting '/'                                                                                                                             |
+| security.max-sessions           | `1`                                        | Max concurrent session for one user, "-1" unlimited                                                                                               |
+| security                        | `Rest`                                     | `Trusted`, `Rest` or `OAuth2Bff`. See [Security](https://github.com/ligoj/ligoj/wiki/Security)                                                    |
+| ligoj.sso.url                   | `${ligoj.endpoint.api.url}/security/login` | Authentication end-point URL                                                                                                                      |
+| ligoj.sso.content               | `{"name":"%s","password":"%s"}`            | SSO payload template.                                                                                                                             |
+| app-env                         | `auto`                                     | Suffix for index and login HTML files, maybe `-prod`, `auto` or empty. When `auto`, the suffix is guessed from the way the application is started |
+| log.http                        | `info`                                     | When `debug`, all HTTP queries are logged. Increase log files.                                                                                    |
+| log.level                       | `info`                                     | Configure log verbosity of all internal components: Spring and Jetty                                                                              |
+| ligoj.security.login-by-api-key | `false`                                    | Enable [login by API key](https://github.com/ligoj/ligoj/wiki/Security#login-by-api-key-provider)                                                 |
 
 ### System level-only variables
 
