@@ -96,7 +96,7 @@ public class ApiKeyLoginFilter extends AbstractAuthenticationProcessingFilter {
 		// Call /rest/session to validate credentials (don't reuse its session)
 		try {
 			// Build the full URL (localhost for internal call)
-			final var sessionUrl = String.format("http://localhost:%d%s/rest/session", request.getServerPort(), request.getContextPath());
+			final var sessionUrl = String.format("http://localhost:%d%s/rest/session", request.getLocalPort(), request.getContextPath());
 
 			// Set headers
 			final var headers = new HttpHeaders();
