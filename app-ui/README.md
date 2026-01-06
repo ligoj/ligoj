@@ -106,7 +106,7 @@ ligoj/ligoj-ui:4.0.1 sh -c "curl http://127.0.0.1:8088/ligoj-api/manage/health"
 ## Endpoints
 
 | Property                   | Endpoint                     | Default                         |
-| -------------------------- | ---------------------------- | ------------------------------- |
+|----------------------------|------------------------------|---------------------------------|
 | ligoj.endpoint             | Default base endpoint URL    | http://localhost:8081/ligoj-api |
 | ligoj.endpoint.api.url     | Core API URL                 | ${ligoj.endpoint}/rest          |
 | ligoj.endpoint.manage.url  | Health status and management | ${ligoj.endpoint}/manage        |
@@ -123,7 +123,7 @@ docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj/ligoj-ui:4
 Docker environment variables
 
 | Docker env   | Default value       | Note                                                                             |
-| ------------ | ------------------- | -------------------------------------------------------------------------------- |
+|--------------|---------------------|----------------------------------------------------------------------------------|
 | CONTEXT      | `ligoj`             | Context, without starting '/'                                                    |
 | SERVER_HOST  | `0.0.0.0`           | IP of the listening socket.                                                      |
 | SERVER_PORT  | `8080`              | Passed to server listening port and exposed port.                                |
@@ -135,11 +135,11 @@ Spring-Boot properties, injected in CUSTOM_OPTS
 (In addition of endpoint properties)
 
 | Name                            | Default value                              | Note                                                                                                                                              |
-| ------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------------|--------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | server.port                     | `${SERVER_PORT}`                           | Server listening port inside the container.                                                                                                       |
 | server.address                  | `${SERVER_HOST}`                           | IP of the listening socket.                                                                                                                       |
 | server.servlet.context-path     | `/${CONTEXT}`                              | Context, starting '/'                                                                                                                             |
-| security.max-sessions           | `1`                                        | Max concurrent session for one user, "-1" unlimited                                                                                               |
+| security.max-sessions           | `1`                                        | Max concurrent session for one user, use `-1` for unlimited concurrency. FIFO policy is applied.                                                  |
 | security                        | `Rest`                                     | `Trusted`, `Rest` or `OAuth2Bff`. See [Security](https://github.com/ligoj/ligoj/wiki/Security)                                                    |
 | ligoj.sso.url                   | `${ligoj.endpoint.api.url}/security/login` | Authentication end-point URL                                                                                                                      |
 | ligoj.sso.content               | `{"name":"%s","password":"%s"}`            | SSO payload template.                                                                                                                             |
@@ -154,7 +154,7 @@ These variables are only relevant when set as Java System property.
 For sample `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 
 | Name                   | Default value      | Note                               |
-| ---------------------- | ------------------ | ---------------------------------- |
+|------------------------|--------------------|------------------------------------|
 | ligoj.log.file.name    | `./ui-rolling.log` | File inside `LIGOJ_HOME` directory |
 | ligoj.log.file.size    | `10 MB`            | Max log file size                  |
 | ligoj.log.file.enabled | `true`             | Enablement of log file             |
@@ -166,6 +166,6 @@ For sample `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 The source compatibility is 21 without preview features.
 
 | Vendor  | Release | OS              |
-| ------- | ------- | --------------- |
+|---------|---------|-----------------|
 | Oracle  | 21      | Linux and MacOS |
 | OpenJDK | 21      | Linux and MacOS |

@@ -19,3 +19,5 @@ bin/
 /package-lock.json
 /app-api/.m2/
 /app-api/settings.xml
+app-ui/node_modules/
+app-ui/src/main/webapp/src/main/resources/static/
