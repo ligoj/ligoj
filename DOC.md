@@ -294,33 +294,33 @@ For this real time URL access, the system uses caches. Therefore, if you want to
 
 Static security based Spring-Security, and defining a simple Role Based Access Control. Pattern based URL are statics and cannot be easily changed at runtime. This security is the first firewall. Can only be updated by creating your own spring-security XML or Spring-Boot Java configuration.
 
-The security design is based on the `app-ui` container that decides whereas a request is forwarded to `app-api` for the next security level. The final authentication and the authorization are always performed by the `app-api` container.
+The security design is based on the `ligoj-ui` container that decides whereas a request is forwarded to `ligoj-api` for the next security level. The final authentication and the authorization are always performed by the `ligoj-api` container.
 
 The decision follows this matrix:
 
-| URL               | Session | API Key | [PreAuth](#pre-authenticated-access) | Login | Auth.     | Response | Notes                                           |
-| ----------------- | ------- | ------- | ------------------------------------ | ----- | --------- | -------- | ----------------------------------------------- |
-| public            | *       | *       | *                                    | *     | *         | `200`    | Whitelisted page                                |
-| /rest/*           | Yes     | *       | *                                    | *     | Granted   | `200`    | Authorization is checked by `app-api`           |
-| /rest/*           | No      | No      | Not configured                       | *     | Refused   | `401`    | Unauthorized by `app-api`                       |
-| /rest/*           | No      | Invalid | Not configured                       | KO    | *         | `403`    | API key refused by `app-api`                    |
-| /rest/*           | No      | Valid   | Not configured                       | OK    | Granted   | `200`    | API key and authorization accepted by `app-api` |
-| /rest/*           | No      | Valid   | Not configured                       | OK    | Refused   | `200`    | Unauthorized by `app-api`                       |
-| /rest/*           | No      | Valid   | Not configured                       | OK    | Refused   | `200`    | Unauthorized by `app-api`                       |
-| /login-by-api-key | No      | Valid   | Not configured                       | OK    | Is admin  | `200`    | Only administrators can use this feature        |
-| /login-by-api-key | No      | *       | *                                    | OK    | Not admin | `302`    | Redirection to login form or OAuth page.        |
-| (other)           | Yes     | *       | *                                    | *     | Granted   | `200`    | Private, not `/rest` Authorized by `app-api`    |
-| (other)           | No      | *       | Not configured                       | *     | Refused   | `403`    |                                                 |
-| (other)           | No      | *       | Missing                              | *     | *         | `401`    |                                                 |
-| (other)           | No      | *       | Invalid                              | KO    | *         | `401`    | Login refused by `app-api`                      |
-| (other)           | No      | *       | Valid                                | OK    | Granted   | `200`    | Logged and granted by `app-api`                 |
-| (other)           | No      | *       | Valid                                | OK    | Refused   | `403`    | Logged and unauthorized by `app-api`            |
+| URL               | Session | API Key | [PreAuth](#pre-authenticated-access) | Login | Auth.     | Response | Notes                                             |
+| ----------------- | ------- | ------- | ------------------------------------ | ----- | --------- | -------- | ------------------------------------------------- |
+| public            | *       | *       | *                                    | *     | *         | `200`    | Whitelisted page                                  |
+| /rest/*           | Yes     | *       | *                                    | *     | Granted   | `200`    | Authorization is checked by `ligoj-api`           |
+| /rest/*           | No      | No      | Not configured                       | *     | Refused   | `401`    | Unauthorized by `ligoj-api`                       |
+| /rest/*           | No      | Invalid | Not configured                       | KO    | *         | `403`    | API key refused by `ligoj-api`                    |
+| /rest/*           | No      | Valid   | Not configured                       | OK    | Granted   | `200`    | API key and authorization accepted by `ligoj-api` |
+| /rest/*           | No      | Valid   | Not configured                       | OK    | Refused   | `200`    | Unauthorized by `ligoj-api`                       |
+| /rest/*           | No      | Valid   | Not configured                       | OK    | Refused   | `200`    | Unauthorized by `ligoj-api`                       |
+| /login-by-api-key | No      | Valid   | Not configured                       | OK    | Is admin  | `200`    | Only administrators can use this feature          |
+| /login-by-api-key | No      | *       | *                                    | OK    | Not admin | `302`    | Redirection to login form or OAuth page.          |
+| (other)           | Yes     | *       | *                                    | *     | Granted   | `200`    | Private, not `/rest` Authorized by `ligoj-api`    |
+| (other)           | No      | *       | Not configured                       | *     | Refused   | `403`    |                                                   |
+| (other)           | No      | *       | Missing                              | *     | *         | `401`    |                                                   |
+| (other)           | No      | *       | Invalid                              | KO    | *         | `401`    | Login refused by `ligoj-api`                      |
+| (other)           | No      | *       | Valid                                | OK    | Granted   | `200`    | Logged and granted by `ligoj-api`                 |
+| (other)           | No      | *       | Valid                                | OK    | Refused   | `403`    | Logged and unauthorized by `ligoj-api`            |
 
 ### Pre-authenticated access
 
-A pre-authentication is an authentication performed by a trusted security component between your users and the `app-ui` container. This component forward only trusted request and add specific headers in the forwarded request to the `app-ui` container.
+A pre-authentication is an authentication performed by a trusted security component between your users and the `ligoj-ui` container. This component forward only trusted request and add specific headers in the forwarded request to the `ligoj-ui` container.
  
-The `PreAuth` filter, can be enabled by the arguments `-Dsecurity.pre-auth-principal=${HEADER_PRINCIPAL}` and `-Dsecurity.pre-auth-credentials=${HEADER_CREDENTIAL}` of `app-ui` at launch time only. When these arguments are empty, the `PreAuth` filter is not enabled. When enabled, the corresponding header must be included in the incoming request, otherwise the response will be a `401` error.
+The `PreAuth` filter, can be enabled by the arguments `-Dsecurity.pre-auth-principal=${HEADER_PRINCIPAL}` and `-Dsecurity.pre-auth-credentials=${HEADER_CREDENTIAL}` of `ligoj-ui` at launch time only. When these arguments are empty, the `PreAuth` filter is not enabled. When enabled, the corresponding header must be included in the incoming request, otherwise the response will be a `401` error.
 
 You should use the right [plugin-id](https://github.com/ligoj/plugin-id) implementation to get the user details. 
 
@@ -381,15 +381,16 @@ This security level gives read or write access with propagation (GRANT) option t
 
 ### Login
 
-The enabled login modes is configured only at launch time of the `app-ui` container with `-Dsecurity=${MODE}` argument. The behavior is described in the blow table:
+The enabled login mode is configured only at launch time of the `ligoj-ui` container with `-Dsecurity=${MODE}` argument. The behavior is described in the blow table:
 
-| Mode        | Implementation                                                | Behavior                                                                           |
-| ----------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `Trusted`   | `org.ligoj.app.http.security.TrustedAuthenticationProvider`   | Login is always accepted, `app-api` container is not involved. Useful for testing. |
-| `Rest`      | `org.ligoj.app.http.security.RestAuthenticationProvider`      | `/rest/security/login` is called.                                                  |
-| `OAuth2Bff` | `org.ligoj.app.http.security.OAuth2BffAuthenticationProvider` | Login and logout operations are delegated to external OAuth2 identity provider     |
+| Mode        | Implementation                                                | Login screen   | Behavior                                                                             |
+| ----------- | ------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------ |
+| `Trusted`   | `org.ligoj.app.http.security.TrustedAuthenticationProvider`   | Ligoj endpoint | Login is always accepted, `ligoj-api` container is not involved. Useful for testing. |
+| `Rest`      | `org.ligoj.app.http.security.RestAuthenticationProvider`      | Ligoj endpoint | Login operation is delegated to a REST endpoint, by default one of `ligoj-api`.      |
+| `OAuth2Bff` | `org.ligoj.app.http.security.OAuth2BffAuthenticationProvider` | OIDC Provider  | Login and logout operations are delegated to external OAuth2 identity provider       |
 
-#### `/login-by-api-key` Provider
+
+#### `/login-by-api-key` bypass
 
 In a browser, whatever the provider selected, the URL `http://localhost:8080/ligoj/login-by-api-key?api-key=API_KEY&api-user=API_USER` bypasses the login process and directly grants a session to the user.
 
@@ -401,32 +402,30 @@ The contraints are:
 Timeline:
 - A special authentication provider is placed before the standard provider and listen the `/login-by-api-key` path. This provider only enabled when `ligoj.security.login-by-api-key` is `true`.
 - `API_KEY` and `API_USER` query parameters must be present and not empty. If not, a `400` is returned
-- The API `/session` endpoint s called with these crdentials in order to check the credentials and to retrieve the permissions of this user. If the call failed, a `401` is returned
-- One of the API user permissions must match `pattern=.*` and `method=DELETE`. If not, a `401 is returned`.
-- When succeeded, a stateful session is created in WEB container and a `302 /` is returned.
+- The API `/session` endpoint is called with these credentials in order to check them and to retrieve the permissions of this user. If the call failed, a `401` is returned
+- One of the API user's permissions must match `pattern=.*` and `method=DELETE`. If not, a `401` is returned.
+- When succeeded, a stateful session is created in `ligoj-ui` container and a `302 /` is returned.
+
 
 #### `OAuth2Bff` Provider
 
-Sample configuration file [application.properties](app-ui/src/main/resources/application.properties)
+In this authentication mode, the login page is served by the OIDC provider such as AWS Cognito, Keycloak or EntraID.
+Additional configuration is added to the `CUSTOM_OPTS` environment variable (for now), instead of the standard `application.properties` configuration file.
 
-``` ini
-# OAuth2 specific overrides
-security = OAuth2Bff
-ligoj.security.oauth2.username-attribute = email
-ligoj.security.login.url = /oauth2/authorization/keycloak
-spring.security.oauth2.client.provider.keycloak.issuer-uri = http://localhost:9083/realms/keycloak
-spring.security.oauth2.client.registration.keycloak.provider =  keycloak
-spring.security.oauth2.client.registration.keycloak.authorization-grant-type = authorization_code
-spring.security.oauth2.client.registration.keycloak.client-id = ligoj
-spring.security.oauth2.client.registration.keycloak.client-secret = secret
-spring.security.oauth2.client.registration.keycloak.scope = openid
-```
+#### `Rest` Provider
 
-Corresponding Keycloak configuration::
-- Root URL = http://localhost:8080/ligoj/
-- Home URL = http://localhost:8080/ligoj/
-- Redirect Login URI: http://localhost:8080/ligoj/login/oauth2/code/keycloak
-- Redirect Logout URI: http://localhost:8080/ligoj/oauth2/authorization/keycloak?logout
+In this mode, authentication information is entered in the Ligoj login screen, and transmitted via `ligoj-ui` (not directly by the browser) to a REST resource whose result will determine the success of the authentication.
+
+Timeline:
+- The user POST an HTTP request to `http://$ligoj-ui/login` with the credentials
+- The security provider is selected according to the `security` configuration property, so `org.ligoj.app.http.security.RestAuthenticationProvider` for this case.
+- The security provider `POST` the login credentials to the endpoint defined by `ligoj.sso.url`.
+- By default, this endpoint is ``${ligoj.endpoint.api.url}/security/login` which will delegate the authentication to the defined `plugin:id` node designated by the `feature:iam:node:primary` configuration.
+- The plugin node proceed to the validation of the credentials.
+- A `204` HTTP response is expected for a success. Any other response is considered as an authentication failure.
+- The Java `HttpSession` is created in `ligoj-ui` container, with optional custom principal name (set by `X-Real-User` response header)
+- If a concurrency limit (`security.max-sessions`) is reached for this principal, the oldest session is invalidated.
+- The `JSSESSIONID` cookie and other cookies optionnaly set by the plugin are forwarded back to the browser.
 
 
 ## Configuration
@@ -736,3 +735,685 @@ mvn clean deploy -Dgpg.skip=false -Psources,javadoc,minify -DskipTests=true
 ## Setup notices
 
 For Eclipse compiler, enable 'Store information about method parameters (usable with reflection)' in general preferences/Java/Compiler
+
+
+# Installation
+
+# Docker Installation
+
+These actions allow the first installation of Ligoj on an host having Docker installed.
+
+### Preparation of the Ligoj data directory
+
+A directory on the host must be created to store the application's persistent data. It is possible to create Docker data volumes, however this configuration is not documented here.
+This directory will contain:
+- plugins installed manually or downloaded automatically. Those are `jar` files.
+- temporary and persistent data of plug-ins
+- hook scripts
+- (optional) the secret file to encrypt secrets in the database using AES-256
+
+```bash
+mkdir -p /var/lib/ligoj
+```
+
+### Database creation
+
+Connect to the PostGreSQL 15+ server
+
+```bash
+sudo su postgres
+psql
+```
+
+Execute the following SQL commands to create the Ligoj database, and the SQL user that will be used by the application.
+If the password is customized, make sure to note it down for the [container configuration](#ligoj-container-configuration) step.
+
+```sql
+CREATE USER ligoj WITH ENCRYPTED PASSWORD 'ligoj';
+CREATE DATABASE ligoj WITH OWNER=ligoj ENCODING='UTF-8';
+GRANT ALL ON DATABASE ligoj to ligoj;
+GRANT ALL ON SCHEMA public TO ligoj;
+```
+
+The schema (tables, indexes, etc.) will be automatically completed by the application during its first startup. Schema migrations are also handled by Ligoj at each startup.
+
+### Docker daemon configuration
+
+The `/etc/docker/daemon.json` file can be adjusted to enable mirror mode for Docker images pointing to a Nexus.
+
+```json
+{
+    "default-address-pools": [
+        {
+            "base": "192.168.0.0/16",
+            "size": 24
+        }
+    ],
+    "insecure-registries": [
+        "nexus-docker-pull.some.nexus.com",
+        "nexus-docker-push.some.nexus.com"
+    ],
+    "registry-mirrors": [
+        "https://nexus-docker-pull.some.nexus.com"
+    ]
+}
+```
+
+# Docker Execution
+
+Ligoj is composed of 2 Docker containers:
+- `ligoj-api`: Ligoj API, not intended to be accessible outside the Docker network. Accessible only from the other container `ligoj-ui`. This container is the only one able to access the database and other sources (LDAP, Jenkins API, etc.). It is a RESTful, transactional API based on Spring-Boot.
+- `ligoj-ui`: Ligoj Frontend, is just a proxy for `ligoj-api` with routing rules too complex to be handled directly by Apache or NGinx. This container manages user sessions, is stateful and based on Spring-Boot.
+
+## Configuration
+
+### `application.properties` file
+
+In the configuration file `/var/lib/ligoj/config/application.properties`, adapt the database username and password. All these configurations can be converted into `-D` arguments in the Docker execution line.
+
+This configuration file can be shared between the 2 containers `ligoj-ui` and `ligoj-api` but it's not recommended. If a common Spring Boot configuration needs to have a different value from one container to another, use a `-D` argument dedicated to these containers.
+
+```bash
+# Volume for configuration and installed Ligoj plugins
+mkdir -p /var/lib/ligoj/hooks
+mkdir -p /var/lib/ligoj/files
+mkdir -p /var/lib/ligoj/config
+
+# Configuration file to adapt
+echo '
+#
+# [ligoj-api]
+#
+jdbc.username=ligoj
+jdbc.password=ligoj
+jdbc.database=ligoj
+jdbc.host=127.0.0.1
+jdbc.vendor=postgresql
+jdbc.driverClassName=org.postgresql.Driver
+jdbc.port=5432
+jpa.hbm2ddl=update
+jpa.dialect=org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect
+' > /var/lib/ligoj/config/application.properties
+```
+
+### Trusted certificates
+
+For Java environments, the management of trusted certification authorities is handled in a JKS file: a TrustStore.
+
+To facilitate the creation of these files, a Python script [plugins/ssl.py](https://github.com/ligoj/cli/blob/master/plugins/ssl.py) allows easily adding certificates (the whole chain) from a given site into a JKS file.
+
+Multiple consecutive executions are possible to progressively build the target JKS file.
+
+Then, this file must be made available to the target container.
+
+In the example below, the JKS file is filled with 2 CAs.
+
+```bash
+python plugins/ssl.py keycloak.sample.com 443 ./ligoj.jks changeit
+```
+
+```log
+[*] Retrieving certificate chain from keycloak.sample.com:443 using keytool...
+[*] Found 3 certificate(s) in the chain.
+[*] Keystore './ligoj.jks' not found. Creating a new one...
+[*] Created new keystore: ./ligoj.jks
+[*] Importing certificate with alias 'keycloak_some_cert_0'...
+[*] Importing certificate with alias 'keycloak_some_cert_1'...
+[*] Importing certificate with alias 'keycloak_some_cert_2'...
+[*] Successfully imported 3 certificates into './ligoj.jks'.
+```
+
+Then the JKS should be copied to the server hosting the `ligoj-ui` and/or the `ligoj-api` container.
+
+The last step is to reference this TrustStore in the `docker run` command with the `CUSTOM_OPTS` environment variable to include the property `-Djavax.net.ssl.trustStore=/home/ligoj/ligoj-ui.jks`.
+
+In the absence of this `javax.net.ssl.trustStore` property, the default Java TrustStore will be used.
+
+Modifying the content of a TrustStore is only taken into account after restarting the Java container.
+
+## `ligoj-api` Container
+
+```bash
+# Volume for scripts associated with hooks. Only this location will be executable
+mkdir -p /var/lib/ligoj/hooks
+
+# Volume for image configuration files, stylesheets, etc.
+mkdir -p /var/lib/ligoj/files
+
+# Stop API container
+sudo docker stop ligoj-api
+
+# Start Docker container with file and configuration volumes
+sudo docker run \
+--name "ligoj-api" \
+--network="host" \
+-v /var/lib/ligoj:/home/ligoj \
+-v /var/lib/ligoj/hooks:/home/hooks \
+-v /var/lib/ligoj/files:/home/files \
+--detach \
+--restart=always \
+--log-opt max-size=5m --log-opt max-file=5 \
+-e SERVER_PORT=8088 \
+-e CUSTOM_OPTS='--enable-preview -Dlog.level=INFO -Dcom.sun.jndi.ldap.connect.pool.initsize=1 -Dcom.sun.jndi.ldap.connect.pool.maxsize=1 -Dcom.sun.jndi.ldap.connect.pool.prefsize=1 -Dcom.sun.jndi.ldap.connect.pool.debug=all -Dligoj.sslVerify=false' \
+ligoj/ligoj-api:4.0.2-SNAPSHOT-101
+```
+
+Access logs
+
+```bash
+sudo docker logs -f ligoj-api
+```
+
+```log
+2023-07-18 20:00:02.628 INFO  PluginsClassLoader requested but not found in the current classloader hierarchy org.springframework.boot.loader.LaunchedURLClassLoader@6576fe71
+2023-07-18 20:00:02.632 INFO  Install the plugin classloader for application org.springframework.boot.SpringApplication@4facf68f([])
+2023-07-18 20:00:02.633 INFO  Home directory is '/home/ligoj', resolved from the system property 'ligoj.home'
+2023-07-18 20:00:02.633 INFO  Initialize the plug-ins from directory from /home/ligoj
+2023-07-18 20:00:02.646 INFO  Plugins ClassLoader has added 0 plug-ins and ignored 0 old plug-ins, digest 1B2M2Y8AsgTpgAmY7PhCfg==
+2023-07-18 20:00:02.648 INFO  Application listener and plugin classloader are now configured
+
+🅛🅘🅖🅞🅙 🅐🅟🅘
+:: Ligoj API :: (v4.0.2-SNAPSHOT)
+
+...
+2023-07-18 20:08:21.583 INFO  Started Application in 11.234 seconds (process running for 11.854)
+```
+
+### Notes
+
+The Ligoj mount point `/home/hooks` to the host directory `/var/lib/ligoj/hooks` allows the `ligoj hook` CLI command to execute scripts placed in this directory.
+
+The Ligoj mount point `/home/files` to the host directory `/var/lib/ligoj/files` allows the `ligoj files` CLI command to place files in this directory. In the [post-install](#customization-of-the-ui) configuration, this directory as well as `/home/hooks` will be authorized to allow depositing files subsequently executed by hooks.
+
+
+## `ligoj-ui` Container
+
+### Starting the container without login verification
+
+This startup mode with the `-Dsecurity=Trusted` option allows running Ligoj without authentication verification. Thus passwords are not verified, however all RBAC logic remains active. Allows performing `run-as` by "authenticating" as any user.
+
+*Warning* Do not enable this mode for production, or only after restricting its access to known or local IPs.
+
+```bash
+sudo docker stop ligoj-ui
+sudo docker run \
+--name "ligoj-ui" \
+--network="host" \
+--detach \
+--restart=always \
+-v /var/lib/ligoj:/home/ligoj \
+-e CUSTOM_OPTS='-Dsecurity=Trusted -Dlog.level=info' \
+-e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
+-e SERVER_PORT=8089 \
+ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```
+
+Access logs
+
+```bash
+sudo docker logs -f ligoj-ui
+```
+
+```log
+🅛🅘🅖🅞🅙 🅤🅘
+:: Ligoj UI :: (v4.0.2-SNAPSHOT)
+
+2023-07-18 20:17:06.107 INFO  Starting Application v4.0.2-SNAPSHOT using Java 17.0.2 with PID 1 (/usr/local/ligoj/app-ui.war started by root in /usr/local/ligoj)
+...
+2023-07-18 20:17:07.199 INFO  Started Application in 1.342 seconds (process running for 1.821)
+```
+
+### Test connectivity
+
+```bash
+# From the system
+curl http://localhost/ligoj/login.html
+```
+
+### Check `ligoj-api` container health via `ligoj-ui`
+
+```bash
+sudo docker run --rm -it \
+--name "ligoj-ui" \
+--network="host" \
+ligoj/ligoj-ui:4.0.2-SNAPSHOT-101 sh -c "apk add curl && curl http://127.0.0.1:8088/ligoj-api/manage/health"
+```
+
+```json
+{"status":"UP"}
+```
+
+
+### Integration with reverse proxy
+
+Without integration with a reverse proxy or upstream load balancer, Ligoj is available:
+- Only on the `http` protocol. Although `https` is possible, it requires modifying the execution in `Dockerfile` to configure certificates, KeyStore, and TrustStore.
+- On the IP configured via the Docker environment variable `SERVER_HOST` (default `0.0.0.0`)
+- On the port configured via the Docker environment variable `SERVER_PORT` (configured below as `8089`)
+- On the URL (path) configured via the Docker environment variable `CONTEXT` (configured below as `/ligoj`)
+- Add the corresponding DNS `ligoj.sample.com` in the tenant's DNS zone, Record type A, similar to Jenkins for the IP.
+
+
+```bash
+echo 'backend ligoj
+  server server_ligoj 127.0.0.1:8089
+  http-request set-header X-Forwarded-Proto "https"' > /etc/haproxy/conf.d/ligoj.cfg
+echo 'ligoj.sample.com ligoj' >> /etc/haproxy/maps/hosts.map
+service haproxy restart
+```
+
+### Reverse proxy configuration test
+
+From the system hosting the reverse proxy (via localhost)
+
+```bash
+curl --resolve ligoj.sample.com:80:127.0.0.1 http://ligoj.sample.com/ligoj
+```
+
+From the external system reaching the reverse proxy (via its external IP)
+
+```bash
+curl --resolve ligoj.sample.com:80:10.125.13.185 http://ligoj.sample.com/ligoj
+```
+
+# Configuration
+
+The objective of this section is:
+- CLI configuration,
+- creation of an API key for the administrator,
+- configuration of Ligoj and its plugins.
+
+## CLI Configuration
+
+Install the CLI
+
+```shell
+pip install -U pip git+https://github.com/ligoj/cli@main
+```
+
+After configuring the [ligoj](./README.md) CLI, your Ligoj configuration file `~/.ligoj/config` should look like this for the `default` profile (to simplify):
+
+```ini
+[default]
+endpoint=https://ligoj.sample.com/ligoj
+output=json
+```
+
+The Ligoj secret file `~/.ligoj/credentials` should look like this:
+```ini
+[default]
+api_user=ligoj-admin
+```
+
+Without using configuration files, the equivalent in environment variables is:
+
+```bash
+export LIGOJ_ENDPOINT="https://ligoj.sample.com/ligoj"
+export LIGOJ_OUTPUT="json"
+export LIGOJ_API_USER="ligoj-admin"
+```
+
+Create a new API Key
+
+```bash
+# Login with a password ignored in "Trusted" mode
+ligoj session login --password __trusted_mode_so_whatever__
+
+# Creation of an API Key for the administrator and save
+ligoj token create --save --id cli_init
+ligoj token list
+
+# Logout of the previous session cookie retrieved by user/password login since now we have an API token
+ligoj session logout
+
+# Verification of the API key without error
+ligoj session whoami
+```
+
+## Plugin Configuration
+
+```bash
+# Put here the path leading to a Nexus proxy from where Ligoj plugins will be downloaded once cached by Nexus
+MAVEN_PLUGINS_ENDPOINT="http://nexus.sample.com/repository/maven_group/"
+
+echo "General configuration: proxy cache, .."
+ligoj configuration set --id "plugins.repository-manager.nexus.search.proxy.host" --value "proxy.infra.local"
+ligoj configuration set --id "plugins.repository-manager.nexus.search.proxy.port" --value "8080"
+ligoj configuration set --id "plugins.repository-manager.nexus.artifact.url" --value "$MAVEN_PLUGINS_ENDPOINT"
+ligoj configuration set --id "ligoj.plugin.repository" --value "nexus"
+ligoj configuration set --id "ligoj.plugin.update" --value "false"
+```
+
+## File management
+
+Hooks, and read-only files management
+
+```bash
+ligoj configuration set --id "ligoj.hook.path" --value "^/home/hooks/.*,^/home/ligoj/.*"
+ligoj configuration set --id "ligoj.file.path" --value "^/home/files/.*,^/home/hooks/.*,^/home/ligoj/META-INF/resources/webjars/.*,^/home/ligoj/statics/themes/.*"
+```
+
+## PLugin installation
+
+```bash
+echo "Installing plugins (Ligoj DEV/SNAPSHOT mode only)..."
+ligoj plugin install --id "plugin-id" --repository "nexus" --version 2.2.11
+ligoj plugin install --id "plugin-id-ldap" --repository "nexus" --version 2.2.7
+ligoj plugin install --id "plugin-build" --repository "nexus" --version 1.1.4
+ligoj plugin install --id "plugin-build-jenkins" --repository "nexus" --version 1.1.1
+ligoj plugin install --id "plugin-qa"  --repository "nexus" --version 1.1.5
+ligoj plugin install --id "plugin-qa-sonarqube" --repository "nexus" --version 1.1.6
+# plugin-iam-node specifies which node/directory will be taken into account for IAM/SSO authentication among a set of LDAP directories
+ligoj plugin install --id "plugin-iam-node" --repository "nexus" --version 1.2.2
+ligoj plugin install --id "plugin-ui" --repository "nexus" --version 1.1.11
+# plugin-password, a priori, useless for a setup without plugin-id-sql or plugin-id-ldap
+ligoj plugin install --id "plugin-password" --repository "nexus" --version 1.1.3 # allows password resets
+# plugin-menu-node allows UI activation of plugin-id-x (Identity part) and other plugins
+ligoj plugin install --id "plugin-menu-node" --repository "nexus"         # specifies which plugins contribute to the GUI interface
+
+# Eventually, install a plugin from the snapshot repository
+# ligoj plugin upload --id "plugin-id" --version "2.1.8-SNAPSHOT" --from "https://ligoj.io/plugins/plugin-id-2.1.8-SNAPSHOT.jar"
+
+# Install Javadoc for OpenAPI documentation
+ligoj plugin javadoc --repository "nexus"
+ligoj plugin restart --wait 60
+```
+
+## Plugin spcification configuration
+
+For sample, `plugin-ai-ldap` configuration from the CLI:
+
+```bash
+ligoj configuration set --id "cache.id-ldap-data.ttl" --value "37200"
+ligoj configuration set --id "service:id:user-display" --value "mail-no-domain"
+ligoj cache invalidate
+
+ligoj plugin restart --wait 60
+
+# Backup of an LDAP configuration
+ligoj node get --id "service:id:ldap:hr-main" --parameters-mode "all" --parameters-compact  --parameters-secured > conf/ligoj/nodes/ldap-backup.json
+
+echo "Configuring plugins ..."
+ligoj node create --id "service:id:ldap:hr-main" --name "HR Main" --from conf/ligoj/nodes/ldap.json
+ligoj node create --id "service:build:jenkins:master1" --name "Jenkins Master1" --from conf/ligoj/nodes/jenkins.json
+ligoj configuration set --id "feature:iam:node:primary" --value "service:id:ldap:hr-main" --system
+ligoj plugin restart --wait 60
+```
+
+*Notes* To build your own plugins or rebuild them from their sources, documentation is available on the GitHub [plugin-api](https://github.com/ligoj/ligoj-api) repository
+
+## Customization of the UI
+
+```bash
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/META-INF/resources/webjars/home/img/logo.png"
+ligoj file put --from ./customize/bg1.jpg  --path "/home/ligoj/statics/themes/bootstrap-material-design/img/bg1.jpg"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/favicon.ico"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/favicon.ico"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/favicon-16x16.png"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/favicon-32x32.png"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/android-chrome-192x192.png"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/android-chrome-512x512.png"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/apple-touch.png"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-70x70.png"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-144x144.png"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-150x150.png"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-310x150.png"
+ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-310x310.png"
+```
+
+# Configuration of authentication
+
+After configuring the primary `node` responsible for authentication, the `Trusted` mode can be disabled, the API keys generated previously remain valid.
+
+It is anyway possible to revert to this mode to regain access to Ligoj in case it becomes inaccessible due to a configuration defect of the LDAP `node`.
+
+System property `security` value determines the authentication mode:
+
+| `security` mode | Login screen  | Identity Provider                                                   |
+| --------------- | ------------- | ------------------------------------------------------------------- |
+| `Trusted`       | Ligoj         | Authentication required but always accepted                         |
+| `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
+| `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
+
+## `Rest` mode
+
+For sample, if LDAP authentication is expected to be proceeded `plugin-id-ldap`
+
+In this authentication mode, the login page is served by Ligoj. Authentication is done by Ligoj API through LDAP plugin expected to be configured.
+
+```bash
+sudo docker rm -f ligoj-ui
+sudo docker run \
+--name "ligoj-ui" \
+--network="host" \
+--detach \
+--restart=always \
+--log-opt max-size=5m --log-opt max-file=5 \
+-v /var/lib/ligoj:/home/ligoj \
+-e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=Rest' \
+-e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
+-e SERVER_PORT=8089 \
+ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```
+
+## `OAuth2Bff` mode
+
+In this mode, authentication information is entered in the OIDC identity provider.
+
+Parameters for the [`application.properties` configuration file](#configuration) are [here](https://github.com/ligoj/ligoj/wiki/Security#oauth2bff-provider)
+
+Note: If the KeyCloak server uses an unknown SSL certificate authority (CA), follow the [trusted certificate configuration](#trusted-certificates) procedure for the `ligoj-ui` container.
+
+### With KeyCloak
+
+In this authentication mode, the login page is served by KeyCloak.
+Additional configuration is added to the `CUSTOM_OPTS` environment variable (for now), instead of the standard `application.properties` configuration file.
+
+Prerequisites:
+- KeyCloak instance configured on the same LDAP as the one configured as `plugin-id-ldap` in Ligoj
+- Redirect configuration filled in
+  - Base URL: https://ligoj.sample.com/ligoj
+  - Login URI:
+    - https://ligoj.sample.com/ligoj/login/oauth2/code/keycloak
+    - https://ligoj.sample.com/users/auth/openid_connect/callback
+    - https://ligoj.sample.com/ligoj/oauth2/authorization/keycloak?logout
+  - Logout URI: https://ligoj.sample.com/ligoj/login/oauth2/authorization/keycloak?logout
+- *Optional* Valid certificates in the container's JKS. See [trusted certificates](#trusted-certificates)
+
+Sample configuration file [application.properties](app-ui/src/main/resources/application.properties)
+
+``` ini
+# OAuth2 specific overrides
+security = OAuth2Bff
+ligoj.security.oauth2.username-attribute = email
+ligoj.security.login.url = /oauth2/authorization/keycloak
+spring.security.oauth2.client.provider.keycloak.issuer-uri = http://localhost:9083/realms/keycloak
+spring.security.oauth2.client.registration.keycloak.provider =  keycloak
+spring.security.oauth2.client.registration.keycloak.authorization-grant-type = authorization_code
+spring.security.oauth2.client.registration.keycloak.client-id = ligoj
+spring.security.oauth2.client.registration.keycloak.client-secret = secret
+spring.security.oauth2.client.registration.keycloak.scope = openid
+```
+
+Corresponding Keycloak configuration::
+- Root URL = http://localhost:8080/ligoj/
+- Home URL = http://localhost:8080/ligoj/
+- Redirect Login URI: http://localhost:8080/ligoj/login/oauth2/code/keycloak
+- Redirect Logout URI: http://localhost:8080/ligoj/oauth2/authorization/keycloak?logout
+
+```bash
+sudo docker rm -f ligoj-ui
+sudo docker run \
+--name "ligoj-ui" \
+--network="host" \
+--detach \
+--restart=always \
+--log-opt max-size=5m --log-opt max-file=5 \
+-v /var/lib/ligoj:/home/ligoj \
+-e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=OAuth2Bff -Djavax.net.ssl.trustStore=/home/ligoj/ligoj-ui.jks -Dspring.security.oauth2.client.registration.keycloak.provider=keycloak -Dspring.security.oauth2.client.registration.keycloak.client-id=ligoj -Dspring.security.oauth2.client.registration.keycloak.client-secret=tMpwYaU2pBc9wXuWfYPPJXtEgxIDNGW9 -Dspring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.sample.com/realms/ligoj -Dligoj.security.login.url=/oauth2/authorization/keycloak -Dligoj.security.oauth2.username-attribute=preferred_username -Dspring.security.oauth2.client.registration.keycloak.scope=openid -Dligoj.security.login-by-api-key=true -Dsecurity.max-sessions=-1' \
+-e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
+-e SERVER_PORT=8089 \
+ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```
+
+## Configure with `bootstrap` commands
+
+These commands are aggregations of Ligoj API calls and/or ancillary tools.
+
+
+### Create scopes and global groups.
+
+Execution necessary only once, but repeatable without error
+
+*Note* No existing jenkins job for the moment
+
+```bash
+ligoj bootstrap init --base-dn="ou=sample,,c=fr" --users-base-dn "" --internal-users-base-dn "ou=people" --technical-users-base-dn "ou=technical-users" --external-users-base-dn "ou=external" --groups-base-dn "" --technical-groups-base-dn "ou=tools" --projects-base-dn "ou=projects"
+```
+
+
+### Create a project
+
+Create a new project and associate `ligoj-user` user as its manager.
+
+```bash
+ligoj bootstrap welcome-user --id "ligoj-user" --project "project1" --name "Sample Project1" --group-suffix="-team"
+```
+
+### Create a project attached to another project
+
+Creation of a project materializing a team by designating the administrator of the project and the administrator of the future project.
+Associated groups are also created.
+
+```bash
+ligoj bootstrap create-project --project "project2" --name "Sample Project2" --group-suffix="-team" --groups="admin,dev" --parent-project "project1" --parent-admin "ligoj-user" --on-behalf-of other-user.name@sample.com
+```
+
+*Note* The `admin` group is implicitly added and automatically receives a delegation of management for the project
+
+
+To retrieve project associations, use this SQL query:
+
+```sql
+/* MySQL */
+SELECT pkey, JSON_EXTRACT(creation_context, '$."parent-project"') FROM ligoj_project;
+
+/* PostgreSQL */
+SELECT pkey, JSON_EXTRACT_PATH_TEXT(creation_context::JSON, 'parent-project') FROM ligoj_project;
+```
+
+To retrieve projects associated with a project, use this SQL query:
+
+```sql
+/* MySQL */
+SELECT pkey FROM ligoj_project WHERE 'project1'=JSON_EXTRACT(creation_context, '$."parent-project"');
+
+/* PostgreSQL */
+SELECT pkey FROM ligoj_project WHERE 'project1'=JSON_EXTRACT_PATH_TEXT(creation_context::JSON, 'parent-project');
+```
+
+### Create roles for a project
+
+Creation of roles in different tools based on groups and linked to tool permissions declared in a configuration file.
+
+This action does not need to access Ligoj, but to the remote tools.
+
+```bash
+ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from="conf/sample.conf.empty.json" \
+--sonar-endpoint="" \
+--sonar-api-token="" \
+--jenkins-home="" \
+--jenkins-endpoint="" \
+--jenkins-api-user="" \
+--jenkins-api-token="" \
+--nexus-endpoint="" \
+--nexus-user="" \
+--nexus-password=""
+```
+
+# Troubleshooting
+
+## Messages `WARN  constraint "uk_..." of relation "..." does not exist, skipping`
+
+Depending on the PgSQL version, messages like `WARN  constraint "uk_..." of relation "..." does not exist, skipping` might appear. They can be ignored, and are related to a verbosity defect in the [Hibernate](https://github.com/quarkusio/quarkus/issues/16204) and [here](https://hibernate.atlassian.net/browse/HHH-14889) module during schema updates.
+
+## Messages `ERROR Request execution ' [0] GET https://search.maven.org/`
+
+Depending on the proxy configuration provided by the Docker daemon, a non-blocking error `ERROR Request execution ' [0] GET https://search.maven.org/...` related to automatic plugin updates might appear in the logs. 
+It can be ignored and will disappear after applying a custom Nexus configurations.
+
+
+## Lost authentication configuration for administration
+
+If an LDAP configuration has been changed in such a way that it is no longer possible to connect to the application via LDAP, then 2 solutions are possible:
+
+### Via the GUI
+
+The steps are as follows:
+- Interrupt the application network, i.e., make it available only for certain IPs
+- Change the security mode of the `ligoj-ui` container to `Trusted`
+- Restart the `ligoj-ui` container
+- Connect with a Ligoj administrator username, i.e., having the `ADMIN` role, and any password
+- Change the desired LDAP configuration
+- Change the security mode of the `ligoj-ui` container to `Rest`
+- Restore network accessibility of the application for users
+
+### Via the database
+
+To switch to the backup federator, the steps are as follows:
+- Change the system configuration value (table `s_configuration`) of the `feature:iam:node:primary` property to another identity provider node LDAP or other. For example a node of the `plugin:id:sql` plugin.
+- Wait for the cache to expire or restart the `ligoj-api` container for the value to be taken into account
+
+To change an IP address, port, or LDAP parameter, the steps are as follows:
+- Change one or several node parameter values (table `ligoj_parameter_value`) associated with the involved identity federation `node`. Some of these values may already be encrypted. Putting a new clear value remains supported, encryption of this value will be done during the next update of the node via API or UI.
+- Example: `UPDATE ligoj_parameter_value SET value = 'new_secret' WHERE node='service:id:ldap:annuaire' AND parameter='service:id:ldap:password'`
+- Wait for the cache to expire or restart the `ligoj-api` container for the value to be taken into account
+
+
+### Message `Caused by: jakarta.persistence.EntityExistsException` in startup logs
+
+This is a conflict related plugin management when some plugins are updated.
+
+```log
+...
+Caused by: jakarta.persistence.EntityExistsException: A different object with the same identifier value was already associated with the session : [o...]
+```
+
+This error can occur if sequences have been reset, PK updates or insertions have been made in the database without going through the API.
+
+Example of sequence:
+
+```sql
+\c ligoj
+SELECT * FROM "s_plugin";
+
+  id  |         artifact         |            key            |  type   |    version   
+------+--------------------------+---------------------------+---------+----------------
+    3 | plugin-welcome-data-rbac | feature:welcome:data-rbac | FEATURE | 4.0.1-SNAPSHOT
+ 5002 | plugin-iam-node          | feature:iam:node          | FEATURE | 1.2.1-SNAPSHOT
+    1 | plugin-iam-empty         | feature:iam:empty         | FEATURE | 4.0.4
+    2 | plugin-ui                | feature:ui                | FEATURE | 1.1.1
+
+// Fix the sequance value
+SELECT setval('s_plugin_seq', (SELECT COALESCE(MAX(id),0) FROM s_plugin) + 1, false);
+```
+
+
+### Plugin compatibility errors
+
+These errors manifest as Java Exceptions of type `java.lang.NoSuchMethodError` or `java.lang.NoClassDefFoundError` and are linked to a mismatch between the Ligoj API compatibility version and the installed plugins.
+None of the following solutions destroy configuration or plugin/application data.
+
+- Either the Ligoj version is too old compared to the installed plugins. Although it is possible to revert to an earlier version to find harmony, this operation is not recommended. It is therefore preferable to upgrade to a later version compatible with these plugins. The procedure is as follows:
+  - Update Ligoj by pointing the `ligoj-api` container to a more recent version
+  - Restart the `ligoj-api` container
+- Either the plugin version is too old.
+  - The simplest solution:
+    - Delete the identified plugin(s), or all: `rm -f /var/lib/ligoj/plugins/*.jar`
+    - Restart the `ligoj-api` container
+    - Reinstall the plugin(s), via the CLI or the GUI
+    - Restart the container or just the context via the CLI
+  - The solution without plugin deletion:
+    - Restart `ligoj-api` without activated plugins by adding the option `-Dligoj.plugin.enabled=false`
+    - Reinstall the plugin(s), via the CLI or the GUI
+    - Restart `ligoj-api` with activated plugins by removing the option `-Dligoj.plugin.enabled=false`
