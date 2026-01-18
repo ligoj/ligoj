@@ -208,6 +208,7 @@ Many terms are used in this documentations and the definitions will make the lig
   * There is also a "admin" flag allowing to the receiver to share this delegate to another visible resource.
 * Project: A team owning a set of subscriptions, see the Subscription documentation
 * Project leader: The main contact of the project, and default manager of the project
+* Hook: A script executed when a specific event occurs.
 
 ### Authorization
 
@@ -510,6 +511,37 @@ MVVM is managed by [CascadeJS](https://github.com/fabdouglas/cascadejs) with ena
 
 Note: VueJS rewrite is in progress.
 
+
+## Hook
+
+Hooks are event based actions, one event by successful API call.
+
+The definition of a hook is :
+- A name
+- A match of the HTTP method: exact method of any
+- A match of the API resource path: exact path or regex
+- The script name to be executed
+- The secrets and configuration names to be dynamically retrieved and added to the context of this event
+
+Timeline:
+- When an API call succeed, all the hooks are checked to find the matching ones:
+  * Match of the HTTP method
+  * Match of the API resource path
+- For each matching hook, the corresponding hook's script is asynchronously executed in a sub-shell after the event is processed
+- The script is executed with a JSON object, encoded as base64, as an environment variable `PAYLOAD`
+- The JSON structure is:
+  * `now`: the current date and time
+  * `name`: the hook name
+  * `path`: the API resource path
+  * `method`: the HTTP method
+  * `api`: the API name
+  * `inject`: a map of configuration/secret decrypted values
+  * `timeout`: the execution timeout in seconds
+  * `params`: the API parameters
+
+More details available in the `HookProcessRunnable` class.
+
+
 # Plugin management
 
 A single jar (archive) containing binaries (Java class files), configuration extensions and static resources.
@@ -736,8 +768,6 @@ mvn clean deploy -Dgpg.skip=false -Psources,javadoc,minify -DskipTests=true
 
 For Eclipse compiler, enable 'Store information about method parameters (usable with reflection)' in general preferences/Java/Compiler
 
-
-# Installation
 
 # Docker Installation
 
@@ -1093,6 +1123,153 @@ ligoj configuration set --id "ligoj.hook.path" --value "^/home/hooks/.*,^/home/l
 ligoj configuration set --id "ligoj.file.path" --value "^/home/files/.*,^/home/hooks/.*,^/home/ligoj/META-INF/resources/webjars/.*,^/home/ligoj/statics/themes/.*"
 ```
 
+
+## Hooks
+
+Hooks are event based actions, one event by successful API call.
+
+To get API calls the hook can watch: 
+- From the [ UI Ligoj console](https://ligoj.pickloudy02.si1-dev-pickloudy02.dgfip.nuage01.fi.francecloud.rie.gouv.fr/ligoj/#/api)
+- From the CLI, execute these commands:
+
+```bash
+ligoj info api --output wadl --print url
+ligoj info api --output openapi --print url
+ligoj info api --output swagger --print url
+
+ligoj info api --output wadl --print content
+ligoj info api --output openapi --print content
+```
+
+A triggered hook script get an environment variable `PAYLOAD` containing:
+- API input
+- API result
+- API context
+
+More [detailed structure](#hook).
+
+To test hook in the real condition, use the Docker command `docker exec ligoj-api python3 --version`
+
+
+### Prepare hook script file
+
+#### Write hook script file on the host
+
+The operation involves writing the script file (Shell, Python, etc.) directly into the directory `/var/lib/instance_datas/ligoj/hooks` and making it executable.
+
+```bash
+vi /var/lib/instance_datas/ligoj/hooks/ligoj_audit.sh
+#
+chmod +x /var/lib/instance_datas/ligoj/hooks/ligoj_audit.sh
+```
+
+#### Upload hook script file on the host
+
+Using the CLI, upload the hook file into the right location:
+
+```bash
+vi docs/sample_hook_ligoj_audit.sh
+#
+
+ligoj file put --from docs/sample_hook_ligoj_audit.sh --path "/home/hooks/ligoj_audit.sh" --executable
+```
+
+### Samples
+
+#### Watch system roles actions
+
+```bash
+ligoj hook upsert --name "audit_role_change" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"system/security/role.*"}'
+#
+
+tail -f /var/lib/instance_datas/ligoj/hooks/ligoj_audit.log
+```
+
+#### Watch group memberships actions
+
+
+```bash
+ligoj hook upsert --name "on_group_ops" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"service/id/user.*"}'
+```
+
+#### Watch group memberships actions with injected secret
+
+[Configurations](http://localhost:8080/ligoj/#/system) are string values and can be encrypted in database. When the hook scripts are called, secrets are decrypted and inject in the `PAYLOAD`.
+
+```bash
+ligoj hook upsert --name "on_group_ops" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"service/id/user.*"}' --inject "alfresco"
+```
+
+Sample `PAYLOAD`:
+
+```json
+{
+    "result": {
+        "addedGroups": ["new-group1"],
+        "removedGroups": ["old-group1"]
+    },
+    "path": "service/id/user",
+    "method": "PUT",
+    "now": "2024-05-08T21:13:01Z",
+    "name": "on_group_ops",
+    "api": "UserOrgResource#update",
+    "params": [
+        {
+            "firstName": "John",
+            "lastName": "Doe",
+            "id": "test-class",
+            "company": "department1",
+            "customAttributes": {
+                "foo": "bar"
+            },
+            "mail": "test@sample.org",
+            "groups": [
+                "new-group1",
+                "previous-group"
+            ],
+            "returnGeneratePassword": false,
+            "name": "jdoe"
+        }
+    ],
+    "inject": {
+        "alfresco" : "My_Secret"
+    },
+    "user": "ligoj-admin",
+    "timeout": 30
+}
+```
+
+### Update hook
+
+```bash
+ligoj hook upsert --id 4 --name "audit_role_change_new" --command "/home/hooks/ligoj_audit.sh" --directory  /var/log --match '{"path":"system/security/role.*"}'
+```
+
+### Delete hook
+
+Deletion can be done by `id` or `name` attribute:
+
+```bash
+ligoj hook delete --id 2
+ligoj hook delete --name "audit_role_change"
+```
+
+### Hook get details
+
+Optional `id` or `name` filters are accepted:
+
+
+```bash
+ligoj hook get
+ligoj hook get --id 1
+ligoj hook get --name "audit_role_change"
+```
+
+```json
+[{"id": 1, "name": "audit_role_change", "workingDirectory": "/var/log", "command": "/path/to/ligoj_audit.sh", "match": "{\"path\":\"system/role.*\"}"}]
+```
+
+
 ## PLugin installation
 
 ```bash
@@ -1161,7 +1338,7 @@ ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bo
 ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-310x310.png"
 ```
 
-# Configuration of authentication
+## Configuration of authentication
 
 After configuring the primary `node` responsible for authentication, the `Trusted` mode can be disabled, the API keys generated previously remain valid.
 
@@ -1175,7 +1352,7 @@ System property `security` value determines the authentication mode:
 | `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
 | `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
 
-## `Rest` mode
+### `Rest` mode
 
 For sample, if LDAP authentication is expected to be proceeded `plugin-id-ldap`
 
@@ -1196,7 +1373,7 @@ sudo docker run \
 ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
 ```
 
-## `OAuth2Bff` mode
+### `OAuth2Bff` mode
 
 In this mode, authentication information is entered in the OIDC identity provider.
 
@@ -1204,7 +1381,7 @@ Parameters for the [`application.properties` configuration file](#configuration)
 
 Note: If the KeyCloak server uses an unknown SSL certificate authority (CA), follow the [trusted certificate configuration](#trusted-certificates) procedure for the `ligoj-ui` container.
 
-### With KeyCloak
+#### With KeyCloak
 
 In this authentication mode, the login page is served by KeyCloak.
 Additional configuration is added to the `CUSTOM_OPTS` environment variable (for now), instead of the standard `application.properties` configuration file.
@@ -1417,3 +1594,4 @@ None of the following solutions destroy configuration or plugin/application data
     - Restart `ligoj-api` without activated plugins by adding the option `-Dligoj.plugin.enabled=false`
     - Reinstall the plugin(s), via the CLI or the GUI
     - Restart `ligoj-api` with activated plugins by removing the option `-Dligoj.plugin.enabled=false`
+
