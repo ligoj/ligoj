@@ -183,7 +183,7 @@ The ordered implied security levels:
 * [URL access granted by static configuration](#url-access-granted-by-static-configuration)
 * [URL access granted by RBAC](#url-access-granted-by-rbac)
 * [Resource access](#resource-access) granted by ORBAC
-* Organization Role Based Access Control are related to identity plugins derived from [ligoj/plugin-id](ligoj/plugin-id). These plug-ins map user from a repository like LDAP to groups and permissions.
+* Organization Role Based Access Control are related to identity plugins derived from [ligoj/plugin-id](https://github.com/ligoj/plugin-id). These plug-ins map user from a repository like LDAP to groups and permissions.
 
 All work with a `deny all` by default.
 
@@ -240,7 +240,7 @@ When the user profile is loaded, the authorizations (`ui` and `api`) are checked
 The watched components are :
 - The current browser's URL itself: the `location`, visible in the navigation URL. When it is unauthorized, a security message is displayed, and the content is not loaded.
 - The HTML components having `href` attribute
-- The HTML components having `data-secured-service`, `data-secured-role` or `data-secured-method` attribute. See [data-secured-*](#data-secured-*)
+- The HTML components having `data-secured-service`, `data-secured-role` or `data-secured-method` attribute. See [data-secured-*](#data-secured-)
 
 The matched URL starts after the `#/` fragment part. Samples:
     * `^system/bench`: Browser URL `#/system/bench`
@@ -429,7 +429,7 @@ Timeline:
 - The `JSSESSIONID` cookie and other cookies optionnaly set by the plugin are forwarded back to the browser.
 
 
-## Configuration
+## Convention and configuration
 
 ### Code summary
 ```java
@@ -441,6 +441,7 @@ configuration.get("my-key");
 See `ConfigurationResource.java`
 
 ### Description
+
 Configuration can be retrieved: 
 * From built-in Spring variable resolution: static, and resolved only when the context is started
 ```java
@@ -458,11 +459,13 @@ configuration.get("my-key");
 ```
 
 ### Failover
+
 Built-in Spring property resolver use the `System.getProperty` then `application.properties`, then the default value.
 
 For `ConfigurationResource`, the sequence is the same with database lookup first.
 
 ### Encryption
+
 Both solutions are backed by [Jasypt](http://www.jasypt.org/) to protect secret from configuration files and stored sensitive data in database. 
 It is possible to benefit the same security level for other stored data:
 ```java
@@ -796,7 +799,8 @@ psql
 ```
 
 Execute the following SQL commands to create the Ligoj database, and the SQL user that will be used by the application.
-If the password is customized, make sure to note it down for the [container configuration](#ligoj-container-configuration) step.
+
+If the password is customized, make sure to note it down for the [container configuration](#configuration) step.
 
 ```sql
 CREATE USER ligoj WITH ENCRYPTED PASSWORD 'ligoj';
@@ -1061,7 +1065,7 @@ Install the CLI
 pip install -U pip git+https://github.com/ligoj/cli@main
 ```
 
-After configuring the [ligoj](./README.md) CLI, your Ligoj configuration file `~/.ligoj/config` should look like this for the `default` profile (to simplify):
+After configuring the [ligoj CLI](httpss://github.com/ligoj/cli/README.md) CLI, your Ligoj configuration file `~/.ligoj/config` should look like this for the `default` profile (to simplify):
 
 ```ini
 [default]
@@ -1129,7 +1133,7 @@ ligoj configuration set --id "ligoj.file.path" --value "^/home/files/.*,^/home/h
 Hooks are event based actions, one event by successful API call.
 
 To get API calls the hook can watch: 
-- From the [ UI Ligoj console](https://ligoj.pickloudy02.si1-dev-pickloudy02.dgfip.nuage01.fi.francecloud.rie.gouv.fr/ligoj/#/api)
+- From the UI Ligoj console, in APi (`/#/api`) page
 - From the CLI, execute these commands:
 
 ```bash
