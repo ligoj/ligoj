@@ -12,6 +12,7 @@ COPY Dockerfile ./*prepare-build.sh ./
 RUN touch ~/.bash_profile && \
     { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     npm install -g clean-css-cli@5.6.3 && \
+    npm install && npm run build && \
     mkdir -p src/main/build && mkdir -p src/main/webapp && \
     chmod +x src/main/build/minify.sh && src/main/build/minify.sh
 

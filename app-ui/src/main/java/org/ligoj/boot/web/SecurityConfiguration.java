@@ -106,7 +106,7 @@ public class SecurityConfiguration {
 	@Bean
 	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint(AbstractAuthenticationProvider provider) {
 		final var ep = new RedirectAuthenticationEntryPoint(loginUrl);
-		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, "/index-prod.html", "/login.html", "/login-prd.html"));
+		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, "/index-prod.html", "/login.html", "/login-prd.html", "/v-index.html"));
 		ep.setRedirectStrategy(getRestFailureStrategy());
 		ep.setForceRedirectUrl(provider.isForceRedirect());
 		return ep;

@@ -199,6 +199,7 @@ Many terms are used in this documentations and the definitions will make the lig
 * Group: A set of users of users. A group can be within another groups. A user can be member of any number of groups. Note that a group may not be empty depending on the underlining IAM provider, but a virtual and invisible user may be kept for empty groups.
 * Company: A set of users. A company can be within another a single company. A user is member of exactly one company.
 * Container: Company or group.
+* Container scope: A logical LDAP like sub-tree to calssify a container. At creation time of a container, this scope ensures the container is created in the correct hierarchy. At read time, it is used to display the containers by adding logical type to them.
 * Node: A service, tool or tool instance, see the Subscription documentation.
 * Tree: An abstract hierarchical path. (to-do) A bit difficult to explain for now...
 * Resource: Container, user, node or a tree.
