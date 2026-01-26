@@ -430,6 +430,19 @@ Timeline:
 - The `JSSESSIONID` cookie and other cookies optionnaly set by the plugin are forwarded back to the browser.
 
 
+## Audit
+
+Most of the entities are audited. The audit data has only the following fields:
+* `createdBy`: not updatable field, principal name at creation time.
+* `createdDate`: not updatable field, creation time.
+* `lastModifiedBy`: principal name at last modification time.
+* `lastModifiedDate`: last modification time.
+* `creationContext`: not updatable field, optional, user context at creation time.
+* `metadata`: updatable field, optional, free form JSON.
+
+
+These fields are automatically set by the transaction manager in successful API calls.
+
 ## Convention and configuration
 
 ### Code summary
