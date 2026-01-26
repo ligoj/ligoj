@@ -1183,12 +1183,12 @@ To test hook in the real condition, use the Docker command `docker exec ligoj-ap
 
 #### Write hook script file on the host
 
-The operation involves writing the script file (Shell, Python, etc.) directly into the directory `/var/lib/instance_datas/ligoj/hooks` and making it executable.
+The operation involves writing the script file (Shell, Python, etc.) directly into the directory `/home/ligoj/hooks` and making it executable.
 
 ```bash
-vi /var/lib/instance_datas/ligoj/hooks/ligoj_audit.sh
+vi /home/ligoj/hooks/ligoj_audit.sh
 #
-chmod +x /var/lib/instance_datas/ligoj/hooks/ligoj_audit.sh
+chmod +x /home/ligoj/hooks/ligoj_audit.sh
 ```
 
 #### Upload hook script file on the host
@@ -1210,7 +1210,7 @@ ligoj file put --from docs/sample_hook_ligoj_audit.sh --path "/home/hooks/ligoj_
 ligoj hook upsert --name "audit_role_change" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"system/security/role.*"}'
 #
 
-tail -f /var/lib/instance_datas/ligoj/hooks/ligoj_audit.log
+tail -f /home/ligoj/hooks/ligoj_audit.log
 ```
 
 #### Watch group memberships actions
