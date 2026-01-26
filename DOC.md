@@ -516,9 +516,25 @@ MVVM is managed by [CascadeJS](https://github.com/fabdouglas/cascadejs) with ena
 Note: VueJS rewrite is in progress.
 
 
+## File
+
+Uploaded files are always stored by the `ligoj-api` container, and use `ligoj.file.path` for authorization. Only administrators can use this feature.
+
+The endpoint `/system/file` allow download and upload. Files can be statics for endusers or configurations files or hooks.
+
+When an user requests a file, the priority is the following:
+* Resources from the Ligoj home directory. Usually images and other public assets for customization : `/META-INF/resources/webjars/` , `/statics/themes/`.
+* Resources from the plugins
+* Resources from the application
+* Resources from the libraries
+
+Note : non assets files files located in the Ligoj home directory such as `plugins`, `config`, are not reachable to endusers.
+
 ## Hook
 
 Hooks are event based actions, one event by successful API call.
+
+Uploaded scipts using [file](#file) must in addition be placed inside one of the location defined by `ligoj.hook.path`, and only administrators use this feature.
 
 The definition of a hook is :
 - A name
@@ -542,6 +558,13 @@ Timeline:
   * `inject`: a map of configuration/secret decrypted values
   * `timeout`: the execution timeout in seconds
   * `params`: the API parameters
+
+In `ligoj-api` container, when a hook matches, the following logs appear:
+
+```log
+2026-01-25 17:21:15.425 INFO  [Hook system/security/role/1 -> audit_role_change] Triggered
+2026-01-25 17:21:15.457 INFO  [Hook system/security/role/1 -> audit_role_change] Succeed, code: 0, duration: 00:00:00.031
+```
 
 More details available in the `HookProcessRunnable` class.
 
