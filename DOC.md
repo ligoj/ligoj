@@ -56,7 +56,7 @@ JPA specification requires that your `orm.xml` comes along your entities, even w
 ```java
 @Autowired
 private CsvForJpa csvForJpa;
-...
+
 csvForJpa.insert("csv", Entity.class);
 ```
 See `CsvForJpa.java`
@@ -459,7 +459,7 @@ See `ConfigurationResource.java`
 Configuration can be retrieved: 
 * From built-in Spring variable resolution: static, and resolved only when the context is started
 ```java
-@Value("$(my-key:default-value"}
+@Value("$(my-key:default-value")
 private String value;
 ```
 * From `ConfigurationResource`, a persistent database backed and cached configuration
@@ -485,11 +485,11 @@ It is possible to benefit the same security level for other stored data:
 ```java
 @Autowired
 private CryptoHelper cryptoHelper;
-...
-cryptoHelper.encryptAsNeeded(value)
-cryptoHelper.encrypt(value)
-cryptoHelper.decryptAsNeeded(value)
-cryptoHelper.decrypt(value)
+
+cryptoHelper.encryptAsNeeded(value);
+cryptoHelper.encrypt(value);
+cryptoHelper.decryptAsNeeded(value);
+cryptoHelper.decrypt(value);
 ```
 
 ## Pagination
@@ -547,20 +547,24 @@ Note : non assets files files located in the Ligoj home directory such as `plugi
 
 Hooks are event based actions, one event by successful API call.
 
-Uploaded scipts using [file](#file) must in addition be placed inside one of the location defined by `ligoj.hook.path`, and only administrators use this feature.
+Uploaded scipts using [file](#file) must in addition be placed inside one of the location defined by `ligoj.hook.path` (multiple regex values separated by a comma), and only administrators use this feature.
 
 The definition of a hook is :
-- A name
+- A name (unique)
 - A match of the HTTP method: exact method of any
 - A match of the API resource path: exact path or regex
 - The script name to be executed
 - The secrets and configuration names to be dynamically retrieved and added to the context of this event
+- The delay before execution: `0` for synchronous, `>0` for asynchronous.
 
 Timeline:
 - When an API call succeed, all the hooks are checked to find the matching ones:
   * Match of the HTTP method
   * Match of the API resource path
-- For each matching hook, the corresponding hook's script is asynchronously executed in a sub-shell after the event is processed
+- Matching hooks are split onto two groups: synchronous and asynchronous.
+  - Synchronous hooks (`delay=0`) are executed in the same thread as the API call.
+  - Asynchronous hooks (`delay>0`) are executed in a sub-shell after the event is processed.
+- Just before the execution, the script is checked to be allowed by `ligoj.hook.path`
 - The script is executed with a JSON object, encoded as base64, as an environment variable `PAYLOAD`
 - The JSON structure is:
   * `now`: the current date and time
@@ -571,9 +575,17 @@ Timeline:
   * `inject`: a map of configuration/secret decrypted values
   * `timeout`: the execution timeout in seconds
   * `params`: the API parameters
+  * `user`: the principal name
+  * `result`: the API result. Some response types like streams cannot be serialized in this hook. In this case the result is a string like `<ClassName>`.
+ - For each synchronous hook, 2 additional header are added to the response depending on the success or not. `NAME` is the hook name where hyphens and non alphanumeric characters are replaced by underscores.
+   - `X-Ligoj-Hook-NAME` :
+      * `SUCCEED`: the hook was executed successfully
+      * `FAILED`: the hook failed due to an error
+      * `SKIP`: the hook was skipped because of security or configuration limits
+   - `X-Ligoj-Hook-NAME-Message` : hook output message gathered from standard and error streams when non empty
+ 
 
 In `ligoj-api` container, when a hook matches, the following logs appear:
-
 ```log
 2026-01-25 17:21:15.425 INFO  [Hook system/security/role/1 -> audit_role_change] Triggered
 2026-01-25 17:21:15.457 INFO  [Hook system/security/role/1 -> audit_role_change] Succeed, code: 0, duration: 00:00:00.031
