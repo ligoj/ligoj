@@ -44,5 +44,9 @@ define({
 	"database-lock" : "La base de donnée a un verrou en attente sur l'enregistrement que vous avez essayé de mettre à jour.<br/>Réessayez plus tard ou contactez votre administrateur",
 	"ldap-down" : "La base d'utilisateur n'est pas disponible",
 	"mail-down" : "Le mail n'a pas pu être envoyé",
-	"cycle" : "Cycle de {{this}} détecté"
+	"cycle" : "Cycle de {{this}} détecté",
+    "hook-failed": "Hook échoué <small>{{this}}</small>",
+    "hook-failed-message": "{{this}}",
+    "hook-succeed": "Hook déclenché <small>{{this}}</small>",
+    "hook-succeed-message": "{{this}}"
 });

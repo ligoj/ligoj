@@ -84,12 +84,12 @@ define([
 		},
 
 		handleRedirect(redirect) {
-            if (redirect === 'local') {
-                current.showAuthenticationAlert();
-            } else if (redirect) {
-                window.location.href = window.location.protocol + '//'+window.location.host + redirect;
-            }
-        },
+			if (redirect === 'local') {
+				current.showAuthenticationAlert();
+			} else if (redirect) {
+				window.location.href = window.location.protocol + '//' + window.location.host + redirect;
+			}
+		},
 
 		/**
 		 * Show the authentication requirement and load the login form for the popup.
@@ -145,13 +145,16 @@ define([
 				return;
 			}
 			var errorObj;
-            var redirect = xhr && xhr.getResponseHeader("x-redirect");
-            if (redirect) {
-                current.handleRedirect(redirect);
-                return;
-            }
+			var redirect = xhr && xhr.getResponseHeader("x-redirect");
+			if (redirect) {
+				current.handleRedirect(redirect);
+				return;
+			}
 			if (xhr.status === 400) {
-				current.manageBadRequestError(xhr.responseText, false, true);
+				var message = current.manageBadRequestError(xhr.responseText, false, true);
+				if (message) {
+					notifyManager.notifyDanger(message, errorMessages.error400);
+				}
 			} else if (xhr.status === 403) {
 				// Permission denied handler
 				current.manageSecurityError();
@@ -183,9 +186,9 @@ define([
 				if (errorObj.code === 'integrity-foreign') {
 					// `assignment`, CONSTRAINT `FK...`
 					// FOREIGN KEY (`project`)
-					notifyManager.notify(Handlebars.compile(errorMessages['error412-foreign-details'])({from: integrityMessage[0], to: integrityMessage[1]}), errorMessages.error412, 'warning');
+					notifyManager.notify(Handlebars.compile(errorMessages['error412-foreign-details'])({ from: integrityMessage[0], to: integrityMessage[1] }), errorMessages.error412, 'warning');
 				} else if (errorObj.code === 'integrity-unicity') {
-					notifyManager.notify(Handlebars.compile(errorMessages['error412-unicity-details'])({entry: integrityMessage[0], name: integrityMessage[1]}), errorMessages.error412, 'warning');
+					notifyManager.notify(Handlebars.compile(errorMessages['error412-unicity-details'])({ entry: integrityMessage[0], name: integrityMessage[1] }), errorMessages.error412, 'warning');
 				} else {
 					// Not managed integrity error
 					notifyManager.notify(errorMessages['error412-unknown-details'], errorMessages.error412, 'warning');
@@ -214,7 +217,7 @@ define([
 					notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-details'])(current._trimUrl(xhr)), errorMessages.error503);
 				}
 			} else if (xhr.status > 500) {
-				notifyManager.notifyDanger(errorMessages['error' + xhr.status +'-details'], errorMessages['error' + xhr.status] || errorMessages.error500);
+				notifyManager.notifyDanger(errorMessages['error' + xhr.status + '-details'], errorMessages['error' + xhr.status] || errorMessages.error500);
 			} else if (xhr.status === 200 || (xhr.status === 0 && xhr.statusText === 'n/a')) {
 				// JavaScript error
 				traceLog('Javascript error (' + xhr.status + ') : ' + xhr.responseText, errorThrown);
@@ -248,6 +251,7 @@ define([
 			}
 			// A unknown error
 			notifyManager.notify(text);
+			return null;
 		},
 
 		/**
@@ -260,7 +264,7 @@ define([
 			var alertType = notifyManager.getTypeFromBusiness(errorObj.code);
 
 			// First translate from user's scope
-			var i18nMessage = (errorObj.message && ($cascade.$messages.error[errorObj.message] || errorMessages[errorObj.message] || errorObj.message)) || errorMessages.errorUnknownCode;
+			var i18nMessage = (errorObj.message && (($cascade.$messages && $cascade.$messages.error && $cascade.$messages.error[errorObj.message]) || errorMessages[errorObj.message] || errorObj.message)) || errorMessages.errorUnknownCode;
 			if (i18nMessage && errorObj.parameters && errorObj.parameters.length && i18nMessage.indexOf('{{') !== -1) {
 				for (var index = 0; index < errorObj.parameters.length; index++) {
 					var parameterKey = errorObj.parameters[index];
@@ -297,12 +301,14 @@ define([
 					xhr: xhr,
 					settings: settings
 				};
-                var redirect = xhr && xhr.getResponseHeader("x-redirect");
-                if (redirect) {
-                    current.handleRedirect(redirect);
-                    return;
-                }
-            }).ajaxError(function (event, xhr, textStatus, errorThrown) {
+				current.handleHookMessages(event, xhr);
+				var redirect = xhr && xhr.getResponseHeader("x-redirect");
+				if (redirect) {
+					current.handleRedirect(redirect);
+					return;
+				}
+			}).ajaxError(function (event, xhr, textStatus, errorThrown) {
+				current.handleHookMessages(event, xhr);
 				current.manageAjaxError(event, xhr, textStatus, errorThrown);
 			}).ajaxStart(function () {
 				// Add loading indicator
@@ -314,6 +320,42 @@ define([
 			requirejs.onError = function (err) {
 				current.manageRequireJsError(err);
 			};
+		},
+
+		/**
+		 * Manage hook status and messages
+		 */
+		handleHookMessages: function (event, xhr) {
+			// Extract the 'X-Ligoj-Hook-*' headers and the 'X-Ligoj-Hook-*-Message' headers'
+			var headersAsArray = xhr.getAllResponseHeaders().split('\r\n');
+			var headers = headersAsArray.reduce(function (acc, current, i) {
+				var parts = current.split(': ');
+				var header = parts[0];
+				if (header.toLowerCase().startsWith('x-ligoj-hook-')) {
+					acc[header] = current.substring(header.length + 2).trim();
+				}
+				return acc;
+			}, {});
+			for (var header in headers) {
+				if (!header.endsWith('-Message')) {
+					var hookName = header.substring('X-Ligoj-Hook-'.length);
+					var status = xhr.getResponseHeader(header);
+					var message = xhr.getResponseHeader(header + '-Message');
+					if (status === 'FAILED') {
+						notifyManager.notify(
+							message ? Handlebars.compile(errorMessages['hook-failed-message'])(message) : Handlebars.compile(errorMessages['hook-failed'])(hookName),
+							message ? Handlebars.compile(['hook-failed'])(hookName) : "",
+							'warning'
+						);
+					} else if (message) {
+						notifyManager.notify(
+							Handlebars.compile(errorMessages['hook-succeed-message'])(message),
+							Handlebars.compile(errorMessages['hook-succeed'])(hookName),
+							'info'
+						);
+					}
+				}
+			}
 		},
 
 		/**
@@ -329,8 +371,8 @@ define([
 				}
 			}
 			if (err.xhr && err.xhr.status === 401) {
-                var redirect = xhr && xhr.getResponseHeader("x-redirect");
-                current.handleRedirect(redirect || 'local');
+				var redirect = xhr && xhr.getResponseHeader("x-redirect");
+				current.handleRedirect(redirect || 'local');
 			} else if (err.requireType === 'timeout' && err.requireModules) {
 				if (!current.isLoginPromptDisplayed()) {
 					notifyManager.notifyDanger(Handlebars.compile(errorMessages['error404-timeout-details'])(err.requireModules[0]), errorMessages['error404-timeout']);
@@ -347,7 +389,7 @@ define([
 					throw err;
 				} else {
 					// Broken page is not the home page, fail-safe redirection
-					notifyManager.notify(Handlebars.compile(errorMessages['error404-redirected-details'])({page: window.location.hash}), Handlebars.compile(errorMessages['error404-redirected'])({icon: '<i class="fas fa-2 fa-map-signs text-danger"></i>&nbsp;'}), 'warning', 'toast-top-right');
+					notifyManager.notify(Handlebars.compile(errorMessages['error404-redirected-details'])({ page: window.location.hash }), Handlebars.compile(errorMessages['error404-redirected'])({ icon: '<i class="fas fa-2 fa-map-signs text-danger"></i>&nbsp;' }), 'warning', 'toast-top-right');
 					window.location.hash = '#/';
 				}
 			} else {
@@ -356,10 +398,10 @@ define([
 				throw err;
 			}
 		},
-		
-		ignoredRequireModules : {},
-		
-		ignoreRequireModuleError: function(modules) {
+
+		ignoredRequireModules: {},
+
+		ignoreRequireModuleError: function (modules) {
 			if (Array.isArray(modules)) {
 				for (var index = 0; index < modules.length; index++) {
 					current.ignoredRequireModules[modules[index]] = true;

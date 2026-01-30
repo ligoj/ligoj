@@ -45,7 +45,11 @@ define({
 		"database-lock" : "The data base has a pending lock on the record you are trying to update.br/>Retry later or contact your administrator",
 		"ldap-down" : "The user directory is not available",
 		"mail-down" : "The mail could not be sent",
-		"cycle" : "Detected {{this}} cycle"
+		"cycle" : "Detected {{this}} cycle",
+		"hook-failed": "Failed hook <small>{{this}}</small>",
+		"hook-failed-message": "{{this}}",
+		"hook-succeed": "Triggered hook <small>{{this}}</small>",
+		"hook-succeed-message": "{{this}}"
 	},
 	"fr" : true
 });
