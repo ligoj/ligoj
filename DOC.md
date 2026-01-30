@@ -547,7 +547,9 @@ Note : non assets files files located in the Ligoj home directory such as `plugi
 
 Hooks are event based actions, one event by successful API call.
 
-Uploaded scipts using [file](#file) must in addition be placed inside one of the location defined by `ligoj.hook.path` (multiple regex values separated by a comma), and only administrators use this feature.
+### Hook with scripts
+
+Uploaded scripts using [file](#file) must in addition be placed inside one of the location defined by `ligoj.hook.path` (multiple regex values separated by a comma), and only administrators use this feature.
 
 The definition of a hook is :
 - A name (unique)
@@ -577,12 +579,12 @@ Timeline:
   * `params`: the API parameters
   * `user`: the principal name
   * `result`: the API result. Some response types like streams cannot be serialized in this hook. In this case the result is a string like `<ClassName>`.
- - For each synchronous hook, 2 additional header are added to the response depending on the success or not. `NAME` is the hook name where hyphens and non alphanumeric characters are replaced by underscores.
+ - For each synchronous hook, 2 additional headers are added to the response depending on the success or not. `NAME` is the hook name where hyphens and non alphanumeric characters are replaced by underscores.
    - `X-Ligoj-Hook-NAME` :
       * `SUCCEED`: the hook was executed successfully
       * `FAILED`: the hook failed due to an error
       * `SKIP`: the hook was skipped because of security or configuration limits
-   - `X-Ligoj-Hook-NAME-Message` : hook output message gathered from standard and error streams when non empty
+   - `X-Ligoj-Hook-NAME-Message` : hook output message gathered from standard output and error streams when non empty
  
 
 In `ligoj-api` container, when a hook matches, the following logs appear:
@@ -592,6 +594,32 @@ In `ligoj-api` container, when a hook matches, the following logs appear:
 ```
 
 More details available in the `HookProcessRunnable` class.
+
+### Hook with plugins
+
+Plugins can register themself as hooks by extending a CXF interface `ContainerResponseFilter`.
+
+Any uncaught exception in this filter rollbacks the current transaction.
+
+Sample hook:
+```java
+import jakarta.ws.rs.ext.Provider;
+
+@Provider
+public class HookResponseFilter implements ContainerResponseFilter {
+
+	@Override
+	public void filter(final ContainerRequestContext requestContext, final ContainerResponseContext responseContext) {
+		final var status = responseContext.getStatus();
+		if (status >= 200 && status < 300) {
+      // Do someting. 
+			throw new BusinessException("Invalid request");
+		}
+	}
+}
+```
+
+Sample implementation in `org.ligoj.bootstrap.core.resource.filter.HookResponseFilter`
 
 
 # Plugin management
