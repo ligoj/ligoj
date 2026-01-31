@@ -344,7 +344,7 @@ define([
 					if (status === 'FAILED') {
 						notifyManager.notify(
 							message ? Handlebars.compile(errorMessages['hook-failed-message'])(message) : Handlebars.compile(errorMessages['hook-failed'])(hookName),
-							message ? Handlebars.compile(['hook-failed'])(hookName) : "",
+							message ? Handlebars.compile(errorMessages['hook-failed'])(hookName) : "",
 							'warning'
 						);
 					} else if (message) {
