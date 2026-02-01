@@ -684,10 +684,13 @@ Contraints are:
 - Business key of a token is its `name`, uniqu for a user and case sensitive
 - API Key hash is stored in database, not the actual API key.
 - Optional expiration date can be set. The expired token cannot be used, and are daily purged by default with this CRON expression `0 0 4 * * ?`. This can be overridden with `api.token.purge` property.
+- Expired tokens are not neither listed, neither returned even if they are not yet physically deleted.
+- API `purge/all` forces the deletion of all expired tokens. This API is only available to administrators.
+- API `purge/me` forces the deletion of all expired tokens of current principal.
 
 API generation:
 - A Random `128` characters string is generated. Can be overridden with `api.token.length` property. This is actual value returned to the principal.
-- A hash is generated from the request token's name with `SHA-512` algorithm. Can be overridden with `api.token.digest` property.
+- A hash is generated from the token's name and principal's name with `SHA-512` algorithm. Can be overridden with `api.token.digest` property.
 - A `SHA-1` hash is created from the principal's name, the previous hash, and a secret from `api.token.secret`. There is `31` iterations, can be overridden with `api.token.iterations` property.
 - The `SHA-1` hash is then crypted with `DESede` algorithm. Can be overridden with `api.token.digest` property. This the actual value stored in database.
 
@@ -1687,6 +1690,12 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 
 | Name                                                  | Default value                            | Note                                                                                              |
 | ----------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| api.token.purge                                       | `0 0 4 * * ?`                            | CRON expression for expired API tokens purge. See [API Token](#api-tokens) section.               |
+| api.token.iterations                                  | `31`                                     | API token hash iterations. See [API Token](#api-tokens) section.                                  |
+| api.token.digest                                      | `SHA-512`                                | API token hash algorithm. See [API Token](#api-tokens) section.                                   |
+| api.token.length                                      | `128`                                    | API token length. See [API Token](#api-tokens) section.                                           |
+| api.token.crypt                                       | `DESede`                                 | API token encryption algorithm. See [API Token](#api-tokens) section.                             |
+| api.token.secret                                      | `secret`                                 | Secret file location. Can also be defined in `APP_CRYPTO_FILE`environment variable.               |
 | app.crypto.file                                       |                                          | Secret file location. Can also be defined in `APP_CRYPTO_FILE`environment variable.               |
 | app.crypto.password                                   |                                          | Secret value. Can also be defined in `APP_CRYPTO_PASSWORD`environment variable.                   |
 | cache.location                                        | `classpath:META-INF/hazelcast-local.xml` | Custom Hazelcast configuration file location                                                      |
