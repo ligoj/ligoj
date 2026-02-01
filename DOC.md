@@ -1735,7 +1735,7 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | ligoj.plugin.repository                               | `central`                                | Repository identifier used to query plugin install or update.  May be `central`, `nexus`          |
 | ligoj.sslVerify                                       | `true`                                   | `false` disables the standard SSL verifications (domain name, certifications chain and validity). |
 | logging.level.root                                    | `info`                                   | Configure default log verbosity of all internal components: Spring, Jetty, Hibernate,...          |
-| logging.level.<category>                              | *vary*                                   | Configure default log verbosity a specific category                                               |
+| logging.level.<category>                              | *vary*                                   | See [log4j2.json](app-api/src/main/resources/log4j2.json) for specific category                   |
 | plugins.repository-manager.${repository}.search.url   | *depends on repository*                  | URL template to discover plugins.                                                                 |
 | plugins.repository-manager.${repository}.artifact.url | *depends on repository*                  | URL template to download plugins.                                                                 |
 | plugins.repository-manager.${repository}.groupId      | `org.ligoj.plugin`                       | Maven `groupId` to filter the Ligoj plugins                                                       |
