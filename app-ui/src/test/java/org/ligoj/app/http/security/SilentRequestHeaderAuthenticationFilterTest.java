@@ -159,7 +159,7 @@ class SilentRequestHeaderAuthenticationFilterTest {
 
 	private SilentRequestHeaderAuthenticationFilter newFilter() {
 		final var authenticationManager = Mockito.mock(AuthenticationManager.class);
-		final var filter = new SilentRequestHeaderAuthenticationFilter() {
+		final var filter = new SilentRequestHeaderAuthenticationFilter(SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PAGES_LOGIN) {
 			@Override
 			protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, Authentication authResult) {
 				// Nothing to do

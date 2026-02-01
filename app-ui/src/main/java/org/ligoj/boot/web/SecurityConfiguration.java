@@ -3,14 +3,11 @@
  */
 package org.ligoj.boot.web;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.http.security.AbstractAuthenticationProvider;
-import org.ligoj.app.http.security.ApiKeyLoginFilter;
-import org.ligoj.app.http.security.DigestAuthenticationFilter;
-import org.ligoj.app.http.security.OAuth2BffAuthenticationProvider;
-import org.ligoj.app.http.security.SilentRequestHeaderAuthenticationFilter;
-import org.ligoj.app.http.security.SimpleUserDetailsService;
+import org.ligoj.app.http.security.*;
 import org.ligoj.bootstrap.http.security.ExtendedWebSecurityExpressionHandler;
 import org.ligoj.bootstrap.http.security.RedirectAuthenticationEntryPoint;
 import org.ligoj.bootstrap.http.security.RestRedirectStrategy;
@@ -48,6 +45,7 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Spring Boot security configuration.
@@ -63,9 +61,13 @@ public class SecurityConfiguration {
 	private int maxSession;
 
 	@Value("${security:Rest}")
+	@Getter
+	@Setter
 	private String securityProvider;
 
 	@Value("${security.pre-auth-principal:}")
+	@Getter
+	@Setter
 	protected String securityPreAuthPrincipal;
 
 	@Value("${security.pre-auth-logout:}")
@@ -184,7 +186,7 @@ public class SecurityConfiguration {
 				// Login
 				matcher.matcher(HttpMethod.POST, LOGIN_API),
 				// Public static resources
-				RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PAGES.pattern()),
+				RegexRequestMatcher.regexMatcher(HttpMethod.GET, getWhiteListPages().pattern()),
 				RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_ASSETS.pattern()),
 				matcher.matcher("/rest/redirect"), matcher.matcher("/rest/security/login"), matcher.matcher("/captcha.png")).permitAll()
 				.requestMatchers(matcher.matcher("/rest/service/password/reset/**"), matcher.matcher("/rest/service/password/recovery/**")).anonymous()
@@ -195,14 +197,7 @@ public class SecurityConfiguration {
 		final var loginDeniedUrl = loginUrl + "?denied";
 		http.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint(provider)).accessDeniedPage(loginDeniedUrl));
 		provider.configureLogout(http, logoutUrl, securityPreAuthCookies);
-
-		final var loginSuccessHandler = getSuccessHandler();
-		final var loginFailureHandler = getFailureHandler();
-		if (provider instanceof OAuth2BffAuthenticationProvider) {
-			http.oauth2Login(Customizer.withDefaults());
-		} else {
-			provider.configureLogin(http, loginDeniedUrl, LOGIN_API, loginSuccessHandler, loginFailureHandler);
-		}
+		configureLoginHandler(http, provider, loginDeniedUrl);
 
 		// Stateful session
 		http.csrf(AbstractHttpConfigurer::disable);
@@ -216,7 +211,7 @@ public class SecurityConfiguration {
 		// Activate a pre-auth filter if configured header
 		if (isPreAuth()) {
 			log.info("Pre-auth filter is enabled with {}/{}, logout: {}", securityPreAuthPrincipal, securityPreAuthCredentials, logoutUrl);
-			preAuthBean = new SilentRequestHeaderAuthenticationFilter();
+			preAuthBean = new SilentRequestHeaderAuthenticationFilter(getWhiteListPages());
 			preAuthBean.setPrincipalRequestHeader(securityPreAuthPrincipal);
 			preAuthBean.setCredentialsRequestHeader(securityPreAuthCredentials);
 			http.addFilterAt(preAuthBean, AbstractPreAuthenticatedProcessingFilter.class);
@@ -228,6 +223,30 @@ public class SecurityConfiguration {
 			preAuthBean.setAuthenticationManager(authenticationManager);
 		}
 		return chain;
+	}
+
+	void configureLoginHandler(HttpSecurity http, AbstractAuthenticationProvider provider, String loginDeniedUrl) throws Exception {
+		if (isOauth2Bff()) {
+			http.oauth2Login(Customizer.withDefaults());
+		} else {
+			final var loginSuccessHandler = getSuccessHandler();
+			final var loginFailureHandler = getFailureHandler();
+			provider.configureLogin(http, loginDeniedUrl, LOGIN_API, loginSuccessHandler, loginFailureHandler);
+		}
+	}
+
+	private boolean isOauth2Bff() {
+		return "OAuth2Bff".equals(securityProvider);
+	}
+
+	/**
+	 * Return the white list pages depending on the current authentication provider.
+	 *
+	 * @return the white list pages depending on the current authentication provider.
+	 */
+	public Pattern getWhiteListPages() {
+		return (isPreAuth() || isOauth2Bff()) ? SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PAGES
+				: SilentRequestHeaderAuthenticationFilter.WHITE_LIST_PAGES_LOGIN;
 	}
 
 	private boolean isPreAuth() {

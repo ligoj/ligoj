@@ -26,7 +26,13 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	/**
 	 * Static pages
 	 */
-	public static final Pattern WHITE_LIST_PAGES = Pattern.compile("/(\\d{3}|logout|login)(-prod)?\\.html(\\?.*)?");
+	public static final Pattern WHITE_LIST_PAGES_LOGIN = Pattern.compile("/(\\d{3}|logout|login)(-prod)?\\.html(\\?.*)?");
+
+	/**
+	 * Static pages
+	 */
+	public static final Pattern WHITE_LIST_PAGES = Pattern.compile("/(\\d{3}|logout)(-prod)?\\.html(\\?.*)?");
+
 	/**
 	 * Static assets
 	 */
@@ -36,16 +42,28 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	 */
 	private String principalHeaderCopy;
 
+	private final Pattern whiteListPages;
+
 	/**
-	 * Simple constructor using a forward to "401" page on error.
+	 * Simple constructor using a forward to "401" page on error. Default white list pages are login pages.
 	 */
 	public SilentRequestHeaderAuthenticationFilter() {
+		this(WHITE_LIST_PAGES_LOGIN);
+	}
+
+	/**
+	 * Simple constructor using a forward to "401" page on error.
+	 *
+	 * @param whiteListPages Pattern of pages to exclude from this filter.
+	 */
+	public SilentRequestHeaderAuthenticationFilter(Pattern whiteListPages) {
 		final var handler = new SimpleUrlAuthenticationFailureHandler();
 		handler.setUseForward(true);
 		setAuthenticationFailureHandler(handler);
 		setExceptionIfHeaderMissing(false);
 		setCheckForPrincipalChanges(false);
 		setContinueFilterChainOnUnsuccessfulAuthentication(false);
+		this.whiteListPages = whiteListPages;
 	}
 
 	@Override
@@ -60,10 +78,8 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	}
 
 	private boolean isAllowed(HttpServletRequest req) {
-		return WHITE_LIST_PAGES.matcher(req.getServletPath()).matches() ||
-				WHITE_LIST_ASSETS.matcher(req.getServletPath()).matches() || (req.getServletPath().startsWith("/rest")
-				&& isAuthDatPresent(req, "api-key")
-				&& isAuthDatPresent(req, "api-user"));
+		return whiteListPages.matcher(req.getServletPath()).matches() || WHITE_LIST_ASSETS.matcher(req.getServletPath()).matches()
+				|| (req.getServletPath().startsWith("/rest") && isAuthDatPresent(req, "api-key") && isAuthDatPresent(req, "api-user"));
 	}
 
 	@Override
@@ -77,8 +93,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 			final var principal = (String) getPreAuthenticatedPrincipal(req);
 			if (principal == null || getPreAuthenticatedCredentials(req) == null) {
 				// We want this header
-				unsuccessfulAuthentication(req, res,
-						new PreAuthenticatedCredentialsNotFoundException(principalHeaderCopy + " header not found in request."));
+				unsuccessfulAuthentication(req, res, new PreAuthenticatedCredentialsNotFoundException(principalHeaderCopy + " header not found in request."));
 			} else if (req.getRequestURI().matches(req.getContextPath() + "/?login.html")) {
 				// In pre-auth mode, "/login" page is not available
 				res.sendRedirect(Strings.CS.appendIfMissing(req.getContextPath(), "/"));
