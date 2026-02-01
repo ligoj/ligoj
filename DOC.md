@@ -6,10 +6,10 @@
 The backend container assumes the business role of the application, is stateless, scalable and based on intensive convention over configuration design.
 
 ## Relevant stack parts
-* Java9
-* Spring 5 baseline : -core, -security and -data
+* Java
+* Spring baseline: -core, -security and -data
 * CXF, not Spring-WS
-* JPA 2
+* JPA
 
 # Philosophy
 The main ideas are Convention over Configuration and modularity. 
@@ -175,7 +175,6 @@ Jane;Doe;21;jdoe2;jane.doe@other.com;2
 
 ## Security
 
-
 This topic is talking about [O]RBAC mechanism implemented in this application. This is the far most complex feature.
 
 The ordered implied security levels:
@@ -334,11 +333,11 @@ You should use the right [plugin-id](https://github.com/ligoj/plugin-id) impleme
 
 For AWS Cognito placed on an ALB, use [plugin-id-cognito](https://github.com/ligoj/plugin-id-cognito), and these properties:
 
-| Property                      | Value                   |
-| ----------------------------- | ----------------------- |
-| security.pre-auth-principal   | X-Amzn-Oidc-Identity    |
-| security.pre-auth-credentials | X-Amzn-Oidc-Accesstoken |
-| security.pre-auth-logout      | (Cognito subdomain)     |
+| Property                      | Value                     |
+| ----------------------------- | ------------------------- |
+| security.pre-auth-principal   | `X-Amzn-Oidc-Identity`    |
+| security.pre-auth-credentials | `X-Amzn-Oidc-Accesstoken` |
+| security.pre-auth-logout      | (Cognito subdomain)       |
 
 ### URL access granted by RBAC
 
@@ -428,6 +427,44 @@ Timeline:
 - The Java `HttpSession` is created in `ligoj-ui` container, with optional custom principal name (set by `X-Real-User` response header)
 - If a concurrency limit (`security.max-sessions`) is reached for this principal, the oldest session is invalidated.
 - The `JSSESSIONID` cookie and other cookies optionnaly set by the plugin are forwarded back to the browser.
+
+
+### Administrator user reinitialisation
+
+By default, the user `ligoj-admin` is created at the first start assigned to the role `ADMIN`, and this behavior can be configured with `ligoj.initial.user.*` properties.
+
+#### Scenario #1
+
+Use case:
+
+- Instead of the user `ligoj-admin`, create `some-user`.
+- Assign this user to a role `Administrators`
+- Create an API token named `init_token`
+- Print this token value in the console only on the first start
+
+Options to set:
+
+- `ligoj.initial.user.name`: `some-user`
+- `ligoj.initial.user.action`: `init`
+- `ligoj.initial.user.role`: `Administrators`
+- `ligoj.initial.user.token.name`: `init_token`
+
+#### Scenario #2
+
+Use case:
+
+- Instead of the user `ligoj-admin`, create `some-user`.
+- Assign this user to a role `Administrators`
+- Create an API token named `init_token`
+- Replace this token by a value `SECRET` (this value will not be printed)
+
+Options to set:
+
+- `ligoj.initial.user.name`: `some-user`
+- `ligoj.initial.user.action`: `reset`
+- `ligoj.initial.user.role`: `Administrators`
+- `ligoj.initial.user.token.name`: `init_token`
+- `ligoj.initial.user.token.value`: `SECRET`
 
 
 ## Audit
@@ -558,6 +595,7 @@ The definition of a hook is :
 - The script name to be executed
 - The secrets and configuration names to be dynamically retrieved and added to the context of this event
 - The delay before execution: `0` for synchronous, `>0` for asynchronous.
+- The timeout of the script execution in seconds. Default value is managed by `ligoj.hook.timeout` configuration. Default is `30` seconds.
 
 Timeline:
 - When an API call succeed, all the hooks are checked to find the matching ones:
@@ -637,6 +675,25 @@ The javadoc documentation is extracted from the `-javadoc.jar` artifacts of plug
 - Parameter description
 - Response description
 - Type description
+
+## API Tokens
+
+API tokens are used to authenticate API calls instead of a password or other credentials.
+Contraints are:
+- API tokens are  scoped to a user. No user (even administrators) can list or see these tokens
+- Business key of a token is its `name`, uniqu for a user and case sensitive
+- API Key hash is stored in database, not the actual API key.
+- Optional expiration date can be set. The expired token cannot be used, and are daily purged by default with this CRON expression `0 0 4 * * ?`. This can be overridden with `api.token.purge` property.
+
+API generation:
+- A Random `128` characters string is generated. Can be overridden with `api.token.length` property. This is actual value returned to the principal.
+- A hash is generated from the request token's name with `SHA-512` algorithm. Can be overridden with `api.token.digest` property.
+- A `SHA-1` hash is created from the principal's name, the previous hash, and a secret from `api.token.secret`. There is `31` iterations, can be overridden with `api.token.iterations` property.
+- The `SHA-1` hash is then crypted with `DESede` algorithm. Can be overridden with `api.token.digest` property. This the actual value stored in database.
+
+
+See `ApiTokenResource` for more details.
+
 
 # Plugin management
 
@@ -1213,7 +1270,7 @@ ligoj configuration set --id "ligoj.plugin.repository" --value "nexus"
 ligoj configuration set --id "ligoj.plugin.update" --value "false"
 ```
 
-## File management
+## File configuration
 
 Hooks, and read-only files management
 
@@ -1223,7 +1280,7 @@ ligoj configuration set --id "ligoj.file.path" --value "^/home/files/.*,^/home/h
 ```
 
 
-## Hooks
+## Hook configuration
 
 Hooks are event based actions, one event by successful API call.
 
@@ -1610,6 +1667,94 @@ ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from=
 --nexus-password=""
 ```
 
+# `ligoj-api` container configuration properties
+
+## Docker environment variables
+
+| Docker env   | Default value                  | Note                                                                             |
+| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
+| CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration. See                                                    |
+| CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
+| SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
+| SERVER_PORT  | `8081`                         | Passed to server listening port and exposed port.                                |
+| JAVA_MEMORY  | `-Xms128M -Xmx128M`            | JVM Memory                                                                       |
+| CUSTOM_OPTS  |                                | Additional JVM options, like `-D...`                                             |
+| JAVA_OPTIONS |                                | Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties |
+
+## Application level properties
+
+Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot properties (can be injected in `CUSTOM_OPTS`) and can be dynamically modified from the administration console:
+
+| Name                                                  | Default value                            | Note                                                                                              |
+| ----------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| app.crypto.file                                       |                                          | Secret file location. Can also be defined in `APP_CRYPTO_FILE`environment variable.               |
+| app.crypto.password                                   |                                          | Secret value. Can also be defined in `APP_CRYPTO_PASSWORD`environment variable.                   |
+| cache.location                                        | `classpath:META-INF/hazelcast-local.xml` | Custom Hazelcast configuration file location                                                      |
+| cache.${cache_name}.ttl                               |                                          | For each cache, default TTL can be adjusted.                                                      |
+| feature:iam:node:primary                              | `empty`                                  | Ligoj `plugin-id` node's identifier used as primary IAM provider. `empty` = always granted.       |
+|                                                       |                                          | See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node).                                  |
+| feature:iam:node:secondary                            | `secondary`                              | Ligoj `plugin-id` node's identifier used as secondary IAM provider. `empty` = always granted.     |
+|                                                       |                                          | See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node).                                  |
+| global.tools.external                                 | ``                                       | Ligoj `plugin-id` node's identifiers globally available for external users.                       |
+| global.tools.internal                                 | ``                                       | Ligoj `plugin-id` node's globally available for internal users.                                   |
+| health.node                                           | `0 0 0/1 1/1 * ?`                        | CRON expression to refresh the health of the nodes                                                |
+| health.subscription                                   | `0 0 2 1/1 * ?`                          | CRON expression to refresh the health of the subscriptions                                        |
+| jdbc.vendor                                           | `mysql`                                  | Database type: `mysql`, `postgresql`, `mariadb`                                                   |
+| jdbc.port                                             | `3306`                                   |                                                                                                   |
+| jdbc.database                                         | `ligoj`                                  |                                                                                                   |
+| jdbc.username                                         | `ligoj`                                  |                                                                                                   |
+| jdbc.password                                         | `ligoj`                                  |                                                                                                   |
+| jdbc.host                                             | `localhost`                              |                                                                                                   |
+| jdbc.driverClassName                                  | `com.mysql.cj.jdbc.Driver`               | Java class name of the driver: `org.postgresql.Driver`                                            |
+| jdbc.urlparam                                         | *complex*                                | See [application.properties](app-api/src/main/resources/application.properties)                   |
+| jdbc.url                                              | *complex*                                | See [application.properties](app-api/src/main/resources/application.properties)                   |
+| jdbc.validationQuery                                  | `select 1;`                              |                                                                                                   |
+| jdbc.maxIdleTime                                      | `180000`                                 |                                                                                                   |
+| jdbc.maxPoolSize                                      | `150`                                    |                                                                                                   |
+| jpa.dialect                                           | `...MySQL5InnoDBUtf8Dialect`             | For PgSQL: `org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect`                             |
+| jpa.hbm2ddl                                           | `update`                                 | update, none, validate. With "update", the server takes up to 30s to start                        |
+| jpa.log_queries_slower_than_ms                        | `0`                                      | Minimal cost of logged slow Hibernate queries. `0`to disable it.                                  |
+| jpa.generate_statistics                               | `false`                                  | When `true` Hibernate statistics are logged.                                                      |
+| management.context-path                               | `/manage`                                |                                                                                                   |
+| management.security.roles                             | `USER`                                   | Default RBAC role assigned to new user.                                                           |
+| ligoj.initial.user.action                             | ``                                       | When `init`, the initialization is executed once. When `reset`, its execution is forced.          |
+| ligoj.initial.user.name                               | `ligoj-admin`                            | The initial user name.                                                                            |
+| ligoj.initial.user.role                               | `ADMIN`                                  | The initial role name to associate to the initial user.                                           |
+| ligoj.initial.user.token.name                         | `auto-install`                           | The API token name to associate to the initial user.                                              |
+| ligoj.initial.user.token.value                        | ``                                       | When defined, the API token value is forced to the given value, and not printed.                  |
+|                                                       |                                          | Otherwise, a generated value is set and printed in log:                                           |
+|                                                       |                                          | `[INIT] Token '..' has been set for initial user '..' to value: ..`                               |
+| ligoj.hook.path                                       | `^$`                                     | Comma separated RegEx. See [Hook](#hook).                                                         |
+| ligoj.hook.timeout                                    | `30`                                     | Default hook timeout in seconds. See [Hook](#hook).                                               |
+| ligoj.file.path                                       | `^$`                                     | Comma separated RegEx. See [File](#file).                                                         |
+| ligoj.plugin.enabled                                  | `true`                                   | When false, plugins are not loaded and their state is not updated                                 |
+| ligoj.plugin.ignore                                   | `plugin-password-management`             | Filtered (deprecated, fixed version, ...) plugins for install or update from the repositories     |
+| ligoj.plugin.install                                  | ``                                       | List plugin identifiers to automatically install at start time: `p1,p2,...`.                      |
+|                                                       |                                          | Update are performed according to `ligoj.plugin.update` option                                    |
+| ligoj.plugin.update                                   | `false`                                  | `true` updates the plugins automatically at start time to the latest available version.           |
+| ligoj.plugin.repository                               | `central`                                | Repository identifier used to query plugin install or update.  May be `central`, `nexus`          |
+| ligoj.sslVerify                                       | `true`                                   | `false` disables the standard SSL verifications (domain name, certifications chain and validity). |
+| logging.level.root                                    | `info`                                   | Configure default log verbosity of all internal components: Spring, Jetty, Hibernate,...          |
+| logging.level.<category>                              | *vary*                                   | Configure default log verbosity a specific category                                               |
+| plugins.repository-manager.${repository}.search.url   | *depends on repository*                  | URL template to discover plugins.                                                                 |
+| plugins.repository-manager.${repository}.artifact.url | *depends on repository*                  | URL template to download plugins.                                                                 |
+| plugins.repository-manager.${repository}.groupId      | `org.ligoj.plugin`                       | Maven `groupId` to filter the Ligoj plugins                                                       |
+| server.port                                           | `${SERVER_PORT}`                         |                                                                                                   |
+| server.address                                        | `${SERVER_HOST}`                         |                                                                                                   |
+| server.servlet.context-path                           | `/${CONTEXT}`                            |                                                                                                   |
+
+## System level-only variables
+
+These variables are only relevant when set as Java System property.
+For sample `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
+
+| Name                   | Default value       | Note                               |
+| ---------------------- | ------------------- | ---------------------------------- |
+| ligoj.log.file.name    | `./api-rolling.log` | File inside `LIGOJ_HOME` directory |
+| ligoj.log.file.size    | `10 MB`             | Max log file size                  |
+| ligoj.log.file.enabled | `true`              | Enablement of log file             |
+
+
 # Troubleshooting
 
 ## Messages `WARN  constraint "uk_..." of relation "..." does not exist, skipping`
@@ -1697,3 +1842,24 @@ None of the following solutions destroy configuration or plugin/application data
     - Reinstall the plugin(s), via the CLI or the GUI
     - Restart `ligoj-api` with activated plugins by removing the option `-Dligoj.plugin.enabled=false`
 
+
+### Database connectivity
+
+You can experience network issue with a remote database. To validate the link from the `ligoj-api`.
+
+
+#### MySQL
+
+```bash
+docker run --rm -it \
+ --name "ligoj-api" \
+ ligoj/ligoj-api:4.0.1 sh -c "apk add mysql-client && mysql -h 192.168.1.16 --user=ligoj --password=ligoj ligoj"
+```
+
+#### PostgreSQL
+
+```bash
+docker run --rm -it \
+ --name "ligoj-api" \
+ ligoj/ligoj-api:4.0.1 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"
+```
