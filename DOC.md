@@ -622,6 +622,22 @@ public class HookResponseFilter implements ContainerResponseFilter {
 Sample implementation in `org.ligoj.bootstrap.core.resource.filter.HookResponseFilter`
 
 
+
+## OpenAPI
+
+Available formats:
+- OpenAPI documentation is available at [http://localhost:8080/ligoj/rest/openapi.json](http://localhost:8080/ligoj/rest/openapi.json).
+- Wadl documentation is available at [http://localhost:8080/ligoj/rest?_wadl](http://localhost:8080/ligoj/rest?_wadl).
+
+The Swagger UI is available at [http://localhost:8080/ligoj/#/api](http://localhost:8080/ligoj/#/api).
+
+All enabled plugins contribute to the final generated OpenAPI document.
+The javadoc documentation is extracted from the `-javadoc.jar` artifacts of plugins and associated to relevant OpenAPI operations. Supported documentation includes:
+- Operation description
+- Parameter description
+- Response description
+- Type description
+
 # Plugin management
 
 A single jar (archive) containing binaries (Java class files), configuration extensions and static resources.
@@ -758,6 +774,8 @@ All JAX-RS path, query, path parameters and form parameters must be in lower cas
 Add as much as possible JSR-303 annotation on your beans (`@NotNull`, `@Size`,..) By default all parameters without annotations are `@NotNull` and all properties are `@Nullable`. Cascaded bean validation still requires `@Valid` on cascaded property.
 
 Dont use try/catch block for technical exception handling. Use them only to handle business rule and `BusinessException` class.
+
+Add documentation to public endpoints, including the Javadoc parameters and return values. They are reused ofr OpenAPI documentation. See [OpenAPI](#openapi) for more details.
 
 ### Tools
 
@@ -1351,7 +1369,7 @@ ligoj hook get --name "audit_role_change"
 ```
 
 
-## PLugin installation
+## Plugin installation
 
 ```bash
 echo "Installing plugins (Ligoj DEV/SNAPSHOT mode only)..."
@@ -1463,6 +1481,7 @@ Parameters for the [`application.properties` configuration file](#configuration)
 Note: 
 - If the KeyCloak server uses an unknown SSL certificate authority (CA), follow the [trusted certificate configuration](#trusted-certificates) procedure for the `ligoj-ui` container.
 - At start time, the OAuth configuration is discovered from the OIDC provider. This means that the `ligoj-ui` container must be able to reach the OIDC provider. This is the actual limitation of Spring Security. If its unavailable at start time, the `ligoj-ui` container will fail to start. See https://github.com/spring-projects/spring-boot/issues/46862.
+- With this provider, the login page (login.html) is no more avaivable.
 
 #### With KeyCloak
 
