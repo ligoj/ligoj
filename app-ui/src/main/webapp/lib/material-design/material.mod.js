@@ -25,11 +25,11 @@ define([
 				'radioElements': '.radio > label > input[type=radio], label.radio-inline > input[type=radio]'
 			};
 			$.material.init(options);
-			$cascade.register('html', function (selector) {
-				$.material.input(selector.find(options.inputElements));
-				$.material.checkbox(selector.find(options.checkboxElements));
-				$.material.togglebutton(selector.find(options.togglebuttonElements));
-				$.material.radio(selector.find(options.radioElements));
+			$cascade.on('html:after', function (data) {
+				$.material.input(data.target.find(options.inputElements));
+				$.material.checkbox(data.target.find(options.checkboxElements));
+				$.material.togglebutton(data.target.find(options.togglebuttonElements));
+				$.material.radio(data.target.find(options.radioElements));
 			});
 		}
 	};

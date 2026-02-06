@@ -114,13 +114,22 @@ define([], function () {
 				}
 
 				$current.$view = $parentElement;
-				$current.$template = template && Handlebars.compile(template);
+				if(template) {
+				    var eventData = {template: template};
+                    $current.$cascade.trigger('view:before:compile', eventData, $current);
+    				$current.$template = template && Handlebars.compile(eventData.template);
+                    $current.$cascade.trigger('view:after:compile', eventData, $current);
+				} else {
+				    $current.$template = null;
+				}
 				$current.$view.off().empty().html((options.viewBuilder || $self.viewBuilder)($current));
 			}
 		},
 		unload: {
 			controller: function (module, context) {
+                context.$cascade.trigger('view:before:unload', context.$view, context);
 				context.$view && $.contains(document.documentElement, context.$view[0]) && context.$view.off().empty();
+                context.$cascade.trigger('view:after:unload', context.$view, context);
 			}
 		}
 	};

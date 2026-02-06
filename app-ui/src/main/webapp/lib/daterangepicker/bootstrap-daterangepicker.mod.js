@@ -25,9 +25,9 @@ define(['jquery', 'cascade', 'i18n!daterangepicker/nls/daterangepicker-messages'
 					firstDay: $.fn.datepicker.dates[locale.requireLocale].weekStart || 0
 				}
 			};
-			$cascade.register('html', function (selector) {
+			$cascade.on('html:after', function (data) {
 				// Ensure previous pop-ups are closed
-				selector.find('.modal').on('hidden', function () {
+				data.target.find('.modal').on('hidden', function () {
 					$('.dropdown').removeClass('open');
 				});
 			});

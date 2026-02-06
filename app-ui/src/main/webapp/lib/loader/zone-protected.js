@@ -26,12 +26,12 @@ define(['jquery', 'security.mod', 'cascade', 'error.mod', 'handlebars.mod', 'toa
 		type: 'GET',
 		url: REST_PATH + 'session',
 		success: function (session) {
-			$cascade.register('html', function (selector) {
-				if (!selector.hasClass('select2-chosen') && !selector.hasClass('dataTables_paginate') && !selector.hasClass('dataTables_info')) {
-					security.applySecurity(selector);
+			$cascade.on('html:after', function (data) {
+				if (!data.target.hasClass('select2-chosen') && !data.target.hasClass('dataTables_paginate') && !data.target.hasClass('dataTables_info')) {
+					security.applySecurity(data.target);
 				}
 			});
-			$cascade.register('fragment-main', function () {
+			$cascade.on('fragment-main', function () {
 				decorate(session);
 			});
 			decorate(session);

@@ -64,9 +64,10 @@ define([
 		/**
 		 * This list is filled by JavaScript modules listening for a module HTML load, and before modules's
 		 * JavaScript
-		 * @type {array}
+		 * Key is the event name, such as 'html', 'fragment:before'.
+		 * See trigger and register function.
 		 */
-		callbacks: [],
+		callbacks: {},
 
 		/**
 		 * Unload all modules of given context from the AMD. The modules are unloaded in the reverse order of the associated loaded plugin.
@@ -87,6 +88,7 @@ define([
 		 */
 		unload: function (context) {
 			// First, unload children
+			$self.trigger('unload:before', null, context);
 			if (context.$siblings) {
 				context.$siblings.forEach($self.unload);
 				delete context.$siblings;
@@ -105,6 +107,7 @@ define([
 			delete $self.$current.$initializeTransaction
 			context.$unloaded = true;
 			$self.undefModules(context);
+			$self.trigger('unload:after', null, context);
 			return context.$parent;
 		},
 
@@ -167,14 +170,14 @@ define([
 					$self.securedZoneLoader(context, transaction, fragments, reload, url);
 				} else {
 					$self.appendSpin($('[data-cascade-hierarchy="1"]').off().empty(), 'fa-3x');
-					$self.off('session').register('session', function () {
+					$self.off('session').on('session', function () {
 						$self.securedZoneLoader(context, transaction, fragments, reload, url);
 					});
 				}
 			});
 		},
 
-		setTitle: function(title) {
+		setTitle: function (title) {
 			document.title = title;
 			$('.cascade-title').text(title);
 		},
@@ -295,7 +298,7 @@ define([
 		loadPlugins: function (plugins, callback) {
 			var requiredPath = [];
 			var requiredNames = [];
-			plugins.forEach(function(plugin) {
+			plugins.forEach(function (plugin) {
 				if (typeof $self.plugins[plugin] === 'undefined') {
 					// This plugin has not yet been loaded
 					requiredPath.push('plugins/' + plugin);
@@ -345,7 +348,7 @@ define([
 
 			// Build the required modules
 			var requireJsModules = [];
-			options.plugins.forEach(function(pluginName) {requireJsModules.push($self.plugins[pluginName].load.require(options));});
+			options.plugins.forEach(function (pluginName) { requireJsModules.push($self.plugins[pluginName].load.require(options)); });
 
 			// Load with AMD the resources
 			require(requireJsModules, function () {
@@ -391,10 +394,12 @@ define([
 				}
 
 				// Insert the compiled view in the wrapper
-				$self.trigger('fragment-' + id, context, context);
+				$self.trigger('fragment:before', null, context);
+				$self.trigger('fragment-' + id, null, context);
 
 				// Initialize the controller
 				$self.initializeContext($current, transaction, options.callback, options.parameters);
+				$self.trigger('fragment:after', null, context);
 			}, options.errorCallback);
 		},
 
@@ -414,7 +419,7 @@ define([
 		 * @param  {context} $context Target context.
 		 */
 		copyAPI: function ($context) {
-			$self.apiFunctions.forEach(function(api) {$context['$' + api] = $self.proxy($context, $self[api]);});
+			$self.apiFunctions.forEach(function (api) { $context['$' + api] = $self.proxy($context, $self[api]); });
 		},
 
 		/**
@@ -463,8 +468,8 @@ define([
 			if (id.charAt(0) === '/') {
 				// Absolute path for home
 				var index = id.lastIndexOf('/');
-				home = id.substr(1, index - 1);
-				id = id.substr(index + 1);
+				home = id.substring(1, index - 1);
+				id = id.substring(index + 1);
 				while (context && context.$path !== home) {
 					context = context.$parent;
 				}
@@ -620,10 +625,11 @@ define([
 					if (arguments.length === 1) {
 						// proceed only for identified parent to manage correctly the selector
 						var id = this.attr('id');
-						if ((id && id.substr(0, 2) !== 'jq') || this.is('[data-cascade-hierarchy]')) {
+						if ((id && id.substring(0, 2) !== 'jq') || this.is('[data-cascade-hierarchy]')) {
 							applicationManager.debug && traceDebug('Html content updated for ' + id);
+							$self.trigger('html:before', {target: this, content: arguments}, this);
 							var result = originalHtmlMethod.apply(this, arguments);
-							$self.trigger('html', this);
+							$self.trigger('html:after', {target: this, content: arguments}, this);
 							return result;
 						}
 					}
@@ -638,7 +644,7 @@ define([
 					if (hash === '') {
 						$self.load('');
 					} else if (hash && hash.indexOf('#/') === 0) {
-						$self.load(hash.substr(2));
+						$self.load(hash.substring(2));
 					}
 				};
 				$(window).hashchange(function () {
@@ -677,13 +683,13 @@ define([
 		},
 		closestFromSiblings: function (siblings, item, requestContext) {
 			for (var index = 0; index < siblings.length; index++) {
-			    var sibling = siblings[index];
-			    if (requestContext !== sibling) { // Prevent recursive loop
-                    var owner = $self.closest(siblings[index], item);
-                    if (typeof owner !== 'undefined') {
-                        return owner;
-                    }
-               }
+				var sibling = siblings[index];
+				if (requestContext !== sibling) { // Prevent recursive loop
+					var owner = $self.closest(siblings[index], item);
+					if (typeof owner !== 'undefined') {
+						return owner;
+					}
+				}
 			}
 		},
 
@@ -717,19 +723,37 @@ define([
 			}
 		},
 
-		register: function (event, listener) {
+		/**
+		 * Register a callback to the given event.
+		 * @param {string} event    The event name to listen.
+		 * @param {string} callback THe callback to register.
+		 * @return selector
+		 */
+		on: function (event, callback) {
 			$self.callbacks[event] = $self.callbacks[event] || [];
-			$self.callbacks[event].push(listener);
+			$self.callbacks[event].push(callback);
 			return $self;
 		},
 
+
+		/**
+		 * Unregister all callbacks from the given event.
+		 * @param {string} event    The event name to unregister.
+		 * @return selector
+		 */
 		off: function (event) {
-			$self.callbacks[event] = [];
+			var listenedEvents = Object.keys($self.callbacks);
+			for (var index = 0; index < listenedEvents.length; index++) {
+				var listenedEvent = listenedEvents[index];
+				if (listenedEvent.indexOf(event) === 0) {
+					delete $self.callbacks[listenedEvent]
+				}
+			}
 			return $self;
 		},
 
 		/**
-		 * Proceed all registered post DOM ready functions.
+		 * Proceed all registered callbacks for the given event.
 		 * @param {string} event    The event name to trigger.
 		 * @param {object} data 	Optional data to attach to this event. Will the the current view as default.
 		 * @param {object} context 	Optional context to attach to the event.
@@ -737,12 +761,20 @@ define([
 		 */
 		trigger: function (event, data, context) {
 			applicationManager.debug && traceDebug('Trigger event', event);
-			var callbacks = $self.callbacks[event] || [];
-			for (var index = 0; index < callbacks.length; index++) {
-				if (typeof callbacks[index] === 'function') {
-					callbacks[index](data || (context || $self.$context).$view, context);
-				} else {
-					traceLog('Expected function, but got "' + typeof callbacks[index] + '" : ' + callbacks[index]);
+			var listenedEvents = Object.keys($self.callbacks);
+			for (var index = 0; index < listenedEvents.length; index++) {
+				var listenedEvent = listenedEvents[index];
+				if (listenedEvent.indexOf(event) === 0) {
+					// Match event
+					var callbacks = $self.callbacks[listenedEvent];
+					for (var cIndex = 0; cIndex < callbacks.length; cIndex++) {
+						var callback = callbacks[cIndex];
+						if (typeof callback === 'function') {
+							callback(data || (context || $self.$context).$view, context);
+						} else {
+							traceLog('Expected function, but got "' + typeof callback + '" : ' + callback);
+						}
+					}
 				}
 			}
 			return $self;

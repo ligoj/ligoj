@@ -101,9 +101,10 @@ define([
 					'text!main/public/login/login-popup.html', 'i18n!main/public/login/nls/messages'
 				], function (html, messages) {
 					current.loginMessages = messages;
+					$cascade.trigger('html:before:login', {target: $popup, content:[]});
 					$('body').first().append(Handlebars.compile(html)(messages));
 					var $popup = _('_login');
-					$cascade.trigger('html', $popup);
+					$cascade.trigger('html:after:login', {target: $popup, content:[]});
 					$popup.on('show.bs.modal', function () {
 						$('.modal').not($popup).modal('hide');
 						_('_login').off('submit').on('submit', current.login);

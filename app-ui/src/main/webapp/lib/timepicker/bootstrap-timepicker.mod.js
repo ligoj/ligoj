@@ -8,8 +8,8 @@ define(['cascade', 'moment', 'bootstrap-timepicker', 'l10n.mod', 'moment.mod'], 
 			// Look locale provided by MomentJs to check meridian
 			var ltFormat = (moment && (typeof moment.localeData === 'function') && moment.localeData()._longDateFormat && moment.localeData()._longDateFormat.LT) || '';
 			$.fn.timepicker.defaults.showMeridian = ltFormat.endsWith('A');
-			$cascade.register('html', function (selector) {
-				selector.find('input.time').timepicker();
+			$cascade.on('html:after', function (data) {
+				data.target.find('input.time').timepicker();
 			});
 
 			/**

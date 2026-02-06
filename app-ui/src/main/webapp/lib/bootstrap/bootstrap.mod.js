@@ -5,15 +5,15 @@ define([
 	'jquery', 'cascade', 'bootstrap', 'form'
 ], function ($, $cascade) {
 	// Global handler for better bootstrap implicit experience
-	$('body').popover({selector: '[data-toggle="popover"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body'});
-	$('body').tooltip({selector: '[data-toggle="tooltip"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body', animation: false});
-	
+	$('body').popover({ selector: '[data-toggle="popover"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body' });
+	$('body').tooltip({ selector: '[data-toggle="tooltip"]:not([data-trigger="manual"])', html: 'true', trigger: 'hover focus', container: 'body', animation: false });
+
 	function closeTooltips() {
-		$('[data-toggle="tooltip"][aria-describedby]').each(function() {
+		$('[data-toggle="tooltip"][aria-describedby]').each(function () {
 			$(this).tooltip('hide');
 		});
 		// Destroy orphan previous tooltips
-		$('.tooltip.in').empty().remove();	
+		$('.tooltip.in').empty().remove();
 	};
 	$(document).on('click', '.toggle-visibility', function () {
 		$(this).toggleClass('active');
@@ -28,7 +28,7 @@ define([
 				$('[aria-describedby="' + $(this).attr('id') + '"]').popover('hide');
 			});
 		}
-	}).on('show.bs.dropdown', null, function(e) {
+	}).on('show.bs.dropdown', null, function (e) {
 		// Close previous dropdowns
 		$('.dropdown-menu.detached').closeDropdown();
 
@@ -37,17 +37,17 @@ define([
 		if (!$trigger.hasClass('detached') && $trigger.closest('.dropdown-overflow').length && $trigger.closest('.dropdown').length) {
 			var flag = 'dropdown-' + Math.random();
 			var $dropdown = $trigger.closest('.dropdown');
-			var $menu = $dropdown.find('.dropdown-menu').addClass('detached').attr('data-previous-container',flag);
-			$trigger.addClass('detached').attr('data-dropdown-container',flag);
+			var $menu = $dropdown.find('.dropdown-menu').addClass('detached').attr('data-previous-container', flag);
+			$trigger.addClass('detached').attr('data-dropdown-container', flag);
 			$('body').append($menu.css({
 				position: 'absolute',
 				display: 'initial',
 				left: $menu.offset().left + 'px',
-				width : $menu.width() + 'px',
+				width: $menu.width() + 'px',
 				top: ($menu.offset().top + $(e.target).outerHeight()) + 'px'
 			}).data('open', true).detach());
 		}
-	}).on('hidden.bs.dropdown', null, function(e) {
+	}).on('hidden.bs.dropdown', null, function (e) {
 		var $trigger = $(e.relatedTarget);
 		if ($trigger.hasClass('detached')) {
 			$('[data-previous-container="' + $trigger.attr('data-dropdown-container') + '"]').closeDropdown();
@@ -88,31 +88,31 @@ define([
 	}).on('click.bs.tab.data-api.ajax', 'a[data-toggle="tab-ajax"][data-ajax]:not([cascade-loaded])', function (e) {
 		// Load active partials for tab
 		var $tab = $(this)
-		var $link = $tab.attr('cascade-loaded','true');
-		$.proxy($cascade.loadPartial, $link)(function() {
+		var $link = $tab.attr('cascade-loaded', 'true');
+		$.proxy($cascade.loadPartial, $link)(function () {
 			$link.attr('data-toggle', 'tab').trigger('click.bs.tab.data-api');
 		});
 		e.preventDefault();
 	})
-	// Load active partials for collapse
-	.on('show.bs.collapse', '.collapse[data-ajax]', $cascade.loadPartial)
-	// Load active partials for popover
-	.on('show.bs.popover', '[data-ajax]', $cascade.loadPartial)
-	// Load active partials for modal
-	.on('click.bs.modal.data-api.ajax', '[data-toggle="modal-ajax"][data-ajax]:not([cascade-loaded])', function (e) {
-		var $link = $(this).attr('cascade-loaded','true');
-		$.proxy($cascade.loadPartial, $link)(function() {
-			$link.attr('data-toggle', 'modal').trigger('click.bs.modal.data-api');
-		});
-		e.preventDefault();
-	}).on('show.bs.modal', '.modal', closeTooltips)
-	.on('show.bs.tooltip', null, closeTooltips)
-	.on('hide.bs.modal', '.modal', closeTooltips)
-	.on('select2-close', null, closeTooltips)
-	.on('show.bs.modal', '.modal[data-ajax]', $cascade.loadPartial);
-	
+		// Load active partials for collapse
+		.on('show.bs.collapse', '.collapse[data-ajax]', $cascade.loadPartial)
+		// Load active partials for popover
+		.on('show.bs.popover', '[data-ajax]', $cascade.loadPartial)
+		// Load active partials for modal
+		.on('click.bs.modal.data-api.ajax', '[data-toggle="modal-ajax"][data-ajax]:not([cascade-loaded])', function (e) {
+			var $link = $(this).attr('cascade-loaded', 'true');
+			$.proxy($cascade.loadPartial, $link)(function () {
+				$link.attr('data-toggle', 'modal').trigger('click.bs.modal.data-api');
+			});
+			e.preventDefault();
+		}).on('show.bs.modal', '.modal', closeTooltips)
+		.on('show.bs.tooltip', null, closeTooltips)
+		.on('hide.bs.modal', '.modal', closeTooltips)
+		.on('select2-close', null, closeTooltips)
+		.on('show.bs.modal', '.modal[data-ajax]', $cascade.loadPartial);
+
 	// Placeholder patch for Select2
-	$.fn.select2Placeholder = function(placeholder) {
+	$.fn.select2Placeholder = function (placeholder) {
 		var data = $(this).data('select2');
 		if (typeof placeholder === 'string') {
 			data.opts.placeholder = placeholder;
@@ -130,7 +130,7 @@ define([
 		return this;
 	};
 	$.fn.closeDropdown = function () {
-		this.each(function() {
+		this.each(function () {
 			var $dropdown = $(this);
 			var flag = $dropdown.attr('data-previous-container') || $dropdown.attr('data-dropdown-container');
 			var $trigger = $();
@@ -254,11 +254,11 @@ define([
 	}
 
 	// Transformation
-	$cascade.register('html', function (selector) {
+	$cascade.on('html:after', function (data) {
 		// Add popover feature
-		selector.find('.tab-pane.active[data-ajax]').each($cascade.loadPartial);
+		data.target.find('.tab-pane.active[data-ajax]').each($cascade.loadPartial);
 	});
-	$cascade.register('hash', function (url) {
+	$cascade.on('hash', function (url) {
 		$('.modal-backdrop').remove();
 		$('.tooltip').remove();
 		$('.popover').remove();
@@ -271,7 +271,7 @@ define([
 	 * Full screen management : enter full screen
 	 * @param {Object} $selector Optional selector.
 	 */
-	$.fn.fullscreen = function() {
+	$.fn.fullscreen = function () {
 		var el = $(this)[0] || document.documentElement;
 
 		// use necessary prefixed versions
@@ -294,7 +294,7 @@ define([
 	/**
 	 * Exit full screen management
 	 */
-	$.fn.exitFullscreen = function() {
+	$.fn.exitFullscreen = function () {
 		// use necessary prefixed versions
 		if (document.webkitExitFullscreen) {
 			document.webkitCancelFullScreen();

@@ -28,8 +28,8 @@ define([
 		lengthChange: false,
 
 		// Call this method from 'fnRowCallback' if you redefine it.
-		super_fnRowCallback: function (nRow) {
-			$cascade.trigger('html', $(nRow));
+		super_fnRowCallback: function (nRow, rowData) {
+			$cascade.trigger('html:after:datatables:row', {target: $(nRow), rowData: rowData, dataTable: this, content: []});
 		},
 
 		// By default, call super method

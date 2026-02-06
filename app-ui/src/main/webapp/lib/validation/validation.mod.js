@@ -224,7 +224,7 @@ define([
 			var $that = this;
 
 			// Track the use case loading
-			$cascade.register('hash', function () {
+			$cascade.on('hash', function () {
 				$that.mapping = {};
 			});
 			return $that;
