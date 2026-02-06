@@ -1,0 +1,99 @@
+{
+	"name": "Ligoj",
+	"description": "Ligoj Administration Portal",
+	"author": "kloudy.io",
+	"keywords": [
+		"ligoj"
+	],
+	"version": "4.0.1",
+	"homepage": "https://github.com/ligoj/ligoj",
+	"engines": {
+		"jetty": "9.4.19"
+	},
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"contributors": [
+		"fabrice.daugan@gmail.com"
+	],
+	"license": "MIT",
+	"bugs": "https://github.com/ligoj/ligoj/issues",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ligoj/ligoj"
+	},
+	"happiness": {
+		"globals": [
+			"jQuery"
+		]
+	},
+	"eslintConfig": {
+		"globals": {
+			"jQuery": true
+		}
+	},
+	"xo": {
+		"globals": [
+			"jQuery"
+		],
+		"rule": {
+			"no-unneeded-ternary": 0,
+			"dot-notation": 0,
+			"import/no-amd": 0,
+			"indent": 0,
+			"max-lines": 0,
+			"max-params": 0,
+			"no-new": 0,
+			"no-unused-expressions": 0,
+			"import/no-dynamic-require": 0,
+			"unicorn/explicit-length-check": 0,
+			"quote-props": 0,
+			"no-template-curly-in-string": 0
+		},
+		"envs": [
+			"node",
+			"window"
+		]
+	},
+	"stylelint": {
+		"rules": {
+			"at-rule-no-unknown": [
+				true,
+				{
+					"ignoreAtRules": [
+						"include",
+						"mixin"
+					]
+				}
+			],
+			"indentation": "tab",
+			"selector-combinator-space-before": "never",
+			"selector-combinator-space-after": "never",
+			"selector-list-comma-newline-after": "never-multi-line",
+			"rule-non-nested-empty-line-before": null,
+			"media-feature-no-missing-punctuation": null,
+			"number-leading-zero": "never"
+		}
+	},
+	"private": true,
+	"analyze": true,
+	"devDependencies": {
+		"@vitejs/plugin-vue": "^6.0.3",
+		"happiness": ">7.x",
+		"node": ">=0.5.x",
+		"sass": "^1.97.1",
+		"sass-loader": "^16.0.6",
+		"vite": "^7.3.0",
+		"xo": "^0.12.0"
+	},
+	"dependencies": {
+		"@mdi/font": "^7.4.47",
+		"pinia": "^3.0.4",
+		"vee-validate": "^4.15.1",
+		"vue": "^3.5.26",
+		"vue-router": "^4.6.4",
+		"vuetify": "^3.11.6"
+	}
+}
