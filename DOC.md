@@ -631,10 +631,12 @@ In `ligoj-api` container, when a hook matches, the following logs appear:
 2026-01-25 17:21:15.457 INFO  [Hook system/security/role/1 -> audit_role_change] Succeed, code: 0, duration: 00:00:00.031
 ```
 
-More details available in the `HookProcessRunnable` class.
 
-Synchronous hooks are executed by `org.ligoj.bootstrap.core.resource.filter.HookResponseFilter`.
-Asynchronous hooks are executed by `org.ligoj.bootstrap.core.resource.handler.AsynchronousHookInterceptor`.
+Synchronous hooks are triggered by `org.ligoj.bootstrap.core.resource.filter.HookResponseFilter` class.
+
+Asynchronous hooks are triggered by `org.ligoj.bootstrap.core.resource.handler.AsynchronousHookInterceptor` class.
+
+Hooks are executed by `org.ligoj.bootstrap.resource.system.hook.HookProcessRunnable` class.
 
 ### Hook with plugins
 
