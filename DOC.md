@@ -633,6 +633,9 @@ In `ligoj-api` container, when a hook matches, the following logs appear:
 
 More details available in the `HookProcessRunnable` class.
 
+Synchronous hooks are executed by `org.ligoj.bootstrap.core.resource.filter.HookResponseFilter`.
+Asynchronous hooks are executed by `org.ligoj.bootstrap.core.resource.handler.AsynchronousHookInterceptor`.
+
 ### Hook with plugins
 
 Plugins can register themself as hooks by extending a CXF interface `ContainerResponseFilter`.
