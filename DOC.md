@@ -835,7 +835,35 @@ These extensions may:
 
 ## Subscription
 
-![subscription](docs/assets/img/subscription.png)
+A subscription is the holder of the configuration of a service instance for a project:
+- The node instance
+- The parameters values
+- The project
+
+![subscription relationship](docs/assets/img/subscription.png)
+
+
+## Multiple subscriptions sample
+
+A project can have multiple subscriptions.
+
+In the below diagram, the project `Project 123` has two subscriptions:
+- `Subscription[id=1]` linking the `Project[id=123]` to LDAP group `prj123admin` defined by `ParameterValue[id=2]` within the LDAP server `Node[id=service:id:ldap:server1]`
+- `Subscription`[id=2] linking the `Project`[id=123] to LDAP group `prj123dev` defined by `ParameterValue[id=3]` within the LDAP server `Node[id=service:id:ldap:server1]`
+- The `Node` instance `service:id:ldap:server1` owns the `ParameterValue[id=1]` definig the actual server URL.
+
+![multiple subscriptions](docs/assets/img/subscription-instance.png)
+
+
+## Multiple subscriptions, multiple nodes sample
+
+In the below diagram derived from the previous one, LDAP group `admin` has been migrated to another LDAP server.
+
+- A new `Node[id=service:id:ldap:server2]` is created for the new LDAP server, along with the new `ParameterValue[id=4]` owning the URL value `ldaps://10.0.0.13/`
+- The `Subscription[id=2]` is updated to point to this new `Node`
+
+![multiple subscriptions, multiple nodes](docs/assets/img/subscription-instance-2.png)
+
 
 # Development
 
