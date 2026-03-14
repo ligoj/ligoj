@@ -1143,6 +1143,8 @@ Then, this file must be made available to the target container.
 
 In the example below, the JKS file is filled with 2 CAs.
 
+Note: This script requires `keytool` to be available on the host.
+
 ```bash
 python plugins/ssl.py keycloak.sample.com 443 ./ligoj.jks changeit
 ```
@@ -1272,6 +1274,24 @@ sudo docker run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
 ligoj/ligoj-ui:4.0.2-SNAPSHOT-101 sh -c "apk add curl && curl http://127.0.0.1:8088/ligoj-api/manage/health"
+```
+
+```json
+{"status":"UP"}
+```
+
+### Call `ligoj-api` API directly from the host
+
+By network design, `ligoj-api` is not directly accessible from the host. The following call the container from this trusted network with an `run-as`.
+The HTTP Header `SM_UniversalID` is used to *declare* the user.
+
+The following call, get the user session details using then endpoint `/rest/session` with the user `ligoj-user`.
+
+```bash
+sudo docker run --rm -it \
+--name "ligoj-ui" \
+--network="host" \
+ligoj/ligoj-ui:4.0.2-SNAPSHOT-101 sh -c "apk add curl && curl http://127.0.0.1:8088/ligoj-api/rest/session -H 'SM_UniversalID:ligoj-user'"
 ```
 
 ```json
