@@ -1,7 +1,7 @@
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 ARG JAVA_VERSION="21-jdk"
-ARG NODE_VERSION="20-bookworm-slim"
+ARG NODE_VERSION="24-bookworm-slim"
 ARG MAVEN_VERSION="3.9.6-amazoncorretto-21-debian-bookworm"
 
 FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION} as builder_node
@@ -24,7 +24,7 @@ RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=tr
     { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn clean package -B
 
-FROM --platform=${TARGETPLATFORM} openjdk:${JAVA_VERSION}
+FROM --platform=${TARGETPLATFORM} eclipse-temurin:${JAVA_VERSION}
 ARG VERSION="4.0.1-SNAPSHOT"
 ARG ARTIFACT_ID="app-ui"
 ARG SERVER_HOME="/usr/local/ligoj"
