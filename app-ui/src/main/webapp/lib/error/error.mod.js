@@ -103,7 +103,7 @@ define([
 					current.loginMessages = messages;
 					$cascade.trigger('html:before:login', {target: $popup, content:[]});
 					$('body').first().append(Handlebars.compile(html)(messages));
-					var $popup = _('_login');
+					var $popup = $('#_login');
 					$cascade.trigger('html:after:login', {target: $popup, content:[]});
 					$popup.on('show.bs.modal', function () {
 						$('.modal').not($popup).modal('hide');

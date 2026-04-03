@@ -62,7 +62,7 @@ define([
 		ext: {},
 
 		/**
-		 * This list is filled by JavaScript modules listening for a module HTML load, and before modules's
+		 * This list is filled by JavaScript modules listening for a module HTML load, and before modules'
 		 * JavaScript
 		 * Key is the event name, such as 'html', 'fragment:before'.
 		 * See trigger and register function.
@@ -71,7 +71,7 @@ define([
 
 		/**
 		 * Unload all modules of given context from the AMD. The modules are unloaded in the reverse order of the associated loaded plugin.
-		 * @param  {context}  Context to undefine modules
+		 * @param  {object} context  Context to undefine modules
 		 */
 		undefModules: function (context) {
 			for (var index = context.$plugins.length; index-- > 0;) {
@@ -218,11 +218,12 @@ define([
 		 * Post-conditions : $self.$current.$hindex >= hindex
 		 *
 		 * @param  {object} context     The actual loaded context.
+		 * @param  {object} transaction The current transaction.
 		 * @param  {array} fragments    Fragments of current URL. A not null array.
 		 * @param  {integer} hindex     The context hierarchy index to validate. All previous contexts inside the hierarchy of given context
 		 *                              have been validated and are loaded. Work as a cursor. A positive number.
 		 * @param  {function} callback  When defined, this callback is called instead of the current function when the fragment is loaded.
-		 *                              The parameters will be in the order with theses properties :
+		 *                              The parameters will be in the order with these properties :
 		 *                              - context : May be the same if the current hierarchy index still valid against the target fragments.
 		 *                              - fragments : Same value than the original parameter.
 		 *                              - hindex : Incremented (+1) parameter value.
@@ -262,7 +263,7 @@ define([
 
 			// Check the cursor
 			if (hindex >= fragments.length) {
-				// Load is completed but we have to check the implicit fragments such as "home"
+				// Load is completed, but we have to check the implicit fragments such as "home"
 				if ($self.finalize(parent, parameters, transaction)) {
 					// There is no more implicit fragments to add, and there is no parameter
 					return;
@@ -322,23 +323,23 @@ define([
 
 		/**
 		 * For each enabled plugins, load the associated module of the given <code>id</code> and <code>home</code>. The plugin order is important
-		 * because of the UX. For sample, a "css" plugin should be loaded before an html. In addition this order ensure the reversed unload to
+		 * because of the UX. For sample, a "css" plugin should be loaded before a html. In addition, this order ensure the reversed unload to
 		 * make the HTML unloaded before the CSS and avoid a displayed dirty HTML.
 		 * @param {object} context  The parent context to use.
 		 * @param {String} home     The home URL of module to load. CSS, HTML, i18n and controller will be loaded from this base.
 		 * @param {String} id       The module identifier. Used to determine the base file name inside the home URL.
 		 * @param {object} options  Optional options in addition of the ones defined in each plugin :
-		 *                            - {function} callback      Callback when all modules are loaded, controller is initialized.
-		 *                            - {string} fragment        Related URL fragment part associated to this context.
-		 *                            - {array} plugins          Enabled plugin names for this fragment. When undefined, the default plugins are used.
-		 *                            - {integer} hindex         When defined (>=0) without "$parentElement", will be used to resolve the parent
-		 *                                                       element and will be used as "$parentElement".
-		 *                                                       May also be useful for CSS selectors to change the display of component
-		 *                                                       depending the placement inside the hierarchy.
-		 *                                                       The CSS selector (where X corresponds to hindex) used to resolve this parent
-		 *                                                       will be: #_hierarchy-X,[data-cascade-hierarchy=X],.data-cascade-hierarchy-X
-		 *                            - {object} data            Data to save in the new context inside "$data".
-		 *                            - {string} parameters      Parameters as string to pass to the controller during the initialization.
+		 *                            - {function} callback: Callback when all modules are loaded, controller is initialized.
+		 *                            - {string} fragment:   Related URL fragment part associated to this context.
+		 *                            - {array} plugins:     Enabled plugin names for this fragment. When undefined, the default plugins are used.
+		 *                            - {integer} hindex:    When defined (>=0) without "$parentElement", will be used to resolve the parent
+		 *                                                   element and will be used as "$parentElement".
+		 *                                                   May also be useful for CSS selectors to change the display of component
+		 *                                                   depending on the placement inside the hierarchy.
+		 *                                                   The CSS selector (where X corresponds to hindex) used to resolve this parent
+		 *                                                   will be: #_hierarchy-X,[data-cascade-hierarchy=X],.data-cascade-hierarchy-X
+		 *                            - {object} data:       Data to save in the new context inside "$data".
+		 *                            - {string} parameters: Parameters as string to pass to the controller during the initialization.
 		 */
 		loadFragmentInternal: function (context, transaction, home, id, options) {
 			options.home = home.replace(/\/$/, '');
@@ -415,7 +416,7 @@ define([
 		},
 
 		/**
-		 * Copy and proxy API function of this loader to the the target context.
+		 * Copy and proxy API function of this loader to the target context.
 		 * @param  {context} $context Target context.
 		 */
 		copyAPI: function ($context) {
@@ -437,7 +438,7 @@ define([
 		},
 
 		/**
-		 * Share context of "from" with the formal "to object. All injected CascadeJS properties are copied, and only these ones.
+		 * Share context of "from" with the formal "to object. All injected CascadeJS properties are copied, and only these.
 		 * @param  {object} from Source context containing injected properties.
 		 * @param  {object} to   Target context to fill.
 		 */
@@ -451,7 +452,7 @@ define([
 		/**
 		 * Load partials from a markup definition, inject the compiled template HTML inside the current element with loaded i18n file, load the CSS and initialize the controller.
 		 * 'data-ajax' attribute defines the identifier of resources to load. Is used to build the base name of HTML, JS,... and also used as an identifier built with the identifier of containing view.
-		 * 'data-plugins' attribute defines the resources to be loaded. By default the HTML template is loaded and injected inside the current element.
+		 * 'data-plugins' attribute defines the resources to be loaded. By default, the HTML template is loaded and injected inside the current element.
 		 * Partials does not interfere with the hierarchy.
 		 * @param {function} callback Optional callback when partial is loaded.
 		 */
@@ -460,7 +461,7 @@ define([
 			var context = $self.$current;
 			callback = typeof callback === 'function' ? callback : null;
 
-			// Get the resource to load : HTML, CSS, JS, i28N ? By default the HTML is loaded
+			// Get the resource to load : HTML, CSS, JS, i28N ? By default, the HTML is loaded
 			var plugins = ($target.attr('data-plugins') || 'html').split(',');
 			var id = $target.attr('data-ajax');
 			var home = context.$path;
@@ -485,7 +486,7 @@ define([
 			}
 			context.$parent = context.$parent || $target;
 
-			// Sub module management
+			// Sub-module management
 			if ($(this).attr('data-cascade') === 'true') {
 				home += '/' + id;
 			}
@@ -667,7 +668,7 @@ define([
 		closest: function (context, item) {
 			var property = context[item];
 			if (property && property instanceof jQuery) {
-				// Non empty jQuery object
+				// Non-empty jQuery object
 				return property.length ? property : $self.super(context, item);
 			}
 			return property || $self.super(context, item);
@@ -755,11 +756,15 @@ define([
 		/**
 		 * Proceed all registered callbacks for the given event.
 		 * @param {string} event    The event name to trigger.
-		 * @param {object} data 	Optional data to attach to this event. Will the the current view as default.
+		 * @param {object} data 	Optional data to attach to this event. Will the current view as default.
 		 * @param {object} context 	Optional context to attach to the event.
 		 * @return selector
 		 */
 		trigger: function (event, data, context) {
+			if (event && event.startsWith('html') && (!data || !data.target)) {
+				// Drop this event
+				return $self;
+			}
 			applicationManager.debug && traceDebug('Trigger event', event);
 			var listenedEvents = Object.keys($self.callbacks);
 			for (var index = 0; index < listenedEvents.length; index++) {
