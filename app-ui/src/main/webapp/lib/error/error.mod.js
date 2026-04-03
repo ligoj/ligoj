@@ -83,7 +83,7 @@ define([
 			return (_('_login').length !== 0 && $('button[data-target="#_login"]').length !== 0) || current.isLoginPromptBeingDisplayed;
 		},
 
-		handleRedirect(redirect) {
+		handleRedirect: function (redirect) {
 			if (redirect === 'local') {
 				current.showAuthenticationAlert();
 			} else if (redirect) {

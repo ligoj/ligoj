@@ -239,7 +239,7 @@ define(['cascade'], function ($cascade) {
 				return split[0].charAt(0) + split[split.length - 1].charAt(0);
 			}
 
-			// Fail safe rendering based on login
+			// Fail-safe rendering based on login
 			var id = user.id || user || '??';
 			if (id.length === 1) {
 				id = id + id;
@@ -405,10 +405,9 @@ define(['cascade'], function ($cascade) {
 		 * @return {string} The normalized value.
 		 */
 		normalize: function (str) {
-			var i;
 			var changes = current.defaultDiacriticsRemovalMap;
 			str = str.replace(/[-[()\]${},;_:]/g, ' ').replace(/( (de|du|des|l'|d'|le|la|les|au|aux))+ /gi, ' ').replace(/ {2,}/g, ' ');
-			for (i = 0; i < changes.length; i++) {
+			for (var i = 0; i < changes.length; i++) {
 				str = str.replace(changes[i].letters, changes[i].base);
 			}
 			return str.toLowerCase();
@@ -420,7 +419,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		getToolFromId: function (id) {
 			// Pattern is : service:{service name}:{tool name}(:whatever)
-			const data = id.split(':');
+			var data = id.split(':');
 			return data.length > 2 && data.slice(0, 3).join('-');
 		},
 
@@ -429,10 +428,9 @@ define(['cascade'], function ($cascade) {
 		 */
 		getHierarchyId: function (id) {
 			// Pattern is : service:{service name}:{tool name}(:whatever)
-			const data = id.split(':');
-			let index;
-			let result = '';
-			for (index = 2; index <= data.length; index++) {
+			var data = id.split(':');
+			var result = '';
+			for (var index = 2; index <= data.length; index++) {
 				result += ' ' + data.slice(0, index).join('-');
 			}
 			return result;
@@ -443,7 +441,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		getServiceFromId: function (id) {
 			// Pattern is : service:{service name}:{tool name}(:whatever)
-			const data = id.split(':');
+			var data = id.split(':');
 			return data.length > 1 && data.slice(0, 2).join('-');
 		},
 
@@ -471,7 +469,7 @@ define(['cascade'], function ($cascade) {
 		},
 
 		toToolBaseIcon: function (node) {
-			const fragments = node.split(':');
+			var fragments = node.split(':');
 			return 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2];
 		},
 
@@ -526,8 +524,8 @@ define(['cascade'], function ($cascade) {
 				return;
 			}
 
-			const service = current.getServiceNameFromId(node);
-			const path = 'main/service/' + service + '/';
+			var service = current.getServiceNameFromId(node);
+			var path = 'main/service/' + service + '/';
 			if (path === context.$path) {
 				// Current context is loaded
 				return callback && callback(context);
@@ -561,7 +559,7 @@ define(['cascade'], function ($cascade) {
 		 */
 		requireTool: function (context, node, callback) {
 			// First, load service dependencies
-			const transaction = context.$transaction;
+			var transaction = context.$transaction;
 
 			// Check the plugin is enabled
 			if (node && typeof securityManager.plugins !== 'undefined' && $.inArray(node.split(':').slice(0, 3).join(':'), securityManager.plugins) < 0) {
@@ -575,9 +573,9 @@ define(['cascade'], function ($cascade) {
 				}
 
 				// Then, load tool dependencies
-				const service = current.getServiceNameFromId(node);
-				const tool = current.getToolNameFromId(node);
-				const path = 'main/service/' + service + '/' + tool;
+				var service = current.getServiceNameFromId(node);
+				var tool = current.getToolNameFromId(node);
+				var path = 'main/service/' + service + '/' + tool;
 				if (path === context.$path) {
 					// Current context is loaded
 					return callback && callback(context);
