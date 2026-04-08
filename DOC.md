@@ -203,8 +203,8 @@ Many terms are used in this documentation and the definitions will make the expl
 * Tree: An abstract hierarchical path. (to-do) A bit difficult to explain for now...
 * Resource: Container, user, node or a tree.
 * Delegate: Is a read permission given to a receiver for a container.
-  * A receiver can be any resource. The delegate receiver's type is either "USER", "GROUP" or "COMPANY".
-  * There is a "write" flag allowing to write in this container.
+  * A receiver can be any resource. The delegate receiver's type is either `USER`, `GROUP` or `COMPANY`.
+  * There is a `write` flag allowing to write in this container.
   * There is also a "admin" flag allowing to the receiver to share this delegate to another visible resource.
 * Project: A team owning a set of subscriptions, see the Subscription documentation
 * Project leader: The main contact of the project, and default manager of the project
@@ -212,27 +212,25 @@ Many terms are used in this documentation and the definitions will make the expl
 
 ### Authorization
 
-An access to URLs and having the following properties:
-* method:  `GET`, `POST`, `PUT`, `DELETE` or _ `null`_ for all of them. Defined the HTTP method enabling this authorization.
-* pattern: Regular expression of the URL to match:
+Access to URLs depends on the following properties:
+* `method`:  `GET`, `POST`, `PUT`, `DELETE` or `null` for all of them.
+* `pattern`: A regular expression of the URL to match:
   * `.*`: any URL
   * `^rest/.*`: any REST URL
   * `^rest/my-resource/\d+`: access to `my-resource` by their identifier only.
-* type: 
+* `type`: 
   * `ui`: This authorization is based on the fragment part of the URL
   * `api`: The URL corresponds to a REST access. The matched URL starts with the path without the context and includes the query parameters.
 
+
 ### How it works ?
 
-The authentication is first implied. The built-in authentication feature is based on `x-api-key` and `x-api-user` headers or parameters.
-When both are provided, they are checked. When only `x-api-user` or `x-api-key` is provided, they are ignored.
-
-
-The `api` authorization is checked at server side for each REST access, and is partially used at browser side.  
 
 The `ui` authorization is based on the fragment part of the URL, so only checked by the browser. This is not really a security, and is only relevant to disable, hide or remove the UI component the principal should not see. You may notice this kind of authorization could be overridden by the user at the browser side. As base practices, this kind of authorization **must** be associated to a corresponding `api` authorization.
 
 The `ui` security can be avoided by the user when he/she requests separately each JavaScript/CSS/HTML,... static resources, but the data are guarded by the `api` authorizations.
+
+The `api` authorization is checked at server side for each REST access (see [At server side](#at-server-side), and is partially used at browser side.
 
 ### At browser side
 
@@ -250,7 +248,7 @@ When a HTML component is unauthorized, by default its removed from the DOM. It i
 
 When a HTML component contains only unauthorized components (buttons group, dropdown,...), it is also removed from the DOM. This process is recursively applied.
 
-### `data-secured-*`
+#### `data-secured-*`
 
 The `data-secured-*` attributes value corresponds to the related `api` usage the component depends on. For sample, having a chart displaying data collected from a REST URL should be displayed only when the REST service is authorized. Without this `data-secured-service`, the chart is displayed but with an empty content: still secured, but not really friendly.
 
@@ -277,7 +275,26 @@ SVG component is only displayed when `api` URL `rest/financial/y2y` is allowed w
 
 ### At server side
 
-This is the most simple control: each HTTP request to `api` endpoint is checked by this guard. The access is authorized when there is at least one couple {URL pattern, HTTP method} matching the HTTP request URL.
+Each HTTP request to `api` endpoint is checked by this guard. 
+
+The sub-steps:
+- Authentication
+- Roles attachment to the principal
+- Authorization based on resolved roles
+
+
+The authentication is first implied. The built-in authentication feature is based on `x-api-key` and `x-api-user` headers or parameters.
+- When both are provided, they are checked.
+- Otherwise, when only `x-api-user` or `x-api-key` is provided, they are ignored, and then the plugins implementing `IdentityServicePlugin` are involved
+
+
+The roles living in `S_ROLE` tables are collected from:
+1. The `S_ROLE_ASSIGNMENT` table maintaining the relationship between users and roles.
+2. The plugins contributing to `ISessionSettingsProvider`. For sample roles mapped from Ldap or external APIs. This contribution can be disabled at request level with `x-api-local-roles` header set to `true`.
+
+
+From the resolved roles, the set of permissions are checked agains the current request.
+The access is granted when there is at least one permission having its `pattern` and `method` matching the current HTTP request URL.
 
 The matched URL starts after the context path, without the leading `/`, and includes the query part. Samples:
   * `.*`: any URL, `/rest`, `/manage` (actuator), ... all endpoints
