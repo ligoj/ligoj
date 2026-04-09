@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.server.ErrorPageRegistry;
+import org.springframework.boot.web.error.ErrorPageRegistry;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 /**

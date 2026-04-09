@@ -7,7 +7,7 @@ import org.ligoj.app.resource.security.FederatedUserDetailsService;
 import org.ligoj.bootstrap.core.security.ApiTokenAuthenticationFilter;
 import org.ligoj.bootstrap.core.security.AuthorizingFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
