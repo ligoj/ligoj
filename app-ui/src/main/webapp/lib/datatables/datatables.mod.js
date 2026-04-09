@@ -25,7 +25,9 @@ define([
 		searching: false,
 		ordering: true,
 		autoWidth: false,
-		lengthChange: false,
+		lengthChange: true,
+		processing: true,
+		lengthMenu: [10, 25, 50,100],
 
 		// Call this method from 'fnRowCallback' if you redefine it.
 		super_fnRowCallback: function (nRow, rowData) {
