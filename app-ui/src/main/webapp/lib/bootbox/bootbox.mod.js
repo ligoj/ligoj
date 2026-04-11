@@ -9,7 +9,7 @@ define(['jquery', 'cascade', 'i18n!bootbox/nls/bootbox-messages', 'bootbox/bootb
 	 * Display a prompt for a delete confirmation.
 	 * @param {Function} callback confirmed callback.
 	 * @param {String} param optional deletion parameter used for template.
-	 * @param {String} param2 optional html message to add.
+	 * @param {String} param2 optional HTML message to add.
 	 */
 	module.confirmDelete = function (callback, param, param2) {
 		var message = Handlebars.compile($cascade.$messages['deleteConfirm' + (param ? 'Param' : '')])(param) + (param2 || '');
