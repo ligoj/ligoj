@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
@@ -326,6 +328,7 @@ define([
 		 * because of the UX. For sample, a "css" plugin should be loaded before a html. In addition, this order ensure the reversed unload to
 		 * make the HTML unloaded before the CSS and avoid a displayed dirty HTML.
 		 * @param {object} context  The parent context to use.
+		 * @param {object} transaction  Current transaction.
 		 * @param {String} home     The home URL of module to load. CSS, HTML, i18n and controller will be loaded from this base.
 		 * @param {String} id       The module identifier. Used to determine the base file name inside the home URL.
 		 * @param {object} options  Optional options in addition of the ones defined in each plugin :
@@ -498,7 +501,8 @@ define([
 
 		/**
 		 * Check the transaction corresponds to the given one.
-		 * @param transaction : Object or number
+		 * @param {{$transaction}|number} transaction : Object or number
+		 * @param {object} context : Current context
 		 */
 		isSameTransaction: function (transaction, context) {
 			return (transaction.$transaction === $self.transaction || transaction === $self.transaction) && (typeof (context || transaction).$unloaded === 'undefined');
@@ -540,8 +544,8 @@ define([
 
 		/**
 		 * Propagate the transaction from current context to parent context.
-		 * @param context : Context to update.
-		 * @param transaction : Transaction identifier to propagate to the hierarchy.
+		 * @param {$transaction,$parent} context : Context to update.
+		 * @param {object} transaction : Transaction identifier to propagate to the hierarchy.
 		 */
 		propagateTransaction: function (context, transaction) {
 			context.$parent && $self.propagateTransaction(context.$parent, transaction);
