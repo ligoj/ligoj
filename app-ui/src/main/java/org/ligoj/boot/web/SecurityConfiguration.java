@@ -185,6 +185,8 @@ public class SecurityConfiguration {
 		http.authorizeHttpRequests(authorize -> authorize.requestMatchers(
 				// Login
 				matcher.matcher(HttpMethod.POST, LOGIN_API),
+				matcher.matcher(HttpMethod.GET, LOGIN_BY_API_KEY_API+ ".html"),
+
 				// Public static resources
 				RegexRequestMatcher.regexMatcher(HttpMethod.GET, getWhiteListPages().pattern()),
 				RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_ASSETS.pattern()),

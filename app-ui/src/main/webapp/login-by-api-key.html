@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<meta name="description" content="">
+		<meta name="author" content="Ligoj">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="themes/bootstrap-material-design/ico/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">
+		<meta name="msapplication-config" content="themes/bootstrap-material-design/ico/browserconfig.xml">
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Ligoj API key login</title>
+
+		<link rel="apple-touch-icon" sizes="180x180" href="themes/bootstrap-material-design/ico/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="themes/bootstrap-material-design/ico/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="themes/bootstrap-material-design/ico/favicon-16x16.png">
+		<link rel="mask-icon" href="themes/bootstrap-material-design/ico/safari-pinned-tab.svg" color="#5bbad5">
+		<link rel="shortcut icon" href="themes/bootstrap-material-design/ico/favicon.ico" id="favicon" />
+		<link rel="manifest" href="themes/bootstrap-material-design/ico/site.webmanifest">
+		<link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/google-roboto.css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+        <link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/fontawesome.css?v7.0.1" />
+        <link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/brands.css?v7.0.1" />
+        <link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/regular.css?v7.0.1" />
+        <link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/solid.css?v7.0.1" />
+		<link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="themes/bootstrap-material-design/css/bootstrap-material-design-short.css" />
+		<link rel="stylesheet" type="text/css" href="main/public/login/login.css?DEV" />
+	</head>
+	<body class="login-page">
+	<style>
+		.card-signup .content {
+			padding: 17px 30px 0 10px;
+		}
+		.form-control {
+			margin-top: 16px;
+		}
+	</style>
+		<div class="page-header header-filter login" style="background-image: url('themes/bootstrap-material-design/img/bg1.jpg'); background-size: cover; background-position: top center;">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
+						<div class="card card-signup">
+							<form id="login" class="form" action="login-by-api-key" method="post" autocomplete="on" >
+								<div class="header text-center">
+									<h4 class="card-title">API Key login</h4>
+								</div>
+								<fieldset class="content" id="inputs">
+									<div class="input-group show-login show-recovery show-reset">
+										<label class="input-group-addon"  for="api-user">
+											<i class="fas fa-user"></i>
+										</label>
+										<input type="text" name="api-user" id="api-user" autocomplete="on" autofocus="autofocus" required="required" class="form-control user" placeholder="API user"/>
+									</div>
+
+									<div class="input-group show-login show-reset ">
+										<label class="input-group-addon" for="api-key">
+											<i class="fas fa-lock"></i>
+										</label>
+										<input type="password" class="form-control password" name="api-key" id="api-key" autocomplete="on" required="required" placeholder="API KEY"/>
+									</div>
+
+								</fieldset>
+								<fieldset class="footer text-center" id="actions">
+									<div class="btn-group">
+									<button type="submit" class="btn btn-primary btn-lg btn-simple" id="submit"><i class="fas fa-cog fa-spin"></i><span>Connect</span></button>
+									</div>
+								</fieldset>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<footer class="footer">
+			<div class="copyright pull-right">
+				&copy; <script>document.write(new Date().getFullYear())</script>, made with <i class="fas fa-heart heart"></i> by <a href="https://kloudy.io" class="brand" target="_blank">Kloudy</a>
+			</div>
+		</footer>
+	</body>
+</html>

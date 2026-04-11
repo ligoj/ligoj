@@ -410,7 +410,9 @@ The enabled login mode is configured only at launch time of the `ligoj-ui` conta
 
 #### `/login-by-api-key` bypass
 
-In a browser, whatever the provider selected, the URL `http://localhost:8080/ligoj/login-by-api-key?api-key=API_KEY&api-user=API_USER` bypasses the login process and directly grants a session to the user.
+In a browser, whatever the provider selected, the user can bypass the login process and directly grants a session to the user.
+- With a `GET` or `POST` to `http://localhost:8080/ligoj/login-by-api-key?api-key=API_KEY&api-user=API_USER`
+- With a `GET` from `http://localhost:8080/ligoj/login-by-api-key.html` and a form submit the above `POST`
 
 The constraints are:
 * The `API_USER` is an administrator, must have at least one API permission `.*`. This feature is only available for administrators.

@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,20 +79,19 @@ public class ApiKeyLoginFilter extends AbstractAuthenticationProcessingFilter {
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+		final var apiUser = getApiUser(request);
+		log.info("Attempting API key authentication for user: '{}' ...", apiUser);
 		if (!enableLoginByApiKey) {
 			// Feature is disabled
+			log.warn("Login by API key endpoint '{}' is disabled", request.getServletPath());
 			return null;
 		}
 
 		final var apiKey = getApiKey(request);
-		final var apiUser = getApiUser(request);
-
 		if (StringUtils.isBlank(apiKey) || StringUtils.isBlank(apiUser)) {
-			log.warn("Missing api-key or api-user in request to /login-by-api-key");
+			log.warn("Missing api-key or api-user in request to '{}'", request.getServletPath());
 			return null;
 		}
-
-		log.info("Attempting API key authentication for user: {}", apiUser);
 
 		// Call /rest/session to validate credentials (don't reuse its session)
 		try {
@@ -128,6 +128,9 @@ public class ApiKeyLoginFilter extends AbstractAuthenticationProcessingFilter {
 				// Create authentication - Spring Security will create its own session
 				return new CookieUsernamePasswordAuthenticationToken(realUserName, apiKey, List.of(new SimpleGrantedAuthority("ROLE_USER")), List.of());
 			}
+			return null;
+		} catch (HttpClientErrorException.Forbidden e) {
+			log.info("Authentication failed for user: '{}'", apiUser);
 			return null;
 		} catch (Exception e) {
 			log.error("Error validating credentials via /rest/session", e);
