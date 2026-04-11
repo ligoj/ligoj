@@ -3067,6 +3067,7 @@ fieldset[disabled] .navbar .btn-link:focus {
 .modal-content .modal-footer {
   border-top: none;
   padding: 7px;
+  padding-bottom: 24px;
 }
 .modal-content .modal-footer button {
   margin: 0;
