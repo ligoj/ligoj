@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
@@ -41,7 +43,7 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Icon of corresponding tool with optional recursive display.
-		 * @param {Object|string} node The node : tool, service ... The priority is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
+		 * @param {{id,refined}|string} node The node : tool, service ... The priority is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
 		 * @param {string} suffix For URL icon, the suffix to add to the path.
 		 * @param {boolean} dataSrc When defined, the resolved "img" source ("src") is also stored to "data-src". It permits a reset to the original src image after alter.
 		 * @param {boolean} recursive When defined, the parent icon is prepended to this icon.
@@ -63,7 +65,7 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Icon of corresponding tool.
-		 * @param {Object|string} node The node : tool, service ... The priority is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
+		 * @param {{uiClasses}|string} node The node : tool, service ... The priority is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
 		 * @param {string} suffix For URL icon, the suffix to add to the path.
 		 * @param {boolean} dataSrc When defined, the resolved "img" source ("src") is also stored to "data-src". It permits a reset to the original src image after alter.
 		 * @param {array} fragments Identifier fragments built from the node.
@@ -99,9 +101,9 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Return the name of the given resource from it's localized name or technical name that should be never null.
 		 * Try the localized value, then the 'name' attribute, then the 'name' attribute, then the 'id' attribute, then the resource itself.
-		 * @param {Object|string} resource The resource object or plain string value.
-		 * @param {type} The resource type : NODE, USER,... or undefined
-		 * @return {string} The resource human readable name built from the available resource data. 
+		 * @param {{name?, label?, id?}|string} resource The resource object or plain string value.
+		 * @param {string} type The resource type : NODE, USER,... or undefined
+		 * @return {string} The resource human-readable name built from the available resource data.
 		 */
 		getResourceName: function (resource, type) {
 			return type === 'NODE' ? current.getNodeName(resource) : resource.name || resource.label || resource.id || resource;
@@ -111,7 +113,7 @@ define(['cascade'], function ($cascade) {
 		 * Return the name of the given node from it's localized name or technical name that should be never null.
 		 * Try the localized name of its identifier (id'), then the localized name of the node itself when 'string', then the 'name' attribute, then the 'name' attribute, then the 'id' attribute, then the node itself.
 		 * @param {Object|string} node The node object or plain string value.
-		 * @return {string} The node human readable name built from the available resource data. 
+		 * @return {string} The node human-readable name built from the available resource data.
 		 */
 		getNodeName: function (node) {
 			return (node.id && current.$messages[node.id]) || ((typeof node) === 'string' && current.$messages[node]) || node.name || node.label || node.id || node;
@@ -146,7 +148,7 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Return a link targeting the project page. 
+		 * Return a link targeting the project page.
 		 * @param {Object|string|number} project The project data : id, name,... The identifier is required, either in 'id' attribute, either as a string, either as a number value.
 		 * @return {string} The project link markup.
 		 */
@@ -156,9 +158,9 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Return a link targeting the user page. Display the full name in the link.
-		 * When there are not enough data to build it, no first name or no last name, then the first later of the login and the the remaining are used to build the full name.
-		 * For sample 'aeinstein' will be display as fail-safe value : 'A. Einstein'.
-		 * @param {Object|string} user The user data : login, full name, etc... The identifier is required, either in 'id' attribute, either as a string.
+		 * When there are not enough data to build it, no first name or no last name, then the first later of the login and the remaining are used to build the full name.
+		 * For sample 'jdoe' will be display as fail-safe value : 'J. Doe'.
+		 * @param {{id,firstName,lastName,company,locked,lockedBy,isolated,previousCompany}|string} user The user data : login, full name, etc... The identifier is required, either in 'id' attribute, either as a string.
 		 * @param {string} text The optional text to display. When empty, full name is used.
 		 * @return {string} The user link markup.
 		 */
@@ -187,8 +189,8 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Return a link targeting to the user page. Display only user name in the link.
-		 * @param {Object|string} user The user data : login, fullname, etc... The identifier is required, either in 'id' attribute, either as a string.
+		 * Return a link targeting to the user page. Display only username in the link.
+		 * @param {{id}|string} user The user data : login, fullName, etc... The identifier is required, either in 'id' attribute, either as a string.
 		 * @return {string} The user link markup with user identifier as text.
 		 */
 		getUserLoginLink: function (user) {
@@ -197,9 +199,9 @@ define(['cascade'], function ($cascade) {
 
 		/**
 		 * Return the full name of given user. May be built from the provided information.
-		 * When there are not enough data to build it, no first name or no last name, then the first later of the login and the the remaining are used to build the full name.
-		 * @param {Object|string} user The user data : login, fullname, etc... The identifier is required, either in 'id' attribute, either as a string.
-		 * @return {string} The full name of given user. 
+		 * When there are not enough data to build it, no first name or no last name, then the first later of the login and the remaining are used to build the full name.
+		 * @param {{id,fullName,firstName,lastName}|string} user The user data : login, fullName, etc... The identifier is required, either in 'id' attribute, either as a string.
+		 * @return {string} The full name of given user.
 		 */
 		getFullName: function (user) {
 			if (user.fullName) {
@@ -215,14 +217,14 @@ define(['cascade'], function ($cascade) {
 				return '<italic>' + user.id.substring(0, 1).capitalize() + '</italic>. ' + user.lastName;
 			}
 
-			// Fail safe rendering based on login
+			// Failsafe rendering based on login
 			var id = user.id || user || '??';
 			return '<italic>' + id.substring(0, 1).capitalize() + '</italic>. <italic>' + id.substring(1).capitalize() + '</italic>';
 		},
 
 		/**
 		 * Return the relevant 2 letters identifying the given user.
-		 * @param {Object|string} user The user data : login, fullname, etc... The identifier is required, either in 'id' attribute, either as a string.
+		 * @param {{id,fullName,firstName,lastName}|string} user The user data : login, fullName, etc... The identifier is required, either in 'id' attribute, either as a string.
 		 * @return {string} The relevant 2 letters identifying the given user.
 		 */
 		toUser2Letters: function (user) {
@@ -488,6 +490,7 @@ define(['cascade'], function ($cascade) {
 		 * Return the first level of refinement, just after root. This corresponds to the first implementation
 		 * of a service. The result will be
 		 * cached.
+         * @param {{tool, refined}} node
 		 */
 		getTool: function (node) {
 			if (node.tool) {
@@ -636,7 +639,7 @@ define(['cascade'], function ($cascade) {
 		},
 
 		/**
-		 * Escape HTML content. From "<b>Value'&amp;"</b>" gives "&lt;b&gt;Value&#39;&amp;amp;&quot;&gt;/b&gt;"
+		 * Escape HTML content. From "<b>Value''&amp;"</b>" gives "&lt;b&gt;Value&#39;#39;&amp;amp;&quot;&gt;/b&gt;"
 		 * @param {string} str  Markup string to protect.
 		 * @return {string}     Protected string.
 		 */
@@ -661,6 +664,30 @@ define(['cascade'], function ($cascade) {
 				.replace(/&lt;/g, '<')
 				.replace(/&gt;/g, '>')
 				.replace(/&amp;/g, '&');
+		},
+
+		/**
+		 * Delete the selected entry after popup confirmation, or directly from its identifier.
+		 */
+		deleteEntry: function (table, url, id, text) {
+			// Delete without confirmation
+			$.ajax({
+				type: 'DELETE',
+				url: REST_PATH + url + id,
+				success: function () {
+					notifyManager.notify(Handlebars.compile(current.$messages.deleted)(text + '(' + id + ')'));
+					table?.api().ajax.reload();
+				}
+			});
+		},
+
+        confirmDeleteTableEntry: function ($this, table, url, id, displayFunction) {
+            // Requires a confirmation
+            const entity = table?.fnGetData($this.closest('tr')[0]);
+            const text = typeof displayFunction === 'function' ? displayFunction(entity) : (entity.name + '/' + entity.type);
+            bootbox.confirmDelete(function (confirmed) {
+                confirmed && current.deleteEntry(table, url, entity.id, text);
+            }, text);
 		}
 	};
 	return current;
