@@ -472,7 +472,7 @@ define([
 			if (id.charAt(0) === '/') {
 				// Absolute path for home
 				var index = id.lastIndexOf('/');
-				home = id.substring(1, index - 1);
+				home = id.substring(1, index);
 				id = id.substring(index + 1);
 				while (context && context.$path !== home) {
 					context = context.$parent;
