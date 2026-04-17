@@ -499,45 +499,54 @@ Most of the entities are audited. The audit data has only the following fields:
 
 These fields are automatically set by the transaction manager in successful API calls.
 
-## Convention and configuration
+## Configuration values
+
+Values resolution priorities
+
+| Priority | Source                               | Note                                                                                                |
+| -------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| 1        | Spring Command-line arguments        | `--ligoj.property=value` when running the application                                               |
+| 2        | Java System properties               | `-Dligoj.property=value`                                                                            |
+| 3        | OS environment variables             | `LIGOJ_PROPERTY=value`                                                                              |
+| 4        | Application properties or YAML files | `application.properties` or `application.yml`                                                       |
+| 5        | Profile-specific configuration files | `application-{profile}.properties` or `application-{profile}.yml`                                   |
+| 6        | External configuration files         | `application.properties` or `application.yml` in a custom location                                  |
+| 7        | JNDI attributes                      |                                                                                                     |
+| 8        | Explicit failover value              | Only SPEL, `@Value("${ligoj.property:default}")`                                                    |
+| 9        | Database                             | Only with `configuration.get("ligoj.property")`. Not supported by built-in Spring property resolver |
 
 ### Code summary
+
+Using `ConfigurationResource`, see `ConfigurationResource.java`
+
 ```java
 @Autowired
 private ConfigurationResource configuration;
 
-configuration.get("my-key");
+configuration.get("my-key", "default-value"); // Default value as string
+configuration.get("my-key", 42);              // Default value as number
+configuration.get("my-key");                  // Default is null
+configuration.put("my-key");                  // Save a new value in database only
+configuration.put("my-key", true);            // Save a new value in System too, but still lost after restart
+configuration.put("my-key", true, true);      // Encrypt the value
 ```
-See `ConfigurationResource.java`
 
-### Description
+`put` operations update the value in database, however the value has the lowest priority than the other sources.
+The third parameter `system` set 
 
-Configuration can be retrieved from: 
-* From built-in Spring variable resolution: static, and resolved only when the context is started
+Using built-in Spring variable resolution: static, and resolved only when the context is started
 ```java
 @Value("$(my-key:default-value")
 private String value;
 ```
-* From `ConfigurationResource`, a persistent database backed and cached configuration
-```java
-@Autowired
-private ConfigurationResource configuration;
 
-configuration.get("my-key", "default-value");
-configuration.get("my-key", 42);
-configuration.get("my-key");
-```
 
-### Failover
-
-Built-in Spring property resolver use the `System.getProperty` then `application.properties`, then the default value.
-
-For `ConfigurationResource`, the sequence is the same with database lookup first.
 
 ### Encryption
 
 Both solutions are backed by [Jasypt](http://www.jasypt.org/) to protect secret from configuration files and stored sensitive data in database. 
 It is possible to benefit the same security level for other stored data:
+
 ```java
 @Autowired
 private CryptoHelper cryptoHelper;
@@ -551,6 +560,7 @@ cryptoHelper.decrypt(value);
 ## Pagination
 
 ### Code summary
+
 ```java
 @Autowired
 private PaginationJson paging;
