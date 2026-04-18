@@ -241,7 +241,7 @@
                 </executions>
                 <configuration>
                     <mainClass>org.ligoj.boot.api.Application</mainClass>
-                    <excludeGroupIds>org.projectlombok,org.eclipse.jetty.websocket</excludeGroupIds>
+                    <excludeGroupIds>org.projectlombok</excludeGroupIds>
                 </configuration>
             </plugin>
         </plugins>
