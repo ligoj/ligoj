@@ -532,7 +532,7 @@ configuration.put("my-key", true, true);      // Encrypt the value
 ```
 
 `put` operations update the value in database, however the value has the lowest priority than the other sources.
-The third parameter `system` set 
+The third parameter `system` set the value also in System properties. It overrides temporarily at the higheest priority.
 
 Using built-in Spring variable resolution: static, and resolved only when the context is started
 ```java
