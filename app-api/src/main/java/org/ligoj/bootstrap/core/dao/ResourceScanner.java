@@ -21,10 +21,11 @@ import java.util.LinkedHashSet;
 
 /**
  * Special scanner handling the VFS protocol.
- *
+ * @deprecated Replace with Bootstrap implementation
  * @author Fabrice Daugan
  */
 @Slf4j
+@Deprecated
 public class ResourceScanner extends StandardScanner {
 
 	/**
@@ -81,13 +82,13 @@ public class ResourceScanner extends StandardScanner {
 		final URI ormJarUrl;
 		final var urlStr = ormUrl.toString();
 		if ("jar".equals(ormUrl.getProtocol())) {
-			ormJarUrl = URI.create(StringUtils.substringBeforeLast(urlStr.replace("jar:",""), "!"));
+			log.debug("Hibernate ORM, remove nested part from path {}", ormUrl);
+			ormJarUrl = URI.create(StringUtils.substringBeforeLast(urlStr.replace("jar:", ""), "!"));
 		} else {
 			// Remove the trailing path
 			log.debug("Hibernate ORM, remove trailing /orm.xml from {}", ormUrl);
 			ormJarUrl = URI.create(urlStr.substring(0, urlStr.length() - META_INF_ORM_XML.length() - 1));
 		}
-		log.info("Resolved JAR URL: '{}' from ORM URL '{}'({})", ormJarUrl, ormUrl,ormUrl.getProtocol());
 		return ormJarUrl.toURL();
 	}
 
