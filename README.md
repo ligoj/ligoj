@@ -61,7 +61,7 @@ cd ligoj
 mkdir -p "$(pwd)/.ligoj"
 echo "LIGOJ_HOME=$(pwd)/.ligoj
 PODMAN_USERNS=keep-id" > .env
-docker-compose -p ligoj up -d --build
+podman compose -f compose.yml -f compose-override.yml -p ligoj up -d --build
 open http://localhost:8080/ligoj
 ```
 
