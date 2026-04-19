@@ -8,7 +8,7 @@ export default {
   'nav.companies': 'Entités',
   'nav.delegates': 'Délégués',
   'nav.projects': 'Projets',
-  'nav.system': 'Système',
+  'nav.system': 'Administration',
   'nav.roles': 'Rôles',
   'nav.plugins': 'Plugins',
   'nav.nodes': 'Nœuds',

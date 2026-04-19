@@ -8,7 +8,7 @@ export default {
   'nav.companies': 'Companies',
   'nav.delegates': 'Delegates',
   'nav.projects': 'Projects',
-  'nav.system': 'System',
+  'nav.system': 'Administration',
   'nav.roles': 'Roles',
   'nav.plugins': 'Plugins',
   'nav.nodes': 'Nodes',
@@ -149,7 +149,7 @@ export default {
   'delegate.empty': 'No delegates configured.',
 
   // Administration
-  'admin.title': 'System Administration',
+  'admin.title': 'Administration',
   'admin.health': 'System Status',
   'admin.version': 'API Version',
   'admin.pluginCount': 'Installed Plugins',
