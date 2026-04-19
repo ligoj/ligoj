@@ -30,6 +30,8 @@ describe('Plugin Registry', () => {
       component: {},
       routes: [{ path: '/test' }],
       install: definition.install,
+      feature: null,
+      service: null,
       meta: { version: '1.0' }
     })
   })
