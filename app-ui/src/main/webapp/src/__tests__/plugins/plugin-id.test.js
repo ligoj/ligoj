@@ -28,6 +28,14 @@ describe('plugin-id contract', () => {
     expect(() => pluginIdDef.feature('unknown-action')).toThrow(/no feature "unknown-action"/)
   })
 
+  it('install() registers the plugin routes on the given router', () => {
+    const addRoute = vi.fn()
+    pluginIdDef.install({ pluginId: 'id', router: { addRoute } })
+    expect(addRoute).toHaveBeenCalled()
+    const registered = addRoute.mock.calls.map(([route]) => route.path)
+    expect(registered).toContain('/id/container-scope')
+  })
+
   it('feature("acceptAgreement") POSTs and flips the user setting', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true })
     const settings = {}

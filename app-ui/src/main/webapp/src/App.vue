@@ -14,14 +14,10 @@
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.js'
 import { loadAllPlugins } from '@/plugins/loader.js'
-import { registerBuiltinPlugins } from '@/plugins/index.js'
 import AppLayout from '@/layouts/AppLayout.vue'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
 
 const auth = useAuthStore()
-
-// Register built-in plugin components before any dynamic loading
-registerBuiltinPlugins()
 
 onMounted(async () => {
   const ok = await auth.fetchSession()
@@ -29,10 +25,9 @@ onMounted(async () => {
     window.location.href = 'v-login.html'
     return
   }
-  // Load frontend plugins (silently ignores backend-only plugins without Vue UI)
-  const pluginIds = auth.appSettings?.plugins || []
-  if (pluginIds.length) {
-    loadAllPlugins(pluginIds)
-  }
+  // Optional backend-listed plugins load lazily; required plugins are
+  // pre-loaded in main.js so their routes exist before navigation.
+  const optional = (auth.appSettings?.plugins || []).filter(id => id !== 'id')
+  if (optional.length) loadAllPlugins(optional)
 })
 </script>

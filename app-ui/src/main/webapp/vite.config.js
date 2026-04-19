@@ -8,6 +8,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
+      // Resolve the shared-surface module locally during dev/test. At runtime
+      // the browser resolves `@ligoj/host` via the import map in v-index.html.
+      '@ligoj/host': resolve(__dirname, 'src/host.js'),
     },
   },
   test: {
@@ -27,6 +30,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'v-index.html'),
         login: resolve(__dirname, 'v-login.html'),
+        host: resolve(__dirname, 'src/host.js'),
       },
       external: [/^\/main\//, /^\/ligoj\/main\//],
       output: {
@@ -43,6 +47,13 @@ export default defineConfig({
           const stable = ['vue', 'router', 'pinia', 'vuetify']
           return stable.includes(chunk.name)
             ? 'assets/[name].js'
+            : 'assets/[name]-[hash].js'
+        },
+        entryFileNames: (chunk) => {
+          // `host` is the shared-surface entry consumed by runtime plugins —
+          // must resolve to a stable URL so the import map doesn't drift.
+          return chunk.name === 'host'
+            ? 'assets/host.js'
             : 'assets/[name]-[hash].js'
         },
       },

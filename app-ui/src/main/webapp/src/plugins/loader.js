@@ -1,6 +1,7 @@
 import registry from './registry.js'
 import { loadNlsMessages } from './nls-adapter.js'
 import { useI18nStore } from '@/stores/i18n.js'
+import router from '@/router/index.js'
 
 const loaded = new Set()
 
@@ -28,7 +29,7 @@ export async function loadPlugin(pluginId) {
     registry.register(pluginId, definition)
 
     if (definition.install) {
-      await definition.install({ pluginId })
+      await definition.install({ pluginId, router })
     }
 
     const i18nStore = useI18nStore()

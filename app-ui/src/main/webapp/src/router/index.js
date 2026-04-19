@@ -12,7 +12,6 @@ import UserEditView from '@/views/UserEditView.vue'
 import GroupEditView from '@/views/GroupEditView.vue'
 import CompanyEditView from '@/views/CompanyEditView.vue'
 import DelegateEditView from '@/views/DelegateEditView.vue'
-import ContainerScopeView from '@/views/ContainerScopeView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import AboutView from '@/views/AboutView.vue'
 import AdminView from '@/views/AdminView.vue'
@@ -34,7 +33,7 @@ const routes = [
   { path: '/id/delegate', name: 'id-delegate', component: DelegateListView },
   { path: '/id/delegate/new', name: 'id-delegate-new', component: DelegateEditView },
   { path: '/id/delegate/:id', name: 'id-delegate-edit', component: DelegateEditView },
-  { path: '/id/container-scope', name: 'id-container-scope', component: ContainerScopeView },
+  // /id/container-scope is registered by plugin-id at runtime (see ui/src/index.js).
   { path: '/home/project', name: 'project', component: ProjectListView },
   { path: '/home/project/new', name: 'project-new', component: ProjectEditView },
   { path: '/home/project/:id', name: 'project-detail', component: ProjectDetailView },
