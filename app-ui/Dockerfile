@@ -1,19 +1,21 @@
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 ARG JAVA_VERSION="21-jdk"
+ARG JAVA_IMAGE="eclipse-temurin"
 ARG NODE_VERSION="24-bookworm-slim"
 ARG MAVEN_VERSION="3.9.6-amazoncorretto-21-debian-bookworm"
 
 FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION} as builder_node
+WORKDIR /build/src/main/webapp
+ADD src/main/webapp/package.json src/main/webapp/package-lock.json ./
+RUN npm ci
+ADD src/main/webapp .
+RUN npm run build -- --outDir ./vue-dist --emptyOutDir && \
+    cp vue-dist/v-index.html . && \
+    cp vue-dist/v-login.html . && \
+    cp -r vue-dist/assets/ . && \
+    rm -rf vue-dist node_modules
 WORKDIR /build/
-ADD src/main/build src/main/build
-ADD src/main/webapp src/main/webapp
-COPY Dockerfile ./*prepare-build.sh ./
-RUN touch ~/.bash_profile && \
-    { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
-    npm install -g clean-css-cli@5.6.3 && \
-    mkdir -p src/main/build && mkdir -p src/main/webapp && \
-    chmod +x src/main/build/minify.sh && src/main/build/minify.sh
 
 FROM --platform=${BUILDPLATFORM} maven:${MAVEN_VERSION} as builder
 WORKDIR /build/
@@ -24,7 +26,7 @@ RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=tr
     { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
     mvn clean package -B
 
-FROM --platform=${TARGETPLATFORM} eclipse-temurin:${JAVA_VERSION}
+FROM --platform=${TARGETPLATFORM} ${JAVA_IMAGE}:${JAVA_VERSION}
 ARG VERSION="4.0.1-SNAPSHOT"
 ARG ARTIFACT_ID="app-ui"
 ARG SERVER_HOME="/usr/local/ligoj"

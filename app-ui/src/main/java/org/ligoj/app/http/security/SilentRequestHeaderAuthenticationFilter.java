@@ -26,7 +26,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	/**
 	 * Static pages
 	 */
-	public static final Pattern WHITE_LIST_PAGES_LOGIN = Pattern.compile("/(\\d{3}|logout|login)(-prod)?\\.html(\\?.*)?");
+	public static final Pattern WHITE_LIST_PAGES_LOGIN = Pattern.compile("/(\\d{3}|logout|login|v-login)(-prod)?\\.html(\\?.*)?");
 
 	/**
 	 * Static pages
@@ -36,7 +36,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	/**
 	 * Static assets
 	 */
-	public static final Pattern WHITE_LIST_ASSETS = Pattern.compile("/(favicon.ico|logout|(themes|lib|dist|main/public)/.*)");
+	public static final Pattern WHITE_LIST_ASSETS = Pattern.compile("/(favicon.ico|logout|(themes|lib|dist|main/public|assets)/.*)");
 	/**
 	 * Only there because of visibility of "principalRequestHeader" of {@link RequestHeaderAuthenticationFilter}
 	 */

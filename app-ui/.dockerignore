@@ -1,1 +1,5 @@
 *.launch
+src/main/webapp/node_modules
+src/main/webapp/e2e
+src/main/webapp/test-results
+src/main/webapp/playwright-report

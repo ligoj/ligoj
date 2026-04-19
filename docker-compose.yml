@@ -1,0 +1,51 @@
+services:
+  ligoj-api:
+    image: ligoj/ligoj-api:4.0.1
+    hostname: ligoj-api
+    ports:
+      - "8081:8081"
+    environment:
+      - LIGOJ_HOME=/home/ligoj
+      - CUSTOM_OPTS=-Djdbc.host=ligoj-db
+      - JAVA_OPTIONS=-Duser.timezone=UTC --enable-preview --add-modules java.se --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.perf=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.util.regex=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED --add-opens java.xml/javax.xml.catalog=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens jdk.management.jfr/jdk.management.jfr=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED
+    depends_on:
+      ligoj-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/ligoj-api/manage/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 20
+      start_period: 60s
+
+  ligoj-db:
+    image: mysql:8.0
+    hostname: ligoj-db
+    environment:
+      - MYSQL_DATABASE=ligoj
+      - MYSQL_USER=ligoj
+      - MYSQL_PASSWORD=ligoj
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - ligoj-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uligoj", "-pligoj"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
+  ligoj-ui:
+    build:
+      context: ./app-ui
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ENDPOINT=http://ligoj-api:8081/ligoj-api
+    depends_on:
+      ligoj-api:
+        condition: service_healthy
+
+volumes:
+  ligoj-db-data:

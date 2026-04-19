@@ -108,7 +108,7 @@ public class SecurityConfiguration {
 	@Bean
 	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint(AbstractAuthenticationProvider provider) {
 		final var ep = new RedirectAuthenticationEntryPoint(loginUrl);
-		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, "/index-prod.html", "/login.html", "/login-prd.html", "/v-index.html"));
+		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, "/index-prod.html", "/login.html", "/login-prd.html", "/v-index.html", "/v-login.html"));
 		ep.setRedirectStrategy(getRestFailureStrategy());
 		ep.setForceRedirectUrl(provider.isForceRedirect());
 		return ep;
@@ -184,8 +184,7 @@ public class SecurityConfiguration {
 		final var matcher = PathPatternRequestMatcher.withDefaults();
 		http.authorizeHttpRequests(authorize -> authorize.requestMatchers(
 				// Login
-				matcher.matcher(HttpMethod.POST, LOGIN_API),
-				matcher.matcher(HttpMethod.GET, LOGIN_BY_API_KEY_API+ ".html"),
+				matcher.matcher(HttpMethod.POST, LOGIN_API), matcher.matcher(HttpMethod.GET, LOGIN_BY_API_KEY_API + ".html"),
 
 				// Public static resources
 				RegexRequestMatcher.regexMatcher(HttpMethod.GET, getWhiteListPages().pattern()),

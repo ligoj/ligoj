@@ -1,24 +1,14 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
-import vuetify from './plugins/vuetify'
-
-import PluginLoader from './plugins/PluginLoader'
-
-// Register plugins (could be loaded from a config file)
-// For local development, we point to the file path. In production, this might be a URL.
-// PluginLoader.register('id', '../../../../../ligoj-plugins/plugin-id/src/main/resources/META-INF/resources/id/IdPlugin.vue')
-
-// Sample: Register a plugin by URL (e.g. for production or remote loading)
-// The URL should point to a JS module that default exports a Vue component or a configuration object.
-PluginLoader.registerUrl('id', 'main/id/IdPlugin.vue')
+import vuetify from './plugins/vuetify.js'
+import router from './router/index.js'
 
 const app = createApp(App)
+const pinia = createPinia()
 
-app.use(createPinia())
+app.use(pinia)
 app.use(vuetify)
-
-// Expose PluginLoader to global properties or provide it
-app.config.globalProperties.$pluginLoader = PluginLoader
+app.use(router)
 
 app.mount('#app')
