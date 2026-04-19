@@ -33,7 +33,7 @@ async function loadRequiredPlugins() {
   if (import.meta.env.DEV) {
     const { default: registry } = await import('./plugins/registry.js')
     const devSources = {
-      id: () => import('../../../../../ligoj-plugins/plugin-id/ui/src/index.js'),
+      id: () => import('../../../../../../ligoj-plugins/plugin-id/ui/src/index.js'),
     }
     for (const id of REQUIRED_PLUGINS) {
       const loader = devSources[id]
