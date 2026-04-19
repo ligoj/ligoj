@@ -4,17 +4,18 @@ export function useApi() {
   const errorStore = useErrorStore()
 
   async function request(url, options = {}) {
+    const { silent, ...rest } = options
     const opts = {
       credentials: 'include',
-      ...options,
+      ...rest,
       headers: {
-        ...(options.body && typeof options.body === 'string' ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
+        ...(rest.body && typeof rest.body === 'string' ? { 'Content-Type': 'application/json' } : {}),
+        ...rest.headers,
       },
     }
 
     const response = await fetch(url, opts)
-    await errorStore.handleResponse(response)
+    if (!silent) await errorStore.handleResponse(response)
     if (!response.ok) return null
 
     const ct = response.headers.get('content-type')
@@ -23,30 +24,33 @@ export function useApi() {
     return response.text()
   }
 
-  function get(url) {
-    return request(url)
+  function get(url, options) {
+    return request(url, options)
   }
 
-  function post(url, data) {
+  function post(url, data, options) {
     return request(url, {
+      ...options,
       method: 'POST',
       body: data != null ? JSON.stringify(data) : undefined,
     })
   }
 
-  function put(url, data) {
+  function put(url, data, options) {
     return request(url, {
+      ...options,
       method: 'PUT',
       body: data != null ? JSON.stringify(data) : undefined,
     })
   }
 
-  function del(url) {
-    return request(url, { method: 'DELETE' })
+  function del(url, options) {
+    return request(url, { ...options, method: 'DELETE' })
   }
 
-  function upload(url, formData) {
+  function upload(url, formData, options) {
     return request(url, {
+      ...options,
       method: 'POST',
       body: formData,
     })

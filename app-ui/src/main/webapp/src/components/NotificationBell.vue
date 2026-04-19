@@ -77,23 +77,28 @@ function formatTime(ts) {
   return t('notification.daysAgo', { n: Math.floor(diff / 86400000) })
 }
 
+// The `rest/message` endpoint is optional — some backends don't expose it.
+// Silence its errors so a 404 falls through to demo mode instead of raising
+// a user-visible toast on every poll.
+const SILENT = { silent: true }
+
 function markRead(n) {
   n.read = true
   if (!demoMode.value) {
-    api.put(`rest/message/${n.id}/read`)
+    api.put(`rest/message/${n.id}/read`, undefined, SILENT)
   }
 }
 
 function markAllRead() {
   notifications.value.forEach(n => { n.read = true })
   if (!demoMode.value) {
-    api.put('rest/message/read')
+    api.put('rest/message/read', undefined, SILENT)
   }
 }
 
 async function loadNotifications() {
   // Try API first
-  const data = await api.get('rest/message?rows=20&page=1&sidx=id&sord=desc')
+  const data = await api.get('rest/message?rows=20&page=1&sidx=id&sord=desc', SILENT)
   if (data && !data.code) {
     demoMode.value = false
     notifications.value = (data.data || []).map(m => ({
