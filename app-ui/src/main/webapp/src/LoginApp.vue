@@ -1,142 +1,116 @@
 <template>
-  <v-app>
-    <v-main class="login-bg d-flex align-center justify-center">
-      <v-card width="420" elevation="8" rounded="lg" class="pa-4">
-        <v-card-text class="text-center pb-0">
-          <img src="@/assets/ligoj.svg" alt="Ligoj" style="width: 48px; height: 48px" />
-          <h1 class="text-h5 font-weight-bold mt-2 mb-1" style="color: #1a237e">Ligoj</h1>
-          <p class="text-subtitle-2 text-medium-emphasis mb-2">{{ msg['title-' + mode] }}</p>
-        </v-card-text>
+  <main class="login-bg">
+    <section class="card">
+      <header class="card-head">
+        <img src="@/assets/ligoj.svg" alt="Ligoj" class="logo" />
+        <h1>Ligoj</h1>
+        <p class="subtitle">{{ msg['title-' + mode] }}</p>
+      </header>
 
-        <v-card-text>
-          <v-alert v-if="infoMsg" type="info" variant="tonal" density="compact" class="mb-4">
-            {{ infoMsg }}
-          </v-alert>
-          <v-alert v-if="successMsg" type="success" variant="tonal" density="compact" class="mb-4">
-            {{ successMsg }}
-          </v-alert>
-          <v-alert v-if="errorMsg" type="error" variant="tonal" density="compact" class="mb-4" data-test="error-alert">
-            {{ errorMsg }}
-          </v-alert>
+      <div class="card-body">
+        <p v-if="infoMsg" class="alert alert-info">{{ infoMsg }}</p>
+        <p v-if="successMsg" class="alert alert-success">{{ successMsg }}</p>
+        <p v-if="errorMsg" class="alert alert-error" data-test="error-alert">{{ errorMsg }}</p>
 
-          <v-form ref="formRef" @submit.prevent="submit">
-            <!-- Username -->
-            <v-text-field
+        <form ref="formRef" @submit.prevent="submit" novalidate>
+          <label class="field">
+            <span class="label">{{ msg.username }}</span>
+            <input
               v-model="username"
-              :label="msg.username"
-              prepend-inner-icon="mdi-account"
-              variant="outlined"
-              :autofocus="mode !== 'reset'"
+              type="text"
               autocomplete="username"
+              :autofocus="mode !== 'reset'"
               :disabled="mode === 'reset'"
               :readonly="mode === 'reset'"
-              :rules="mode !== 'reset' ? [rules.required] : []"
-              class="mb-2"
               data-test="username"
+              @input="clearFieldError('username')"
             />
+            <span v-if="fieldErrors.username" class="field-error">{{ fieldErrors.username }}</span>
+          </label>
 
-            <!-- Password (login + reset) -->
-            <v-text-field
-              v-if="mode !== 'recovery'"
-              v-model="password"
-              :label="mode === 'reset' ? msg.newPassword : msg.password"
-              prepend-inner-icon="mdi-lock"
-              :type="showPwd ? 'text' : 'password'"
-              :append-inner-icon="showPwd ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showPwd = !showPwd"
-              variant="outlined"
-              autocomplete="current-password"
-              :rules="[rules.required, ...(mode === 'reset' ? [rules.passwordStrength] : [])]"
-              :hint="mode === 'reset' ? msg.helpPassword : ''"
-              persistent-hint
-              class="mb-2"
-              data-test="password"
-            />
-
-            <!-- Confirm Password (reset only) -->
-            <v-text-field
-              v-if="mode === 'reset'"
-              v-model="passwordConfirm"
-              :label="msg.passwordConfirm"
-              prepend-inner-icon="mdi-lock-check"
-              :type="showPwd ? 'text' : 'password'"
-              variant="outlined"
-              autocomplete="new-password"
-              :rules="[rules.required, rules.passwordMatch]"
-              class="mb-2"
-            />
-
-            <!-- Email (recovery only) -->
-            <v-text-field
-              v-if="mode === 'recovery'"
-              v-model="mail"
-              :label="msg.mail"
-              prepend-inner-icon="mdi-email"
-              type="email"
-              variant="outlined"
-              :rules="[rules.required]"
-              class="mb-2"
-            />
-
-            <!-- CAPTCHA (reset + recovery) -->
-            <div v-if="mode !== 'login'" class="mb-4">
-              <div class="d-flex align-center mb-2">
-                <img
-                  :src="captchaSrc"
-                  alt="CAPTCHA"
-                  class="captcha-img rounded"
-                  @click="refreshCaptcha"
-                  style="cursor: pointer; height: 40px"
-                />
-                <v-btn icon size="small" variant="text" class="ml-2" @click="refreshCaptcha">
-                  <v-icon>mdi-refresh</v-icon>
-                </v-btn>
-              </div>
-              <v-text-field
-                v-model="captcha"
-                :label="msg.captcha"
-                prepend-inner-icon="mdi-shield-key"
-                variant="outlined"
-                :rules="[rules.required]"
-                :hint="msg.helpCaptcha"
-                persistent-hint
-                density="compact"
+          <label v-if="mode !== 'recovery'" class="field">
+            <span class="label">{{ mode === 'reset' ? msg.newPassword : msg.password }}</span>
+            <span class="input-wrap">
+              <input
+                v-model="password"
+                :type="showPwd ? 'text' : 'password'"
+                autocomplete="current-password"
+                data-test="password"
+                @input="clearFieldError('password')"
               />
+              <button type="button" class="toggle" @click="showPwd = !showPwd" :aria-label="showPwd ? 'Hide password' : 'Show password'">
+                {{ showPwd ? '\u{1F648}' : '\u{1F441}' }}
+              </button>
+            </span>
+            <span v-if="mode === 'reset'" class="field-hint">{{ msg.helpPassword }}</span>
+            <span v-if="fieldErrors.password" class="field-error">{{ fieldErrors.password }}</span>
+          </label>
+
+          <label v-if="mode === 'reset'" class="field">
+            <span class="label">{{ msg.passwordConfirm }}</span>
+            <input
+              v-model="passwordConfirm"
+              :type="showPwd ? 'text' : 'password'"
+              autocomplete="new-password"
+              @input="clearFieldError('passwordConfirm')"
+            />
+            <span v-if="fieldErrors.passwordConfirm" class="field-error">{{ fieldErrors.passwordConfirm }}</span>
+          </label>
+
+          <label v-if="mode === 'recovery'" class="field">
+            <span class="label">{{ msg.mail }}</span>
+            <input
+              v-model="mail"
+              type="email"
+              @input="clearFieldError('mail')"
+            />
+            <span v-if="fieldErrors.mail" class="field-error">{{ fieldErrors.mail }}</span>
+          </label>
+
+          <div v-if="mode !== 'login'" class="field captcha-field">
+            <div class="captcha-row">
+              <img
+                :src="captchaSrc"
+                alt="CAPTCHA"
+                class="captcha-img"
+                @click="refreshCaptcha"
+              />
+              <button type="button" class="icon-btn" @click="refreshCaptcha" aria-label="Refresh CAPTCHA">
+                &#x21bb;
+              </button>
             </div>
-
-            <v-btn
-              type="submit"
-              color="primary"
-              size="large"
-              block
-              :loading="loading"
-              data-test="submit"
-            >{{ msg['submit-' + mode] }}</v-btn>
-          </v-form>
-
-          <!-- Mode switch links -->
-          <div class="text-center mt-4">
-            <v-btn
-              v-if="mode === 'login'"
-              variant="text"
-              size="small"
-              @click="switchMode('recovery')"
-            >{{ msg.recover }}</v-btn>
-            <v-btn
-              v-if="mode !== 'login'"
-              variant="text"
-              size="small"
-              @click="switchMode('login')"
-            >{{ msg.back }}</v-btn>
+            <span class="label">{{ msg.captcha }}</span>
+            <input
+              v-model="captcha"
+              type="text"
+              autocomplete="off"
+              @input="clearFieldError('captcha')"
+            />
+            <span class="field-hint">{{ msg.helpCaptcha }}</span>
+            <span v-if="fieldErrors.captcha" class="field-error">{{ fieldErrors.captcha }}</span>
           </div>
-        </v-card-text>
-      </v-card>
-    </v-main>
-  </v-app>
+
+          <button type="submit" class="submit" :disabled="loading" data-test="submit">
+            <span v-if="loading" class="spinner" aria-hidden="true"></span>
+            {{ msg['submit-' + mode] }}
+          </button>
+        </form>
+
+        <div class="links">
+          <button v-if="mode === 'login'" type="button" class="link" @click="switchMode('recovery')">
+            {{ msg.recover }}
+          </button>
+          <button v-if="mode !== 'login'" type="button" class="link" @click="switchMode('login')">
+            {{ msg.back }}
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 
 const isFr = (navigator.language || '').startsWith('fr')
 
@@ -233,20 +207,15 @@ const infoMsg = ref('')
 const successMsg = ref('')
 const showPwd = ref(false)
 const token = ref('')
-
 const captchaSrc = ref('')
+const fieldErrors = reactive({})
 
 function refreshCaptcha() {
   captchaSrc.value = 'captcha.png?' + Date.now()
 }
 
-const rules = {
-  required: v => !!v || msg.required,
-  passwordStrength: v => {
-    if (!v) return true
-    return (/[A-Z]/.test(v) && /[a-z]/.test(v) && /[0-9]/.test(v) && v.length >= 8) || msg['password-weak']
-  },
-  passwordMatch: v => v === password.value || msg['password-mismatch'],
+function clearFieldError(field) {
+  if (fieldErrors[field]) fieldErrors[field] = ''
 }
 
 function clearMessages() {
@@ -255,8 +224,44 @@ function clearMessages() {
   successMsg.value = ''
 }
 
+function validate() {
+  Object.keys(fieldErrors).forEach(k => (fieldErrors[k] = ''))
+  let valid = true
+  if (mode.value !== 'reset' && !username.value) {
+    fieldErrors.username = msg.required
+    valid = false
+  }
+  if (mode.value !== 'recovery' && !password.value) {
+    fieldErrors.password = msg.required
+    valid = false
+  }
+  if (mode.value === 'reset') {
+    if (password.value && !(/[A-Z]/.test(password.value) && /[a-z]/.test(password.value) && /[0-9]/.test(password.value) && password.value.length >= 8)) {
+      fieldErrors.password = msg['password-weak']
+      valid = false
+    }
+    if (!passwordConfirm.value) {
+      fieldErrors.passwordConfirm = msg.required
+      valid = false
+    } else if (passwordConfirm.value !== password.value) {
+      fieldErrors.passwordConfirm = msg['password-mismatch']
+      valid = false
+    }
+  }
+  if (mode.value === 'recovery' && !mail.value) {
+    fieldErrors.mail = msg.required
+    valid = false
+  }
+  if (mode.value !== 'login' && !captcha.value) {
+    fieldErrors.captcha = msg.required
+    valid = false
+  }
+  return valid
+}
+
 function switchMode(newMode) {
   clearMessages()
+  Object.keys(fieldErrors).forEach(k => (fieldErrors[k] = ''))
   mode.value = newMode
   captcha.value = ''
   password.value = ''
@@ -265,7 +270,6 @@ function switchMode(newMode) {
     refreshCaptcha()
     infoMsg.value = msg['message-' + newMode] || ''
   }
-  // Update URL hash
   if (newMode === 'recovery') {
     window.location.hash = '#recovery' + (username.value ? '=' + encodeURIComponent(username.value) : '')
   } else if (newMode === 'login') {
@@ -352,8 +356,7 @@ async function doRecovery() {
 }
 
 async function submit() {
-  const { valid } = await formRef.value.validate()
-  if (!valid) return
+  if (!validate()) return
 
   loading.value = true
   clearMessages()
@@ -366,8 +369,7 @@ async function submit() {
     errorMsg.value = msg['error-network']
   } finally {
     loading.value = false
-    if (!successMsg.value) infoMsg.value = ''
-    else infoMsg.value = ''
+    infoMsg.value = ''
   }
 }
 
@@ -375,7 +377,6 @@ onMounted(() => {
   const hash = window.location.hash || ''
   const search = window.location.search || ''
 
-  // Check for reset token: #reset=TOKEN/USERNAME
   const resetMatch = hash.match(/#reset=([a-zA-Z0-9\-]+)\/([a-zA-Z0-9\-]+)/)
   if (resetMatch) {
     token.value = resetMatch[1]
@@ -386,7 +387,6 @@ onMounted(() => {
     return
   }
 
-  // Check for recovery: #recovery=USERNAME or #recovery
   const recoveryMatch = hash.match(/#recovery(=([a-zA-Z0-9\-]+))?/)
   if (recoveryMatch) {
     if (recoveryMatch[2]) username.value = recoveryMatch[2]
@@ -396,7 +396,6 @@ onMounted(() => {
     return
   }
 
-  // Check for query string messages
   if (search.includes('concurrency')) {
     errorMsg.value = msg['error-concurrency']
   } else if (search.includes('logout')) {
@@ -406,13 +405,198 @@ onMounted(() => {
 </script>
 
 <style scoped>
+* { box-sizing: border-box; }
+
 .login-bg {
   min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
   background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+  color: #222;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.card-head {
+  padding: 24px 24px 0;
+  text-align: center;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+}
+
+h1 {
+  margin: 8px 0 4px;
+  font-size: 1.5rem;
+  color: #1a237e;
+}
+
+.subtitle {
+  margin: 0 0 8px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.card-body {
+  padding: 16px 24px 24px;
+}
+
+.alert {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+.alert-info    { background: #e3f2fd; color: #0277bd; border-color: #b3e5fc; }
+.alert-success { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
+.alert-error   { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
+
+.field {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  background: #fff;
+  color: #222;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus {
+  outline: none;
+  border-color: #1a237e;
+  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
+}
+input:disabled,
+input[readonly] {
+  background: #f5f5f5;
+  color: #888;
+}
+
+.input-wrap {
+  position: relative;
+  display: block;
+}
+.toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 6px 8px;
+  color: #666;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #777;
+}
+.field-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #c62828;
+}
+
+.captcha-field {
+  margin-top: 4px;
+}
+.captcha-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 .captcha-img {
   border: 1px solid #ccc;
-  min-width: 150px;
+  border-radius: 4px;
   height: 40px;
+  min-width: 150px;
+  cursor: pointer;
 }
+.icon-btn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #555;
+}
+.icon-btn:hover { background: #f0f0f0; }
+
+.submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background: #1a237e;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+.submit:hover:not(:disabled) { background: #0d47a1; }
+.submit:disabled { opacity: 0.65; cursor: not-allowed; }
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.links {
+  margin-top: 12px;
+  text-align: center;
+}
+.link {
+  background: none;
+  border: none;
+  color: #0d47a1;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.link:hover { text-decoration: underline; }
 </style>

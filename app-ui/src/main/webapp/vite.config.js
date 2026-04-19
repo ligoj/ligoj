@@ -32,7 +32,9 @@ export default defineConfig({
       output: {
         manualChunks: {
           vuetify: ['vuetify'],
-          vendor: ['vue', 'vue-router', 'pinia'],
+          vue: ['vue'],
+          router: ['vue-router'],
+          pinia: ['pinia'],
         },
       },
     },

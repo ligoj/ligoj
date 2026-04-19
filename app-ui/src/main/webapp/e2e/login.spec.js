@@ -19,7 +19,7 @@ test.describe('Login page', () => {
   test('rejects empty form submission', async ({ page }) => {
     await page.getByRole('button', { name: /sign in/i }).click()
     // Should show validation errors for required fields
-    await expect(page.locator('.v-messages__message').first()).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('.field-error').first()).toBeVisible({ timeout: 5000 })
   })
 
   test('successful login redirects to main app', async ({ page }) => {

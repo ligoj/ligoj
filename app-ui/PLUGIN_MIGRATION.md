@@ -38,7 +38,9 @@ PluginLoader.registerUrl('remote-plugin', 'https://example.com/plugins/RemotePlu
 ```
 
 ### Loading
+
 Use `PluginLoader.load('my-plugin')` to get the module, or `PluginLoader.getComponent('my-plugin')` to get a Vue Async Component.
 
 ### Singleton Pattern
+
 The loader ensures that once a plugin is loaded, the same instance (module) is returned for subsequent requests.

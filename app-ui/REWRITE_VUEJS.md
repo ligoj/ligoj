@@ -1,6 +1,6 @@
 # Introduction
 
-The Spring Boot Application is in @Ligoj/app-api.
+The Spring Boot Application is in @ligoj/app-api.
 The goal is to rewrite the UI in VueJS.
 
 # Current design
@@ -13,10 +13,10 @@ The goal is to rewrite the UI in VueJS.
 - jQuery.sparkline.js
 - Handlebars.js
 - require.js
-- "cascade.js", a custom MVVM library
-- "error.mod.js", a custom error manager
-- "application.mod.js", a custom application manager
-- "security.mod.js", a custom security manager
+- `cascade.js`, a custom MVVM library
+- `error.mod.js`, a custom error manager
+- `application.mod.js`, a custom application manager
+- `security.mod.js`, a custom security manager
 
 The application is plugin aware, so with dynamical ressources.
 
@@ -74,9 +74,8 @@ This script is a guard and a DOM protection layer. It checks the security of the
 
 Migrate the current implementation :
 - Common module with utilities, routing, main VueJS app etc. in `app-ui/src/main/webapp`
-- Migrated modular plugin `plugin-id` in `plugin-id/src/main/resources/META-INF/resources/id`.
+- Migrate modular plugin `plugin-id` in `plugin-id/src/main/resources/META-INF/resources/id`.
 - A plugin is singleton, it can be loaded multiple times but only one instance is kept.
-- Do not delete or update the current implementation
 - Use `v-index.html` as main entry point for the new VueJS app
 - Use `v-login.html` as main entry point for the new VueJS login
 - Find a way to minimize the code size of the login part. There is no need to load the full application for the login.
@@ -84,5 +83,11 @@ Migrate the current implementation :
 - Complete Dockerfile to include the npm command for the VueJS application.
 - Document the new implementation for plugins :
   - how to migrate them and how to load/add them from the application dynamically by their name or id or path. 
-  - Use `plugin-id` as sample to add it in the app.
-  - By contract make all plugins exposing 1 sample function that can be called from the application and other plugins.
+  - Use `plugin-id` (there `/Users/fabdouglas/git/ligoj-plugins/plugin-id`) as sample to add it in the app.
+  - By contract make all plugins exposing 1 function `feature` that can be called from the application and other plugins.
+  
+The challenge is that each module like `plugin-id` is a standalone Maven project:
+- it has its own life cycle
+- it can be added, removed by a Java plugin manager discovered and served by a Webjars Servlet (`/Users/fabdouglas/git/bootstrap/bootstrap-plugin/src/main/java/org/ligoj/bootstrap/resource/system/plugin/WebjarsServlet.java`).
+- no restart or build is needed to add/remove a plugin from the context
+- make it easy to test in local mode in browser. Mybe one vite configuration per module?
