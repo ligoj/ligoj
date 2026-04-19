@@ -18,7 +18,11 @@ export async function loadPlugin(pluginId) {
     throw new Error(`Invalid plugin ID: "${pluginId}"`)
   }
 
-  const url = `/webjars/${pluginId}/vue/index.js`
+  // BASE_URL is `/ligoj/` in both dev (where the vite proxy forwards
+  // /ligoj/webjars/* to Spring) and prod (where Spring serves the app
+  // under its `/ligoj` context path). Using an absolute `/webjars/...`
+  // here bypasses the dev proxy and 404s.
+  const url = `${import.meta.env.BASE_URL}webjars/${pluginId}/vue/index.js`
 
   try {
     const module = await import(/* @vite-ignore */ url)
