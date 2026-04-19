@@ -26,3 +26,23 @@ Object.defineProperty(globalThis, 'localStorage', {
   writable: true,
 })
 beforeEach(() => { storage.clear() })
+
+// jsdom lacks ResizeObserver; Vuetify's data-table / pagination call it on
+// mount. A minimal no-op stub is enough for rendering to succeed in tests.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+}
+// IntersectionObserver is also absent and used by some Vuetify components.
+if (typeof globalThis.IntersectionObserver === 'undefined') {
+  globalThis.IntersectionObserver = class {
+    constructor() {}
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() { return [] }
+  }
+}
