@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import App from './App.vue'
 import vuetify from './plugins/vuetify.js'
+import i18n from './plugins/i18n.js'
 import router from './router/index.js'
 import { loadAllPlugins } from './plugins/loader.js'
 import { registerBuiltinPlugins } from './plugins/index.js'
@@ -11,6 +12,7 @@ const pinia = createPinia()
 
 app.use(pinia)
 setActivePinia(pinia)
+app.use(i18n)
 
 // Built-in plugin stubs (bundled with the host).
 registerBuiltinPlugins()
