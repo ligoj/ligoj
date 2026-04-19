@@ -19,7 +19,7 @@ registerBuiltinPlugins()
 
 // External plugins whose routes must be registered before the router mounts.
 // Kept small on purpose — plugins whose absence is recoverable load lazily.
-const REQUIRED_PLUGINS = ['id']
+const REQUIRED_PLUGINS = ['id', 'ui']
 
 ;(async () => {
   await loadAllPlugins(REQUIRED_PLUGINS)
