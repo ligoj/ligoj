@@ -28,12 +28,18 @@ describe('plugin-id contract', () => {
     expect(() => pluginIdDef.feature('unknown-action')).toThrow(/no feature "unknown-action"/)
   })
 
-  it('install() registers the plugin routes on the given router', () => {
+  it('install() registers all /id/* routes on the given router', () => {
     const addRoute = vi.fn()
     pluginIdDef.install({ pluginId: 'id', router: { addRoute } })
-    expect(addRoute).toHaveBeenCalled()
     const registered = addRoute.mock.calls.map(([route]) => route.path)
-    expect(registered).toContain('/id/container-scope')
+    expect(registered).toEqual(expect.arrayContaining([
+      '/id/user', '/id/user/new', '/id/user/:id',
+      '/id/group', '/id/group/new', '/id/group/:id',
+      '/id/company', '/id/company/new', '/id/company/:id',
+      '/id/delegate', '/id/delegate/new', '/id/delegate/:id',
+      '/id/container-scope',
+    ]))
+    expect(registered).toHaveLength(13)
   })
 
   it('feature("acceptAgreement") POSTs and flips the user setting', async () => {
