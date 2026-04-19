@@ -9,6 +9,8 @@ export default {
   'nav.delegates': 'Délégués',
   'nav.projects': 'Projets',
   'nav.system': 'Administration',
+  'nav.information': 'Informations',
+  'nav.configuration': 'Configuration',
   'nav.roles': 'Rôles',
   'nav.plugins': 'Plugins',
   'nav.nodes': 'Nœuds',
