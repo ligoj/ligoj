@@ -21,3 +21,15 @@ export { useAuthStore } from './stores/auth.js'
 export { default as ImportExportBar } from './components/ImportExportBar.vue'
 export { default as LigojDataTable } from './components/LigojDataTable.vue'
 export { default as LigojDataTableServer } from './components/LigojDataTableServer.vue'
+
+/**
+ * The app's public base path, e.g. `/ligoj/`. Exported so plugins can
+ * build absolute URLs that resolve correctly under the host's deployment.
+ *
+ * Plugin bundles are compiled with their own Vite `base` (defaults to
+ * `/`), so inside a plugin `import.meta.env.BASE_URL` is NOT the host's
+ * base — using it for `fetch('${BASE}rest/...')` produces `/rest/...`
+ * which the host's context-path mapping rejects. Always use this export
+ * in plugin code instead.
+ */
+export const APP_BASE = import.meta.env.BASE_URL
