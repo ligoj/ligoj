@@ -2,8 +2,64 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
+/**
+ * Dev-only: the import map in v-index.html points shared-dep bare specifiers
+ * (vue, vue-router, pinia, vuetify, @ligoj/host) at /ligoj/assets/*.js —
+ * build artefacts that don't exist under `npm run dev`. Plugins loaded at
+ * runtime from the webjars servlet carry `import ... from "vue"` in their
+ * compiled output; without these shims the browser 404s on the import map
+ * target and the plugin fails to load.
+ *
+ * Each shim is registered as a virtual module so vite's normal transform
+ * pipeline resolves the bare specifier through its dep-optimizer and
+ * rewrites it to the pre-bundled URL. The middleware exposes that
+ * transformed code at the exact URL the import map asks for.
+ */
+const SHIMS = {
+  '/ligoj/assets/vue.js':     { from: 'vue' },
+  '/ligoj/assets/router.js':  { from: 'vue-router' },
+  '/ligoj/assets/pinia.js':   { from: 'pinia' },
+  '/ligoj/assets/vuetify.js': { from: 'vuetify' },
+  '/ligoj/assets/host.js':    { from: '/src/host.js' },
+}
+
+function ligojDevSharedImports() {
+  return {
+    name: 'ligoj-dev-shared-imports',
+    apply: 'serve',
+    resolveId(id) {
+      return SHIMS[id] ? id : null
+    },
+    load(id) {
+      const shim = SHIMS[id]
+      if (!shim) return null
+      return `export * from ${JSON.stringify(shim.from)};\n` +
+             `import * as __ns from ${JSON.stringify(shim.from)};\n` +
+             `export default __ns.default ?? __ns;\n`
+    },
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const urlPath = req.url?.split('?')[0]
+        if (!urlPath || !SHIMS[urlPath]) return next()
+        try {
+          const result = await server.transformRequest(urlPath)
+          if (result) {
+            res.setHeader('Content-Type', 'application/javascript')
+            res.setHeader('Cache-Control', 'no-cache')
+            res.end(result.code)
+            return
+          }
+        } catch (err) {
+          console.error('[ligoj-dev-shim]', urlPath, err)
+        }
+        next()
+      })
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), ligojDevSharedImports()],
   base: '/ligoj/',
   resolve: {
     alias: {
