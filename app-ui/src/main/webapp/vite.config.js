@@ -36,6 +36,15 @@ export default defineConfig({
           router: ['vue-router'],
           pinia: ['pinia'],
         },
+        // Stable filenames for shared deps so runtime-loaded plugins can
+        // resolve `import 'vue'` (etc.) via the import map in v-index.html.
+        // Other chunks stay hashed for cache-busting.
+        chunkFileNames: (chunk) => {
+          const stable = ['vue', 'router', 'pinia', 'vuetify']
+          return stable.includes(chunk.name)
+            ? 'assets/[name].js'
+            : 'assets/[name]-[hash].js'
+        },
       },
     },
     outDir: resolve(__dirname, '../../../target/classes/META-INF/resources/webjars/vue-dist'),

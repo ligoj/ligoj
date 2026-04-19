@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import registry, { callFeature } from '@/plugins/registry.js'
-import pluginIdDef from '../../../../../../../../ligoj-plugins/plugin-id/src/main/resources/META-INF/resources/webjars/id/vue/index.js'
+// Imports the plugin source (pre-build). The built bundle at
+// ../src/main/resources/.../webjars/id/vue/index.js is what the host loads
+// at runtime — here we test the authoring surface directly.
+import pluginIdDef from '../../../../../../../../ligoj-plugins/plugin-id/ui/src/index.js'
 
 describe('plugin-id contract', () => {
   it('exports required fields (id, label, install, feature, service, meta)', () => {

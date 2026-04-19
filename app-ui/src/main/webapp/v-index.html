@@ -6,6 +6,22 @@
   <link rel="icon" type="image/x-icon" href="/ligoj/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ligoj</title>
+  <!--
+    Import map: shared module instances for plugins dynamically loaded at
+    runtime from /webjars/{id}/vue/index.js. Plugins are built with `vue`,
+    `vue-router`, `pinia`, `vuetify` marked external so they resolve
+    through these stable URLs and share the host's instances.
+  -->
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "/ligoj/assets/vue.js",
+        "vue-router": "/ligoj/assets/router.js",
+        "pinia": "/ligoj/assets/pinia.js",
+        "vuetify": "/ligoj/assets/vuetify.js"
+      }
+    }
+  </script>
 </head>
 
 <body>
