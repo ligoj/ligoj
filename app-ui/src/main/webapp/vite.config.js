@@ -136,6 +136,12 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      // Plugin assets: app-ui's /main/* servlet proxies to ligoj-api on :8081.
+      '/ligoj/main': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      // Legacy: kept for any code still fetching /webjars/* directly.
       '/ligoj/webjars': {
         target: 'http://localhost:8080',
         changeOrigin: true,

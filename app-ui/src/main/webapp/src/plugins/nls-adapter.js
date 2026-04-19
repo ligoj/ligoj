@@ -33,11 +33,10 @@ async function fetchText(url) {
 }
 
 export async function loadNlsMessages(pluginId, locale = 'en') {
-  // Prefix with the app base so /ligoj/webjars/... hits the dev proxy
-  // and Spring's webjars handler in prod.
+  // Plugin NLS bundles are served via the `/main/*` proxy (see loader.js).
   const appBase = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
   const base = pluginId
-    ? `${appBase}webjars/${pluginId}/nls`
+    ? `${appBase}main/${pluginId}/nls`
     : `${appBase}main/nls`
 
   // Load root bundle

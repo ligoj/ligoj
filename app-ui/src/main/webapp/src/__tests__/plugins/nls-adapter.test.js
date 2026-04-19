@@ -80,8 +80,8 @@ describe('NLS Adapter', () => {
     const result = await loadNlsMessages('test-plugin', 'fr')
     expect(result).toEqual({ hello: 'monde', welcome: 'Welcome' })
     expect(globalThis.fetch).toHaveBeenCalledTimes(2)
-    expect(globalThis.fetch).toHaveBeenNthCalledWith(1, '/webjars/test-plugin/nls/messages.js', { credentials: 'include' })
-    expect(globalThis.fetch).toHaveBeenNthCalledWith(2, '/webjars/test-plugin/nls/fr/messages.js', { credentials: 'include' })
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(1, '/main/test-plugin/nls/messages.js', { credentials: 'include' })
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(2, '/main/test-plugin/nls/fr/messages.js', { credentials: 'include' })
   })
 
   it('returns root messages when locale is en (does not fetch locale file)', async () => {
