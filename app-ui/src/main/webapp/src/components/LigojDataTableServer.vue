@@ -1,9 +1,11 @@
 <template>
-  <v-data-table
+  <v-data-table-server
     v-bind="$attrs"
     :headers="headers"
     :items="items"
-    class="ligoj-data-table"
+    :items-length="itemsLength"
+    :loading="loading"
+    class="ligoj-data-table-server"
   >
     <template
       v-for="name in forwardedSlotNames"
@@ -24,16 +26,29 @@
         @copy="copyToClipboard"
       />
     </template>
-  </v-data-table>
+  </v-data-table-server>
 </template>
 
 <script setup>
 /**
- * LigojDataTable — client-side drop-in for `<v-data-table>` with a tools
- * menu (Export CSV, Copy to clipboard) in the header of the last column.
+ * LigojDataTableServer — drop-in for `<v-data-table-server>` with the
+ * same tools menu as LigojDataTable.
  *
- * The cogs column is excluded from exports; pass `:tools="false"` to
- * suppress it. See LigojDataTableServer for the server-paginated variant.
+ * Because server-side pagination only ever hands us the current page in
+ * `items`, the table accepts an explicit `fetchAll` function used
+ * exclusively by the Export CSV / Copy to clipboard actions. The
+ * function should return the full dataset as an array — typically by
+ * hitting the same endpoint without pagination (rows=99999 or whatever
+ * the backend permits).
+ *
+ *   <LigojDataTableServer
+ *     :headers="headers"
+ *     :items="page.items"
+ *     :items-length="page.total"
+ *     :fetch-all="fetchAllRows"
+ *     filename="users.csv"
+ *     @update:options="onOptions"
+ *   />
  */
 import { computed, useSlots } from 'vue'
 import TableToolsMenu from './TableToolsMenu.vue'
@@ -42,10 +57,18 @@ import { useTableTools } from '@/composables/useTableTools.js'
 defineOptions({ inheritAttrs: false })
 
 const props = defineProps({
-  headers:  { type: Array,   required: true },
-  items:    { type: Array,   default: () => [] },
-  tools:    { type: Boolean, default: true },
-  filename: { type: String,  default: 'table.csv' },
+  headers:     { type: Array,   required: true },
+  items:       { type: Array,   default: () => [] },
+  itemsLength: { type: Number,  default: 0 },
+  loading:     { type: Boolean, default: false },
+  tools:       { type: Boolean, default: true },
+  filename:    { type: String,  default: 'table.csv' },
+  /**
+   * Return the FULL dataset the menu should export. Called only when the
+   * user triggers Export CSV or Copy to clipboard. If omitted the actions
+   * fall back to exporting just the visible page.
+   */
+  fetchAll:    { type: Function, default: null },
 })
 
 const slots = useSlots()
@@ -70,7 +93,7 @@ const forwardedSlotNames = computed(() => {
 
 const { exporting, copying, exportCsv, copyToClipboard } = useTableTools({
   headers: () => props.headers,
-  getRows: () => props.items,
+  getRows: async () => (props.fetchAll ? await props.fetchAll() : props.items),
   filename: () => props.filename,
 })
 
