@@ -3,7 +3,6 @@ import { useAuthStore } from '@/stores/auth.js'
 import HomeView from '@/views/HomeView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import AboutView from '@/views/AboutView.vue'
-import AdminView from '@/views/AdminView.vue'
 import PluginView from '@/views/PluginView.vue'
 
 const routes = [
@@ -12,7 +11,6 @@ const routes = [
   { path: '/about', name: 'about', component: AboutView },
   // /id/* routes are registered at runtime by plugin-id.
   // /home/*, /system/*, /api/*, /subscribe are registered by plugin-ui.
-  { path: '/admin', name: 'admin', component: AdminView },
   // Catch-all: tries to load a plugin, falls back to 404.
   { path: '/:pathMatch(.*)*', name: 'not-found', component: PluginView },
 ]

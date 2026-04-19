@@ -25,8 +25,16 @@ const NAV_CONFIG = [
     auth: '^home',
   },
   {
-    id: 'admin', label: 'Administration', labelKey: 'nav.admin', icon: 'mdi-cog', route: '/admin',
-    auth: '^api',
+    id: 'system', label: 'System', labelKey: 'nav.system', icon: 'mdi-cog', route: '/system',
+    auth: '^system',
+    children: [
+      { id: 'system-user',   label: 'Users',   labelKey: 'nav.users',   icon: 'mdi-account-multiple', route: '/system/user',   auth: '^system/user' },
+      { id: 'system-role',   label: 'Roles',   labelKey: 'nav.roles',   icon: 'mdi-shield-account',   route: '/system/role',   auth: '^system/role' },
+      { id: 'system-plugin', label: 'Plugins', labelKey: 'nav.plugins', icon: 'mdi-puzzle',           route: '/system/plugin', auth: '^system/plugin' },
+      { id: 'system-node',   label: 'Nodes',   labelKey: 'nav.nodes',   icon: 'mdi-server',           route: '/system/node',   auth: '^system/node' },
+      { id: 'system-cache',  label: 'Cache',   labelKey: 'nav.cache',   icon: 'mdi-database-refresh', route: '/system/cache',  auth: '^system/cache' },
+      { id: 'system-bench',  label: 'Bench',   labelKey: 'nav.bench',   icon: 'mdi-speedometer',      route: '/system/bench',  auth: '^system/bench' },
+    ],
   },
 ]
 
