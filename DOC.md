@@ -3,50 +3,66 @@
 ![architecture](docs/assets/img/architecture.png)
 
 # Key features
+
 The backend container assumes the business role of the application, is stateless, scalable and based on extensive use of convention over configuration design.
 
 ## Relevant stack parts
+
 * Java
 * Spring baseline: core, security and data
 * CXF, not Spring-WS
 * JPA
 
 # Philosophy
+
 The main ideas are Convention over Configuration and modularity. 
 
 ## Convention over Configuration
+
 There is a default behaviour based on the convention, but it's always possible to override it.
 
 ## REST Endpoint
+
 By convention, the [status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) is determined for you (200, 204, 400, ...) and follows the best practices.
+
 ## Exception handling
+
 Avoid using "try-catch" statements in your application. Let the error reach the filters that will generate the status code and REST payload for you. See [[Exception handling]].
 
 ## Validation handling
+
 Implicit validation management is handled before the REST controller is actually called. Properties mapping, types, and BVAL constraints are managed for you. This avoids a lot of useless code and tests. See [[Jackson Ext]] and [[CXF Ext]].
 
 ## Entity equals/hashcode
+
 No `equals` or `hashcode` are required. The design above Spring-Data implies these methods are not required to build a consistent cache for Hibernate.
 
 ## getter/setter
+
 Thanks to [Lombok](http://projectlombok.org/), don't write `getX` and `setX` anymore.
 
 ## Basic ORM operations
+
 Thanks to [Spring Data](https://projects.spring.io/spring-data-jpa/), basic operations such as `findAll` or `findOne` are available at zero cost. In addition, some operations have been added (`findAllBy`, `findOneExpected`, ...), see [[Spring-Data Ext]]
 
 ## Database mapping
+
 JPA to DDL generation is backed by Hibernate. We have added conventional `ManyToOne` column naming ensuring the proper compatibility with constraints (`@Unique`,...), case-insensitive databases and exception handling. See [[Hibernate Ext]].
 
 ## Security over REST
+
 With REST, comes some conventional meaning of `GET`, `POST`,... methods. The integrated RBAC security layer facilitates dynamical security configuration.
 
 ## Modularity
+
 Split your code to make a micro-services grid. Instead of having a global configuration file (XML, YML,...), a centralized Spring-Boot java configuration, or some boilerplate code to register your features.
 
 ## Cache
+
 With Hazelcast, even with [Spring-Boot](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-hazelcast.html) you cannot easily split the `CacheConfig`. We have built a merged configuration that collects the available `CacheConfig` to register them to the `HazelcastInstance`. See [[Hibernate Ext]].
 
 ## JPA
+
 JPA specification requires that your `orm.xml` accompanies your entities, even with `package` auto-discovery classes. But in a modular application, it's not possible to anticipate the entities you'll get in the classpath. See [[Hibernate Ext]].
 
 # Features
@@ -74,7 +90,9 @@ In addition of these solution, come the CSV format:
 The CSV format is not mandatory for your data, there is a built-in integration. 
 
 ### Sample
-Test classe
+
+Test class
+
 ```java
 public class MyTest {
   @Autowired
@@ -85,7 +103,9 @@ public class MyTest {
   }
 }
 ```
+
 Entities
+
 ```java
 public @Entity @Getter @Setter class PublicProfile {
   private @Id String id;
@@ -911,26 +931,26 @@ Always use simple words. Because long words  :
 * take some useless spaces in your editor and your mind
 * increase the conventional naming entropy in the team
 
-Lines length is `120` chars for code and comments.
+Lines length is `140` chars for code and comments.
 
 Every technical name (variable, URL, API component) exposed to end user must be written in lower case. In addition, for non-local names (Classes, HTML identifiers, CSS classes, function) avoid using 'trimmed' nouns such as: `passwd` (`password`), `param` (`parameter`), `gen` (`generate`), `init` (`initialize`),...
 
 Use patterns for packages or name for files of the same type as described in the below table.
 
-| Type                      | Package convention                                          | Name convention                                                             |
-| ------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
-| All                       | ASCII                                                       | ASCII                                                                       |
-| All                       | JavaScript syntax                                           | main/...                                                                    | --> See Standard JS, happiness style, only on Atom and SonarQube             |
-| All                       | Java syntax                                                 | lower case package, [a-z]+ in src/main/java or src/test/java,               | --> SonarQube profile enabled on your project, only on Eclipse and SonarQube |
-| All                       | HTML syntax                                                 | main/...                                                                    | --> Bootstrap Linter, only on Visual Source Code and SonarQube               |
-| JAX-RS                    | resources                                                   | ...resource....                                                             | ...Resource.java, use nouns, camel case                                      |
-| Spring Data Repository    |                                                             | ...repository...                                                            | ...Repository.java, use nouns, camel case                                    |
-| Exception                 | near the using components, but not in a "exception" package | ...Exception.java, camel case                                               |
-| JPA entity                | ...model...                                                 | Use nouns, camel case                                                       |
-| JPA property              |                                                             | Use nouns, camel case, plural for collections. No `List` or `Set` suffixes. |
-| View Object               | near the using components, but not in a "vo" package        | ...Vo.java, use nouns, camel case                                           |
-| Web files (js, html, css) | ...module/usecase/....                                      | simple nouns, singular, lower case. Use `-` as word separator               |
-| i18n keys                 | ../nls/messages.js or ../nls/xx/messages.js                 | simple nouns, lower case. Use `-` as word separator                         |
+| Type                   | Package convention                           | Name convention                                                             |
+| ---------------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
+| All                    | ASCII                                        | ASCII                                                                       |
+| All                    | JavaScript syntax                            | See JS linter                                                               |
+| All                    | Java syntax                                  | Lower case package, [a-z]+ in `src/main/java` or `src/test/java`            |
+| All                    | HTML syntax                                  | See VueJS Linter                                                            |
+| JAX-RS                 | resources                                    | `*Resource.java`, use nouns, camel case                                     |
+| Spring Data Repository |                                              | `*Repository.java`, use nouns, camel case                                   |
+| Exception              | near the using components, no nested package | `*Exception.java`, camel case                                               |
+| JPA entity             | ...model...                                  | Use nouns, camel case                                                       |
+| JPA property           |                                              | Use nouns, camel case, plural for collections. No `List` or `Set` suffixes. |
+| View Object            | near the using components, no nested package | `*Vo.java`, use nouns, camel case                                           |
+| Web files              | ...module/usecase/....                       | Simple nouns, singular, lower case. Use `-` as word separator               |
+| i18n keys              | `fr`, `en`                                   | Simple nouns, lower case. Use `-` as word separator                         |
 
 
 Avoid getter/setter, use Lombok
@@ -976,46 +996,31 @@ Add documentation to public endpoints, including the Javadoc parameters and retu
 
 * [JSE 21+](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or [OpenJDK 21+](http://jdk.java.net/21/)
 * Java IDE 
-  * Either [IntelliJ IDEA 2024](https://www.jetbrains.com/idea/)
-  * Either [Eclipse 2024‑03+ (java package)](http://www.eclipse.org/downloads/eclipse-packages/) + [Lombok](https://projectlombok.org/) + Java14 JDT patch from the marketplace for version before 2020‑06.
+  * Either [IntelliJ IDEA 2026](https://www.jetbrains.com/idea/)
+  * Either [Eclipse 2026+ (java package)](http://www.eclipse.org/downloads/eclipse-packages/) + [Lombok](https://projectlombok.org/)
 * [Docker](https://www.docker.com/) or [Podman](https://podman.io/)
 * [Maven 3.9+](https://maven.apache.org/download.cgi)
-* A PgSQL/MySQL (or another compatible) database
-* SonarQube, ... (to complete), see the badges for the complete list.
+* A PgSQL 15+ / MySQL 5.7+ (or another compatible) database
+* SonarQube, ... see the badges for the complete list.
 * [Visual Studio Code](https://code.visualstudio.com/)
-* npm
+* npm with NodeJS 24+
 
 ## Database setup
 
-For the below samples, a MySQL server for `ligoj-api` container is needed.
+For the below samples, a PgSQL server 15+ for `ligoj-api` container is needed.
 
 Note: At the first start, schema is updated/created and the initial data is inserted into the database.
 
-### With your own database
+```shell
+# MysQL
+podman run --name ligoj-db -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=ligoj -e MYSQL_USER=ligoj -e MYSQL_PASSWORD=ligoj -d mysql:5.7
 
-```sql
-mysql --user=root
-CREATE DATABASE `ligoj` DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_bin;
-CREATE USER 'ligoj'@'localhost' IDENTIFIED BY 'ligoj';
-GRANT ALL ON `ligoj`.* TO 'ligoj'@'localhost';
-FLUSH PRIVILEGES;
-quit
-```
-
-### With a fresh new database 
-
-```
-docker run --name ligoj-db -d -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=ligoj -e MYSQL_USER=ligoj -e MYSQL_PASSWORD=ligoj -d mysql:5.7
-```
-
-## Building
-
-Docker build (ARG) variables:
-
-```
-NEXUS_URL : Repository base host used to download the WAR files
-VERSION   : Ligoj version, used to build the WAR_URL
-WAR_URL   : Full WAR URL, built from NEXUS_URL and VERSION
+# PGSQL
+podman run --name ligoj-db -p 5432:5432 -e POSTGRES_PASSWORD=ligoj -e POSTGRES_USER=ligoj -d postgres
+CREATE USER ligoj WITH ENCRYPTED PASSWORD 'ligoj';
+CREATE DATABASE ligoj WITH OWNER=ligoj ENCODING='UTF-8';
+GRANT ALL ON DATABASE ligoj to ligoj;
+GRANT ALL ON SCHEMA public TO ligoj;
 ```
 
 ## Running
@@ -1030,7 +1035,7 @@ mvn spring-boot:run -f app-ui/pom.xml&
 
 ### With your IDE
 
-From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
+From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes:
 
 ```
 org.ligoj.boot.api.Application
@@ -1053,7 +1058,7 @@ mvn clean package -Pminify -DskipTests=true
 
 ### Nexus OSS
 
-```
+```shell
 mvn clean deploy -Dgpg.skip=false -Psources,javadoc,minify -DskipTests=true
 ```
 
@@ -1075,7 +1080,7 @@ This directory will contain:
 - hook scripts
 - (optional) the secret file to encrypt secrets in the database using AES-256
 
-```bash
+```shell
 mkdir -p /var/lib/ligoj
 ```
 
@@ -1083,7 +1088,7 @@ mkdir -p /var/lib/ligoj
 
 Connect to the PostGreSQL 15+ server
 
-```bash
+```shell
 sudo su postgres
 psql
 ```
@@ -1137,7 +1142,7 @@ In the configuration file `/var/lib/ligoj/config/application.properties`, adapt 
 
 This configuration file can be shared between the 2 containers `ligoj-ui` and `ligoj-api` but it's not recommended. If a common Spring Boot configuration needs to have a different value from one container to another, use a `-D` argument dedicated to these containers.
 
-```bash
+```shell
 # Volume for configuration and installed Ligoj plugins
 mkdir -p /var/lib/ligoj/hooks
 mkdir -p /var/lib/ligoj/files
@@ -1174,7 +1179,7 @@ In the example below, the JKS file is filled with 2 CAs.
 
 Note: This script requires `keytool` to be available on the host.
 
-```bash
+```shell
 python plugins/ssl.py keycloak.sample.com 443 ./ligoj.jks changeit
 ```
 
@@ -1199,7 +1204,7 @@ Modifying the content of a TrustStore is only taken into account after restartin
 
 ## `ligoj-api` Container
 
-```bash
+```shell
 # Volume for scripts associated with hooks. Only this location will be executable
 mkdir -p /var/lib/ligoj/hooks
 
@@ -1226,7 +1231,7 @@ ligoj/ligoj-api:4.0.2-SNAPSHOT-101
 
 Access logs
 
-```bash
+```shell
 sudo docker logs -f ligoj-api
 ```
 
@@ -1245,6 +1250,19 @@ sudo docker logs -f ligoj-api
 2023-07-18 20:08:21.583 INFO  Started Application in 11.234 seconds (process running for 11.854)
 ```
 
+### Docker environment variables
+
+| Docker env   | Default value                  | Note                                                                             |
+| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
+| CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration. See                                                    |
+| CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
+| SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
+| SERVER_PORT  | `8081`                         | Passed to server listening port and exposed port.                                |
+| JAVA_MEMORY  | `-Xms128M -Xmx128M`            | JVM Memory                                                                       |
+| CUSTOM_OPTS  |                                | Additional JVM options, like `-D...`                                             |
+| JAVA_OPTIONS |                                | Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties |
+
+
 ### Notes
 
 The Ligoj mount point `/home/hooks` to the host directory `/var/lib/ligoj/hooks` allows the `ligoj hook` CLI command to execute scripts placed in this directory.
@@ -1260,7 +1278,7 @@ This startup mode with the `-Dsecurity=Trusted` option allows running Ligoj with
 
 *Warning* Do not enable this mode for production, or only after restricting its access to known or local IPs.
 
-```bash
+```shell
 sudo docker stop ligoj-ui
 sudo docker run \
 --name "ligoj-ui" \
@@ -1276,7 +1294,7 @@ ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
 
 Access logs
 
-```bash
+```shell
 sudo docker logs -f ligoj-ui
 ```
 
@@ -1291,14 +1309,14 @@ sudo docker logs -f ligoj-ui
 
 ### Test connectivity
 
-```bash
+```shell
 # From the system
 curl http://localhost/ligoj/login.html
 ```
 
 ### Check `ligoj-api` container health via `ligoj-ui`
 
-```bash
+```shell
 sudo docker run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
@@ -1316,7 +1334,7 @@ The HTTP Header `SM_UniversalID` is used to *declare* the user.
 
 The following call, get the user session details using then endpoint `/rest/session` with the user `ligoj-user`.
 
-```bash
+```shell
 sudo docker run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
@@ -1338,7 +1356,7 @@ Without integration with a reverse proxy or upstream load balancer, Ligoj is ava
 - Add the corresponding DNS `ligoj.sample.com` in the tenant's DNS zone, Record type A, similar to Jenkins for the IP.
 
 
-```bash
+```shell
 echo 'backend ligoj
   server server_ligoj 127.0.0.1:8089
   http-request set-header X-Forwarded-Proto "https"' > /etc/haproxy/conf.d/ligoj.cfg
@@ -1350,17 +1368,116 @@ service haproxy restart
 
 From the system hosting the reverse proxy (via localhost)
 
-```bash
+```shell
 curl --resolve ligoj.sample.com:80:127.0.0.1 http://ligoj.sample.com/ligoj
 ```
 
 From the external system reaching the reverse proxy (via its external IP)
 
-```bash
+```shell
 curl --resolve ligoj.sample.com:80:10.125.13.185 http://ligoj.sample.com/ligoj
 ```
 
-# Configuration
+
+### Configuration of authentication
+
+After configuring the primary `node` responsible for authentication, the `Trusted` mode can be disabled, the API keys generated previously remain valid.
+
+It is anyway possible to revert to this mode to regain access to Ligoj in case it becomes inaccessible due to a configuration defect of the LDAP `node`.
+
+System property `security` value determines the authentication mode:
+
+| `security` mode | Login screen  | Identity Provider                                                   |
+| --------------- | ------------- | ------------------------------------------------------------------- |
+| `Trusted`       | Ligoj         | Authentication required but always accepted                         |
+| `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
+| `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
+
+#### `Rest` mode
+
+For sample, if LDAP authentication is expected to be proceeded `plugin-id-ldap`
+
+In this authentication mode, the login page is served by Ligoj. Authentication is done by Ligoj API through LDAP plugin expected to be configured.
+
+```shell
+sudo docker rm -f ligoj-ui
+sudo docker run \
+--name "ligoj-ui" \
+--network="host" \
+--detach \
+--restart=always \
+--log-opt max-size=5m --log-opt max-file=5 \
+-v /var/lib/ligoj:/home/ligoj \
+-e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=Rest' \
+-e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
+-e SERVER_PORT=8089 \
+ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```
+
+#### `OAuth2Bff` mode
+
+In this mode, authentication information is entered in the OIDC identity provider.
+
+Parameters for the [`application.properties` configuration file](#configuration) are [here](https://github.com/ligoj/ligoj/wiki/Security#oauth2bff-provider)
+
+Note: 
+- If the KeyCloak server uses an unknown SSL certificate authority (CA), follow the [trusted certificate configuration](#trusted-certificates) procedure for the `ligoj-ui` container.
+- At start time, the OAuth configuration is discovered from the OIDC provider. This means that the `ligoj-ui` container must be able to reach the OIDC provider. This is the actual limitation of Spring Security. If its unavailable at start time, the `ligoj-ui` container will fail to start. See https://github.com/spring-projects/spring-boot/issues/46862.
+- With this provider, the login page (login.html) is no more available.
+
+##### With Keycloak
+
+In this authentication mode, the login page is served by Keycloak.
+Additional configuration is added to the `CUSTOM_OPTS` environment variable (for now), instead of the standard `application.properties` configuration file.
+
+Prerequisites:
+- KeyCloak instance configured on the same LDAP as the one configured as `plugin-id-ldap` in Ligoj
+- Redirect configuration filled in
+  - Base URL: https://ligoj.sample.com/ligoj
+  - Login URI:
+    - https://ligoj.sample.com/ligoj/login/oauth2/code/keycloak
+    - https://ligoj.sample.com/users/auth/openid_connect/callback
+    - https://ligoj.sample.com/ligoj/oauth2/authorization/keycloak?logout
+  - Logout URI: https://ligoj.sample.com/ligoj/login/oauth2/authorization/keycloak?logout
+- *Optional* Valid certificates in the container's JKS. See [trusted certificates](#trusted-certificates)
+
+Sample configuration file [application.properties](app-ui/src/main/resources/application.properties)
+
+``` ini
+# OAuth2 specific overrides
+security = OAuth2Bff
+ligoj.security.oauth2.username-attribute = email
+ligoj.security.login.url = /oauth2/authorization/keycloak
+spring.security.oauth2.client.provider.keycloak.issuer-uri = http://localhost:9083/realms/keycloak
+spring.security.oauth2.client.registration.keycloak.provider =  keycloak
+spring.security.oauth2.client.registration.keycloak.authorization-grant-type = authorization_code
+spring.security.oauth2.client.registration.keycloak.client-id = ligoj
+spring.security.oauth2.client.registration.keycloak.client-secret = secret
+spring.security.oauth2.client.registration.keycloak.scope = openid
+```
+
+Corresponding Keycloak configuration::
+- Root URL = http://localhost:8080/ligoj/
+- Home URL = http://localhost:8080/ligoj/
+- Redirect Login URI: http://localhost:8080/ligoj/login/oauth2/code/keycloak
+- Redirect Logout URI: http://localhost:8080/ligoj/oauth2/authorization/keycloak?logout
+
+```shell
+sudo docker rm -f ligoj-ui
+sudo docker run \
+--name "ligoj-ui" \
+--network="host" \
+--detach \
+--restart=always \
+--log-opt max-size=5m --log-opt max-file=5 \
+-v /var/lib/ligoj:/home/ligoj \
+-e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=OAuth2Bff -Djavax.net.ssl.trustStore=/home/ligoj/ligoj-ui.jks -Dspring.security.oauth2.client.registration.keycloak.provider=keycloak -Dspring.security.oauth2.client.registration.keycloak.client-id=ligoj -Dspring.security.oauth2.client.registration.keycloak.client-secret=tMpwYaU2pBc9wXuWfYPPJXtEgxIDNGW9 -Dspring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.sample.com/realms/ligoj -Dligoj.security.login.url=/oauth2/authorization/keycloak -Dligoj.security.oauth2.username-attribute=preferred_username -Dspring.security.oauth2.client.registration.keycloak.scope=openid -Dligoj.security.login-by-api-key=true -Dsecurity.max-sessions=-1' \
+-e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
+-e SERVER_PORT=8089 \
+ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```
+
+# Configuration with CLI
 
 The objective of this section is:
 - CLI configuration,
@@ -1391,7 +1508,7 @@ api_user=ligoj-admin
 
 Without using configuration files, the equivalent in environment variables is:
 
-```bash
+```shell
 export LIGOJ_ENDPOINT="https://ligoj.sample.com/ligoj"
 export LIGOJ_OUTPUT="json"
 export LIGOJ_API_USER="ligoj-admin"
@@ -1399,7 +1516,7 @@ export LIGOJ_API_USER="ligoj-admin"
 
 Create a new API Key
 
-```bash
+```shell
 # Login with a password ignored in "Trusted" mode
 ligoj session login --password __trusted_mode_so_whatever__
 
@@ -1416,7 +1533,7 @@ ligoj session whoami
 
 ## Plugin Configuration
 
-```bash
+```shell
 # Put here the path leading to a Nexus proxy from where Ligoj plugins will be downloaded once cached by Nexus
 MAVEN_PLUGINS_ENDPOINT="http://nexus.sample.com/repository/maven_group/"
 
@@ -1432,7 +1549,7 @@ ligoj configuration set --id "ligoj.plugin.update" --value "false"
 
 Hooks, and read-only files management
 
-```bash
+```shell
 ligoj configuration set --id "ligoj.hook.path" --value "^/home/hooks/.*,^/home/ligoj/.*"
 ligoj configuration set --id "ligoj.file.path" --value "^/home/files/.*,^/home/hooks/.*,^/home/ligoj/META-INF/resources/webjars/.*,^/home/ligoj/statics/themes/.*"
 ```
@@ -1446,7 +1563,7 @@ To get API calls the hook can watch:
 - From the UI Ligoj console, in APi (`/#/api`) page
 - From the CLI, execute these commands:
 
-```bash
+```shell
 ligoj info api --output wadl --print url
 ligoj info api --output openapi --print url
 ligoj info api --output swagger --print url
@@ -1471,7 +1588,7 @@ To test hook in the real condition, use the Docker command `docker exec ligoj-ap
 
 The operation involves writing the script file (Shell, Python, etc.) directly into the directory `/home/ligoj/hooks` and making it executable.
 
-```bash
+```shell
 vi /home/ligoj/hooks/ligoj_audit.sh
 #
 chmod +x /home/ligoj/hooks/ligoj_audit.sh
@@ -1481,7 +1598,7 @@ chmod +x /home/ligoj/hooks/ligoj_audit.sh
 
 Using the CLI, upload the hook file into the right location:
 
-```bash
+```shell
 vi docs/sample_hook_ligoj_audit.sh
 #
 
@@ -1492,7 +1609,7 @@ ligoj file put --from docs/sample_hook_ligoj_audit.sh --path "/home/hooks/ligoj_
 
 #### Watch system roles actions
 
-```bash
+```shell
 ligoj hook upsert --name "audit_role_change" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"system/security/role.*"}'
 #
 
@@ -1502,7 +1619,7 @@ tail -f /home/ligoj/hooks/ligoj_audit.log
 #### Watch group membership actions
 
 
-```bash
+```shell
 ligoj hook upsert --name "on_group_ops" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"service/id/user.*"}'
 ```
 
@@ -1510,7 +1627,7 @@ ligoj hook upsert --name "on_group_ops" --command "/home/hooks/ligoj_audit.sh" -
 
 [Configurations](http://localhost:8080/ligoj/#/system) are string values and can be encrypted in database. When the hook scripts are called, secrets are decrypted and injected in the `PAYLOAD`.
 
-```bash
+```shell
 ligoj hook upsert --name "on_group_ops" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"service/id/user.*"}' --inject "alfresco"
 ```
 
@@ -1555,7 +1672,7 @@ Sample `PAYLOAD`:
 
 ### Update hook
 
-```bash
+```shell
 ligoj hook upsert --id 4 --name "audit_role_change_new" --command "/home/hooks/ligoj_audit.sh" --directory  /var/log --match '{"path":"system/security/role.*"}'
 ```
 
@@ -1563,7 +1680,7 @@ ligoj hook upsert --id 4 --name "audit_role_change_new" --command "/home/hooks/l
 
 Deletion can be done by `id` or `name` attribute:
 
-```bash
+```shell
 ligoj hook delete --id 2
 ligoj hook delete --name "audit_role_change"
 ```
@@ -1573,7 +1690,7 @@ ligoj hook delete --name "audit_role_change"
 Optional `id` or `name` filters are accepted:
 
 
-```bash
+```shell
 ligoj hook get
 ligoj hook get --id 1
 ligoj hook get --name "audit_role_change"
@@ -1586,7 +1703,7 @@ ligoj hook get --name "audit_role_change"
 
 ## Plugin installation
 
-```bash
+```shell
 echo "Installing plugins (Ligoj DEV/SNAPSHOT mode only)..."
 ligoj plugin install --id "plugin-id" --repository "nexus" --version 2.2.11
 ligoj plugin install --id "plugin-id-ldap" --repository "nexus" --version 2.2.7
@@ -1614,7 +1731,7 @@ ligoj plugin restart --wait 60
 
 For sample, `plugin-ai-ldap` configuration from the CLI:
 
-```bash
+```shell
 ligoj configuration set --id "cache.id-ldap-data.ttl" --value "37200"
 ligoj configuration set --id "service:id:user-display" --value "mail-no-domain"
 ligoj cache invalidate
@@ -1635,7 +1752,7 @@ ligoj plugin restart --wait 60
 
 ## Customization of the UI
 
-```bash
+```shell
 ligoj file put --from ./customize/logo.png --path "/home/ligoj/META-INF/resources/webjars/home/img/logo.png"
 ligoj file put --from ./customize/bg1.jpg  --path "/home/ligoj/statics/themes/bootstrap-material-design/img/bg1.jpg"
 ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/favicon.ico"
@@ -1652,104 +1769,6 @@ ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bo
 ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-310x310.png"
 ```
 
-## Configuration of authentication
-
-After configuring the primary `node` responsible for authentication, the `Trusted` mode can be disabled, the API keys generated previously remain valid.
-
-It is anyway possible to revert to this mode to regain access to Ligoj in case it becomes inaccessible due to a configuration defect of the LDAP `node`.
-
-System property `security` value determines the authentication mode:
-
-| `security` mode | Login screen  | Identity Provider                                                   |
-| --------------- | ------------- | ------------------------------------------------------------------- |
-| `Trusted`       | Ligoj         | Authentication required but always accepted                         |
-| `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
-| `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
-
-### `Rest` mode
-
-For sample, if LDAP authentication is expected to be proceeded `plugin-id-ldap`
-
-In this authentication mode, the login page is served by Ligoj. Authentication is done by Ligoj API through LDAP plugin expected to be configured.
-
-```bash
-sudo docker rm -f ligoj-ui
-sudo docker run \
---name "ligoj-ui" \
---network="host" \
---detach \
---restart=always \
---log-opt max-size=5m --log-opt max-file=5 \
--v /var/lib/ligoj:/home/ligoj \
--e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=Rest' \
--e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
--e SERVER_PORT=8089 \
-ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
-```
-
-### `OAuth2Bff` mode
-
-In this mode, authentication information is entered in the OIDC identity provider.
-
-Parameters for the [`application.properties` configuration file](#configuration) are [here](https://github.com/ligoj/ligoj/wiki/Security#oauth2bff-provider)
-
-Note: 
-- If the KeyCloak server uses an unknown SSL certificate authority (CA), follow the [trusted certificate configuration](#trusted-certificates) procedure for the `ligoj-ui` container.
-- At start time, the OAuth configuration is discovered from the OIDC provider. This means that the `ligoj-ui` container must be able to reach the OIDC provider. This is the actual limitation of Spring Security. If its unavailable at start time, the `ligoj-ui` container will fail to start. See https://github.com/spring-projects/spring-boot/issues/46862.
-- With this provider, the login page (login.html) is no more available.
-
-#### With Keycloak
-
-In this authentication mode, the login page is served by Keycloak.
-Additional configuration is added to the `CUSTOM_OPTS` environment variable (for now), instead of the standard `application.properties` configuration file.
-
-Prerequisites:
-- KeyCloak instance configured on the same LDAP as the one configured as `plugin-id-ldap` in Ligoj
-- Redirect configuration filled in
-  - Base URL: https://ligoj.sample.com/ligoj
-  - Login URI:
-    - https://ligoj.sample.com/ligoj/login/oauth2/code/keycloak
-    - https://ligoj.sample.com/users/auth/openid_connect/callback
-    - https://ligoj.sample.com/ligoj/oauth2/authorization/keycloak?logout
-  - Logout URI: https://ligoj.sample.com/ligoj/login/oauth2/authorization/keycloak?logout
-- *Optional* Valid certificates in the container's JKS. See [trusted certificates](#trusted-certificates)
-
-Sample configuration file [application.properties](app-ui/src/main/resources/application.properties)
-
-``` ini
-# OAuth2 specific overrides
-security = OAuth2Bff
-ligoj.security.oauth2.username-attribute = email
-ligoj.security.login.url = /oauth2/authorization/keycloak
-spring.security.oauth2.client.provider.keycloak.issuer-uri = http://localhost:9083/realms/keycloak
-spring.security.oauth2.client.registration.keycloak.provider =  keycloak
-spring.security.oauth2.client.registration.keycloak.authorization-grant-type = authorization_code
-spring.security.oauth2.client.registration.keycloak.client-id = ligoj
-spring.security.oauth2.client.registration.keycloak.client-secret = secret
-spring.security.oauth2.client.registration.keycloak.scope = openid
-```
-
-Corresponding Keycloak configuration::
-- Root URL = http://localhost:8080/ligoj/
-- Home URL = http://localhost:8080/ligoj/
-- Redirect Login URI: http://localhost:8080/ligoj/login/oauth2/code/keycloak
-- Redirect Logout URI: http://localhost:8080/ligoj/oauth2/authorization/keycloak?logout
-
-```bash
-sudo docker rm -f ligoj-ui
-sudo docker run \
---name "ligoj-ui" \
---network="host" \
---detach \
---restart=always \
---log-opt max-size=5m --log-opt max-file=5 \
--v /var/lib/ligoj:/home/ligoj \
--e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=OAuth2Bff -Djavax.net.ssl.trustStore=/home/ligoj/ligoj-ui.jks -Dspring.security.oauth2.client.registration.keycloak.provider=keycloak -Dspring.security.oauth2.client.registration.keycloak.client-id=ligoj -Dspring.security.oauth2.client.registration.keycloak.client-secret=tMpwYaU2pBc9wXuWfYPPJXtEgxIDNGW9 -Dspring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.sample.com/realms/ligoj -Dligoj.security.login.url=/oauth2/authorization/keycloak -Dligoj.security.oauth2.username-attribute=preferred_username -Dspring.security.oauth2.client.registration.keycloak.scope=openid -Dligoj.security.login-by-api-key=true -Dsecurity.max-sessions=-1' \
--e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
--e SERVER_PORT=8089 \
-ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
-```
-
 ## Configure with `bootstrap` commands
 
 These commands are aggregations of Ligoj API calls and/or ancillary tools.
@@ -1761,7 +1780,7 @@ Execution is necessary only once, but repeatable without error
 
 *Note* No existing jenkins job for the moment
 
-```bash
+```shell
 ligoj bootstrap init --base-dn="ou=sample,,c=fr" --users-base-dn "" --internal-users-base-dn "ou=people" --technical-users-base-dn "ou=technical-users" --external-users-base-dn "ou=external" --groups-base-dn "" --technical-groups-base-dn "ou=tools" --projects-base-dn "ou=projects"
 ```
 
@@ -1770,7 +1789,7 @@ ligoj bootstrap init --base-dn="ou=sample,,c=fr" --users-base-dn "" --internal-u
 
 Create a new project and associate `ligoj-user` user as its manager.
 
-```bash
+```shell
 ligoj bootstrap welcome-user --id "ligoj-user" --project "project1" --name "Sample Project1" --group-suffix="-team"
 ```
 
@@ -1779,7 +1798,7 @@ ligoj bootstrap welcome-user --id "ligoj-user" --project "project1" --name "Samp
 Creation of a project materializing a team by designating the administrator of the project and the administrator of the future project.
 Associated groups are also created.
 
-```bash
+```shell
 ligoj bootstrap create-project --project "project2" --name "Sample Project2" --group-suffix="-team" --groups="admin,dev" --parent-project "project1" --parent-admin "ligoj-user" --on-behalf-of other-user.name@sample.com
 ```
 
@@ -1812,7 +1831,7 @@ Creation of roles in different tools based on groups and linked to tool permissi
 
 This action does not need to access Ligoj, but to the remote tools.
 
-```bash
+```shell
 ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from="conf/sample.conf.empty.json" \
 --sonar-endpoint="" \
 --sonar-api-token="" \
@@ -1824,20 +1843,6 @@ ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from=
 --nexus-user="" \
 --nexus-password=""
 ```
-
-# `ligoj-api` container configuration properties
-
-## Docker environment variables
-
-| Docker env   | Default value                  | Note                                                                             |
-| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
-| CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration. See                                                    |
-| CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
-| SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
-| SERVER_PORT  | `8081`                         | Passed to server listening port and exposed port.                                |
-| JAVA_MEMORY  | `-Xms128M -Xmx128M`            | JVM Memory                                                                       |
-| CUSTOM_OPTS  |                                | Additional JVM options, like `-D...`                                             |
-| JAVA_OPTIONS |                                | Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties |
 
 ## Application level properties
 
@@ -2014,7 +2019,7 @@ You can experience network issue with a remote database. To validate the link fr
 
 #### MySQL
 
-```bash
+```shell
 docker run --rm -it \
  --name "ligoj-api" \
  ligoj/ligoj-api:4.0.1 sh -c "apk add mysql-client && mysql -h 192.168.1.16 --user=ligoj --password=ligoj ligoj"
@@ -2022,7 +2027,7 @@ docker run --rm -it \
 
 #### PostgreSQL
 
-```bash
+```shell
 docker run --rm -it \
  --name "ligoj-api" \
  ligoj/ligoj-api:4.0.1 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"
