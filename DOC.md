@@ -209,13 +209,13 @@ All work with a `deny all` by default.
 ### Vocabulary
 
 Many terms are used in this documentation and the definitions will make the explanations lighter: 
-* User: a user defined in the IAM system
+* User: A user defined in the IAM system.
 * Principal: The current authenticated user.
 * Credentials: A set of information proving the identity of the principal.
-* Role: Simple logical name aggregating authorizations. Unauthenticated users have the `ROLE_ANONYMOUS` role
+* Role: Simple logical name aggregating authorizations. Unauthenticated users have the `ROLE_ANONYMOUS` role.
 * Role Assignment: A role associated with a user. A user can have any number of roles. The role `USER` (even if it is not defined) is granted to any authenticated user.
 * System Administrator: A principal user having an `api` authorization with the `.*` pattern.
-* Group: A set of users. A group can be within another group. A user can be member of any number of groups. Note that a group may not be empty depending on the underlining IAM provider, but a virtual and invisible user may be kept for empty groups.
+* Group: A set of users. A group can be within another group. A user can be member of any number of groups. Note that a group may not be empty depending on the underlying IAM provider, but a virtual and invisible user may be kept for empty groups.
 * Company: A set of users. A company can be within another company. A user is a member of exactly one company.
 * Container: Company or group.
 * Container scope: A logical LDAP-like sub-tree to classify a container. At creation time of a container, this scope ensures the container is created in the correct hierarchy. At read time, it is used to display the containers by adding a logical type to them.
@@ -225,15 +225,15 @@ Many terms are used in this documentation and the definitions will make the expl
 * Delegate: A read permission given to a receiver for a container.
   * A receiver can be any resource. The delegate receiver's type is either `USER`, `GROUP` or `COMPANY`.
   * There is a `write` flag allowing to write in this container.
-  * There is also a "admin" flag allowing the receiver to share this delegate with another visible resource.
-* Project: A team owning a set of subscriptions, see the Subscription documentation
-* Project leader: The main contact of the project, and default manager of the project
+  * There is also an "admin" flag allowing the receiver to share this delegate with another visible resource.
+* Project: A team owning a set of subscriptions, see the Subscription documentation.
+* Project leader: The main contact of the project, and default manager of the project.
 * Hook: A script executed when a specific event occurs.
 
 ### Authorization
 
 Access to URLs depends on the following properties:
-* `method`:  `GET`, `POST`, `PUT`, `DELETE` or `null` for all of them.
+* `method`: `GET`, `POST`, `PUT`, `DELETE` or `null` for all of them.
 * `pattern`: A regular expression of the URL to match:
   * `.*`: any URL
   * `^rest/.*`: any REST URL
