@@ -22,3 +22,4 @@ bin/
 app-ui/node_modules/
 app-ui/src/main/webapp/node_modules/
 app-ui/src/main/webapp/src/main/resources/static/
+.claude/settings.json
