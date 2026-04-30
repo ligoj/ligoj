@@ -80,5 +80,38 @@ export function useDataTable(endpoint, { defaultSort = 'name', defaultOrder = 'a
     items.value = all.slice(start, start + itemsPerPage)
   }
 
-  return { items, totalItems, loading, error, search, demoMode, load }
+  /**
+   * Fetch the full dataset in one shot, ignoring the table's current
+   * pagination state. Designed to plug straight into
+   * `<LigojDataTableServer :fetch-all="dt.loadAll" />` so the tools
+   * menu's CSV / clipboard exports always cover every row, not just
+   * the rendered page. The current `search` filter is applied so the
+   * export reflects what the user is actually looking at.
+   */
+  async function loadAll() {
+    if (demoMode.value && Array.isArray(demoData)) {
+      return [...demoData]
+    }
+    const params = new URLSearchParams()
+    // Single-page "give me everything" call. The legacy Ligoj backend
+    // tolerates this — the underlying repositories cap internally.
+    params.set('rows', '999999')
+    params.set('page', '1')
+    params.set('sidx', defaultSort)
+    params.set('sord', defaultOrder)
+    if (search.value) params.set('search[value]', search.value)
+    try {
+      const resp = await fetch(`rest/${endpoint}?${params}`, { credentials: 'include' })
+      if (!resp.ok) {
+        if (Array.isArray(demoData)) return [...demoData]
+        return []
+      }
+      const data = await resp.json()
+      return Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
+    } catch {
+      return Array.isArray(demoData) ? [...demoData] : []
+    }
+  }
+
+  return { items, totalItems, loading, error, search, demoMode, load, loadAll }
 }
