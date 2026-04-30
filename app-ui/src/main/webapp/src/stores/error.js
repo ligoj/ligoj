@@ -5,16 +5,37 @@ export const useErrorStore = defineStore('error', () => {
   let nextId = 0
   const errors = ref([])
 
-  function push(error) {
-    const entry = {
+  /**
+   * Push a notification onto the snackbar stack. Accepts either a plain
+   * message string or `{ message, status, severity, timeout }`.
+   * `severity` defaults to 'error' so existing callers keep their
+   * behaviour; pass 'success' / 'info' / 'warning' for non-error
+   * confirmations. Auto-dismiss is faster for non-errors.
+   */
+  function push(entry) {
+    const e = typeof entry === 'string' ? { message: entry } : (entry || {})
+    const severity = e.severity || 'error'
+    const item = {
       id: ++nextId,
-      message: typeof error === 'string' ? error : error.message || 'Unknown error',
-      status: error.status || null,
+      message: e.message || 'Unknown error',
+      status: e.status || null,
+      severity,
       timestamp: Date.now(),
     }
-    errors.value.push(entry)
-    setTimeout(() => dismiss(entry.id), 8000)
-    return entry.id
+    errors.value.push(item)
+    const timeout = e.timeout ?? (severity === 'error' ? 8000 : 4000)
+    if (timeout > 0) setTimeout(() => dismiss(item.id), timeout)
+    return item.id
+  }
+
+  /** Shortcut: green confirmation snackbar. */
+  function success(message, opts = {}) {
+    return push({ ...opts, message, severity: 'success' })
+  }
+
+  /** Shortcut: blue informational snackbar. */
+  function info(message, opts = {}) {
+    return push({ ...opts, message, severity: 'info' })
   }
 
   function dismiss(id) {
@@ -60,5 +81,5 @@ export const useErrorStore = defineStore('error', () => {
     return response
   }
 
-  return { errors, push, dismiss, clear, handleResponse }
+  return { errors, push, success, info, dismiss, clear, handleResponse }
 })

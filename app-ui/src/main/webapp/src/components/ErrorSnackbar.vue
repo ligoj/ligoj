@@ -1,17 +1,17 @@
 <template>
   <div class="error-snackbar-stack">
     <v-snackbar
-      v-for="error in errorStore.errors"
-      :key="error.id"
+      v-for="entry in errorStore.errors"
+      :key="entry.id"
       :model-value="true"
-      color="error"
+      :color="entry.severity || 'error'"
       location="bottom right"
       timeout="-1"
     >
-      <span v-if="error.status" class="font-weight-bold mr-1">{{ error.status }}</span>
-      {{ error.message }}
+      <span v-if="entry.status" class="font-weight-bold mr-1">{{ entry.status }}</span>
+      {{ entry.message }}
       <template #actions>
-        <v-btn variant="text" icon="mdi-close" size="small" @click="errorStore.dismiss(error.id)" />
+        <v-btn variant="text" icon="mdi-close" size="small" @click="errorStore.dismiss(entry.id)" />
       </template>
     </v-snackbar>
   </div>

@@ -54,6 +54,34 @@ describe('useErrorStore', () => {
     expect(store.errors).toHaveLength(0)
   })
 
+  it('default severity is "error"', () => {
+    const store = useErrorStore()
+    store.push('boom')
+    expect(store.errors[0].severity).toBe('error')
+  })
+
+  it('success() pushes a success entry and auto-dismisses faster (4s)', () => {
+    const store = useErrorStore()
+    store.success('Saved')
+    expect(store.errors).toHaveLength(1)
+    expect(store.errors[0].severity).toBe('success')
+    expect(store.errors[0].message).toBe('Saved')
+    vi.advanceTimersByTime(4000)
+    expect(store.errors).toHaveLength(0)
+  })
+
+  it('info() pushes an info entry', () => {
+    const store = useErrorStore()
+    store.info('FYI')
+    expect(store.errors[0].severity).toBe('info')
+  })
+
+  it('explicit severity override on push() wins', () => {
+    const store = useErrorStore()
+    store.push({ message: 'oops', severity: 'warning' })
+    expect(store.errors[0].severity).toBe('warning')
+  })
+
   it('handleResponse does nothing for ok response', async () => {
     const store = useErrorStore()
     const resp = { ok: true, status: 200 }

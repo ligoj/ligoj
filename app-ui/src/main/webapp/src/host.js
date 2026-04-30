@@ -12,6 +12,7 @@
  */
 
 export { useApi } from './composables/useApi.js'
+export { useClipboard } from './composables/useClipboard.js'
 export { useDataTable } from './composables/useDataTable.js'
 export { useFormGuard } from './composables/useFormGuard.js'
 export { useAppStore } from './stores/app.js'
