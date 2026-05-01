@@ -10,23 +10,12 @@
     <v-divider />
     <v-list density="compact" nav :opened="openedGroups">
       <template v-for="item in auth.navItems" :key="item.id">
-        <v-list-item
-          v-if="!item.children"
-          :prepend-icon="item.icon"
-          :title="item.labelKey ? t(item.labelKey) : item.label"
-          :to="item.route"
-        />
+        <v-list-item v-if="!item.children" :prepend-icon="item.icon" :title="item.labelKey ? t(item.labelKey) : item.label" :to="item.route" />
         <v-list-group v-else :value="item.id">
           <template #activator="{ props }">
             <v-list-item v-bind="props" :prepend-icon="item.icon" :title="item.labelKey ? t(item.labelKey) : item.label" />
           </template>
-          <v-list-item
-            v-for="child in item.children"
-            :key="child.id"
-            :prepend-icon="child.icon"
-            :title="child.labelKey ? t(child.labelKey) : child.label"
-            :to="child.route"
-          />
+          <v-list-item v-for="child in item.children" :key="child.id" :prepend-icon="child.icon" :title="child.labelKey ? t(child.labelKey) : child.label" :to="child.route" />
         </v-list-group>
       </template>
     </v-list>
@@ -40,7 +29,7 @@
 
   <v-app-bar app density="compact" elevation="1">
     <v-app-bar-nav-icon @click="appStore.toggleSidebar()" />
-    <v-toolbar-title>{{ appStore.title }}</v-toolbar-title>
+    <v-toolbar-title><v-breadcrumbs v-if="appStore.breadcrumbs.length" :items="appStore.breadcrumbs" /></v-toolbar-title>
     <v-spacer />
     <v-menu>
       <template #activator="{ props }">
@@ -49,13 +38,7 @@
         </v-btn>
       </template>
       <v-list density="compact">
-        <v-list-item
-          v-for="loc in i18n.SUPPORTED_LOCALES"
-          :key="loc"
-          :title="LOCALE_NAMES[loc] || loc"
-          :active="i18n.locale === loc"
-          @click="i18n.setLocale(loc)"
-        />
+        <v-list-item v-for="loc in i18n.SUPPORTED_LOCALES" :key="loc" :title="LOCALE_NAMES[loc] || loc" :active="i18n.locale === loc" @click="i18n.setLocale(loc)" />
       </v-list>
     </v-menu>
     <NotificationBell />
@@ -72,7 +55,7 @@
 
   <v-main>
     <v-container fluid>
-      <v-breadcrumbs v-if="appStore.breadcrumbs.length" :items="appStore.breadcrumbs" />
+
       <slot />
     </v-container>
   </v-main>
