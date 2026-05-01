@@ -22,6 +22,7 @@ export { useAuthStore } from './stores/auth.js'
 export { default as ImportExportBar } from './components/ImportExportBar.vue'
 export { default as LigojDataTable } from './components/LigojDataTable.vue'
 export { default as LigojDataTableServer } from './components/LigojDataTableServer.vue'
+export { default as NodeIcon, nodeIcon } from './components/NodeIcon.vue'
 
 /**
  * The app's public base path, e.g. `/ligoj/`. Exported so plugins can
