@@ -44,7 +44,7 @@ define(['cascade'], function ($cascade) {
 		/**
 		 * Icon of corresponding tool with optional recursive display.
 		 * @param {{id,refined}|string} node The node : tool, service ... The priority is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
-		 * @param {string} suffix For URL icon, the suffix to add to the path.
+		 * @param {string} suffix For URL icon, the suffix to add to the image path. only used when `uiClasses` is not defined.
 		 * @param {boolean} dataSrc When defined, the resolved "img" source ("src") is also stored to "data-src". It permits a reset to the original src image after alter.
 		 * @param {boolean} recursive When defined, the parent icon is prepended to this icon.
 		 */
@@ -68,20 +68,42 @@ define(['cascade'], function ($cascade) {
 		 * @param {{uiClasses}|string} node The node : tool, service ... The priority is : 'uiCLasses', then 3rd fragment of node's identifier ('id' or the string value itself), then 2nd fragment of the node's identifier
 		 * @param {string} suffix For URL icon, the suffix to add to the path.
 		 * @param {boolean} dataSrc When defined, the resolved "img" source ("src") is also stored to "data-src". It permits a reset to the original src image after alter.
-		 * @param {array} fragments Identifier fragments built from the node.
+		 * @param {array} fragments Identifier fragments built from the node. Corresponds the parts name of the node identienfier. Example: ["bt", "jira", "server-1"]
 		 */
 		toIconBase: function (node, suffix, dataSrc, fragments) {
 			var uiClasses = node && node.uiClasses;
 			var title = current.getNodeName(node) || fragments[2] || fragments[1];
 			var result;
+			var uiClassesParts = [];
 			if (uiClasses) {
-				// Use classes instead of picture
-				result = uiClasses.startsWith('$') ? '<span class="icon-text">' + uiClasses.substring(1) + '</span>' : ('<i data-toggle="tooltip" title="' + title + '" class="fa-fw ' + uiClasses + '"></i>');
+				// Use the defined UI classes to render the icon
+				uiClassesParts = uiClasses.split(' ');
+				var explicitIcon = uiClassesParts.find(function (part) {
+					return part.startsWith('mdi-') || part.startsWith('fa-');
+				});
+				if (explicitIcon) {
+					// Remove the explicit icon from the UI classes
+					uiClassesParts = uiClassesParts.filter(function (part) {
+						return part !== explicitIcon;
+					});
+				}
+
+				if (explicitIcon) {
+					// Use the icon provided by the node
+					result = '<i data-toggle="tooltip" title="' + title + '" class="fa-fw ' + explicitIcon + + ' ' + uiClassesParts.join(' ') + '"></i>';
+				} else if (uiClasses.startsWith('$')) {
+					// Full text
+					result = '<span data-toggle="tooltip" title="' + title + '" class="icon-text">' + uiClasses.substring(1) + '</span>';
+				} else {
+					// Generic icon from UI classes
+					result = '<span data-toggle="tooltip" title="' + title + '" class="' + uiClassesParts.join(' ') + '"</span>';
+				}
 			} else if (fragments.length < 3) {
-				// Simple service
+				// Only service name 
+				// TODO : add in tooltip the translated name if defined
 				result = '<i data-toggle="tooltip" title="' + title + '" class="fas fa-wrench"></i>';
 			} else {
-				// Use a provided picture
+				// Use an implicitely provided picture
 				var url = 'main/service/' + fragments[1] + '/' + fragments[2] + '/img/' + fragments[2] + (suffix || '') + '.png';
 				result = '<img src="' + url + '" data-toggle="tooltip" title="' + title + '" alt="" onerror="this.className=this.className+\' broken\'"' + (dataSrc ? ' data-src="' + url + '"' : '') + ' class="tool"/>';
 			}
@@ -95,7 +117,7 @@ define(['cascade'], function ($cascade) {
 		 * @return A link with icon depending on the target, title and text.
 		 */
 		getResourceLink: function (target, type) {
-			return '<i class="' + current.targetTypeClass[type] + ' fa-fw" title="<strong>' + current.$messages[type] +'</strong> ' + current.getResourceName(target, type) + '" data-toggle="tooltip"></i> ' + current['get' + type.capitalize() + 'Link'](target);
+			return '<i class="' + current.targetTypeClass[type] + ' fa-fw" title="<strong>' + current.$messages[type] + '</strong> ' + current.getResourceName(target, type) + '" data-toggle="tooltip"></i> ' + current['get' + type.capitalize() + 'Link'](target);
 		},
 
 		/**
@@ -490,7 +512,7 @@ define(['cascade'], function ($cascade) {
 		 * Return the first level of refinement, just after root. This corresponds to the first implementation
 		 * of a service. The result will be
 		 * cached.
-         * @param {{tool, refined}} node
+		 * @param {{tool, refined}} node
 		 */
 		getTool: function (node) {
 			if (node.tool) {
@@ -681,13 +703,13 @@ define(['cascade'], function ($cascade) {
 			});
 		},
 
-        confirmDeleteTableEntry: function ($this, table, url, displayFunction) {
-            // Requires a confirmation
-            const entity = table?.fnGetData($this.closest('tr')[0]);
-            const text = typeof displayFunction === 'function' ? displayFunction(entity) : (entity.name + '/' + entity.type);
-            bootbox.confirmDelete(function (confirmed) {
-                confirmed && current.deleteEntry(table, url, entity.id, text);
-            }, text);
+		confirmDeleteTableEntry: function ($this, table, url, displayFunction) {
+			// Requires a confirmation
+			const entity = table?.fnGetData($this.closest('tr')[0]);
+			const text = typeof displayFunction === 'function' ? displayFunction(entity) : (entity.name + '/' + entity.type);
+			bootbox.confirmDelete(function (confirmed) {
+				confirmed && current.deleteEntry(table, url, entity.id, text);
+			}, text);
 		}
 	};
 	return current;
