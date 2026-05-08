@@ -408,7 +408,12 @@ onMounted(() => {
 * { box-sizing: border-box; }
 
 .login-bg {
-  min-height: 100vh;
+  /* Pin to the viewport exactly, not min-height — combined with the
+   * unscoped body reset below this prevents the page-level vertical
+   * scrollbar that the default 8 px body margin used to produce. */
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -421,6 +426,12 @@ onMounted(() => {
 .card {
   width: 100%;
   max-width: 420px;
+  /* The card may grow tall in reset mode (extra password + captcha
+   * fields). Cap it at the viewport and let scrolling happen inside
+   * the card body — the outer page never scrolls. */
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -451,6 +462,10 @@ h1 {
 
 .card-body {
   padding: 16px 24px 24px;
+  /* Grows to fill the card and scrolls internally if the form (e.g.
+   * reset mode with extra fields) overflows the viewport. */
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
 
 .alert {
@@ -599,4 +614,19 @@ input[readonly] {
   padding: 4px 8px;
 }
 .link:hover { text-decoration: underline; }
+</style>
+
+<!--
+  Unscoped: zero out the default html/body margin so .login-bg's 100vh
+  fits the viewport exactly. Without this, the browser adds 8 px of
+  body margin and the page gets a vertical scrollbar regardless of
+  what we do to the inner layout.
+-->
+<style>
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
 </style>
