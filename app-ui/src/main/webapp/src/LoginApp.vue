@@ -2,18 +2,18 @@
   <main class="login-bg">
     <section class="card">
       <header class="card-head">
-        <div class="locale-row" role="group" aria-label="Language">
-          <button
+        <select
+          class="locale-select"
+          aria-label="Language"
+          :value="locale"
+          @change="setLocale($event.target.value)"
+        >
+          <option
             v-for="loc in LOCALES"
             :key="loc.code"
-            type="button"
-            class="locale-btn"
-            :class="{ 'locale-btn--active': locale === loc.code }"
-            :aria-pressed="locale === loc.code"
-            :title="loc.label"
-            @click="setLocale(loc.code)"
-          >{{ loc.label }}</button>
-        </div>
+            :value="loc.code"
+          >{{ loc.flag }} {{ loc.label }}</option>
+        </select>
         <img src="@/assets/ligoj.svg" alt="Ligoj" class="logo" />
         <h1>Ligoj</h1>
         <p class="subtitle">{{ msg['title-' + mode] }}</p>
@@ -125,8 +125,8 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 
 const LOCALES = [
-  { code: 'en', label: 'English' },
-  { code: 'fr', label: 'Français' },
+  { code: 'en', label: 'English',  flag: '\u{1F1EC}\u{1F1E7}' /* 🇬🇧 */ },
+  { code: 'fr', label: 'Français', flag: '\u{1F1EB}\u{1F1F7}' /* 🇫🇷 */ },
 ]
 
 /** Same storage key the main app's vue-i18n uses, so a locale picked
@@ -493,38 +493,24 @@ onMounted(() => {
   text-align: center;
 }
 
-.locale-row {
+.locale-select {
   position: absolute;
   top: 8px;
   right: 8px;
-  display: inline-flex;
-  gap: 4px;
-}
-.locale-btn {
-  background: transparent;
+  background: #fff;
   border: 1px solid #ccc;
   border-radius: 4px;
-  padding: 2px 8px;
-  font-size: 0.75rem;
-  color: #555;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  color: #333;
   cursor: pointer;
   line-height: 1.4;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  /* Native browser chrome looks fine — no need to style the arrow. */
 }
-.locale-btn:hover {
-  background: #f0f0f0;
-  border-color: #999;
-  color: #222;
-}
-.locale-btn--active {
-  background: #1a237e;
+.locale-select:focus {
+  outline: none;
   border-color: #1a237e;
-  color: #fff;
-}
-.locale-btn--active:hover {
-  background: #0d47a1;
-  border-color: #0d47a1;
-  color: #fff;
+  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
 }
 
 .logo {
