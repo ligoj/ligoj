@@ -23,10 +23,53 @@
       }
     }
   </script>
+  <!--
+    Boot indicator: a pure CSS spinner shown immediately while main.js
+    parses, fetches the session, and pre-loads the required plugins.
+    The first thing Vue does on mount is replace `#app`'s children, so
+    this disappears the moment the app is ready — no flash, no JS
+    needed before paint.
+  -->
+  <style>
+    html, body { margin: 0; height: 100%; }
+    .ligoj-boot {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+      z-index: 0;
+    }
+    .ligoj-boot__spinner {
+      width: 56px;
+      height: 56px;
+      border: 4px solid rgba(255, 255, 255, 0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: ligoj-spin 0.8s linear infinite;
+    }
+    .ligoj-boot__text {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      opacity: 0.85;
+    }
+    @keyframes ligoj-spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 
 <body>
-  <div id="app"></div>
+  <div id="app">
+    <div class="ligoj-boot" role="status" aria-live="polite" aria-label="Loading Ligoj">
+      <div class="ligoj-boot__spinner" aria-hidden="true"></div>
+      <p class="ligoj-boot__text">Loading…</p>
+    </div>
+  </div>
   <script type="module" src="/src/main.js"></script>
 </body>
 
