@@ -25,7 +25,7 @@ router.beforeEach(async (to) => {
   if (!auth.isAuthenticated) {
     const ok = await auth.fetchSession()
     if (!ok) {
-      window.location.href = 'v-login.html'
+      auth.redirectToLogin()
       return false
     }
   }

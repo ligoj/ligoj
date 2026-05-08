@@ -22,7 +22,7 @@ const auth = useAuthStore()
 onMounted(async () => {
   const ok = await auth.fetchSession()
   if (!ok) {
-    window.location.href = 'v-login.html'
+    auth.redirectToLogin()
     return
   }
   // Optional backend-listed plugins load lazily; required plugins are

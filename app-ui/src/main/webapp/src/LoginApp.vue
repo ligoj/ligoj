@@ -189,6 +189,9 @@ const MESSAGES = {
     'error-captcha': 'CAPTCHA non concordant',
     'error-cookie': 'Les Cookies doivent être acceptés pour ce site',
     'error-network': 'Erreur réseau. Veuillez réessayer.',
+    'error-expired': 'Votre session a expiré. Veuillez vous reconnecter.',
+    'error-unavailable': 'Service temporairement indisponible. Veuillez réessayer dans quelques instants.',
+    'error-denied': 'Accès refusé. Veuillez vous reconnecter.',
     'password-weak': 'Trop faible, 8 ou plus majuscules, minuscules et chiffres',
     'password-mismatch': 'Mots de passe différents',
   },
@@ -229,6 +232,9 @@ const MESSAGES = {
     'error-captcha': 'CAPTCHA did not match',
     'error-cookie': 'Cookies must be accepted for this site',
     'error-network': 'Network error. Please try again.',
+    'error-expired': 'Your session has expired. Please sign in again.',
+    'error-unavailable': 'Service temporarily unavailable. Please try again in a few moments.',
+    'error-denied': 'Access denied. Please sign in again.',
     'password-weak': 'Too weak, 8+ uppercase, lowercase and digit chars',
     'password-mismatch': 'Passwords do not match',
   },
@@ -480,9 +486,18 @@ onMounted(() => {
     return
   }
 
-  if (search.includes('concurrency')) {
-    errorMsg.value = msg['error-concurrency']
-  } else if (search.includes('logout')) {
+  // Redirects from the main app encode the failure reason as a flag —
+  // surface a localized message so the user knows why they're back here
+  // instead of staring at a silent login form.
+  const params = new URLSearchParams(search)
+  const REASONS = ['expired', 'unavailable', 'network', 'denied', 'concurrency']
+  for (const flag of REASONS) {
+    if (params.has(flag) || search.includes(flag)) {
+      errorMsg.value = msg['error-' + flag]
+      return
+    }
+  }
+  if (params.has('logout') || search.includes('logout')) {
     successMsg.value = msg['success-logout']
   }
 })

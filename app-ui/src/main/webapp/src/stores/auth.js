@@ -82,10 +82,20 @@ export const useAuthStore = defineStore('auth', () => {
       .filter(Boolean)
   })
 
+  /**
+   * HTTP status returned by the latest /rest/session probe. 0 means a
+   * network-level failure (no response received). Inspected by callers
+   * that need to know *why* the session lookup failed — the redirect to
+   * the login page surfaces this through a query-string flag so the
+   * login screen can show a meaningful error.
+   */
+  const lastSessionStatus = ref(null)
+
   async function fetchSession() {
     loading.value = true
     try {
       const resp = await fetch('rest/session', { credentials: 'include' })
+      lastSessionStatus.value = resp.status
       if (!resp.ok) {
         session.value = null
         return false
@@ -94,10 +104,35 @@ export const useAuthStore = defineStore('auth', () => {
       return true
     } catch {
       session.value = null
+      lastSessionStatus.value = 0
       return false
     } finally {
       loading.value = false
     }
+  }
+
+  /**
+   * Map the last fetchSession status to a short query-string flag that
+   * v-login.html turns into a localized error message.
+   *
+   *   0       → 'network'      → "Network error"
+   *   401/403 → 'expired'      → "Your session has expired"
+   *   503/502 → 'unavailable'  → "Service temporarily unavailable"
+   *   other   → 'denied'       → generic "Access denied"
+   */
+  function loginRedirectReason() {
+    const s = lastSessionStatus.value
+    if (s === 0) return 'network'
+    if (s === 401 || s === 403) return 'expired'
+    if (s === 502 || s === 503 || s === 504) return 'unavailable'
+    return 'denied'
+  }
+
+  /** Send the user back to the login page with the failure reason in
+   *  the query string so the login form can render it. */
+  function redirectToLogin() {
+    const reason = loginRedirectReason()
+    window.location.href = 'v-login.html?' + reason
   }
 
   async function logout() {
@@ -111,6 +146,6 @@ export const useAuthStore = defineStore('auth', () => {
     uiAuthorizations, apiAuthorizations, appSettings,
     navItems,
     isAllowed, isAllowedApi,
-    fetchSession, logout,
+    fetchSession, logout, redirectToLogin, lastSessionStatus,
   }
 })
