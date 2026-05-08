@@ -359,14 +359,41 @@ async function doLogin() {
   const params = new URLSearchParams()
   params.append('username', username.value.toLowerCase())
   params.append('password', password.value)
-  const resp = await fetch('login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params,
-    credentials: 'include',
-  })
-  const data = await resp.json().catch(() => null)
-  if (!resp.ok || (data && !data.success)) {
+
+  let resp
+  try {
+    resp = await fetch('login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        // Ask the backend for JSON explicitly so it skips the
+        // 302-redirect-to-login-page that Spring Security's form login
+        // does by default. Without this we follow the redirect and end
+        // up parsing HTML, which used to look like a successful login
+        // and trigger a page reload.
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: params,
+      credentials: 'include',
+    })
+  } catch (e) {
+    console.error('[login] network error', e)
+    errorMsg.value = msg['error-network']
+    return
+  }
+
+  let data = null
+  try {
+    data = await resp.json()
+  } catch {
+    /* non-JSON body (e.g. HTML after a backend redirect) → treat as failure */
+  }
+
+  // Treat anything that's not an explicit `{success: true}` payload as a
+  // failure. That covers HTTP errors (4xx/5xx), backend redirects whose
+  // followed response is HTML, and explicit `{success: false}`.
+  if (!resp.ok || data?.success !== true) {
     handleError(resp.status, data)
     return
   }
