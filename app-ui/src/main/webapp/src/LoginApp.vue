@@ -2,6 +2,18 @@
   <main class="login-bg">
     <section class="card">
       <header class="card-head">
+        <div class="locale-row" role="group" aria-label="Language">
+          <button
+            v-for="loc in LOCALES"
+            :key="loc.code"
+            type="button"
+            class="locale-btn"
+            :class="{ 'locale-btn--active': locale === loc.code }"
+            :aria-pressed="locale === loc.code"
+            :title="loc.label"
+            @click="setLocale(loc.code)"
+          >{{ loc.label }}</button>
+        </div>
         <img src="@/assets/ligoj.svg" alt="Ligoj" class="logo" />
         <h1>Ligoj</h1>
         <p class="subtitle">{{ msg['title-' + mode] }}</p>
@@ -110,89 +122,121 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 
-const isFr = (navigator.language || '').startsWith('fr')
+const LOCALES = [
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' },
+]
 
-const msg = reactive(isFr ? {
-  username: 'Identifiant',
-  password: 'Mot de passe',
-  newPassword: 'Nouveau mot de passe',
-  passwordConfirm: 'Confirmation mot de passe',
-  mail: 'Mail',
-  captcha: 'CAPTCHA',
-  'title-login': 'Authentification',
-  'title-reset': 'Réinitialiser le mot de passe',
-  'title-recovery': 'Demande de réinitialisation',
-  'submit-login': 'Se connecter',
-  'submit-reset': 'Valider',
-  'submit-recovery': 'Envoyer',
-  recover: 'Mot de passe oublié',
-  back: 'Retour',
-  required: 'Ce champ est requis',
-  helpPassword: '8 caractères min. avec majuscules, minuscules et chiffres',
-  helpCaptcha: 'Caractères apparaissant dans l\'image ci-dessus',
-  validating: 'Validation ...',
-  'message-reset': 'Saisissez votre nouveau mot de passe deux fois, ainsi que le texte de sécurité.',
-  'message-recovery': 'Saisissez votre identifiant, l\'adresse mail correspondante ainsi que le texte de sécurité. Un mail vous sera envoyé.',
-  'success-login': 'Authentifié',
-  'success-reset': 'Mot de passe réinitialisé',
-  'success-recovery': 'Requête envoyée',
-  'success-logout': 'Vous êtes déconnecté',
-  'error-technical': 'Erreur technique',
-  'error-password': 'Mots de passe différents',
-  'error-password-complexity': 'Mot de passe trop faible — 8 ou plus majuscules, minuscules et chiffres',
-  'error-password-policy': 'Le nouveau mot de passe est dans l\'historique des anciens mots de passe',
-  'error-login': 'Authentification échouée',
-  'error-mail': 'Mail non envoyé',
-  'error-concurrency': 'Compte utilisé ailleurs en ce moment',
-  'error-reset': 'Jeton expiré',
-  'error-connected': 'Vous devez d\'abord vous déconnecter',
-  'error-captcha': 'CAPTCHA non concordant',
-  'error-cookie': 'Les Cookies doivent être acceptés pour ce site',
-  'error-network': 'Erreur réseau. Veuillez réessayer.',
-  'password-weak': 'Trop faible, 8 ou plus majuscules, minuscules et chiffres',
-  'password-mismatch': 'Mots de passe différents',
-} : {
-  username: 'Username',
-  password: 'Password',
-  newPassword: 'New password',
-  passwordConfirm: 'Confirm password',
-  mail: 'Email',
-  captcha: 'CAPTCHA',
-  'title-login': 'Sign in',
-  'title-reset': 'Reset password',
-  'title-recovery': 'Password recovery',
-  'submit-login': 'Sign in',
-  'submit-reset': 'Validate',
-  'submit-recovery': 'Send request',
-  recover: 'Forgot password',
-  back: 'Back',
-  required: 'This field is required',
-  helpPassword: '8+ chars with uppercase, lowercase and digits',
-  helpCaptcha: 'Characters appearing in the above picture',
-  validating: 'Validating ...',
-  'message-reset': 'Provide your new password twice and the security text.',
-  'message-recovery': 'Provide your username, the corresponding email and the security characters. A mail will be sent to continue the process.',
-  'success-login': 'Authentication succeed',
-  'success-reset': 'Password has been reset',
-  'success-recovery': 'Request has been sent',
-  'success-logout': 'You are now logged out',
-  'error-technical': 'Technical error',
-  'error-password': 'Passwords do not match',
-  'error-password-complexity': 'Password is too weak — 8+ uppercase, lowercase and digit chars',
-  'error-password-policy': 'Password is in history of old passwords',
-  'error-login': 'Authentication failed',
-  'error-mail': 'Mail cannot be sent',
-  'error-concurrency': 'Your account is being used somewhere else',
-  'error-reset': 'Expired token',
-  'error-connected': 'You have to logout first',
-  'error-captcha': 'CAPTCHA did not match',
-  'error-cookie': 'Cookies must be accepted for this site',
-  'error-network': 'Network error. Please try again.',
-  'password-weak': 'Too weak, 8+ uppercase, lowercase and digit chars',
-  'password-mismatch': 'Passwords do not match',
-})
+/** Same storage key the main app's vue-i18n uses, so a locale picked
+ *  on the login screen is honoured by the host once the user is in. */
+const LOCALE_STORAGE_KEY = 'ligoj-locale'
+
+function readSavedLocale() {
+  try { return localStorage.getItem(LOCALE_STORAGE_KEY) } catch { return null }
+}
+
+function detectLocale() {
+  const saved = readSavedLocale()
+  if (saved && MESSAGES[saved]) return saved
+  return (navigator.language || '').startsWith('fr') ? 'fr' : 'en'
+}
+
+const MESSAGES = {
+  fr: {
+    username: 'Identifiant',
+    password: 'Mot de passe',
+    newPassword: 'Nouveau mot de passe',
+    passwordConfirm: 'Confirmation mot de passe',
+    mail: 'Mail',
+    captcha: 'CAPTCHA',
+    'title-login': 'Authentification',
+    'title-reset': 'Réinitialiser le mot de passe',
+    'title-recovery': 'Demande de réinitialisation',
+    'submit-login': 'Se connecter',
+    'submit-reset': 'Valider',
+    'submit-recovery': 'Envoyer',
+    recover: 'Mot de passe oublié',
+    back: 'Retour',
+    required: 'Ce champ est requis',
+    helpPassword: '8 caractères min. avec majuscules, minuscules et chiffres',
+    helpCaptcha: 'Caractères apparaissant dans l\'image ci-dessus',
+    validating: 'Validation ...',
+    'message-reset': 'Saisissez votre nouveau mot de passe deux fois, ainsi que le texte de sécurité.',
+    'message-recovery': 'Saisissez votre identifiant, l\'adresse mail correspondante ainsi que le texte de sécurité. Un mail vous sera envoyé.',
+    'success-login': 'Authentifié',
+    'success-reset': 'Mot de passe réinitialisé',
+    'success-recovery': 'Requête envoyée',
+    'success-logout': 'Vous êtes déconnecté',
+    'error-technical': 'Erreur technique',
+    'error-password': 'Mots de passe différents',
+    'error-password-complexity': 'Mot de passe trop faible — 8 ou plus majuscules, minuscules et chiffres',
+    'error-password-policy': 'Le nouveau mot de passe est dans l\'historique des anciens mots de passe',
+    'error-login': 'Authentification échouée',
+    'error-mail': 'Mail non envoyé',
+    'error-concurrency': 'Compte utilisé ailleurs en ce moment',
+    'error-reset': 'Jeton expiré',
+    'error-connected': 'Vous devez d\'abord vous déconnecter',
+    'error-captcha': 'CAPTCHA non concordant',
+    'error-cookie': 'Les Cookies doivent être acceptés pour ce site',
+    'error-network': 'Erreur réseau. Veuillez réessayer.',
+    'password-weak': 'Trop faible, 8 ou plus majuscules, minuscules et chiffres',
+    'password-mismatch': 'Mots de passe différents',
+  },
+  en: {
+    username: 'Username',
+    password: 'Password',
+    newPassword: 'New password',
+    passwordConfirm: 'Confirm password',
+    mail: 'Email',
+    captcha: 'CAPTCHA',
+    'title-login': 'Sign in',
+    'title-reset': 'Reset password',
+    'title-recovery': 'Password recovery',
+    'submit-login': 'Sign in',
+    'submit-reset': 'Validate',
+    'submit-recovery': 'Send request',
+    recover: 'Forgot password',
+    back: 'Back',
+    required: 'This field is required',
+    helpPassword: '8+ chars with uppercase, lowercase and digits',
+    helpCaptcha: 'Characters appearing in the above picture',
+    validating: 'Validating ...',
+    'message-reset': 'Provide your new password twice and the security text.',
+    'message-recovery': 'Provide your username, the corresponding email and the security characters. A mail will be sent to continue the process.',
+    'success-login': 'Authentication succeed',
+    'success-reset': 'Password has been reset',
+    'success-recovery': 'Request has been sent',
+    'success-logout': 'You are now logged out',
+    'error-technical': 'Technical error',
+    'error-password': 'Passwords do not match',
+    'error-password-complexity': 'Password is too weak — 8+ uppercase, lowercase and digit chars',
+    'error-password-policy': 'Password is in history of old passwords',
+    'error-login': 'Authentication failed',
+    'error-mail': 'Mail cannot be sent',
+    'error-concurrency': 'Your account is being used somewhere else',
+    'error-reset': 'Expired token',
+    'error-connected': 'You have to logout first',
+    'error-captcha': 'CAPTCHA did not match',
+    'error-cookie': 'Cookies must be accepted for this site',
+    'error-network': 'Network error. Please try again.',
+    'password-weak': 'Too weak, 8+ uppercase, lowercase and digit chars',
+    'password-mismatch': 'Passwords do not match',
+  },
+}
+
+const locale = ref(detectLocale())
+const msg = computed(() => MESSAGES[locale.value])
+
+function setLocale(loc) {
+  if (!MESSAGES[loc]) return
+  locale.value = loc
+  try { localStorage.setItem(LOCALE_STORAGE_KEY, loc) } catch { /* ignore */ }
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = loc
+  }
+}
 
 const formRef = ref(null)
 const mode = ref('login')
@@ -374,6 +418,11 @@ async function submit() {
 }
 
 onMounted(() => {
+  // Reflect the active locale on <html lang> for accessibility / spell-check.
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = locale.value
+  }
+
   const hash = window.location.hash || ''
   const search = window.location.search || ''
 
@@ -439,8 +488,43 @@ onMounted(() => {
 }
 
 .card-head {
+  position: relative;
   padding: 24px 24px 0;
   text-align: center;
+}
+
+.locale-row {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  gap: 4px;
+}
+.locale-btn {
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  color: #555;
+  cursor: pointer;
+  line-height: 1.4;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.locale-btn:hover {
+  background: #f0f0f0;
+  border-color: #999;
+  color: #222;
+}
+.locale-btn--active {
+  background: #1a237e;
+  border-color: #1a237e;
+  color: #fff;
+}
+.locale-btn--active:hover {
+  background: #0d47a1;
+  border-color: #0d47a1;
+  color: #fff;
 }
 
 .logo {
