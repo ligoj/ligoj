@@ -21,8 +21,6 @@
 
       <div class="card-body">
         <p v-if="infoMsg" class="alert alert-info">{{ infoMsg }}</p>
-        <p v-if="successMsg" class="alert alert-success">{{ successMsg }}</p>
-        <p v-if="errorMsg" class="alert alert-error" data-test="error-alert">{{ errorMsg }}</p>
 
         <form ref="formRef" @submit.prevent="submit" novalidate>
           <label class="field">
@@ -120,6 +118,26 @@
         </div>
       </div>
     </section>
+
+    <!-- Toast stack: floats over the card, doesn't shift layout -->
+    <div class="toast-stack" role="region" aria-live="polite" aria-label="Notifications">
+      <div
+        v-for="t in toasts"
+        :key="t.id"
+        class="toast"
+        :class="`toast--${t.severity}`"
+        role="status"
+        :data-test="t.severity === 'error' ? 'error-alert' : undefined"
+      >
+        <span class="toast-message">{{ t.message }}</span>
+        <button
+          type="button"
+          class="toast-close"
+          aria-label="Dismiss"
+          @click="dismissToast(t.id)"
+        >&times;</button>
+      </div>
+    </div>
   </main>
 </template>
 
@@ -260,9 +278,30 @@ const passwordConfirm = ref('')
 const mail = ref('')
 const captcha = ref('')
 const loading = ref(false)
-const errorMsg = ref('')
 const infoMsg = ref('')
-const successMsg = ref('')
+
+/* -------- toast notifications --------
+ * Floating snackbars used for errors and one-shot successes (login OK,
+ * password reset OK, recovery sent, logout). The inline `infoMsg`
+ * stays for contextual mode-switch help that should remain pinned to
+ * the form (message-reset / message-recovery).
+ */
+const toasts = ref([])
+let toastSeq = 0
+
+function pushToast(severity, message, ms = 6000) {
+  if (!message) return
+  const id = ++toastSeq
+  toasts.value.push({ id, severity, message })
+  if (ms > 0) {
+    setTimeout(() => dismissToast(id), ms)
+  }
+  return id
+}
+
+function dismissToast(id) {
+  toasts.value = toasts.value.filter((t) => t.id !== id)
+}
 const showPwd = ref(false)
 const token = ref('')
 const captchaSrc = ref('')
@@ -277,9 +316,8 @@ function clearFieldError(field) {
 }
 
 function clearMessages() {
-  errorMsg.value = ''
   infoMsg.value = ''
-  successMsg.value = ''
+  toasts.value = []
 }
 
 function validate() {
@@ -339,21 +377,21 @@ function handleError(status, body) {
   if (status === 400) {
     if (body?.errors) {
       if (body.errors.password) {
-        errorMsg.value = msg['error-password-complexity']
+        pushToast('error', msg['error-password-complexity'])
       } else if (body.errors.session) {
-        errorMsg.value = msg['error-cookie']
+        pushToast('error', msg['error-cookie'])
       } else {
-        errorMsg.value = msg['error-captcha']
+        pushToast('error', msg['error-captcha'])
       }
     } else {
-      errorMsg.value = msg['error-technical']
+      pushToast('error', msg['error-technical'])
     }
   } else if (status === 403) {
-    errorMsg.value = msg['error-connected']
+    pushToast('error', msg['error-connected'])
   } else if (status === 503) {
-    errorMsg.value = msg['error-mail']
+    pushToast('error', msg['error-mail'])
   } else {
-    errorMsg.value = msg['error-' + mode.value] || msg['error-technical']
+    pushToast('error', msg['error-' + mode.value] || msg['error-technical'])
   }
   if (mode.value !== 'login') {
     refreshCaptcha()
@@ -385,7 +423,7 @@ async function doLogin() {
     })
   } catch (e) {
     console.error('[login] network error', e)
-    errorMsg.value = msg['error-network']
+    pushToast('error', msg['error-network'])
     return
   }
 
@@ -403,7 +441,7 @@ async function doLogin() {
     handleError(resp.status, data)
     return
   }
-  successMsg.value = msg['success-login']
+  pushToast('success', msg['success-login'])
   window.location.href = 'v-index.html'
 }
 
@@ -422,7 +460,7 @@ async function doReset() {
     handleError(resp.status, body)
     return
   }
-  successMsg.value = msg['success-reset']
+  pushToast('success', msg['success-reset'])
   setTimeout(() => { window.location.href = 'v-login.html' }, 2000)
 }
 
@@ -437,7 +475,7 @@ async function doRecovery() {
     handleError(resp.status, body)
     return
   }
-  successMsg.value = msg['success-recovery']
+  pushToast('success', msg['success-recovery'])
 }
 
 async function submit() {
@@ -451,7 +489,7 @@ async function submit() {
     else if (mode.value === 'reset') await doReset()
     else if (mode.value === 'recovery') await doRecovery()
   } catch {
-    errorMsg.value = msg['error-network']
+    pushToast('error', msg['error-network'])
   } finally {
     loading.value = false
     infoMsg.value = ''
@@ -493,12 +531,12 @@ onMounted(() => {
   const REASONS = ['expired', 'unavailable', 'network', 'denied', 'concurrency']
   for (const flag of REASONS) {
     if (params.has(flag) || search.includes(flag)) {
-      errorMsg.value = msg['error-' + flag]
+      pushToast('error', msg['error-' + flag])
       return
     }
   }
   if (params.has('logout') || search.includes('logout')) {
-    successMsg.value = msg['success-logout']
+    pushToast('success', msg['success-logout'])
   }
 })
 </script>
@@ -743,6 +781,56 @@ input[readonly] {
   padding: 4px 8px;
 }
 .link:hover { text-decoration: underline; }
+
+/* -------- toast snackbar stack -------- */
+.toast-stack {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  pointer-events: none;
+  max-width: calc(100vw - 32px);
+}
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 260px;
+  max-width: 420px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  color: #fff;
+  animation: toast-in 0.18s ease-out;
+}
+.toast-message { flex: 1 1 auto; line-height: 1.35; }
+.toast-close {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0.85;
+}
+.toast-close:hover { opacity: 1; }
+
+.toast--error    { background: #c62828; }
+.toast--success  { background: #2e7d32; }
+.toast--info     { background: #0277bd; }
+.toast--warning  { background: #ef6c00; }
+
+@keyframes toast-in {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
 </style>
 
 <!--
