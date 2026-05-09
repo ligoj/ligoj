@@ -142,7 +142,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 
 const LOCALES = [
   { code: 'en', label: 'English',  flag: '\u{1F1EC}\u{1F1E7}' /* 🇬🇧 */ },
@@ -259,11 +259,24 @@ const MESSAGES = {
 }
 
 const locale = ref(detectLocale())
-const msg = computed(() => MESSAGES[locale.value])
+
+/**
+ * `msg` is a `reactive` object (NOT a `computed` ref) so plain
+ * `msg['error-denied']` works the same in `<script setup>` JS as it
+ * does in the template. A computed ref would only auto-unwrap inside
+ * templates; in script code `msg['x']` would return `undefined` and
+ * downstream guards (`if (!message) return` in pushToast) would
+ * silently swallow every notification — that's the bug behind the
+ * "no banner appears after a redirect" report.
+ */
+const msg = reactive({ ...MESSAGES[locale.value] })
 
 function setLocale(loc) {
   if (!MESSAGES[loc]) return
   locale.value = loc
+  // Replace every key with the new locale's value. EN and FR share the
+  // same key set so a plain Object.assign is enough.
+  Object.assign(msg, MESSAGES[loc])
   try { localStorage.setItem(LOCALE_STORAGE_KEY, loc) } catch { /* ignore */ }
   if (typeof document !== 'undefined') {
     document.documentElement.lang = loc
