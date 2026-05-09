@@ -9,6 +9,7 @@ export const useAppStore = defineStore('app', () => {
 
   function setBreadcrumbs(items) {
     breadcrumbs.value = items
+    setTitle(items.slice(-1)[0].title)
   }
 
   function setTitle(t) {

@@ -20,7 +20,6 @@ const route = useRoute()
 const appStore = useAppStore()
 
 onMounted(() => {
-  appStore.setTitle('Not Found')
   appStore.setBreadcrumbs([
     { title: 'Home', to: '/' },
     { title: 'Not Found' },

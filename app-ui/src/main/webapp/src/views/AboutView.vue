@@ -102,7 +102,6 @@ const buildDate = computed(() => {
 })
 
 onMounted(() => {
-  appStore.setTitle(t('about.title'))
   appStore.setBreadcrumbs([
     { title: t('nav.home'), to: '/' },
     { title: t('nav.about') },

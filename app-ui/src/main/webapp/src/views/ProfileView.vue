@@ -37,7 +37,7 @@
           <v-card-text>
             <v-list density="compact">
               <v-list-subheader>{{ t('profile.uiAuth', { count: auth.uiAuthorizations.length }) }}</v-list-subheader>
-              <v-list-item v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-'+i">
+              <v-list-item v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i">
                 <v-list-item-title class="text-caption font-weight-medium">{{ pattern }}</v-list-item-title>
               </v-list-item>
             </v-list>
@@ -60,7 +60,6 @@ const i18n = useI18nStore()
 const t = i18n.t
 
 onMounted(() => {
-  appStore.setTitle(t('profile.title'))
   appStore.setBreadcrumbs([
     { title: t('nav.home'), to: '/' },
     { title: t('nav.profile') },

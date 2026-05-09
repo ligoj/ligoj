@@ -3,14 +3,7 @@
     <h1 class="text-h4 mb-2">{{ t('nav.dashboard') }}</h1>
     <p class="text-subtitle-1 text-medium-emphasis mb-6">{{ t('dashboard.welcome', { name: auth.userName }) }}</p>
     <v-row>
-      <v-col
-        v-for="card in cards"
-        :key="card.id"
-        cols="12"
-        sm="6"
-        md="4"
-        lg="3"
-      >
+      <v-col v-for="card in cards" :key="card.id" cols="12" sm="6" md="4" lg="3">
         <v-card :to="card.route" hover elevation="2" rounded="lg">
           <v-card-item>
             <template #prepend>
@@ -69,7 +62,6 @@ const cards = computed(() => {
 })
 
 onMounted(() => {
-  appStore.setTitle(t('nav.dashboard'))
   appStore.setBreadcrumbs([{ title: t('nav.home'), to: '/' }])
 })
 </script>
