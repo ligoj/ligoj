@@ -27,6 +27,7 @@
  * deployment regardless of the plugin's own Vite base.
  */
 import { defineComponent, h } from 'vue'
+import { VChip } from 'vuetify/components'
 
 const APP_BASE = import.meta.env.BASE_URL
 
@@ -93,9 +94,40 @@ export function nodeIcon(node) {
 
 export default defineComponent({
   name: 'NodeIcon',
-  props: { node: { type: [Object, String], default: null } },
+  props: {
+    node: { type: [Object, String], default: null },
+    /** Wrap the rendered icon (and optional text) in a v-chip. */
+    chip: { type: Boolean, default: false },
+    /**
+     * Show a text label next to the icon. `true` resolves to
+     * `node.name` (falling back to `node.id`); a string overrides the
+     * label entirely; `false` (default) is icon-only.
+     */
+    text: { type: [Boolean, String], default: false },
+    /** Forwarded to v-chip when `chip` is set. */
+    size: { type: String, default: 'small' },
+    color: { type: String, default: undefined },
+    variant: { type: String, default: 'tonal' },
+  },
   setup(props) {
-    return () => nodeIcon(props.node)
+    return () => {
+      const icon = nodeIcon(props.node)
+      const obj = typeof props.node === 'object' ? props.node : null
+      const label = typeof props.text === 'string'
+        ? props.text
+        : (props.text ? (obj?.name || obj?.id || '') : '')
+
+      if (!props.chip) {
+        if (!label) return icon
+        return h('span', { class: 'node-icon-inline' }, [icon, ' ', label])
+      }
+
+      return h(
+        VChip,
+        { size: props.size, color: props.color, variant: props.variant },
+        () => label ? [icon, ' ', label] : [icon],
+      )
+    }
   },
 })
 </script>
@@ -122,5 +154,10 @@ export default defineComponent({
   font-size: 0.85em;
   font-weight: 500;
   line-height: 1.4;
+}
+.node-icon-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
 }
 </style>
