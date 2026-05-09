@@ -19,7 +19,6 @@ Compile Java sources, optionally minify sources (css/js) and package into the WA
 You can enable minified CSS/JS with the maven profile 'minify'. This requires 'clean-css-cli' NPM module.
 
 ```
-npm install clean-css-cli -g
 mvn clean package -Pminifiy -DskipTests=true
 ```
 
@@ -51,7 +50,6 @@ In case of a custom build you can specify its remote or local location.
 With this mode, no build tools (Java, Maven,...) are required to build the image.
 
 ```bash
-docker build -t ligoj/ligoj-ui:4.0.1 --progress=plain -f Dockerfile .
 podman build -t ligoj/ligoj-ui:4.0.1 --progress=plain -f Dockerfile .
 ```
 
@@ -73,7 +71,7 @@ The same applies to [app-api](../app-api/Dockerfile)
 # Run Docker image
 
 ```
-docker run --rm -it \
+podman run --rm -it \
   --name ligoj-ui \
   --network="host" \
   -e CUSTOM_OPTS='-Dsecurity=Trusted -Dlog.level=info' \
@@ -97,7 +95,7 @@ Explanations:
 You can experience network issue with remote/local API. To validate the link, try this :
 
 ```bash
-docker run --rm -it \
+podman run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
 ligoj/ligoj-ui:4.0.1 sh -c "curl http://127.0.0.1:8088/ligoj-api/manage/health"
@@ -115,7 +113,7 @@ ligoj/ligoj-ui:4.0.1 sh -c "curl http://127.0.0.1:8088/ligoj-api/manage/health"
 ## Run with security disabled
 
 ```
-docker run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj/ligoj-ui:4.0.1
+podman run -d --name ligoj-ui --link ligoj-api:api -p 8080:8080 ligoj/ligoj-ui:4.0.1
 ```
 
 ## Relevant variables
@@ -183,7 +181,7 @@ open http://localhost:5173/ligoj/
 ## Start Vite `plugin-ui` server
 
 ```shell
-cd /Users/fabdouglas/git/ligoj-plugins/plugin-ui/ui
+cd ~/git/ligoj-plugins/plugin-ui/ui
 npm run build
 npm run dev
 ```
@@ -191,7 +189,8 @@ npm run dev
 ## Start Vite `plugin-id` server
 
 ```shell
-cd /Users/fabdouglas/git/ligoj-plugins/plugin-id/ui
+cd ~/git/ligoj-plugins/plugin-id/ui
+npm run build
 npm run dev
 open http://localhost:5173/ligoj/
 ```
