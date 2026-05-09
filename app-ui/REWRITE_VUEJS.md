@@ -18,11 +18,11 @@ The goal is to rewrite the UI in VueJS.
 - `application.mod.js`, a custom application manager
 - `security.mod.js`, a custom security manager
 
-The application is plugin aware, so with dynamical ressources.
+The application is plugin aware, so with dynamical resources.
 
 ## `cascade.js` focus
 
-This library located in `cascade.js` file hanles:
+This library located in `cascade.js` file handles:
 - Convention over configuration routing and injection
 - i18n along with handlebars
 - Inherited contexts from parent hierarchy
@@ -50,13 +50,13 @@ Basic behavior:
 The assets of `plugin_name` are not parts of the main application, but are brought by plugins. Each plugin is scoped to a specific path, and contains its own assets : css, js, html, etc.
 Each plugin is in its own GitHub repository. See `plugin-id/src/main/resources/META-INF/resources/id` in this workspace for sample.
 
-The plugins are not parts of the main application, they are made available by another Spring Boot application that add to the classpath the ressources. That's why the `plugin_name` is important to scope the module assets.
+The plugins are not parts of the main application, they are made available by another Spring Boot application that add to the classpath the resources. That's why the `plugin_name` is important to scope the module assets.
 
 For the unload of a module, the `unload` function is called if present of this module and the DOM is cleaned.
 
 ## `error.mod.js` focus
 
-This script handles all errors and exceptions. It display the correct message in the UI and log the error in the console.
+This script handles all errors and exceptions. It displays the correct message in the UI and log the error in the console.
 
 ## `security.mod.js` focus
 
@@ -70,7 +70,9 @@ This script is a guard and a DOM protection layer. It checks the security of the
 - VeeValidate
 - Vuetify
 - VeeValidateI18n
+- Material Design icons and simpleicons.org
 - ...
+
 
 Migrate the current implementation :
 - Common module with utilities, routing, main VueJS app etc. in `app-ui/src/main/webapp`
@@ -83,11 +85,15 @@ Migrate the current implementation :
 - Complete Dockerfile to include the npm command for the VueJS application.
 - Document the new implementation for plugins :
   - how to migrate them and how to load/add them from the application dynamically by their name or id or path. 
-  - Use `plugin-id` (there `/Users/fabdouglas/git/ligoj-plugins/plugin-id`) as sample to add it in the app.
+  - Use `plugin-id` (there `~/git/ligoj-plugins/plugin-id`) as sample to add it in the app.
   - By contract make all plugins exposing 1 function `feature` that can be called from the application and other plugins.
   
 The challenge is that each module like `plugin-id` is a standalone Maven project:
 - it has its own life cycle
-- it can be added, removed by a Java plugin manager discovered and served by a Webjars Servlet (`/Users/fabdouglas/git/bootstrap/bootstrap-plugin/src/main/java/org/ligoj/bootstrap/resource/system/plugin/WebjarsServlet.java`).
+- it can be added, removed by a Java plugin manager discovered and served by a Webjars Servlet (`~/git/bootstrap/bootstrap-plugin/src/main/java/org/ligoj/bootstrap/resource/system/plugin/WebjarsServlet.java`).
 - no restart or build is needed to add/remove a plugin from the context
-- make it easy to test in local mode in browser. Mybe one vite configuration per module?
+- make it easy to test in local mode in browser. Maybe one Vite configuration per module?
+
+# Core components
+
+Core components are in `~/git/ligoj/app-ui/src/main/webapp/src/components`
