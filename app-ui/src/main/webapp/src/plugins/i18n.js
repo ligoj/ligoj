@@ -1,4 +1,5 @@
 import { createI18n } from 'vue-i18n'
+import vuetify from '@/plugins/vuetify.js'
 import en from '@/i18n/en.js'
 import fr from '@/i18n/fr.js'
 
@@ -59,6 +60,13 @@ const i18n = createI18n({
   warnHtmlMessage: false,
 })
 
+// Initial sync — Vuetify created with default 'en'; align it to the
+// locale we just detected so widget chrome (data-table footer, etc.)
+// renders in the right language from the first paint.
+if (vuetify?.locale?.current) {
+  vuetify.locale.current.value = i18n.global.locale.value
+}
+
 /**
  * Sets the active locale, syncs localStorage, and returns the applied value.
  * Unknown locales fall back to English.
@@ -66,6 +74,11 @@ const i18n = createI18n({
 export function setLocale(loc) {
   const target = SUPPORTED_LOCALES.includes(loc) ? loc : 'en'
   i18n.global.locale.value = target
+  // Keep Vuetify's built-in widget translations aligned with the app
+  // locale. Vuetify ships separate message bundles wired in vuetify.js.
+  if (vuetify?.locale?.current) {
+    vuetify.locale.current.value = target
+  }
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('ligoj-locale', target)
   }

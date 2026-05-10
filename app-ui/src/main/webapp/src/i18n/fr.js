@@ -51,6 +51,14 @@ export default {
   'common.unsavedTitle': 'Modifications non sauvegardées',
   'common.unsavedMsg': 'Vous avez des modifications non sauvegardées. Les abandonner ?',
   'common.discard': 'Abandonner',
+  'common.new': 'Nouveau',
+  'common.refresh': 'Actualiser',
+  'common.value': 'Valeur',
+  'common.dash': '—',
+
+  // Les traductions Système / API / Projet / Accueil / Manuel sont
+  // livrées avec plugin-ui (voir ligoj-plugins/plugin-ui/ui/src/i18n) et
+  // injectées dans ce store au moment de l'install() du plugin.
 
   // Dashboard
   'dashboard.welcome': 'Bienvenue, {{name}}',
@@ -62,23 +70,6 @@ export default {
   'dashboard.manageContainerScopes': 'Gérer les portées de conteneurs',
   'dashboard.manageProjects': 'Gérer les projets et souscriptions',
   'dashboard.manageAdmin': 'Administration système',
-
-  // Projects
-  'project.title': 'Projets',
-  'project.new': 'Nouveau projet',
-  'project.edit': 'Modifier le projet',
-  'project.detail': 'Projet',
-  'project.name': 'Nom',
-  'project.pkey': 'Clé du projet',
-  'project.pkeyHint': 'Identifiant unique, non modifiable après la création',
-  'project.description': 'Description',
-  'project.teamLeader': 'Chef d\'équipe',
-  'project.teamLeaderHint': 'Identifiant utilisateur (ex: admin)',
-  'project.created': 'Créé le',
-  'project.deleteTitle': 'Supprimer le projet',
-  'project.deleteConfirm': 'Êtes-vous certain de supprimer {{name}} ? Cette action est irréversible.',
-  'project.deleteWithSubs': 'Supprimer {{name}} et toutes ses souscriptions ? Cette action est irréversible.',
-  'project.empty': 'Aucun projet. Créez un projet pour commencer à gérer les souscriptions.',
 
   // Subscriptions
   'subscription.title': 'Souscriptions',

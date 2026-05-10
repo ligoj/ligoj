@@ -26,6 +26,27 @@
         @copy="copyToClipboard"
       />
     </template>
+
+    <template
+      v-for="h in tooltipHeaders"
+      :key="h.slotName"
+      #[h.slotName]="{ column, getSortIcon, toggleSort }"
+    >
+      <span
+        class="ligoj-th-tooltip"
+        :class="{ 'ligoj-th-sortable': column.sortable }"
+        @click="column.sortable && toggleSort?.(column)"
+      >
+        {{ column.title }}
+        <v-icon
+          v-if="column.sortable && getSortIcon"
+          :icon="getSortIcon(column)"
+          size="x-small"
+          class="ml-1"
+        />
+        <v-tooltip activator="parent" location="top" :text="h.tooltip" />
+      </span>
+    </template>
   </v-data-table-server>
 </template>
 
@@ -91,6 +112,24 @@ const forwardedSlotNames = computed(() => {
   return Object.keys(slots).filter((n) => !reserved.includes(n))
 })
 
+/**
+ * Headers that opt into a Vuetify tooltip via a `tooltip` field. We
+ * skip the column owned by the tools menu and any column the caller
+ * already overrides with its own `header.<key>` slot.
+ */
+const tooltipHeaders = computed(() => {
+  const reservedKey = !customLastHeaderSlot.value && props.tools ? lastKey.value : null
+  return props.headers
+    .filter((h) => {
+      if (!h.tooltip) return false
+      const k = h.key ?? h.value
+      if (k === reservedKey) return false
+      if (slots[`header.${k}`]) return false
+      return true
+    })
+    .map((h) => ({ tooltip: h.tooltip, slotName: `header.${h.key ?? h.value}` }))
+})
+
 const { exporting, copying, exportCsv, copyToClipboard } = useTableTools({
   headers: () => props.headers,
   getRows: async () => (props.fetchAll ? await props.fetchAll() : props.items),
@@ -99,3 +138,14 @@ const { exporting, copying, exportCsv, copyToClipboard } = useTableTools({
 
 defineExpose({ exportCsv, copyToClipboard })
 </script>
+
+<style scoped>
+.ligoj-th-tooltip {
+  display: inline-flex;
+  align-items: center;
+}
+.ligoj-th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+</style>

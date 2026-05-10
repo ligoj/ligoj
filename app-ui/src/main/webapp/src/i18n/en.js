@@ -51,6 +51,14 @@ export default {
   'common.unsavedTitle': 'Unsaved changes',
   'common.unsavedMsg': 'You have unsaved changes. Discard them?',
   'common.discard': 'Discard',
+  'common.new': 'New',
+  'common.refresh': 'Refresh',
+  'common.value': 'Value',
+  'common.dash': '—',
+
+  // System / API / Project / Home / Manual translations live with
+  // plugin-ui (see ligoj-plugins/plugin-ui/ui/src/i18n) and are merged
+  // into this store at plugin install() time.
 
   // Dashboard
   'dashboard.welcome': 'Welcome, {{name}}',
@@ -62,23 +70,6 @@ export default {
   'dashboard.manageContainerScopes': 'Manage container scopes',
   'dashboard.manageProjects': 'Manage projects and subscriptions',
   'dashboard.manageAdmin': 'System administration',
-
-  // Projects
-  'project.title': 'Projects',
-  'project.new': 'New Project',
-  'project.edit': 'Edit Project',
-  'project.detail': 'Project',
-  'project.name': 'Name',
-  'project.pkey': 'Project Key',
-  'project.pkeyHint': 'Unique identifier, cannot be changed after creation',
-  'project.description': 'Description',
-  'project.teamLeader': 'Team Leader',
-  'project.teamLeaderHint': 'User login ID (e.g. admin)',
-  'project.created': 'Created',
-  'project.deleteTitle': 'Delete Project',
-  'project.deleteConfirm': 'Are you sure you want to delete {{name}}? This action cannot be undone.',
-  'project.deleteWithSubs': 'Delete {{name}} and all its subscriptions? This cannot be undone.',
-  'project.empty': 'No projects yet. Create a project to start managing subscriptions.',
 
   // Subscriptions
   'subscription.title': 'Subscriptions',

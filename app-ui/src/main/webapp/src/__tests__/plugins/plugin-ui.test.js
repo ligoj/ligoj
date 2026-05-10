@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
 import registry, { callFeature } from '@/plugins/registry.js'
 import pluginUiDef from '../../../../../../../../ligoj-plugins/plugin-ui/ui/src/index.js'
 
@@ -21,6 +22,7 @@ describe('plugin-ui contract', () => {
   })
 
   it('install() registers all expected routes on the given router', () => {
+    setActivePinia(createPinia())
     const addRoute = vi.fn()
     pluginUiDef.install({ pluginId: 'ui', router: { addRoute } })
     const registered = addRoute.mock.calls.map(([route]) => route.path)

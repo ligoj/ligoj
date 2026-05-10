@@ -1,6 +1,7 @@
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { en, fr } from 'vuetify/locale'
 import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
 
@@ -40,5 +41,15 @@ export default createVuetify({
   theme: {
     defaultTheme: 'ligojLight',
     themes: { ligojLight, ligojDark },
+  },
+  /**
+   * Vuetify ships its own translations for built-in widget strings
+   * ("Items per page", "Page X of Y", chip dismiss labels, etc.). Keep
+   * its locale in sync with vue-i18n via setLocale() in plugins/i18n.js.
+   */
+  locale: {
+    locale: 'en',
+    fallback: 'en',
+    messages: { en, fr },
   },
 })

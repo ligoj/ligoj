@@ -22,8 +22,15 @@ export const useI18nStore = defineStore('i18n', () => {
     return setI18nLocale(loc)
   }
 
-  function merge(newMessages) {
-    mergeMessages(newMessages)
+  /**
+   * Merge a flat message map into the store. Plugins call this from
+   * their `install()` hook to ship translations alongside their bundle:
+   *   i18n.merge(enMessages, 'en')
+   *   i18n.merge(frMessages, 'fr')
+   * Omitting the locale falls back to the active one (legacy NLS path).
+   */
+  function merge(newMessages, locale) {
+    mergeMessages(newMessages, locale)
   }
 
   const loadedBundles = new Set()
