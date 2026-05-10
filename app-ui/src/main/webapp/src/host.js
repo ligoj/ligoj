@@ -23,6 +23,8 @@ export { default as ImportExportBar } from './components/ImportExportBar.vue'
 export { default as LigojDataTable } from './components/LigojDataTable.vue'
 export { default as LigojDataTableServer } from './components/LigojDataTableServer.vue'
 export { default as NodeIcon, nodeIcon } from './components/NodeIcon.vue'
+export { default as NodeModeChip } from './components/NodeModeChip.vue'
+export { nodeType, isInstance } from './utils/nodeType.js'
 
 /**
  * The app's public base path, e.g. `/ligoj/`. Exported so plugins can
