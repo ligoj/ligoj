@@ -1,7 +1,7 @@
 import { ref, watch, onBeforeUnmount } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 
-export function useFormGuard(formData, { message = 'You have unsaved changes. Discard them?' } = {}) {
+export function useFormGuard(formData) {
   const isDirty = ref(false)
   const showGuardDialog = ref(false)
   let savedSnapshot = ''

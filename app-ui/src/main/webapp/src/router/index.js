@@ -20,7 +20,7 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach(async (to) => {
+router.beforeEach(async () => {
   const auth = useAuthStore()
   if (!auth.isAuthenticated) {
     const ok = await auth.fetchSession()

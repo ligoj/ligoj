@@ -2,17 +2,8 @@
   <main class="login-bg">
     <section class="card">
       <header class="card-head">
-        <select
-          class="locale-select"
-          aria-label="Language"
-          :value="locale"
-          @change="setLocale($event.target.value)"
-        >
-          <option
-            v-for="loc in LOCALES"
-            :key="loc.code"
-            :value="loc.code"
-          >{{ loc.flag }} {{ loc.label }}</option>
+        <select class="locale-select" aria-label="Language" :value="locale" @change="setLocale($event.target.value)">
+          <option v-for="loc in LOCALES" :key="loc.code" :value="loc.code">{{ loc.flag }} {{ loc.label }}</option>
         </select>
         <img src="@/assets/ligoj.svg" alt="Ligoj" class="logo" />
         <h1>Ligoj</h1>
@@ -25,29 +16,15 @@
         <form ref="formRef" @submit.prevent="submit" novalidate>
           <label class="field">
             <span class="label">{{ msg.username }}</span>
-            <input
-              v-model="username"
-              type="text"
-              autocomplete="username"
-              :autofocus="mode !== 'reset'"
-              :disabled="mode === 'reset'"
-              :readonly="mode === 'reset'"
-              data-test="username"
-              @input="clearFieldError('username')"
-            />
+            <input v-model="username" type="text" autocomplete="username" :autofocus="mode !== 'reset'" :disabled="mode === 'reset'" :readonly="mode === 'reset'" data-test="username"
+              @input="clearFieldError('username')" />
             <span v-if="fieldErrors.username" class="field-error">{{ fieldErrors.username }}</span>
           </label>
 
           <label v-if="mode !== 'recovery'" class="field">
             <span class="label">{{ mode === 'reset' ? msg.newPassword : msg.password }}</span>
             <span class="input-wrap">
-              <input
-                v-model="password"
-                :type="showPwd ? 'text' : 'password'"
-                autocomplete="current-password"
-                data-test="password"
-                @input="clearFieldError('password')"
-              />
+              <input v-model="password" :type="showPwd ? 'text' : 'password'" autocomplete="current-password" data-test="password" @input="clearFieldError('password')" />
               <button type="button" class="toggle" @click="showPwd = !showPwd" :aria-label="showPwd ? 'Hide password' : 'Show password'">
                 <svg class="toggle-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                   <path :d="showPwd ? PATH_EYE_OFF : PATH_EYE" fill="currentColor" />
@@ -60,44 +37,25 @@
 
           <label v-if="mode === 'reset'" class="field">
             <span class="label">{{ msg.passwordConfirm }}</span>
-            <input
-              v-model="passwordConfirm"
-              :type="showPwd ? 'text' : 'password'"
-              autocomplete="new-password"
-              @input="clearFieldError('passwordConfirm')"
-            />
+            <input v-model="passwordConfirm" :type="showPwd ? 'text' : 'password'" autocomplete="new-password" @input="clearFieldError('passwordConfirm')" />
             <span v-if="fieldErrors.passwordConfirm" class="field-error">{{ fieldErrors.passwordConfirm }}</span>
           </label>
 
           <label v-if="mode === 'recovery'" class="field">
             <span class="label">{{ msg.mail }}</span>
-            <input
-              v-model="mail"
-              type="email"
-              @input="clearFieldError('mail')"
-            />
+            <input v-model="mail" type="email" @input="clearFieldError('mail')" />
             <span v-if="fieldErrors.mail" class="field-error">{{ fieldErrors.mail }}</span>
           </label>
 
           <div v-if="mode !== 'login'" class="field captcha-field">
             <div class="captcha-row">
-              <img
-                :src="captchaSrc"
-                alt="CAPTCHA"
-                class="captcha-img"
-                @click="refreshCaptcha"
-              />
+              <img :src="captchaSrc" alt="CAPTCHA" class="captcha-img" @click="refreshCaptcha" />
               <button type="button" class="icon-btn" @click="refreshCaptcha" aria-label="Refresh CAPTCHA">
                 &#x21bb;
               </button>
             </div>
             <span class="label">{{ msg.captcha }}</span>
-            <input
-              v-model="captcha"
-              type="text"
-              autocomplete="off"
-              @input="clearFieldError('captcha')"
-            />
+            <input v-model="captcha" type="text" autocomplete="off" @input="clearFieldError('captcha')" />
             <span class="field-hint">{{ msg.helpCaptcha }}</span>
             <span v-if="fieldErrors.captcha" class="field-error">{{ fieldErrors.captcha }}</span>
           </div>
@@ -121,21 +79,9 @@
 
     <!-- Toast stack: floats over the card, doesn't shift layout -->
     <div class="toast-stack" role="region" aria-live="polite" aria-label="Notifications">
-      <div
-        v-for="t in toasts"
-        :key="t.id"
-        class="toast"
-        :class="`toast--${t.severity}`"
-        role="status"
-        :data-test="t.severity === 'error' ? 'error-alert' : undefined"
-      >
+      <div v-for="t in toasts" :key="t.id" class="toast" :class="`toast--${t.severity}`" role="status" :data-test="t.severity === 'error' ? 'error-alert' : undefined">
         <span class="toast-message">{{ t.message }}</span>
-        <button
-          type="button"
-          class="toast-close"
-          aria-label="Dismiss"
-          @click="dismissToast(t.id)"
-        >&times;</button>
+        <button type="button" class="toast-close" aria-label="Dismiss" @click="dismissToast(t.id)">&times;</button>
       </div>
     </div>
   </main>
@@ -145,7 +91,7 @@
 import { ref, reactive, onMounted } from 'vue'
 
 const LOCALES = [
-  { code: 'en', label: 'English',  flag: '\u{1F1EC}\u{1F1E7}' /* 🇬🇧 */ },
+  { code: 'en', label: 'English', flag: '\u{1F1EC}\u{1F1E7}' /* 🇬🇧 */ },
   { code: 'fr', label: 'Français', flag: '\u{1F1EB}\u{1F1F7}' /* 🇫🇷 */ },
 ]
 
@@ -518,7 +464,7 @@ onMounted(() => {
   const hash = window.location.hash || ''
   const search = window.location.search || ''
 
-  const resetMatch = hash.match(/#reset=([a-zA-Z0-9\-]+)\/([a-zA-Z0-9\-]+)/)
+  const resetMatch = hash.match(/#reset=([a-zA-Z0-9-]+)\/([a-zA-Z0-9-]+)/)
   if (resetMatch) {
     token.value = resetMatch[1]
     username.value = resetMatch[2]
@@ -528,7 +474,7 @@ onMounted(() => {
     return
   }
 
-  const recoveryMatch = hash.match(/#recovery(=([a-zA-Z0-9\-]+))?/)
+  const recoveryMatch = hash.match(/#recovery(=([a-zA-Z0-9-]+))?/)
   if (recoveryMatch) {
     if (recoveryMatch[2]) username.value = recoveryMatch[2]
     mode.value = 'recovery'
@@ -555,7 +501,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 .login-bg {
   /* Pin to the viewport exactly, not min-height — combined with the
@@ -608,6 +556,7 @@ onMounted(() => {
   line-height: 1.4;
   /* Native browser chrome looks fine — no need to style the arrow. */
 }
+
 .locale-select:focus {
   outline: none;
   border-color: #1a237e;
@@ -646,9 +595,24 @@ h1 {
   font-size: 0.9rem;
   border: 1px solid transparent;
 }
-.alert-info    { background: #e3f2fd; color: #0277bd; border-color: #b3e5fc; }
-.alert-success { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
-.alert-error   { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
+
+.alert-info {
+  background: #e3f2fd;
+  color: #0277bd;
+  border-color: #b3e5fc;
+}
+
+.alert-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.alert-error {
+  background: #ffebee;
+  color: #c62828;
+  border-color: #ffcdd2;
+}
 
 .field {
   display: block;
@@ -674,11 +638,13 @@ input[type="email"] {
   color: #222;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
+
 input:focus {
   outline: none;
   border-color: #1a237e;
   box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
 }
+
 input:disabled,
 input[readonly] {
   background: #f5f5f5;
@@ -689,6 +655,7 @@ input[readonly] {
   position: relative;
   display: block;
 }
+
 .toggle {
   position: absolute;
   right: 4px;
@@ -704,9 +671,11 @@ input[readonly] {
   align-items: center;
   justify-content: center;
 }
+
 .toggle:hover {
   color: #1a237e;
 }
+
 .toggle-icon {
   display: block;
 }
@@ -717,6 +686,7 @@ input[readonly] {
   font-size: 0.8rem;
   color: #777;
 }
+
 .field-error {
   display: block;
   margin-top: 4px;
@@ -727,12 +697,14 @@ input[readonly] {
 .captcha-field {
   margin-top: 4px;
 }
+
 .captcha-row {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
+
 .captcha-img {
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -740,6 +712,7 @@ input[readonly] {
   min-width: 150px;
   cursor: pointer;
 }
+
 .icon-btn {
   background: none;
   border: 1px solid #ccc;
@@ -750,7 +723,10 @@ input[readonly] {
   cursor: pointer;
   color: #555;
 }
-.icon-btn:hover { background: #f0f0f0; }
+
+.icon-btn:hover {
+  background: #f0f0f0;
+}
 
 .submit {
   width: 100%;
@@ -768,8 +744,15 @@ input[readonly] {
   gap: 8px;
   transition: background 0.15s;
 }
-.submit:hover:not(:disabled) { background: #0d47a1; }
-.submit:disabled { opacity: 0.65; cursor: not-allowed; }
+
+.submit:hover:not(:disabled) {
+  background: #0d47a1;
+}
+
+.submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
 
 .spinner {
   width: 14px;
@@ -779,12 +762,18 @@ input[readonly] {
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .links {
   margin-top: 12px;
   text-align: center;
 }
+
 .link {
   background: none;
   border: none;
@@ -793,7 +782,10 @@ input[readonly] {
   cursor: pointer;
   padding: 4px 8px;
 }
-.link:hover { text-decoration: underline; }
+
+.link:hover {
+  text-decoration: underline;
+}
 
 /* -------- toast snackbar stack -------- */
 .toast-stack {
@@ -807,6 +799,7 @@ input[readonly] {
   pointer-events: none;
   max-width: calc(100vw - 32px);
 }
+
 .toast {
   pointer-events: auto;
   display: flex;
@@ -821,7 +814,12 @@ input[readonly] {
   color: #fff;
   animation: toast-in 0.18s ease-out;
 }
-.toast-message { flex: 1 1 auto; line-height: 1.35; }
+
+.toast-message {
+  flex: 1 1 auto;
+  line-height: 1.35;
+}
+
 .toast-close {
   flex: 0 0 auto;
   background: none;
@@ -833,16 +831,37 @@ input[readonly] {
   padding: 0 2px;
   opacity: 0.85;
 }
-.toast-close:hover { opacity: 1; }
 
-.toast--error    { background: #c62828; }
-.toast--success  { background: #2e7d32; }
-.toast--info     { background: #0277bd; }
-.toast--warning  { background: #ef6c00; }
+.toast-close:hover {
+  opacity: 1;
+}
+
+.toast--error {
+  background: #c62828;
+}
+
+.toast--success {
+  background: #2e7d32;
+}
+
+.toast--info {
+  background: #0277bd;
+}
+
+.toast--warning {
+  background: #ef6c00;
+}
 
 @keyframes toast-in {
-  from { transform: translateX(20px); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 </style>
 
@@ -853,7 +872,9 @@ input[readonly] {
   what we do to the inner layout.
 -->
 <style>
-html, body, #app {
+html,
+body,
+#app {
   margin: 0;
   padding: 0;
   height: 100%;

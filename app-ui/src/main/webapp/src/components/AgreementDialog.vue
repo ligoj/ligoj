@@ -21,7 +21,7 @@
 import { ref } from 'vue'
 import { useI18nStore } from '@/stores/i18n.js'
 
-const props = defineProps({
+defineProps({
   modelValue: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
 })

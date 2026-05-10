@@ -6,9 +6,7 @@
           {{ item.label }}
         </text>
         <g :transform="`translate(${labelWidth}, 0)`">
-          <rect v-for="(seg, i) in item.segments" :key="i"
-            :x="seg.x" :y="padding" :width="seg.width" :height="barHeight - 2 * padding"
-            :fill="seg.color" class="bar-segment"
+          <rect v-for="(seg, i) in item.segments" :key="i" :x="seg.x" :y="padding" :width="seg.width" :height="barHeight - 2 * padding" :fill="seg.color" class="bar-segment"
             :title="`${seg.key}: ${seg.value}`" />
         </g>
       </g>
@@ -45,7 +43,6 @@ const barWidth = computed(() => width - labelWidth - 20);
 
 const bars = computed(() => {
   return props.data.map(item => {
-    const total = item.segments.reduce((sum, seg) => sum + seg.value, 0);
     let currentX = 0;
 
     const segments = item.segments.map(seg => {
@@ -72,13 +69,16 @@ const bars = computed(() => {
 .stacked-bar-chart {
   overflow-x: auto;
 }
+
 .bar-segment {
   transition: opacity 0.2s ease;
   cursor: pointer;
 }
+
 .bar-segment:hover {
   opacity: 0.8;
 }
+
 .bar-label {
   font-size: 12px;
   fill: currentColor;

@@ -11,9 +11,8 @@
     </v-card-title>
     <v-card-text>
       <div class="d-flex flex-wrap ga-2 mb-4">
-        <v-btn v-for="op in operations" :key="op.value" :color="op.color" variant="outlined" size="small"
-          @click="executeOp(op.value)" :disabled="!canExecute(op.value)" :loading="executing === op.value"
-          :prepend-icon="op.icon">
+        <v-btn v-for="op in operations" :key="op.value" :color="op.color" variant="outlined" size="small" @click="executeOp(op.value)" :disabled="!canExecute(op.value)"
+          :loading="executing === op.value" :prepend-icon="op.icon">
           {{ op.label }}
         </v-btn>
       </div>
@@ -84,13 +83,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useVmApi } from './useVmApi.js'
-import { useI18nStore } from '@/stores/i18n.js'
 
 const props = defineProps({
   subscriptionId: { type: Number, required: true }
 })
 
-const { t } = useI18nStore()
 const api = useVmApi()
 
 const vmStatus = ref(null)

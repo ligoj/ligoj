@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import registry from '@/plugins/registry.js'
 
 describe('Plugin Registry', () => {
@@ -41,7 +41,7 @@ describe('Plugin Registry', () => {
       install: vi.fn()
     }
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
     const result = registry.register('no-id', definition)
 
     expect(result).toBe(false)
@@ -54,7 +54,7 @@ describe('Plugin Registry', () => {
       id: 'no-install'
     }
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
     const result = registry.register('no-install', definition)
 
     expect(result).toBe(false)

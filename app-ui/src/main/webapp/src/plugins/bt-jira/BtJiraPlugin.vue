@@ -9,8 +9,7 @@
       </v-btn>
     </v-card-title>
     <v-card-text>
-      <v-text-field v-model="projectUrl" label="JIRA Project" readonly
-        append-inner-icon="mdi-open-in-new" @click:append-inner="openJira" />
+      <v-text-field v-model="projectUrl" label="JIRA Project" readonly append-inner-icon="mdi-open-in-new" @click:append-inner="openJira" />
 
       <h3 class="text-subtitle-1 font-weight-medium mt-4 mb-2">Issues by Priority</h3>
       <div v-for="stat in issueStats" :key="stat.priority" class="d-flex align-center mb-2">
@@ -53,13 +52,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useBtJiraApi } from './useBtJiraApi.js'
-import { useI18nStore } from '@/stores/i18n.js'
 
 const props = defineProps({
   subscriptionId: { type: Number, required: true }
 })
 
-const { t } = useI18nStore()
 const api = useBtJiraApi()
 
 const projectData = ref(null)
@@ -187,7 +184,7 @@ async function pollImportTask() {
       attempts++
 
     } catch (error) {
-      throw new Error('Failed to check import status')
+      throw new Error('Failed to check import status', { cause: error })
     }
   }
 

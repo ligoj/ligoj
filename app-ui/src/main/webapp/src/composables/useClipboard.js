@@ -23,11 +23,11 @@ export function useClipboard() {
     if (text == null || text === '') return false
     const value = String(text)
 
-    let ok = false
+    let ok = true
     try {
       await navigator.clipboard.writeText(value)
-      ok = true
     } catch {
+      // fallback for browsers / contexts where the async API is unavailable
       ok = legacyTextareaCopy(value)
     }
 

@@ -9,9 +9,8 @@
       <span v-else-if="mode === 'detail'">Message</span>
       <span v-else>New Message</span>
       <v-spacer />
-      <v-text-field v-if="mode === 'main'" v-model="filter" density="compact" variant="outlined"
-        hide-details prepend-inner-icon="mdi-magnify" placeholder="Search..."
-        style="max-width: 250px" class="mr-2" @update:model-value="debouncedSearch" />
+      <v-text-field v-if="mode === 'main'" v-model="filter" density="compact" variant="outlined" hide-details prepend-inner-icon="mdi-magnify" placeholder="Search..." style="max-width: 250px"
+        class="mr-2" @update:model-value="debouncedSearch" />
       <v-btn v-if="mode !== 'new'" color="success" @click="mode = 'new'" prepend-icon="mdi-email-plus">
         New
       </v-btn>
@@ -22,8 +21,7 @@
         <v-list-item v-if="!messages.length" class="text-center text-medium-emphasis">
           No messages
         </v-list-item>
-        <v-list-item v-for="msg in messages" :key="msg.id" @click="viewMessage(msg)"
-          :class="{ 'bg-amber-lighten-5': msg.unread }" rounded>
+        <v-list-item v-for="msg in messages" :key="msg.id" @click="viewMessage(msg)" :class="{ 'bg-amber-lighten-5': msg.unread }" rounded>
           <template #prepend>
             <v-avatar :color="getAvatarColor(msg)" size="40">
               <span class="text-white text-body-2">{{ getInitials(msg.from) }}</span>
@@ -71,8 +69,7 @@
         <v-textarea v-model="newMsg.value" label="Message" rows="4" />
         <div class="d-flex justify-end ga-2">
           <v-btn @click="mode = 'main'">Cancel</v-btn>
-          <v-btn type="submit" color="success" :loading="sending" prepend-icon="mdi-send"
-            :disabled="!newMsg.target || !newMsg.value">Send</v-btn>
+          <v-btn type="submit" color="success" :loading="sending" prepend-icon="mdi-send" :disabled="!newMsg.target || !newMsg.value">Send</v-btn>
         </div>
       </v-form>
     </v-card-text>
@@ -242,7 +239,7 @@ watch(() => newMsg.value.target, async (target) => {
     try {
       const result = await api.getAudience(newMsg.value.targetType, target)
       audience.value = result || 0
-    } catch (error) {
+    } catch {
       audience.value = 0
     }
   } else {

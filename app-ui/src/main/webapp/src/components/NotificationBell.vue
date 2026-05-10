@@ -12,21 +12,11 @@
       <v-card-title class="d-flex align-center py-2">
         <span class="text-subtitle-1 font-weight-medium">{{ t('notification.title') }}</span>
         <v-spacer />
-        <v-btn
-          v-if="notifications.length"
-          variant="text"
-          size="small"
-          @click="markAllRead"
-        >{{ t('notification.markAllRead') }}</v-btn>
+        <v-btn v-if="notifications.length" variant="text" size="small" @click="markAllRead">{{ t('notification.markAllRead') }}</v-btn>
       </v-card-title>
       <v-divider />
       <v-list v-if="notifications.length" density="compact" class="pa-0" max-height="360" style="overflow-y: auto">
-        <v-list-item
-          v-for="n in notifications"
-          :key="n.id"
-          :class="{ 'bg-blue-lighten-5': !n.read }"
-          @click="markRead(n)"
-        >
+        <v-list-item v-for="n in notifications" :key="n.id" :class="{ 'bg-blue-lighten-5': !n.read }" @click="markRead(n)">
           <template #prepend>
             <v-icon :color="n.iconColor || 'grey'" size="small" class="mr-3">{{ n.icon }}</v-icon>
           </template>
@@ -46,11 +36,9 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useApi } from '@/composables/useApi.js'
-import { useAuthStore } from '@/stores/auth.js'
 import { useI18nStore } from '@/stores/i18n.js'
 
 const api = useApi()
-const auth = useAuthStore()
 const i18n = useI18nStore()
 const t = i18n.t
 

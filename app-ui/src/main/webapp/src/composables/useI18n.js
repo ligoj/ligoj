@@ -13,9 +13,5 @@ export function useI18n(pluginId) {
     i18nStore.markLoaded(bundleId)
   }
 
-  function t(key, params) {
-    return i18nStore.t(key, params)
-  }
-
   return { t: i18nStore.t, load }
 }
