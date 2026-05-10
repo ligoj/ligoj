@@ -90,16 +90,21 @@ export default defineConfig({
       },
       external: [/^\/main\//, /^\/ligoj\/main\//],
       output: {
-        // Rolldown (Vite 8+) only accepts a function for `manualChunks`;
-        // the object form throws at build time. Each shared dep still
-        // lands in its own named chunk so the import map in index.html
-        // can resolve plugins' bare `import 'vue'` (etc.) to stable URLs.
-        manualChunks: (id) => {
-          if (!id.includes('node_modules')) return
-          if (/[\\/]node_modules[\\/]vuetify[\\/]/.test(id)) return 'vuetify'
-          if (/[\\/]node_modules[\\/]vue-router[\\/]/.test(id)) return 'router'
-          if (/[\\/]node_modules[\\/]pinia[\\/]/.test(id)) return 'pinia'
-          if (/[\\/]node_modules[\\/](?:vue|@vue)[\\/]/.test(id)) return 'vue'
+        // Rolldown's default `minSize: 20480` silently merges chunks
+        // smaller than 20 KB into their importer, which would fold Vue
+        // (~80 KB) into the pinia chunk (~4 KB) and break the import
+        // map in index.html. `advancedChunks` with per-group `minSize:
+        // 0` keeps each shared dep on its stable filename.
+        advancedChunks: {
+          groups: [
+            // Highest-priority groups claim modules first; vue must
+            // outrank vuetify or rolldown folds @vue/* into vuetify
+            // (it pulls them in transitively).
+            { name: 'vue',     test: /[\\/]node_modules[\\/](?:vue|@vue)[\\/]/, priority: 100, minSize: 0 },
+            { name: 'router',  test: /[\\/]node_modules[\\/]vue-router[\\/]/,   priority: 90,  minSize: 0 },
+            { name: 'pinia',   test: /[\\/]node_modules[\\/]pinia[\\/]/,        priority: 80,  minSize: 0 },
+            { name: 'vuetify', test: /[\\/]node_modules[\\/]vuetify[\\/]/,      priority: 70,  minSize: 0 },
+          ],
         },
         // Stable filenames for shared deps so runtime-loaded plugins can
         // resolve `import 'vue'` (etc.) via the import map in index.html.
