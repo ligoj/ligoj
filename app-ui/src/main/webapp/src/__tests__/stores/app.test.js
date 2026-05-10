@@ -35,6 +35,25 @@ describe('useAppStore', () => {
     expect(store.breadcrumbs).toEqual(crumbs)
   })
 
+  it('setBreadcrumbs accepts a refresh handler and clears it on the next call', () => {
+    const store = useAppStore()
+    const fn = () => {}
+    store.setBreadcrumbs([{ title: 'A' }], { refresh: fn })
+    expect(store.refresh).toBe(fn)
+    // Next page navigates without opting in: handler is dropped.
+    store.setBreadcrumbs([{ title: 'B' }])
+    expect(store.refresh).toBeNull()
+  })
+
+  it('setRefresh sets/clears the refresh handler independently', () => {
+    const store = useAppStore()
+    const fn = () => {}
+    store.setRefresh(fn)
+    expect(store.refresh).toBe(fn)
+    store.setRefresh(null)
+    expect(store.refresh).toBeNull()
+  })
+
   it('toggleSidebar flips sidebarOpen', () => {
     const store = useAppStore()
     expect(store.sidebarOpen).toBe(true)

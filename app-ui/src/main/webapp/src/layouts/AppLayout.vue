@@ -29,7 +29,25 @@
 
   <v-app-bar app density="compact" elevation="1">
     <v-app-bar-nav-icon @click="appStore.toggleSidebar()" />
-    <v-toolbar-title><v-breadcrumbs v-if="appStore.breadcrumbs.length" :items="appStore.breadcrumbs" /></v-toolbar-title>
+    <div class="d-flex align-center flex-grow-1 min-width-0">
+      <v-breadcrumbs
+        v-if="appStore.breadcrumbs.length"
+        :items="appStore.breadcrumbs"
+        class="pa-0"
+      />
+      <v-btn
+        v-if="appStore.refresh"
+        icon
+        size="small"
+        variant="text"
+        class="ml-1"
+        :loading="refreshing"
+        :title="t('nav.refresh')"
+        @click="doRefresh"
+      >
+        <v-icon>mdi-refresh</v-icon>
+      </v-btn>
+    </div>
     <v-spacer />
     <v-menu>
       <template #activator="{ props }">
@@ -62,7 +80,7 @@
 </template>
 
 <script setup>
-import { computed, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTheme, useDisplay } from 'vuetify'
 import { useAuthStore } from '@/stores/auth.js'
@@ -101,5 +119,13 @@ function toggleTheme() {
 async function doLogout() {
   await auth.logout()
   window.location.href = 'v-login.html'
+}
+
+const refreshing = ref(false)
+async function doRefresh() {
+  const fn = appStore.refresh
+  if (!fn || refreshing.value) return
+  refreshing.value = true
+  try { await fn() } finally { refreshing.value = false }
 }
 </script>

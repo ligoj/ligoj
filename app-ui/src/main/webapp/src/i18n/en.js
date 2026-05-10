@@ -19,6 +19,7 @@ export default {
   'nav.profile': 'Profile',
   'nav.about': 'About',
   'nav.logout': 'Logout',
+  'nav.refresh': 'Refresh',
 
   // Common
   'common.search': 'Search',
