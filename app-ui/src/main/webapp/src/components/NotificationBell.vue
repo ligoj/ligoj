@@ -101,7 +101,7 @@ async function loadNotifications() {
     // Demo mode
     demoMode.value = true
     if (!notifications.value.length) {
-      notifications.value = [...DEMO_NOTIFICATIONS]
+      //notifications.value = [...DEMO_NOTIFICATIONS]
     }
   }
 }
