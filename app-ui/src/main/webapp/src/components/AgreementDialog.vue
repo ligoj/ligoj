@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :model-value="modelValue" max-width="500" persistent @update:model-value="$emit('update:modelValue', $event)">
+  <v-dialog :model-value="modelValue" max-width="500" @update:model-value="$emit('update:modelValue', $event)">
     <v-card>
       <v-card-title>{{ t('agreement.title') }}</v-card-title>
       <v-card-text>
