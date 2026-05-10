@@ -49,20 +49,7 @@
       </v-btn>
     </div>
     <v-spacer />
-    <v-menu>
-      <template #activator="{ props }">
-        <v-btn v-bind="props" icon size="small">
-          <v-icon>mdi-translate</v-icon>
-        </v-btn>
-      </template>
-      <v-list density="compact">
-        <v-list-item v-for="loc in i18n.SUPPORTED_LOCALES" :key="loc" :title="LOCALE_NAMES[loc] || loc" :active="i18n.locale === loc" @click="i18n.setLocale(loc)" />
-      </v-list>
-    </v-menu>
     <NotificationBell />
-    <v-btn icon size="small" @click="toggleTheme">
-      <v-icon>{{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
-    </v-btn>
     <v-btn variant="text" prepend-icon="mdi-account" @click="router.push('/profile')">
       <span class="d-none d-sm-inline">{{ auth.userName }}</span>
     </v-btn>
@@ -82,7 +69,7 @@
 <script setup>
 import { computed, ref, watchEffect } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useTheme, useDisplay } from 'vuetify'
+import { useDisplay } from 'vuetify'
 import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
 import { useI18nStore } from '@/stores/i18n.js'
@@ -90,14 +77,11 @@ import NotificationBell from '@/components/NotificationBell.vue'
 
 const router = useRouter()
 const route = useRoute()
-const theme = useTheme()
 const { mobile } = useDisplay()
 const auth = useAuthStore()
 const appStore = useAppStore()
 const i18n = useI18nStore()
 const t = i18n.t
-
-const LOCALE_NAMES = { en: 'English', fr: 'Français' }
 
 /** Auto-expand sidebar groups whose children match the current route */
 const openedGroups = computed(() => {
@@ -106,15 +90,9 @@ const openedGroups = computed(() => {
     .map(item => item.id)
 })
 
-const isDark = computed(() => theme.global.current.value.dark)
-
 watchEffect(() => {
   if (mobile.value) appStore.sidebarOpen = false
 })
-
-function toggleTheme() {
-  theme.global.name.value = isDark.value ? 'ligojLight' : 'ligojDark'
-}
 
 async function doLogout() {
   await auth.logout()

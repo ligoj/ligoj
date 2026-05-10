@@ -169,6 +169,9 @@ export default {
   'profile.roles': 'Roles',
   'profile.permissions': 'Permissions',
   'profile.uiAuth': 'UI Authorizations ({{count}})',
+  'profile.preferences': 'Preferences',
+  'profile.theme': 'Theme',
+  'profile.language': 'Language',
 
   // About
   'about.title': 'About Ligoj',
