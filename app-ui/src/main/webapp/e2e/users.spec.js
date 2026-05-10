@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Users CRUD', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('v-index.html#/id/user')
+    await page.goto('index.html#/id/user')
     await page.waitForLoadState('networkidle')
     await page.locator('.v-application').waitFor({ timeout: 15000 })
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/users|utilisateurs/i, { timeout: 15000 })
@@ -55,7 +55,7 @@ test.describe('Users CRUD', () => {
   })
 
   test('user edit form shows action buttons in edit mode', async ({ page }) => {
-    await page.goto('v-index.html#/id/user/admin')
+    await page.goto('index.html#/id/user/admin')
     await page.waitForLoadState('networkidle')
     await page.locator('.v-application').waitFor({ timeout: 15000 })
     const actionsCard = page.locator('.v-card:has-text("Actions")')

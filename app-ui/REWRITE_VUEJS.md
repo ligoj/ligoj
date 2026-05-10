@@ -134,8 +134,8 @@ Migrate the current implementation :
 - Common module with utilities, routing, main VueJS app etc. in `app-ui/src/main/webapp`
 - Migrate modular plugin `plugin-id` in `plugin-id/src/main/resources/META-INF/resources/id`.
 - A plugin is singleton, it can be loaded multiple times but only one instance is kept.
-- Use `v-index.html` as main entry point for the new VueJS app
-- Use `v-login.html` as main entry point for the new VueJS login
+- Use `index.html` as main entry point for the new VueJS app
+- Use `login.html` as main entry point for the new VueJS login
 - Find a way to minimize the code size of the login part. There is no need to load the full application for the login.
 - Do not use Axios library, only native fetch API
 - Complete Dockerfile to include the npm command for the VueJS application.
@@ -154,3 +154,4 @@ The challenge is that each module like `plugin-id` is a standalone Maven project
 # Core components
 
 Core components are in `~/git/ligoj/app-ui/src/main/webapp/src/components`. They are share with the other plugins modules.
+- `LigojDataTable` and `LigojDataTableServer` ar the base components for the data table.

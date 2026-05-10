@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Admin page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('v-index.html#/admin')
+    await page.goto('index.html#/admin')
     await page.locator('.v-application').waitFor({ timeout: 15000 })
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/admin/i, { timeout: 15000 })
   })
@@ -26,7 +26,7 @@ test.describe('Admin page', () => {
 
 test.describe('Profile page', () => {
   test('displays profile with username', async ({ page }) => {
-    await page.goto('v-index.html#/profile')
+    await page.goto('index.html#/profile')
     await page.waitForLoadState('networkidle')
     await page.locator('.v-application').waitFor({ timeout: 15000 })
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/profile|profil/i, { timeout: 15000 })
@@ -36,7 +36,7 @@ test.describe('Profile page', () => {
 
 test.describe('About page', () => {
   test('displays about page with app info', async ({ page }) => {
-    await page.goto('v-index.html#/about')
+    await page.goto('index.html#/about')
     await page.waitForLoadState('networkidle')
     await page.locator('.v-application').waitFor({ timeout: 15000 })
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/about|à propos/i, { timeout: 15000 })

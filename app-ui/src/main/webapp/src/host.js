@@ -3,7 +3,7 @@
  *
  * Plugins are built as independent Vite library bundles in their own Maven
  * modules; they mark `@ligoj/host` as external so they don't duplicate the
- * host's stores/composables. At runtime the import map in v-index.html
+ * host's stores/composables. At runtime the import map in index.html
  * routes `@ligoj/host` to the chunk emitted by this entry — plugins then
  * use the host's own pinia / reactive instances.
  *

@@ -28,14 +28,14 @@ const NAV_CONFIG = [
     id: 'system', label: 'System', labelKey: 'nav.system', icon: 'mdi-cog', route: '/system',
     auth: '^system',
     children: [
-      { id: 'system-information',   label: 'Information',   labelKey: 'nav.information',   icon: 'mdi-information-outline', route: '/system/information',   auth: '^system' },
-      { id: 'system-configuration', label: 'Configuration', labelKey: 'nav.configuration', icon: 'mdi-tune',                route: '/system/configuration', auth: '^system/configuration' },
-      { id: 'system-user',          label: 'Users',         labelKey: 'nav.users',         icon: 'mdi-account-multiple',    route: '/system/user',          auth: '^system/user' },
-      { id: 'system-role',          label: 'Roles',         labelKey: 'nav.roles',         icon: 'mdi-shield-account',      route: '/system/role',          auth: '^system/role' },
-      { id: 'system-plugin',        label: 'Plugins',       labelKey: 'nav.plugins',       icon: 'mdi-puzzle',              route: '/system/plugin',        auth: '^system/plugin' },
-      { id: 'system-node',          label: 'Nodes',         labelKey: 'nav.nodes',         icon: 'mdi-server',              route: '/system/node',          auth: '^system/node' },
-      { id: 'system-cache',         label: 'Cache',         labelKey: 'nav.cache',         icon: 'mdi-database-refresh',    route: '/system/cache',         auth: '^system/cache' },
-      { id: 'system-bench',         label: 'Bench',         labelKey: 'nav.bench',         icon: 'mdi-speedometer',         route: '/system/bench',         auth: '^system/bench' },
+      { id: 'system-information', label: 'Information', labelKey: 'nav.information', icon: 'mdi-information-outline', route: '/system/information', auth: '^system' },
+      { id: 'system-configuration', label: 'Configuration', labelKey: 'nav.configuration', icon: 'mdi-tune', route: '/system/configuration', auth: '^system/configuration' },
+      { id: 'system-user', label: 'Users', labelKey: 'nav.users', icon: 'mdi-account-multiple', route: '/system/user', auth: '^system/user' },
+      { id: 'system-role', label: 'Roles', labelKey: 'nav.roles', icon: 'mdi-shield-account', route: '/system/role', auth: '^system/role' },
+      { id: 'system-plugin', label: 'Plugins', labelKey: 'nav.plugins', icon: 'mdi-puzzle', route: '/system/plugin', auth: '^system/plugin' },
+      { id: 'system-node', label: 'Nodes', labelKey: 'nav.nodes', icon: 'mdi-server', route: '/system/node', auth: '^system/node' },
+      { id: 'system-cache', label: 'Cache', labelKey: 'nav.cache', icon: 'mdi-database-refresh', route: '/system/cache', auth: '^system/cache' },
+      { id: 'system-bench', label: 'Bench', labelKey: 'nav.bench', icon: 'mdi-speedometer', route: '/system/bench', auth: '^system/bench' },
     ],
   },
 ]
@@ -113,7 +113,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * Map the last fetchSession status to a short query-string flag that
-   * v-login.html turns into a localized error message.
+   * login.html turns into a localized error message.
    *
    *   0       → 'network'      → "Network error"
    *   401/403 → 'expired'      → "Your session has expired"
@@ -132,7 +132,7 @@ export const useAuthStore = defineStore('auth', () => {
    *  the query string so the login form can render it. */
   function redirectToLogin() {
     const reason = loginRedirectReason()
-    window.location.href = 'v-login.html?' + reason
+    window.location.href = 'login.html?' + reason
   }
 
   async function logout() {

@@ -88,21 +88,19 @@ Cross-browser Testing Platform and Open Source <3 Provided by [Sauce Labs][homep
 
 ## Pages disponibles (18 vues)
 
-| Page             | Route                      | Donnees               |
-| :--------------- | :------------------------- | :-------------------- |
-| Login            | `/v-login.html`            | API auth              |
-| Dashboard        | `/#/`                      | Cartes de navigation  |
-| Projects (liste) | `/#/home/project`          | 4 projets (MySQL)     |
-| Project (detail) | `/#/home/project/:id`      | Souscriptions         |
-| Project (edit)   | `/#/home/project/:id/edit` | Formulaire CRUD       |
-| Users            | `/#/id/user`               | API live              |
-| Groups           | `/#/id/group`              | API live              |
-| Companies        | `/#/id/company`            | API live              |
-| Delegates        | `/#/id/delegate`           | 5 delegations (MySQL) |
-| Container Scopes | `/#/id/container-scope`    | Onglets group/company |
-| Administration   | `/#/admin`                 | 15 plugins actifs     |
-| Profile          | `/#/profile`               | Session, roles        |
-| About            | `/#/about`                 | Version, features     |
+| Page             | Route                   | Donnees               |
+| :--------------- | :---------------------- | :-------------------- |
+| Login            | `/login.html`           | API auth              |
+| Home page        | `/#/`                   | Cartes de navigation  |
+| Projects list    | `/#/home/project`       | 4 projets (MySQL)     |
+| Project details  | `/#/home/project/:id`   | Souscriptions         |
+| Users list       | `/#/id/user`            | API live              |
+| Groups list      | `/#/id/group`           | API live              |
+| Companies list   | `/#/id/company`         | API live              |
+| Delegates        | `/#/id/delegate`        | 5 delegations (MySQL) |
+| Container Scopes | `/#/id/container-scope` | Onglets group/company |
+| System info      | `/#/system/information` | System information    |
+| Profile          | `/#/profile`            | User profile          |
 
 > Sans plugin IAM (LDAP/AD), le systeme utilise `feature:iam:empty`. Les pages Identity affichent les donnees retournees par l'API (qui peuvent etre vides). Les pages Projects et Delegates utilisent les vraies donnees MySQL.
 

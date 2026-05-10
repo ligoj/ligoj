@@ -30,21 +30,8 @@
   <v-app-bar app density="compact" elevation="1">
     <v-app-bar-nav-icon @click="appStore.toggleSidebar()" />
     <div class="d-flex align-center flex-grow-1 min-width-0">
-      <v-breadcrumbs
-        v-if="appStore.breadcrumbs.length"
-        :items="appStore.breadcrumbs"
-        class="pa-0"
-      />
-      <v-btn
-        v-if="appStore.refresh"
-        icon
-        size="small"
-        variant="text"
-        class="ml-1"
-        :loading="refreshing"
-        :title="t('nav.refresh')"
-        @click="doRefresh"
-      >
+      <v-breadcrumbs v-if="appStore.breadcrumbs.length" :items="appStore.breadcrumbs" class="pa-0" />
+      <v-btn v-if="appStore.refresh" icon size="small" variant="text" class="ml-1" :loading="refreshing" :title="t('nav.refresh')" @click="doRefresh">
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
     </div>
@@ -96,7 +83,7 @@ watchEffect(() => {
 
 async function doLogout() {
   await auth.logout()
-  window.location.href = 'v-login.html'
+  window.location.href = 'login.html'
 }
 
 const refreshing = ref(false)

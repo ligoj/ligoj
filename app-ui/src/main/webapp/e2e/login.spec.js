@@ -5,7 +5,7 @@ test.use({ storageState: { cookies: [], origins: [] } })
 
 test.describe('Login page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('v-login.html')
+    await page.goto('login.html')
     await page.waitForLoadState('networkidle')
   })
 
@@ -27,8 +27,8 @@ test.describe('Login page', () => {
     await page.getByLabel('Username').fill('testuser')
     await page.locator('input[type="password"]').fill('testpass')
     await page.getByRole('button', { name: /sign in/i }).click()
-    await page.waitForURL('**/v-index.html**', { timeout: 15000 })
-    await expect(page).toHaveURL(/v-index\.html/)
+    await page.waitForURL('**/index.html**', { timeout: 15000 })
+    await expect(page).toHaveURL(/index\.html/)
   })
 
   test('forgot password link switches to recovery mode', async ({ page }) => {

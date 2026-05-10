@@ -401,7 +401,7 @@ async function doLogin() {
     return
   }
   pushToast('success', msg['success-login'])
-  window.location.href = 'v-index.html'
+  window.location.href = 'index.html'
 }
 
 async function doReset() {
@@ -420,7 +420,7 @@ async function doReset() {
     return
   }
   pushToast('success', msg['success-reset'])
-  setTimeout(() => { window.location.href = 'v-login.html' }, 2000)
+  setTimeout(() => { window.location.href = 'login.html' }, 2000)
 }
 
 async function doRecovery() {

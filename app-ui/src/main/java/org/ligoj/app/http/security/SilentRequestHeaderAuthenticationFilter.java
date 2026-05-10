@@ -26,12 +26,12 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	/**
 	 * Static pages
 	 */
-	public static final Pattern WHITE_LIST_PAGES_LOGIN = Pattern.compile("/(\\d{3}|logout|login|v-login)(-prod)?\\.html(\\?.*)?");
+	public static final Pattern WHITE_LIST_PAGES_LOGIN = Pattern.compile("/(\\d{3}|logout|login)\\.html(\\?.*)?");
 
 	/**
 	 * Static pages
 	 */
-	public static final Pattern WHITE_LIST_PAGES = Pattern.compile("/(\\d{3}|logout)(-prod)?\\.html(\\?.*)?");
+	public static final Pattern WHITE_LIST_PAGES = Pattern.compile("/(\\d{3}|logout)\\.html(\\?.*)?");
 
 	/**
 	 * Static assets

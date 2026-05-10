@@ -11,8 +11,8 @@ ADD src/main/webapp/package.json src/main/webapp/package-lock.json ./
 RUN npm ci
 ADD src/main/webapp .
 RUN npm run build -- --outDir ./vue-dist --emptyOutDir && \
-    cp vue-dist/v-index.html . && \
-    cp vue-dist/v-login.html . && \
+    cp vue-dist/index.html . && \
+    cp vue-dist/login.html . && \
     cp -r vue-dist/assets/ . && \
     rm -rf vue-dist node_modules
 WORKDIR /build/

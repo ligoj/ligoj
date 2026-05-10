@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Container Scopes', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('v-index.html#/id/container-scope')
+    await page.goto('index.html#/id/container-scope')
     await page.waitForLoadState('networkidle')
     // Wait for Vue app to mount
     await page.locator('.v-application').waitFor({ timeout: 15000 })

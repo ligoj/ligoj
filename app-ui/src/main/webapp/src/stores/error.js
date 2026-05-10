@@ -73,7 +73,7 @@ export const useErrorStore = defineStore('error', () => {
     }
 
     if (status === 401) {
-      window.location.href = 'v-login.html?expired'
+      window.location.href = 'login.html?expired'
       return response
     }
 

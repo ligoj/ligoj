@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
 /**
- * Dev-only: the import map in v-index.html points shared-dep bare specifiers
+ * Dev-only: the import map in index.html points shared-dep bare specifiers
  * (vue, vue-router, pinia, vuetify, @ligoj/host) at /ligoj/assets/*.js —
  * build artefacts that don't exist under `npm run dev`. Plugins loaded at
  * runtime from the webjars servlet carry `import ... from "vue"` in their
@@ -16,11 +16,11 @@ import { resolve } from 'path'
  * transformed code at the exact URL the import map asks for.
  */
 const SHIMS = {
-  '/ligoj/assets/vue.js':     { from: 'vue' },
-  '/ligoj/assets/router.js':  { from: 'vue-router' },
-  '/ligoj/assets/pinia.js':   { from: 'pinia' },
+  '/ligoj/assets/vue.js': { from: 'vue' },
+  '/ligoj/assets/router.js': { from: 'vue-router' },
+  '/ligoj/assets/pinia.js': { from: 'pinia' },
   '/ligoj/assets/vuetify.js': { from: 'vuetify' },
-  '/ligoj/assets/host.js':    { from: '/src/host.js' },
+  '/ligoj/assets/host.js': { from: '/src/host.js' },
 }
 
 function ligojDevSharedImports() {
@@ -34,8 +34,8 @@ function ligojDevSharedImports() {
       const shim = SHIMS[id]
       if (!shim) return null
       return `export * from ${JSON.stringify(shim.from)};\n` +
-             `import * as __ns from ${JSON.stringify(shim.from)};\n` +
-             `export default __ns.default ?? __ns;\n`
+        `import * as __ns from ${JSON.stringify(shim.from)};\n` +
+        `export default __ns.default ?? __ns;\n`
     },
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
@@ -65,7 +65,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
       // Resolve the shared-surface module locally during dev/test. At runtime
-      // the browser resolves `@ligoj/host` via the import map in v-index.html.
+      // the browser resolves `@ligoj/host` via the import map in index.html.
       '@ligoj/host': resolve(__dirname, 'src/host.js'),
     },
   },
@@ -84,20 +84,25 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'v-index.html'),
-        login: resolve(__dirname, 'v-login.html'),
+        main: resolve(__dirname, 'index.html'),
+        login: resolve(__dirname, 'login.html'),
         host: resolve(__dirname, 'src/host.js'),
       },
       external: [/^\/main\//, /^\/ligoj\/main\//],
       output: {
-        manualChunks: {
-          vuetify: ['vuetify'],
-          vue: ['vue'],
-          router: ['vue-router'],
-          pinia: ['pinia'],
+        // Rolldown (Vite 8+) only accepts a function for `manualChunks`;
+        // the object form throws at build time. Each shared dep still
+        // lands in its own named chunk so the import map in index.html
+        // can resolve plugins' bare `import 'vue'` (etc.) to stable URLs.
+        manualChunks: (id) => {
+          if (!id.includes('node_modules')) return
+          if (/[\\/]node_modules[\\/]vuetify[\\/]/.test(id)) return 'vuetify'
+          if (/[\\/]node_modules[\\/]vue-router[\\/]/.test(id)) return 'router'
+          if (/[\\/]node_modules[\\/]pinia[\\/]/.test(id)) return 'pinia'
+          if (/[\\/]node_modules[\\/](?:vue|@vue)[\\/]/.test(id)) return 'vue'
         },
         // Stable filenames for shared deps so runtime-loaded plugins can
-        // resolve `import 'vue'` (etc.) via the import map in v-index.html.
+        // resolve `import 'vue'` (etc.) via the import map in index.html.
         // Other chunks stay hashed for cache-busting.
         chunkFileNames: (chunk) => {
           const stable = ['vue', 'router', 'pinia', 'vuetify']
