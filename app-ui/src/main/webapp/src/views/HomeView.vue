@@ -35,13 +35,24 @@ const i18n = useI18nStore()
 const t = i18n.t
 
 const CARD_META = computed(() => ({
+  // Identity
   'id-user': { color: 'blue', subtitle: t('dashboard.manageUsers') },
   'id-group': { color: 'teal', subtitle: t('dashboard.manageGroups') },
   'id-company': { color: 'indigo', subtitle: t('dashboard.manageCompanies') },
   'id-delegate': { color: 'purple', subtitle: t('dashboard.manageDelegates') },
   'id-container-scope': { color: 'cyan', subtitle: t('dashboard.manageContainerScopes') },
+  // Projects
   'project': { color: 'orange', subtitle: t('dashboard.manageProjects') },
+  // Administration — uniform slate color signals the "admin" section
   'admin': { color: 'red', subtitle: t('dashboard.manageAdmin') },
+  'system-information': { color: 'blue-grey-darken-1', subtitle: t('dashboard.manageInformation') },
+  'system-configuration': { color: 'blue-grey-darken-1', subtitle: t('dashboard.manageConfiguration') },
+  'system-user': { color: 'blue-grey-darken-1', subtitle: t('dashboard.manageSystemUsers') },
+  'system-role': { color: 'blue-grey-darken-1', subtitle: t('dashboard.manageRoles') },
+  'system-plugin': { color: 'blue-grey-darken-1', subtitle: t('dashboard.managePlugins') },
+  'system-node': { color: 'blue-grey-darken-1', subtitle: t('dashboard.manageNodes') },
+  'system-cache': { color: 'blue-grey-darken-1', subtitle: t('dashboard.manageCache') },
+  'system-bench': { color: 'blue-grey-darken-1', subtitle: t('dashboard.manageBench') },
 }))
 
 /** Flatten nav items into dashboard cards */
