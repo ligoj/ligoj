@@ -65,7 +65,7 @@
                 </tr>
                 <tr>
                   <td class="font-weight-medium">{{ t('about.buildTool') }}</td>
-                  <td>Vite 6</td>
+                  <td>Vite 8</td>
                 </tr>
                 <tr>
                   <td class="font-weight-medium">{{ t('about.state') }}</td>
