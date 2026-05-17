@@ -119,6 +119,39 @@ Cross-browser Testing Platform and Open Source <3 Provided by [Sauce Labs][homep
 
 # Get started
 
+## Prerequisites
+
+The build is driven by `podman compose`. Make sure `podman-compose` (the Python
+tool) is on your `PATH` *before* `docker-compose`, so Podman runs the build
+natively via buildah instead of delegating to a Docker CLI:
+
+```bash
+# Linux (Fedora/RHEL/Amazon Linux 2023)
+sudo dnf install -y podman podman-compose git
+
+# Linux (Debian/Ubuntu)
+sudo apt install -y podman python3-pip git && pip install --user podman-compose
+
+# macOS
+brew install podman podman-compose git && podman machine init && podman machine start
+```
+
+Quick sanity check — both lines should match:
+
+```bash
+which podman-compose                  # → /usr/bin/podman-compose (or similar)
+podman compose version | head -n1     # → podman-compose version x.y.z
+```
+
+If `podman compose version` instead prints something like
+`Executing external compose provider "/usr/local/bin/docker-compose"`,
+your `podman compose` is delegating to Docker. This still works but triggers
+the *"Docker Compose is configured to build using Bake, but buildkit isn't
+enabled"* warning, ignores `BUILDAH_FORMAT`, and uses the legacy builder. Install
+`podman-compose` to fix.
+
+## Run
+
 ```bash
 git clone https://github.com/ligoj/ligoj.git && cd ligoj
 podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
@@ -148,12 +181,11 @@ and [ligoj-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 ### One script rebuild and run
 
-Install Podman + Compose plugin + git, then build and run (Amazon Linux 2023 /
-RHEL / Fedora — adapt the package manager for other distros):
+Assumes [Prerequisites](#prerequisites) are installed. Clones the repo, sets up a
+persistent home, then builds and starts the stack:
 
 ```bash
-sudo dnf install -y podman podman-compose git
-sudo systemctl enable --now podman.socket
+sudo systemctl enable --now podman.socket   # Linux only, idempotent
 
 git clone https://github.com/ligoj/ligoj.git
 cd ligoj
@@ -267,6 +299,8 @@ by layering exactly one of these override files on top:
 To avoid repeating the long flag list, define a small alias for your session:
 
 ```bash
+# Tell buildah to emit Docker-format images (OCI is the buildah default and not
+# accepted by every downstream registry). No-op if podman delegates to docker.
 export BUILDAH_FORMAT=docker
 
 # Pick ONE of these:
