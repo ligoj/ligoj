@@ -1,5 +1,30 @@
+# IDE
+.idea/
+.settings/
+.classpath
+.project
+*.iml
 *.launch
-src/main/webapp/node_modules
-src/main/webapp/e2e
-src/main/webapp/test-results
-src/main/webapp/playwright-report
+
+# OS
+.DS_Store
+
+# VCS
+.git/
+.gitignore
+.gitattributes
+
+# Maven build output (re-generated in the builder stage)
+target/
+
+# Node build output / deps (re-generated in the builder_node stage)
+**/node_modules/
+**/dist/
+**/vue-dist/
+
+# Frontend test artifacts (not needed for the production image)
+src/main/webapp/e2e/
+src/main/webapp/test-results/
+src/main/webapp/playwright-report/
+src/main/webapp/playwright.config.js
+src/main/webapp/docker-compose-vuejs-dev.yml

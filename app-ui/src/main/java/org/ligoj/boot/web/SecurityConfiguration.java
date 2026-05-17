@@ -98,6 +98,7 @@ public class SecurityConfiguration {
 	static final String LOGIN_BY_API_KEY_API = "/login-by-api-key";
 	static final String LOGOUT_HTML = "/logout.html";
 	static final String INDEX_HTML = "/index.html";
+	static final String LOGIN_HTML = "/login.html";
 
 	/**
 	 * A 403 JSON management.
@@ -108,7 +109,7 @@ public class SecurityConfiguration {
 	@Bean
 	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint(AbstractAuthenticationProvider provider) {
 		final var ep = new RedirectAuthenticationEntryPoint(loginUrl);
-		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, "/index.html", "/login.html"));
+		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, LOGIN_HTML));
 		ep.setRedirectStrategy(getRestFailureStrategy());
 		ep.setForceRedirectUrl(provider.isForceRedirect());
 		return ep;

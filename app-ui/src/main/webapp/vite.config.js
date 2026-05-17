@@ -82,6 +82,11 @@ export default defineConfig({
     },
   },
   build: {
+    // Vuetify ships ~530 KB minified — that's the whole component
+    // library and we already split shared deps off. Raise the warning
+    // threshold so it stops firing on a chunk we accept; revisit if we
+    // tree-shake Vuetify via vite-plugin-vuetify.
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
@@ -95,7 +100,7 @@ export default defineConfig({
         // (~80 KB) into the pinia chunk (~4 KB) and break the import
         // map in index.html. `advancedChunks` with per-group `minSize:
         // 0` keeps each shared dep on its stable filename.
-        advancedChunks: {
+        codeSplitting: {
           groups: [
             // Highest-priority groups claim modules first; vue must
             // outrank vuetify or rolldown folds @vue/* into vuetify

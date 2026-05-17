@@ -1,0 +1,18 @@
+# IDE
+.idea/
+.settings/
+.classpath
+.project
+*.iml
+*.launch
+
+# OS
+.DS_Store
+
+# VCS
+.git/
+.gitignore
+.gitattributes
+
+# Maven build output (re-generated in the builder stage)
+target/

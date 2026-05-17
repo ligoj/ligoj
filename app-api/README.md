@@ -1,13 +1,12 @@
 [![Docker](https://img.shields.io/docker/build/ligoj/ligoj-api.svg)](https://hub.docker.com/r/ligoj/ligoj-api)
 
-# API (REST) container running a stateless SpringBoot application.
+# API (REST) container running a stateless Spring Boot application.
 
 ## Roles
 
-- URL security level, with RBAC: User / Role / Permission for a URL pattern supporting dynamic configuration
-- Resource security level (most complex) gives to users, groups and companies can access (read, write, +grant) to nodes,
-  users, groups, companies
-- plugin runtime and life-cycle management
+- URL security level, with RBAC: User / Role / Permission for a URL pattern supporting dynamic configuration.
+- Resource security level (the most complex) allows users, groups, and companies to access (read, write, and grant) nodes, users, groups, and companies.
+- Plugin runtime and lifecycle management.
 
 ## API Schema
 
@@ -95,9 +94,7 @@ Compile Java sources and produce the WAR file.
 mvn clean package -DskipTests=true
 ```
 
-Note: you can run this command either from the root module, either from the `app-api` module. When executed from the
-root module, both WAR (`app-api` and `app-ui`) will be created. But if you want to produce production binaries, enable
-the "minify" profile `minify`.
+Note: You can run this command either from the root module or from the `app-api` module. When executed from the root module, both WARs (`app-api` and `app-ui`) will be created.
 
 # Test the WAR
 
@@ -109,13 +106,13 @@ java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=fal
 
 ## Build with Docker builder
 
-With this mode, no build tools (java, Maven, ...) are required to build the image.
+With this mode, no build tools (Java, Maven, ...) are required to build the image.
 
 ```bash
 docker build -t ligoj/ligoj-api:4.0.1 -f Dockerfile .
 ```
 
-Also, compatible with `podman`, and multiple target architectures:
+It is also compatible with multiple target architectures:
 
 ```bash
 podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-api -t ligoj/ligoj-api:4.0.1 -f Dockerfile .
@@ -123,12 +120,39 @@ podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligo
 
 ## Custom Maven proxy
 
-To use a custom Maven configuration (proxy, mirror, ...), copy your `settings.xml` Maven file in `.m2/` directory.
+To use a custom Maven configuration (proxy, mirror, ...), copy your `settings.xml` Maven file into the `.m2/` directory.
 
 Content will be copied at build time with a Docker `COPY` instruction.
-The same applies to [app-ui](../app-ui/Dockerfile)
+The same applies to [app-ui](../app-ui/Dockerfile).
 
-*Note* This file will be in the final Docker image, only in the builder image.
+*Note*: This file will not be in the final Docker image, only in the builder image.
+
+## Build behind a private Maven mirror with self-signed TLS
+
+When the build must fetch artifacts from an internal mirror whose TLS certificate is
+self-signed (or simply not in the JDK trust store), enable the `MAVEN_INSECURE_TLS`
+build argument to disable Maven's HTTPS certificate and hostname validation:
+
+```bash
+docker build --build-arg MAVEN_INSECURE_TLS=true -t ligoj/ligoj-api:4.0.1 -f Dockerfile .
+```
+
+When enabled, the builder stage exports the following `MAVEN_OPTS` for every `mvn`
+invocation (dependency pre-fetch and final `package`):
+
+- `-Dmaven.wagon.http.ssl.insecure=true` — accept any server certificate.
+- `-Dmaven.wagon.http.ssl.allowall=true` — skip hostname verification.
+- `-Dmaven.resolver.transport=wagon` — switch the resolver to the wagon transport so the two flags above take effect (Maven 3.9 defaults to the native HTTP transport, which ignores them).
+
+The flag is opt-in and defaults to `false`. Released images are built with full TLS
+verification.
+
+> **Warning** — Only enable `MAVEN_INSECURE_TLS=true` against trusted mirrors on a
+> trusted network. It removes all transport-level integrity guarantees and exposes
+> the build to MitM-injected dependencies. Where possible, prefer importing the
+> mirror's CA into the builder image via `prepare-build.sh`; a ready-to-use sample
+> is provided in [`prepare-build-sample.sh`](prepare-build-sample.sh) — drop your
+> PEM certificates in a `.ca/` directory and rename the script to `prepare-build.sh`.
 
 # Prepare database
 
@@ -171,7 +195,7 @@ psql ligoj
 ```sql
 CREATE USER ligoj WITH ENCRYPTED PASSWORD 'ligoj';
 CREATE DATABASE ligoj WITH OWNER=ligoj ENCODING='UTF-8';
-GRANT ALL PRIVILEDGES ON DATABASE ligoj to ligoj
+GRANT ALL PRIVILEGES ON DATABASE ligoj TO ligoj;
 ```
 
 ### PgSQL 15+
@@ -179,7 +203,7 @@ GRANT ALL PRIVILEDGES ON DATABASE ligoj to ligoj
 ```sql
 CREATE USER ligoj WITH ENCRYPTED PASSWORD 'ligoj';
 CREATE DATABASE ligoj WITH OWNER=ligoj ENCODING='UTF-8';
-GRANT ALL ON DATABASE ligoj to ligoj;
+GRANT ALL ON DATABASE ligoj TO ligoj;
 GRANT ALL ON SCHEMA public TO ligoj;
 ```
 
@@ -208,7 +232,7 @@ docker run --rm -it \
 
 ### MySQL and crypto sample
 
-More complex run with crypto, port mapping, disabled schema generation and volume configurations
+More complex run with crypto, port mapping, disabled schema generation, and volume configurations:
 
 ```bash
 docker run --rm -it \
@@ -225,18 +249,18 @@ Explanations:
 
 - `-e CRYPTO="-Dapp.crypto.file=/home/ligoj/security.key"`: Specify the SQL column cryptographic DES secret file. More
   information is available
-  there: [core-context-common.xml](https://github.com/ligoj/bootstrap/tree/master/bootstrap-core/src/main/resources/META-INF/spring/core-context-common.xml#L16C101-L16C101)
-- `-e CUSTOM_OPTS="..."`: Options related to database, and other application features,
-  see [Relevant variables](#relevant-variables)
-- `-v ~/.ligoj:/home/ligoj \`: External persistent volume for plugins and other data.
-- `-p 8680:8081`: Exposition of the internal port `8081` to `8680`
+  [here](https://github.com/ligoj/bootstrap/tree/master/bootstrap-core/src/main/resources/META-INF/spring/core-context-common.xml#L16C101-L16C101).
+- `-e CUSTOM_OPTS="..."`: Options related to the database and other application features.
+  See [Relevant variables](#relevant-variables).
+- `-v ~/.ligoj:/home/ligoj`: External persistent volume for plugins and other data.
+- `-p 8680:8081`: Exposes the internal port `8081` to `8680`.
 
 Note: On Windows host, replace all `` \ `` (escape) by `` ` `` for multi-line support.
 
 ### PgSQL sample
 
 More complex run with system properties for LDAP (see [plugin-id-ldap](https://github.com/ligoj/plugin-id-ldap)) and
-custom ORM dialect
+a custom ORM dialect:
 
 ```bash
 docker run --rm \
@@ -249,17 +273,17 @@ docker run --rm \
  ligoj/ligoj-api:4.0.1
 ```
 
-Note: There is an uncovered Hibernate issue with schema generation `update` mode. The configured database user must see
-only the target database. If there are several visible databases by this user, the update mechanism will populate the
-tables of all visible tables, including the ones of the not targeted database. This strategy may produce an empty SQL
-schema update when some tables are already existing in a database different from the target one.
+Note: There is a known Hibernate issue with schema generation `update` mode. The configured database user must see
+only the target database. If there are several databases visible to this user, the update mechanism will try to populate the
+tables of all visible databases, including the ones of the non-targeted databases. This strategy may produce an empty SQL
+schema update when some tables already exist in a database different from the target one.
 
 
 ## Compatibilities
 
 ### Database
 
-Tested compatibility and performance for 10K+ users and 1K+ projects.
+Tested compatibility and performance for 10,000+ users and 1,000+ projects.
 
 | Vendor                                    | Version | Driver                   | Dialect                                                  | Status                  |
 | ----------------------------------------- | ------- | ------------------------ | -------------------------------------------------------- | ----------------------- |
@@ -269,10 +293,10 @@ Tested compatibility and performance for 10K+ users and 1K+ projects.
 | [MySQL](https://www.mysql.com)            | 8.0     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL8InnoDBUtf8Dialect     | OK                      |
 | [MariaDB](https://mariadb.org/)           | 10.1    | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
 | [MariaDB](https://mariadb.org/)           | 10.1    | org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK, unknown performance |
-| [PostGreSQL](https://www.postgresql.org/) | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
-| [PostGreSQL](https://www.postgresql.org/) | 10.21   | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
-| [PostGreSQL](https://www.postgresql.org/) | 15.1    | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
-| [PostGreSQL](https://www.postgresql.org/) | 17.0    | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+| [PostgreSQL](https://www.postgresql.org/) | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+| [PostgreSQL](https://www.postgresql.org/) | 10.21   | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+| [PostgreSQL](https://www.postgresql.org/) | 15.1    | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+| [PostgreSQL](https://www.postgresql.org/) | 17.0    | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
 
 ### JSE
 
@@ -285,7 +309,7 @@ The source compatibility is 21 without preview features.
 
 # Management endpoints
 
-The following commands are only available in development mode, with exposed API:
+The following command is only available in development mode with the API exposed:
 
 ```bash
 curl -H "SM_UniversalID:ligoj-admin" http://localhost:8081/ligoj-api/manage/info
