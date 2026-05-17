@@ -121,9 +121,12 @@ Cross-browser Testing Platform and Open Source <3 Provided by [Sauce Labs][homep
 
 ## Prerequisites
 
-The build is driven by `podman compose`. Make sure `podman-compose` (the Python
-tool) is on your `PATH` *before* `docker-compose`, so Podman runs the build
-natively via buildah instead of delegating to a Docker CLI:
+The build is driven by `podman compose`, a thin wrapper that delegates to an
+external provider. **By default it prefers `docker-compose` over `podman-compose`
+when both are installed** — which means installing `podman-compose` alone is not
+enough on a machine that already has Docker Compose. Two steps:
+
+### 1. Install `podman-compose`
 
 ```bash
 # Linux (Fedora/RHEL/Amazon Linux 2023)
@@ -136,19 +139,45 @@ sudo apt install -y podman python3-pip git && pip install --user podman-compose
 brew install podman podman-compose git && podman machine init && podman machine start
 ```
 
-Quick sanity check — both lines should match:
+### 2. Tell Podman to prefer it
+
+Use a drop-in file rather than editing `containers.conf` directly — Podman
+merges every `*.conf` it finds under `containers.conf.d/`, and a drop-in file
+can declare its own `[engine]` section without colliding with one already
+present in your main config (TOML rejects duplicate sections per file):
+
+```bash
+mkdir -p ~/.config/containers/containers.conf.d
+cat > ~/.config/containers/containers.conf.d/ligoj-compose.conf <<'EOF'
+[engine]
+compose_providers = ["podman-compose"]
+compose_warning_logs = false
+EOF
+```
+
+`compose_warning_logs = false` silences the `>>>> Executing external compose
+provider <<<<` banner.
+
+> If you previously appended `[engine]` directly to `~/.config/containers/containers.conf`
+> and got `Key 'engine' has already been defined`, remove that appended block
+> (and delete any duplicate `[engine]` section) before creating the drop-in
+> file above.
+
+### 3. Sanity check
 
 ```bash
 which podman-compose                  # → /usr/bin/podman-compose (or similar)
-podman compose version | head -n1     # → podman-compose version x.y.z
+podman compose version | head -n1     # → podman-compose version 1.x.x
 ```
 
-If `podman compose version` instead prints something like
-`Executing external compose provider "/usr/local/bin/docker-compose"`,
-your `podman compose` is delegating to Docker. This still works but triggers
-the *"Docker Compose is configured to build using Bake, but buildkit isn't
-enabled"* warning, ignores `BUILDAH_FORMAT`, and uses the legacy builder. Install
-`podman-compose` to fix.
+If step 3 instead prints `Docker Compose version vX.Y.Z` (preceded by the
+delegation banner), step 2 hasn't taken effect — check `containers.conf` and
+that `podman-compose` is on `PATH`.
+
+Why this matters: delegating to `docker-compose` triggers the warning
+*"Docker Compose is configured to build using Bake, but buildkit isn't enabled"*,
+makes `BUILDAH_FORMAT` a no-op, and falls back to the legacy Docker builder
+(`Sending build context to Docker daemon ...`) instead of buildah.
 
 ## Run
 
