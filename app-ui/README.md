@@ -35,7 +35,7 @@ java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar target/app-ui-4
 # Build Docker image
 
 ```bash
-docker build -t ligoj/ligoj-ui:4.0.1 .
+podman build -t ligoj/ligoj-ui:4.0.1 .
 ```
 
 During the Docker build, the WAR file `ligoj-ui.war` is not copied from your local file system but from a previously released

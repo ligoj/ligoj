@@ -119,14 +119,19 @@ Cross-browser Testing Platform and Open Source <3 Provided by [Sauce Labs][homep
 
 # Get started
 
-```
-curl https://raw.githubusercontent.com/ligoj/ligoj/master/docker-compose.yml -o docker-compose.yml -s && docker-compose up
+```bash
+git clone https://github.com/ligoj/ligoj.git && cd ligoj
+podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
 ```
 
-Open your browser at: [Ligoj Home](http://localhost:8080/ligoj)
-User/password for the administrator role: `ligoj-admin` and `ligoj-user` for a regular user
+Then open [Ligoj Home](http://localhost:8080/ligoj) in your browser.
 
-You can install the plug-ins for RBAC security: plugin-id,plugin-id-ldap,plugin-id-ldap-embedded
+| Role          | Login         | Password      |
+| ------------- | ------------- | ------------- |
+| Administrator | `ligoj-admin` | `ligoj-admin` |
+| Regular user  | `ligoj-user`  | `ligoj-user`  |
+
+For RBAC security, install: `plugin-id`, `plugin-id-ldap`, `plugin-id-ldap-embedded`.
 
 ## Dev section
 
@@ -143,21 +148,24 @@ and [ligoj-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 ### One script rebuild and run
 
-Docker, compose and git install, then build, then run.
+Install Podman + Compose plugin + git, then build and run (Amazon Linux 2023 /
+RHEL / Fedora — adapt the package manager for other distros):
 
 ```bash
-sudo yum install -y docker git
-sudo pip3 install docker-compose
-sudo usermod -a -G docker ec2-user
-sudo systemctl enable docker.service
-sudo systemctl start docker.service
+sudo dnf install -y podman podman-compose git
+sudo systemctl enable --now podman.socket
+
 git clone https://github.com/ligoj/ligoj.git
 cd ligoj
+
 mkdir -p "$(pwd)/.ligoj"
-echo "LIGOJ_HOME=$(pwd)/.ligoj
-PODMAN_USERNS=keep-id" > .env
-podman compose -f compose.yml -f compose-override.yml -p ligoj up -d --build
-open http://localhost:8080/ligoj
+cat > .env <<EOF
+LIGOJ_HOME=$(pwd)/.ligoj
+PODMAN_USERNS=keep-id
+EOF
+
+podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
+xdg-open http://localhost:8080/ligoj 2>/dev/null || true
 ```
 
 ## Publish to AWS ECR
@@ -212,47 +220,76 @@ LIGOJ_API_PREPARE_BUILD='export HTTP_PROXY=192.168.0.254:8000 && export HTTPS_PR
 | `prepare-run.sh`   | app-*   | `WORKDIR`    | RUN   | Additional Bash commands executed inside the final image, before `java`                            |
 | `.m2/`             | app-*   | `/root/.m2/` | BUILD | Custom Maven configuration: proxy, mirror, dependencies,...                                        |
 
-Sample `prepare-build.sh` file:
+Minimal `prepare-build.sh` (HTTP proxy):
 
-```ini
+```bash
 export http_proxy=192.168.0.254:8000
 export https_proxy=192.168.0.254:8000
 ```
 
+A more complete sample — importing private/self-signed CA certificates so Maven
+trusts an internal mirror — ships as
+[`app-api/prepare-build-sample.sh`](app-api/prepare-build-sample.sh) and
+[`app-ui/prepare-build-sample.sh`](app-ui/prepare-build-sample.sh). Copy the file
+to `prepare-build.sh` to activate it.
+
 ## Persistent Ligoj home
 
-By default, with Docker compose, the home is persistent it contains:
+With Docker compose, the Ligoj home directory is persistent and contains:
 
-- plugins installation
-- logs of containers
+- plugin installations
+- container logs
 - database data
 
 ```bash
 mkdir -p "$(pwd)/.ligoj"
-echo "LIGOJ_HOME=$(pwd)/.ligoj
-PODMAN_USERNS=keep-id" > .env
+cat > .env <<EOF
+LIGOJ_HOME=$(pwd)/.ligoj
+PODMAN_USERNS=keep-id
+EOF
 ```
 
 ## Use MySQL or PostgreSQL databases
 
-By default, the Docker compose overrides is loaded from `compose.override.yml` and contains MySQL configuration.
+`compose.yml` defines only the `api` and `ui` services. The database is picked
+by layering exactly one of these override files on top:
 
-For MySQL, the docker-compose command is:
+| Database               | Override file          | Image (default)  | Data directory          |
+| ---------------------- | ---------------------- | ---------------- | ----------------------- |
+| PostgreSQL *(default)* | `compose-override.yml` | `postgres:17`    | `$LIGOJ_HOME/postgres`  |
+| MySQL                  | `compose-mysql.yml`    | `mysql:8.0.36`   | `$LIGOJ_HOME/mysql`     |
+
+> Running `podman compose -p ligoj up -d` *without* an override file fails on
+> purpose — the DB choice is always explicit. To auto-load the PG override
+> instead, rename `compose-override.yml` to `compose.override.yml` (the dot
+> form is picked up automatically by Compose).
+
+To avoid repeating the long flag list, define a small alias for your session:
 
 ```bash
 export BUILDAH_FORMAT=docker
-podman-compose -p ligoj build
-podman-compose -p ligoj -f compose.yml  -f compose-mysql.yml up -d
-podman-compose -p ligoj -f compose.yml  -f compose-mysql.yml down
+
+# Pick ONE of these:
+alias lc='podman compose -p ligoj -f compose.yml -f compose-override.yml'  # PostgreSQL
+alias lc='podman compose -p ligoj -f compose.yml -f compose-mysql.yml'     # MySQL
+
+lc build     # build the images
+lc up -d     # start the stack
+lc logs -f   # tail the logs
+lc down      # stop the stack
 ```
 
-For PostgreSQL, the docker-compose command is:
+### Switching between databases
+
+Each override file uses its own bind-mount directory (see the table above), so
+the two databases coexist on disk and swapping back and forth is non-destructive.
+The schema is created automatically by Hibernate (`-Djpa.hbm2ddl=update`) on first
+start, so expect a longer first boot.
+
+To start from a clean slate, wipe the matching directory:
 
 ```bash
-export BUILDAH_FORMAT=docker
-podman-compose -p ligoj build
-podman-compose -p ligoj -f compose.yml  -f compose-override.yml up -d
-podman-compose -p ligoj -f compose.yml  -f compose-override.yml down
+rm -rf "${LIGOJ_HOME:-./.ligoj}/postgres"   # or .../mysql
 ```
 
 # API Description

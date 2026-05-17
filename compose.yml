@@ -1,12 +1,21 @@
+# =============================================================================
+# Ligoj — base compose stack
+# =============================================================================
+# Defines the `api` and `ui` services. The `db` service is intentionally NOT
+# declared here; pick a database by layering an override file on top:
+#
+#   PostgreSQL (default):
+#     podman compose -p ligoj -f compose.yml -f compose-override.yml up -d
+#
+#   MySQL:
+#     podman compose -p ligoj -f compose.yml -f compose-mysql.yml    up -d
+#
+# Build args of interest:
+#   JAVA_VERSION         — Temurin JRE tag prefix (default: 21)
+#   MAVEN_VERSION        — Maven builder image tag
+#   MAVEN_INSECURE_TLS   — set to "true" to disable Maven HTTPS verification
+# =============================================================================
 services:
-  db:
-    container_name: ligoj-db
-    restart: always
-    networks:
-      ligoj-network:
-        aliases:
-          - db
-
   api:
     container_name: ligoj-api
     image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-api:${LIGOJ_VERSION:-4.0.0}
@@ -15,16 +24,17 @@ services:
       args:
         BUILDPLATFORM: ${LIGOJ_BUILD_PLATFORM:-linux/amd64}
         TARGETPLATFORM: ${LIGOJ_TARGET_PLATFORM:-linux/amd64}
-        JAVA_VERSION: ${JAVA_VERSION:-21-jdk}
+        JAVA_VERSION: ${JAVA_VERSION:-21}
         MAVEN_VERSION: ${MAVEN_VERSION:-3.9.6-amazoncorretto-21-debian-bookworm}
+        MAVEN_INSECURE_TLS: ${MAVEN_INSECURE_TLS:-false}
     restart: always
     environment:
       JAVA_OPTIONS: ${LIGOJ_API_JAVA_OPTIONS:--Duser.timezone=UTC}
-      CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db}
       CRYPTO: ${LIGOJ_API_CRYPTO:--Dapp.crypto.password=public}
       PREPARE_RUN: ${LIGOJ_API_PREPARE_RUN:-echo "No PREPARE_RUN"}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     expose:
       - 8081
     volumes:
@@ -33,6 +43,7 @@ services:
       ligoj-network:
         aliases:
           - api
+
   ui:
     container_name: ligoj-ui
     image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-ui:${LIGOJ_VERSION:-4.0.0}
@@ -41,9 +52,10 @@ services:
       args:
         BUILDPLATFORM: ${LIGOJ_BUILD_PLATFORM:-linux/amd64}
         TARGETPLATFORM: ${LIGOJ_TARGET_PLATFORM:-linux/amd64}
-        JAVA_VERSION: ${JAVA_VERSION:-21-jdk}
+        JAVA_VERSION: ${JAVA_VERSION:-21}
         NODE_VERSION: ${NODE_VERSION:-24-bookworm-slim}
         MAVEN_VERSION: ${MAVEN_VERSION:-3.9.6-amazoncorretto-21-debian-bookworm}
+        MAVEN_INSECURE_TLS: ${MAVEN_INSECURE_TLS:-false}
     restart: always
     environment:
       SERVER_PORT: ${LIGOJ_WEB_PORT:-8080}

@@ -1,17 +1,42 @@
+# =============================================================================
+# Ligoj — PostgreSQL override (default database)
+# =============================================================================
+# Layer on top of compose.yml:
+#   podman compose -p ligoj -f compose.yml -f compose-override.yml up -d
+#
+# Customize via environment / .env:
+#   LIGOJ_DB_IMAGE       — Postgres image (default: postgres:17)
+#   LIGOJ_DB_NAME        — database name  (default: ligoj)
+#   LIGOJ_DB_USER        — db user        (default: ligoj)
+#   LIGOJ_DB_PASSWORD    — db password    (default: ligoj)
+#   LIGOJ_HOME           — host data dir  (default: /home/ligoj)
+# =============================================================================
 services:
   db:
     container_name: ligoj-db
-    image: postgres:15.3-bookworm
+    image: ${LIGOJ_DB_IMAGE:-postgres:17}
+    restart: always
     environment:
-      POSTGRES_DB: ligoj
-      POSTGRES_USER: ligoj
-      POSTGRES_PASSWORD: ligoj
+      POSTGRES_DB: ${LIGOJ_DB_NAME:-ligoj}
+      POSTGRES_USER: ${LIGOJ_DB_USER:-ligoj}
+      POSTGRES_PASSWORD: ${LIGOJ_DB_PASSWORD:-ligoj}
       PGDATA: /var/lib/postgresql/data/pgdata
     expose:
       - 5432
     volumes:
       - ${LIGOJ_HOME:-/home/ligoj}/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LIGOJ_DB_USER:-ligoj} -d ${LIGOJ_DB_NAME:-ligoj}"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    networks:
+      ligoj-network:
+        aliases:
+          - db
+
   api:
-    container_name: ligoj-api
     environment:
-      CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db -Djdbc.vendor=postgresql -Djdbc.port=5432 -Djpa.dialect=org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect -Djdbc.driverClassName=org.postgresql.Driver -Dcom.sun.jndi.ldap.connect.pool.initsize=1 -Dcom.sun.jndi.ldap.connect.pool.maxsize=1 -Dcom.sun.jndi.ldap.connect.pool.prefsize=1 -Dcom.sun.jndi.ldap.connect.pool.debug=all}
+      # PG JDBC + dialect + schema auto-update. Override wholesale via LIGOJ_API_CUSTOM_OPTS.
+      CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db -Djdbc.vendor=postgresql -Djdbc.port=5432 -Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djdbc.driverClassName=org.postgresql.Driver -Djpa.dialect=org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect -Djpa.hbm2ddl=update}
