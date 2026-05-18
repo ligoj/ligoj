@@ -30,7 +30,7 @@ const NAV_CONFIG = [
     children: [
       { id: 'system-information', label: 'Information', labelKey: 'nav.information', icon: 'mdi-information-outline', route: '/system/information', auth: '^system' },
       { id: 'system-configuration', label: 'Configuration', labelKey: 'nav.configuration', icon: 'mdi-tune', route: '/system/configuration', auth: '^system/configuration' },
-      { id: 'system-user', label: 'Users', labelKey: 'nav.users', icon: 'mdi-account-multiple', route: '/system/user', auth: '^system/user' },
+      { id: 'system-user', label: 'Users', labelKey: 'nav.systemUsers', icon: 'mdi-account-multiple', route: '/system/user', auth: '^system/user' },
       { id: 'system-role', label: 'Roles', labelKey: 'nav.roles', icon: 'mdi-shield-account', route: '/system/role', auth: '^system/role' },
       { id: 'system-plugin', label: 'Plugins', labelKey: 'nav.plugins', icon: 'mdi-puzzle', route: '/system/plugin', auth: '^system/plugin' },
       { id: 'system-node', label: 'Nodes', labelKey: 'nav.nodes', icon: 'mdi-server', route: '/system/node', auth: '^system/node' },
