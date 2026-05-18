@@ -71,6 +71,14 @@ export default {
   'dashboard.manageContainerScopes': 'Manage container scopes',
   'dashboard.manageProjects': 'Manage projects and subscriptions',
   'dashboard.manageAdmin': 'System administration',
+  'dashboard.manageInformation': 'View system status',
+  'dashboard.manageConfiguration': 'Manage system configuration',
+  'dashboard.manageSystemUsers': 'Manage system accounts',
+  'dashboard.manageRoles': 'Manage roles and permissions',
+  'dashboard.managePlugins': 'Manage installed plugins',
+  'dashboard.manageNodes': 'Manage nodes and IAM providers',
+  'dashboard.manageCache': 'Manage application cache',
+  'dashboard.manageBench': 'Test database performance',
 
   // Subscriptions
   'subscription.title': 'Subscriptions',

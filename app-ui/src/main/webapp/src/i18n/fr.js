@@ -71,6 +71,14 @@ export default {
   'dashboard.manageContainerScopes': 'Gérer les portées de conteneurs',
   'dashboard.manageProjects': 'Gérer les projets et souscriptions',
   'dashboard.manageAdmin': 'Administration système',
+  'dashboard.manageInformation': 'Voir l\'état du système',
+  'dashboard.manageConfiguration': 'Gérer la configuration système',
+  'dashboard.manageSystemUsers': 'Gérer les comptes système',
+  'dashboard.manageRoles': 'Gérer les rôles et permissions',
+  'dashboard.managePlugins': 'Gérer les plugins installés',
+  'dashboard.manageNodes': 'Gérer les nœuds et fournisseurs IAM',
+  'dashboard.manageCache': 'Gérer le cache applicatif',
+  'dashboard.manageBench': 'Tester les performances de la base',
 
   // Subscriptions
   'subscription.title': 'Souscriptions',
