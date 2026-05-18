@@ -73,7 +73,13 @@ export const useErrorStore = defineStore('error', () => {
     }
 
     if (status === 401) {
-      window.location.href = 'login.html?expired'
+      // Bounce to the SPA root instead of /login.html?expired (which
+      // Spring would capture as a saved-request and replay verbatim
+      // after OIDC, including the wrong host/port). The boot flow at
+      // /ligoj/ re-runs fetchSession, detects Spring's 302 to OAuth,
+      // and runs the IdP flow via auth.redirectToLogin().
+      const base = import.meta.env.BASE_URL || '/'
+      window.location.href = base
       return response
     }
 

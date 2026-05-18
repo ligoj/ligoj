@@ -229,7 +229,13 @@ public class SecurityConfiguration {
 
 	void configureLoginHandler(HttpSecurity http, AbstractAuthenticationProvider provider, String loginDeniedUrl) throws Exception {
 		if (isOauth2Bff()) {
-			http.oauth2Login(Customizer.withDefaults());
+			// Always land on the SPA root after a successful OIDC login.
+			// `true` forces this URL regardless of any saved request — the
+			// SPA owns the post-login routing itself, so a stale or
+			// dev-mode-mistargeted savedRequest (e.g. with the backend's
+			// host:port baked in from before the vite proxy was tuned)
+			// can never be replayed.
+			http.oauth2Login(o -> o.defaultSuccessUrl("/", true));
 		} else {
 			final var loginSuccessHandler = getSuccessHandler();
 			final var loginFailureHandler = getFailureHandler();

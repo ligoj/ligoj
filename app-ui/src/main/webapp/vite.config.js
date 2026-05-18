@@ -143,6 +143,28 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      // Spring Security OIDC endpoints: /oauth2/authorization/{client}
+      // starts the IdP flow (Spring 302s the browser to the configured
+      // provider); /login/oauth2/code/{client} is the callback that
+      // sets the session cookie. Both must reach the backend or the
+      // OAuth dance can't complete in dev.
+      //
+      // `changeOrigin` is intentionally OFF here: Spring builds the
+      // OAuth `redirect_uri` from the inbound `Host` header. We need
+      // it to point at vite (`localhost:5173`) so the IdP redirects
+      // back to the browser, not to the backend port (`:8080`).
+      // For the same reason the OAuth callback proxy preserves Host.
+      // (Alternative: add `xfwd: true` and set
+      // `server.forward-headers-strategy=framework` in
+      // application.properties — closer to a prod reverse-proxy.)
+      '/ligoj/oauth2': {
+        target: 'http://localhost:8080',
+        changeOrigin: false,
+      },
+      '/ligoj/login/oauth2': {
+        target: 'http://localhost:8080',
+        changeOrigin: false,
+      },
       '/ligoj/logout': {
         target: 'http://localhost:8080',
         changeOrigin: true,

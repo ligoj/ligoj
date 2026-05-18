@@ -91,10 +91,37 @@ export const useAuthStore = defineStore('auth', () => {
    */
   const lastSessionStatus = ref(null)
 
+  /**
+   * Set by `fetchSession` when Spring Security responds with a 3xx
+   * (typical OIDC entry point: 302 → `/oauth2/authorization/{client}`).
+   * `redirect: 'manual'` turns the response into an `opaqueredirect`
+   * which we can't read the Location of, but its presence is enough
+   * to trigger a top-level navigation in `redirectToLogin()` so the
+   * browser — not fetch — runs the OAuth flow end-to-end.
+   */
+  const needsOAuthRedirect = ref(false)
+
   async function fetchSession() {
     loading.value = true
     try {
-      const resp = await fetch('rest/session', { credentials: 'include' })
+      // Build the URL against the app's base so relative-path drift
+      // (e.g. after a misrouted navigation) can't chain bad segments
+      // like `/ligoj/oauth2/authorization/rest/session`.
+      const base = import.meta.env.BASE_URL || '/'
+      const resp = await fetch(`${base}rest/session`, {
+        credentials: 'include',
+        // Don't let fetch follow Spring's 302 to OAuth — same-origin
+        // 302s would be followed and we'd parse the IdP's HTML as JSON.
+        redirect: 'manual',
+        headers: { Accept: 'application/json' },
+      })
+      // Manual redirect mode surfaces 3xx as `opaqueredirect`, status 0.
+      if (resp.type === 'opaqueredirect') {
+        session.value = null
+        needsOAuthRedirect.value = true
+        lastSessionStatus.value = 302
+        return false
+      }
       lastSessionStatus.value = resp.status
       if (!resp.ok) {
         session.value = null
@@ -128,11 +155,29 @@ export const useAuthStore = defineStore('auth', () => {
     return 'denied'
   }
 
-  /** Send the user back to the login page with the failure reason in
-   *  the query string so the login form can render it. */
+  /**
+   * Send the user back to authentication. With OIDC enabled, Spring
+   * Security tells us so via a 302 to its OAuth entry point — we
+   * surface that as `needsOAuthRedirect` and top-level-navigate
+   * directly to `/oauth2/authorization/keycloak` so the browser runs
+   * the full IdP flow (XHR can't, because the IdP is cross-origin).
+   * Without OIDC we fall back to the local login page.
+   *
+   * Always absolute — relative URLs would chain bad path segments if
+   * the browser is currently sitting on a misrouted SPA-fallback URL.
+   */
   function redirectToLogin() {
+    const base = import.meta.env.BASE_URL || '/'
+    if (needsOAuthRedirect.value) {
+      // The OAuth registration id is the segment Spring exposes via
+      // `spring.security.oauth2.client.registration.<id>` (the project
+      // uses `keycloak`). Plumb this through a config endpoint if you
+      // need multi-IdP support.
+      window.location.href = `${base}oauth2/authorization/keycloak`
+      return
+    }
     const reason = loginRedirectReason()
-    window.location.href = 'login.html?' + reason
+    window.location.href = `${base}login.html?${reason}`
   }
 
   async function logout() {
@@ -146,6 +191,6 @@ export const useAuthStore = defineStore('auth', () => {
     uiAuthorizations, apiAuthorizations, appSettings,
     navItems,
     isAllowed, isAllowedApi,
-    fetchSession, logout, redirectToLogin, lastSessionStatus,
+    fetchSession, logout, redirectToLogin, lastSessionStatus, needsOAuthRedirect,
   }
 })
