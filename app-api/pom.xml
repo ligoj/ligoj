@@ -411,5 +411,32 @@
                 </dependency>
             </dependencies>
         </profile>
+        <!--
+            Activated automatically when -DbuildNumber=... is supplied (e.g. by
+            the Docker build, which injects git provenance from the host).
+            Skips buildnumber-maven-plugin's SCM lookup so we don't get a
+            warning about a missing .git directory inside the builder image.
+            The injected ${buildNumber} / ${scmBranch} flow through resource
+            filtering and the manifest as usual.
+        -->
+        <profile>
+            <id>buildnumber-from-property</id>
+            <activation>
+                <property>
+                    <name>buildNumber</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

@@ -27,6 +27,9 @@ services:
         JAVA_VERSION: ${JAVA_VERSION:-21}
         MAVEN_VERSION: ${MAVEN_VERSION:-3.9.6-amazoncorretto-21-debian-bookworm}
         MAVEN_INSECURE_TLS: ${MAVEN_INSECURE_TLS:-false}
+        GIT_COMMIT: ${GIT_COMMIT:-0}
+        GIT_BRANCH: ${GIT_BRANCH:-UNKNOWN_BRANCH}
+        GIT_COMMIT_TIME: ${GIT_COMMIT_TIME:-1970-01-01T00:00:00Z}
     restart: always
     environment:
       JAVA_OPTIONS: ${LIGOJ_API_JAVA_OPTIONS:--Duser.timezone=UTC}
@@ -56,6 +59,9 @@ services:
         NODE_VERSION: ${NODE_VERSION:-24-bookworm-slim}
         MAVEN_VERSION: ${MAVEN_VERSION:-3.9.6-amazoncorretto-21-debian-bookworm}
         MAVEN_INSECURE_TLS: ${MAVEN_INSECURE_TLS:-false}
+        GIT_COMMIT: ${GIT_COMMIT:-0}
+        GIT_BRANCH: ${GIT_BRANCH:-UNKNOWN_BRANCH}
+        GIT_COMMIT_TIME: ${GIT_COMMIT_TIME:-1970-01-01T00:00:00Z}
     restart: always
     environment:
       SERVER_PORT: ${LIGOJ_WEB_PORT:-8080}

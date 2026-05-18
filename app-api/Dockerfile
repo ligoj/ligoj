@@ -25,6 +25,12 @@ RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
     fi && \
     mvn -B -ntp -DskipTests dependency:go-offline || true
 
+# Git provenance, injected from the host (see compose.yml). Defaults match the
+# buildnumber-maven-plugin's own fallbacks so an unset host env is harmless.
+ARG GIT_COMMIT=0
+ARG GIT_BRANCH=UNKNOWN_BRANCH
+ARG GIT_COMMIT_TIME=1970-01-01T00:00:00Z
+
 # Build. Custom build-time setup (proxies, etc.) lives in prepare-build.sh.
 COPY . .
 RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
@@ -33,7 +39,11 @@ RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
     fi && \
     { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || \
       echo "No prepare-build.sh; skipping custom build setup."; } && \
-    mvn -B -ntp -DskipTests clean package
+    mvn -B -ntp -DskipTests \
+        -DbuildNumber="$GIT_COMMIT" \
+        -DscmBranch="$GIT_BRANCH" \
+        -Dtimestamp="$GIT_COMMIT_TIME" \
+        clean package
 
 # ---------- Runtime stage ----------
 FROM --platform=${TARGETPLATFORM} eclipse-temurin:${JAVA_VERSION}-jre AS runtime

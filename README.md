@@ -261,6 +261,10 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:4.0.0
 | LIGOJ_WEB_CUSTOM_OPTS  | web     | RUN   | ``                                    | Additional Java properties, merged with `LIGOJ_WEB_JAVA_OPTIONS`                                                                                                                                                                     |
 | LIGOJ_BUILD_PLATFORM   | app-*   | BUILD | `linux/amd64`                         | Docker build platform.                                                                                                                                                                                                               |
 | LIGOJ_TARGET_PLATFORM  | app-*   | BUILD | `linux/amd64`                         | Docker run platform.                                                                                                                                                                                                                 |
+| MAVEN_INSECURE_TLS     | app-*   | BUILD | `false`                               | When `true`, disables Maven HTTPS cert + hostname validation. See [app-api/README](app-api/README.md#build-behind-a-private-maven-mirror-with-self-signed-tls).                                                                       |
+| GIT_COMMIT             | app-*   | BUILD | `0`                                   | Captured from host git, embedded as `${buildNumber}` in the WAR manifest and the `git.commit` OCI label. See [Embedding git provenance](#embedding-git-provenance).                                                                  |
+| GIT_BRANCH             | app-*   | BUILD | `UNKNOWN_BRANCH`                      | Captured from host git, embedded as `${scmBranch}`.                                                                                                                                                                                  |
+| GIT_COMMIT_TIME        | app-*   | BUILD | `1970-01-01T00:00:00Z`                | Captured from host git (ISO-8601), embedded as `${timestamp}`.                                                                                                                                                                       |
 
 Sample `.env` file:
 
@@ -293,6 +297,33 @@ trusts an internal mirror — ships as
 [`app-api/prepare-build-sample.sh`](app-api/prepare-build-sample.sh) and
 [`app-ui/prepare-build-sample.sh`](app-ui/prepare-build-sample.sh). Copy the file
 to `prepare-build.sh` to activate it.
+
+## Embedding git provenance
+
+The build context sent to the Docker builder is `app-api/` / `app-ui/` — the
+repo's `.git/` directory lives at the *parent* and is therefore invisible to the
+builder. Without help, `buildnumber-maven-plugin` warns and falls back to
+`buildNumber=0` / `scmBranch=UNKNOWN_BRANCH`.
+
+Capture the values on the host and pass them through as build args:
+
+```bash
+export GIT_COMMIT=$(git rev-parse HEAD)
+export GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+export GIT_COMMIT_TIME=$(git log -1 --format=%cI)
+
+podman compose -p ligoj -f compose.yml -f compose-override.yml build
+```
+
+[compose.yml](compose.yml) interpolates these into `build.args`, both
+[Dockerfiles](app-api/Dockerfile) forward them to Maven as
+`-DbuildNumber=… -DscmBranch=… -Dtimestamp=…`, and a profile in each module's
+`pom.xml` activates on the presence of `-DbuildNumber=`, suppressing the SCM
+lookup the plugin would otherwise attempt (this is what silences the
+`Cannot get the revision information from the scm repository` warning).
+
+Local Maven builds (`mvn package` without `-DbuildNumber=…`) are unaffected —
+the plugin still reads the real `.git` on disk.
 
 ## Persistent Ligoj home
 
