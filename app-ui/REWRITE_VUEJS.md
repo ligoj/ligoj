@@ -155,3 +155,285 @@ The challenge is that each module like `plugin-id` is a standalone Maven project
 
 Core components are in `~/git/ligoj/app-ui/src/main/webapp/src/components`. They are share with the other plugins modules.
 - `LigojDataTable` and `LigojDataTableServer` ar the base components for the data table.
+
+---
+
+# What was actually shipped
+
+The plan above kept its bones but a few items shifted in practice — record here so the next plugin migration starts from reality, not the wish list.
+
+- **VeeValidate / VeeValidateI18n** never landed. Vuetify's built-in `:rules` are enough for the forms we have and avoid a second validation library that the plugins would then have to learn.
+- **`v-dialog` persistent** is removed globally so ESC closes any dialog (see "Decisions"). Don't re-add it without a strong reason.
+- **i18n is modularised**: host keeps only generic keys (`common.*`, `nav.*`, `dashboard.*`, `agreement.*`, `error.*`, `profile.*`). Plugin-local keys ship inside each plugin's bundle and merge at `install()` time. See "Translations" below.
+- **Theme system**: 12 themes live in `plugins/vuetify.js`; the user picks one from `ProfileView`. Persisted in `localStorage` under `ligoj-theme`.
+- **Build chain**: Vite 8 with rolldown. `manualChunks` is rejected — use `output.codeSplitting.groups`. ESLint 9+ flat config (`eslint.config.js`); legacy `.eslintrc.cjs` is removed.
+- **Lint baseline**: `js.configs.recommended` + `pluginVue.configs['flat/essential']` (NOT `flat/recommended` — too strict on the chosen one-attr-per-line style). `vue/valid-v-slot` runs with `{ allowModifiers: true }` because Vuetify data-table cell templates use dotted slot names (`#item.foo`).
+
+---
+
+# Plugin migration recipe
+
+Use this as a checklist when porting `plugin-<id>` (e.g. `plugin-prov`, `plugin-prov-aws`, …) from the legacy AMD bundle to Vue. `plugin-id` and `plugin-ui` are the two reference implementations — start by reading their `ui/` folder before writing your own.
+
+## 1. Directory layout
+
+Add a `ui/` sibling to the plugin's Maven `src/`:
+
+```
+plugin-<id>/
+├── pom.xml
+├── src/                        # Maven module — unchanged
+└── ui/                         # Vue source — new
+    ├── package.json
+    ├── vite.config.js
+    ├── eslint.config.js
+    └── src/
+        ├── index.js            # Plugin entry — see §2
+        ├── service.js          # Optional: action dispatcher
+        ├── i18n/
+        │   ├── en.js           # Plain object with flat keys
+        │   └── fr.js
+        └── views/
+            └── *.vue
+```
+
+`vite build` emits the bundle into `../src/main/resources/META-INF/resources/webjars/<id>/vue/` so Maven still packages it into the plugin JAR. No build-time symlink, no extra Maven plugin — just the right Vite `outDir`.
+
+## 2. The plugin contract
+
+`ui/src/index.js` must default-export an object with these fields. Host code reads them via `plugins/loader.js` and `plugins/registry.js`.
+
+```js
+import { useI18nStore } from '@ligoj/host'
+import Plugin from './Plugin.vue'              // root component
+import enMessages from './i18n/en.js'
+import frMessages from './i18n/fr.js'
+import service from './service.js'
+import FooView from './views/FooView.vue'
+
+const routes = [
+  { path: '/<id>/foo', name: '<id>-foo', component: FooView },
+]
+
+const features = {
+  // Action functions callable from other plugins via callFeature(<id>, action, …).
+  doSomething: service.doSomething,
+}
+
+export default {
+  id: '<id>',                                  // stable plugin id
+  label: 'My Plugin',                          // display label
+  component: Plugin,                           // optional root component
+  routes,
+  install({ router }) {
+    // Merge translations BEFORE any view renders. The host pre-loads
+    // required plugins synchronously in main.js, so views never see
+    // missing keys.
+    const i18n = useI18nStore()
+    i18n.merge(enMessages, 'en')
+    i18n.merge(frMessages, 'fr')
+    for (const route of routes) router.addRoute(route)
+  },
+  feature(action, ...args) {
+    const fn = features[action]
+    if (!fn) throw new Error(`Plugin "<id>" has no feature "${action}"`)
+    return fn(...args)
+  },
+  service,
+  meta: { icon: 'mdi-...', color: 'blue-darken-3' },
+}
+
+export { service }
+```
+
+Also at the top of `index.js`, inject the sibling stylesheet manually — Vite's library mode emits a separate `index.css` but does NOT auto-inject it on dynamic-import:
+
+```js
+if (typeof document !== 'undefined') {
+  const id = 'ligoj-plugin-<id>-css'
+  if (!document.getElementById(id)) {
+    const link = document.createElement('link')
+    link.id = id
+    link.rel = 'stylesheet'
+    link.href = new URL(/* @vite-ignore */ './index.css', import.meta.url).href
+    document.head.appendChild(link)
+  }
+}
+```
+
+## 3. Vite config template
+
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path'
+
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: { '@': resolve(__dirname, 'src') },
+  },
+  build: {
+    lib: {
+      entry: resolve(__dirname, 'src/index.js'),
+      formats: ['es'],
+      fileName: () => 'index.js',
+    },
+    rollupOptions: {
+      // Shared deps come from the host via the import map in index.html.
+      // Marking them external keeps each plugin small and ensures one
+      // pinia / vue runtime instance, not N copies.
+      external: ['vue', 'vue-router', 'pinia', 'vuetify', '@ligoj/host'],
+      output: { entryFileNames: 'index.js' },
+    },
+    outDir: resolve(__dirname, '../src/main/resources/META-INF/resources/webjars/<id>/vue'),
+    emptyOutDir: true,
+  },
+})
+```
+
+## 4. Shared host surface (`@ligoj/host`)
+
+Imported from the host bundle via the import map; treat as the public API and don't bypass it. Current exports (see `app-ui/src/main/webapp/src/host.js`):
+
+| Export | Purpose |
+|---|---|
+| `useApi` | `get / post / put / del` against `rest/*`. Adds redirect handling, error toasts, and 401 → bounce-to-SPA-root behaviour. |
+| `useAuthStore` | Session, roles, `redirectToLogin()`, OIDC-aware logout. |
+| `useAppStore` | Breadcrumbs (`setBreadcrumbs(items, { refresh })`), title, refresh button in app bar. |
+| `useI18nStore` | `t(key, params)`, `setLocale(loc)`, `merge(messages, locale?)`. |
+| `useErrorStore` | Toast queue (`push / success / info`), centralized API response handling. |
+| `useClipboard` | `copy(text, { message })` with browser API + textarea fallback. |
+| `useDataTable` | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`). |
+| `useFormGuard` | Unsaved-changes dialog + `onBeforeRouteLeave` integration. |
+| `LigojDataTable` / `LigojDataTableServer` | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported. |
+| `LigojConfirmDialog` | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s. |
+| `NodeIcon` / `nodeIcon` / `NodeModeChip` | Render a node's icon and subscription mode consistently. |
+| `nodeType` / `isInstance` | Classify a node id (`service` / `feature` / `tool` / `instance`). |
+| `ImportExportBar` | CSV import/export header strip for list views. |
+| `APP_BASE` | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths. |
+
+## 5. Translations
+
+Two reasons keys live with the plugin:
+
+- the host bundle stays free of plugin churn,
+- the translations are version-locked to the views that use them.
+
+Inside the plugin: keep keys **flat** (the host's vue-i18n is configured with `messageResolver: (obj, path) => obj?.[path]`, no dot traversal).
+
+```js
+// ui/src/i18n/en.js
+export default {
+  '<id>.title': 'My Feature',
+  '<id>.foo.deleteConfirm': 'Delete {name}?',
+  // ...
+}
+```
+
+Use them via `useI18nStore`:
+
+```js
+import { useI18nStore } from '@ligoj/host'
+const { t } = useI18nStore()
+t('<id>.foo.deleteConfirm', { name })
+```
+
+Keep table `headers` arrays as `computed(() => […])` so they re-evaluate on locale change — Vuetify will re-render the columns.
+
+## 6. Routing
+
+Routes are registered dynamically via `install({ router })`. Use kebab-case names (`<id>-foo`) to avoid clashes with other plugins. The host's router has a catch-all `/:pathMatch(.*)*` route that falls back to `PluginView`, so missing routes 404 cleanly.
+
+Detail views generally **don't** want to be routes — open them as dialogs from the list view (see `UserEditDialog` in plugin-id). That avoids a second round-trip and keeps the user's table state.
+
+## 7. Styles
+
+Two patterns are in use:
+
+- **SFC `<style scoped>`** — preferred for view-local styling. Vite library mode bundles them into `index.css` and the snippet in §2 auto-injects.
+- **`<style>` (unscoped)** — for selectors that have to reach into Vuetify's teleported DOM (data-table cells, dialog overlays). Always namespace by a unique class on the SFC's root.
+
+Global Vuetify tweaks live in `app-ui/src/main/webapp/src/assets/vuetify-overrides.css` and are imported once from `plugins/vuetify.js`. Add to that file instead of duplicating CSS in every plugin.
+
+## 8. Building and testing
+
+```bash
+cd plugin-<id>/ui
+npm install
+npm run build          # emits to ../src/main/resources/.../webjars/<id>/vue/
+npm run dev            # serves a standalone preview (rarely useful — see below)
+npm run lint
+```
+
+For real integration testing, run the host's vite dev server (`app-ui/src/main/webapp`) — `npm run dev` there proxies `/ligoj/main/<id>/vue/*` to the backend, which serves the plugin's freshly-built bundle from `target/classes/`. So the cycle is:
+
+1. Edit plugin source in `plugin-<id>/ui/src/`.
+2. `npm run build` in the plugin's `ui/` folder.
+3. Browser auto-reloads (vite watches the proxied URL).
+
+Unit-test the plugin's authoring surface from the host's vitest setup — see `app-ui/src/main/webapp/src/__tests__/plugins/plugin-id.test.js` as the template. Important: `install()` reaches into the i18n store, so the test must `setActivePinia(createPinia())` before calling it.
+
+---
+
+# Decisions and gotchas
+
+Battle scars worth respecting on the next migration.
+
+## Vite / rolldown
+
+- `manualChunks` (object or function) is rejected in Vite 8. Use `build.rollupOptions.output.codeSplitting.groups` with `priority` + `minSize: 0`. Vue must outrank Vuetify on priority — otherwise Vuetify pulls `@vue/*` into its chunk and `vue.js` is never emitted (breaking the import map).
+- Default `chunkSizeWarningLimit: 500` fires on `vuetify.js` (~530 KB). Bumped to `700` host-side; the proper fix is `vite-plugin-vuetify` for per-component tree-shaking — currently not enabled.
+- The host's `chunkFileNames` keeps stable filenames for `vue`, `router`, `pinia`, `vuetify`, `host`. The import map in `index.html` depends on those.
+
+## Dev-server proxies
+
+- All `/ligoj/*` paths the backend should see go through `vite.config.js` proxies. **`changeOrigin: false`** on `/ligoj/oauth2`, `/ligoj/login/oauth2`, and `/ligoj/logout` — Spring builds OAuth redirect URIs from the inbound `Host` header, and we need it to point at vite (`:5173`), not the backend (`:8080`).
+- Other paths (`/ligoj/rest`, `/ligoj/main`, `/ligoj/webjars`, …) keep `changeOrigin: true`.
+
+## Authentication
+
+- `auth.fetchSession()` uses `redirect: 'manual'` so Spring's `302 → /oauth2/authorization/<client>` surfaces as `opaqueredirect` (status 0). The store sets `needsOAuthRedirect = true`; `redirectToLogin()` then top-level-navigates the browser to the OAuth entry (XHR can't follow cross-origin redirects).
+- `error.js` on a 401 navigates to `${BASE_URL}` (the SPA root), not to `login.html` directly. The root re-runs the session probe and handles OIDC vs. local-login correctly.
+- `auth.logout()` is a top-level navigation to `${BASE_URL}logout` — never an XHR. Required for Spring's `OidcClientInitiatedLogoutSuccessHandler` to drive the full Spring → Keycloak `end_session_endpoint` → back chain.
+- In OIDC mode `login.html` is short-circuited on mount: it probes `/rest/session` and bounces to `/ligoj/` if Spring returns either `200` (already authenticated) or `opaqueredirect` (must go through OAuth). The local form only renders when Spring genuinely returned `401`.
+
+## Vue Router 4
+
+- Returning `false` from `onBeforeRouteLeave` consumes the `next` callback. Don't capture it and call later — that triggers an "Unhandled error during execution of native event handler" warning. Instead capture the target route and use `router.push(to)` after confirm. `useFormGuard` is the reference implementation.
+
+## Vuetify
+
+- `v-dialog persistent` was removed from every dialog so ESC closes uniformly. ESC fires `update:model-value=false`, which our handlers treat as Cancel — never as Save.
+- `v-row dense` is deprecated in current Vuetify — use `density="comfortable"`.
+- `v-data-table` cell templates use dotted slot names (`#item.foo`). ESLint's `vue/valid-v-slot` treats the dot as a directive modifier and trips; the rule is configured with `{ allowModifiers: true }` in the project's `eslint.config.js`.
+- Vuetify's own widget i18n (data-table footer, etc.) is wired to the app locale via the `locale: { messages: { en, fr } }` block in `plugins/vuetify.js`, kept in sync by `setLocale()` in `plugins/i18n.js`.
+
+## Forms / autocompletes
+
+- Setting `form.value.<type>` (the discriminator) and `form.value.<value>` (the identifier) in the same synchronous block races: the watcher on `<type>` fires post-flush and wipes the identifier you just set. Set the type field first, `await nextTick()`, then set the value. See `DelegateEditView.vue`'s edit-mode load for the canonical fix.
+- For server-side autocompletes, lazy-load the first page on `@update:menu` (dropdown open), not on mount. Users who never open the dropdown should make zero API calls.
+
+## Plugins / build outputs
+
+- A plugin's own `import.meta.env.BASE_URL` is `/`, not `/ligoj/`. Always use the host's `APP_BASE` export when building absolute URLs (`fetch`, `<img>` `src`, etc.).
+- The Spring API container resolves `/main/<id>/vue/index.js` to the plugin's webjar resources. After `mvn install` of the plugin module, the new bundle is picked up without an API restart.
+
+---
+
+# Migration checklist (per plugin)
+
+Copy/paste into the plugin's first PR description.
+
+- [ ] `ui/` folder added with `package.json`, `vite.config.js`, `eslint.config.js`
+- [ ] `ui/src/index.js` exports `{ id, label, install, feature, service, meta, routes }`
+- [ ] `install()` registers routes AND merges `i18n/en.js` + `i18n/fr.js` into `useI18nStore`
+- [ ] Sibling CSS auto-injection snippet present
+- [ ] Plugin entry added to `REQUIRED_PLUGINS` in host `main.js` (if mandatory) or left to lazy-load via `App.vue`
+- [ ] At least one happy-path view ported (use `LigojDataTableServer` + `LigojConfirmDialog` rather than rolling your own)
+- [ ] Translations use **flat keys** in plugin's `i18n/{en,fr}.js`; host's `i18n/{en,fr}.js` untouched
+- [ ] Existing legacy assets in `src/main/resources/META-INF/resources/<id>/` left alone — the plugin loader prefers `vue/index.js` and ignores the AMD bundle
+- [ ] Test added in `app-ui/src/main/webapp/src/__tests__/plugins/plugin-<id>.test.js` mirroring the plugin-id one
+- [ ] Lint passes: `npm run lint` in `ui/`
+- [ ] Build passes: `npm run build` in `ui/` AND `mvn -pl <module> install` from the plugin repo
+- [ ] Smoke test: navigate to a route, change locale, log out and back in through OIDC, refresh the page
