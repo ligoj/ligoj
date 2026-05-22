@@ -39,20 +39,22 @@ const APP_BASE = import.meta.env.BASE_URL
  * pass through unchanged so explicit `mdi-*` strings still work.
  */
 const FA_TO_MDI = {
-  'far fa-id-badge':  'mdi-badge-account-outline',
-  'fa fa-suitcase':   'mdi-briefcase-variant',
-  'fa fa-database':   'mdi-database-outline',
-  'fab fa-jenkins':   'mdi-flask',
-  'fa fa-git':        'mdi-git',
-  'fa fa-github':     'mdi-github',
-  'fa fa-gitlab':     'mdi-gitlab',
-  'fa fa-industry':   'mdi-factory',
-  'fab fa-jira':      'mdi-jira',
-  'fab fa-confluence':'mdi-gitlab',
-  'fa fa-envelope':   'mdi-email-outline',
-  'fab fa-aws':       'mdi-aws',
-  'fab fa-windows':   'mdi-azure',
-  'fas fa-cloud':     'mdi-cloud-outline',
+  'far fa-id-badge': 'mdi-badge-account-outline',
+  'fas fa-server': 'mdi-server',
+  'fa fa-suitcase': 'mdi-briefcase-variant',
+  'fa fa-database': 'mdi-database-outline',
+  'fab fa-jenkins': 'mdi-flask',
+  'fa fa-git': 'mdi-git',
+  'fa fa-github': 'mdi-github',
+  'fa fa-gitlab': 'mdi-gitlab',
+  'fa fa-industry': 'mdi-factory',
+  'fab fa-jira': 'mdi-jira',
+  'fab fa-confluence': 'mdi-gitlab',
+  'fa fa-envelope': 'mdi-email-outline',
+  'fab fa-aws': 'mdi-aws',
+  'fab fa-docker': 'mdi-microsoft-azure',
+  'fab fa-windows': 'mdi-azure',
+  'fas fa-cloud': 'mdi-cloud-outline',
 }
 
 function convertFromFontAwesome(uiClasses) {
@@ -141,10 +143,12 @@ export default defineComponent({
   height: 24px;
   object-fit: contain;
 }
+
 .tool-icon.broken {
   opacity: 0.35;
   filter: grayscale(1);
 }
+
 .icon-text {
   display: inline-block;
   padding: 0.05em 0.4em;
@@ -155,6 +159,7 @@ export default defineComponent({
   font-weight: 500;
   line-height: 1.4;
 }
+
 .node-icon-inline {
   display: inline-flex;
   align-items: center;
