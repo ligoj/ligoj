@@ -81,9 +81,11 @@ watchEffect(() => {
   if (mobile.value) appStore.sidebarOpen = false
 })
 
-async function doLogout() {
-  await auth.logout()
-  window.location.href = 'login.html'
+function doLogout() {
+  // `auth.logout()` does the top-level navigation to /logout. Don't
+  // race it with a local nav — Spring's success handler decides where
+  // we land (Keycloak end-session → app, or login page for non-OIDC).
+  auth.logout()
 }
 
 const refreshing = ref(false)

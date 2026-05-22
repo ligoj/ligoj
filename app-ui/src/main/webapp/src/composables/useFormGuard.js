@@ -1,11 +1,18 @@
 import { ref, watch, onBeforeUnmount } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
+import { onBeforeRouteLeave, useRouter } from 'vue-router'
 
 export function useFormGuard(formData) {
+  const router = useRouter()
   const isDirty = ref(false)
   const showGuardDialog = ref(false)
   let savedSnapshot = ''
-  let pendingNext = null
+  // Capture the target route, not the `next` callback. Vue Router 4
+  // considers `next` consumed once a guard returns `false`; calling
+  // `pendingNext()` afterwards triggers a "Unhandled error during
+  // execution of native event handler" warning surfaced through the
+  // confirm dialog's button. Re-navigating via `router.push(to)` is
+  // the idiomatic v4 pattern and side-steps the issue entirely.
+  let pendingTo = null
 
   function snapshot() {
     return JSON.stringify(formData.value)
@@ -21,28 +28,29 @@ export function useFormGuard(formData) {
     isDirty.value = snapshot() !== savedSnapshot
   }, { deep: true })
 
-  // Vue Router guard
-  onBeforeRouteLeave((to, from, next) => {
+  onBeforeRouteLeave((to) => {
     if (isDirty.value) {
-      pendingNext = next
+      pendingTo = to
       showGuardDialog.value = true
       return false
     }
-    next()
+    // Returning undefined lets the navigation proceed — no need to
+    // call next() in the v4 API.
   })
 
   function confirmLeave() {
     showGuardDialog.value = false
     isDirty.value = false
-    if (pendingNext) {
-      pendingNext()
-      pendingNext = null
+    if (pendingTo) {
+      const to = pendingTo
+      pendingTo = null
+      router.push(to)
     }
   }
 
   function cancelLeave() {
     showGuardDialog.value = false
-    pendingNext = null
+    pendingTo = null
   }
 
   // Browser beforeunload

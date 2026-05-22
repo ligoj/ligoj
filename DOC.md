@@ -1446,7 +1446,13 @@ Sample configuration file [application.properties](app-ui/src/main/resources/app
 ``` ini
 # OAuth2 specific overrides
 security = OAuth2Bff
-ligoj.security.oauth2.username-attribute = email
+
+# For login using the e-mail, recommended for EntraID, GMail,...
+#ligoj.security.oauth2.username-attribute = email
+
+# For login using the internal user identifier, recommended for LDAP
+ligoj.security.oauth2.username-attribute = preferred_username
+
 ligoj.security.login.url = /oauth2/authorization/keycloak
 spring.security.oauth2.client.provider.keycloak.issuer-uri = http://localhost:9083/realms/keycloak
 spring.security.oauth2.client.registration.keycloak.provider =  keycloak

@@ -180,9 +180,20 @@ export const useAuthStore = defineStore('auth', () => {
     window.location.href = `${base}login.html?${reason}`
   }
 
-  async function logout() {
-    await fetch('rest/security/logout', { method: 'POST', credentials: 'include' })
+  /**
+   * Top-level navigate to Spring's `/logout` endpoint. We can't use
+   * `fetch` here — RP-initiated OIDC logout chains through Spring →
+   * Keycloak's `end_session_endpoint` → back, and only a full browser
+   * navigation can follow the cross-origin 302s. Spring's
+   * `OidcClientInitiatedLogoutSuccessHandler` (wired in
+   * `OAuth2BffAuthenticationProvider`) drives the chain when OAuth2Bff
+   * is the active provider; for the password-based provider it just
+   * invalidates the session and lands on the configured success URL.
+   */
+  function logout() {
+    const base = import.meta.env.BASE_URL || '/'
     session.value = null
+    window.location.href = `${base}logout`
   }
 
   return {

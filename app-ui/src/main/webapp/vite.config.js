@@ -167,7 +167,10 @@ export default defineConfig({
       },
       '/ligoj/logout': {
         target: 'http://localhost:8080',
-        changeOrigin: true,
+        // Same reason as /ligoj/oauth2: Spring builds the OIDC
+        // `post_logout_redirect_uri` from the inbound Host header,
+        // and we need it to point at vite (`localhost:5173`).
+        changeOrigin: false,
       },
       '/ligoj/captcha.png': {
         target: 'http://localhost:8080',

@@ -455,11 +455,34 @@ async function submit() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   // Reflect the active locale on <html lang> for accessibility / spell-check.
   if (typeof document !== 'undefined') {
     document.documentElement.lang = locale.value
   }
+
+  // OIDC short-circuit. With `security=OAuth2Bff`, this page must
+  // never be shown — even on manual navigation or post-logout
+  // redirects. Probe `/rest/session` with `redirect: 'manual'`:
+  //   - opaqueredirect → Spring 302 to OAuth entry → OIDC mode,
+  //     unauthenticated. Bounce to /ligoj/, let auth.redirectToLogin()
+  //     start the IdP flow.
+  //   - ok → already authenticated. Bounce to /ligoj/ (home).
+  //   - else (401 etc.) → standard provider, render the form.
+  // Network errors fall through so the user sees the form rather than
+  // a blank page when the backend is unreachable.
+  try {
+    const base = import.meta.env.BASE_URL || '/'
+    const resp = await fetch(`${base}rest/session`, {
+      credentials: 'include',
+      redirect: 'manual',
+      headers: { Accept: 'application/json' },
+    })
+    if (resp.type === 'opaqueredirect' || resp.ok) {
+      window.location.href = base
+      return
+    }
+  } catch { /* network error — render the form */ }
 
   const hash = window.location.hash || ''
   const search = window.location.search || ''
