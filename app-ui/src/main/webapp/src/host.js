@@ -25,7 +25,14 @@ export { default as LigojDataTableServer } from './components/LigojDataTableServ
 export { default as LigojConfirmDialog } from './components/LigojConfirmDialog.vue'
 export { default as NodeIcon, nodeIcon } from './components/NodeIcon.vue'
 export { default as NodeModeChip } from './components/NodeModeChip.vue'
-export { nodeType, isInstance } from './utils/nodeType.js'
+export { default as PluginFeatures } from './components/PluginFeatures.vue'
+export { nodeType, isInstance, nodePluginId } from './utils/nodeType.js'
+
+// Vuetify primitives re-exported for plugins. A plugin's Vite build keeps
+// `@ligoj/host` external; importing VBtn/VIcon from here lets a plugin's
+// `renderFeatures()` build VNodes with `h(VBtn, …)` without bundling its
+// own copy of Vuetify (which would break shared theming / instance state).
+export { VBtn, VChip, VIcon, VTooltip } from 'vuetify/components'
 
 /**
  * The app's public base path, e.g. `/ligoj/`. Exported so plugins can

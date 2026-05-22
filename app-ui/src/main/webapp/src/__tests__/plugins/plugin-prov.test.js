@@ -35,6 +35,41 @@ describe('plugin-prov contract', () => {
     expect(registered).toHaveLength(5)
   })
 
+  it('feature("renderFeatures") returns VNodes the host can mount', () => {
+    setActivePinia(createPinia())
+    const result = pluginProvDef.feature('renderFeatures', { id: 7, node: { id: 'service:prov:aws:bar' } })
+    expect(Array.isArray(result)).toBe(true)
+    expect(result.length).toBeGreaterThan(0)
+    for (const node of result) {
+      expect(node.__v_isVNode).toBe(true)
+    }
+  })
+
+  it('feature("renderDetailsKey") returns chips when a quote is present', () => {
+    setActivePinia(createPinia())
+    const result = pluginProvDef.feature('renderDetailsKey', {
+      id: 7,
+      node: { id: 'service:prov:aws:bar' },
+      data: {
+        quote: {
+          nbInstances: 3,
+          nbDatabases: 1,
+          totalCpu: 12,
+          totalRam: 32768,
+          totalStorage: 2048,
+          location: { name: 'eu-west-1' },
+        },
+      },
+    })
+    expect(result).toBeTruthy()
+    expect(result.__v_isVNode).toBe(true)
+  })
+
+  it('feature("renderDetailsKey") returns null when no quote data exists', () => {
+    setActivePinia(createPinia())
+    expect(pluginProvDef.feature('renderDetailsKey', { id: 7, node: { id: 'service:prov:aws:bar' } })).toBeNull()
+  })
+
   it('feature("requestCatalogUpdate") POSTs to the catalog endpoint', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true })
     await pluginProvDef.feature('requestCatalogUpdate', 'service:prov:aws')

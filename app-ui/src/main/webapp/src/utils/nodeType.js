@@ -21,3 +21,17 @@ export function nodeType(node) {
 export function isInstance(node) {
   return nodeType(node) === 'instance'
 }
+
+/**
+ * Returns the plugin id that owns a node, or `null` if it can't be derived.
+ * The plugin id is the second segment of the node id:
+ *   service:id            → 'id'
+ *   service:id:ldap       → 'id'
+ *   service:prov:aws:foo  → 'prov'
+ *   feature:foo           → 'foo'
+ */
+export function nodePluginId(node) {
+  const id = typeof node === 'string' ? node : (node?.id || '')
+  const parts = id.split(':').filter(Boolean)
+  return parts[1] || null
+}

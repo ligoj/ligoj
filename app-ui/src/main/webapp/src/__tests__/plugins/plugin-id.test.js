@@ -46,6 +46,38 @@ describe('plugin-id contract', () => {
     expect(registered).toHaveLength(11)
   })
 
+  it('feature("renderFeatures") returns VNodes the host can mount', () => {
+    setActivePinia(createPinia())
+    const result = pluginIdDef.feature('renderFeatures', { id: 42, node: { id: 'service:id:ldap:foo' } })
+    expect(Array.isArray(result)).toBe(true)
+    expect(result.length).toBeGreaterThan(0)
+    // VNodes have a __v_isVNode flag in Vue 3.
+    for (const node of result) {
+      expect(node.__v_isVNode).toBe(true)
+    }
+  })
+
+  it('feature("renderDetailsKey") returns a chip VNode when members are present', () => {
+    setActivePinia(createPinia())
+    const result = pluginIdDef.feature('renderDetailsKey', {
+      id: 42,
+      node: { id: 'service:id:ldap:foo' },
+      data: { members: 12 },
+    })
+    expect(result).toBeTruthy()
+    expect(result.__v_isVNode).toBe(true)
+  })
+
+  it('feature("renderDetailsKey") returns null when there are no details to show', () => {
+    setActivePinia(createPinia())
+    const result = pluginIdDef.feature('renderDetailsKey', {
+      id: 42,
+      node: { id: 'service:id:ldap:foo' },
+      data: {},
+    })
+    expect(result).toBeNull()
+  })
+
   it('feature("acceptAgreement") POSTs and flips the user setting', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true })
     const settings = {}
