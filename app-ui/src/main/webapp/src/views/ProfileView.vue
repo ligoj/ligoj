@@ -77,7 +77,7 @@
               <div class="text-subtitle-2 flex-grow-1">{{ t('profile.theme') }}</div>
             </div>
 
-            <v-row dense>
+            <v-row density="comfortable">
               <v-col v-for="opt in THEME_OPTIONS" :key="opt.id" cols="6" sm="4" md="3" lg="2">
                 <v-card
                   class="theme-tile"
