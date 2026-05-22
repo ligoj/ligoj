@@ -8,6 +8,11 @@ import {
   formatStorage,
   donutPath,
   donutFullPath,
+  scaleCost,
+  COST_PERIODS,
+  COST_PERIOD_FACTORS,
+  rowMatches,
+  maxOfField,
   TAB_TYPES,
 } from '../../../../../../../../ligoj-plugins/plugin-prov/ui/src/quoteFormatters.js'
 
@@ -149,6 +154,158 @@ describe('quoteFormatters', () => {
       expect(d).toContain('A 20 20')
       // Two M segments — outer and inner.
       expect((d.match(/M /g) || []).length).toBe(2)
+    })
+  })
+
+  describe('scaleCost / COST_PERIODS / COST_PERIOD_FACTORS', () => {
+    it('exposes the four periods in display order', () => {
+      expect([...COST_PERIODS]).toEqual(['hour', 'day', 'month', 'year'])
+    })
+
+    it('uses the legacy ratios (730 h/mo, 30 d/mo, 12 mo/y)', () => {
+      expect(COST_PERIOD_FACTORS.hour).toBeCloseTo(1 / 730)
+      expect(COST_PERIOD_FACTORS.day).toBeCloseTo(1 / 30)
+      expect(COST_PERIOD_FACTORS.month).toBe(1)
+      expect(COST_PERIOD_FACTORS.year).toBe(12)
+    })
+
+    it('returns null/undefined cost unchanged', () => {
+      expect(scaleCost(null, 'hour')).toBeNull()
+      expect(scaleCost(undefined, 'year')).toBeUndefined()
+    })
+
+    it('scales a plain number cost', () => {
+      expect(scaleCost(100, 'month')).toBe(100)
+      expect(scaleCost(120, 'year')).toBe(1440)
+      expect(scaleCost(30, 'day')).toBe(1)
+      expect(scaleCost(730, 'hour')).toBeCloseTo(1)
+    })
+
+    it('scales min/max of a range and preserves other fields', () => {
+      const scaled = scaleCost({ min: 100, max: 200, unbound: true }, 'year')
+      expect(scaled.min).toBe(1200)
+      expect(scaled.max).toBe(2400)
+      expect(scaled.unbound).toBe(true)
+    })
+
+    it('passes through null min/max in a range', () => {
+      const scaled = scaleCost({ min: null, max: 100, unbound: false }, 'year')
+      expect(scaled.min).toBeNull()
+      expect(scaled.max).toBe(1200)
+      expect(scaled.unbound).toBe(false)
+    })
+
+    it('falls back to monthly factor for unknown periods', () => {
+      expect(scaleCost(42, 'decade')).toBe(42)
+    })
+
+    it('does not mutate the input', () => {
+      const input = { min: 10, max: 20 }
+      const before = { ...input }
+      scaleCost(input, 'year')
+      expect(input).toEqual(before)
+    })
+  })
+
+  describe('rowMatches', () => {
+    const sample = {
+      id: 42,
+      name: 'powerbi gateway',
+      description: 'Reporting bridge',
+      os: 'LINUX',
+      price: {
+        type: { name: 't3a.2xlarge', code: 't3a.2xlarge' },
+        location: { name: 'eu-west-3' },
+      },
+    }
+
+    it('returns true for an empty/null/undefined query', () => {
+      expect(rowMatches(sample, '')).toBe(true)
+      expect(rowMatches(sample, null)).toBe(true)
+      expect(rowMatches(sample, undefined)).toBe(true)
+    })
+
+    it('returns false when the row itself is missing', () => {
+      expect(rowMatches(null, 'foo')).toBe(false)
+      expect(rowMatches(undefined, 'foo')).toBe(false)
+    })
+
+    it('matches the name field, case-insensitive', () => {
+      expect(rowMatches(sample, 'GATEWAY')).toBe(true)
+      expect(rowMatches(sample, 'power')).toBe(true)
+    })
+
+    it('matches the description', () => {
+      expect(rowMatches(sample, 'reporting')).toBe(true)
+    })
+
+    it('matches OS / engine / level (top-level or via price)', () => {
+      expect(rowMatches(sample, 'linux')).toBe(true)
+      expect(rowMatches({ price: { engine: 'POSTGRESQL' } }, 'postgres')).toBe(true)
+      expect(rowMatches({ level: 'Enterprise' }, 'ENTER')).toBe(true)
+    })
+
+    it('matches the price type name and code', () => {
+      expect(rowMatches(sample, 't3a')).toBe(true)
+    })
+
+    it('matches the location name (top-level or via price)', () => {
+      expect(rowMatches(sample, 'eu-west')).toBe(true)
+      expect(rowMatches({ location: { name: 'us-east-1' } }, 'us-east')).toBe(true)
+    })
+
+    it('matches the row id as a string', () => {
+      expect(rowMatches(sample, '42')).toBe(true)
+    })
+
+    it('returns false when nothing matches', () => {
+      expect(rowMatches(sample, 'mysql')).toBe(false)
+    })
+
+    it('tolerates rows missing many fields', () => {
+      const sparse = { name: 'minimal' }
+      expect(rowMatches(sparse, 'min')).toBe(true)
+      expect(rowMatches(sparse, 'something')).toBe(false)
+    })
+
+    it('treats a numeric query as a string', () => {
+      expect(rowMatches({ id: 99, name: 'x' }, 99)).toBe(true)
+    })
+  })
+
+  describe('maxOfField', () => {
+    it('returns 0 for an empty / null / undefined list', () => {
+      expect(maxOfField([], (r) => r.cpu)).toBe(0)
+      expect(maxOfField(null, (r) => r.cpu)).toBe(0)
+      expect(maxOfField(undefined, (r) => r.cpu)).toBe(0)
+    })
+
+    it('returns the largest accessor result', () => {
+      const rows = [{ cpu: 2 }, { cpu: 8 }, { cpu: 4 }]
+      expect(maxOfField(rows, (r) => r.cpu)).toBe(8)
+    })
+
+    it('skips null/undefined rows', () => {
+      const rows = [{ cpu: 1 }, null, { cpu: 5 }, undefined]
+      expect(maxOfField(rows, (r) => r.cpu)).toBe(5)
+    })
+
+    it('coerces non-numeric accessor returns to 0', () => {
+      const rows = [{ cpu: '4' }, { cpu: 'abc' }, { cpu: 6 }]
+      expect(maxOfField(rows, (r) => r.cpu)).toBe(6)
+    })
+
+    it('respects the accessor function (drill through nested shapes)', () => {
+      const rows = [
+        { price: { type: { ram: 1024 } } },
+        { price: { type: { ram: 8192 } } },
+        { ram: 4096 },
+      ]
+      expect(maxOfField(rows, (r) => r.ram ?? r.price?.type?.ram)).toBe(8192)
+    })
+
+    it('returns 0 when every row contributes 0', () => {
+      expect(maxOfField([{ cpu: 0 }, {}, { cpu: null }], (r) => r.cpu)).toBe(0)
     })
   })
 
