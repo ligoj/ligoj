@@ -25,6 +25,7 @@ export default {
   // Common
   'common.search': 'Search',
   'common.save': 'Save',
+  'common.create': 'Create',
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',
   'common.remove': 'Remove',
@@ -37,6 +38,7 @@ export default {
   'common.status': 'Status',
   'common.loading': 'Loading...',
   'common.required': 'This field is required',
+  'common.positive': 'Must be greater than 0',
   'common.active': 'Active',
   'common.deleted': 'Deleted',
   'common.unknown': 'Unknown',
