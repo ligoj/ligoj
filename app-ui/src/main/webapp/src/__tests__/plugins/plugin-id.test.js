@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
 import registry, { callFeature } from '@/plugins/registry.js'
 // Imports the plugin source (pre-build). The built bundle at
 // ../src/main/resources/.../webjars/id/vue/index.js is what the host loads
@@ -29,17 +30,20 @@ describe('plugin-id contract', () => {
   })
 
   it('install() registers all /id/* routes on the given router', () => {
+    setActivePinia(createPinia())
     const addRoute = vi.fn()
     pluginIdDef.install({ pluginId: 'id', router: { addRoute } })
     const registered = addRoute.mock.calls.map(([route]) => route.path)
     expect(registered).toEqual(expect.arrayContaining([
-      '/id/user', '/id/user/new', '/id/user/:id',
+      // Users now edit through a dialog (UserEditDialog) opened from
+      // the list, so /id/user/new and /id/user/:id are no longer routes.
+      '/id/user',
       '/id/group', '/id/group/new', '/id/group/:id',
       '/id/company', '/id/company/new', '/id/company/:id',
       '/id/delegate', '/id/delegate/new', '/id/delegate/:id',
       '/id/container-scope',
     ]))
-    expect(registered).toHaveLength(13)
+    expect(registered).toHaveLength(11)
   })
 
   it('feature("acceptAgreement") POSTs and flips the user setting', async () => {
