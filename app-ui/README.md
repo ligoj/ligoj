@@ -208,16 +208,12 @@ open http://localhost:5173/ligoj/
 ## Start Vite `plugin-ui` server
 
 ```shell
-cd ~/git/ligoj-plugins/plugin-ui/ui
-npm run build
-npm run dev
+npm run build --prefix ~/git/ligoj-plugins/plugin-ui/ui
 ```
 
 ## Start Vite `plugin-id` server
 
 ```shell
-cd ~/git/ligoj-plugins/plugin-id/ui
-npm run build
-npm run dev
+npm run build --prefix ~/git/ligoj-plugins/plugin-id/ui
 open http://localhost:5173/ligoj/
 ```
