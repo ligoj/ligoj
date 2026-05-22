@@ -4,6 +4,9 @@ import * as directives from 'vuetify/directives'
 import { en, fr } from 'vuetify/locale'
 import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
+// Project-wide Vuetify CSS tweaks (imported after `vuetify/styles` so
+// our rules win the cascade).
+import '@/assets/vuetify-overrides.css'
 
 /* -----------------------------------------------------------------------
  * Theme catalog

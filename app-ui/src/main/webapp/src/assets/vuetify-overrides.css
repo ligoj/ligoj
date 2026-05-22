@@ -1,0 +1,15 @@
+/*
+ * Global Vuetify component tweaks. Kept tiny on purpose — anything
+ * bigger than a few rules belongs in a theme or a wrapper component.
+ */
+
+/* v-list-item & v-list-group: tighten the gap between the prepend
+ * icon (or avatar) and the title. Vuetify ships 32 px (24 px at
+ * `density="compact"`) which steals horizontal room in side menus
+ * and admin lists. !important is needed because Vuetify's density-
+ * scoped selectors out-specify a plain rule.
+ */
+:root {
+  --v-list-group-prepend: 12px;
+  --v-list-prepend-gap: 8px;
+}
