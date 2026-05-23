@@ -181,6 +181,8 @@ export default {
   'profile.permissions': 'Permissions',
   'profile.uiAuth': 'UI Authorizations ({{count}})',
   'profile.preferences': 'Preferences',
+  'profile.apiTokens': 'API tokens',
+  'profile.apiTokensHint': 'Create or revoke keys for the REST API',
   'profile.theme': 'Theme',
   'profile.language': 'Language',
 
@@ -196,6 +198,9 @@ export default {
   'about.framework': 'Framework',
   'about.buildTool': 'Build Tool',
   'about.state': 'State',
+  'about.resources': 'Resources',
+  'about.api': 'REST API',
+  'about.apiHint': 'Endpoints, examples, and live SwaggerUI',
 
   // Login
   'login.title': 'Ligoj',

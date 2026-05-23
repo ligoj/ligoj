@@ -181,6 +181,8 @@ export default {
   'profile.permissions': 'Permissions',
   'profile.uiAuth': 'Autorisations UI ({{count}})',
   'profile.preferences': 'Préférences',
+  'profile.apiTokens': 'Tokens API',
+  'profile.apiTokensHint': 'Créer ou révoquer des clés pour l\'API REST',
   'profile.theme': 'Thème',
   'profile.language': 'Langue',
 
@@ -196,6 +198,9 @@ export default {
   'about.framework': 'Framework',
   'about.buildTool': 'Outil de build',
   'about.state': 'État',
+  'about.resources': 'Ressources',
+  'about.api': 'API REST',
+  'about.apiHint': 'Points d\'accès, exemples et SwaggerUI en direct',
 
   // Login
   'login.title': 'Ligoj',

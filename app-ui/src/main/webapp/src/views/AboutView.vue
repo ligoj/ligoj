@@ -76,6 +76,25 @@
           </v-card-text>
         </v-card>
       </v-col>
+
+      <v-col cols="12" md="6">
+        <v-card>
+          <v-card-title>
+            <v-icon class="mr-2">mdi-bookshelf</v-icon>
+            {{ t('about.resources') }}
+          </v-card-title>
+          <v-card-text>
+            <v-list density="compact">
+              <v-list-item to="/api" link>
+                <template #prepend><v-icon>mdi-api</v-icon></template>
+                <v-list-item-title>{{ t('about.api') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ t('about.apiHint') }}</v-list-item-subtitle>
+                <template #append><v-icon size="small">mdi-chevron-right</v-icon></template>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
   </div>
 </template>
