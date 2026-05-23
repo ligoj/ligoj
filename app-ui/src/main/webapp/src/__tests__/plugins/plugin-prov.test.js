@@ -4,7 +4,7 @@ import registry, { callFeature } from '@/plugins/registry.js'
 // Imports the plugin source (pre-build). The built bundle at
 // ../src/main/resources/.../webjars/prov/vue/index.js is what the host loads
 // at runtime — here we test the authoring surface directly.
-import pluginProvDef from '../../../../../../../../ligoj-plugins/plugin-prov/ui/src/index.js'
+import pluginProvDef, { service as provService } from '../../../../../../../../ligoj-plugins/plugin-prov/ui/src/index.js'
 
 describe('plugin-prov contract', () => {
   it('exports required fields (id, label, install, feature, service, meta)', () => {
@@ -88,6 +88,40 @@ describe('plugin-prov contract', () => {
       expect.objectContaining({ method: 'POST' }),
     )
     fetchSpy.mockRestore()
+  })
+
+  it('exposes the same `service` object via the default export and the named export', () => {
+    expect(provService).toBe(pluginProvDef.service)
+    // Sanity-check a couple of well-known members so the named export
+    // stays a reliable entry point for direct ES consumers.
+    expect(typeof provService.requestCatalogUpdate).toBe('function')
+    expect(typeof provService.scheduleTaskPoll).toBe('function')
+    expect(typeof provService.renderFeatures).toBe('function')
+    expect(typeof provService.renderDetailsKey).toBe('function')
+  })
+
+  it('feature("scheduleTaskPoll") returns a handle and clears the interval on done', async () => {
+    vi.useFakeTimers()
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ end: true, finished: true, result: 'ok' }),
+    })
+    const onPartial = vi.fn()
+    const onDone = vi.fn()
+    const handle = pluginProvDef.feature('scheduleTaskPoll', 'fake-url', onPartial, onDone, 1000)
+    expect(handle).toBeTruthy()
+    // First interval tick — polling fires once.
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
+    expect(onPartial).toHaveBeenCalledTimes(1)
+    expect(onDone).toHaveBeenCalledTimes(1)
+    // Now that `end: true` came back, the timer should be cleared —
+    // a second advance must NOT trigger any more fetches.
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
+    clearInterval(handle)
+    fetchSpy.mockRestore()
+    vi.useRealTimers()
   })
 })
 
