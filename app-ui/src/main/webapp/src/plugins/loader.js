@@ -26,7 +26,16 @@ export async function loadPlugin(pluginId) {
 
   try {
     const module = await import(/* @vite-ignore */ url)
-    const definition = module.default || module
+    const definition = module.default
+    // Spring's RestRedirectStrategy returns a no-op JS stub (401) for
+    // unauthenticated JS requests. As an ES module it parses fine but
+    // has no default export — and the namespace itself is frozen, so
+    // we can't fall back to `module` and mutate `.id` on it. Treat the
+    // missing default as a "not loaded yet, try again after auth"
+    // signal: skip silently, don't add to `loaded`, no console spam.
+    if (!definition || typeof definition !== 'object') {
+      return null
+    }
 
     if (!definition.id) definition.id = pluginId
 
