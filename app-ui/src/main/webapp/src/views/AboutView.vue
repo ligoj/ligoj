@@ -4,30 +4,83 @@
 
     <v-row>
       <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>
-            <v-icon class="mr-2">mdi-information</v-icon>
-            {{ t('about.app') }}
-          </v-card-title>
-          <v-card-text>
-            <v-table density="compact">
-              <tbody>
-                <tr>
-                  <td class="font-weight-medium">{{ t('about.version') }}</td>
-                  <td>{{ auth.appSettings.buildVersion || '-' }}</td>
-                </tr>
-                <tr>
-                  <td class="font-weight-medium">{{ t('about.buildDate') }}</td>
-                  <td>{{ buildDate }}</td>
-                </tr>
-                <tr>
-                  <td class="font-weight-medium">{{ t('about.buildNumber') }}</td>
-                  <td>{{ auth.appSettings.buildNumber || '-' }}</td>
-                </tr>
-              </tbody>
-            </v-table>
-          </v-card-text>
-        </v-card>
+        <v-row>
+          <v-col cols="12" md="12">
+            <v-card>
+              <v-card-title>
+                <v-icon class="mr-2">mdi-information</v-icon>
+                {{ t('about.app') }}
+              </v-card-title>
+              <v-card-text>
+                <v-table density="compact">
+                  <tbody>
+                    <tr>
+                      <td class="font-weight-medium">{{ t('about.version') }}</td>
+                      <td>{{ auth.appSettings.buildVersion || '-' }}</td>
+                    </tr>
+                    <tr>
+                      <td class="font-weight-medium">{{ t('about.buildDate') }}</td>
+                      <td>{{ buildDate }}</td>
+                    </tr>
+                    <tr>
+                      <td class="font-weight-medium">{{ t('about.buildNumber') }}</td>
+                      <td>{{ auth.appSettings.buildNumber || '-' }}</td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </v-card-text>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" md="12">
+
+            <v-card>
+              <v-card-title>
+                <v-icon class="mr-2">mdi-monitor-dashboard</v-icon>
+                {{ t('about.frontend') }}
+              </v-card-title>
+              <v-card-text>
+                <v-table density="compact">
+                  <tbody>
+                    <tr>
+                      <td class="font-weight-medium">{{ t('about.framework') }}</td>
+                      <td>Vue 3 + Vuetify 4</td>
+                    </tr>
+                    <tr>
+                      <td class="font-weight-medium">{{ t('about.buildTool') }}</td>
+                      <td>Vite 8</td>
+                    </tr>
+                    <tr>
+                      <td class="font-weight-medium">{{ t('about.state') }}</td>
+                      <td>Pinia 3</td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </v-card-text>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" md="12">
+
+            <v-card>
+              <v-card-title>
+                <v-icon class="mr-2">mdi-bookshelf</v-icon>
+                {{ t('about.resources') }}
+              </v-card-title>
+              <v-card-text>
+                <v-list density="compact">
+                  <v-list-item to="/api" link>
+                    <template #prepend><v-icon>mdi-api</v-icon></template>
+                    <v-list-item-title>{{ t('about.api') }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ t('about.apiHint') }}</v-list-item-subtitle>
+                    <template #append><v-icon size="small">mdi-chevron-right</v-icon></template>
+                  </v-list-item>
+                </v-list>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+
       </v-col>
 
       <v-col cols="12" md="6">
@@ -50,51 +103,7 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>
-            <v-icon class="mr-2">mdi-monitor-dashboard</v-icon>
-            {{ t('about.frontend') }}
-          </v-card-title>
-          <v-card-text>
-            <v-table density="compact">
-              <tbody>
-                <tr>
-                  <td class="font-weight-medium">{{ t('about.framework') }}</td>
-                  <td>Vue 3 + Vuetify 3</td>
-                </tr>
-                <tr>
-                  <td class="font-weight-medium">{{ t('about.buildTool') }}</td>
-                  <td>Vite 8</td>
-                </tr>
-                <tr>
-                  <td class="font-weight-medium">{{ t('about.state') }}</td>
-                  <td>Pinia 2</td>
-                </tr>
-              </tbody>
-            </v-table>
-          </v-card-text>
-        </v-card>
-      </v-col>
 
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>
-            <v-icon class="mr-2">mdi-bookshelf</v-icon>
-            {{ t('about.resources') }}
-          </v-card-title>
-          <v-card-text>
-            <v-list density="compact">
-              <v-list-item to="/api" link>
-                <template #prepend><v-icon>mdi-api</v-icon></template>
-                <v-list-item-title>{{ t('about.api') }}</v-list-item-title>
-                <v-list-item-subtitle>{{ t('about.apiHint') }}</v-list-item-subtitle>
-                <template #append><v-icon size="small">mdi-chevron-right</v-icon></template>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-col>
     </v-row>
   </div>
 </template>
