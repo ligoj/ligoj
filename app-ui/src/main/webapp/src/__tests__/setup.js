@@ -46,3 +46,24 @@ if (typeof globalThis.IntersectionObserver === 'undefined') {
     takeRecords() { return [] }
   }
 }
+// visualViewport is referenced by Vuetify's `VOverlay` location
+// strategies (v-dialog, v-menu, v-tooltip). jsdom doesn't ship one
+// so we provide an inert stub that satisfies the property reads
+// Vuetify performs at mount time.
+if (typeof window !== 'undefined' && !window.visualViewport) {
+  Object.defineProperty(window, 'visualViewport', {
+    writable: true,
+    value: {
+      width: 1024,
+      height: 768,
+      offsetLeft: 0,
+      offsetTop: 0,
+      pageLeft: 0,
+      pageTop: 0,
+      scale: 1,
+      addEventListener() {},
+      removeEventListener() {},
+      dispatchEvent() { return true },
+    },
+  })
+}
