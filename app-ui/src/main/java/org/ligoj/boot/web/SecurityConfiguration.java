@@ -235,7 +235,14 @@ public class SecurityConfiguration {
 			// dev-mode-mistargeted savedRequest (e.g. with the backend's
 			// host:port baked in from before the vite proxy was tuned)
 			// can never be replayed.
-			http.oauth2Login(o -> o.defaultSuccessUrl("/", true));
+			//
+			// On the failure side, Spring's default URL is `/login?error`
+			// — a path the SPA doesn't own. Send the user back to the
+			// Vue login page so they get a localized error message
+			// instead of the legacy form Spring would otherwise render.
+			http.oauth2Login(o -> o
+					.defaultSuccessUrl("/", true)
+					.failureUrl("/login.html?denied"));
 		} else {
 			final var loginSuccessHandler = getSuccessHandler();
 			final var loginFailureHandler = getFailureHandler();

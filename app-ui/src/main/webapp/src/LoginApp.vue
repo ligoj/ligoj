@@ -463,12 +463,15 @@ onMounted(async () => {
 
   // OIDC short-circuit. With `security=OAuth2Bff`, this page must
   // never be shown — even on manual navigation or post-logout
-  // redirects. Probe `/rest/session` with `redirect: 'manual'`:
-  //   - opaqueredirect → Spring 302 to OAuth entry → OIDC mode,
-  //     unauthenticated. Bounce to /ligoj/, let auth.redirectToLogin()
-  //     start the IdP flow.
-  //   - ok → already authenticated. Bounce to /ligoj/ (home).
-  //   - else (401 etc.) → standard provider, render the form.
+  // redirects. Probe `/rest/session`:
+  //   - opaqueredirect → Spring sent a literal 302 to the OAuth entry.
+  //   - 401 + `x-redirect` containing `/oauth2/authorization/` →
+  //     same intent, expressed XHR-friendly by Spring's
+  //     RestRedirectStrategy. Treat both as "OIDC mode".
+  //   - ok → already authenticated.
+  //   - else (plain 401) → standard provider, render the form.
+  // In every redirect case we bounce to /ligoj/ and let the SPA boot
+  // flow run auth.redirectToLogin(), which does the IdP top-level nav.
   // Network errors fall through so the user sees the form rather than
   // a blank page when the backend is unreachable.
   try {
@@ -478,7 +481,9 @@ onMounted(async () => {
       redirect: 'manual',
       headers: { Accept: 'application/json' },
     })
-    if (resp.type === 'opaqueredirect' || resp.ok) {
+    const xRedirect = resp.headers?.get?.('x-redirect') || ''
+    const wantsOAuth = xRedirect.includes('/oauth2/authorization/')
+    if (resp.type === 'opaqueredirect' || resp.ok || wantsOAuth) {
       window.location.href = base
       return
     }

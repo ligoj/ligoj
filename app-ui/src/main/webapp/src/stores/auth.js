@@ -116,7 +116,15 @@ export const useAuthStore = defineStore('auth', () => {
         headers: { Accept: 'application/json' },
       })
       // Manual redirect mode surfaces 3xx as `opaqueredirect`, status 0.
-      if (resp.type === 'opaqueredirect') {
+      // Spring's `RestRedirectStrategy` instead emits a 401 with an
+      // `x-redirect` header pointing at the configured login URL
+      // (e.g. `/oauth2/authorization/keycloak`) — XHR-friendly by
+      // design. Treat both signals identically: kick the browser
+      // through the IdP flow.
+      // `?.get?.()` so test mocks that omit `headers` don't trip us.
+      const xRedirect = resp.headers?.get?.('x-redirect') || ''
+      const wantsOAuth = xRedirect.includes('/oauth2/authorization/')
+      if (resp.type === 'opaqueredirect' || wantsOAuth) {
         session.value = null
         needsOAuthRedirect.value = true
         lastSessionStatus.value = 302
