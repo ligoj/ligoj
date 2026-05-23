@@ -124,7 +124,7 @@ This script is a guard and a DOM protection layer. It checks the security of the
 - Vite
 - Pinia
 - VeeValidate
-- Vuetify
+- Vuetify 4
 - VeeValidateI18n
 - Material Design icons and simpleicons.org
 - ...
@@ -296,22 +296,22 @@ export default defineConfig({
 
 Imported from the host bundle via the import map; treat as the public API and don't bypass it. Current exports (see `app-ui/src/main/webapp/src/host.js`):
 
-| Export | Purpose |
-|---|---|
-| `useApi` | `get / post / put / del` against `rest/*`. Adds redirect handling, error toasts, and 401 → bounce-to-SPA-root behaviour. |
-| `useAuthStore` | Session, roles, `redirectToLogin()`, OIDC-aware logout. |
-| `useAppStore` | Breadcrumbs (`setBreadcrumbs(items, { refresh })`), title, refresh button in app bar. |
-| `useI18nStore` | `t(key, params)`, `setLocale(loc)`, `merge(messages, locale?)`. |
-| `useErrorStore` | Toast queue (`push / success / info`), centralized API response handling. |
-| `useClipboard` | `copy(text, { message })` with browser API + textarea fallback. |
-| `useDataTable` | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`). |
-| `useFormGuard` | Unsaved-changes dialog + `onBeforeRouteLeave` integration. |
-| `LigojDataTable` / `LigojDataTableServer` | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported. |
-| `LigojConfirmDialog` | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s. |
-| `NodeIcon` / `nodeIcon` / `NodeModeChip` | Render a node's icon and subscription mode consistently. |
-| `nodeType` / `isInstance` | Classify a node id (`service` / `feature` / `tool` / `instance`). |
-| `ImportExportBar` | CSV import/export header strip for list views. |
-| `APP_BASE` | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths. |
+| Export                                    | Purpose                                                                                                                       |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `useApi`                                  | `get / post / put / del` against `rest/*`. Adds redirect handling, error toasts, and 401 → bounce-to-SPA-root behaviour.      |
+| `useAuthStore`                            | Session, roles, `redirectToLogin()`, OIDC-aware logout.                                                                       |
+| `useAppStore`                             | Breadcrumbs (`setBreadcrumbs(items, { refresh })`), title, refresh button in app bar.                                         |
+| `useI18nStore`                            | `t(key, params)`, `setLocale(loc)`, `merge(messages, locale?)`.                                                               |
+| `useErrorStore`                           | Toast queue (`push / success / info`), centralized API response handling.                                                     |
+| `useClipboard`                            | `copy(text, { message })` with browser API + textarea fallback.                                                               |
+| `useDataTable`                            | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`).                        |
+| `useFormGuard`                            | Unsaved-changes dialog + `onBeforeRouteLeave` integration.                                                                    |
+| `LigojDataTable` / `LigojDataTableServer` | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported.                        |
+| `LigojConfirmDialog`                      | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s.                                                |
+| `NodeIcon` / `nodeIcon` / `NodeModeChip`  | Render a node's icon and subscription mode consistently.                                                                      |
+| `nodeType` / `isInstance`                 | Classify a node id (`service` / `feature` / `tool` / `instance`).                                                             |
+| `ImportExportBar`                         | CSV import/export header strip for list views.                                                                                |
+| `APP_BASE`                                | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths. |
 
 ## 5. Translations
 

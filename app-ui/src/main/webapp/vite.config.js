@@ -105,10 +105,10 @@ export default defineConfig({
             // Highest-priority groups claim modules first; vue must
             // outrank vuetify or rolldown folds @vue/* into vuetify
             // (it pulls them in transitively).
-            { name: 'vue',     test: /[\\/]node_modules[\\/](?:vue|@vue)[\\/]/, priority: 100, minSize: 0 },
-            { name: 'router',  test: /[\\/]node_modules[\\/]vue-router[\\/]/,   priority: 90,  minSize: 0 },
-            { name: 'pinia',   test: /[\\/]node_modules[\\/]pinia[\\/]/,        priority: 80,  minSize: 0 },
-            { name: 'vuetify', test: /[\\/]node_modules[\\/]vuetify[\\/]/,      priority: 70,  minSize: 0 },
+            { name: 'vue', test: /[\\/]node_modules[\\/](?:vue|@vue)[\\/]/, priority: 100, minSize: 0 },
+            { name: 'router', test: /[\\/]node_modules[\\/]vue-router[\\/]/, priority: 90, minSize: 0 },
+            { name: 'pinia', test: /[\\/]node_modules[\\/]pinia[\\/]/, priority: 80, minSize: 0 },
+            { name: 'vuetify', test: /[\\/]node_modules[\\/]vuetify[\\/]/, priority: 70, minSize: 0 },
           ],
         },
         // Stable filenames for shared deps so runtime-loaded plugins can
