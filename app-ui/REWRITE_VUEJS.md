@@ -168,6 +168,9 @@ The plan above kept its bones but a few items shifted in practice — record her
 - **Theme system**: 12 themes live in `plugins/vuetify.js`; the user picks one from `ProfileView`. Persisted in `localStorage` under `ligoj-theme`.
 - **Build chain**: Vite 8 with rolldown. `manualChunks` is rejected — use `output.codeSplitting.groups`. ESLint 9+ flat config (`eslint.config.js`); legacy `.eslintrc.cjs` is removed.
 - **Lint baseline**: `js.configs.recommended` + `pluginVue.configs['flat/essential']` (NOT `flat/recommended` — too strict on the chosen one-attr-per-line style). `vue/valid-v-slot` runs with `{ allowModifiers: true }` because Vuetify data-table cell templates use dotted slot names (`#item.foo`).
+- **Subscription row delegation** landed during the plugin-prov port. Plugins extend the row chrome by implementing `renderFeatures` / `renderDetailsKey` actions that return VNodes; the host mounts them via the `<PluginFeatures>` render-function component. See "Subscription row delegation" below.
+- **Host-exposed Vuetify primitives**. `host.js` now re-exports `VBtn`, `VChip`, `VIcon`, `VTooltip` so plugin `feature()` actions can build VNodes with `h(VBtn, …)` without bundling their own Vuetify copy. New plugins should reach for `@ligoj/host` first before importing from `vuetify/components` directly.
+- **`common.create` / `common.positive`** added to the host i18n bundle. The plugin-prov dialogs surfaced these missing keys; they're generic enough to live in `common.*`.
 
 ---
 
@@ -311,6 +314,9 @@ Imported from the host bundle via the import map; treat as the public API and do
 | `NodeIcon` / `nodeIcon` / `NodeModeChip`  | Render a node's icon and subscription mode consistently.                                                                      |
 | `nodeType` / `isInstance`                 | Classify a node id (`service` / `feature` / `tool` / `instance`).                                                             |
 | `ImportExportBar`                         | CSV import/export header strip for list views.                                                                                |
+| `PluginFeatures`                          | Render-function delegate that mounts a plugin's VNodes for a subscription row (`renderFeatures`, `renderDetailsKey`, …). See "Subscription row delegation" below. |
+| `nodePluginId`                            | Returns the plugin id (the second `:`-segment) of a node — `service:prov:aws` → `'prov'`. Used by `PluginFeatures` to resolve the right plugin. |
+| `VBtn` / `VChip` / `VIcon` / `VTooltip`   | Re-exports of Vuetify primitives. Plugins build their VNodes with `h(VBtn, …)` without bundling their own Vuetify (which would break shared theming and instance state). |
 | `APP_BASE`                                | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths. |
 
 ## 5. Translations
@@ -374,6 +380,63 @@ For real integration testing, run the host's vite dev server (`app-ui/src/main/w
 
 Unit-test the plugin's authoring surface from the host's vitest setup — see `app-ui/src/main/webapp/src/__tests__/plugins/plugin-id.test.js` as the template. Important: `install()` reaches into the i18n store, so the test must `setActivePinia(createPinia())` before calling it.
 
+For **view-level component tests** (mounting a plugin's SFC), follow the recipe in `__tests__/components/CatalogListView.test.js`:
+
+1. `setActivePinia(createPinia())`.
+2. `mergeMessages(plugin-en-bundle, 'en')` (or `'fr'`) — plugin-local keys are merged via `install()` in production, but tests bypass that path, so seed the bundle manually with `import { mergeMessages } from '@/plugins/i18n.js'`.
+3. Mount with `global: { plugins: [vuetify, i18nPlugin, router] }` where `vuetify = createVuetify({ components, directives })`.
+4. Stub `globalThis.fetch = vi.fn(() => Promise.resolve({ ok: true, ... }))` BEFORE mounting — `setup.js` pre-stubs it as a bare `vi.fn()`, and `vi.spyOn` doesn't replace an already-mocked fn reliably.
+
+`setup.js` polyfills `ResizeObserver`, `IntersectionObserver`, and `visualViewport` so Vuetify's overlay components (`v-dialog`, `v-menu`, `v-tooltip`) mount under jsdom.
+
+---
+
+# Subscription row delegation
+
+Plugins contribute to the host's subscription rows (in `ProjectDetailView`'s table) without owning the surrounding chrome. The host exposes a render-function component, `PluginFeatures`, that mounts a plugin's VNodes for a given subscription row:
+
+```vue
+<!-- In ProjectDetailView -->
+<PluginFeatures :subscription="item" action="renderFeatures" />
+<PluginFeatures :subscription="item" action="renderDetailsKey" />
+```
+
+`PluginFeatures` resolves the plugin from the subscription's node id (via `nodePluginId(subscription.node)`), lazy-loads it if the host hasn't pre-registered it, calls `plugin.feature(action, subscription)`, and mounts whatever VNodes come back.
+
+Plugins implement these actions inside their `feature()` dispatcher. Today two are wired (in plugin-id and plugin-prov):
+
+- **`renderFeatures(subscription)`** — small action icons next to the unsubscribe button.
+- **`renderDetailsKey(subscription)`** — resource chips (counts, totals, location) for the details column.
+
+The function returns VNodes (single, array, or `null`). The host never interprets HTML — the plugin paints its own pixels:
+
+```js
+import { h } from 'vue'
+import { VBtn, VIcon, useI18nStore } from '@ligoj/host'
+
+const features = {
+  renderFeatures(subscription) {
+    const { t } = useI18nStore()
+    return [
+      h(VBtn, {
+        icon: true, size: 'small', variant: 'text',
+        title: t('id.renderFeatures.manage'),
+        to: `/id/group?subscription=${subscription.id}`,
+      }, () => h(VIcon, { size: 'small' }, () => 'mdi-account-multiple')),
+    ]
+  },
+  renderDetailsKey(subscription) {
+    const count = subscription?.data?.members
+    if (count == null) return null
+    return h(VChip, { size: 'small', variant: 'tonal' }, () => `${count} members`)
+  },
+}
+```
+
+A plugin that doesn't implement an action throws from its dispatcher; `PluginFeatures` swallows that specific error so the column degrades cleanly to "nothing rendered". Real exceptions surface via `console.warn`.
+
+`ProjectDetailView` also calls `rest/subscription/status/refresh?id=…&id=…` after the initial project load to populate `subscription.data` / `status` / fresh `parameters` — without that round-trip `renderDetailsKey` would always see `data === undefined` (the project endpoint omits live state by design).
+
 ---
 
 # Decisions and gotchas
@@ -408,6 +471,23 @@ Battle scars worth respecting on the next migration.
 - `v-row dense` is deprecated in current Vuetify — use `density="comfortable"`.
 - `v-data-table` cell templates use dotted slot names (`#item.foo`). ESLint's `vue/valid-v-slot` treats the dot as a directive modifier and trips; the rule is configured with `{ allowModifiers: true }` in the project's `eslint.config.js`.
 - Vuetify's own widget i18n (data-table footer, etc.) is wired to the app locale via the `locale: { messages: { en, fr } }` block in `plugins/vuetify.js`, kept in sync by `setLocale()` in `plugins/i18n.js`.
+- **v-select slot signature changed in v4**. The `#item` and `#selection` slots are now called with `{ item, internalItem, index, props }` where `item` is the **raw object directly** — `item.raw` was the Vuetify 3 wrapper. Reading `item.raw.foo` crashes with `Cannot read properties of undefined (reading 'foo')`. Fix: use `item.foo` (and pass `item`, not `item.raw`, to child components).
+- **`:rules="[required]"` array literals trigger "Maximum recursive updates"**. Vuetify 4's `v-form` watches the `rules` prop by reference; an inline `[fn]` is a fresh array per render. When the input mounts inside an `v-expansion-panel-text` expand transition, v-form revalidates every frame and runs away. Always hoist:
+  ```js
+  const REQUIRED_RULES = [required]
+  const REQUIRED_POSITIVE_RULES = [required, positive]
+  ```
+  Then use `:rules="REQUIRED_RULES"` in the template. Same fix for custom validators.
+- **`v-combobox` + computed `:items` + `clearable` + expansion panel = infinite re-render**. Vuetify 4's combobox re-emits on mount when wrapped this way, looping forever. Either move items to a `shallowRef` (not a `computed`), add `eager` on the panel so content mounts on dialog open instead of during the expand transition, or fall back to `v-text-field` (used in plugin-prov for processor / architecture).
+- **`v-expansion-panel` model**. Initialise the `v-expansion-panels` model with `null` (not `undefined`) — `undefined` triggers weird "open by default" behavior in Vuetify 4. Use `eager` to pre-render the body so inputs mount once, outside any transition.
+
+## vue-i18n
+
+- **Escape literal `@` with `{'@'}`**. vue-i18n treats `@` as the start of a linked-message reference (`@:foo`, `@.upper:foo`, `@{foo}`). Any literal `@` in a translation string throws `Invalid linked format` at message-compilation time and the whole bundle fails to load. Wrap with `{'@'}` (a v-i18n literal-placeholder) and switch the JS string delimiter to `"..."` so the single quotes inside don't need escaping:
+  ```js
+  'foo.workloadHint': "duration{'@'}cpu pairs, e.g. 100,40{'@'}20",
+  ```
+- **Locale changes don't fire** unless the component reads `t()` reactively. The host's `useI18nStore.t` is the proxy that tracks locale; plain string captures don't. Re-evaluate via `computed(() => t('foo'))` for derived strings.
 
 ## Forms / autocompletes
 
