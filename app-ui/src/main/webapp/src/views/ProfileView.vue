@@ -23,6 +23,12 @@
                   <v-chip v-for="role in auth.roles" :key="role" size="small" class="mr-1">{{ role }}</v-chip>
                 </v-list-item-subtitle>
               </v-list-item>
+              <v-list-item to="/api/token" link>
+                <template #prepend><v-icon>mdi-key-variant</v-icon></template>
+                <v-list-item-title>{{ t('profile.apiTokens') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ t('profile.apiTokensHint') }}</v-list-item-subtitle>
+                <template #append><v-icon size="small">mdi-chevron-right</v-icon></template>
+              </v-list-item>
             </v-list>
           </v-card-text>
         </v-card>
