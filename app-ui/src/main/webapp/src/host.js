@@ -27,6 +27,18 @@ export { default as NodeIcon, nodeIcon } from './components/NodeIcon.vue'
 export { default as NodeModeChip } from './components/NodeModeChip.vue'
 export { default as PluginFeatures } from './components/PluginFeatures.vue'
 export { nodeType, isInstance, nodePluginId } from './utils/nodeType.js'
+// Registry lookup so a plugin can collaborate with sibling/sub-plugins
+// (e.g. `plugin-id` delegating to `plugin-id-ldap` for tool-specific row
+// actions). `callFeature` throws if the target plugin isn't registered
+// — call sites that want graceful degradation should use
+// `pluginRegistry.get(id)?.feature?.(...)` directly.
+export { default as pluginRegistry, callFeature } from './plugins/registry.js'
+// `loadPlugin` is exposed so a plugin can lazy-pull a sibling at runtime
+// (e.g. the subscribe wizard hydrates `id-ldap`'s i18n before rendering
+// the parameter labels for an LDAP node). `pluginIdFromKey` converts the
+// canonical backend plugin key (`service:id:ldap`) to the URL-safe form
+// the loader resolves to a webjar bundle (`id-ldap`).
+export { loadPlugin, pluginIdFromKey } from './plugins/loader.js'
 
 // Vuetify primitives re-exported for plugins. A plugin's Vite build keeps
 // `@ligoj/host` external; importing VBtn/VIcon from here lets a plugin's
