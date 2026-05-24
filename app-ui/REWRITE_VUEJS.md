@@ -1,3 +1,20 @@
+# Where to start (fresh session orientation)
+
+If you're picking this up cold, the fastest path to context is:
+
+1. **Read this doc end-to-end** — sections later in the file are denser than the intro.
+2. **Read the reference plugins**:
+   - `ligoj-plugins/plugin-id/ui/src/index.js` — service-level plugin contract.
+   - `ligoj-plugins/plugin-id-ldap/ui/src/index.js` — tool-level (sub-plugin) variant.
+   - `ligoj-plugins/plugin-ui/ui/src/views/SubscribeWizardView.vue` — the central subscription/node wizard. Subscribe + edit-node + create-node modes.
+3. **Read the host surface**:
+   - `app-ui/src/main/webapp/src/host.js` — public API plugins consume.
+   - `app-ui/src/main/webapp/src/plugins/loader.js` — `loadPlugin`, `pluginIdFromKey`, `requires` handling, in-flight dedup.
+   - `app-ui/src/main/webapp/src/plugins/registry.js` — `register`, `get`, `callFeature`.
+4. **Run the tests** (`cd app-ui/src/main/webapp && npm run test --silent`) to confirm the workspace is sound before changing anything.
+
+When in doubt: "Status snapshot" lists exactly what's shipped, "Decisions and gotchas" lists what bit somebody on the way here.
+
 # Introduction
 
 The Spring Boot Application is in @ligoj/app-api.
@@ -158,19 +175,48 @@ Core components are in `~/git/ligoj/app-ui/src/main/webapp/src/components`. They
 
 ---
 
-# What was actually shipped
+# Status snapshot
 
-The plan above kept its bones but a few items shifted in practice — record here so the next plugin migration starts from reality, not the wish list.
+What's actually shipped in this branch — record here so the next plugin migration starts from reality, not the wish list.
 
-- **VeeValidate / VeeValidateI18n** never landed. Vuetify's built-in `:rules` are enough for the forms we have and avoid a second validation library that the plugins would then have to learn.
-- **`v-dialog` persistent** is removed globally so ESC closes any dialog (see "Decisions"). Don't re-add it without a strong reason.
-- **i18n is modularised**: host keeps only generic keys (`common.*`, `nav.*`, `dashboard.*`, `agreement.*`, `error.*`, `profile.*`). Plugin-local keys ship inside each plugin's bundle and merge at `install()` time. See "Translations" below.
-- **Theme system**: 12 themes live in `plugins/vuetify.js`; the user picks one from `ProfileView`. Persisted in `localStorage` under `ligoj-theme`.
-- **Build chain**: Vite 8 with rolldown. `manualChunks` is rejected — use `output.codeSplitting.groups`. ESLint 9+ flat config (`eslint.config.js`); legacy `.eslintrc.cjs` is removed.
-- **Lint baseline**: `js.configs.recommended` + `pluginVue.configs['flat/essential']` (NOT `flat/recommended` — too strict on the chosen one-attr-per-line style). `vue/valid-v-slot` runs with `{ allowModifiers: true }` because Vuetify data-table cell templates use dotted slot names (`#item.foo`).
-- **Subscription row delegation** landed during the plugin-prov port. Plugins extend the row chrome by implementing `renderFeatures` / `renderDetailsKey` actions that return VNodes; the host mounts them via the `<PluginFeatures>` render-function component. See "Subscription row delegation" below.
-- **Host-exposed Vuetify primitives**. `host.js` now re-exports `VBtn`, `VChip`, `VIcon`, `VTooltip` so plugin `feature()` actions can build VNodes with `h(VBtn, …)` without bundling their own Vuetify copy. New plugins should reach for `@ligoj/host` first before importing from `vuetify/components` directly.
-- **`common.create` / `common.positive`** added to the host i18n bundle. The plugin-prov dialogs surfaced these missing keys; they're generic enough to live in `common.*`.
+## Reference implementations (read these first)
+
+| Plugin           | Role                                                    | What it demonstrates                                                                                                                                                |
+| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plugin-id`      | Service-level plugin with full CRUD views               | The "fat" pattern: routes, root component, list/edit views, `renderFeatures` / `renderDetailsKey` / `renderDetailsFeatures` hooks, parent-to-child delegation hook. |
+| `plugin-ui`      | Service-level plugin with shared UI views (the wizards) | Cross-plugin shared views: `SubscribeWizardView` (subscribe / edit-node / create-node modes), `SystemNodeView`, `ProjectDetailView`, …                              |
+| `plugin-id-ldap` | Tool-level sub-plugin                                   | The "thin" pattern: no routes, no component. Just i18n labels + a `renderFeatures` hook the parent merges in. Declares `requires: ['id']`.                          |
+| `plugin-prov`    | Large service-level plugin (legacy)                     | The first port — `renderFeatures` and `renderDetailsKey` patterns originated here.                                                                                  |
+
+## Infrastructure decisions
+
+- **VeeValidate / VeeValidateI18n** never landed. Vuetify's built-in `:rules` are enough; avoids a second validation library plugins would have to learn.
+- **`v-dialog` persistent** is removed globally so ESC closes any dialog. See "Decisions" — don't re-add without a strong reason.
+- **i18n is modularised**: host keeps only generic keys (`common.*`, `nav.*`, `dashboard.*`, `agreement.*`, `error.*`, `profile.*`). Plugins ship their own keys via `useI18nStore().merge(...)` in `install()`. See "Translations" and "Parameter form conventions".
+- **Theme system**: 12 themes in `plugins/vuetify.js`; user picks via `ProfileView`. Persisted in `localStorage` under `ligoj-theme`.
+- **Build chain**: Vite 8 with rolldown. `manualChunks` rejected — use `output.codeSplitting.groups`. ESLint 9+ flat config (`eslint.config.js`); no `.eslintrc.cjs`.
+- **Lint baseline**: `js.configs.recommended` + `pluginVue.configs['flat/essential']` (NOT `flat/recommended`). `vue/valid-v-slot` runs with `{ allowModifiers: true }` because Vuetify data-table cell templates use dotted slot names (`#item.foo`).
+- **Host-exposed Vuetify primitives**: `host.js` re-exports `VBtn`, `VChip`, `VIcon`, `VTooltip`. Plugin `feature()` actions build VNodes with `h(VBtn, …)` without bundling their own Vuetify copy.
+
+## Plugin loading model (current)
+
+- **Pre-loaded** in `main.js`: `REQUIRED_PLUGINS = ['id', 'ui', 'prov']`. The host's sidebar nav references `/id/*` and `/prov/*` routes statically, so these must register their routes before the router mounts.
+- **Lazy-loaded** in `App.vue` on session ready: `auth.appSettings.plugins` is run through `pluginIdFromKey(...)` (strips `service:` / `feature:` prefix, swaps `:` for `-`) before being passed to `loadAllPlugins`. The backend's `FeaturePlugin.getKey()` returns `service:id:ldap`; the loader needs `id-ldap`.
+- **Just-in-time** via `loadPlugin(id)`: triggered by the wizard's `ensureToolPluginLoaded(nodeId)` whenever it fetches parameters, and by `PluginFeatures` when it encounters an unloaded subscription plugin.
+- **Declared dependencies** via `requires: ['id']` on the plugin manifest. The loader awaits these BEFORE calling `install()`, so parent i18n is merged and registry slot exists by the time the sub-plugin runs. `plugin-id-ldap` uses this — `plugin-id` could be dropped from `REQUIRED_PLUGINS` without breaking LDAP.
+- **Concurrency**: `loadPlugin` dedupes in-flight loads via a `Map<id, Promise>`, so the wizard's lazy load and a sub-plugin's `requires` can race the same id without double-importing.
+
+## Subscription wizard (`SubscribeWizardView`)
+
+One file, three modes — used by everything that creates or edits subscriptions and nodes:
+
+| Mode          | Trigger                                  | Steps shown                                        | Result                                                                                                              |
+| ------------- | ---------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `subscribe`   | `/subscribe` route (from project detail) | Service → Tool → Instance → Mode → Params          | POST `rest/subscription`                                                                                            |
+| `edit-node`   | "Edit" in `SystemNodeView` (dialog)      | Read-only chain + editable Name + Params           | PUT `rest/node` (uses `node` field, not `refined` — `NodeEditionVo` has no `setRefined`, Jackson drops `refined:`). |
+| `create-node` | "New node" in `SystemNodeView` (dialog)  | Service → Tool → new-instance form + Mode + Params | POST `rest/node` with full payload (id, name, **`node`** (parent), mode, parameters).                               |
+
+Parameters are auto-rendered from `/rest/node/<tool-id>/parameter/<MODE>` — the wizard reads parameter labels and descriptions via `t(p.id)` and `t(p.id + '-description')` against the unified i18n store. See "Parameter form conventions".
 
 ---
 
@@ -224,10 +270,11 @@ const features = {
 }
 
 export default {
-  id: '<id>',                                  // stable plugin id
+  id: '<id>',                                  // stable plugin id (URL-safe)
   label: 'My Plugin',                          // display label
   component: Plugin,                           // optional root component
   routes,
+  requires: ['<parent-id>'],                   // optional — see "Tool-level variant" below
   install({ router }) {
     // Merge translations BEFORE any view renders. The host pre-loads
     // required plugins synchronously in main.js, so views never see
@@ -247,6 +294,78 @@ export default {
 }
 
 export { service }
+```
+
+### Tool-level (sub-plugin) variant
+
+Tool-level plugins like `plugin-id-ldap` (lives at `service:id:ldap`) augment a service-level parent. They typically:
+
+- **Don't** export routes or a root component. The parent provides them.
+- **Declare** `requires: ['<parent-id>']` so the loader pulls the parent (and its i18n) before this plugin's `install()` runs.
+- **Ship** an i18n bundle with parameter labels keyed on the parameter ids the tool owns (e.g. `service:id:ldap:base-dn`). The subscribe wizard's flat `t(p.id)` lookup resolves them automatically — see "Parameter form conventions".
+- **Implement** `renderFeatures` (and friends). The parent's `service.js` looks for a sub-plugin via `subPluginIdFor(node)` — for a node `service:id:ldap:local`, this resolves to `id-ldap` and the parent merges the child's VNodes into its own row buttons.
+
+Minimal sub-plugin manifest:
+
+```js
+import { useI18nStore } from '@ligoj/host'
+import enMessages from './i18n/en.js'
+import frMessages from './i18n/fr.js'
+import service from './service.js'
+
+const features = { renderFeatures: service.renderFeatures }
+
+export default {
+  id: 'id-ldap',
+  label: 'Identity LDAP',
+  requires: ['id'],                            // parent must be loaded first
+  install() {
+    const i18n = useI18nStore()
+    i18n.merge(enMessages, 'en')
+    i18n.merge(frMessages, 'fr')
+  },
+  feature(action, ...args) {
+    const fn = features[action]
+    if (!fn) throw new Error(`Plugin "id-ldap" has no feature "${action}"`)
+    return fn(...args)
+  },
+  service,
+  meta: { icon: 'mdi-folder-network-outline', color: 'blue-grey-darken-2' },
+}
+```
+
+The parent's delegation hook (lives in the parent's `service.js`):
+
+```js
+import { pluginRegistry } from '@ligoj/host'
+
+function subPluginIdFor(subscription) {
+  const id = subscription?.node?.id || ''
+  const parts = id.split(':').filter(Boolean)
+  if (parts.length < 3) return null              // not a tool/instance
+  return `${parts[1]}-${parts[2]}`               // e.g. service:id:ldap → 'id-ldap'
+}
+
+function delegateToToolPlugin(subscription, action) {
+  const subId = subPluginIdFor(subscription)
+  if (!subId) return []
+  const plugin = pluginRegistry.get(subId)
+  if (typeof plugin?.feature !== 'function') return []
+  try {
+    const result = plugin.feature(action, subscription)
+    return result == null ? [] : (Array.isArray(result) ? result : [result])
+  } catch (err) {
+    if (!new RegExp(`no feature ["']${action}["']`).test(err?.message || '')) {
+      console.warn(`[plugin:<parent>] delegate to ${subId}.${action} threw`, err)
+    }
+    return []
+  }
+}
+
+// Inside renderFeatures(subscription):
+const buttons = [/* parent's own VNodes */]
+buttons.push(...delegateToToolPlugin(subscription, 'renderFeatures'))
+return buttons
 ```
 
 Also at the top of `index.js`, inject the sibling stylesheet manually — Vite's library mode emits a separate `index.css` but does NOT auto-inject it on dynamic-import:
@@ -299,25 +418,27 @@ export default defineConfig({
 
 Imported from the host bundle via the import map; treat as the public API and don't bypass it. Current exports (see `app-ui/src/main/webapp/src/host.js`):
 
-| Export                                    | Purpose                                                                                                                                                                  |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `useApi`                                  | `get / post / put / del` against `rest/*`. Adds redirect handling, error toasts, and 401 → bounce-to-SPA-root behaviour.                                                 |
-| `useAuthStore`                            | Session, roles, `redirectToLogin()`, OIDC-aware logout.                                                                                                                  |
-| `useAppStore`                             | Breadcrumbs (`setBreadcrumbs(items, { refresh })`), title, refresh button in app bar.                                                                                    |
-| `useI18nStore`                            | `t(key, params)`, `setLocale(loc)`, `merge(messages, locale?)`.                                                                                                          |
-| `useErrorStore`                           | Toast queue (`push / success / info`), centralized API response handling.                                                                                                |
-| `useClipboard`                            | `copy(text, { message })` with browser API + textarea fallback.                                                                                                          |
-| `useDataTable`                            | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`).                                                                   |
-| `useFormGuard`                            | Unsaved-changes dialog + `onBeforeRouteLeave` integration.                                                                                                               |
-| `LigojDataTable` / `LigojDataTableServer` | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported.                                                                   |
-| `LigojConfirmDialog`                      | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s.                                                                                           |
-| `NodeIcon` / `nodeIcon` / `NodeModeChip`  | Render a node's icon and subscription mode consistently.                                                                                                                 |
-| `nodeType` / `isInstance`                 | Classify a node id (`service` / `feature` / `tool` / `instance`).                                                                                                        |
-| `ImportExportBar`                         | CSV import/export header strip for list views.                                                                                                                           |
-| `PluginFeatures`                          | Render-function delegate that mounts a plugin's VNodes for a subscription row (`renderFeatures`, `renderDetailsKey`, …). See "Subscription row delegation" below.        |
-| `nodePluginId`                            | Returns the plugin id (the second `:`-segment) of a node — `service:prov:aws` → `'prov'`. Used by `PluginFeatures` to resolve the right plugin.                          |
-| `VBtn` / `VChip` / `VIcon` / `VTooltip`   | Re-exports of Vuetify primitives. Plugins build their VNodes with `h(VBtn, …)` without bundling their own Vuetify (which would break shared theming and instance state). |
-| `APP_BASE`                                | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths.                                            |
+| Export                                    | Purpose                                                                                                                                                                                                                                         |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useApi`                                  | `get / post / put / del` against `rest/*`. Adds redirect handling, error toasts, and 401 → bounce-to-SPA-root behaviour.                                                                                                                        |
+| `useAuthStore`                            | Session, roles, `redirectToLogin()`, OIDC-aware logout.                                                                                                                                                                                         |
+| `useAppStore`                             | Breadcrumbs (`setBreadcrumbs(items, { refresh })`), title, refresh button in app bar.                                                                                                                                                           |
+| `useI18nStore`                            | `t(key, params)`, `setLocale(loc)`, `merge(messages, locale?)`.                                                                                                                                                                                 |
+| `useErrorStore`                           | Toast queue (`push / success / info`), centralized API response handling.                                                                                                                                                                       |
+| `useClipboard`                            | `copy(text, { message })` with browser API + textarea fallback.                                                                                                                                                                                 |
+| `useDataTable`                            | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`).                                                                                                                                          |
+| `useFormGuard`                            | Unsaved-changes dialog + `onBeforeRouteLeave` integration.                                                                                                                                                                                      |
+| `LigojDataTable` / `LigojDataTableServer` | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported.                                                                                                                                          |
+| `LigojConfirmDialog`                      | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s.                                                                                                                                                                  |
+| `NodeIcon` / `nodeIcon` / `NodeModeChip`  | Render a node's icon and subscription mode consistently.                                                                                                                                                                                        |
+| `nodeType` / `isInstance`                 | Classify a node id (`service` / `feature` / `tool` / `instance`).                                                                                                                                                                               |
+| `ImportExportBar`                         | CSV import/export header strip for list views.                                                                                                                                                                                                  |
+| `PluginFeatures`                          | Render-function delegate that mounts a plugin's VNodes for a subscription row (`renderFeatures`, `renderDetailsKey`, …). See "Subscription row delegation" below.                                                                               |
+| `nodePluginId`                            | Returns the plugin id (the second `:`-segment) of a node — `service:prov:aws` → `'prov'`. Used by `PluginFeatures` to resolve the right plugin.                                                                                                 |
+| `VBtn` / `VChip` / `VIcon` / `VTooltip`   | Re-exports of Vuetify primitives. Plugins build their VNodes with `h(VBtn, …)` without bundling their own Vuetify (which would break shared theming and instance state).                                                                        |
+| `APP_BASE`                                | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths.                                                                                                                   |
+| `pluginRegistry` / `callFeature`          | Direct registry access for parent-to-child delegation (`subPluginIdFor`, `delegateToToolPlugin`). `callFeature` throws on missing plugin; prefer `pluginRegistry.get(id)?.feature?.(...)` when graceful degradation matters.                    |
+| `loadPlugin` / `pluginIdFromKey`          | Lazy-load a sibling plugin at runtime. The wizard uses these to `ensureToolPluginLoaded(nodeId)` before rendering parameter labels, so i18n inheritance works even if discovery hasn't run. `pluginIdFromKey('service:id:ldap')` → `'id-ldap'`. |
 
 ## 5. Translations
 
@@ -347,13 +468,80 @@ t('<id>.foo.deleteConfirm', { name })
 
 Keep table `headers` arrays as `computed(() => […])` so they re-evaluate on locale change — Vuetify will re-render the columns.
 
-## 6. Routing
+## 6. Parameter form conventions
+
+The subscribe wizard auto-renders the parameter form for any node. To make it look good for **your** plugin's parameters, ship the right i18n keys.
+
+### Wire shape (`ParameterVo`)
+
+The backend serialises an enum-style `type`. **Values are UPPERCASE** — `TEXT`, `BOOL`, `SELECT`, `MULTIPLE`, `INTEGER`, `DATE`, `TAGS`. The wizard normalises via `typeKind(p) = String(p.type).toLowerCase()`.
+
+```jsonc
+{
+  "id": "service:id:ldap:base-dn",     // ← matches the i18n key
+  "type": "TEXT",                       // ← uppercase
+  "mandatory": false,
+  "secured": false,                     // ← drives password masking
+  "defaultValue": null,
+  "min": null, "max": null,             // INTEGER only
+  "values": [],                         // SELECT/MULTIPLE/TAGS only
+  "depends": []
+}
+```
+
+Notable backend gaps (not yet exposed in `ParameterVo`):
+
+- **No `name` / `description`** — labels and hints come from the plugin's i18n bundle. Anything reading `p.name` or `p.description` is dead code.
+- **No `pattern`** — `Parameter.data` stores `{"pattern": "..."}` server-side for TEXT but `NodeHelper.toVo()` doesn't expose it. Live regex validation on text inputs needs a backend change to surface this.
+- **`secured`** drives the password input — not the parameter name. The legacy `p.name.toLowerCase().includes('password')` heuristic doesn't work because `p.name` doesn't exist.
+
+### i18n contract for parameters
+
+Two keys per parameter:
+
+```js
+// In your plugin's ui/src/i18n/en.js
+export default {
+  'service:id:ldap:base-dn': 'Base DN',                                    // label
+  'service:id:ldap:url': 'Connection URLs',
+  'service:id:ldap:url-description': 'Comma-separated URLs, failover only', // optional hint
+  // ...
+}
+```
+
+Wizard helpers:
+
+- `paramLabel(p) = t(p.id) ?? p.id` — falls back to the raw id so missing keys are visible.
+- `paramHint(p) = t(p.id + '-description')` or `null` — suppresses the `:persistent-hint` slot when undefined.
+- `tOrNull(key)` detects vue-i18n's "key not found → echo back" behaviour and returns `null`. Use it in any helper that wants to distinguish "missing" from "blank".
+
+### Inherited parameter labels
+
+A subscription on `service:id:ldap:local` carries both LDAP-specific parameters (`service:id:ldap:*`, owned by `plugin-id-ldap`) and identity-shared ones (`service:id:group`, `service:id:ou`, owned by `plugin-id`). The wizard's flat `t(p.id)` lookup is plugin-agnostic — it just reads from the unified store. **Each owning plugin ships its keys; inheritance falls out for free.**
+
+When porting a tool-level plugin, ship only the keys YOUR plugin's CSV declares. Let the parent ship the inherited ones.
+
+### Lazy-loading the right bundle
+
+The wizard's `ensureToolPluginLoaded(nodeId)` runs at parameter-fetch time (and from `bootstrapEdit` for the edit-node mode). It converts the node id to a plugin id via `pluginIdFromKey` and fires `loadPlugin(...)` best-effort:
+
+```js
+function ensureToolPluginLoaded(nodeId) {
+  const pluginId = pluginIdFromKey(nodeId)        // 'service:id:ldap' → 'id-ldap'
+  if (!pluginId) return
+  loadPlugin(pluginId).catch(() => {})            // 404 ok — keeps rendering with raw ids
+}
+```
+
+vue-i18n's reactive store re-renders labels in place when `mergeLocaleMessage` fires, so a late-arriving bundle just refreshes the form — no race between parameter fetch and bundle download.
+
+## 7. Routing
 
 Routes are registered dynamically via `install({ router })`. Use kebab-case names (`<id>-foo`) to avoid clashes with other plugins. The host's router has a catch-all `/:pathMatch(.*)*` route that falls back to `PluginView`, so missing routes 404 cleanly.
 
 Detail views generally **don't** want to be routes — open them as dialogs from the list view (see `UserEditDialog` in plugin-id). That avoids a second round-trip and keeps the user's table state.
 
-## 7. Styles
+## 8. Styles
 
 Two patterns are in use:
 
@@ -362,7 +550,7 @@ Two patterns are in use:
 
 Global Vuetify tweaks live in `app-ui/src/main/webapp/src/assets/vuetify-overrides.css` and are imported once from `plugins/vuetify.js`. Add to that file instead of duplicating CSS in every plugin.
 
-## 8. Building and testing
+## 9. Building and testing
 
 ```bash
 cd plugin-<id>/ui
@@ -403,10 +591,11 @@ Plugins contribute to the host's subscription rows (in `ProjectDetailView`'s tab
 
 `PluginFeatures` resolves the plugin from the subscription's node id (via `nodePluginId(subscription.node)`), lazy-loads it if the host hasn't pre-registered it, calls `plugin.feature(action, subscription)`, and mounts whatever VNodes come back.
 
-Plugins implement these actions inside their `feature()` dispatcher. Today two are wired (in plugin-id and plugin-prov):
+Plugins implement these actions inside their `feature()` dispatcher. Three are wired today (across plugin-id, plugin-prov, plugin-id-ldap):
 
 - **`renderFeatures(subscription)`** — small action icons next to the unsubscribe button.
-- **`renderDetailsKey(subscription)`** — resource chips (counts, totals, location) for the details column.
+- **`renderDetailsKey(subscription)`** — stable resource chips for the details column (resource id, provider name, …).
+- **`renderDetailsFeatures(subscription)`** — live resource chips (counts, quotas) — refreshed by the `rest/subscription/status/refresh` round-trip described below.
 
 The function returns VNodes (single, array, or `null`). The host never interprets HTML — the plugin paints its own pixels:
 
@@ -436,6 +625,23 @@ const features = {
 A plugin that doesn't implement an action throws from its dispatcher; `PluginFeatures` swallows that specific error so the column degrades cleanly to "nothing rendered". Real exceptions surface via `console.warn`.
 
 `ProjectDetailView` also calls `rest/subscription/status/refresh?id=…&id=…` after the initial project load to populate `subscription.data` / `status` / fresh `parameters` — without that round-trip `renderDetailsKey` would always see `data === undefined` (the project endpoint omits live state by design).
+
+## Parent-to-child delegation
+
+`PluginFeatures` resolves to the **service-level** plugin (segment 2 of the node id — `service:id:ldap:local` → `'id'`). To get tool-specific contributions (`plugin-id-ldap`'s activity exports, etc.) on top of the parent's buttons, the parent's `renderFeatures` looks up its tool sub-plugin and merges:
+
+```js
+// Inside plugin-id/ui/src/service.js
+function subPluginIdFor(subscription) {
+  const parts = (subscription?.node?.id || '').split(':').filter(Boolean)
+  if (parts.length < 3) return null
+  return `${parts[1]}-${parts[2]}`              // service:id:ldap:* → 'id-ldap'
+}
+const buttons = [/* parent's own */]
+buttons.push(...delegateToToolPlugin(subscription, 'renderFeatures'))
+```
+
+The sub-plugin doesn't need to know about delegation — it just implements `renderFeatures` like any other plugin. The parent decides where in its output the child's VNodes go (typically appended).
 
 ---
 
@@ -488,6 +694,22 @@ Battle scars worth respecting on the next migration.
   'foo.workloadHint': "duration{'@'}cpu pairs, e.g. 100,40{'@'}20",
   ```
 - **Locale changes don't fire** unless the component reads `t()` reactively. The host's `useI18nStore.t` is the proxy that tracks locale; plain string captures don't. Re-evaluate via `computed(() => t('foo'))` for derived strings.
+- **Missing keys are echoed back, not `null`**. vue-i18n's default behaviour with `messageResolver: (obj, path) => obj?.[path] ?? null` is to return the key string when no message matches. For helpers that want to detect missing keys (label fallback, suppressing an empty hint), wrap with `tOrNull(key) = (value === key ? null : value)`. The subscribe wizard does this for `paramHint`.
+- **Colons in keys are fine** — the host's vue-i18n is configured with a flat `messageResolver` (no dot/colon traversal), so `service:id:ldap:base-dn` is a literal lookup. This is what makes parameter id → label resolution work.
+
+## Backend interop
+
+- **`ParameterType` is serialised UPPERCASE** (`TEXT`, `BOOL`, …). Always normalise via `typeKind(p)` before comparing — lowercase literals like `p.type === 'text'` silently never match.
+- **`NodeEditionVo` parent field is `node`, NOT `refined`**. The class implements `Refining<String>` with an override `getRefined() { return getNode(); }` but **no `setRefined`**, so Jackson silently drops `refined:` on POST/PUT and the `@NotBlank` validation on `node` rejects the payload. The wizard's create-node / edit-node paths both use `node: parentId`.
+- **`UriColonDecodingFilter`** (in app-api's `Application.java`) is a servlet filter at `HIGHEST_PRECEDENCE` that substitutes `%3A` → `:` in the request URI before CXF matches routes. JAX-RS `@Path("{node:service:.+}/parameter/{mode}")` regexes are matched against the RAW URI, so a `encodeURIComponent`'d node id (`service%3Aid%3Aldap`) 404s without this filter. Don't decode other percent-encodings (especially `%2F`) — only `:` is safe per RFC 3986 sub-delim rules.
+- **Plugin discovery uses colon-keys** (`auth.appSettings.plugins` returns `['service:id', 'service:id:ldap', …]`). The frontend converts via `pluginIdFromKey('service:id:ldap')` → `'id-ldap'` before passing to `loadPlugin`. The loader's id validation regex `^[a-zA-Z0-9][\w-]*$` rejects raw colon-keys, so the transformation is non-negotiable.
+
+## Plugin loader
+
+- **`requires: ['<parent-id>']`** declares a hard dependency. The loader awaits all `requires` before calling the dependent's `install()`, so parent i18n is merged and registry slot is populated. Use this for any tool-level plugin instead of relying on `REQUIRED_PLUGINS`.
+- **In-flight dedup** is via `Map<id, Promise>`. Concurrent `loadPlugin(<id>)` calls share one Promise; the cleanup `.finally()` runs after success/failure. Safe to call from multiple places (wizard's `ensureToolPluginLoaded`, a sub-plugin's `requires`, lazy discovery in `App.vue`).
+- **Re-entrant safe**: `loaded` and `inFlight` keep ordering correct even when a parent's `install()` triggers another `loadPlugin` indirectly (e.g. through `useI18nStore` side-effects).
+- **Single-line cycle protection**: `requires` is processed via `Promise.all` (parallel). If two plugins require each other, both stall forever. Don't do that — keep `requires` a strict tree.
 
 ## Forms / autocompletes
 
@@ -505,15 +727,30 @@ Battle scars worth respecting on the next migration.
 
 Copy/paste into the plugin's first PR description.
 
+## Service-level plugin
+
 - [ ] `ui/` folder added with `package.json`, `vite.config.js`, `eslint.config.js`
 - [ ] `ui/src/index.js` exports `{ id, label, install, feature, service, meta, routes }`
 - [ ] `install()` registers routes AND merges `i18n/en.js` + `i18n/fr.js` into `useI18nStore`
-- [ ] Sibling CSS auto-injection snippet present
-- [ ] Plugin entry added to `REQUIRED_PLUGINS` in host `main.js` (if mandatory) or left to lazy-load via `App.vue`
+- [ ] Sibling CSS auto-injection snippet present (Vite library mode doesn't auto-inject)
+- [ ] Plugin entry added to `REQUIRED_PLUGINS` in host `main.js` if the host's sidebar nav references its routes; otherwise let `App.vue`'s lazy load via `pluginIdFromKey` pick it up
 - [ ] At least one happy-path view ported (use `LigojDataTableServer` + `LigojConfirmDialog` rather than rolling your own)
+- [ ] Parameter labels: every CSV-declared parameter id has a matching key in `i18n/{en,fr}.js` (and an optional `-description` for the hint)
 - [ ] Translations use **flat keys** in plugin's `i18n/{en,fr}.js`; host's `i18n/{en,fr}.js` untouched
-- [ ] Existing legacy assets in `src/main/resources/META-INF/resources/<id>/` left alone — the plugin loader prefers `vue/index.js` and ignores the AMD bundle
-- [ ] Test added in `app-ui/src/main/webapp/src/__tests__/plugins/plugin-<id>.test.js` mirroring the plugin-id one
+- [ ] Existing legacy assets in `src/main/resources/META-INF/resources/<id>/` left alone — the loader prefers `vue/index.js` and ignores the AMD bundle
+- [ ] Contract test in `app-ui/src/main/webapp/src/__tests__/plugins/plugin-<id>.test.js` mirroring `plugin-id.test.js`
 - [ ] Lint passes: `npm run lint` in `ui/`
 - [ ] Build passes: `npm run build` in `ui/` AND `mvn -pl <module> install` from the plugin repo
 - [ ] Smoke test: navigate to a route, change locale, log out and back in through OIDC, refresh the page
+
+## Tool-level (sub-plugin) variant — `plugin-id-ldap` template
+
+Use this when the plugin is a tool implementation of an existing service (`service:<parent>:<tool>`). It typically inherits everything except parameter labels and tool-specific row actions.
+
+- [ ] `ui/` folder with same skeleton as a service-level plugin
+- [ ] `ui/src/index.js` declares `requires: ['<parent-id>']` — loader pulls the parent before installing
+- [ ] `install()` only merges i18n (no routes, no component)
+- [ ] i18n covers **only this tool's CSV-declared parameters** — inherited keys (`service:<parent>:*`) come from the parent's bundle
+- [ ] `service.js` implements `renderFeatures(subscription)` for tool-specific row actions; the parent merges them via `subPluginIdFor(...)` / `delegateToToolPlugin(...)`
+- [ ] No bundle URL conflict: parent's manifest id and tool's manifest id resolve to different webjar paths (`webjars/<parent>/vue/` vs `webjars/<parent>-<tool>/vue/`)
+- [ ] Contract test asserts `requires: ['<parent-id>']` so the dependency stays declared
