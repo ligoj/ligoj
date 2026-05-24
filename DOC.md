@@ -1787,7 +1787,7 @@ Execution is necessary only once, but repeatable without error
 *Note* No existing jenkins job for the moment
 
 ```shell
-ligoj bootstrap init --base-dn="ou=sample,,c=fr" --users-base-dn "" --internal-users-base-dn "ou=people" --technical-users-base-dn "ou=technical-users" --external-users-base-dn "ou=external" --groups-base-dn "" --technical-groups-base-dn "ou=tools" --projects-base-dn "ou=projects"
+ligoj bootstrap init --base-dn="ou=sample,,c=fr" --users-base-dn "" --internal-users-base-dn "ou=people" --technical-users-base-dn "ou=technical-users" --external-users-base-dn "ou=external" --groups-base-dn "" --technical-groups-base-dn "ou=tools" --projects-base-dn "ou=project"
 ```
 
 
