@@ -13,7 +13,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.js'
-import { loadAllPlugins } from '@/plugins/loader.js'
+import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import AppLayout from '@/layouts/AppLayout.vue'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
 
@@ -27,7 +27,12 @@ onMounted(async () => {
   }
   // Optional backend-listed plugins load lazily; required plugins are
   // pre-loaded in main.js so their routes exist before navigation.
-  const optional = (auth.appSettings?.plugins || []).filter(id => id !== 'id')
+  // `appSettings.plugins` is a list of `FeaturePlugin.getKey()` values
+  // (e.g. `service:id:ldap`) — normalise them to the short, URL-safe form
+  // the loader accepts before passing them through.
+  const optional = (auth.appSettings?.plugins || [])
+    .map(pluginIdFromKey)
+    .filter(id => id && id !== 'id')
   if (optional.length) loadAllPlugins(optional)
 })
 </script>

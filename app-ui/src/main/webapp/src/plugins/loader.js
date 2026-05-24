@@ -28,14 +28,23 @@ export function pluginIdFromKey(key) {
   return key.replace(/^(service|feature):/, '').replace(/:/g, '-')
 }
 
-export async function loadPlugin(pluginId) {
-  if (loaded.has(pluginId)) return registry.get(pluginId)
+export function loadPlugin(pluginId) {
+  if (loaded.has(pluginId)) return Promise.resolve(registry.get(pluginId))
 
   if (registry.has(pluginId)) {
     loaded.add(pluginId)
-    return registry.get(pluginId)
+    return Promise.resolve(registry.get(pluginId))
   }
 
+  const existing = inFlight.get(pluginId)
+  if (existing) return existing
+
+  const p = _loadPlugin(pluginId).finally(() => inFlight.delete(pluginId))
+  inFlight.set(pluginId, p)
+  return p
+}
+
+async function _loadPlugin(pluginId) {
   // Validate plugin ID to prevent path traversal
   if (!/^[a-zA-Z0-9][\w-]*$/.test(pluginId)) {
     throw new Error(`Invalid plugin ID: "${pluginId}"`)
@@ -61,6 +70,17 @@ export async function loadPlugin(pluginId) {
     }
 
     if (!definition.id) definition.id = pluginId
+
+    // Resolve declared dependencies before registering or installing this
+    // plugin: parents must own their slot in the registry and have merged
+    // their i18n bundle before a sub-plugin runs install() — e.g.
+    // `plugin-id-ldap` (tool-level) requires `plugin-id` (service-level)
+    // so the wizard can resolve inherited parameter labels like
+    // `service:id:ou` regardless of which plugin set is preloaded.
+    const requires = Array.isArray(definition.requires) ? definition.requires : []
+    if (requires.length) {
+      await Promise.all(requires.map((depId) => loadPlugin(depId)))
+    }
 
     registry.register(pluginId, definition)
 

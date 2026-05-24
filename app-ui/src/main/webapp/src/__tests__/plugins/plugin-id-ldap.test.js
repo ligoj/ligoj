@@ -17,6 +17,13 @@ describe('plugin-id-ldap contract', () => {
     expect(pluginIdLdapDef.meta).toMatchObject({ icon: expect.any(String), color: expect.any(String) })
   })
 
+  it('declares `requires: ["id"]` — parent plugin must load first', () => {
+    // The loader awaits everything in `requires` before calling install(),
+    // so the parent's i18n is merged and registry slot exists before any
+    // delegation or label lookup runs.
+    expect(pluginIdLdapDef.requires).toEqual(['id'])
+  })
+
   it('declares no routes — tool-level augmentation only', () => {
     expect(pluginIdLdapDef.routes).toBeUndefined()
   })
