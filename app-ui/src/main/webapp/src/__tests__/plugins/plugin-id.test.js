@@ -42,8 +42,10 @@ describe('plugin-id contract', () => {
       '/id/company', '/id/company/new', '/id/company/:id',
       '/id/delegate', '/id/delegate/new', '/id/delegate/:id',
       '/id/container-scope',
+      // Subscription-scoped group members view (legacy id.html port).
+      '/id/subscription/:id',
     ]))
-    expect(registered).toHaveLength(11)
+    expect(registered).toHaveLength(12)
   })
 
   it('feature("renderFeatures") returns VNodes the host can mount', () => {
@@ -57,9 +59,30 @@ describe('plugin-id contract', () => {
     }
   })
 
-  it('feature("renderDetailsKey") returns a chip VNode when members are present', () => {
+  it('feature("renderDetailsKey") returns a chip VNode for the group identifier', () => {
     setActivePinia(createPinia())
     const result = pluginIdDef.feature('renderDetailsKey', {
+      id: 42,
+      node: { id: 'service:id:ldap:foo' },
+      parameters: { 'service:id:group': 'engineering' },
+    })
+    expect(result).toBeTruthy()
+    expect(result.__v_isVNode).toBe(true)
+  })
+
+  it('feature("renderDetailsKey") returns null when no group parameter is set', () => {
+    setActivePinia(createPinia())
+    const result = pluginIdDef.feature('renderDetailsKey', {
+      id: 42,
+      node: { id: 'service:id:ldap:foo' },
+      parameters: {},
+    })
+    expect(result).toBeNull()
+  })
+
+  it('feature("renderDetailsFeatures") returns a member-count chip', () => {
+    setActivePinia(createPinia())
+    const result = pluginIdDef.feature('renderDetailsFeatures', {
       id: 42,
       node: { id: 'service:id:ldap:foo' },
       data: { members: 12 },
@@ -68,9 +91,9 @@ describe('plugin-id contract', () => {
     expect(result.__v_isVNode).toBe(true)
   })
 
-  it('feature("renderDetailsKey") returns null when there are no details to show', () => {
+  it('feature("renderDetailsFeatures") returns null when no member count', () => {
     setActivePinia(createPinia())
-    const result = pluginIdDef.feature('renderDetailsKey', {
+    const result = pluginIdDef.feature('renderDetailsFeatures', {
       id: 42,
       node: { id: 'service:id:ldap:foo' },
       data: {},
