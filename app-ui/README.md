@@ -209,5 +209,5 @@ open http://localhost:5173/ligoj/
 
 For sample, for the plugin `plugin-ui` and `plugin-id` in `~/git/ligoj-plugins/`:
 ```shell
-npm run build --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-id/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-prov/ui
+npm run build --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-id/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-prov/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-id-ldap/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-prov-aws/ui
 ```

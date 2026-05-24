@@ -59,6 +59,48 @@ describe('plugin-id-ldap contract', () => {
     })
     expect(result).toEqual([])
   })
+
+  it('parameterField() returns custom components for OU / parent-group / group in subscribe mode', () => {
+    setActivePinia(createPinia())
+    const ouComp = pluginIdLdapDef.feature('parameterField', {
+      parameter: { id: 'service:id:ou' },
+      mode: 'create',
+      isNode: false,
+    })
+    const parentComp = pluginIdLdapDef.feature('parameterField', {
+      parameter: { id: 'service:id:parent-group' },
+      mode: 'create',
+      isNode: false,
+    })
+    const groupComp = pluginIdLdapDef.feature('parameterField', {
+      parameter: { id: 'service:id:group' },
+      mode: 'link',
+      isNode: false,
+    })
+    expect(ouComp).toBeTruthy()
+    expect(parentComp).toBeTruthy()
+    expect(groupComp).toBeTruthy()
+  })
+
+  it('parameterField() returns null in node edit/create mode — those forms tweak tool config, not subscriptions', () => {
+    setActivePinia(createPinia())
+    const result = pluginIdLdapDef.feature('parameterField', {
+      parameter: { id: 'service:id:ou' },
+      mode: 'create',
+      isNode: true,
+    })
+    expect(result).toBeNull()
+  })
+
+  it('parameterField() returns null for parameters the plugin does not customise', () => {
+    setActivePinia(createPinia())
+    const result = pluginIdLdapDef.feature('parameterField', {
+      parameter: { id: 'service:id:ldap:base-dn' },
+      mode: 'create',
+      isNode: false,
+    })
+    expect(result).toBeNull()
+  })
 })
 
 describe('plugin-id delegation to plugin-id-ldap', () => {
