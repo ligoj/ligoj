@@ -461,9 +461,35 @@ onMounted(async () => {
     document.documentElement.lang = locale.value
   }
 
+  const hash = window.location.hash || ''
+  const search = window.location.search || ''
+  const params = new URLSearchParams(search)
+
+  // CRITICAL: handle error / status flags BEFORE the OIDC bounce probe.
+  // If we landed here as the failure URL of an OAuth round-trip
+  // (`/login.html?denied`) and we then probe `/rest/session`, Spring
+  // returns either `opaqueredirect` or a `401 + x-redirect` that
+  // points at `/oauth2/authorization/<client>` — which would bounce
+  // us straight back into the IdP flow that just failed. Cue an
+  // infinite redirect loop and a "too many redirects" browser error.
+  // The presence of an error / logout flag means the SPA has been
+  // intentionally routed here to display feedback; surface it and
+  // STOP. The user can manually retry from the form.
+  const REASONS = ['expired', 'unavailable', 'network', 'denied', 'concurrency']
+  for (const flag of REASONS) {
+    if (params.has(flag) || search.includes(flag)) {
+      pushToast('error', msg['error-' + flag])
+      return
+    }
+  }
+  if (params.has('logout') || search.includes('logout')) {
+    pushToast('success', msg['success-logout'])
+    return
+  }
+
   // OIDC short-circuit. With `security=OAuth2Bff`, this page must
-  // never be shown — even on manual navigation or post-logout
-  // redirects. Probe `/rest/session`:
+  // never be shown on manual navigation or post-logout redirects.
+  // Probe `/rest/session`:
   //   - opaqueredirect → Spring sent a literal 302 to the OAuth entry.
   //   - 401 + `x-redirect` containing `/oauth2/authorization/` →
   //     same intent, expressed XHR-friendly by Spring's
@@ -489,9 +515,6 @@ onMounted(async () => {
     }
   } catch { /* network error — render the form */ }
 
-  const hash = window.location.hash || ''
-  const search = window.location.search || ''
-
   const resetMatch = hash.match(/#reset=([a-zA-Z0-9-]+)\/([a-zA-Z0-9-]+)/)
   if (resetMatch) {
     token.value = resetMatch[1]
@@ -509,21 +532,6 @@ onMounted(async () => {
     refreshCaptcha()
     infoMsg.value = msg['message-recovery']
     return
-  }
-
-  // Redirects from the main app encode the failure reason as a flag —
-  // surface a localized message so the user knows why they're back here
-  // instead of staring at a silent login form.
-  const params = new URLSearchParams(search)
-  const REASONS = ['expired', 'unavailable', 'network', 'denied', 'concurrency']
-  for (const flag of REASONS) {
-    if (params.has(flag) || search.includes(flag)) {
-      pushToast('error', msg['error-' + flag])
-      return
-    }
-  }
-  if (params.has('logout') || search.includes('logout')) {
-    pushToast('success', msg['success-logout'])
   }
 })
 </script>
