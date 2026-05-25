@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
+import { readFileSync } from 'node:fs'
 
 /**
  * Dev-only: the import map in index.html points shared-dep bare specifiers
@@ -21,6 +22,82 @@ const SHIMS = {
   '/ligoj/assets/pinia.js': { from: 'pinia' },
   '/ligoj/assets/vuetify.js': { from: 'vuetify' },
   '/ligoj/assets/host.js': { from: '/src/host.js' },
+}
+
+/**
+ * Dev-only: serve `favicon.ico` from the webapp root at `/ligoj/favicon.ico`.
+ *
+ * Production gets the favicon from the WAR root (Maven packs `webapp/`
+ * as the WAR), but vite's dev server only auto-serves files from
+ * `<root>/public` — we don't have one, and adopting it would also pull
+ * in every other webapp-root file (HTML entries, themes, error pages),
+ * conflicting with vite's own routing. Setting `publicDir: false` and
+ * serving the single file we actually need keeps both worlds clean:
+ * dev sees the favicon, the production WAR layout is unchanged.
+ */
+/**
+ * Match both the base-prefixed path (the one the HTML actually links to)
+ * AND the bare `/favicon.ico` that some browsers auto-fetch independently
+ * of `<link rel=icon>`. Keep this list small — anything else routes
+ * through vite's normal handling.
+ */
+const FAVICON_PATHS = new Set(['/ligoj/favicon.ico', '/favicon.ico'])
+
+/**
+ * Sniff the actual content type. The file at `webapp/favicon.ico` is
+ * historically a PNG with an `.ico` extension — production tolerates
+ * that because Jetty serves it with whatever the extension implies and
+ * most browsers fall back to content sniffing. Vite's dev server
+ * doesn't do extension-based content-type mapping for our middleware,
+ * so we set the right type explicitly. Firefox in strict-MIME mode and
+ * some webkit builds reject PNG bytes served as `image/x-icon`.
+ */
+function sniffImageType(buf) {
+  if (!buf || buf.length < 4) return 'image/x-icon'
+  // PNG header: 89 50 4E 47
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) return 'image/png'
+  // ICO header: 00 00 01 00
+  if (buf[0] === 0x00 && buf[1] === 0x00 && buf[2] === 0x01 && buf[3] === 0x00) return 'image/x-icon'
+  // SVG starts with `<` (0x3C). Coarse but enough for the favicon case.
+  if (buf[0] === 0x3C) return 'image/svg+xml'
+  return 'image/x-icon'
+}
+
+function ligojDevFavicon() {
+  let buf = null
+  let mime = 'image/x-icon'
+  try {
+    buf = readFileSync(resolve(__dirname, 'favicon.ico'))
+    mime = sniffImageType(buf)
+  } catch {
+    // `favicon.ico` missing — leave `buf` null so the middleware falls
+    // through to a 404 instead of crashing the dev server on boot.
+  }
+  return {
+    name: 'ligoj-dev-favicon',
+    apply: 'serve',
+    configureServer(server) {
+      // Use the unmounted (req.url-inspecting) form rather than connect's
+      // `.use(path, handler)`. The mounted form does prefix-matching and
+      // rewrites `req.url`, which can interact poorly with vite's own
+      // internal asset middlewares — the inspection form follows the
+      // exact same pattern as `ligojDevSharedImports` above and is known
+      // to fire before vite's static handler 404s.
+      server.middlewares.use((req, res, next) => {
+        const urlPath = req.url?.split('?')[0]
+        if (!urlPath || !FAVICON_PATHS.has(urlPath)) return next()
+        if (!buf) return next()
+        res.setHeader('Content-Type', mime)
+        // Disable caching in dev so a browser that previously cached a
+        // 404 doesn't keep showing a missing icon. Chrome / Safari
+        // sometimes hold the favicon cache across normal reloads, so
+        // an explicit `no-cache` is the only reliable way to force a
+        // revalidation per page load.
+        res.setHeader('Cache-Control', 'no-cache')
+        res.end(buf)
+      })
+    },
+  }
 }
 
 function ligojDevSharedImports() {
@@ -59,7 +136,7 @@ function ligojDevSharedImports() {
 }
 
 export default defineConfig({
-  plugins: [vue(), ligojDevSharedImports()],
+  plugins: [vue(), ligojDevSharedImports(), ligojDevFavicon()],
   base: '/ligoj/',
   resolve: {
     alias: {
