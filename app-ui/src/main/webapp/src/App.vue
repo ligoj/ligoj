@@ -13,11 +13,13 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth.js'
+import { useAppStore } from '@/stores/app.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import AppLayout from '@/layouts/AppLayout.vue'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
 
 const auth = useAuthStore()
+const app = useAppStore()
 
 onMounted(async () => {
   const ok = await auth.fetchSession()
@@ -25,6 +27,11 @@ onMounted(async () => {
     auth.redirectToLogin()
     return
   }
+  // Push the backend's `ApplicationSettings#name` into the app store so
+  // `document.title` gets the right brand suffix on every page. The
+  // store defaults to "Ligoj" before this fires, which keeps the boot
+  // window's tab title sane.
+  app.setAppName(auth.appSettings?.name)
   // Optional backend-listed plugins load lazily; required plugins are
   // pre-loaded in main.js so their routes exist before navigation.
   // `appSettings.plugins` is a list of `FeaturePlugin.getKey()` values

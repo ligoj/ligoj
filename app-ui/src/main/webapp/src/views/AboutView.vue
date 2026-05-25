@@ -124,7 +124,7 @@
         <v-card-title class="d-flex align-center ga-2">
           <img :src="ligojLogo" alt="" class="ligoj-dialog-logo" />
           <v-icon>mdi-license</v-icon>
-          <span>{{ appName }} — {{ t('about.license') }} (MIT)</span>
+          <span>Ligoj — {{ t('about.license') }} (MIT)</span>
         </v-card-title>
         <v-card-text>
           <pre class="ligoj-license">{{ licenseText }}</pre>
@@ -230,6 +230,7 @@ onMounted(() => {
   height: 40px;
   flex-shrink: 0;
 }
+
 .ligoj-dialog-logo {
   width: 28px;
   height: 28px;
