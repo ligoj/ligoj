@@ -2,9 +2,9 @@
   <v-navigation-drawer v-model="appStore.sidebarOpen" :temporary="mobile" app color="primary" dark>
     <v-list-item @click="router.push('/')" class="pa-4">
       <template #prepend>
-        <img src="@/assets/ligoj.svg" alt="Ligoj" style="width: 32px; height: 32px; margin-right: 8px" />
+        <img src="@/assets/ligoj.svg" :alt="appName" style="width: 32px; height: 32px; margin-right: 8px" />
       </template>
-      <v-list-item-title class="text-h6 font-weight-bold">Ligoj</v-list-item-title>
+      <v-list-item-title class="text-h6 font-weight-bold">{{ appName }}</v-list-item-title>
     </v-list-item>
     <v-divider />
     <v-list density="compact" nav :opened="openedGroups">
@@ -76,6 +76,14 @@ const auth = useAuthStore()
 const appStore = useAppStore()
 const i18n = useI18nStore()
 const t = i18n.t
+
+/**
+ * Display name shown in the sidebar brand. Sourced from the backend's
+ * `ApplicationSettings#name` (driven by the `ligoj.name` property);
+ * falls back to "Ligoj" when the session hasn't loaded yet or the
+ * backend pre-dates the field.
+ */
+const appName = computed(() => auth.appSettings?.name || 'Ligoj')
 
 /** Auto-expand sidebar groups whose children match the current route */
 const openedGroups = computed(() => {

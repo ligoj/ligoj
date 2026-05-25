@@ -6,7 +6,6 @@
           <option v-for="loc in LOCALES" :key="loc.code" :value="loc.code">{{ loc.flag }} {{ loc.label }}</option>
         </select>
         <img src="@/assets/ligoj.svg" alt="Ligoj" class="logo" />
-        <h1>Ligoj</h1>
         <p class="subtitle">{{ msg['title-' + mode] }}</p>
       </header>
 

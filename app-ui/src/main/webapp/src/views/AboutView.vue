@@ -2,7 +2,7 @@
   <div>
     <h1 class="text-h4 mb-6 d-flex align-center ga-3">
       <img :src="ligojLogo" alt="" class="ligoj-title-logo" />
-      <span>{{ t('about.title') }}</span>
+      <span>{{ t('about.title', { name: appName }) }}</span>
     </h1>
 
     <v-row>
@@ -124,10 +124,10 @@
         <v-card-title class="d-flex align-center ga-2">
           <img :src="ligojLogo" alt="" class="ligoj-dialog-logo" />
           <v-icon>mdi-license</v-icon>
-          <span>{{ t('about.license') }} — MIT</span>
+          <span>{{ appName }} — {{ t('about.license') }} (MIT)</span>
         </v-card-title>
         <v-card-text>
-          <pre class="ligoj-license">{{ MIT_LICENSE }}</pre>
+          <pre class="ligoj-license">{{ licenseText }}</pre>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -155,14 +155,24 @@ const t = i18n.t
 
 const licenseDialog = ref(false)
 
+/**
+ * Display name. Sourced from the backend's `ApplicationSettings#name`
+ * (driven by the `ligoj.name` Spring property); falls back to "Ligoj"
+ * when the session hasn't loaded yet or the backend pre-dates the field.
+ * Threaded into the page title, license dialog header, and the
+ * copyright line of the inlined MIT text below.
+ */
+const appName = computed(() => auth.appSettings?.name || 'Ligoj')
+
 /* MIT license inlined verbatim — kept here so the About view doesn't
  * have to fetch the LICENSE file from the backend (and so the dialog
- * works offline / in the dev server). Mirrors the repo's root LICENSE.
- * If the repo's license text ever changes, update this constant in
- * lockstep — the dialog title says "MIT" which assumes this text. */
-const MIT_LICENSE = `MIT License
+ * works offline / in the dev server). Mirrors the repo's root LICENSE
+ * with one substitution: the copyright line uses `${appName}` so a
+ * rebranded deployment sees its own name. The repo LICENSE itself is
+ * not regenerated from this — change both in lockstep. */
+const LICENSE_TEMPLATE = (name) => `MIT License
 
-Copyright (c) Ligoj Contributors
+Copyright (c) ${name} Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -181,6 +191,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.`
+
+const licenseText = computed(() => LICENSE_TEMPLATE(appName.value))
 
 const buildDate = computed(() => {
   const ts = auth.appSettings.buildTimestamp

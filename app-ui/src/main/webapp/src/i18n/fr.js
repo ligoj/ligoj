@@ -187,7 +187,7 @@ export default {
   'profile.language': 'Langue',
 
   // About
-  'about.title': 'À propos de Ligoj',
+  'about.title': 'À propos de {name}',
   'about.app': 'Application',
   'about.version': 'Version',
   'about.buildDate': 'Date de build',
