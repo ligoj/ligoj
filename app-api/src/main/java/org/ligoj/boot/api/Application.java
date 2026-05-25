@@ -3,7 +3,6 @@
  */
 package org.ligoj.boot.api;
 
-import com.hazelcast.spring.HazelcastObjectExtractionConfiguration;
 import org.apache.cxf.spring.boot.autoconfigure.openapi.OpenApiAutoConfiguration;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.ligoj.bootstrap.resource.system.plugin.WebjarsServlet;
@@ -31,7 +30,6 @@ import java.util.Collections;
  */
 @SpringBootApplication(exclude = {
 		OpenApiAutoConfiguration.class,
-		HazelcastObjectExtractionConfiguration.class,
 })
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
 public class Application extends SpringBootServletInitializer {
