@@ -11,7 +11,9 @@ If you're picking this up cold, the fastest path to context is:
    - `app-ui/src/main/webapp/src/host.js` — public API plugins consume.
    - `app-ui/src/main/webapp/src/plugins/loader.js` — `loadPlugin`, `pluginIdFromKey`, `requires` handling, in-flight dedup.
    - `app-ui/src/main/webapp/src/plugins/registry.js` — `register`, `get`, `callFeature`.
-4. **Run the tests** (`cd app-ui/src/main/webapp && npm run test --silent`) to confirm the workspace is sound before changing anything.
+4. **Run the tests** to confirm the workspace is sound before changing anything:
+   - Host suite: `cd app-ui/src/main/webapp && npm run test --silent`.
+   - Per plugin: `cd ligoj-plugins/plugin-<id>/ui && npm test`. Plugin contract tests live in each plugin's own repo (see §9). The host suite only exercises host-internal modules now.
 
 When in doubt: "Status snapshot" lists exactly what's shipped, "Decisions and gotchas" lists what bit somebody on the way here.
 
@@ -558,6 +560,7 @@ npm install
 npm run build          # emits to ../src/main/resources/.../webjars/<id>/vue/
 npm run dev            # serves a standalone preview (rarely useful — see below)
 npm run lint
+npm test               # vitest run — plugin-local contract / view tests
 ```
 
 For real integration testing, run the host's vite dev server (`app-ui/src/main/webapp`) — `npm run dev` there proxies `/ligoj/main/<id>/vue/*` to the backend, which serves the plugin's freshly-built bundle from `target/classes/`. So the cycle is:
@@ -566,14 +569,84 @@ For real integration testing, run the host's vite dev server (`app-ui/src/main/w
 2. `npm run build` in the plugin's `ui/` folder.
 3. Browser auto-reloads (vite watches the proxied URL).
 
-Unit-test the plugin's authoring surface from the host's vitest setup — see `app-ui/src/main/webapp/src/__tests__/plugins/plugin-id.test.js` as the template. Important: `install()` reaches into the i18n store, so the test must `setActivePinia(createPinia())` before calling it.
+### Plugin-local tests (vitest in `plugin-<id>/ui/`)
 
-For **view-level component tests** (mounting a plugin's SFC), follow the recipe in `__tests__/components/CatalogListView.test.js`:
+Plugin contract tests live in the plugin repo, not the host. The host's `__tests__/plugins/` folder only keeps host-internal tests (`registry.test.js`, `plugin-contracts.test.js`, `nls-adapter.test.js`, `provFormatters.test.js`, `useProvApi.test.js` — the in-tree legacy plugins still under `@/plugins/`). Plugin tests run with `npm test` inside the plugin's `ui/` folder.
+
+The setup is mechanical. The reference is `plugin-id-ldap/ui/` — copy it for any new migration.
+
+**1. Devs deps in `package.json`:**
+
+```jsonc
+{
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@vue/test-utils": "^2.4.10",
+    "jsdom": "^28.1.0",
+    "pinia": "^3.0.4",
+    "vitest": "^4.1.5"
+    // …plus the build deps you already have
+  }
+}
+```
+
+**2. `vite.config.js` — add `resolve.alias`, `resolve.dedupe` and a `test` block:**
+
+```js
+const HOST_SRC = resolve(__dirname, '../../../ligoj/app-ui/src/main/webapp/src')
+
+export default defineConfig({
+  // …existing build config…
+  resolve: {
+    alias: {
+      // Pull the real host surface in for tests / dev. At runtime the
+      // browser resolves @ligoj/host via the import map in index.html;
+      // the build keeps it external.
+      '@ligoj/host': resolve(HOST_SRC, 'host.js'),
+      // host.js transitively imports `@/stores/*`, `@/composables/*`, …
+      // The plugin's own code never uses `@/`, so this only affects
+      // host-side imports pulled in through @ligoj/host.
+      '@': HOST_SRC,
+    },
+    // CRITICAL. Without dedupe each side of the test picks its own
+    // node_modules copy of pinia (etc.) and `setActivePinia` from
+    // the test never reaches `useI18nStore` resolved via @ligoj/host.
+    dedupe: ['vue', 'pinia', 'vue-router', 'vuetify'],
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['src/__tests__/setup.js'],
+    exclude: ['node_modules/**', 'dist/**'],
+    css: false,
+    server: { deps: { inline: ['vuetify'] } },
+  },
+})
+```
+
+**3. `src/__tests__/setup.js`** — fetch stub, localStorage, ResizeObserver / IntersectionObserver / visualViewport polyfills. Copy from `plugin-id-ldap/ui/src/__tests__/setup.js`.
+
+**4. Test imports** — use `@ligoj/host` for the registry / stores; relative paths for plugin and sibling-plugin sources:
+
+```js
+import { pluginRegistry, callFeature } from '@ligoj/host'
+import pluginIdLdapDef from '../index.js'                                  // local
+import pluginIdDef from '../../../../plugin-id/ui/src/index.js'            // sibling repo
+```
+
+`install()` reaches into the i18n store, so any test that calls it must `setActivePinia(createPinia())` first.
+
+### View-level component tests (mounting a plugin's SFC)
+
+For SFC mount tests inside the plugin repo:
 
 1. `setActivePinia(createPinia())`.
-2. `mergeMessages(plugin-en-bundle, 'en')` (or `'fr'`) — plugin-local keys are merged via `install()` in production, but tests bypass that path, so seed the bundle manually with `import { mergeMessages } from '@/plugins/i18n.js'`.
-3. Mount with `global: { plugins: [vuetify, i18nPlugin, router] }` where `vuetify = createVuetify({ components, directives })`.
-4. Stub `globalThis.fetch = vi.fn(() => Promise.resolve({ ok: true, ... }))` BEFORE mounting — `setup.js` pre-stubs it as a bare `vi.fn()`, and `vi.spyOn` doesn't replace an already-mocked fn reliably.
+2. Seed plugin-local i18n keys via `useI18nStore().merge(enBundle, 'en')` — `install()` does this in production; tests bypass that path.
+3. Mount with `global: { plugins: [vuetify, router] }` where `vuetify = createVuetify({ components, directives })`. The host's `i18n` plugin is already initialised by `useI18nStore`.
+4. Stub `globalThis.fetch = vi.fn(() => Promise.resolve({ ok: true, … }))` BEFORE mounting — `setup.js` pre-stubs it as a bare `vi.fn()`, and `vi.spyOn` doesn't replace an already-mocked fn reliably.
 
 `setup.js` polyfills `ResizeObserver`, `IntersectionObserver`, and `visualViewport` so Vuetify's overlay components (`v-dialog`, `v-menu`, `v-tooltip`) mount under jsdom.
 
@@ -738,8 +811,10 @@ Copy/paste into the plugin's first PR description.
 - [ ] Parameter labels: every CSV-declared parameter id has a matching key in `i18n/{en,fr}.js` (and an optional `-description` for the hint)
 - [ ] Translations use **flat keys** in plugin's `i18n/{en,fr}.js`; host's `i18n/{en,fr}.js` untouched
 - [ ] Existing legacy assets in `src/main/resources/META-INF/resources/<id>/` left alone — the loader prefers `vue/index.js` and ignores the AMD bundle
-- [ ] Contract test in `app-ui/src/main/webapp/src/__tests__/plugins/plugin-<id>.test.js` mirroring `plugin-id.test.js`
+- [ ] Plugin-local vitest scaffolding wired up: `package.json` scripts/devDeps, `vite.config.js` aliases + `dedupe` + `test` block, `src/__tests__/setup.js`. See "Plugin-local tests" in §9 — `plugin-id-ldap/ui/` is the reference.
+- [ ] Contract test in `plugin-<id>/ui/src/__tests__/plugin-<id>.test.js` mirroring `plugin-id-ldap.test.js`
 - [ ] Lint passes: `npm run lint` in `ui/`
+- [ ] Tests pass: `npm test` in `ui/`
 - [ ] Build passes: `npm run build` in `ui/` AND `mvn -pl <module> install` from the plugin repo
 - [ ] Smoke test: navigate to a route, change locale, log out and back in through OIDC, refresh the page
 
@@ -753,4 +828,4 @@ Use this when the plugin is a tool implementation of an existing service (`servi
 - [ ] i18n covers **only this tool's CSV-declared parameters** — inherited keys (`service:<parent>:*`) come from the parent's bundle
 - [ ] `service.js` implements `renderFeatures(subscription)` for tool-specific row actions; the parent merges them via `subPluginIdFor(...)` / `delegateToToolPlugin(...)`
 - [ ] No bundle URL conflict: parent's manifest id and tool's manifest id resolve to different webjar paths (`webjars/<parent>/vue/` vs `webjars/<parent>-<tool>/vue/`)
-- [ ] Contract test asserts `requires: ['<parent-id>']` so the dependency stays declared
+- [ ] Contract test in `plugin-<parent>-<tool>/ui/src/__tests__/` asserts `requires: ['<parent-id>']` so the dependency stays declared. The test typically also imports the parent's `index.js` (sibling-repo relative path) to exercise parent → tool delegation.
