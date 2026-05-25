@@ -5,7 +5,6 @@
         <img src="@/assets/ligoj.svg" alt="Ligoj" style="width: 32px; height: 32px; margin-right: 8px" />
       </template>
       <v-list-item-title class="text-h6 font-weight-bold">Ligoj</v-list-item-title>
-      <v-list-item-subtitle class="text-caption">v{{ auth.appSettings.buildVersion || '?' }}</v-list-item-subtitle>
     </v-list-item>
     <v-divider />
     <v-list density="compact" nav :opened="openedGroups">
@@ -22,7 +21,15 @@
     <template #append>
       <v-divider />
       <v-list density="compact" nav>
-        <v-list-item prepend-icon="mdi-information-outline" :title="t('nav.about')" to="/about" />
+        <!-- Build version inlined on the "About" row to save vertical
+             space — sits in the row's append slot so it doesn't push
+             the title down or take its own row. Same `/about` route
+             still owns the full version / git / plugin details. -->
+        <v-list-item prepend-icon="mdi-information-outline" :title="t('nav.about')" to="/about">
+          <template #append>
+            <span class="ligoj-version">v{{ auth.appSettings.buildVersion || '?' }}</span>
+          </template>
+        </v-list-item>
       </v-list>
     </template>
   </v-navigation-drawer>
@@ -96,3 +103,15 @@ async function doRefresh() {
   try { await fn() } finally { refreshing.value = false }
 }
 </script>
+
+<style scoped>
+/* Smaller-than-caption font for the inline version label on the About
+ * row. Vuetify's default `text-caption` is still too prominent here —
+ * we want the version visible for bug reports but not competing with
+ * the "About" label for attention. */
+.ligoj-version {
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  opacity: 0.7;
+}
+</style>
