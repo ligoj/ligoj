@@ -587,7 +587,7 @@ The setup is mechanical. The reference is `plugin-id-ldap/ui/` — copy it for a
     "@vue/test-utils": "^2.4.10",
     "jsdom": "^28.1.0",
     "pinia": "^3.0.4",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.7"
     // …plus the build deps you already have
   }
 }
