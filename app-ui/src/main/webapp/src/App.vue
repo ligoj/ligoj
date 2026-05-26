@@ -21,6 +21,24 @@ import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
 const auth = useAuthStore()
 const app = useAppStore()
 
+/**
+ * Backend-only plugins. These ship Java only and intentionally have no
+ * Vue bundle to load — distinct from "not migrated yet" plugins like
+ * `iam-node` / `prov-azure`, which will eventually have one. Skipping
+ * the dynamic import for these avoids a guaranteed 404 in the network
+ * panel on every session-refresh, since the host's
+ * `auth.appSettings.plugins` still lists them as installed.
+ *
+ * Add new no-UI plugins here as they land — the alternative would be a
+ * backend marker (e.g. an `ApplicationSettings.headlessPlugins` array)
+ * which is heavier than this 1-liner.
+ */
+const NO_UI_PLUGINS = new Set([
+  'iam-empty',
+  'iam-node',
+  'welcome-data-rbac',
+])
+
 onMounted(async () => {
   const ok = await auth.fetchSession()
   if (!ok) {
@@ -36,10 +54,12 @@ onMounted(async () => {
   // pre-loaded in main.js so their routes exist before navigation.
   // `appSettings.plugins` is a list of `FeaturePlugin.getKey()` values
   // (e.g. `service:id:ldap`) — normalise them to the short, URL-safe form
-  // the loader accepts before passing them through.
+  // the loader accepts before passing them through. Backend-only plugins
+  // (see `NO_UI_PLUGINS`) are filtered out so we never even attempt the
+  // dynamic import.
   const optional = (auth.appSettings?.plugins || [])
     .map(pluginIdFromKey)
-    .filter(id => id && id !== 'id')
+    .filter(id => id && id !== 'id' && !NO_UI_PLUGINS.has(id))
   if (optional.length) loadAllPlugins(optional)
 })
 </script>
