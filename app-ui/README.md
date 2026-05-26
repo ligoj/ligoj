@@ -211,14 +211,14 @@ For sample, for the plugin `plugin-ui` and `plugin-id` in `~/git/ligoj-plugins/`
 
 
 ```shell
-npm install --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm install --prefix ~/git/ligoj-plugins/plugin-id/ui && npm install --prefix ~/git/ligoj-plugins/plugin-prov/ui && npm install --prefix ~/git/ligoj-plugins/plugin-id-ldap/ui && npm install --prefix ~/git/ligoj-plugins/plugin-prov-aws/ui
+npm install --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm install --prefix ~/git/ligoj-plugins/plugin-id/ui && npm install --prefix ~/git/ligoj-plugins/plugin-prov/ui && npm install --prefix ~/git/ligoj-plugins/plugin-id-ldap/ui && npm install --prefix ~/git/ligoj-plugins/plugin-prov-aws/ui && npm install --prefix ~/git/ligoj-plugins/plugin-password/ui
 ```
 
 
 ```shell
-npm run build --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-id/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-prov/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-id-ldap/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-prov-aws/ui
+npm run build --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-id/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-prov/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-id-ldap/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-prov-aws/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-password/ui
 ```
 
 ```shell
-npm run test --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-id/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-prov/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-id-ldap/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-prov-aws/ui
+npm run test --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-id/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-prov/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-id-ldap/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-prov-aws/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-password/ui
 ```
