@@ -1,6 +1,4 @@
 import registry from './registry.js'
-import { loadNlsMessages } from './nls-adapter.js'
-import { useI18nStore } from '@/stores/i18n.js'
 import router from '@/router/index.js'
 
 const loaded = new Set()
@@ -88,21 +86,29 @@ async function _loadPlugin(pluginId) {
       await definition.install({ pluginId, router })
     }
 
-    const i18nStore = useI18nStore()
-    try {
-      const messages = await loadNlsMessages(pluginId, i18nStore.locale)
-      i18nStore.merge(messages)
-      i18nStore.markLoaded(pluginId)
-    } catch {
-      // NLS is optional, plugin works without translations
-    }
-
     loaded.add(pluginId)
     return registry.get(pluginId)
   } catch (err) {
-    console.error(`Failed to load plugin "${pluginId}" from ${url}:`, err)
+    if (isMissingBundleError(err)) {
+      console.debug(`[plugin loader] no Vue bundle for "${pluginId}" — un-migrated, skipping`)
+    } else {
+      console.error(`Failed to load plugin "${pluginId}" from ${url}:`, err)
+    }
     throw err
   }
+}
+
+/**
+ * Distinguishes "no `vue/index.js` at the target URL" from a genuine
+ * runtime error inside an existing bundle. Chrome/Firefox both throw a
+ * `TypeError` with this exact message from `import()` on 404; Safari
+ * uses `Importing a module script failed.` — match either substring.
+ */
+function isMissingBundleError(err) {
+  if (!err) return false
+  const msg = String(err.message || err)
+  return msg.includes('Failed to fetch dynamically imported module')
+    || msg.includes('Importing a module script failed')
 }
 
 export async function loadAllPlugins(pluginIds) {
