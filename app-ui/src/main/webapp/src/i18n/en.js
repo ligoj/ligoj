@@ -101,7 +101,7 @@ export default {
   'user.firstName': 'First Name',
   'user.lastName': 'Last Name',
   'user.company': 'Company',
-  'user.email': 'Email',
+  'user.emails': 'Emails',
   'user.groups': 'Groups',
   'user.locked': 'Status',
   'user.deleteTitle': 'Delete User',
