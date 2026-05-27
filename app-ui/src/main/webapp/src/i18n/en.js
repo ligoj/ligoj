@@ -212,14 +212,9 @@ export default {
   'login.error': 'Login failed',
   'login.networkError': 'Network error. Please try again.',
 
-  // Notifications
-  'notification.title': 'Notifications',
-  'notification.empty': 'No notifications',
-  'notification.markAllRead': 'Mark all read',
-  'notification.justNow': 'Just now',
-  'notification.minutesAgo': '{{n}} min ago',
-  'notification.hoursAgo': '{{n}}h ago',
-  'notification.daysAgo': '{{n}}d ago',
+  // Notifications strings shipped by plugin-inbox-sql (`notification.*`)
+  // — installs without the plugin don't carry strings they'd never
+  // render. See ligoj-plugins/plugin-inbox-sql/ui/src/i18n.
 
   // Errors & 404
   'error.notFound': 'Page not found',

@@ -43,7 +43,13 @@
       </v-btn>
     </div>
     <v-spacer />
-    <NotificationBell />
+    <!-- Plugin-contributed app-bar items. Each plugin pushes its
+         component via `app.registerHeaderItem(...)` during install;
+         AppLayout has no idea what's in here, so an install without
+         the contributing plugin just renders nothing — no polling,
+         no 401, no badge. The notification bell from plugin-inbox-sql
+         is the first user of this slot. -->
+    <component :is="item" v-for="(item, i) in appStore.headerItems" :key="i" />
     <v-btn variant="text" prepend-icon="mdi-account" @click="router.push('/profile')">
       <span class="d-none d-sm-inline">{{ auth.userName }}</span>
     </v-btn>
@@ -67,7 +73,6 @@ import { useDisplay } from 'vuetify'
 import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
 import { useI18nStore } from '@/stores/i18n.js'
-import NotificationBell from '@/components/NotificationBell.vue'
 
 const router = useRouter()
 const route = useRoute()

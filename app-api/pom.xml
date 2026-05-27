@@ -411,6 +411,17 @@
                 </dependency>
             </dependencies>
         </profile>
+        <profile>
+            <id>test-inbox</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.ligoj.plugin</groupId>
+                    <artifactId>plugin-inbox-sql</artifactId>
+                    <version>1.0.8-SNAPSHOT</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
         <!--
             Activated automatically when -DbuildNumber=... is supplied (e.g. by
             the Docker build, which injects git provenance from the host).

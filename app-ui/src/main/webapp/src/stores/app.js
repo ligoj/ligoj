@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, markRaw } from 'vue'
 
 export const useAppStore = defineStore('app', () => {
   const sidebarOpen = ref(true)
@@ -13,6 +13,15 @@ export const useAppStore = defineStore('app', () => {
    * session resolves so a rebranded deployment sees its own value.
    */
   const appName = ref('Ligoj')
+  /**
+   * Components contributed by plugins for mounting in the app bar (next
+   * to the user menu). Plugins call `registerHeaderItem(Component)`
+   * during their `install()` — see `plugin-inbox-sql` for the
+   * notification bell. The host's `AppLayout` iterates this array with
+   * `<component :is>` so it never needs to import any plugin component
+   * directly; an absent plugin → no mount → no polling.
+   */
+  const headerItems = ref([])
   /**
    * Optional handler the app-bar renders as a Refresh button next to
    * the breadcrumbs. Cleared on every `setBreadcrumbs` call so each
@@ -52,8 +61,24 @@ export const useAppStore = defineStore('app', () => {
     sidebarOpen.value = !sidebarOpen.value
   }
 
+  /**
+   * Plugin hook: register a component to render in the app bar's
+   * right-side stack. Wrapped in `markRaw` so Vue doesn't try to make
+   * the component definition itself reactive — only the `headerItems`
+   * array's identity needs to be reactive so `<component :is>` picks
+   * up late additions (lazy-loaded plugins arrive after AppLayout
+   * mounts). Re-registering the same component is a no-op to keep
+   * hot-reload / double-install scenarios safe.
+   */
+  function registerHeaderItem(component) {
+    if (!component || headerItems.value.includes(component)) return
+    headerItems.value = [...headerItems.value, markRaw(component)]
+  }
+
   return {
     sidebarOpen, title, appName, breadcrumbs, currentPlugin, refresh,
+    headerItems,
     setBreadcrumbs, setRefresh, setTitle, setAppName, toggleSidebar,
+    registerHeaderItem,
   }
 })
