@@ -1,7 +1,7 @@
 <template>
   <v-data-table
     v-bind="$attrs"
-    :headers="headers"
+    :headers="normalizedHeaders"
     :items="items"
     class="ligoj-data-table"
   >
@@ -76,6 +76,20 @@ const lastKey = computed(() => {
   return last?.key ?? last?.value ?? null
 })
 
+/**
+ * Force `align: 'end'` on the last column so body cells align with the
+ * TableToolsMenu cog placed in this column's header (issue #41). The
+ * consumer's own `align` on the last column is intentionally overridden
+ * — the goal is layout consistency across every DataTable in the app.
+ */
+const normalizedHeaders = computed(() => {
+  if (!props.headers.length) return props.headers
+  const list = [...props.headers]
+  const lastIdx = list.length - 1
+  list[lastIdx] = { ...list[lastIdx], align: 'end' }
+  return list
+})
+
 const toolsSlotName = computed(() => (lastKey.value ? `header.${lastKey.value}` : ''))
 
 const customLastHeaderSlot = computed(() =>
@@ -124,5 +138,11 @@ defineExpose({ exportCsv, copyToClipboard })
 .ligoj-th-sortable {
   cursor: pointer;
   user-select: none;
+}
+/* Issue #41 safety net: Vuetify 4 doesn't always propagate header.align
+ * to slot content rendered inside cells, so we explicitly right-align
+ * the last column body cells to match the header tools menu. */
+.ligoj-data-table :deep(tr td:last-child) {
+  text-align: end;
 }
 </style>
