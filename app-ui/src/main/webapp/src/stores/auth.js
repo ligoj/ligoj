@@ -51,6 +51,22 @@ export const useAuthStore = defineStore('auth', () => {
   const uiAuthorizations = computed(() => session.value?.uiAuthorizations ?? [])
   const apiAuthorizations = computed(() => session.value?.apiAuthorizations ?? [])
   const appSettings = computed(() => session.value?.applicationSettings ?? {})
+  /**
+   * Free-form per-user blob the backend uses to ship dynamic UI hints
+   * (`unreadMessages`, `globalTools`, …). Plugins decorate this in their
+   * `ISessionSettingsProvider#decorate`; the SPA reads it through this
+   * computed so the source of truth stays in one place.
+   */
+  const userSettings = computed(() => session.value?.userSettings ?? {})
+  /**
+   * Backend-driven sidebar "global tools" list — each entry pairs a node
+   * id with arbitrary parameters and is rendered by the owning plugin's
+   * `feature('renderGlobal', entry)`. The host's `GlobalToolsList`
+   * component iterates this and mounts the resulting VNodes above the
+   * About menu. Entries reference plugins that may not be loaded yet;
+   * the renderer takes care of lazy-loading.
+   */
+  const globalTools = computed(() => userSettings.value?.globalTools ?? [])
 
   function isAllowed(url) {
     if (isAdmin.value) return true
@@ -207,7 +223,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     session, loading,
     isAuthenticated, userName, roles, isAdmin,
-    uiAuthorizations, apiAuthorizations, appSettings,
+    uiAuthorizations, apiAuthorizations, appSettings, userSettings, globalTools,
     navItems,
     isAllowed, isAllowedApi,
     fetchSession, logout, redirectToLogin, lastSessionStatus, needsOAuthRedirect,

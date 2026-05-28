@@ -19,6 +19,14 @@
       </template>
     </v-list>
     <template #append>
+      <!-- Global tools — backend-driven `userSettings.globalTools` list
+           rendered by each entry's owning plugin via
+           `feature('renderGlobal', { id, parameters })`. Sits ABOVE
+           the About row so external / internal app links are still
+           reachable when the user scrolls all the way down the
+           sidebar. Renders nothing when the array is empty or no
+           plugin opted into the contract. -->
+      <GlobalToolsList />
       <v-divider />
       <v-list density="compact" nav>
         <!-- Build version inlined on the "About" row to save vertical
@@ -73,6 +81,7 @@ import { useDisplay } from 'vuetify'
 import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
 import { useI18nStore } from '@/stores/i18n.js'
+import GlobalToolsList from '@/components/GlobalToolsList.vue'
 
 const router = useRouter()
 const route = useRoute()

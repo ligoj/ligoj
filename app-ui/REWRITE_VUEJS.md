@@ -718,6 +718,85 @@ The sub-plugin doesn't need to know about delegation — it just implements `ren
 
 ---
 
+# Sidebar global tools (`renderGlobal`)
+
+Per-user, backend-driven sidebar links — the "global tools" list. Each
+entry in `session.userSettings.globalTools` pairs a node with arbitrary
+parameters; the owning tool plugin renders it.
+
+## Wire shape
+
+```jsonc
+[
+  // Sample produced by `ISessionSettingsProvider#decorate` for the
+  // Confluence "DIG" instance — pre-configured space-directory query.
+  {
+    "node": {
+      "id": "service:km:confluence:dig",
+      "uiClasses": "fab fa-confluence",
+      "refined": { /* parent NodeVo chain — tool then service */ },
+      "mode": "ALL"
+      // …other NodeVo fields (enabled, parameters, name, …)
+    },
+    "parameters": { "query": "rest/spacedirectory/1/search?…" }
+  }
+]
+```
+
+`node` is the full `NodeVo` (see
+`ligoj-api/plugin-core/src/main/java/org/ligoj/app/api/NodeVo.java`).
+The host's `GlobalToolsList` component derives the owning plugin from
+the first three segments of `node.id` via `pluginIdFromKey('service:km:confluence')`
+→ `'km-confluence'`, lazy-loads it if needed, and asks for the entry's
+rendering. Passing the whole `NodeVo` (not just the id) means the
+plugin can brand the link from `node.uiClasses`, walk `node.refined` to
+discover the parent service, or read the instance name without a
+re-fetch.
+
+## Plugin contract
+
+Tool plugins (the ones at segment 3) implement:
+
+```js
+const features = {
+  renderGlobal({ node, parameters }) {
+    const { t } = useI18nStore()
+    return h(VListItem, {
+      prependIcon: 'mdi-book-open-page-variant',
+      href: `${APP_BASE}rest/${parameters.query}`,
+      target: '_blank',
+      rel: 'noopener noreferrer',
+      // `node.name` gives the instance label set by the admin (e.g.
+      // "Confluence DIG"); fall back to the bare node id when it's
+      // missing so the link is still labelled.
+      title: node?.name || node?.id,
+    })
+  },
+}
+```
+
+Return one VNode, an array of VNodes, or `null` to opt out for a
+specific entry. The host wraps everything inside a `<v-list density="compact" nav>`
+mounted in `AppLayout`'s `#append` slot, **above** the About row, so
+the items inherit sidebar nav styling without each plugin re-doing the
+container.
+
+## Host plumbing
+
+- `useAuthStore` exposes `userSettings` and `globalTools` computed
+  selectors over `session.userSettings`. Plugins read those through
+  `@ligoj/host`'s existing `useAuthStore` re-export.
+- `GlobalToolsList.vue` (in `components/`) watches `auth.globalTools`,
+  lazy-loads each entry's plugin on first observation, bumps a tick
+  ref when a load completes so the render function re-runs, and
+  swallows the "no feature renderGlobal" exception for plugins that
+  opt out. Real errors surface via `console.warn`.
+- An entry whose plugin isn't installed (or doesn't implement
+  `renderGlobal`) renders nothing — same graceful-degrade as the
+  subscription-row delegation.
+
+---
+
 # Decisions and gotchas
 
 Battle scars worth respecting on the next migration.
