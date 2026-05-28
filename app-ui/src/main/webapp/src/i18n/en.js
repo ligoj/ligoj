@@ -221,6 +221,71 @@ export default {
   'error.notFoundMsg': 'The page does not exist or requires a plugin that is not installed.',
   'error.pluginFailed': 'Failed to load plugin',
 
+  // Backend-error catalog (ported verbatim from the legacy
+  // `error.mod.js` / `nls/error-messages.js` bundle). Keys mirror the
+  // legacy flat namespace (`error400`, `error404-details`, …) so any
+  // payload using `{code: "…", message: "…", parameters: [...]}` from
+  // the api resolves through `t(key)` directly. Mustache-style
+  // `{{this}}` placeholders are normalised to vue-i18n `{this}` by the
+  // host's i18n loader (see `plugins/i18n.js`); the same go for
+  // numeric `{{[0]}}` → `{0}` and named `{{name}}` → `{name}`.
+  'error.business': 'Business error',
+  'error.technical': 'Managed technical error',
+  'error.internal': 'Technical error',
+  'error.unknownCode': 'A technical error has occurred, please contact the support team',
+  'error.0': 'Offline mode, no business server available',
+  'error.400': 'Validation error',
+  'error.401': 'Authentication required',
+  'error.401-details': 'Your session has expired, you have to login',
+  'error.403': 'Authorization required',
+  'error.403-details': 'You don\'t have the authorizations to perform this action',
+  'error.404': 'Business service not available',
+  'error.404-details': "The requested business service '{this}' does not exist. Refresh the cache of your browser or contact your administrator",
+  'error.404-data-title': 'Data not available',
+  'error.404-data': "The requested data '{this}' does not exist",
+  'error.404-entity': "The requested business object '{this}' does not exist",
+  'error.412': 'Data integrity',
+  'error.412-unknown-details': 'Unable to proceed this operation because of an unknown data integrity issue',
+  'error.412-foreign-details': 'Unable to proceed this operation on {to} because of relation from {from}',
+  'error.412-unicity-details': 'Unable to proceed this operation because of duplicate entry {entry} ({name})',
+  'error.415': 'Invalid sent media type',
+  'error.415-details': 'The contract of called service may have changed',
+  'error.500': 'Internal error',
+  'error.501': 'Not yet available',
+  'error.501-details': 'This managed error is related to a not yet available feature. Retry later or contact your administrator',
+  'error.503': 'Server resource',
+  'error.503-details': "The requested business service '{this}' is currently not available. Retry later or contact your administrator",
+  'error.504': 'Timeout communication',
+  'error.504-details': 'Business server seems to be overloaded, retry later',
+  'error.status': 'Status',
+  'error.message': 'Message',
+  'error.business-down': 'The business server is not available',
+  'error.database-down': 'The data base is not available',
+  'error.database-lock': 'The data base has a pending lock on the record you are trying to update. Retry later or contact your administrator',
+  'error.ldap-down': 'The user directory is not available',
+  'error.mail-down': 'The mail could not be sent',
+  'error.cycle': 'Detected {this} cycle',
+  // Validation rules — surfaced when a JSR-303-shape body
+  // `{ errors: { <field>: [{ rule, parameters }] } }` lands. Each entry
+  // is `error.rule.<rule-name>` so a backend `rule: "group-type"`
+  // resolves to `error.rule.group-type`. The plain rule name is the
+  // tail fallback if no localised entry exists.
+  'error.rule.NotNull': 'This field is required',
+  'error.rule.NotBlank': 'This field is required',
+  'error.rule.NotEmpty': 'This field is required',
+  'error.rule.Size': 'Invalid size',
+  'error.rule.Min': 'Value too small',
+  'error.rule.Max': 'Value too large',
+  'error.rule.Pattern': 'Invalid format',
+  'error.rule.Email': 'Invalid email',
+  'error.rule.Positive': 'Must be positive',
+  'error.rule.Mapping': 'Invalid type',
+  'error.rule.length': 'Invalid length',
+  'error.rule.already-exist': 'Already exists',
+  'error.rule.unknown-id': 'Unknown identifier',
+  'error.rule.group-type': 'The selected group is not of type Project',
+  'error.rule.StartsWith': 'Must start with {0}',
+
   // Common (additions)
   'common.confirm': 'Confirm',
 

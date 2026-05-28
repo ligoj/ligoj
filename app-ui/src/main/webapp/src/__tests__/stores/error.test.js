@@ -90,17 +90,95 @@ describe('useErrorStore', () => {
     expect(store.errors).toHaveLength(0)
   })
 
-  it('handleResponse pushes error for non-ok response', async () => {
-    const store = useErrorStore()
-    const resp = {
-      ok: false,
-      status: 500,
-      statusText: 'Internal Server Error',
-      headers: { get: () => null },
-      json: () => Promise.resolve({ message: 'Server crashed' }),
+  /**
+   * Build a minimal Response-like stub that mimics the bits the store
+   * actually touches: `headers.get`, `clone().text()`, and the basic
+   * properties (`ok`, `status`, `url`, `type`).
+   */
+  function mockResponse({ status = 200, ok = status < 400, body = '', headers = {}, url = '' } = {}) {
+    const text = typeof body === 'string' ? body : JSON.stringify(body)
+    return {
+      ok, status, url, type: 'basic',
+      headers: { get: (h) => headers[h?.toLowerCase()] ?? headers[h] ?? null },
+      clone: () => ({ text: () => Promise.resolve(text) }),
+      // Legacy helper retained for older tests / callers.
+      json: () => Promise.resolve(typeof body === 'string' ? JSON.parse(body || 'null') : body),
     }
-    await store.handleResponse(resp)
+  }
+
+  it('handleResponse does nothing for ok response', async () => {
+    const store = useErrorStore()
+    const resp = mockResponse({ status: 200, ok: true })
+    const result = await store.handleResponse(resp)
+    expect(result).toBe(resp)
+    expect(store.errors).toHaveLength(0)
+  })
+
+  it('handleResponse surfaces a localised 500 when the body has no code', async () => {
+    // Mirrors the legacy `error.mod.js` behaviour: a 500 without a
+    // `code` field falls through to the generic `error.500` catalog
+    // entry rather than echoing back arbitrary server text.
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({ status: 500, body: { message: 'Server crashed' } }))
     expect(store.errors).toHaveLength(1)
-    expect(store.errors[0].message).toBe('Server crashed')
+    expect(store.errors[0].message).toBe('Internal error')
+    expect(store.errors[0].status).toBe(500)
+  })
+
+  it('handleResponse resolves a business `code` through the i18n catalog', async () => {
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 500,
+      body: { code: 'business-down', message: 'whatever' },
+    }))
+    expect(store.errors).toHaveLength(1)
+    expect(store.errors[0].message).toBe('The business server is not available')
+  })
+
+  it('handleResponse hydrates validationErrors from a JSR-303 body', async () => {
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 400,
+      body: { errors: { 'service:id:group': [{ rule: 'group-type' }] } },
+    }))
+    const errs = store.validationErrors.get('service:id:group')
+    expect(errs).toHaveLength(1)
+    expect(errs[0].rule).toBe('group-type')
+    expect(errs[0].message).toBe('The selected group is not of type Project')
+    expect(store.errors).toHaveLength(1)
+    expect(store.errors[0].title).toBe('Validation error')
+  })
+
+  it('handleResponse maps 403 to the localised Authorization toast', async () => {
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({ status: 403 }))
+    expect(store.errors[0].title).toBe('Authorization required')
+    expect(store.errors[0].message).toBe('You don\'t have the authorizations to perform this action')
+  })
+
+  it('handleResponse builds a cause chain from nested causes', async () => {
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 500,
+      body: { code: 'technical', cause: { message: 'NPE', cause: { message: 'OOM' } } },
+    }))
+    expect(store.errors[0].details).toBe('NPE\n› OOM')
+  })
+
+  it('clearValidationErrors wipes the map', async () => {
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 400,
+      body: { errors: { foo: [{ rule: 'NotNull' }] } },
+    }))
+    expect(store.validationErrors.size).toBe(1)
+    store.clearValidationErrors()
+    expect(store.validationErrors.size).toBe(0)
+  })
+
+  it('errorsFor returns a reactive empty array when the field is clean', () => {
+    const store = useErrorStore()
+    const errs = store.errorsFor('unknown.field')
+    expect(errs.value).toEqual([])
   })
 })
