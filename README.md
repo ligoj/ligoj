@@ -11,7 +11,6 @@ and [ligoj-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ligoj_ligoj&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ligoj_ligoj)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/abf810c094e44c0691f71174c707d6ed)](https://www.codacy.com/gh/ligoj/ligoj?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/ligoj&amp;utm_campaign=Badge_Grade)
-[![Maintainability](https://api.codeclimate.com/v1/badges/f6bc3a113fddfad9151a/maintainability)](https://codeclimate.com/github/ligoj/ligoj/maintainability)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/ligoj/badge)](https://www.codefactor.io/repository/github/ligoj/ligoj)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://fabdouglas.mit-license.org/)
 
@@ -261,7 +260,7 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:4.0.0
 | LIGOJ_WEB_CUSTOM_OPTS  | web     | RUN   | ``                                    | Additional Java properties, merged with `LIGOJ_WEB_JAVA_OPTIONS`                                                                                                                                                                     |
 | LIGOJ_BUILD_PLATFORM   | app-*   | BUILD | `linux/amd64`                         | Docker build platform.                                                                                                                                                                                                               |
 | LIGOJ_TARGET_PLATFORM  | app-*   | BUILD | `linux/amd64`                         | Docker run platform.                                                                                                                                                                                                                 |
-| MAVEN_INSECURE_TLS     | app-*   | BUILD | `false`                               | When `true`, disables Maven HTTPS cert + hostname validation. See [app-api/README](app-api/README.md#build-behind-a-private-maven-mirror-with-self-signed-tls).                                                                       |
+| MAVEN_INSECURE_TLS     | app-*   | BUILD | `false`                               | When `true`, disables Maven HTTPS cert + hostname validation. See [app-api/README](app-api/README.md#build-behind-a-private-maven-mirror-with-self-signed-tls).                                                                      |
 | GIT_COMMIT             | app-*   | BUILD | `0`                                   | Captured from host git, embedded as `${buildNumber}` in the WAR manifest and the `git.commit` OCI label. See [Embedding git provenance](#embedding-git-provenance).                                                                  |
 | GIT_BRANCH             | app-*   | BUILD | `UNKNOWN_BRANCH`                      | Captured from host git, embedded as `${scmBranch}`.                                                                                                                                                                                  |
 | GIT_COMMIT_TIME        | app-*   | BUILD | `1970-01-01T00:00:00Z`                | Captured from host git (ISO-8601), embedded as `${timestamp}`.                                                                                                                                                                       |
@@ -346,10 +345,10 @@ EOF
 `compose.yml` defines only the `api` and `ui` services. The database is picked
 by layering exactly one of these override files on top:
 
-| Database               | Override file          | Image (default)  | Data directory          |
-| ---------------------- | ---------------------- | ---------------- | ----------------------- |
-| PostgreSQL *(default)* | `compose-override.yml` | `postgres:17`    | `$LIGOJ_HOME/postgres`  |
-| MySQL                  | `compose-mysql.yml`    | `mysql:8.0.36`   | `$LIGOJ_HOME/mysql`     |
+| Database               | Override file          | Image (default) | Data directory         |
+| ---------------------- | ---------------------- | --------------- | ---------------------- |
+| PostgreSQL *(default)* | `compose-override.yml` | `postgres:17`   | `$LIGOJ_HOME/postgres` |
+| MySQL                  | `compose-mysql.yml`    | `mysql:8.0.36`  | `$LIGOJ_HOME/mysql`    |
 
 > Running `podman compose -p ligoj up -d` *without* an override file fails on
 > purpose — the DB choice is always explicit. To auto-load the PG override
