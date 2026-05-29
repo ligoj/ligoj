@@ -6,7 +6,7 @@
         <v-btn
           v-bind="activatorProps"
           icon
-          size="x-small"
+          size="small"
           variant="text"
           aria-label="Table tools"
           title="Table tools"
