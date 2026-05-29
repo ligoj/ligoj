@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { useErrorStore } from '@/stores/error.js'
 
 /**
  * Composable for Vuetify v-data-table-server backed by legacy Ligoj DataTables API.
@@ -7,6 +8,7 @@ import { ref } from 'vue'
  * Legacy API returns: { recordsTotal, recordsFiltered, data: [...] }
  */
 export function useDataTable(endpoint, { defaultSort = 'name', defaultOrder = 'asc', demoData = null } = {}) {
+  const errorStore = useErrorStore()
   const items = ref([])
   const totalItems = ref(0)
   const loading = ref(false)
@@ -33,13 +35,25 @@ export function useDataTable(endpoint, { defaultSort = 'name', defaultOrder = 'a
 
       const resp = await fetch(`rest/${endpoint}?${params}`, { credentials: 'include' })
       if (!resp.ok) {
+        // Route through the central error store first so the host
+        // surfaces a toast (and, for 401 + `{redirect:"local"}`, opens
+        // the in-page login dialog). We clone the response so we can
+        // still consume the body ourselves below for the demo-fallback
+        // / inline-error branches.
+        await errorStore.handleResponse(resp.clone())
         const body = await resp.json().catch(() => ({}))
         // If identity provider unavailable and demo data provided, use fallback
         if (body.code === 'internal' && demoData) {
           _applyDemoData(page, itemsPerPage, sortBy)
           return
         }
-        error.value = body.message || body.code || `HTTP ${resp.status}`
+        // 401 is owned by the global handler — the user is being
+        // prompted to re-authenticate via the LoginPromptDialog (or
+        // top-level-redirected to the OIDC entry). Setting an inline
+        // "HTTP 401" message on top of that just clutters the page.
+        if (resp.status !== 401) {
+          error.value = body.message || body.code || `HTTP ${resp.status}`
+        }
         items.value = []
         totalItems.value = 0
         return

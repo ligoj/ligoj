@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useErrorStore } from '@/stores/error.js'
+import { useAuthStore } from '@/stores/auth.js'
 
 describe('useErrorStore', () => {
   beforeEach(() => {
@@ -180,5 +181,56 @@ describe('useErrorStore', () => {
     const store = useErrorStore()
     const errs = store.errorsFor('unknown.field')
     expect(errs.value).toEqual([])
+  })
+
+  it('handleResponse opens the local auth prompt on 401 + {redirect:"local"}', async () => {
+    // The legacy `error.mod.js#showAuthenticationAlert` flow: a 401 with
+    // body `{success:false, redirect:"local"}` should pop the in-page
+    // login dialog (driven by `auth.authPromptOpen`) instead of doing
+    // a full-page nav. The toast that accompanies it must be persistent
+    // (timeout 0) so it stays visible under the dialog.
+    const store = useErrorStore()
+    const auth = useAuthStore()
+    expect(auth.authPromptOpen).toBe(false)
+    await store.handleResponse(mockResponse({
+      status: 401,
+      body: { success: false, redirect: 'local' },
+    }))
+    expect(auth.authPromptOpen).toBe(true)
+    expect(store.errors).toHaveLength(1)
+    // Persistent toast (no auto-dismiss) — advancing well past the
+    // default 8 s budget must not clear it.
+    vi.advanceTimersByTime(60000)
+    expect(store.errors).toHaveLength(1)
+  })
+
+  it('handleResponse follows a same-origin redirect from the 401 body', async () => {
+    // OIDC path: Spring ships the IdP entry URL in `body.redirect`.
+    // Same-origin paths should be honoured; cross-origin URLs are
+    // silently dropped by `handleRedirect` (open-redirect guard).
+    const navTo = vi.fn()
+    const original = window.location
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: { origin: original.origin, href: '', protocol: 'http:', host: 'localhost' },
+    })
+    Object.defineProperty(window.location, 'href', {
+      configurable: true,
+      set: navTo,
+      get: () => '',
+    })
+
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 401,
+      body: { success: false, redirect: '/oauth2/authorization/keycloak' },
+    }))
+    expect(navTo).toHaveBeenCalledWith(expect.stringContaining('/oauth2/authorization/keycloak'))
+    // No dialog for OIDC — we top-level-navigate instead.
+    const auth = useAuthStore()
+    expect(auth.authPromptOpen).toBe(false)
+
+    Object.defineProperty(window, 'location', { configurable: true, writable: true, value: original })
   })
 })

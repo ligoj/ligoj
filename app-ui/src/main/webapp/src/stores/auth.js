@@ -117,6 +117,26 @@ export const useAuthStore = defineStore('auth', () => {
    */
   const needsOAuthRedirect = ref(false)
 
+  /**
+   * Drives the in-page "local" authentication dialog (mounted in
+   * `App.vue`). Flipped to true by `useErrorStore.handleResponse` when
+   * an API call comes back as 401 with body `{success:false, redirect:
+   * "local"}` — the legacy `error.mod.js#showAuthenticationAlert`
+   * flow, transplanted to a Vuetify modal so the user can re-
+   * authenticate without losing the page state they're in. OIDC mode
+   * never lands here: Spring's `redirect` field then carries a Keycloak
+   * path which we follow at the window level instead.
+   */
+  const authPromptOpen = ref(false)
+
+  function openAuthPrompt() {
+    authPromptOpen.value = true
+  }
+
+  function closeAuthPrompt() {
+    authPromptOpen.value = false
+  }
+
   async function fetchSession() {
     loading.value = true
     try {
@@ -227,5 +247,6 @@ export const useAuthStore = defineStore('auth', () => {
     navItems,
     isAllowed, isAllowedApi,
     fetchSession, logout, redirectToLogin, lastSessionStatus, needsOAuthRedirect,
+    authPromptOpen, openAuthPrompt, closeAuthPrompt,
   }
 })

@@ -14,7 +14,11 @@ export function useImportExport() {
         headers: { 'Accept': 'text/csv' },
       })
       if (!resp.ok) {
-        errorStore.push({ message: `Export failed: HTTP ${resp.status}`, status: resp.status })
+        // Defer to the central status-code handler so a 401 +
+        // `{redirect:"local"}` opens the in-page login dialog (and
+        // every other branch — 403 / 412 / 5xx — gets the localised
+        // toast it deserves) instead of an ad-hoc `HTTP <n>` string.
+        await errorStore.handleResponse(resp)
         return false
       }
       const blob = await resp.blob()
@@ -47,10 +51,14 @@ export function useImportExport() {
       })
       uploading.value = false
       if (!resp.ok) {
+        // `handleResponse` clones the body internally, so we can still
+        // read it afterwards for the inline upload-result panel. The
+        // 401 path triggers the LoginPromptDialog; other status codes
+        // flow through the catalogued `error.*` toasts.
+        await errorStore.handleResponse(resp.clone())
         const body = await resp.json().catch(() => ({}))
         const msg = body.message || body.code || `HTTP ${resp.status}`
         uploadResult.value = { success: false, message: msg }
-        errorStore.push({ message: msg, status: resp.status })
         return false
       }
       const data = await resp.json().catch(() => null)

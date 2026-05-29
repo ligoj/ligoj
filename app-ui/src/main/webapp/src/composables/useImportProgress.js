@@ -1,8 +1,10 @@
 import { ref, onUnmounted } from 'vue'
 import { useApi } from '@/composables/useApi.js'
+import { useErrorStore } from '@/stores/error.js'
 
 export function useImportProgress() {
   const api = useApi()
+  const errorStore = useErrorStore()
   const importing = ref(false)
   const status = ref('')
   const entries = ref(0)
@@ -28,6 +30,11 @@ export function useImportProgress() {
     })
 
     if (!resp.ok) {
+      // Surface the failure through the global handler — a 401 here
+      // (session expired mid-upload) needs to pop the in-page login
+      // dialog rather than silently leaving the user staring at a
+      // generic "error" status.
+      await errorStore.handleResponse(resp)
       importing.value = false
       failed.value = true
       status.value = 'error'

@@ -110,7 +110,7 @@ public class SecurityConfiguration {
 	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint(AbstractAuthenticationProvider provider) {
 		final var ep = new RedirectAuthenticationEntryPoint(loginUrl);
 		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, LOGIN_HTML));
-		ep.setRedirectStrategy(getRestFailureStrategy());
+		ep.setRedirectStrategy(getRestFailureStrategy(provider));
 		ep.setForceRedirectUrl(provider.isForceRedirect());
 		return ep;
 	}
@@ -240,12 +240,10 @@ public class SecurityConfiguration {
 			// — a path the SPA doesn't own. Send the user back to the
 			// Vue login page so they get a localized error message
 			// instead of the legacy form Spring would otherwise render.
-			http.oauth2Login(o -> o
-					.defaultSuccessUrl("/", true)
-					.failureUrl("/login.html?denied"));
+			http.oauth2Login(o -> o.defaultSuccessUrl("/", true).failureUrl("/login.html?denied"));
 		} else {
 			final var loginSuccessHandler = getSuccessHandler();
-			final var loginFailureHandler = getFailureHandler();
+			final var loginFailureHandler = getFailureHandler(provider);
 			provider.configureLogin(http, loginDeniedUrl, LOGIN_API, loginSuccessHandler, loginFailureHandler);
 		}
 	}
@@ -327,9 +325,9 @@ public class SecurityConfiguration {
 	 * @return authentication failure configuration.
 	 */
 	@Bean
-	public SimpleUrlAuthenticationFailureHandler getFailureHandler() {
+	public SimpleUrlAuthenticationFailureHandler getFailureHandler(AbstractAuthenticationProvider provider) {
 		final var handler = new SimpleUrlAuthenticationFailureHandler();
-		final var strategy = getRestFailureStrategy();
+		final var strategy = getRestFailureStrategy(provider);
 		handler.setRedirectStrategy(strategy);
 		handler.setDefaultFailureUrl("/");
 		return handler;
@@ -341,10 +339,11 @@ public class SecurityConfiguration {
 	 * @return REST failure configuration.
 	 */
 	@Bean
-	public RestRedirectStrategy getRestFailureStrategy() {
+	public RestRedirectStrategy getRestFailureStrategy(AbstractAuthenticationProvider provider) {
 		final var strategy = new RestRedirectStrategy();
 		strategy.setSuccess(false);
 		strategy.setStatus(401);
+		strategy.setForceRedirect(provider.isForceRedirect());
 		return strategy;
 	}
 

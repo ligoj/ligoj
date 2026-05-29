@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
 import { useI18nStore } from '@/stores/i18n.js'
+import { useAuthStore } from '@/stores/auth.js'
 
 /**
  * Error store — central handler for non-2xx responses from `useApi`.
@@ -264,15 +265,42 @@ export const useErrorStore = defineStore('error', () => {
 
     /* ------------- 401 ---------------------- */
     if (status === 401) {
-      // Bounce to the SPA root instead of /login.html?expired — the
-      // root re-runs `fetchSession()` which detects Spring's 302 to
-      // the OAuth entry (OIDC mode) or surfaces a 401 (REST mode).
-      const base = import.meta.env.BASE_URL || '/'
+      // The backend tells us *how* to recover via the body's `redirect`
+      // field (legacy `error.mod.js#handleRedirect`):
+      //   - "local"      → local provider: pop the in-page login dialog
+      //                    so the user can re-authenticate without
+      //                    losing their current page state.
+      //   - "<path>"     → OIDC provider: Spring shipped the IdP entry
+      //                    URL; top-level-navigate so the browser runs
+      //                    the cross-origin OAuth flow.
+      //   - absent       → no recovery hint: fall back to the SPA root,
+      //                    which re-runs `fetchSession()` and handles
+      //                    the OIDC short-circuit there.
+      // Same dispatch is also triggered by the `x-redirect` header
+      // higher up — this branch covers the response-body variant the
+      // legacy code path used.
+      const bodyRedirect = json?.redirect
+      if (bodyRedirect) {
+        handleRedirect(bodyRedirect)
+        if (bodyRedirect === 'local') {
+          // Pin the toast: we don't auto-dismiss it because it should
+          // stay visible behind/under the dialog until the user
+          // re-authenticates (matches the legacy `-1` timeout).
+          push({
+            title: i18n.t('error.401'),
+            message: i18n.t('error.401-details'),
+            status,
+            timeout: 0,
+          })
+        }
+        return response
+      }
       push({
         title: i18n.t('error.401'),
         message: i18n.t('error.401-details'),
         status,
       })
+      const base = import.meta.env.BASE_URL || '/'
       window.location.href = base
       return response
     }
@@ -435,13 +463,14 @@ export const useErrorStore = defineStore('error', () => {
 
   /**
    * Same-origin redirect honoured here; cross-origin gets dropped to
-   * avoid open-redirect abuse. The legacy `'local'` token is mapped
-   * to the SPA root in OAuth mode (no local login modal in Vue).
+   * avoid open-redirect abuse. The legacy `'local'` token maps to
+   * `useAuthStore.openAuthPrompt()` — the host's in-page login dialog
+   * (mounted in `App.vue`) — so the user can re-authenticate without
+   * losing the page they're on.
    */
   function handleRedirect(redirect) {
     if (redirect === 'local') {
-      const base = import.meta.env.BASE_URL || '/'
-      window.location.href = base
+      useAuthStore().openAuthPrompt()
       return
     }
     try {

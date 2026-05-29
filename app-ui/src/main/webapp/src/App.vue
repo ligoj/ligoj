@@ -7,6 +7,11 @@
       <v-progress-circular indeterminate color="primary" size="64" />
     </v-container>
     <ErrorSnackbar />
+    <!-- Driven by `useAuthStore.authPromptOpen`. The flag is flipped by
+         `useErrorStore.handleResponse` when an API call returns 401 +
+         body `{redirect: "local"}` — the user re-authenticates in place
+         instead of losing the page they're on. -->
+    <LoginPromptDialog />
   </v-app>
 </template>
 
@@ -17,6 +22,7 @@ import { useAppStore } from '@/stores/app.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import AppLayout from '@/layouts/AppLayout.vue'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
+import LoginPromptDialog from '@/components/LoginPromptDialog.vue'
 
 const auth = useAuthStore()
 const app = useAppStore()
