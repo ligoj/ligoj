@@ -6,9 +6,35 @@ import { useErrorStore } from '@/stores/error.js'
  *
  * Legacy API expects: rows, page (1-based), sidx, sord, search[value]
  * Legacy API returns: { recordsTotal, recordsFiltered, data: [...] }
+ *
+ * `extraParams` lets a caller pin endpoint-specific query fields that
+ * shouldn't pollute the per-call options object — typically a server-
+ * side filter that doesn't change across pagination/sort/search
+ * (e.g. `?group=<name>` on the user-list endpoint when scoped to a
+ * group's members). Accepts either:
+ *   - an object  → merged once
+ *   - a function → invoked at each `load()`/`loadAll()`, so the
+ *                  values stay live with any upstream reactive ref
+ *                  (`() => ({ group: groupName.value })`)
+ * Null / empty-string values are dropped so a still-loading prop
+ * doesn't add an `?group=` empty filter to the URL.
  */
-export function useDataTable(endpoint, { defaultSort = 'name', defaultOrder = 'asc', demoData = null } = {}) {
+export function useDataTable(endpoint, { defaultSort = 'name', defaultOrder = 'asc', demoData = null, extraParams = null } = {}) {
   const errorStore = useErrorStore()
+
+  /** Resolve the pinned extra params for the current call. */
+  function resolveExtraParams() {
+    if (!extraParams) return null
+    return typeof extraParams === 'function' ? extraParams() : extraParams
+  }
+
+  function appendExtraParams(searchParams) {
+    const extra = resolveExtraParams()
+    if (!extra) return
+    for (const [k, v] of Object.entries(extra)) {
+      if (v != null && v !== '') searchParams.set(k, String(v))
+    }
+  }
   const items = ref([])
   const totalItems = ref(0)
   const loading = ref(false)
@@ -32,6 +58,8 @@ export function useDataTable(endpoint, { defaultSort = 'name', defaultOrder = 'a
       if (search.value) {
         params.set('search[value]', search.value)
       }
+
+      appendExtraParams(params)
 
       const resp = await fetch(`rest/${endpoint}?${params}`, { credentials: 'include' })
       if (!resp.ok) {
@@ -114,6 +142,7 @@ export function useDataTable(endpoint, { defaultSort = 'name', defaultOrder = 'a
     params.set('sidx', defaultSort)
     params.set('sord', defaultOrder)
     if (search.value) params.set('search[value]', search.value)
+    appendExtraParams(params)
     try {
       const resp = await fetch(`rest/${endpoint}?${params}`, { credentials: 'include' })
       if (!resp.ok) {
