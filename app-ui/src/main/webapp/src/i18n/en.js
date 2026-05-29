@@ -184,6 +184,8 @@ export default {
   'profile.apiTokens': 'API tokens',
   'profile.apiTokensHint': 'Create or revoke keys for the REST API',
   'profile.theme': 'Theme',
+  'profile.skipUnsavedConfirmation': 'Skip leave confirmation',
+  'profile.skipUnsavedConfirmationHint': 'Leave dirty forms without confirmation prompt',
   'profile.language': 'Language',
 
   // About
@@ -288,6 +290,7 @@ export default {
 
   // Common (additions)
   'common.confirm': 'Confirm',
+  'common.dontAskAgain': "Don't ask again",
 
   // User actions
   'user.actions': 'Actions',

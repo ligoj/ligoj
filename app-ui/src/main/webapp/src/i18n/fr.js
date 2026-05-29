@@ -184,6 +184,8 @@ export default {
   'profile.apiTokens': 'Tokens API',
   'profile.apiTokensHint': 'Créer ou révoquer des clés pour l\'API REST',
   'profile.theme': 'Thème',
+  'profile.skipUnsavedConfirmation': 'Quitter sans confirmation',
+  'profile.skipUnsavedConfirmationHint': 'Quitte les formulaires modifiés sans demander confirmation',
   'profile.language': 'Langue',
 
   // About
@@ -279,6 +281,7 @@ export default {
 
   // Common (additions)
   'common.confirm': 'Confirmer',
+  'common.dontAskAgain': 'Ne plus me demander',
 
   // User actions
   'user.actions': 'Actions',
