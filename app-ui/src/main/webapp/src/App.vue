@@ -28,20 +28,34 @@ const auth = useAuthStore()
 const app = useAppStore()
 
 /**
- * Backend-only plugins. These ship Java only and intentionally have no
- * Vue bundle to load — distinct from "not migrated yet" plugins like
- * `iam-node` / `prov-azure`, which will eventually have one. Skipping
- * the dynamic import for these avoids a guaranteed 404 in the network
- * panel on every session-refresh, since the host's
- * `auth.appSettings.plugins` still lists them as installed.
+ * Plugins to skip during the bootstrap fan-out. Two categories:
  *
- * Add new no-UI plugins here as they land — the alternative would be a
- * backend marker (e.g. an `ApplicationSettings.headlessPlugins` array)
- * which is heavier than this 1-liner.
+ *   1. Backend-only by design — Java-only contributors that decorate
+ *      the session (`ISessionSettingsProvider`) or expose admin REST
+ *      surfaces but never ship a Vue bundle.
+ *        - `iam-empty`        — no-op IAM provider.
+ *        - `iam-node`         — node-scoped IAM resolver.
+ *        - `menu-node`        — feeds `userSettings.globalTools`; the
+ *                               host's `GlobalToolsList` reads it
+ *                               directly, no per-plugin code needed.
+ *        - `welcome-data-rbac`— sample-data seeder.
+ *
+ *   2. Not migrated yet — plugins that still live on the legacy
+ *      AMD/Handlebars stack and don't expose `vue/index.js`.
+ *        - `prov-azure`       — provisioning, awaiting migration.
+ *
+ * Skipping the dynamic import for these avoids a guaranteed 404 in
+ * the network panel on every session-refresh, since the host's
+ * `auth.appSettings.plugins` still lists them as installed. Move
+ * entries out of this set once a real Vue bundle lands; add new ones
+ * here as backend-only plugins ship. The heavier alternative would be
+ * a backend marker (e.g. an `ApplicationSettings.headlessPlugins`
+ * array) — defer that until the deny list gets unwieldy.
  */
 const NO_UI_PLUGINS = new Set([
   'iam-empty',
   'iam-node',
+  'menu-node',
   'welcome-data-rbac',
 ])
 
