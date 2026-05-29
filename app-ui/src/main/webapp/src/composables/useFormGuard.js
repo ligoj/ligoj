@@ -1,10 +1,15 @@
 import { ref, watch, onBeforeUnmount } from 'vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
 
+const STORAGE_KEY = 'ligoj.skipUnsavedConfirmation'
+
 export function useFormGuard(formData) {
   const router = useRouter()
   const isDirty = ref(false)
   const showGuardDialog = ref(false)
+  const skipUnsavedConfirmation = ref(
+    typeof window !== 'undefined' && window.localStorage?.getItem(STORAGE_KEY) === 'true'
+  )
   let savedSnapshot = ''
   // Capture the target route, not the `next` callback. Vue Router 4
   // considers `next` consumed once a guard returns `false`; calling
@@ -29,7 +34,7 @@ export function useFormGuard(formData) {
   }, { deep: true })
 
   onBeforeRouteLeave((to) => {
-    if (isDirty.value) {
+    if (isDirty.value && !skipUnsavedConfirmation.value) {
       pendingTo = to
       showGuardDialog.value = true
       return false
@@ -71,5 +76,13 @@ export function useFormGuard(formData) {
     isDirty.value = false
   }
 
-  return { isDirty, showGuardDialog, markClean, confirmLeave, cancelLeave, init }
+  function setSkipUnsavedConfirmation(value) {
+    skipUnsavedConfirmation.value = !!value
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(STORAGE_KEY, value ? 'true' : 'false')
+    }
+  }
+
+  return { isDirty, showGuardDialog, markClean, confirmLeave, cancelLeave, init,
+           skipUnsavedConfirmation, setSkipUnsavedConfirmation }
 }

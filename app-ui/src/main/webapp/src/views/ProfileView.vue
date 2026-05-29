@@ -77,6 +77,25 @@
 
             <v-divider class="mb-4" />
 
+            <!-- Skip unsaved-changes confirmation ---------------------- -->
+            <div class="d-flex align-center mb-4">
+              <v-icon class="mr-3">mdi-bell-off-outline</v-icon>
+              <div class="flex-grow-1">
+                <div class="text-subtitle-2">{{ t('profile.skipUnsavedConfirmation') }}</div>
+                <div class="text-caption text-medium-emphasis">{{ t('profile.skipUnsavedConfirmationHint') }}</div>
+              </div>
+              <v-switch
+                :model-value="skipUnsavedConfirmation"
+                @update:model-value="onSkipUnsavedChange"
+                color="success"
+                hide-details
+                density="compact"
+                inset
+              />
+            </div>
+
+            <v-divider class="mb-4" />
+
             <!-- Theme -------------------------------------------------- -->
             <div class="d-flex align-center mb-3">
               <v-icon class="mr-3">mdi-palette</v-icon>
@@ -114,7 +133,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useTheme } from 'vuetify'
 import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
@@ -135,6 +154,17 @@ const languageItems = computed(() =>
 function chooseTheme(id) {
   theme.global.name.value = id
   persistTheme(id)
+}
+
+const STORAGE_KEY = 'ligoj.skipUnsavedConfirmation'
+const skipUnsavedConfirmation = ref(
+  typeof window !== 'undefined' && window.localStorage?.getItem(STORAGE_KEY) === 'true'
+)
+function onSkipUnsavedChange(value) {
+  skipUnsavedConfirmation.value = !!value
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.setItem(STORAGE_KEY, value ? 'true' : 'false')
+  }
 }
 
 onMounted(() => {
