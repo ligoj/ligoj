@@ -62,6 +62,37 @@
               </v-card-text>
             </v-card>
           </v-col>
+        </v-row>
+
+      </v-col>
+
+      <v-col cols="12" md="6">
+        <v-row>
+          <v-col cols="12" md="12">
+            <v-card>
+              <v-card-title>
+                <v-icon class="mr-2">mdi-source-branch</v-icon>
+                {{ t('about.project') }}
+              </v-card-title>
+              <v-card-text>
+                <v-list density="compact">
+                  <v-list-item href="https://github.com/ligoj/ligoj" target="_blank" rel="noopener noreferrer">
+                    <template #prepend><v-icon>mdi-github</v-icon></template>
+                    <v-list-item-title>{{ t('about.github') }}</v-list-item-title>
+                    <v-list-item-subtitle>github.com/ligoj/ligoj</v-list-item-subtitle>
+                    <template #append><v-icon size="small">mdi-open-in-new</v-icon></template>
+                  </v-list-item>
+                  <v-list-item @click="licenseDialog = true">
+                    <template #prepend><v-icon>mdi-license</v-icon></template>
+                    <v-list-item-title>{{ t('about.license') }}</v-list-item-title>
+                    <v-list-item-subtitle>MIT</v-list-item-subtitle>
+                    <template #append><v-icon size="small">mdi-chevron-right</v-icon></template>
+                  </v-list-item>
+                </v-list>
+              </v-card-text>
+            </v-card>
+          </v-col>
+
 
           <v-col cols="12" md="12">
 
@@ -82,35 +113,9 @@
               </v-card-text>
             </v-card>
           </v-col>
+
         </v-row>
-
       </v-col>
-
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>
-            <v-icon class="mr-2">mdi-source-branch</v-icon>
-            {{ t('about.project') }}
-          </v-card-title>
-          <v-card-text>
-            <v-list density="compact">
-              <v-list-item href="https://github.com/ligoj/ligoj" target="_blank" rel="noopener noreferrer">
-                <template #prepend><v-icon>mdi-github</v-icon></template>
-                <v-list-item-title>{{ t('about.github') }}</v-list-item-title>
-                <v-list-item-subtitle>github.com/ligoj/ligoj</v-list-item-subtitle>
-                <template #append><v-icon size="small">mdi-open-in-new</v-icon></template>
-              </v-list-item>
-              <v-list-item @click="licenseDialog = true">
-                <template #prepend><v-icon>mdi-license</v-icon></template>
-                <v-list-item-title>{{ t('about.license') }}</v-list-item-title>
-                <v-list-item-subtitle>MIT</v-list-item-subtitle>
-                <template #append><v-icon size="small">mdi-chevron-right</v-icon></template>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
 
     </v-row>
 
