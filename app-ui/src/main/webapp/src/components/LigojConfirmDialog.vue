@@ -10,6 +10,15 @@
       <v-card-text>
         <slot>{{ message }}</slot>
       </v-card-text>
+      <v-card-text v-if="showSkipForeverCheckbox" class="pt-0">
+        <v-checkbox
+          :model-value="skipForever"
+          @update:model-value="$emit('update:skipForever', $event)"
+          :label="t('common.dontAskAgain')"
+          hide-details
+          density="compact"
+        />
+      </v-card-text>
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" :disabled="loading" @click="onCancel">
@@ -74,9 +83,12 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   maxWidth: { type: [Number, String], default: 400 },
   persistent: { type: Boolean, default: false },
+  /** Optionally render a "don't ask again" checkbox above the actions. */
+  showSkipForeverCheckbox: { type: Boolean, default: false },
+  skipForever: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
+const emit = defineEmits(['update:modelValue', 'confirm', 'cancel', 'update:skipForever'])
 const { t } = useI18nStore()
 
 const resolvedCancelLabel = computed(() => props.cancelLabel || t('common.cancel'))
