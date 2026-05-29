@@ -87,7 +87,7 @@
               <v-switch
                 :model-value="skipUnsavedConfirmation"
                 @update:model-value="onSkipUnsavedChange"
-                color="primary"
+                color="success"
                 hide-details
                 density="compact"
                 inset
