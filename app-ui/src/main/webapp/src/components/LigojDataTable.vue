@@ -145,4 +145,15 @@ defineExpose({ exportCsv, copyToClipboard })
 .ligoj-data-table :deep(tr td:last-child) {
   text-align: end;
 }
+/* Vuetify 4 only styles the header for align=*, not the body cells.
+   Propagate alignment to body cells so columns visually match their header. */
+:deep(tbody > tr > td.v-data-table-column--align-end) {
+  text-align: end;
+}
+:deep(tbody > tr > td.v-data-table-column--align-center) {
+  text-align: center;
+}
+:deep(tbody > tr > td.v-data-table-column--align-start) {
+  text-align: start;
+}
 </style>
