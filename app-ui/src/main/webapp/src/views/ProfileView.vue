@@ -77,6 +77,25 @@
 
             <v-divider class="mb-4" />
 
+            <!-- Skip unsaved-changes confirmation ---------------------- -->
+            <div class="d-flex align-center mb-4">
+              <v-icon class="mr-3">mdi-bell-off-outline</v-icon>
+              <div class="flex-grow-1">
+                <div class="text-subtitle-2">{{ t('profile.skipUnsavedConfirmation') }}</div>
+                <div class="text-caption text-medium-emphasis">{{ t('profile.skipUnsavedConfirmationHint') }}</div>
+              </div>
+              <v-switch
+                :model-value="skipUnsavedConfirmation"
+                @update:model-value="onSkipUnsavedChange"
+                color="primary"
+                hide-details
+                density="compact"
+                inset
+              />
+            </div>
+
+            <v-divider class="mb-4" />
+
             <!-- Theme -------------------------------------------------- -->
             <div class="d-flex align-center mb-3">
               <v-icon class="mr-3">mdi-palette</v-icon>
@@ -106,24 +125,6 @@
                 </v-card>
               </v-col>
             </v-row>
-
-            <v-divider class="my-4" />
-
-            <!-- Skip unsaved-changes confirmation ---------------------- -->
-            <div class="d-flex align-center">
-              <v-icon class="mr-3">mdi-bell-off-outline</v-icon>
-              <div class="flex-grow-1">
-                <div class="text-subtitle-2">{{ t('profile.skipUnsavedConfirmation') }}</div>
-                <div class="text-caption text-medium-emphasis">{{ t('profile.skipUnsavedConfirmationHint') }}</div>
-              </div>
-              <v-switch
-                :model-value="skipUnsavedConfirmation"
-                @update:model-value="onSkipUnsavedChange"
-                hide-details
-                density="compact"
-                inset
-              />
-            </div>
           </v-card-text>
         </v-card>
       </v-col>
