@@ -244,23 +244,55 @@ export const THEME_OPTIONS = [
   { id: 'oneDark',         label: 'One Dark',         dark: true,  swatch: ['#61afef', '#c678dd', '#282c34'] },
 ]
 
-const STORAGE_KEY = 'ligoj-theme'
-
+/**
+ * Initial theme id for `createVuetify`. The single source of truth is
+ * now `plugins/presets.js` — the user picks a Theme PRESET (a named
+ * palette + shape combo) and we derive the Vuetify theme id from it
+ * here. Done with an inline localStorage read instead of importing
+ * presets.js to keep this file dependency-free (presets.js imports
+ * styles.js but not vuetify.js — keeping it that way avoids a cycle).
+ */
 function detectTheme() {
   if (typeof localStorage === 'undefined') return 'ligojLight'
-  const stored = localStorage.getItem(STORAGE_KEY)
+  // New: read from the unified preset key first.
+  const presetId = localStorage.getItem('ligoj-preset')
+  if (presetId) {
+    const themeId = PRESET_TO_THEME[presetId]
+    if (themeId && themes[themeId]) return themeId
+  }
+  // Legacy fallback: the old "ligoj-theme" key from before presets
+  // existed. Honoured so users who customised on the previous version
+  // don't get reset on upgrade.
+  const stored = localStorage.getItem('ligoj-theme')
   return themes[stored] ? stored : 'ligojLight'
 }
 
 /**
- * Persist the user's theme selection. Components still need to update
- * Vuetify's reactive `theme.global.name.value` themselves — this helper
- * only owns the durable storage side.
+ * Tiny duplication of the preset → theme mapping that lives canonically
+ * in `presets.js#PRESET_OPTIONS`. Kept inline so `detectTheme()` can
+ * resolve the saved preset BEFORE Vuetify (and therefore Vue) exists,
+ * without importing presets.js (which would create a circular import
+ * since presets.js consults this file's THEME_OPTIONS).
+ *
+ * If you add a preset there, mirror the (id → theme) row here too.
+ * Diagnostic test in `__tests__/plugins/presets.test.js` checks the
+ * two tables stay in sync.
  */
-export function persistTheme(name) {
-  if (typeof localStorage !== 'undefined' && themes[name]) {
-    localStorage.setItem(STORAGE_KEY, name)
-  }
+const PRESET_TO_THEME = {
+  'ligoj-classic':    'ligojLight',
+  'ligoj-dark':       'ligojDark',
+  'vscode-dark':      'vscodeDark',
+  'monokai':          'monokai',
+  'nord':             'nord',
+  'darcula-classic':  'intellijDarcula',
+  'pulse':            'githubLight',
+  'argon':            'ligojLight',
+  'aurora':           'ligojDark',
+  'darcula-bento':    'intellijDarcula',
+  'solarized-press':  'solarizedLight',
+  'solarized-brutal': 'solarizedDark',
+  'paper':            'githubLight',
+  'cyber-ligoj':      'ligojDark',
 }
 
 export default createVuetify({

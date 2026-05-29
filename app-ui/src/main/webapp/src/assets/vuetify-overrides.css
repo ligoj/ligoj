@@ -13,3 +13,616 @@
   --v-list-group-prepend: 12px;
   --v-list-prepend-gap: 8px;
 }
+
+/* ===========================================================================
+ * Style catalog
+ *
+ * Selected by `<html data-style="<id>">` — see `src/plugins/styles.js`. The
+ * "default" id is intentionally absent here: it means "no overrides, ship
+ * Vuetify as-is".
+ *
+ * Each style is a CSS-only skin: we never recompute a Vuetify theme, just
+ * paint on top with `[data-style="<id>"]` selectors. That keeps style
+ * orthogonal to the color Theme catalog — every (theme, style) pair is a
+ * valid combination.
+ *
+ * Layering rules of thumb when editing:
+ *   1. Set the body / `<v-application>` background FIRST.
+ *   2. Then override surface shapes: `.v-card`, `.v-app-bar`,
+ *      `.v-navigation-drawer`.
+ *   3. Then call-to-action shapes: `.v-btn`, `.v-chip`, `.v-field`.
+ *   4. Sidebar + active states last — those tend to need the most
+ *      specificity.
+ * ========================================================================= */
+
+/* ============================== compact ==================================
+ * Orthogonal global density toggle — see `applyCompact()` in
+ * `plugins/styles.js`. Lives at `[data-compact="true"]` (instead of in
+ * the style slot) so a user can pair it with any preset: "Pulse +
+ * compact", "Aurora + compact", and so on. Intentionally only touches
+ * SIZES / PADDINGS — never radii, colors, or shadows — so the active
+ * preset's identity stays visible.
+ * ======================================================================== */
+[data-compact="true"] {
+  font-size: 13px;
+}
+[data-compact="true"] .v-card .v-card-title {
+  padding: 8px 12px !important;
+  font-size: 0.95rem;
+}
+[data-compact="true"] .v-card .v-card-text {
+  padding: 8px 12px !important;
+}
+[data-compact="true"] .v-btn {
+  min-height: 28px !important;
+  padding-inline: 10px !important;
+  font-size: 0.8rem !important;
+}
+[data-compact="true"] .v-chip {
+  height: 20px !important;
+  font-size: 0.72rem !important;
+}
+[data-compact="true"] .v-list-item {
+  min-height: 32px !important;
+  padding-inline: 8px !important;
+}
+[data-compact="true"] .v-list-item-title {
+  font-size: 0.85rem !important;
+}
+[data-compact="true"] .v-data-table > .v-table__wrapper > table > tbody > tr > td,
+[data-compact="true"] .v-data-table > .v-table__wrapper > table > thead > tr > th {
+  padding: 4px 8px !important;
+  font-size: 0.82rem !important;
+}
+
+/* ============================== sharp ====================================
+ * Brutalist. Zero radius, monospaced labels, harsh borders, uppercase
+ * buttons. Reads like a 90s admin panel reskinned for 2026 — a love-it-or-
+ * hate-it style that's increasingly popular in dev tools.
+ * ======================================================================== */
+[data-style="sharp"] {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+[data-style="sharp"] .v-card,
+[data-style="sharp"] .v-btn,
+[data-style="sharp"] .v-chip,
+[data-style="sharp"] .v-field,
+[data-style="sharp"] .v-list-item,
+[data-style="sharp"] .v-navigation-drawer,
+[data-style="sharp"] .v-app-bar,
+[data-style="sharp"] .v-dialog > .v-overlay__content > .v-card {
+  border-radius: 0 !important;
+}
+[data-style="sharp"] .v-card {
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.88) !important;
+  border: 2px solid rgba(0, 0, 0, 0.88) !important;
+}
+[data-style="sharp"] .v-btn {
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  border: 2px solid rgba(0, 0, 0, 0.88) !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.88) !important;
+  transition: transform 0.06s linear, box-shadow 0.06s linear !important;
+}
+[data-style="sharp"] .v-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.88) !important;
+}
+[data-style="sharp"] .v-chip {
+  border: 2px solid rgba(0, 0, 0, 0.88) !important;
+  font-weight: 700;
+}
+[data-style="sharp"] .v-app-bar,
+[data-style="sharp"] .v-navigation-drawer {
+  box-shadow: none !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.88);
+  border-right: 2px solid rgba(0, 0, 0, 0.88);
+}
+
+/* ============================== vibrant ==================================
+ * Bold gradients, deep navy sidebar, lifted cards. The "Ligoj 2026"
+ * prototype mock-up turned into a style: cards round to 14 px, the
+ * primary action wears an animated orange→red gradient, the active
+ * sidebar row gets a left accent bar + tinted background. Headings
+ * carry the Inter typographic flavour for that 2026 SaaS look.
+ * ======================================================================== */
+[data-style="vibrant"] {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+[data-style="vibrant"] .v-card {
+  border-radius: 14px !important;
+  box-shadow: 0 12px 28px -8px rgba(26, 35, 126, 0.18) !important;
+  border: 1px solid rgba(26, 35, 126, 0.06) !important;
+}
+[data-style="vibrant"] .v-card .v-card-title {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: 1.15rem;
+}
+[data-style="vibrant"] .v-btn {
+  border-radius: 10px !important;
+  text-transform: none !important;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+[data-style="vibrant"] .v-btn--variant-elevated.bg-primary,
+[data-style="vibrant"] .v-btn--variant-flat.bg-primary,
+[data-style="vibrant"] .v-btn.bg-primary {
+  background: linear-gradient(135deg, #f57c00 0%, #e53935 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px rgba(229, 57, 53, 0.32) !important;
+  background-size: 200% 200%;
+  animation: ligoj-vibrant-shift 8s ease-in-out infinite;
+}
+@keyframes ligoj-vibrant-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+[data-style="vibrant"] .v-btn--variant-elevated.bg-error,
+[data-style="vibrant"] .v-btn.bg-error {
+  background: linear-gradient(135deg, #ef5350 0%, #b71c1c 100%) !important;
+  box-shadow: 0 8px 20px rgba(183, 28, 28, 0.32) !important;
+}
+[data-style="vibrant"] .v-chip {
+  border-radius: 999px !important;
+  font-weight: 600;
+}
+[data-style="vibrant"] .v-field {
+  border-radius: 10px !important;
+}
+[data-style="vibrant"] .v-navigation-drawer {
+  background: linear-gradient(180deg, #1a237e 0%, #0d1b5e 100%) !important;
+  color: #e8eaf6 !important;
+}
+[data-style="vibrant"] .v-navigation-drawer .v-list-item {
+  border-radius: 10px;
+  margin: 3px 10px;
+  color: #c5cae9 !important;
+}
+[data-style="vibrant"] .v-navigation-drawer .v-list-item--active {
+  background: rgba(245, 124, 0, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: inset 4px 0 0 #f57c00;
+}
+[data-style="vibrant"] .v-app-bar {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
+  backdrop-filter: saturate(1.2);
+}
+
+/* ============================== argon ====================================
+ * Argon Dashboard 2 PRO inspired. White surface, gradient stat cards in
+ * indigo / cyan / mint, pill-shaped icon badges, sidebar uses a soft
+ * grey panel with gradient-underlined active row. Lots of soft shadow.
+ * ======================================================================== */
+[data-style="argon"] {
+  font-family: 'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+/* No .v-application background override here — the theme's
+ * `--v-theme-background` token already owns the canvas color. Forcing
+ * a custom hex (e.g. the Argon-mock `#f8f9fe`) on top of a dark theme
+ * leaves headings in the theme's light on-background color, producing
+ * invisible "white on near-white" text. Argon's identity lives in the
+ * gradient stat cards + shadows below; that survives any theme. */
+[data-style="argon"] .v-card {
+  border-radius: 12px !important;
+  border: 0 !important;
+  box-shadow: 0 0 2rem 0 rgba(136, 152, 170, 0.15) !important;
+}
+[data-style="argon"] .v-card .v-card-title {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: #344767;
+}
+/* Stat-card hero treatment — every primary-color card becomes a
+ * gradient surface with white text and a floating icon disc. */
+[data-style="argon"] .v-card.bg-primary {
+  background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-card.bg-info {
+  background: linear-gradient(87deg, #11cdef 0, #1171ef 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-card.bg-success {
+  background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-card.bg-warning {
+  background: linear-gradient(87deg, #fb6340 0, #fbb140 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-btn {
+  border-radius: 8px !important;
+  text-transform: none !important;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+[data-style="argon"] .v-btn.bg-primary {
+  background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-chip {
+  border-radius: 30px !important;
+  font-weight: 600;
+  font-size: 0.72rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-inline: 10px !important;
+}
+[data-style="argon"] .v-field {
+  border-radius: 8px !important;
+  box-shadow: inset 0 1px 2px rgba(50, 50, 93, 0.1) !important;
+}
+[data-style="argon"] .v-navigation-drawer {
+  background: #ffffff !important;
+  box-shadow: 0 0 2rem 0 rgba(136, 152, 170, 0.15) !important;
+}
+[data-style="argon"] .v-navigation-drawer .v-list-item {
+  border-radius: 6px;
+  margin: 2px 12px;
+  color: #525f7f !important;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+[data-style="argon"] .v-navigation-drawer .v-list-item--active {
+  color: #5e72e4 !important;
+  background: rgba(94, 114, 228, 0.05) !important;
+}
+[data-style="argon"] .v-navigation-drawer .v-list-item--active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #5e72e4, #825ee4);
+}
+[data-style="argon"] .v-app-bar {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ============================== glass ====================================
+ * "Light Blue" inspired — dark aurora background, frosted glass surfaces,
+ * accent gradient buttons. Heavy backdrop-filter use means this style
+ * looks best on a recent Chromium / Firefox; fallbacks degrade to flat
+ * translucent dark panels.
+ * ======================================================================== */
+[data-style="glass"] {
+  color-scheme: dark;
+  --glass-bg: rgba(20, 22, 70, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-text: #e8eaf6;
+}
+[data-style="glass"] .v-application {
+  background:
+    radial-gradient(1200px 800px at 10% -10%, rgba(106, 130, 251, 0.35), transparent 60%),
+    radial-gradient(1000px 700px at 110% 110%, rgba(252, 92, 125, 0.28), transparent 60%),
+    linear-gradient(135deg, #14123a 0%, #1d1d4a 50%, #3a3a8e 100%) !important;
+  color: var(--glass-text) !important;
+  min-height: 100vh;
+}
+[data-style="glass"] .v-card,
+[data-style="glass"] .v-navigation-drawer,
+[data-style="glass"] .v-app-bar,
+[data-style="glass"] .v-dialog > .v-overlay__content > .v-card,
+[data-style="glass"] .v-menu > .v-overlay__content > .v-list {
+  border-radius: 18px !important;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  color: var(--glass-text) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+[data-style="glass"] .v-card .v-card-title,
+[data-style="glass"] .v-card .v-card-text {
+  color: var(--glass-text) !important;
+}
+[data-style="glass"] .v-btn {
+  border-radius: 12px !important;
+  text-transform: none !important;
+  font-weight: 600;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(10px);
+}
+[data-style="glass"] .v-btn--variant-elevated.bg-primary,
+[data-style="glass"] .v-btn--variant-flat.bg-primary,
+[data-style="glass"] .v-btn.bg-primary {
+  background: linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 30px rgba(106, 130, 251, 0.45) !important;
+}
+[data-style="glass"] .v-chip {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: var(--glass-text) !important;
+}
+[data-style="glass"] .v-field {
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  --v-field-input-color: var(--glass-text);
+}
+[data-style="glass"] .v-navigation-drawer {
+  border-radius: 0 18px 18px 0 !important;
+}
+[data-style="glass"] .v-navigation-drawer .v-list-item {
+  border-radius: 12px;
+  margin: 3px 10px;
+  color: rgba(232, 234, 246, 0.7) !important;
+}
+[data-style="glass"] .v-navigation-drawer .v-list-item--active {
+  background: rgba(106, 130, 251, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(106, 130, 251, 0.4);
+}
+
+/* ============================== bento ====================================
+ * Apple-style oversized cards arranged like a bento box. Big rounded
+ * squares, heavy padding, large display headings, pastel-tinted surfaces.
+ * Works best paired with a light theme.
+ * ======================================================================== */
+[data-style="bento"] {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+/* Canvas background is left to the active color theme — overriding
+ * with a fixed light grey here broke contrast on dark themes (the
+ * theme's on-background stays light, so the page heading rendered as
+ * near-invisible white on the forced `#f5f5f7`). Bento's identity is
+ * its oversized rounded cards + display typography, both of which
+ * survive any color scheme. */
+[data-style="bento"] .v-card {
+  border-radius: 28px !important;
+  border: none !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  overflow: hidden;
+}
+[data-style="bento"] .v-card .v-card-title {
+  padding: 28px 28px 8px !important;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+[data-style="bento"] .v-card .v-card-text {
+  padding: 8px 28px 28px !important;
+  font-size: 1rem;
+}
+[data-style="bento"] .v-btn {
+  border-radius: 999px !important;
+  text-transform: none !important;
+  font-weight: 600;
+  padding-inline: 22px !important;
+  min-height: 44px !important;
+  letter-spacing: -0.005em;
+}
+[data-style="bento"] .v-chip {
+  border-radius: 14px !important;
+  font-weight: 600;
+}
+[data-style="bento"] .v-field {
+  border-radius: 16px !important;
+}
+[data-style="bento"] .v-list-item {
+  border-radius: 18px;
+  margin: 4px 10px;
+  min-height: 48px;
+}
+[data-style="bento"] .v-navigation-drawer {
+  border-right: none !important;
+}
+[data-style="bento"] .v-app-bar {
+  /* Ride the theme's surface token so dark themes get a dark
+   * translucent bar (instead of a fixed light grey washing out the
+   * inherited white text). `rgb(from … / 0.82)` keeps the Apple
+   * frosted-bar look on top. */
+  background: rgb(from rgb(var(--v-theme-surface)) r g b / 0.82) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: none !important;
+}
+
+/* ============================== neon =====================================
+ * Cyberpunk neon. Black canvas, cyan + magenta accents, glowing borders,
+ * scan-line accents on call-to-action buttons. Looks best with a dark
+ * color theme (Dracula / One Dark / Monokai).
+ * ======================================================================== */
+[data-style="neon"] {
+  color-scheme: dark;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --neon-cyan: #00fff0;
+  --neon-magenta: #ff2bd6;
+  --neon-violet: #a259ff;
+}
+[data-style="neon"] .v-application {
+  background:
+    radial-gradient(1000px 700px at 20% 0%, rgba(162, 89, 255, 0.18), transparent 60%),
+    radial-gradient(900px 600px at 100% 100%, rgba(255, 43, 214, 0.16), transparent 60%),
+    #05010f !important;
+  color: #e8f4ff !important;
+}
+[data-style="neon"] .v-card,
+[data-style="neon"] .v-navigation-drawer,
+[data-style="neon"] .v-app-bar {
+  border-radius: 6px !important;
+  background: rgba(10, 6, 26, 0.85) !important;
+  border: 1px solid rgba(0, 255, 240, 0.22) !important;
+  color: #e8f4ff !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 240, 0.06),
+    0 0 24px rgba(162, 89, 255, 0.12) !important;
+}
+[data-style="neon"] .v-card .v-card-title {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.95rem;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(0, 255, 240, 0.5);
+}
+[data-style="neon"] .v-btn {
+  border-radius: 6px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border: 1px solid var(--neon-cyan) !important;
+  color: var(--neon-cyan) !important;
+  background: transparent !important;
+  box-shadow: 0 0 0 1px rgba(0, 255, 240, 0.25), 0 0 16px rgba(0, 255, 240, 0.18) !important;
+  transition: box-shadow 0.15s, color 0.15s, background 0.15s;
+}
+[data-style="neon"] .v-btn:hover {
+  background: rgba(0, 255, 240, 0.08) !important;
+  box-shadow: 0 0 0 1px rgba(0, 255, 240, 0.5), 0 0 28px rgba(0, 255, 240, 0.5) !important;
+}
+[data-style="neon"] .v-btn.bg-primary,
+[data-style="neon"] .v-btn--variant-elevated.bg-primary {
+  background: linear-gradient(135deg, var(--neon-magenta), var(--neon-violet)) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 24px rgba(255, 43, 214, 0.55) !important;
+}
+[data-style="neon"] .v-chip {
+  border-radius: 4px !important;
+  background: rgba(0, 255, 240, 0.08) !important;
+  border: 1px solid rgba(0, 255, 240, 0.4) !important;
+  color: var(--neon-cyan) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem !important;
+  font-weight: 700;
+}
+[data-style="neon"] .v-field {
+  border-radius: 4px !important;
+  background: rgba(0, 255, 240, 0.04) !important;
+}
+[data-style="neon"] .v-navigation-drawer .v-list-item {
+  border-radius: 4px;
+  margin: 2px 8px;
+  color: rgba(232, 244, 255, 0.6) !important;
+}
+[data-style="neon"] .v-navigation-drawer .v-list-item--active {
+  background: rgba(255, 43, 214, 0.1) !important;
+  color: var(--neon-magenta) !important;
+  box-shadow: inset 3px 0 0 var(--neon-magenta), 0 0 16px rgba(255, 43, 214, 0.25);
+  text-shadow: 0 0 8px rgba(255, 43, 214, 0.55);
+}
+
+/* ============================== paper ====================================
+ * Warm minimalist print look. Cream background, ink-black text, a single
+ * accent color used for links and CTAs. No shadows — just hairline rules.
+ * Reads like a freshly-printed broadsheet.
+ * ======================================================================== */
+[data-style="paper"] {
+  font-family: 'Iowan Old Style', 'Palatino', Georgia, 'Times New Roman', serif;
+  --paper-bg: #f3ede1;
+  --paper-ink: #1a1a1a;
+  --paper-rule: #d8cdb8;
+  --paper-accent: #c8442a;
+}
+[data-style="paper"] .v-application {
+  background: var(--paper-bg) !important;
+  color: var(--paper-ink) !important;
+}
+[data-style="paper"] .v-card {
+  border-radius: 2px !important;
+  background: #fbf7ec !important;
+  border: 1px solid var(--paper-rule) !important;
+  box-shadow: none !important;
+}
+[data-style="paper"] .v-card .v-card-title {
+  font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.005em;
+  border-bottom: 1px solid var(--paper-rule);
+  padding-bottom: 12px !important;
+}
+/* Restore some breathing room under the bordered title — the default
+ * v-card-text top padding (16 px) read as too tight once the title
+ * grew the bottom hairline, making the first row of preferences feel
+ * stuck to the rule. */
+[data-style="paper"] .v-card .v-card-text {
+  padding-top: 22px !important;
+}
+/* Buttons: the hairline border is only appropriate on text-bearing
+ * "action" buttons (Save, Cancel, etc.). Icon-only buttons and every
+ * button mounted inside the app-bar (hamburger nav-icon, logout,
+ * refresh, notification bell…) read as ugly square borders around a
+ * tiny glyph — that was the user-reported "weird borders" bug. */
+[data-style="paper"] .v-btn:not(.v-btn--icon) {
+  border-radius: 2px !important;
+  text-transform: none !important;
+  font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  font-weight: 600;
+  border: 1px solid var(--paper-ink) !important;
+  box-shadow: none !important;
+  letter-spacing: 0;
+}
+[data-style="paper"] .v-app-bar .v-btn,
+[data-style="paper"] .v-btn--icon {
+  border: none !important;
+  box-shadow: none !important;
+}
+[data-style="paper"] .v-btn.bg-primary,
+[data-style="paper"] .v-btn--variant-elevated.bg-primary {
+  background: var(--paper-accent) !important;
+  color: #ffffff !important;
+  border-color: var(--paper-accent) !important;
+}
+[data-style="paper"] .v-chip {
+  border-radius: 2px !important;
+  background: transparent !important;
+  border: 1px solid var(--paper-rule) !important;
+  color: var(--paper-ink) !important;
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+[data-style="paper"] .v-field {
+  border-radius: 2px !important;
+  background: #fbf7ec !important;
+}
+[data-style="paper"] .v-list-item {
+  border-radius: 2px;
+  border-bottom: 1px solid var(--paper-rule);
+}
+[data-style="paper"] .v-list-item:last-child {
+  border-bottom: none;
+}
+[data-style="paper"] .v-navigation-drawer {
+  background: #ece4d2 !important;
+  border-right: 1px solid var(--paper-rule) !important;
+}
+/* AppLayout mounts the drawer with `color="primary" dark`, which forces
+ * white text on whatever background we paint. With the Paper cream
+ * background that produces invisible labels — explicitly re-anchor
+ * the drawer's text + icon color to the paper ink. Targets every
+ * Vuetify text/icon class that the dark-mode flip touches. */
+[data-style="paper"] .v-navigation-drawer,
+[data-style="paper"] .v-navigation-drawer .v-list-item,
+[data-style="paper"] .v-navigation-drawer .v-list-item-title,
+[data-style="paper"] .v-navigation-drawer .v-list-item-subtitle,
+[data-style="paper"] .v-navigation-drawer .v-icon {
+  color: var(--paper-ink) !important;
+}
+[data-style="paper"] .v-navigation-drawer .v-list-item--active {
+  background: transparent !important;
+  color: var(--paper-accent) !important;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+[data-style="paper"] .v-navigation-drawer .v-list-item--active .v-icon {
+  color: var(--paper-accent) !important;
+}
+[data-style="paper"] .v-app-bar {
+  background: var(--paper-bg) !important;
+  border-bottom: 1px solid var(--paper-rule) !important;
+  box-shadow: none !important;
+}

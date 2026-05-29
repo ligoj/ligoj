@@ -184,6 +184,8 @@ export default {
   'profile.apiTokens': 'Tokens API',
   'profile.apiTokensHint': 'Créer ou révoquer des clés pour l\'API REST',
   'profile.theme': 'Thème',
+  'profile.compact': 'Mode compact',
+  'profile.compactHint': 'Espacements resserrés, polices plus petites, tableaux plus denses',
   'profile.skipUnsavedConfirmation': 'Quitter sans confirmation',
   'profile.skipUnsavedConfirmationHint': 'Quitte les formulaires modifiés sans demander confirmation',
   'profile.language': 'Langue',
