@@ -133,6 +133,7 @@ export default {
   'company.title': 'Entités',
   'company.new': 'Nouvelle entité',
   'company.edit': 'Modifier l\'entité',
+  'company.detailsTitle': 'Détails de l\'entité',
   'company.deleteTitle': 'Supprimer l\'entité',
   'company.deleteConfirm': 'Êtes-vous certain de supprimer {{name}} ?',
   'company.noProvider': 'Aucun fournisseur d\'identité configuré. Connectez un plugin IAM (LDAP, AD, etc.) pour gérer les entités.',

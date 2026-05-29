@@ -133,6 +133,7 @@ export default {
   'company.title': 'Companies',
   'company.new': 'New Company',
   'company.edit': 'Edit Company',
+  'company.detailsTitle': 'Company details',
   'company.deleteTitle': 'Delete Company',
   'company.deleteConfirm': 'Are you sure you want to delete {{name}}?',
   'company.noProvider': 'No identity provider is configured. Connect an IAM plugin (LDAP, AD, etc.) to manage companies.',
