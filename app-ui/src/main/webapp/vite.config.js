@@ -168,6 +168,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         login: resolve(__dirname, 'login.html'),
+        loginByApiKey: resolve(__dirname, 'login-by-api-key.html'),
         host: resolve(__dirname, 'src/host.js'),
       },
       external: [/^\/main\//, /^\/ligoj\/main\//],
@@ -219,17 +220,20 @@ export default defineConfig({
       '/ligoj/login': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        // `/ligoj/login.html` is the SPA's own static login page — let
-        // vite serve it from `app-ui/src/main/webapp/login.html` instead
-        // of forwarding to the backend (which has no resource at that
-        // path in OAuth2Bff mode, and would 302 us into the auth flow,
-        // looping forever after a `/login.html?denied` failure URL).
-        // The other paths under `/ligoj/login` — form-login POST and
-        // `/login/oauth2/code/<client>` callback — must still proxy
-        // through, so we only bypass `.html`. The narrower
+        // `/ligoj/login.html` and `/ligoj/login-by-api-key.html` are
+        // the SPA's own static login pages — let vite serve them from
+        // `app-ui/src/main/webapp/` instead of forwarding to the
+        // backend (which has no resource at those paths in OAuth2Bff
+        // mode, and would 302 us into the auth flow, looping forever
+        // after a `?denied` failure URL). The other paths under
+        // `/ligoj/login*` — the form-login POST, the API-key POST
+        // (`/login-by-api-key`), and the `/login/oauth2/code/<client>`
+        // OAuth callback — must still proxy through, so we only
+        // bypass the `.html` files explicitly. The narrower
         // `/ligoj/login/oauth2` proxy below keeps its own settings.
         bypass(req) {
           if (req.url?.startsWith('/ligoj/login.html')) return req.url
+          if (req.url?.startsWith('/ligoj/login-by-api-key.html')) return req.url
         },
       },
       // Spring Security OIDC endpoints: /oauth2/authorization/{client}
