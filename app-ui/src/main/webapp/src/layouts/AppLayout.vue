@@ -2,7 +2,7 @@
   <v-navigation-drawer v-model="appStore.sidebarOpen" :temporary="mobile" app color="primary" dark>
     <v-list-item @click="router.push('/')" class="pa-4">
       <template #prepend>
-        <img src="@/assets/ligoj.svg" :alt="appName" style="width: 32px; height: 32px; margin-right: 8px" />
+        <img src="@/assets/logo.svg" :alt="appName" style="width: 32px; height: 32px; margin-right: 8px" />
       </template>
       <v-list-item-title class="text-h6 font-weight-bold">{{ appName }}</v-list-item-title>
     </v-list-item>

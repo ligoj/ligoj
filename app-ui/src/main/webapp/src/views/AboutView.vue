@@ -88,6 +88,15 @@
                     <v-list-item-subtitle>MIT</v-list-item-subtitle>
                     <template #append><v-icon size="small">mdi-chevron-right</v-icon></template>
                   </v-list-item>
+                  <v-list-item href="https://www.kloudy.fr/" target="_blank" rel="noopener noreferrer" class="built-by-row">
+                    <template #prepend><v-icon>mdi-hammer-wrench</v-icon></template>
+                    <v-list-item-title class="d-flex align-center ga-2">
+                      <span>{{ t('about.builtBy') }}</span>
+                      <img :src="brandWhite" alt="Kloudy" class="brand-img brand-img--rest" />
+                      <img :src="brandColor" alt="" aria-hidden="true" class="brand-img brand-img--hover" />
+                    </v-list-item-title>
+                    <template #append><v-icon size="small">mdi-open-in-new</v-icon></template>
+                  </v-list-item>
                 </v-list>
               </v-card-text>
             </v-card>
@@ -151,7 +160,14 @@ import { useI18nStore } from '@/stores/i18n.js'
 // Vite resolves this to a hashed URL at build time and a dev-server URL
 // at run time — works in both modes without hard-coding `/ligoj/...`.
 // Same asset the sidebar brand uses (AppLayout.vue).
-import ligojLogo from '@/assets/ligoj.svg'
+import ligojLogo from '@/assets/logo.svg'
+// Kloudy brand mark for the "Built by" row. The `-white` variant is
+// the desaturated default (sits quietly in a neutral list item); the
+// other variant is the full-color version surfaced on hover / focus.
+// Both PNGs are small enough (< 1 KB) that vite inlines them as
+// data URLs at build time — zero extra HTTP request.
+import brandWhite from '@/assets/brand-white.png'
+import brandColor from '@/assets/brand.png'
 
 const auth = useAuthStore()
 const appStore = useAppStore()
@@ -240,5 +256,33 @@ onMounted(() => {
   width: 28px;
   height: 28px;
   flex-shrink: 0;
+}
+
+/* "Built by" row — two-image swap. Both PNGs render at the inherited
+ * text line-height so the brand mark scales with the row typography
+ * (and ignores the row's font-size variations across the active
+ * theme/preset). `:hover` and `:focus-visible` both swap so the
+ * keyboard-navigation state matches mouse hover. */
+.built-by-row .brand-img {
+  height: 1.4em;
+  width: auto;
+  vertical-align: middle;
+  /* Keep both images on a stable baseline so the swap doesn't shift
+   * the row height by a pixel. */
+  display: inline-block;
+}
+
+.built-by-row .brand-img--hover {
+  display: none;
+}
+
+.built-by-row:hover .brand-img--rest,
+.built-by-row:focus-visible .brand-img--rest {
+  display: none;
+}
+
+.built-by-row:hover .brand-img--hover,
+.built-by-row:focus-visible .brand-img--hover {
+  display: inline-block;
 }
 </style>

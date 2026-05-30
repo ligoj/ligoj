@@ -202,6 +202,7 @@ export default {
   'about.project': 'Project',
   'about.github': 'GitHub repository',
   'about.license': 'License',
+  'about.builtBy': 'Built and maintained by',
   'about.frontend': 'Frontend',
   'about.framework': 'Framework',
   'about.buildTool': 'Build Tool',

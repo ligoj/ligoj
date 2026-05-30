@@ -18,7 +18,7 @@
         <select class="locale-select" aria-label="Language" :value="locale" @change="setLocale($event.target.value)">
           <option v-for="loc in LOCALES" :key="loc.code" :value="loc.code">{{ loc.flag }} {{ loc.label }}</option>
         </select>
-        <img src="@/assets/ligoj.svg" alt="Ligoj" class="logo" />
+        <img src="@/assets/logo.svg" alt="Ligoj" class="logo" />
         <p class="subtitle">{{ msg.title }}</p>
       </header>
 
@@ -313,7 +313,9 @@ input:focus {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .back {
