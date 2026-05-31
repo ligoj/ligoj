@@ -28,7 +28,7 @@ class SecurityConfigurationTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	void configure() throws Exception {
-		@SuppressWarnings("unchecked") final ObjectPostProcessor<Object> processor = Mockito.mock(ObjectPostProcessor.class);
+		final ObjectPostProcessor<Object> processor = Mockito.mock(ObjectPostProcessor.class);
 		Mockito.doAnswer((Answer<Object>) invocation -> invocation.getArgument(0)).when(processor).postProcess(Mockito.any());
 
 		final var builder = new AuthenticationManagerBuilder(processor);
@@ -36,7 +36,8 @@ class SecurityConfigurationTest {
 		final var authenticationManager = Mockito.mock(AuthenticationManager.class);
 		final var authenticationConfiguration = Mockito.mock(AuthenticationConfiguration.class);
 		Mockito.when(applicationContext.getBeanNamesForType(Mockito.any(Class.class))).thenReturn(new String[0]);
-		final var security = new HttpSecurity(processor, builder, Map.of(ApplicationContext.class, applicationContext, AuthenticationManager.class, authenticationManager));
+		final var security = new HttpSecurity(processor, builder,
+				Map.of(ApplicationContext.class, applicationContext, AuthenticationManager.class, authenticationManager));
 		security.authenticationManager(authenticationManager);
 		final var configuration = new SecurityConfiguration();
 

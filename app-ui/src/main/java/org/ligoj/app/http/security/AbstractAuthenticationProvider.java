@@ -41,8 +41,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 	private String ssoWelcome;
 
 	/**
-	 * Authentication supports.
-	 * {@inheritDoc}
+	 * Authentication supports. {@inheritDoc}
 	 *
 	 * @return Always <code>true</code>
 	 */
@@ -60,12 +59,9 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 	 * @return The HttpSecurity parameter for the chaining.
 	 * @throws Exception From {@link HttpSecurity#logout(Customizer)}
 	 */
-	public HttpSecurity configureLogout(HttpSecurity http,
-			final String logoutUrl, final String[] securityPreAuthCookies) throws Exception {
-		return http.logout(a ->
-				a.addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies))
-						.invalidateHttpSession(true)
-						.logoutSuccessUrl(logoutUrl));
+	public HttpSecurity configureLogout(HttpSecurity http, final String logoutUrl, final String[] securityPreAuthCookies) throws Exception {
+		return http
+				.logout(a -> a.addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies)).invalidateHttpSession(true).logoutSuccessUrl(logoutUrl));
 	}
 
 	/**
@@ -80,14 +76,9 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 	 * @throws Exception From {@link HttpSecurity#formLogin(Customizer)}
 	 */
 	public HttpSecurity configureLogin(HttpSecurity http, final String loginUrlDenied, final String loginApiUrl,
-			final AuthenticationSuccessHandler successHandler,
-			final AuthenticationFailureHandler failureHandler) throws Exception {
+			final AuthenticationSuccessHandler successHandler, final AuthenticationFailureHandler failureHandler) throws Exception {
 		// Standard self-hosted 'form' login
-		return http.formLogin(a -> a
-				.loginPage(loginUrlDenied)
-				.loginProcessingUrl(loginApiUrl)
-				.successHandler(successHandler)
-				.failureHandler(failureHandler));
+		return http.formLogin(a -> a.loginPage(loginUrlDenied).loginProcessingUrl(loginApiUrl).successHandler(successHandler).failureHandler(failureHandler));
 	}
 
 }
