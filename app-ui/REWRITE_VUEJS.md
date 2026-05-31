@@ -190,6 +190,32 @@ What's actually shipped in this branch — record here so the next plugin migrat
 | `plugin-id-ldap` | Tool-level sub-plugin                                   | The "thin" pattern: no routes, no component. Just i18n labels + a `renderFeatures` hook the parent merges in. Declares `requires: ['id']`.                          |
 | `plugin-prov`    | Large service-level plugin (legacy)                     | The first port — `renderFeatures` and `renderDetailsKey` patterns originated here.                                                                                  |
 
+## Migrated plugins
+
+Ported to the `ui/` Vue stack on this branch (each emits to
+`webjars/<id>/vue/`). Use the nearest sibling as a copy template.
+
+| Plugin                                            | Kind           | Notes                                                                         |
+| ------------------------------------------------- | -------------- | ----------------------------------------------------------------------------- |
+| plugin-id                                         | service        | "fat" reference — CRUD views, dialogs, delegation hook                        |
+| plugin-ui                                         | service        | shared wizards (`SubscribeWizardView`, `SystemNodeView`, `ProjectDetailView`) |
+| plugin-id-ldap                                    | tool           | "thin" reference — i18n + `renderFeatures`                                    |
+| plugin-prov                                       | service        | catalog / currency / **Administration** pages via `renderAdmin` (see below)   |
+| plugin-prov-aws / -azure / -fe / -outscale / -ovh | tool           | **i18n-only** (prov parent has no delegation hook)                            |
+| plugin-vm                                         | service        | parent with schedule / snapshot / reports views + delegation hook             |
+| plugin-vm-aws / -azure / -vcloud                  | tool           | delegation: console/portal link + instance chip                               |
+| plugin-vm-google                                  | tool           | i18n + instance chip only — **no** row link (see asset-bug gotcha)            |
+| plugin-bt (+ -jira)                               | service + tool | JIRA browse link + PKEY chip                                                  |
+| plugin-build (+ -jenkins / -travis)               | service + tool | job link + job chip                                                           |
+| plugin-km (+ -confluence)                         | service + tool | space link + space chip                                                       |
+| plugin-qa (+ -sonarqube)                          | service + tool | dashboard link + project chip                                                 |
+| plugin-mail (+ -smtp)                             | service + tool | i18n-only (SMTP node is global, mode NONE)                                    |
+
+All delegating service parents (vm/bt/build/km/qa/mail) share one shape:
+no routes/component (legacy HTML empty / `define({})`), i18n +
+`subPluginIdFor` delegation; each tool's vitest imports its sibling
+parent's `index.js` to exercise parent→tool delegation.
+
 ## Infrastructure decisions
 
 - **VeeValidate / VeeValidateI18n** never landed. Vuetify's built-in `:rules` are enough; avoids a second validation library plugins would have to learn.
@@ -307,6 +333,8 @@ Tool-level plugins like `plugin-id-ldap` (lives at `service:id:ldap`) augment a 
 - **Ship** an i18n bundle with parameter labels keyed on the parameter ids the tool owns (e.g. `service:id:ldap:base-dn`). The subscribe wizard's flat `t(p.id)` lookup resolves them automatically — see "Parameter form conventions".
 - **Implement** `renderFeatures` (and friends). The parent's `service.js` looks for a sub-plugin via `subPluginIdFor(node)` — for a node `service:id:ldap:local`, this resolves to `id-ldap` and the parent merges the child's VNodes into its own row buttons.
 
+**Not every service parent delegates.** The `vm`, `bt`, `build`, `km`, `qa`, and `mail` parents implement `subPluginIdFor` + feature-merging, so their tools contribute `renderFeatures` / `renderDetailsKey`. The `prov` parent does NOT — its tools (`prov-aws`, `prov-azure`, `prov-fe`, `prov-outscale`, `prov-ovh`) are **i18n-only**: parameter labels and nothing else. Check the parent's `service.js` before writing a tool's hooks.
+
 Minimal sub-plugin manifest:
 
 ```js
@@ -420,27 +448,27 @@ export default defineConfig({
 
 Imported from the host bundle via the import map; treat as the public API and don't bypass it. Current exports (see `app-ui/src/main/webapp/src/host.js`):
 
-| Export                                    | Purpose                                                                                                                                                                                                                                         |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `useApi`                                  | `get / post / put / del` against `rest/*`. Adds redirect handling, error toasts, and 401 → bounce-to-SPA-root behaviour.                                                                                                                        |
-| `useAuthStore`                            | Session, roles, `redirectToLogin()`, OIDC-aware logout.                                                                                                                                                                                         |
-| `useAppStore`                             | Breadcrumbs (`setBreadcrumbs(items, { refresh })`), title, refresh button in app bar.                                                                                                                                                           |
-| `useI18nStore`                            | `t(key, params)`, `setLocale(loc)`, `merge(messages, locale?)`.                                                                                                                                                                                 |
-| `useErrorStore`                           | Toast queue (`push / success / info`), centralized API response handling.                                                                                                                                                                       |
-| `useClipboard`                            | `copy(text, { message })` with browser API + textarea fallback.                                                                                                                                                                                 |
-| `useDataTable`                            | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`).                                                                                                                                          |
-| `useFormGuard`                            | Unsaved-changes dialog + `onBeforeRouteLeave` integration.                                                                                                                                                                                      |
-| `LigojDataTable` / `LigojDataTableServer` | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported.                                                                                                                                          |
-| `LigojConfirmDialog`                      | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s.                                                                                                                                                                  |
-| `NodeIcon` / `nodeIcon` / `NodeModeChip`  | Render a node's icon and subscription mode consistently.                                                                                                                                                                                        |
-| `nodeType` / `isInstance`                 | Classify a node id (`service` / `feature` / `tool` / `instance`).                                                                                                                                                                               |
-| `ImportExportBar`                         | CSV import/export header strip for list views.                                                                                                                                                                                                  |
-| `PluginFeatures`                          | Render-function delegate that mounts a plugin's VNodes for a subscription row (`renderFeatures`, `renderDetailsKey`, …). See "Subscription row delegation" below.                                                                               |
-| `nodePluginId`                            | Returns the plugin id (the second `:`-segment) of a node — `service:prov:aws` → `'prov'`. Used by `PluginFeatures` to resolve the right plugin.                                                                                                 |
-| `VBtn` / `VChip` / `VIcon` / `VTooltip`   | Re-exports of Vuetify primitives. Plugins build their VNodes with `h(VBtn, …)` without bundling their own Vuetify (which would break shared theming and instance state).                                                                        |
-| `APP_BASE`                                | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths.                                                                                                                   |
-| `pluginRegistry` / `callFeature`          | Direct registry access for parent-to-child delegation (`subPluginIdFor`, `delegateToToolPlugin`). `callFeature` throws on missing plugin; prefer `pluginRegistry.get(id)?.feature?.(...)` when graceful degradation matters.                    |
-| `loadPlugin` / `pluginIdFromKey`          | Lazy-load a sibling plugin at runtime. The wizard uses these to `ensureToolPluginLoaded(nodeId)` before rendering parameter labels, so i18n inheritance works even if discovery hasn't run. `pluginIdFromKey('service:id:ldap')` → `'id-ldap'`. |
+| Export                                                             | Purpose                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useApi`                                                           | `get / post / put / del` against `rest/*`. Adds redirect handling, error toasts, and 401 → bounce-to-SPA-root behaviour.                                                                                                                                  |
+| `useAuthStore`                                                     | Session, roles, `redirectToLogin()`, OIDC-aware logout.                                                                                                                                                                                                   |
+| `useAppStore`                                                      | Breadcrumbs (`setBreadcrumbs(items, { refresh })`), title, refresh button in app bar.                                                                                                                                                                     |
+| `useI18nStore`                                                     | `t(key, params)`, `setLocale(loc)`, `merge(messages, locale?)`.                                                                                                                                                                                           |
+| `useErrorStore`                                                    | Toast queue (`push / success / info`), centralized API response handling.                                                                                                                                                                                 |
+| `useClipboard`                                                     | `copy(text, { message })` with browser API + textarea fallback.                                                                                                                                                                                           |
+| `useDataTable`                                                     | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`).                                                                                                                                                    |
+| `useFormGuard`                                                     | Unsaved-changes dialog + `onBeforeRouteLeave` integration.                                                                                                                                                                                                |
+| `LigojDataTable` / `LigojDataTableServer`                          | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported.                                                                                                                                                    |
+| `LigojConfirmDialog`                                               | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s.                                                                                                                                                                            |
+| `NodeIcon` / `nodeIcon` / `NodeModeChip`                           | Render a node's icon and subscription mode consistently.                                                                                                                                                                                                  |
+| `nodeType` / `isInstance`                                          | Classify a node id (`service` / `feature` / `tool` / `instance`).                                                                                                                                                                                         |
+| `ImportExportBar`                                                  | CSV import/export header strip for list views.                                                                                                                                                                                                            |
+| `PluginFeatures`                                                   | Render-function delegate that mounts a plugin's VNodes for a subscription row (`renderFeatures`, `renderDetailsKey`, …). See "Subscription row delegation" below.                                                                                         |
+| `nodePluginId`                                                     | Returns the plugin id (the second `:`-segment) of a node — `service:prov:aws` → `'prov'`. Used by `PluginFeatures` to resolve the right plugin.                                                                                                           |
+| `VBtn` / `VChip` / `VIcon` / `VTooltip` / `VListItem` / `VDivider` | Re-exports of Vuetify primitives (the list-item / divider pair is for `renderGlobal` / `renderAdmin` menu VNodes). Plugins build their VNodes with `h(VBtn, …)` without bundling their own Vuetify (which would break shared theming and instance state). |
+| `APP_BASE`                                                         | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths.                                                                                                                             |
+| `pluginRegistry` / `callFeature`                                   | Direct registry access for parent-to-child delegation (`subPluginIdFor`, `delegateToToolPlugin`). `callFeature` throws on missing plugin; prefer `pluginRegistry.get(id)?.feature?.(...)` when graceful degradation matters.                              |
+| `loadPlugin` / `pluginIdFromKey`                                   | Lazy-load a sibling plugin at runtime. The wizard uses these to `ensureToolPluginLoaded(nodeId)` before rendering parameter labels, so i18n inheritance works even if discovery hasn't run. `pluginIdFromKey('service:id:ldap')` → `'id-ldap'`.           |
 
 ## 5. Translations
 
@@ -551,6 +579,56 @@ Two patterns are in use:
 - **`<style>` (unscoped)** — for selectors that have to reach into Vuetify's teleported DOM (data-table cells, dialog overlays). Always namespace by a unique class on the SFC's root.
 
 Global Vuetify tweaks live in `app-ui/src/main/webapp/src/assets/vuetify-overrides.css` and are imported once from `plugins/vuetify.js`. Add to that file instead of duplicating CSS in every plugin.
+
+## 8b. Data tables & list-view conventions
+
+`LigojDataTable` (client data) and `LigojDataTableServer` (server-paged)
+wrap `v-data-table` with the tools (cog) menu — CSV export + copy. They
+**forward any `#header.<key>` / `#item.<key>` slot** to the inner table, so
+you customise a column by declaring the matching slot in the parent. They
+also honour a per-header `tooltip` field (auto-renders a tooltip on the
+header label); a custom `#header.<key>` slot **overrides** the `tooltip`
+field for that column — use one or the other.
+
+**Icon-only headers.** When a column's label is long but an icon conveys
+it, show only the icon and move the label into a tooltip:
+
+```vue
+<template #header.nbQuotes="{ column, getSortIcon, toggleSort }">
+  <span class="icon-header" @click="column.sortable && toggleSort?.(column)">
+    <v-icon size="small">mdi-file-document-multiple-outline</v-icon>
+    <v-icon v-if="column.sortable && getSortIcon" :icon="getSortIcon(column)" size="x-small" class="ml-1" />
+    <v-tooltip activator="parent" location="top" :text="column.title" />
+  </span>
+</template>
+```
+
+Keep `title` populated (even though hidden) so CSV export carries a real
+column name. For a NON-sortable icon-only header drop the
+`getSortIcon`/`toggleSort` bits. plugin-prov's catalog
+(Quotes/Locations/Types/Prices) and currency (`nbQuotes`) use this.
+
+**List-view polish convention** (plugin-id is the reference — apply
+consistently across every list view):
+
+- **Row-action buttons** are icon-only `<v-btn>` with a nested tooltip:
+  ```vue
+  <v-btn icon size="small" variant="text" @click.stop="openEdit(item)">
+    <v-icon size="small">mdi-pencil</v-icon>
+    <v-tooltip activator="parent" location="top" :text="t('common.edit')" />
+  </v-btn>
+  ```
+  `common.edit` / `common.view` / `common.delete` live in the HOST i18n.
+- **Data columns** get a leading header icon via a `#header.<key>` slot:
+  `<v-icon size="small" class="mr-1">ICON</v-icon>{{ column.title }}`.
+- **Identifier cells** read as icon + monospace: a leading
+  `mdi-account-circle` (`color="medium-emphasis"`) beside
+  `<code>{{ item.id }}</code>`.
+- **Boolean cells** use `mdi-check-circle` (`color="success"`) for true and
+  `mdi-minus-circle-outline` (`color="grey-lighten-1"`) for false. NEVER
+  `color="disabled"` — it is not a valid Vuetify color and renders
+  uncolored.
+- **Status cells** (locked/active) use a colored icon wrapped in a tooltip.
 
 ## 9. Building and testing
 
@@ -797,6 +875,51 @@ container.
 
 ---
 
+# Administration menu (`renderAdmin`)
+
+The third host→plugin render-delegation point (alongside subscription-row
+`PluginFeatures` and sidebar `renderGlobal`). It lets any plugin contribute
+entries to the shared **Administration** menu — used by `plugin-prov` for
+its global admin pages (catalog, currency, terraform binary version), which
+have no subscription and so don't belong on a project row.
+
+## Plugin contract
+
+A plugin opts in by implementing a `renderAdmin` feature returning one or
+more `VListItem` VNodes (routes, not hrefs — these are in-app admin pages):
+
+```js
+import { h } from 'vue'
+import { VListItem, useI18nStore } from '@ligoj/host'
+
+const features = {
+  renderAdmin() {
+    const { t } = useI18nStore()
+    return [
+      h(VListItem, { prependIcon: 'mdi-database-cog-outline', title: t('catalog.title'),   to: '/prov/catalog' }),
+      h(VListItem, { prependIcon: 'mdi-cash-multiple',        title: t('currency.title'),  to: '/prov/currency' }),
+      h(VListItem, { prependIcon: 'mdi-terraform',            title: t('terraform.title'), to: '/prov/terraform' }),
+    ]
+  },
+}
+```
+
+## Host plumbing
+
+- `AdminNavExtras.vue` (mounted by `AppLayout` inside the system/Administration
+  nav group) polls every registered plugin for `feature('renderAdmin')`,
+  groups the results per plugin under a visible divider + a thin ownership
+  notice (the plugin's `label`), and renders the entries. Plugins that don't
+  implement `renderAdmin` are skipped (the "no feature" error is swallowed;
+  real errors `console.warn`).
+- **Lazy-load reactivity** — the registry exposes a reactive `version` ref
+  bumped on every `register`/`remove`. `AdminNavExtras` (and the analogous
+  `GlobalToolsList`) read it so a plugin whose bundle arrives *after* first
+  paint re-renders the host menu once it registers. Read `registry.version.value`
+  (and `i18n.locale`) inside the render fn to subscribe to both.
+
+---
+
 # Decisions and gotchas
 
 Battle scars worth respecting on the next migration.
@@ -872,6 +995,25 @@ Battle scars worth respecting on the next migration.
 
 - A plugin's own `import.meta.env.BASE_URL` is `/`, not `/ligoj/`. Always use the host's `APP_BASE` export when building absolute URLs (`fetch`, `<img>` `src`, etc.).
 - The Spring API container resolves `/main/<id>/vue/index.js` to the plugin's webjar resources. After `mvn install` of the plugin module, the new bundle is picked up without an API restart.
+
+## Local toolchain (nvm)
+
+On a machine where the zsh `nvm` shim is broken, `npm`/`node` fail in a
+non-interactive shell (`command not found: _nvm_lazy_load`). Run the
+toolchain from a clean bash with an explicit PATH and call the local
+binaries directly:
+
+```bash
+/bin/bash --noprofile --norc -c '
+  export PATH=$HOME/.nvm/versions/node/<ver>/bin:$PATH
+  cd plugin-<id>/ui
+  ./node_modules/.bin/eslint . && ./node_modules/.bin/vitest run && ./node_modules/.bin/vite build'
+```
+
+When the editor's Edit/Write or shell stdout desync mid-session, apply file
+changes with a Node `fs.readFileSync` → string-replace → `writeFileSync`
+script (it bypasses the editor channel) and verify each change with a
+`grep -c` / second read before running the build.
 
 ---
 
