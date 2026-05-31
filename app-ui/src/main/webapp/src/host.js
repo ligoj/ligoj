@@ -44,7 +44,10 @@ export { loadPlugin, pluginIdFromKey } from './plugins/loader.js'
 // `@ligoj/host` external; importing VBtn/VIcon from here lets a plugin's
 // `renderFeatures()` build VNodes with `h(VBtn, …)` without bundling its
 // own copy of Vuetify (which would break shared theming / instance state).
-export { VBtn, VChip, VIcon, VTooltip } from 'vuetify/components'
+// `VListItem` is what `feature('renderAdmin')` contributors build their
+// Administration menu entries with (see AdminNavExtras); `VDivider` is
+// exposed for symmetry though the host paints the menu separator itself.
+export { VBtn, VChip, VIcon, VTooltip, VListItem, VDivider } from 'vuetify/components'
 
 /**
  * The app's public base path, e.g. `/ligoj/`. Exported so plugins can

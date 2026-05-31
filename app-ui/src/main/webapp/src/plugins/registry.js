@@ -1,6 +1,22 @@
+import { ref } from 'vue'
+
 const plugins = new Map()
 
+/**
+ * Reactive change counter, bumped on every register/remove. Components
+ * that derive UI from the *set* of loaded plugins (e.g. `AdminNavExtras`,
+ * which polls every plugin for a `renderAdmin` contribution) read
+ * `registry.version.value` inside their render function so they re-run
+ * when a plugin is lazily loaded after first paint. The registry stays a
+ * plain singleton otherwise — only this counter is reactive.
+ */
+const version = ref(0)
+
 const registry = {
+  // Exposed so reactive consumers can track (de)registration. Read
+  // `.value` inside a render/computed to subscribe.
+  version,
+
   register(id, definition) {
     const required = ['id', 'install']
     for (const key of required) {
@@ -19,6 +35,7 @@ const registry = {
       service: definition.service || null,
       meta: definition.meta || {},
     })
+    version.value++
     return true
   },
 
@@ -35,7 +52,9 @@ const registry = {
   },
 
   remove(id) {
-    return plugins.delete(id)
+    const removed = plugins.delete(id)
+    if (removed) version.value++
+    return removed
   },
 }
 

@@ -15,6 +15,14 @@
             <v-list-item v-bind="props" :prepend-icon="item.icon" :title="item.labelKey ? t(item.labelKey) : item.label" />
           </template>
           <v-list-item v-for="child in item.children" :key="child.id" :prepend-icon="child.icon" :title="child.labelKey ? t(child.labelKey) : child.label" :to="child.route" />
+          <!-- Plugin-contributed Administration entries (e.g. plugin-prov's
+               catalog / currency / terraform). Rendered only inside the
+               Administration ("system") group, below the built-in
+               entries, behind a divider painted by the component itself.
+               Plugins opt in via `feature('renderAdmin')`; the host has no
+               idea what's here, so an install without a contributing
+               plugin renders nothing. -->
+          <AdminNavExtras v-if="item.id === 'system'" />
         </v-list-group>
       </template>
     </v-list>
@@ -82,6 +90,7 @@ import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
 import { useI18nStore } from '@/stores/i18n.js'
 import GlobalToolsList from '@/components/GlobalToolsList.vue'
+import AdminNavExtras from '@/components/AdminNavExtras.vue'
 
 const router = useRouter()
 const route = useRoute()
