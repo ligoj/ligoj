@@ -219,11 +219,20 @@ npm install --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm install --prefix ~/
 Build
 
 ```shell
-npm run build --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-id/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-prov/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-id-ldap/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-prov-aws/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-password/ui && npm run build --prefix ~/git/ligoj-plugins/plugin-inbox-sql/ui
+for plugin in "plugin-ui" "plugin-id"; do
+   npm run build --prefix ~/git/ligoj-plugins/$plugin/ui
+done
+
+for plugin in "plugin-ui" "plugin-id" "plugin-prov" "plugin-id-ldap" "plugin-prov-aws" "plugin-password" "plugin-inbox-sql" "plugin-vm" "plugin-vm-aws" "plugin-vm-azure" "plugin-qa" "plugin-qa-sonarqube" "plugin-prov-outscale" "plugin-build" "plugin-build-jenkins" "plugin-build-travis" "plugin-km" "plugin-km-confluence"; do
+   npm run build --prefix ~/git/ligoj-plugins/$plugin/ui
+done
+
 ```
 
 Test
 
 ```shell
-npm run test --prefix ~/git/ligoj-plugins/plugin-ui/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-id/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-prov/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-id-ldap/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-prov-aws/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-password/ui && npm run test --prefix ~/git/ligoj-plugins/plugin-inbox-sql/ui
+for plugin in "plugin-ui" "plugin-id"; do
+   npm run test --prefix ~/git/ligoj-plugins/$plugin/ui
+done
 ```
