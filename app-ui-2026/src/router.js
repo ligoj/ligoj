@@ -8,6 +8,7 @@ import GroupsView from '@2026/views/GroupsView.vue'
 import CompaniesView from '@2026/views/CompaniesView.vue'
 import DelegatesView from '@2026/views/DelegatesView.vue'
 import ScopesView from '@2026/views/ScopesView.vue'
+import ProjectsView from '@2026/views/ProjectsView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: DashboardView },
@@ -22,6 +23,7 @@ const routes = [
   { path: '/id/company/:id', name: 'id-company-view', component: CompaniesView },
   { path: '/id/delegate', name: 'id-delegate', component: DelegatesView },
   { path: '/id/scope', name: 'id-scope', component: ScopesView },
+  { path: '/project', name: 'project', component: ProjectsView },
 ]
 
 const router = createRouter({

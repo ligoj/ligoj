@@ -105,6 +105,17 @@ export default {
   'containerScope.subtitle2026': 'Définissez les bases LDAP des groupes et entités.',
   'containerScope.deleteConfirmBefore': 'Êtes-vous certain de supprimer ',
   'containerScope.deleteConfirmAfter': ' ?',
+  // Projects cockpit (2026).
+  'project.title': 'Projets',
+  'project.new': 'Nouveau projet',
+  'project.countLabel': 'projets',
+  'project.searchPlaceholder': 'Rechercher un projet…',
+  'project.subsShort': 'souscr.',
+  'project.open': 'Ouvrir le projet',
+  'project.noTool': 'Aucun outil',
+  'project.createSoon': 'Création de projet — bientôt',
+  'project.detailSoon': 'Détail de « {name} » — bientôt',
+  'common.preview': 'aperçu',
   // 2026 redesign — VibrantDataTable chrome (not provided by the host).
   'common.rows': 'Lignes',
   'common.of': 'sur',

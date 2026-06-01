@@ -81,7 +81,7 @@ const NAV = [
     { label: 'Délégués', route: '/id/delegate', match: '/id/delegate' },
     { label: 'Portées', route: '/id/scope', match: '/id/scope' },
   ] },
-  { label: 'Projets', icon: 'mdi-folder', soon: true },
+  { label: 'Projets', icon: 'mdi-folder', route: '/project', match: '/project' },
   { label: 'Administration', icon: 'mdi-cog', soon: true },
 ]
 
@@ -94,6 +94,7 @@ const title = computed(() => {
   if (route.path.startsWith('/id/delegate')) return 'Délégués'
   if (route.path.startsWith('/id/scope')) return 'Portées'
   if (route.path.startsWith('/id')) return 'Utilisateurs'
+  if (route.path.startsWith('/project')) return 'Projets'
   return 'Accueil'
 })
 function isNavActive(it) {
