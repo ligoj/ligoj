@@ -6,7 +6,10 @@
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <v-card>
-      <v-card-title>{{ title }}</v-card-title>
+      <v-card-title :class="icon ? 'd-flex align-center ga-2' : undefined">
+        <v-icon v-if="icon" :color="iconColor">{{ icon }}</v-icon>
+        <span>{{ title }}</span>
+      </v-card-title>
       <v-card-text>
         <slot>{{ message }}</slot>
       </v-card-text>
@@ -70,6 +73,11 @@ import { useI18nStore } from '@/stores/i18n.js'
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, required: true },
+  /** Optional MDI icon prepended to the title, representing the entity
+   *  the dialog concerns (e.g. mdi-account). Null = no icon (legacy look). */
+  icon: { type: String, default: null },
+  /** Vuetify color for the title icon. */
+  iconColor: { type: String, default: 'primary' },
   /** Plain-text body — superseded by the default slot if provided. */
   message: { type: String, default: '' },
   /** Override the default "Cancel" / "Confirm" labels. */
