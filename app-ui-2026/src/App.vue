@@ -19,12 +19,24 @@
         <span class="brand-word">Ligoj</span>
       </div>
       <nav class="nav">
-        <a v-for="it in NAV" :key="it.label" class="nav-item" :class="{ active: isNavActive(it) }"
-          @click="it.route ? go(it.route) : toast()">
-          <v-icon>{{ it.icon }}</v-icon>
-          <span>{{ it.label }}</span>
-          <span v-if="it.soon" class="soon">bientôt</span>
-        </a>
+        <template v-for="it in NAV" :key="it.label">
+          <a class="nav-item" :class="{ active: isNavActive(it) }"
+            @click="it.children ? go(it.children[0].route) : (it.route ? go(it.route) : toast())">
+            <v-icon>{{ it.icon }}</v-icon>
+            <span>{{ it.label }}</span>
+            <span v-if="it.soon" class="soon">bientôt</span>
+          </a>
+          <!-- Sub-menu (e.g. Identité → Utilisateurs / Groupes / …) shown
+               while the section is active. -->
+          <div v-if="it.children && isNavActive(it)" class="subnav">
+            <a v-for="c in it.children" :key="c.label" class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }"
+              @click="c.route ? go(c.route) : toast()">
+              <span class="dot" />
+              <span>{{ c.label }}</span>
+              <span v-if="c.soon" class="soon">bientôt</span>
+            </a>
+          </div>
+        </template>
       </nav>
       <div class="sb-foot">
         <a class="nav-item" :class="{ active: route.path === '/profile' }" @click="go('/profile')">
@@ -60,9 +72,14 @@ const auth = useAuthStore()
 
 const NAV = [
   { label: 'Accueil', icon: 'mdi-home', route: '/' },
-  // `match` makes the item active across a whole section (e.g. /id/user,
-  // /id/group… once those land), not just the exact landing route.
-  { label: 'Identité', icon: 'mdi-account-group', route: '/id/user', match: '/id' },
+  // `match` makes the item active across a whole section; `children` render
+  // a sub-menu while the section is active.
+  { label: 'Identité', icon: 'mdi-account-group', match: '/id', children: [
+    { label: 'Utilisateurs', route: '/id/user', match: '/id/user' },
+    { label: 'Groupes', route: '/id/group', match: '/id/group' },
+    { label: 'Entités', soon: true },
+    { label: 'Délégués', soon: true },
+  ] },
   { label: 'Projets', icon: 'mdi-folder', soon: true },
   { label: 'Administration', icon: 'mdi-cog', soon: true },
 ]
@@ -71,6 +88,7 @@ const collapsed = ref(false)
 const isLogin = computed(() => route.name === 'login')
 const title = computed(() => {
   if (route.path === '/profile') return 'Profil'
+  if (route.path.startsWith('/id/group')) return 'Groupes'
   if (route.path.startsWith('/id')) return 'Utilisateurs'
   return 'Accueil'
 })
@@ -139,6 +157,12 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .nav-item:hover { background: rgba(255,255,255,.08); }
 .nav-item.active { background: rgba(255,255,255,.16); color: #fff; }
 .nav-item .soon { margin-left: auto; font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(255,255,255,.16); }
+.subnav { margin: 2px 0 6px; padding-left: 14px; display: flex; flex-direction: column; gap: 1px; }
+.sub-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 9px; cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 13px; color: rgba(255,255,255,.74); }
+.sub-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+.sub-item.active { background: rgba(255,255,255,.14); color: #fff; }
+.sub-item .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .6; flex: none; }
+.sub-item .soon { margin-left: auto; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 20px; background: rgba(255,255,255,.14); }
 .sb-foot { padding: 10px; }
 .ver { font-family: var(--v26-mono); font-size: 11px; opacity: .55; padding: 8px 12px; }
 
