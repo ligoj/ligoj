@@ -1,0 +1,142 @@
+<template>
+  <div class="shell" :class="{ 'nav-collapsed': collapsed }">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand" @click="go('/')">
+        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" class="brand-logo">
+          <defs>
+            <path d="M20 70 C20 70 2 87 8 118 C16 155 53 155 53 155 L53 117 C53 117 46 117 42 112 C36 104 40 96 40 96 L20 70Z" id="l1" />
+            <path d="M53 117L129 117L129 155L53 155L53 117Z" id="l2" />
+            <path d="M151 117L131 117L131 155L151 155L151 117Z" id="l3" />
+            <path d="M53 10L91 10L91 117L53 117L53 10Z" id="l4" />
+          </defs>
+          <use fill="#034b80" href="#l2" /><use fill="#ff6900" href="#l3" />
+          <use fill="#4589ca" href="#l4" /><use fill="#ff6900" href="#l1" />
+        </svg>
+        <span class="brand-word">Ligoj</span>
+      </div>
+      <nav class="nav">
+        <a v-for="it in NAV" :key="it.label" class="nav-item" :class="{ active: it.route === route.path }"
+          @click="it.route ? go(it.route) : toast()">
+          <v-icon>{{ it.icon }}</v-icon>
+          <span>{{ it.label }}</span>
+          <span v-if="it.soon" class="soon">bientôt</span>
+        </a>
+      </nav>
+      <div class="sb-foot">
+        <a class="nav-item" :class="{ active: route.path === '/profile' }" @click="go('/profile')">
+          <v-icon>mdi-account-circle</v-icon><span>Profil</span>
+        </a>
+        <div class="ver">UI 2026 · aperçu</div>
+      </div>
+    </aside>
+
+    <!-- App bar -->
+    <header class="bar">
+      <button class="icon-btn" @click="collapsed = !collapsed" title="Menu"><v-icon>mdi-menu</v-icon></button>
+      <span class="crumb">{{ title }}</span>
+      <span class="sp" />
+      <button class="user" @click="go('/profile')"><v-icon size="small">mdi-account</v-icon>{{ auth.userName || 'invité' }}</button>
+      <button class="icon-btn" title="Se déconnecter" @click="auth.logout?.()"><v-icon>mdi-logout</v-icon></button>
+    </header>
+
+    <main class="main"><router-view /></main>
+
+    <div class="toast" :class="{ show: toastMsg }">{{ toastMsg }}</div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.js'
+
+const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+
+const NAV = [
+  { label: 'Accueil', icon: 'mdi-home', route: '/' },
+  { label: 'Identité', icon: 'mdi-account-group', soon: true },
+  { label: 'Projets', icon: 'mdi-folder', soon: true },
+  { label: 'Administration', icon: 'mdi-cog', soon: true },
+]
+
+const collapsed = ref(false)
+const title = computed(() => (route.path === '/profile' ? 'Profil' : 'Accueil'))
+
+function go(path) { if (route.path !== path) router.push(path) }
+
+let toastT
+const toastMsg = ref('')
+function toast(msg = 'Page à venir dans la refonte') {
+  toastMsg.value = msg
+  clearTimeout(toastT)
+  toastT = setTimeout(() => (toastMsg.value = ''), 2200)
+}
+</script>
+
+<style>
+/* Global: Vibrant display font across the whole UI-2026 app. This app is
+   standalone, so applying it globally is safe (the current app-ui is a
+   separate project and untouched). */
+:root { --v26-font: "Bricolage Grotesque", system-ui, sans-serif; --v26-sys: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; --v26-mono: "JetBrains Mono", ui-monospace, monospace; }
+html, body, #app { margin: 0; height: 100%; }
+body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); }
+.v-application, .v-navigation-drawer, .v-app-bar { font-family: var(--v26-sys); }
+</style>
+
+<style scoped>
+.shell {
+  --surface: rgb(var(--v-theme-surface));
+  --ink: rgb(var(--v-theme-on-surface));
+  --muted: rgba(var(--v-theme-on-surface), .6);
+  --line: rgba(var(--v-theme-on-surface), .12);
+  --hover: rgba(var(--v-theme-on-surface), .06);
+  --primary: rgb(var(--v-theme-primary));
+  --on-primary: rgb(var(--v-theme-on-primary));
+  --w: 264px; --h: 56px;
+  min-height: 100vh; color: var(--ink);
+  background: rgb(var(--v-theme-background));
+}
+
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0; width: var(--w); z-index: 30;
+  display: flex; flex-direction: column; color: var(--on-primary);
+  background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 70%, #000));
+  transition: transform .22s ease;
+}
+.nav-collapsed .sidebar { transform: translateX(-100%); }
+.brand { display: flex; align-items: center; gap: 12px; padding: 15px 16px; cursor: pointer; }
+.brand-logo { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
+.brand-word { font-family: var(--v26-font); font-weight: 800; font-size: 20px; letter-spacing: -.02em; }
+.nav { padding: 10px; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 14px; color: rgba(255,255,255,.86); margin-bottom: 2px; }
+.nav-item:hover { background: rgba(255,255,255,.08); }
+.nav-item.active { background: rgba(255,255,255,.16); color: #fff; }
+.nav-item .soon { margin-left: auto; font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(255,255,255,.16); }
+.sb-foot { padding: 10px; }
+.ver { font-family: var(--v26-mono); font-size: 11px; opacity: .55; padding: 8px 12px; }
+
+.bar {
+  position: fixed; top: 0; left: var(--w); right: 0; height: var(--h); z-index: 20;
+  display: flex; align-items: center; gap: 8px; padding: 0 14px;
+  background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  transition: left .22s ease;
+}
+.nav-collapsed .bar { left: 0; }
+.icon-btn { width: 40px; height: 40px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; display: grid; place-items: center; color: var(--ink); }
+.icon-btn:hover { background: var(--hover); }
+.crumb { font-family: var(--v26-font); font-weight: 700; font-size: 16px; color: var(--ink); letter-spacing: -.01em; }
+.sp { flex: 1; }
+.user { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; color: var(--ink); font-family: var(--v26-font); font-weight: 600; font-size: 14px; }
+.user:hover { background: var(--hover); }
+
+.main { margin-left: var(--w); padding: calc(var(--h) + 24px) 28px 64px; transition: margin-left .22s ease; }
+.nav-collapsed .main { margin-left: 0; }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--ink); color: var(--surface); padding: 11px 18px; border-radius: 12px; font-weight: 700; font-size: 14px; z-index: 60; opacity: 0; transition: .25s; pointer-events: none; box-shadow: 0 12px 30px -10px rgba(0,0,0,.5); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 900px) { .sidebar { transform: translateX(-100%); } .bar { left: 0; } .main { margin-left: 0; } }
+</style>
