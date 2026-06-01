@@ -648,9 +648,10 @@ input:disabled, input[readonly] { background: var(--hover); color: var(--ink-3);
 .submit {
   position: relative; overflow: hidden;
   width: 100%; padding: 13px; font-family: var(--font); font-size: 1rem; font-weight: 800; color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--primary)); border: none; border-radius: 12px; cursor: pointer;
+  /* Same warm orange→coral brand gradient as the "Nouvel utilisateur" CTA. */
+  background: linear-gradient(135deg, #ff9436, #ff5a52); border: none; border-radius: 12px; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  box-shadow: 0 14px 28px -12px rgba(var(--v-theme-secondary), .7); transition: filter .15s; margin-top: 4px;
+  box-shadow: 0 14px 28px -12px rgba(255, 90, 82, .6); transition: filter .15s; margin-top: 4px;
 }
 .submit:hover:not(:disabled) { filter: brightness(1.06); }
 .submit:disabled { opacity: .65; cursor: not-allowed; }
