@@ -286,11 +286,13 @@ onMounted(() => {
 .ph-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
 .btn, .btn-ghost, .btn-danger {
-  display: inline-flex; align-items: center; gap: 7px; font-family: var(--font); font-weight: 700; font-size: 13.5px;
-  padding: 9px 15px; border-radius: 11px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s, border-color .15s;
+  display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px;
+  padding: 11px 17px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s, border-color .15s, box-shadow .15s;
 }
-.btn { color: #fff; background: linear-gradient(135deg, var(--accent), var(--primary)); box-shadow: 0 12px 24px -12px rgba(var(--v-theme-secondary), .7); }
-.btn:hover { filter: brightness(1.06); }
+/* Vibrant brand CTA — warm orange→coral gradient (validated mockup --btn1/--btn2),
+   not a cross-hue orange→indigo which read as cheap. Soft, short shadow. */
+.btn { color: #fff; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55); }
+.btn:hover { filter: brightness(1.04); box-shadow: 0 10px 22px -10px rgba(255, 90, 82, .65); }
 .btn-ghost { color: var(--ink-2); background: var(--surface); border-color: var(--border); }
 .btn-ghost:hover:not(:disabled) { border-color: var(--border-2); background: var(--hover); }
 .btn-ghost:disabled { opacity: .55; cursor: default; }
@@ -323,9 +325,13 @@ onMounted(() => {
 /* Gear button + popmenu (matches mockup .iconbtn / .popmenu). */
 .iconbtn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid transparent; background: transparent; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-2); transition: background .12s; }
 .iconbtn:hover { background: var(--hover); }
-.popmenu { min-width: 210px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 40px -16px rgba(0, 0, 0, .4); padding: 6px; }
-.popmenu button { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; cursor: pointer; font-family: var(--font); font-size: 13.5px; font-weight: 600; color: var(--ink); padding: 10px 12px; border-radius: 8px; text-align: left; }
-.popmenu button:hover { background: var(--hover); }
+/* NOTE: v-menu teleports this content to <body>, OUTSIDE the .users scope,
+   so the local --surface/--ink/--border vars don't resolve here. Use the
+   global Vuetify theme tokens directly, or the menu renders transparent
+   ("floating in the background"). */
+.popmenu { min-width: 210px; background: rgb(var(--v-theme-surface)); border: 1px solid rgba(var(--v-theme-on-surface), .12); border-radius: 12px; box-shadow: 0 16px 44px -14px rgba(0, 0, 0, .45); padding: 6px; }
+.popmenu button { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; cursor: pointer; font-family: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif); font-size: 13.5px; font-weight: 600; color: rgb(var(--v-theme-on-surface)); padding: 10px 12px; border-radius: 8px; text-align: left; }
+.popmenu button:hover { background: rgba(var(--v-theme-on-surface), .06); }
 .popmenu button.danger { color: rgb(var(--v-theme-error)); }
-.popmenu .sep { height: 1px; background: var(--border); margin: 5px 4px; }
+.popmenu .sep { height: 1px; background: rgba(var(--v-theme-on-surface), .12); margin: 5px 4px; }
 </style>
