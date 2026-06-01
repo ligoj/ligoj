@@ -137,8 +137,10 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useApi, useFormGuard, useErrorStore, useI18nStore, LigojConfirmDialog } from '@ligoj/host'
+import { useApi, useFormGuard, useErrorStore, useI18nStore } from '@ligoj/host'
 import { TYPE_ICONS } from '../composables/delegateTypes.js'
+// Vibrant replacement for the host's confirm dialog (aliased → tags unchanged).
+import LigojConfirmDialog from '../components/VibrantConfirmDialog.vue'
 
 const props = defineProps({
   // Dialog visibility (v-model).

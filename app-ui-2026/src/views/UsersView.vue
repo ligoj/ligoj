@@ -107,9 +107,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useDataTable, useApi, useAppStore, useErrorStore, useI18nStore, LigojConfirmDialog } from '@ligoj/host'
+import { useDataTable, useApi, useAppStore, useErrorStore, useI18nStore } from '@ligoj/host'
 import { TYPE_ICONS } from '../composables/delegateTypes.js'
 import VibrantDataTable from '../components/VibrantDataTable.vue'
+// Vibrant replacement for the host's (stock-Vuetify) confirm dialog; aliased
+// so the existing <LigojConfirmDialog> tags need no change.
+import LigojConfirmDialog from '../components/VibrantConfirmDialog.vue'
 import UserEditDialog from './UserEditDialog.vue'
 
 const appStore = useAppStore()
