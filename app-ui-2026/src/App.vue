@@ -128,6 +128,49 @@ function toast(msg = 'Page à venir dans la refonte') {
 html, body, #app { margin: 0; height: 100%; }
 body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); }
 .v-application, .v-navigation-drawer, .v-app-bar { font-family: var(--v26-sys); }
+
+/* ---- Vibrant re-skin of Vuetify select / autocomplete dropdown menus ----
+   These overlays teleport to <body>, outside any view scope, so they're
+   styled globally here. Rounded panel, soft shadow, Bricolage font, rounded
+   hover/active items — so picking from a list matches the 2026 look. */
+.v-select__content,
+.v-autocomplete__content,
+.v-combobox__content {
+  border-radius: 14px !important;
+  box-shadow: 0 18px 48px -16px rgba(0, 0, 0, .5) !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), .12);
+  overflow: hidden;
+}
+.v-select__content .v-list,
+.v-autocomplete__content .v-list,
+.v-combobox__content .v-list {
+  background: rgb(var(--v-theme-surface)) !important;
+  padding: 6px !important;
+  font-family: var(--v26-font);
+}
+.v-select__content .v-list-item,
+.v-autocomplete__content .v-list-item,
+.v-combobox__content .v-list-item {
+  border-radius: 9px !important;
+  min-height: 42px !important;
+  margin-bottom: 2px;
+}
+.v-select__content .v-list-item-title,
+.v-autocomplete__content .v-list-item-title,
+.v-combobox__content .v-list-item-title {
+  font-family: var(--v26-font);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+/* Selected option → warm accent tint. */
+.v-select__content .v-list-item--active,
+.v-autocomplete__content .v-list-item--active,
+.v-combobox__content .v-list-item--active {
+  color: #ff5a52;
+  background: rgba(255, 90, 82, .1);
+}
+.v-select__content .v-list-item--active .v-list-item__overlay,
+.v-autocomplete__content .v-list-item--active .v-list-item__overlay { opacity: 0; }
 </style>
 
 <style scoped>

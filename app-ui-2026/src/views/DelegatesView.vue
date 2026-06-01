@@ -50,12 +50,10 @@
         </span>
       </template>
       <template #cell.canAdmin="{ item }">
-        <v-icon v-if="item.canAdmin" color="success" size="18">mdi-check-circle</v-icon>
-        <span v-else class="bdot" />
+        <span class="bdot" :class="{ on: item.canAdmin }" :title="item.canAdmin ? t('delegate.adminGranted') : ''" />
       </template>
       <template #cell.canWrite="{ item }">
-        <v-icon v-if="item.canWrite" color="success" size="18">mdi-check-circle</v-icon>
-        <span v-else class="bdot" />
+        <span class="bdot" :class="{ on: item.canWrite }" :title="item.canWrite ? t('delegate.writeGranted') : ''" />
       </template>
       <template #actions="{ item }">
         <v-menu location="bottom end">
@@ -183,7 +181,9 @@ onMounted(() => {
 .rcv, .res { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
 .rcv-ic, .res-ic { color: var(--ink-3); }
 .rcv-name { font-weight: 600; }
-.bdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--border-2); }
+/* Status dot: muted when off, vivid green with a glow when on. */
+.bdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: rgba(var(--v-theme-on-surface), .2); transition: background .15s, box-shadow .15s; }
+.bdot.on { background: #1d9d63; box-shadow: 0 0 0 3px rgba(29, 157, 99, .18), 0 0 10px 1px rgba(29, 157, 99, .6); }
 
 .iconbtn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid transparent; background: transparent; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-2); transition: background .12s; }
 .iconbtn:hover { background: var(--hover); }
