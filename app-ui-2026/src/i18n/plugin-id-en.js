@@ -106,6 +106,8 @@ export default {
   'user.searchPlaceholder': 'Search a user…',
   'group.subtitle2026': 'Organise groups and their members.',
   'group.searchPlaceholder': 'Search a group…',
+  'company.subtitle2026': 'Manage entities and their directory.',
+  'company.searchPlaceholder': 'Search an entity…',
   // 2026 redesign — VibrantDataTable chrome (not provided by the host).
   'common.rows': 'Rows',
   'common.of': 'of',

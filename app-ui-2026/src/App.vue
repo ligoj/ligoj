@@ -77,7 +77,7 @@ const NAV = [
   { label: 'Identité', icon: 'mdi-account-group', match: '/id', children: [
     { label: 'Utilisateurs', route: '/id/user', match: '/id/user' },
     { label: 'Groupes', route: '/id/group', match: '/id/group' },
-    { label: 'Entités', soon: true },
+    { label: 'Entités', route: '/id/company', match: '/id/company' },
     { label: 'Délégués', soon: true },
   ] },
   { label: 'Projets', icon: 'mdi-folder', soon: true },
@@ -89,6 +89,7 @@ const isLogin = computed(() => route.name === 'login')
 const title = computed(() => {
   if (route.path === '/profile') return 'Profil'
   if (route.path.startsWith('/id/group')) return 'Groupes'
+  if (route.path.startsWith('/id/company')) return 'Entités'
   if (route.path.startsWith('/id')) return 'Utilisateurs'
   return 'Accueil'
 })
