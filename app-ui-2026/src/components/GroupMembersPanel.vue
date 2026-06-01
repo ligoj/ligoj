@@ -9,74 +9,57 @@
        Lifting the body out of the routed view is the deduplication
        that made the dialog cheap: backend API contract is "group name
        → members list", no project / subscription context required. -->
-  <div>
-    <!-- Add-member toolbar. Server-side autocomplete; submit (PUT)
-         reloads the table. -->
-    <v-card variant="tonal" class="mb-4">
-      <v-card-text class="d-flex flex-wrap align-center ga-2">
-        <v-autocomplete v-model="newMember" v-model:search="searchTerm" :label="t('id.group.addPlaceholder')" :items="searchResults" item-title="label" item-value="id" :loading="searching" no-filter
-          clearable variant="outlined" density="compact" hide-details autocomplete="off" style="min-width: 320px; flex: 1 1 320px" @update:search="onSearch" @update:menu="onSearchMenu" />
-        <v-btn color="primary" prepend-icon="mdi-account-plus" :disabled="!newMember || !groupName" :loading="adding" @click="addMember">
-          {{ t('id.group.add') }}
-        </v-btn>
-      </v-card-text>
-    </v-card>
+  <div class="gmpanel">
+    <!-- Add-member bar: server-side autocomplete + Vibrant CTA. -->
+    <div class="addbar">
+      <v-autocomplete v-model="newMember" v-model:search="searchTerm" :label="t('id.group.addPlaceholder')" :items="searchResults" item-title="label" item-value="id" :loading="searching" no-filter
+        clearable variant="outlined" density="comfortable" rounded="lg" hide-details autocomplete="off" class="addsel" prepend-inner-icon="mdi-account-search"
+        @update:search="onSearch" @update:menu="onSearchMenu" />
+      <button class="btn" :disabled="!newMember || !groupName || adding" @click="addMember">
+        <span v-if="adding" class="bspin" aria-hidden="true" /><v-icon v-else size="18">mdi-account-plus</v-icon>{{ t('id.group.add') }}
+      </button>
+    </div>
 
-    <v-text-field v-model="dt.search.value" prepend-inner-icon="mdi-magnify" :label="t('common.search')" variant="outlined" density="compact" hide-details class="search-field mb-4"
-      @update:model-value="onMemberSearch" />
+    <label class="search">
+      <v-icon size="18">mdi-magnify</v-icon>
+      <input v-model="dt.search.value" :placeholder="t('common.search')" @input="onMemberSearch" />
+    </label>
 
-    <v-alert v-if="dt.error.value" type="warning" variant="tonal" class="mb-4">
+    <v-alert v-if="dt.error.value" type="warning" variant="tonal" class="mb-4" rounded="lg">
       {{ dt.error.value === 'internal' ? t('user.noProviderMsg') : dt.error.value }}
     </v-alert>
 
-    <v-skeleton-loader v-if="dt.loading.value && dt.items.value.length === 0" type="table-heading, table-row@5" class="mb-4" />
-
-    <LigojDataTableServer v-if="!dt.error.value" v-show="dt.items.value.length > 0 || !dt.loading.value" filename="members.csv" :fetch-all="dt.loadAll" v-model:items-per-page="itemsPerPage"
-      :headers="headers" :items="dt.items.value" :items-length="dt.totalItems.value" :loading="dt.loading.value" item-value="id" hover @update:options="loadData">
-      <!-- Email chips, same chrome as UserListView (chantier D4 style):
-           up to two as tonal chips, the rest collapse into a "+N" hint
-           so the column stays bounded even when an LDAP user carries
-           five aliases. -->
-      <template #item.id="{ item }">
-        <div class="d-flex align-center ga-2">
-          <v-icon size="small" color="medium-emphasis">mdi-account-circle</v-icon>
-          <code>{{ item.id }}</code>
-        </div>
+    <VibrantDataTable v-if="!dt.error.value" :headers="headers" :items="dt.items.value" :items-length="dt.totalItems.value" :loading="dt.loading.value"
+      item-value="id" default-sort="id" @update:options="loadData">
+      <template #cell.id="{ item }">
+        <span class="login"><v-icon size="16" class="login-ic">mdi-account-circle</v-icon><span class="mono">{{ item.id }}</span></span>
       </template>
-      <template #header.id="{ column }"><span class="d-inline-flex align-center"><v-icon size="small" class="mr-1">mdi-account</v-icon>{{ column.title }}<v-tooltip activator="parent" location="top" :text="column.title" /></span></template>
-      <template #header.company="{ column }"><span class="d-inline-flex align-center"><v-icon size="small" class="mr-1">mdi-domain</v-icon>{{ column.title }}<v-tooltip activator="parent" location="top" :text="column.title" /></span></template>
-      <template #header.mails="{ column }"><span class="d-inline-flex align-center"><v-icon size="small" class="mr-1">mdi-email-outline</v-icon>{{ column.title }}<v-tooltip activator="parent" location="top" :text="column.title" /></span></template>
-      <template #header.groups="{ column }"><span class="d-inline-flex align-center"><v-icon size="small" class="mr-1">mdi-account-group</v-icon>{{ column.title }}<v-tooltip activator="parent" location="top" :text="column.title" /></span></template>
-      <template #item.mails="{ item }">
-        <div class="mails-cell">
-          <v-chip v-for="m in (item.mails || []).slice(0, 2)" :key="m" size="small" variant="tonal" class="mr-1">{{ m }}</v-chip>
-          <span v-if="(item.mails || []).length > 2" class="text-caption text-medium-emphasis">
-            +{{ item.mails.length - 2 }}
-          </span>
-        </div>
+      <template #cell.mails="{ item }">
+        <span class="mails">
+          <span v-for="m in (item.mails || []).slice(0, 2)" :key="m" class="mailchip"><v-icon size="12">mdi-email-outline</v-icon>{{ m }}</span>
+          <span v-if="(item.mails || []).length > 2" class="more">+{{ item.mails.length - 2 }}</span>
+          <span v-if="!(item.mails || []).length" class="dash">—</span>
+        </span>
       </template>
-      <template #item.groups="{ item }">
-        <div class="groups-cell">
-          <v-chip v-for="g in (item.groups || []).slice(0, 3)" :key="g.name || g" size="small" class="mr-1">
-            {{ g.name || g }}
-          </v-chip>
-          <span v-if="(item.groups || []).length > 3" class="text-caption text-medium-emphasis">
-            +{{ item.groups.length - 3 }}
-          </span>
-        </div>
+      <template #cell.groups="{ item }">
+        <span class="groups">
+          <span v-for="g in (item.groups || []).slice(0, 3)" :key="g.name || g" class="chip">{{ g.name || g }}</span>
+          <span v-if="(item.groups || []).length > 3" class="more">+{{ item.groups.length - 3 }}</span>
+          <span v-if="!(item.groups || []).length" class="dash">—</span>
+        </span>
       </template>
-      <template #item.actions="{ item }">
-        <v-btn v-if="canRemove(item)" icon size="small" variant="text" color="error" :title="t('id.group.removeTitle')" @click.stop="startRemove(item)">
-          <v-icon size="small">mdi-account-minus</v-icon>
+      <template #actions="{ item }">
+        <button v-if="canRemove(item)" class="iconbtn danger" :aria-label="t('id.group.removeTitle')" @click.stop="startRemove(item)">
+          <v-icon size="18">mdi-account-minus</v-icon>
           <v-tooltip activator="parent" :text="t('id.group.removeTitle')" location="top" />
-        </v-btn>
+        </button>
         <v-tooltip v-else-if="isTransitive(item)" :text="t('id.group.transitive')" location="top">
           <template #activator="{ props: tt }">
-            <v-icon v-bind="tt" size="small" color="info">mdi-information-outline</v-icon>
+            <v-icon v-bind="tt" size="18" color="info">mdi-information-outline</v-icon>
           </template>
         </v-tooltip>
       </template>
-    </LigojDataTableServer>
+    </VibrantDataTable>
 
     <!-- Confirm dialog. Vuetify teleports it to <body>, so being
          nested inside this panel — which itself can be inside a
@@ -94,10 +77,10 @@ import {
   useDataTable,
   useErrorStore,
   useI18nStore,
-  LigojDataTableServer,
 } from '@ligoj/host'
 import { TYPE_ICONS } from '../composables/delegateTypes.js'
 import LigojConfirmDialog from './VibrantConfirmDialog.vue'
+import VibrantDataTable from './VibrantDataTable.vue'
 
 const props = defineProps({
   /**
@@ -144,13 +127,12 @@ const dt = useDataTable('service/id/user', {
 })
 
 const headers = computed(() => [
-  { title: t('user.login'), key: 'id', sortable: true, width: '160px' },
-  { title: t('user.firstName'), key: 'firstName', sortable: true },
-  { title: t('user.lastName'), key: 'lastName', sortable: true },
-  { title: t('user.company'), key: 'company', sortable: true },
-  { title: t('user.emails'), key: 'mails', sortable: false },
-  { title: t('user.groups'), key: 'groups', sortable: false },
-  { title: '', key: 'actions', sortable: false, width: '60px', align: 'end' },
+  { label: t('user.login'), key: 'id', sortable: true, width: '170px' },
+  { label: t('user.firstName'), key: 'firstName', sortable: true },
+  { label: t('user.lastName'), key: 'lastName', sortable: true },
+  { label: t('user.company'), key: 'company', sortable: true },
+  { label: t('user.emails'), key: 'mails' },
+  { label: t('user.groups'), key: 'groups' },
 ])
 
 function loadData(options) {
@@ -282,23 +264,45 @@ watch(() => groupName.value, (g) => {
 </script>
 
 <style scoped>
-.search-field {
-  max-width: 320px;
+.gmpanel {
+  --ink: rgb(var(--v-theme-on-surface));
+  --ink-3: rgba(var(--v-theme-on-surface), .55);
+  --border: rgba(var(--v-theme-on-surface), .12);
+  --border-2: rgba(var(--v-theme-on-surface), .26);
+  --surface: rgb(var(--v-theme-surface));
+  --pill: rgba(var(--v-theme-on-surface), .06);
+  --accent: rgb(var(--v-theme-secondary));
+  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
 }
 
-/* Same look as UserListView's mails column — soft-wrap on long lists
- * because email addresses can be long; the 2-chip cap + "+N" hint
- * keeps the visual footprint bounded. */
-.mails-cell {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
+/* Add-member bar + CTA. */
+.addbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+.addsel { min-width: 320px; flex: 1 1 320px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px; padding: 11px 17px; border-radius: 12px; cursor: pointer; border: 0; color: #fff; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55); transition: filter .15s; }
+.btn:hover:not(:disabled) { filter: brightness(1.04); }
+.btn:disabled { opacity: .55; cursor: default; }
+.bspin { width: 15px; height: 15px; border: 2px solid rgba(255, 255, 255, .5); border-top-color: #fff; border-radius: 50%; animation: bspin .7s linear infinite; }
+@keyframes bspin { to { transform: rotate(360deg); } }
 
-.groups-cell {
-  max-width: 320px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+/* Member search. */
+.search { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 360px; padding: 9px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-3); margin-bottom: 14px; transition: border-color .15s, box-shadow .15s; }
+.search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(var(--v-theme-secondary), .15); }
+.search input { flex: 1; border: 0; outline: 0; background: transparent; font-family: var(--font); font-size: 14px; color: var(--ink); }
+.search input::placeholder { color: var(--ink-3); }
+
+/* Cells (shared language with UsersView). */
+.login { display: inline-flex; align-items: center; gap: 8px; }
+.login-ic { color: var(--ink-3); }
+.mono { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.mails { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.mailchip { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: rgba(var(--v-theme-on-surface), .72); background: var(--pill); border: 1px solid var(--border); border-radius: 8px; padding: 3px 9px; }
+.mailchip :deep(.v-icon) { opacity: .6; }
+.groups { display: inline-flex; align-items: center; flex-wrap: nowrap; gap: 5px; overflow: hidden; }
+.chip { display: inline-flex; align-items: center; font-size: 12px; font-weight: 700; color: rgba(var(--v-theme-on-surface), .72); background: var(--pill); border: 1px solid var(--border); border-radius: 20px; padding: 3px 11px; white-space: nowrap; }
+.more { font-size: 12px; font-weight: 700; color: var(--ink-3); }
+.dash { color: var(--ink-3); }
+
+.iconbtn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid transparent; background: transparent; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-3); transition: background .12s, color .12s; }
+.iconbtn.danger:hover { background: rgba(var(--v-theme-error), .1); color: rgb(var(--v-theme-error)); }
 </style>
