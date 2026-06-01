@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ligoj — Cockpit 2026 (maquette)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --bg-grad-1: #eef1f6;
+    --surface: #ffffff;
+    --surface-2: #fbfcfd;
+    --border: #e7e9ee;
+    --border-strong: #dfe2e8;
+    --ink: #161a20;
+    --ink-2: #4a515b;
+    --ink-3: #868d98;
+    --ink-4: #aab0ba;
+    --ok: #16a36a;
+    --warn: #e0901a;
+    --err: #e0524a;
+    --idle: #b6bcc6;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow-sm: 0 1px 2px rgba(16,24,40,.05), 0 1px 1px rgba(16,24,40,.04);
+    --shadow-md: 0 1px 2px rgba(16,24,40,.04), 0 12px 28px -14px rgba(16,24,40,.22);
+    --shadow-lg: 0 2px 4px rgba(16,24,40,.04), 0 22px 48px -18px rgba(16,24,40,.30);
+    --font: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 500px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 60%),
+      radial-gradient(1000px 600px at 100% 0%, #eaf0fb 0%, rgba(234,240,251,0) 55%),
+      linear-gradient(180deg, var(--bg-grad-1), var(--bg) 320px);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.01em;
+  }
+  .mono { font-family: var(--mono); font-feature-settings: "tnum" 1; letter-spacing: 0; }
+
+  /* ---------- top bar ---------- */
+  header.topbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 28px;
+    background: rgba(255,255,255,.72);
+    backdrop-filter: saturate(160%) blur(14px);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 18px; letter-spacing: -0.03em; }
+  .brand .mark {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: linear-gradient(135deg, #2f6df6, #1b4fd6);
+    box-shadow: 0 6px 16px -6px rgba(43,99,235,.7), inset 0 1px 0 rgba(255,255,255,.4);
+    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 16px;
+    transform: rotate(-4deg);
+  }
+  .nav { display: flex; gap: 4px; margin-left: 8px; }
+  .nav a { padding: 7px 13px; border-radius: 9px; color: var(--ink-2); text-decoration: none; font-weight: 600; font-size: 14px; }
+  .nav a.active { background: #eef2fb; color: #1b4fd6; }
+  .nav a:hover:not(.active) { background: #f1f2f5; }
+  .spacer { flex: 1; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface); display: grid; place-items: center; color: var(--ink-2);
+    cursor: pointer; transition: .15s;
+  }
+  .icon-btn:hover { color: var(--ink); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+  .avatar {
+    display: flex; align-items: center; gap: 9px; padding: 4px 10px 4px 4px;
+    border: 1px solid var(--border); border-radius: 40px; background: var(--surface); cursor: pointer;
+  }
+  .avatar .dot { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,#3b82f6,#8b5cf6); color:#fff; display:grid; place-items:center; font-weight:700; font-size:12px; }
+  .avatar span { font-weight: 600; font-size: 13px; color: var(--ink-2); }
+
+  /* ---------- shell ---------- */
+  main { max-width: 1380px; margin: 0 auto; padding: 30px 28px 80px; }
+
+  /* ---------- hero ---------- */
+  .hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 22px; flex-wrap: wrap; }
+  .hero h1 { font-size: 30px; line-height: 1.05; font-weight: 800; letter-spacing: -0.035em; margin: 0 0 6px; }
+  .hero .sub { color: var(--ink-3); font-size: 15px; font-weight: 500; }
+  .hero .sub b { color: var(--ink-2); font-weight: 700; }
+
+  .kpis { display: flex; gap: 12px; flex-wrap: wrap; }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 12px 16px; min-width: 116px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+  }
+  .kpi::after { content:""; position:absolute; inset:0 auto 0 0; width:3px; background: var(--accent, #cbd2dc); }
+  .kpi .v { font-family: var(--mono); font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
+  .kpi .l { color: var(--ink-3); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+  .kpi .trend { font-size: 11px; font-weight: 700; }
+  .kpi .trend.up { color: var(--ok); } .kpi .trend.down { color: var(--err); }
+
+  /* ---------- toolbar ---------- */
+  .toolbar { display: flex; align-items: center; gap: 12px; margin: 4px 0 22px; flex-wrap: wrap; }
+  .seg { display: flex; background: #eceef2; border-radius: 11px; padding: 3px; gap: 2px; }
+  .seg button {
+    border: 0; background: transparent; padding: 7px 14px; border-radius: 8px; cursor: pointer;
+    font-family: var(--font); font-weight: 600; font-size: 13px; color: var(--ink-2); display:flex; align-items:center; gap:7px;
+  }
+  .seg button.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+  .search { position: relative; flex: 1; min-width: 220px; max-width: 360px; }
+  .search input {
+    width: 100%; padding: 10px 14px 10px 38px; border-radius: 11px; border: 1px solid var(--border);
+    background: var(--surface); font-family: var(--font); font-size: 14px; color: var(--ink); outline: none; transition:.15s;
+  }
+  .search input::placeholder { color: var(--ink-4); }
+  .search input:focus { border-color: #b9caf3; box-shadow: 0 0 0 4px rgba(59,130,246,.12); }
+  .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-4); }
+  .tcount { color: var(--ink-3); font-size: 13px; font-weight: 600; margin-left: auto; }
+
+  /* ---------- grid ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(338px, 1fr)); gap: 18px; }
+
+  /* ---------- tool card ---------- */
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); overflow: hidden; position: relative;
+    transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s, border-color .18s;
+    opacity: 0; transform: translateY(10px);
+    animation: rise .5s cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--border-strong); }
+  .card::before { content:""; position:absolute; top:0; left:0; right:0; height:3px; background: var(--c); opacity:.9; }
+  .card:hover::after {
+    content:""; position:absolute; inset:-1px; border-radius: inherit; pointer-events:none;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 35%, transparent), 0 18px 50px -22px color-mix(in srgb, var(--c) 55%, transparent);
+  }
+
+  .card-head { display: flex; align-items: center; gap: 12px; padding: 16px 16px 12px; }
+  .glyph {
+    width: 42px; height: 42px; border-radius: 12px; flex: none; display: grid; place-items: center;
+    font-weight: 800; font-size: 18px; letter-spacing: -0.04em;
+    color: var(--c); background: color-mix(in srgb, var(--c) 13%, white);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 22%, transparent);
+  }
+  .glyph img { width: 60%; height: 60%; object-fit: contain; display: block; }
+  .glyph.noimg::after { content: attr(data-letter); }
+  .card-head .t { flex: 1; min-width: 0; }
+  .card-head .name { font-weight: 700; font-size: 16px; letter-spacing: -0.02em; display:flex; align-items:center; gap:7px; }
+  .card-head .kind { font-size: 11.5px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; margin-top: 1px; }
+  .count {
+    font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: var(--ink-2);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 5px 9px; white-space: nowrap;
+  }
+  .count small { color: var(--ink-4); font-weight: 600; }
+
+  .rows { padding: 4px 8px 8px; }
+  .row {
+    display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 10px; cursor: pointer;
+    transition: background .12s;
+  }
+  .row:hover { background: var(--surface-2); }
+  .row + .row { box-shadow: inset 0 1px 0 #f1f2f5; }
+  .st { width: 8px; height: 8px; border-radius: 50%; flex: none; position: relative; }
+  .st::after { content:""; position:absolute; inset:-4px; border-radius:50%; background: currentColor; opacity:.16; }
+  .st.ok { background: var(--ok); color: var(--ok); }
+  .st.warn { background: var(--warn); color: var(--warn); }
+  .st.err { background: var(--err); color: var(--err); }
+  .st.idle { background: var(--idle); color: var(--idle); }
+  .row .rn { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pills { display: flex; gap: 5px; flex: none; }
+  .pill {
+    font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--ink-2);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; padding: 2px 7px;
+  }
+  .pill.cost { color: #1b4fd6; background: #eef2fb; border-color: #dde6fa; }
+  .row .go { color: var(--ink-4); flex: none; opacity: 0; transform: translateX(-3px); transition: .15s; }
+  .row:hover .go { opacity: 1; transform: none; }
+
+  .card-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 10px 16px 14px; margin-top: 2px;
+  }
+  .morelink { font-size: 12.5px; font-weight: 700; color: var(--ink-3); text-decoration: none; }
+  .morelink:hover { color: var(--ink); }
+  .health { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+  .bar { width: 86px; height: 6px; border-radius: 4px; background: #edeff3; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--ok), #34c98a); }
+
+  .foot-note { text-align:center; color: var(--ink-4); font-size: 12.5px; margin-top: 40px; }
+  .foot-note code { font-family: var(--mono); background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:6px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><div class="mark">L</div> Ligoj</div>
+  <nav class="nav">
+    <a href="#" class="active">Accueil</a>
+    <a href="#">Projets</a>
+    <a href="#">Identité</a>
+    <a href="#">Administration</a>
+  </nav>
+  <div class="spacer"></div>
+  <button class="icon-btn" title="Notifications" aria-label="Notifications">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+  </button>
+  <button class="icon-btn" title="Aide" aria-label="Aide">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+  </button>
+  <div class="avatar"><div class="dot">LA</div><span>ligoj-admin</span></div>
+</header>
+
+<main>
+  <div class="hero">
+    <div>
+      <h1>Tableau de bord</h1>
+      <div class="sub">Bonjour <b>ligoj-admin</b> — <b>3</b> outils demandent votre attention aujourd'hui.</div>
+    </div>
+    <div class="kpis">
+      <div class="kpi" style="--accent:#2f6df6"><div class="v">124</div><div class="l">Projets</div></div>
+      <div class="kpi" style="--accent:#16a36a"><div class="v">18</div><div class="l">Outils</div></div>
+      <div class="kpi" style="--accent:#8b5cf6"><div class="v">2 348</div><div class="l">Souscriptions</div></div>
+      <div class="kpi" style="--accent:#e0524a"><div class="v">3</div><div class="l">Alertes</div><div class="trend down">▲ 1</div></div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="seg">
+      <button class="on">▦ Cartes</button>
+      <button>▤ Liste</button>
+    </div>
+    <div class="seg">
+      <button class="on">Fonctionnel</button>
+      <button>Technique</button>
+    </div>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input placeholder="Rechercher un projet ou un outil…" />
+    </div>
+    <span class="tcount" id="tcount"></span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="foot-note">Maquette statique — données fictives. Aucun branchement API. Fichier&nbsp;: <code>dashboard-2026-mockup.html</code></div>
+</main>
+
+<script>
+const TOOLS = [
+  { name:'Jira', kind:'Gestion de tickets', c:'#2563eb', glyph:'J', total:649, active:576, health:.82, rows:[
+    { n:'Airbus — Keycopter', s:'ok', p:['38 ouv.','73 clos'] },
+    { n:'ANRU — Agora', s:'ok', p:['28 ouv.','15 clos'] },
+    { n:'BNPP — KYC', s:'warn', p:['12 ouv.'] },
+    { n:'EDF — Consoweb', s:'ok', p:['33 ouv.','185 clos'] },
+  ]},
+  { name:'Jenkins', kind:'Intégration continue', c:'#d33833', glyph:'J', total:292, active:189, health:.61, rows:[
+    { n:'Airbus — Keycopter', s:'ok', p:['#1842','2m14'] },
+    { n:'BNPP — KYC', s:'err', p:['#318','échec'] },
+    { n:'EDF — PPA Sonar', s:'ok', p:['#77'] },
+    { n:'EPO — EPO', s:'warn', p:['instable'] },
+  ]},
+  { name:'LDAP', kind:'Annuaire', c:'#15a06a', glyph:'L', total:1896, active:1167, health:.94, rows:[
+    { n:'gfi-support-lille', s:'ok', p:['10 mbr.'] },
+    { n:'outils-delivery-core', s:'ok', p:['5 mbr.'] },
+    { n:'3suisses-3s-pt', s:'ok', p:['3 mbr.'] },
+    { n:'abertis-tareas', s:'idle', p:['5 mbr.'] },
+  ]},
+  { name:'SonarQube', kind:'Qualité de code', c:'#4e9bcd', glyph:'S', total:84, active:49, health:.7, rows:[
+    { n:'bnpp-pse-android', s:'warn', p:['B'] },
+    { n:'BNPP — Accueil iPad', s:'ok', p:['A'] },
+    { n:'BNPP — KYC', s:'ok', p:['A'] },
+    { n:'Crédit Agricole — Caroline', s:'err', p:['C'] },
+  ]},
+  { name:'Confluence', kind:'Documentation', c:'#e6a019', glyph:'C', total:522, active:462, health:.88, rows:[
+    { n:'Espace — Delivery', s:'ok', p:['2.3 k'] },
+    { n:'Espace — Architecture', s:'ok', p:['912'] },
+    { n:'Espace — RH', s:'idle', p:['144'] },
+  ]},
+  { name:'AWS EC2', kind:'Provisioning', c:'#7cb518', glyph:'E', total:177, active:13, health:.55, rows:[
+    { n:'i-06755957da1276', s:'ok', p:['running'] },
+    { n:'i-0f9c42a5c54b51', s:'ok', p:['running'] },
+    { n:'i-0eb8922dcfe39f', s:'warn', p:['pending'] },
+    { n:'i-0ecb5acac04b50', s:'err', p:['stopped'] },
+  ]},
+  { name:'GitLab', kind:'Source & MR', c:'#7759c2', glyph:'G', total:552, active:224, health:.9, rows:[
+    { n:'platform / core', s:'ok', p:['4 MR'] },
+    { n:'platform / ui', s:'ok', p:['2 MR'] },
+    { n:'infra / terraform', s:'warn', p:['1 MR','CI…'] },
+  ]},
+  { name:'Provisioning AWS', kind:'Coûts cloud', c:'#ff7a18', glyph:'A', total:20, active:8, health:.76, rows:[
+    { n:'Datasync Framework', s:'ok', p:['8 CPU','303 $'], cost:true },
+    { n:'Loader SAP GP074', s:'warn', p:['14 CPU','428 $'], cost:true },
+    { n:'Digitale2 Carto', s:'ok', p:['6 CPU','992 $'], cost:true },
+  ]},
+  { name:'Squash TM', kind:'Tests', c:'#e0524a', glyph:'S', total:178, active:155, health:.8, rows:[
+    { n:'Acoss — Portail KPI', s:'ok', p:['120'] },
+    { n:'ATR — APS Migration', s:'ok', p:['64'] },
+    { n:'Bayer — AnimPlus', s:'warn', p:['à jour ?'] },
+  ]},
+];
+
+const grid = document.getElementById('grid');
+const tcount = document.getElementById('tcount');
+tcount.textContent = TOOLS.length + ' outils · ' + TOOLS.reduce((a,t)=>a+t.active,0) + ' souscriptions actives';
+
+grid.innerHTML = TOOLS.map((t, i) => `
+  <article class="card" style="--c:${t.c}; animation-delay:${i*55}ms">
+    <div class="card-head">
+      <div class="glyph">${t.glyph}</div>
+      <div class="t">
+        <div class="name">${t.name}</div>
+        <div class="kind">${t.kind}</div>
+      </div>
+      <div class="count">${t.total.toLocaleString('fr-FR')} <small>/ ${t.active}</small></div>
+    </div>
+    <div class="rows">
+      ${t.rows.map(r => `
+        <div class="row">
+          <span class="st ${r.s}"></span>
+          <span class="rn">${r.n}</span>
+          <span class="pills">${r.p.map(p=>`<span class="pill${r.cost?' cost':''}">${p}</span>`).join('')}</span>
+          <svg class="go" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>
+        </div>`).join('')}
+    </div>
+    <div class="card-foot">
+      <a class="morelink" href="#">Voir les ${t.total.toLocaleString('fr-FR')} →</a>
+      <span class="health"><span class="bar"><i style="width:${Math.round(t.health*100)}%"></i></span>${Math.round(t.health*100)}%</span>
+    </div>
+  </article>`).join('');
+</script>
+</body>
+</html>
