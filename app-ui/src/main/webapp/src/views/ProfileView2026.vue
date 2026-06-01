@@ -93,7 +93,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 import { useTheme } from 'vuetify'
 import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
@@ -153,6 +153,15 @@ onMounted(() => {
     { title: t('nav.home'), to: '/' },
     { title: t('nav.profile') },
   ])
+  // Opt the shell (app-bar + sidebar) into the 2026 display font WHILE this
+  // redesign page is shown. AppLayout.vue is never modified; the font is
+  // applied via the `html.ui2026` hook below and removed on leave, so the
+  // default UI is untouched.
+  if (typeof document !== 'undefined') document.documentElement.classList.add('ui2026')
+})
+
+onBeforeUnmount(() => {
+  if (typeof document !== 'undefined') document.documentElement.classList.remove('ui2026')
 })
 </script>
 
@@ -237,4 +246,20 @@ onMounted(() => {
 .tile-desc { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+</style>
+
+<!--
+  Unscoped, but GATED by `html.ui2026` (added by this page on mount, removed
+  on leave). Applies the 2026 display font to the existing shell — sidebar,
+  app-bar breadcrumb and the top-right user area — without modifying
+  AppLayout.vue. When no /next page is mounted the class is gone and the
+  default UI keeps its own font.
+-->
+<style>
+html.ui2026 .v-navigation-drawer,
+html.ui2026 .v-app-bar .v-toolbar__content,
+html.ui2026 .v-breadcrumbs {
+  font-family: "Bricolage Grotesque", system-ui, sans-serif !important;
+  letter-spacing: -0.01em;
+}
 </style>
