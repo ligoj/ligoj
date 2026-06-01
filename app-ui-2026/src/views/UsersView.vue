@@ -1,146 +1,101 @@
 <!--
-  UsersView — 2026 "Vibrant" re-skin of the Users list (plugin-id).
+  UsersView — 2026 "Vibrant" Users list (plugin-id), mockup-faithful.
 
-  The behaviour is ported verbatim from plugin-id's UserListView.vue: it
-  reuses the SAME core building blocks (useDataTable, LigojDataTableServer,
-  LigojConfirmDialog, ImportExportBar, UserEditDialog) via the @ligoj/host
-  alias — only the page chrome is re-skinned (Vibrant hero header + a
-  theme-adaptive panel card around the toolbar and the data table). The
-  reusable LigojDataTableServer itself is left intact (server-side
-  pagination / sort / search / CSV export already wired).
+  Renders the validated 2026 mockup language (page header + toolbar +
+  VibrantDataTable: tinted header, mailchips, group chips, mono login,
+  gear popmenu, "Lignes : N / a–b sur total" footer) while REUSING the
+  real logic: useDataTable for fetch/sort/pagination/search, and the core
+  CRUD dialogs (UserEditDialog, LigojConfirmDialog) via @ligoj/host.
 -->
 <template>
   <div class="users">
-    <header class="hero">
-      <div class="hero-txt">
+    <!-- Page header (mockup .ph): title + count + actions. -->
+    <header class="ph">
+      <div class="ph-txt">
         <h1>{{ t('user.title') }}</h1>
-        <p>{{ t('user.subtitle2026') }}</p>
+        <p class="sub">{{ t('user.subtitle2026') }}</p>
+      </div>
+      <div class="ph-actions">
+        <button class="btn" @click="openCreate"><v-icon size="18">mdi-plus</v-icon>{{ t('user.new') }}</button>
+        <button class="btn-ghost" :disabled="exporting" @click="onExport"><v-icon size="18">mdi-download</v-icon>{{ t('common.export') || 'Exporter' }}</button>
+        <button class="btn-ghost" @click="importInput?.click()"><v-icon size="18">mdi-upload</v-icon>{{ t('common.import') || 'Importer' }}</button>
+        <input ref="importInput" type="file" accept=".csv,.tsv,text/csv" hidden @change="onImport" />
       </div>
     </header>
 
-    <div class="panel">
-      <div class="d-flex flex-wrap align-center mb-4 ga-2">
-        <v-spacer />
-        <v-text-field v-model="dt.search.value" prepend-inner-icon="mdi-magnify" :label="t('common.search')" variant="outlined" density="compact" hide-details class="search-field"
-          @update:model-value="onSearch" />
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">
-          {{ t('user.new') }}
-        </v-btn>
-        <ImportExportBar export-endpoint="service/id/user" import-endpoint="service/id/user/import/csv/full" export-filename="users.csv"
-          @imported="dt.load({ page: 1, itemsPerPage: itemsPerPage.value })" />
-      </div>
-
-      <v-alert v-if="dt.error.value" type="warning" variant="tonal" class="mb-4">
-        <v-alert-title>{{ t('user.noProvider') }}</v-alert-title>
-        {{ dt.error.value === 'internal' ? t('user.noProviderMsg') : dt.error.value }}
-      </v-alert>
-
-      <v-alert v-if="dt.demoMode.value" type="info" variant="tonal" density="compact" class="mb-4">
-        {{ t('user.demoMode') }}
-      </v-alert>
-
-      <v-slide-y-transition>
-        <v-toolbar v-if="selected.length" density="compact" color="primary" rounded class="mb-4">
-          <v-toolbar-title>{{ selected.length }} {{ t('common.selected') }}</v-toolbar-title>
-          <v-spacer />
-          <v-btn variant="elevated" color="error" prepend-icon="mdi-delete" @click="startBulkDelete">
-            {{ t('common.delete') }}
-          </v-btn>
-        </v-toolbar>
-      </v-slide-y-transition>
-
-      <v-skeleton-loader v-if="dt.loading.value && dt.items.value.length === 0" type="table-heading, table-row@5" class="mb-4" />
-
-      <LigojDataTableServer filename="users.csv" :fetch-all="dt.loadAll" v-if="!dt.error.value" v-show="dt.items.value.length > 0 || !dt.loading.value" v-model="selected"
-        v-model:items-per-page="itemsPerPage" :headers="headers" :items="dt.items.value" :items-length="dt.totalItems.value" :loading="dt.loading.value" item-value="id" show-select hover
-        @update:options="loadData" @click:row="(_, { item }) => openEdit(item.id)">
-        <template #item.id="{ item }">
-          <div class="d-flex align-center ga-2">
-            <v-icon size="small" color="medium-emphasis">mdi-account-circle</v-icon>
-            <code>{{ item.id }}</code>
-          </div>
-        </template>
-        <template #header.id="{ column }"><span class="d-inline-flex align-center"><v-icon size="small" class="mr-1">mdi-account</v-icon>{{ column.title }}<v-tooltip activator="parent" location="top" :text="column.title" /></span></template>
-        <template #header.company="{ column }"><span class="d-inline-flex align-center"><v-icon size="small" class="mr-1">mdi-domain</v-icon>{{ column.title }}<v-tooltip activator="parent" location="top" :text="column.title" /></span></template>
-        <template #header.mails="{ column }"><span class="d-inline-flex align-center"><v-icon size="small" class="mr-1">mdi-email-outline</v-icon>{{ column.title }}<v-tooltip activator="parent" location="top" :text="column.title" /></span></template>
-        <template #header.groups="{ column }"><span class="d-inline-flex align-center"><v-icon size="small" class="mr-1">mdi-account-group</v-icon>{{ column.title }}<v-tooltip activator="parent" location="top" :text="column.title" /></span></template>
-        <template #header.locked="{ column }">
-          <span class="d-inline-flex align-center">
-            <v-icon size="small">mdi-shield-account-outline</v-icon>
-            <v-tooltip activator="parent" location="top" :text="column.title" />
-          </span>
-        </template>
-        <template #item.mails="{ item }">
-          <div class="mails-cell">
-            <v-chip v-for="m in (item.mails || []).slice(0, 2)" :key="m" size="small" variant="tonal" class="mr-1">{{ m }}</v-chip>
-            <span v-if="(item.mails || []).length > 2" class="text-caption text-medium-emphasis">
-              +{{ item.mails.length - 2 }}
-            </span>
-          </div>
-        </template>
-        <template #item.groups="{ item }">
-          <div class="groups-cell">
-            <v-chip v-for="g in (item.groups || []).slice(0, 3)" :key="g.name || g" size="small" class="mr-1">{{ g.name || g }}</v-chip>
-            <span v-if="(item.groups || []).length > 3" class="text-caption text-medium-emphasis">
-              +{{ item.groups.length - 3 }}
-            </span>
-          </div>
-        </template>
-        <template #item.locked="{ item }">
-          <div class="text-center">
-            <v-tooltip v-if="item.locked" :text="t('user.statusLocked')" location="top">
-              <template #activator="{ props: tt }">
-                <v-icon v-bind="tt" color="error" size="small">mdi-lock</v-icon>
-              </template>
-            </v-tooltip>
-            <v-tooltip v-else :text="t('user.statusActive')" location="top">
-              <template #activator="{ props: tt }">
-                <v-icon v-bind="tt" color="success" size="small">mdi-lock-open-variant</v-icon>
-              </template>
-            </v-tooltip>
-          </div>
-        </template>
-        <template #item.actions="{ item }">
-          <!-- Single gear button opening a menu of row actions. @click.stop
-               on the gear activator keeps the click off the row, whose
-               @click:row opens the edit dialog. Menu items carry NO .stop:
-               VMenu teleports its content outside the <tr>, and a .stop
-               would swallow the bubbling click close-on-content-click relies
-               on. Lock/Isolate labels are contextual (the API omits
-               `locked`/`isolated` when null → truthy means active). -->
-          <v-menu>
-            <template #activator="{ props }">
-              <v-btn icon size="x-small" variant="text" :aria-label="t('user.actions')" v-bind="props" @click.stop>
-                <v-icon size="small">mdi-cog</v-icon>
-                <v-tooltip activator="parent" :text="t('user.actions')" location="top" />
-              </v-btn>
-            </template>
-            <v-list density="compact" min-width="220">
-              <v-list-item prepend-icon="mdi-pencil" :title="t('user.edit')" @click="openEdit(item.id)" />
-              <v-list-item prepend-icon="mdi-delete" base-color="error" :title="t('common.delete')" @click="startDelete(item)" />
-              <v-divider class="my-1" />
-              <v-list-item :prepend-icon="item.locked ? 'mdi-lock-open-variant' : 'mdi-lock'" :title="item.locked ? t('user.unlock') : t('user.lock')"
-                @click="startUserAction(item, item.locked ? 'unlock' : 'lock')" />
-              <v-list-item :prepend-icon="item.isolated ? 'mdi-account-check' : 'mdi-account-off'" :title="item.isolated ? t('user.restore') : t('user.isolate')"
-                @click="startUserAction(item, item.isolated ? 'restore' : 'isolate')" />
-              <v-list-item prepend-icon="mdi-lock-reset" :title="t('user.resetPassword')" @click="startUserAction(item, 'resetPassword')" />
-            </v-list>
-          </v-menu>
-        </template>
-      </LigojDataTableServer>
+    <!-- Search toolbar (mockup .toolbar). -->
+    <div class="toolbar">
+      <label class="search">
+        <v-icon size="18">mdi-magnify</v-icon>
+        <input v-model="dt.search.value" :placeholder="t('user.searchPlaceholder') || t('common.search')" @input="onSearch" />
+      </label>
+      <span class="tb-sp" />
+      <v-slide-x-transition>
+        <div v-if="selected.length" class="bulkbar">
+          <span class="bulk-count">{{ selected.length }} {{ t('common.selected') }}</span>
+          <button class="btn-danger" @click="startBulkDelete"><v-icon size="16">mdi-delete</v-icon>{{ t('common.delete') }}</button>
+        </div>
+      </v-slide-x-transition>
     </div>
+
+    <v-alert v-if="dt.error.value" type="warning" variant="tonal" class="mb-4" rounded="lg">
+      <v-alert-title>{{ t('user.noProvider') }}</v-alert-title>
+      {{ dt.error.value === 'internal' ? t('user.noProviderMsg') : dt.error.value }}
+    </v-alert>
+    <v-alert v-if="dt.demoMode.value" type="info" variant="tonal" density="compact" class="mb-4" rounded="lg">
+      {{ t('user.demoMode') }}
+    </v-alert>
+
+    <VibrantDataTable v-if="!dt.error.value" :headers="headers" :items="dt.items.value" :items-length="dt.totalItems.value" :loading="dt.loading.value"
+      selectable v-model="selected" item-value="id" default-sort="id" @update:options="loadData" @row-click="(item) => openEdit(item.id)">
+      <template #cell.id="{ item }">
+        <span class="login"><v-icon size="16" class="login-ic">mdi-account-circle</v-icon><span class="mono">{{ item.id }}</span></span>
+      </template>
+      <template #cell.mails="{ item }">
+        <span class="mails">
+          <span v-for="m in (item.mails || []).slice(0, 2)" :key="m" class="mailchip"><v-icon size="12">mdi-email-outline</v-icon>{{ m }}</span>
+          <span v-if="(item.mails || []).length > 2" class="more">+{{ item.mails.length - 2 }}</span>
+          <span v-if="!(item.mails || []).length" class="dash">—</span>
+        </span>
+      </template>
+      <template #cell.groups="{ item }">
+        <span class="groups">
+          <span v-for="g in (item.groups || []).slice(0, 3)" :key="g.name || g" class="chip">{{ g.name || g }}</span>
+          <span v-if="(item.groups || []).length > 3" class="more">+{{ item.groups.length - 3 }}</span>
+          <span v-if="!(item.groups || []).length" class="dash">—</span>
+        </span>
+      </template>
+      <template #cell.locked="{ item }">
+        <v-tooltip :text="item.locked ? t('user.statusLocked') : t('user.statusActive')" location="top">
+          <template #activator="{ props: tt }">
+            <v-icon v-bind="tt" :color="item.locked ? 'error' : 'success'" size="19">{{ item.locked ? 'mdi-lock' : 'mdi-lock-open-variant' }}</v-icon>
+          </template>
+        </v-tooltip>
+      </template>
+      <template #actions="{ item }">
+        <v-menu location="bottom end">
+          <template #activator="{ props }">
+            <button class="iconbtn" v-bind="props" :aria-label="t('user.actions')" @click.stop><v-icon size="18">mdi-cog</v-icon></button>
+          </template>
+          <div class="popmenu">
+            <button @click="openEdit(item.id)"><v-icon size="18">mdi-pencil</v-icon>{{ t('user.edit') }}</button>
+            <button class="danger" @click="startDelete(item)"><v-icon size="18">mdi-delete</v-icon>{{ t('common.delete') }}</button>
+            <div class="sep" />
+            <button @click="startUserAction(item, item.locked ? 'unlock' : 'lock')"><v-icon size="18">{{ item.locked ? 'mdi-lock-open-variant' : 'mdi-lock' }}</v-icon>{{ item.locked ? t('user.unlock') : t('user.lock') }}</button>
+            <button @click="startUserAction(item, item.isolated ? 'restore' : 'isolate')"><v-icon size="18">{{ item.isolated ? 'mdi-account-check' : 'mdi-account-off' }}</v-icon>{{ item.isolated ? t('user.restore') : t('user.isolate') }}</button>
+            <button @click="startUserAction(item, 'resetPassword')"><v-icon size="18">mdi-lock-reset</v-icon>{{ t('user.resetPassword') }}</button>
+          </div>
+        </v-menu>
+      </template>
+    </VibrantDataTable>
 
     <!-- Single-user delete: name in bold red via the default slot. -->
     <LigojConfirmDialog v-model="deleteDialog" :title="t('user.deleteTitle')" :icon="TYPE_ICONS.USER" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmDeleteUser">
       {{ t('user.deleteConfirmBefore') }}<strong class="text-error">{{ deleteTarget?.id }}</strong>{{ t('user.deleteConfirmAfter') }}
     </LigojConfirmDialog>
-
-    <!-- Bulk delete: selected count in bold red. -->
     <LigojConfirmDialog v-model="bulkDeleteDialog" :title="t('common.bulkDeleteTitle')" :icon="TYPE_ICONS.USER" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmBulkDelete">
       {{ t('common.bulkDeleteConfirmBefore') }}<strong class="text-error">{{ selected.length }}</strong>{{ t('common.bulkDeleteConfirmAfter') }}
     </LigojConfirmDialog>
-
-    <!-- Confirmation for sensitive lock/isolate/reset row actions. -->
     <LigojConfirmDialog v-model="actionDialog" :title="t('user.' + actionType)" :icon="TYPE_ICONS.USER" :confirm-label="t('common.confirm')" :loading="actionLoading" @confirm="confirmUserAction">
       {{ t('user.' + actionType + 'ConfirmBefore') }}<strong class="text-error">{{ actionTarget?.id }}</strong>{{ t('user.' + actionType + 'ConfirmAfter') }}
     </LigojConfirmDialog>
@@ -152,8 +107,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useDataTable, useApi, useAppStore, useErrorStore, useI18nStore, ImportExportBar, LigojDataTableServer, LigojConfirmDialog } from '@ligoj/host'
+import { useDataTable, useApi, useAppStore, useErrorStore, useI18nStore, LigojConfirmDialog } from '@ligoj/host'
 import { TYPE_ICONS } from '../composables/delegateTypes.js'
+import VibrantDataTable from '../components/VibrantDataTable.vue'
 import UserEditDialog from './UserEditDialog.vue'
 
 const appStore = useAppStore()
@@ -172,7 +128,6 @@ const DEMO_USERS = [
   { id: 'agarcia', firstName: 'Antoine', lastName: 'Garcia', company: 'Ligoj', mails: ['antoine.garcia@ligoj.org'], groups: [{ name: 'Engineering' }], locked: false },
 ]
 const dt = useDataTable('service/id/user', { defaultSort: 'id', demoData: DEMO_USERS })
-const itemsPerPage = ref(25)
 let searchTimeout = null
 let lastOptions = { page: 1, itemsPerPage: 25, sortBy: [] }
 
@@ -181,26 +136,23 @@ const deleteDialog = ref(false)
 const deleteTarget = ref(null)
 const deleting = ref(false)
 const bulkDeleteDialog = ref(false)
-
-// Row gear-menu action state (lock/unlock, isolate/restore, reset).
 const actionDialog = ref(false)
 const actionType = ref('')
 const actionTarget = ref(null)
 const actionLoading = ref(false)
-
-// User create/edit dialog state. editUserId null = create mode.
 const editDialog = ref(false)
 const editUserId = ref(null)
+const importInput = ref(null)
+const exporting = ref(false)
 
 const headers = computed(() => [
-  { title: t('user.login'), key: 'id', sortable: true },
-  { title: t('user.firstName'), key: 'firstName', sortable: true },
-  { title: t('user.lastName'), key: 'lastName', sortable: true },
-  { title: t('user.company'), key: 'company', sortable: true },
-  { title: t('user.emails'), key: 'mails', sortable: false },
-  { title: t('user.groups'), key: 'groups', sortable: false },
-  { title: t('common.status'), key: 'locked', sortable: false, width: '80px', align: 'center' },
-  { title: '', key: 'actions', sortable: false, width: '120px', align: 'end' },
+  { title: t('user.login'), label: t('user.login'), key: 'id', sortable: true },
+  { label: t('user.firstName'), key: 'firstName', sortable: true },
+  { label: t('user.lastName'), key: 'lastName', sortable: true },
+  { label: t('user.company'), key: 'company', sortable: true },
+  { label: t('user.emails'), key: 'mails' },
+  { label: t('user.groups'), key: 'groups' },
+  { label: t('common.status'), key: 'locked', align: 'center', width: '90px' },
 ])
 
 function loadData(options) {
@@ -210,60 +162,37 @@ function loadData(options) {
 
 function onSearch() {
   clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => dt.load({ page: 1, itemsPerPage: itemsPerPage.value }), 300)
+  searchTimeout = setTimeout(() => dt.load({ page: 1, itemsPerPage: lastOptions.itemsPerPage || 25 }), 300)
 }
 
-function startDelete(item) {
-  deleteTarget.value = item
-  deleteDialog.value = true
-}
+function startDelete(item) { deleteTarget.value = item; deleteDialog.value = true }
 
 async function confirmDeleteUser() {
-  if (dt.demoMode.value) {
-    errorStore.push({ message: t('user.demoDelete'), status: 0 })
-    deleteDialog.value = false
-    return
-  }
+  if (dt.demoMode.value) { errorStore.push({ message: t('user.demoDelete'), status: 0 }); deleteDialog.value = false; return }
   deleting.value = true
   await api.del(`rest/service/id/user/${deleteTarget.value.id}`)
   deleting.value = false
   deleteDialog.value = false
   deleteTarget.value = null
-  dt.load({ page: 1, itemsPerPage: itemsPerPage.value })
+  dt.load(lastOptions)
 }
 
-function startBulkDelete() {
-  bulkDeleteDialog.value = true
-}
+function startBulkDelete() { bulkDeleteDialog.value = true }
 
 async function confirmBulkDelete() {
-  if (dt.demoMode.value) {
-    errorStore.push({ message: t('user.demoDelete'), status: 0 })
-    bulkDeleteDialog.value = false
-    return
-  }
+  if (dt.demoMode.value) { errorStore.push({ message: t('user.demoDelete'), status: 0 }); bulkDeleteDialog.value = false; return }
   deleting.value = true
-  for (const id of selected.value) {
-    await api.del(`rest/service/id/user/${id}`)
-  }
+  for (const id of selected.value) await api.del(`rest/service/id/user/${id}`)
   deleting.value = false
   bulkDeleteDialog.value = false
   selected.value = []
-  dt.load({ page: 1, itemsPerPage: itemsPerPage.value })
+  dt.load(lastOptions)
 }
 
-function startUserAction(item, type) {
-  actionTarget.value = item
-  actionType.value = type
-  actionDialog.value = true
-}
+function startUserAction(item, type) { actionTarget.value = item; actionType.value = type; actionDialog.value = true }
 
 async function confirmUserAction() {
-  if (dt.demoMode.value) {
-    errorStore.push({ message: t('user.demoAction'), status: 0 })
-    actionDialog.value = false
-    return
-  }
+  if (dt.demoMode.value) { errorStore.push({ message: t('user.demoAction'), status: 0 }); actionDialog.value = false; return }
   actionLoading.value = true
   const id = actionTarget.value.id
   const actions = {
@@ -277,34 +206,57 @@ async function confirmUserAction() {
   actionLoading.value = false
   actionDialog.value = false
   actionTarget.value = null
-  // Reload the current page so the status icon and the contextual
-  // lock/isolate menu labels reflect the new state.
   dt.load(lastOptions)
 }
 
-function openCreate() {
-  editUserId.value = null
-  editDialog.value = true
+function openCreate() { editUserId.value = null; editDialog.value = true }
+function openEdit(id) { editUserId.value = id; editDialog.value = true }
+function onUserSaved() { dt.load(lastOptions) }
+
+/* Export: pull all rows then build a CSV client-side (reuses dt.loadAll). */
+async function onExport() {
+  if (dt.demoMode.value) { errorStore.push({ message: t('user.demoMode'), status: 0 }); return }
+  exporting.value = true
+  try {
+    const rows = await dt.loadAll()
+    const cols = headers.value
+    const head = cols.map((c) => csvCell(c.label)).join(',')
+    const body = (rows || []).map((r) => cols.map((c) => csvCell(formatCell(r, c.key))).join(',')).join('\n')
+    downloadCsv(`﻿${head}\n${body}`, 'users.csv')
+  } finally {
+    exporting.value = false
+  }
+}
+function formatCell(row, key) {
+  const v = row[key]
+  if (key === 'mails') return (v || []).join(' ')
+  if (key === 'groups') return (v || []).map((g) => g.name || g).join(' ')
+  if (key === 'locked') return v ? t('user.statusLocked') : t('user.statusActive')
+  return v ?? ''
+}
+function csvCell(s) { const v = String(s ?? ''); return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v }
+function downloadCsv(content, filename) {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
 }
 
-function openEdit(id) {
-  editUserId.value = id
-  editDialog.value = true
-}
-
-function onUserSaved() {
-  // Reload the current page after a create/edit/delete or an account
-  // action performed from the dialog.
-  dt.load(lastOptions)
+async function onImport(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  if (dt.demoMode.value) { errorStore.push({ message: t('user.demoMode'), status: 0 }); e.target.value = ''; return }
+  const fd = new FormData()
+  fd.append('csv-file', file)
+  await api.upload('rest/service/id/user/import/csv/full', fd)
+  e.target.value = ''
+  dt.load({ page: 1, itemsPerPage: lastOptions.itemsPerPage || 25 })
 }
 
 onMounted(() => {
   appStore.setBreadcrumbs(
-    [
-      { title: t('nav.home'), to: '/' },
-      { title: t('nav.identity') },
-      { title: t('user.title') },
-    ],
+    [{ title: t('nav.home'), to: '/' }, { title: t('nav.identity') }, { title: t('user.title') }],
     { refresh: () => dt.load(lastOptions) },
   )
 })
@@ -314,49 +266,66 @@ onMounted(() => {
 .users {
   --surface: rgb(var(--v-theme-surface));
   --ink: rgb(var(--v-theme-on-surface));
-  --muted: rgba(var(--v-theme-on-surface), .6);
-  --line: rgba(var(--v-theme-on-surface), .12);
+  --ink-2: rgba(var(--v-theme-on-surface), .72);
+  --ink-3: rgba(var(--v-theme-on-surface), .55);
+  --border: rgba(var(--v-theme-on-surface), .12);
+  --border-2: rgba(var(--v-theme-on-surface), .26);
+  --hover: rgba(var(--v-theme-on-surface), .05);
+  --pill: rgba(var(--v-theme-on-surface), .06);
   --primary: rgb(var(--v-theme-primary));
-  --on-primary: rgb(var(--v-theme-on-primary));
-  --font: "Bricolage Grotesque", system-ui, sans-serif;
+  --accent: rgb(var(--v-theme-secondary));
+  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
   color: var(--ink);
 }
 
-/* Vibrant page header — smaller sibling of the Dashboard hero. */
-.hero {
-  padding: 22px 26px; border-radius: 22px; margin-bottom: 18px; color: var(--on-primary);
-  background: radial-gradient(600px 200px at 100% -40%, rgba(255,255,255,.18), transparent 70%), linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 60%, #000));
-  box-shadow: 0 18px 40px -22px color-mix(in srgb, var(--primary) 80%, transparent);
+/* Page header (.ph). */
+.ph { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
+.ph-txt h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.03em; font-size: 28px; margin: 0; color: var(--ink); }
+.ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
+.ph-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+.btn, .btn-ghost, .btn-danger {
+  display: inline-flex; align-items: center; gap: 7px; font-family: var(--font); font-weight: 700; font-size: 13.5px;
+  padding: 9px 15px; border-radius: 11px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s, border-color .15s;
 }
-.hero-txt h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.035em; font-size: 28px; margin: 0; }
-.hero-txt p { margin: 6px 0 0; font-size: 14px; opacity: .9; }
+.btn { color: #fff; background: linear-gradient(135deg, var(--accent), var(--primary)); box-shadow: 0 12px 24px -12px rgba(var(--v-theme-secondary), .7); }
+.btn:hover { filter: brightness(1.06); }
+.btn-ghost { color: var(--ink-2); background: var(--surface); border-color: var(--border); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--border-2); background: var(--hover); }
+.btn-ghost:disabled { opacity: .55; cursor: default; }
+.btn-danger { color: #fff; background: rgb(var(--v-theme-error)); }
+.btn-danger:hover { filter: brightness(1.06); }
 
-/* Theme-adaptive panel wrapping the toolbar + data table. */
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px 18px 8px; box-shadow: 0 18px 40px -30px rgba(0,0,0,.45); }
+/* Toolbar (.toolbar) + search. */
+.toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.tb-sp { flex: 1; }
+.search { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 520px; padding: 9px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-3); transition: border-color .15s, box-shadow .15s; }
+.search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(var(--v-theme-secondary), .15); }
+.search input { flex: 1; border: 0; outline: 0; background: transparent; font-family: var(--font); font-size: 14px; color: var(--ink); }
+.search input::placeholder { color: var(--ink-3); }
 
-.search-field {
-  min-width: 200px;
-  max-width: 300px;
-  flex: 1 1 200px;
-}
+.bulkbar { display: flex; align-items: center; gap: 12px; }
+.bulk-count { font-weight: 700; font-size: 13px; color: var(--ink-2); }
 
-/* Let the reused data table sit flush inside the Vibrant panel rather than
-   carrying its own elevated surface. */
-.panel :deep(.v-table) { background: transparent; }
+/* Cells. */
+.login { display: inline-flex; align-items: center; gap: 8px; }
+.login-ic { color: var(--ink-3); }
+.mono { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.mails { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.mailchip { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); background: var(--pill); border: 1px solid var(--border); border-radius: 8px; padding: 3px 9px; }
+.mailchip :deep(.v-icon) { opacity: .6; }
+.groups { display: inline-flex; align-items: center; flex-wrap: nowrap; gap: 5px; overflow: hidden; }
+.chip { display: inline-flex; align-items: center; font-size: 12px; font-weight: 700; color: var(--ink-2); background: var(--pill); border: 1px solid var(--border); border-radius: 20px; padding: 3px 11px; white-space: nowrap; }
+.more { font-size: 12px; font-weight: 700; color: var(--ink-3); }
+.dash { color: var(--ink-3); }
 
-/* Keep the groups column on a single line so rows stay aligned. */
-.groups-cell {
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* Mails column: soft-wrap acceptable (long addresses), +N keeps it bounded. */
-.mails-cell {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
+/* Gear button + popmenu (matches mockup .iconbtn / .popmenu). */
+.iconbtn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid transparent; background: transparent; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-2); transition: background .12s; }
+.iconbtn:hover { background: var(--hover); }
+.popmenu { min-width: 210px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 40px -16px rgba(0, 0, 0, .4); padding: 6px; }
+.popmenu button { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; cursor: pointer; font-family: var(--font); font-size: 13.5px; font-weight: 600; color: var(--ink); padding: 10px 12px; border-radius: 8px; text-align: left; }
+.popmenu button:hover { background: var(--hover); }
+.popmenu button.danger { color: rgb(var(--v-theme-error)); }
+.popmenu .sep { height: 1px; background: var(--border); margin: 5px 4px; }
 </style>

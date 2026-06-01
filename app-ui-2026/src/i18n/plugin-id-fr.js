@@ -95,4 +95,14 @@ export default {
 
   // 2026 redesign — page subtitle for the Vibrant Users view header.
   'user.subtitle2026': 'Gérez les comptes, leurs entités, groupes et accès.',
+  'user.searchPlaceholder': 'Rechercher un utilisateur…',
+  // 2026 redesign — VibrantDataTable chrome (not provided by the host).
+  'common.rows': 'Lignes',
+  'common.of': 'sur',
+  'common.previous': 'Précédent',
+  'common.next': 'Suivant',
+  'common.loading': 'Chargement…',
+  'common.noData': 'Aucune donnée',
+  'common.export': 'Exporter',
+  'common.import': 'Importer',
 }
