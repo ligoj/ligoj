@@ -6,6 +6,7 @@ import LoginView from '@2026/views/LoginView.vue'
 import UsersView from '@2026/views/UsersView.vue'
 import GroupsView from '@2026/views/GroupsView.vue'
 import CompaniesView from '@2026/views/CompaniesView.vue'
+import DelegatesView from '@2026/views/DelegatesView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: DashboardView },
@@ -18,6 +19,7 @@ const routes = [
   { path: '/id/company', name: 'id-company', component: CompaniesView },
   { path: '/id/company/new', name: 'id-company-new', component: CompaniesView },
   { path: '/id/company/:id', name: 'id-company-view', component: CompaniesView },
+  { path: '/id/delegate', name: 'id-delegate', component: DelegatesView },
 ]
 
 const router = createRouter({
