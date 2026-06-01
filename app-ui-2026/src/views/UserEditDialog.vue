@@ -87,7 +87,7 @@
                  dialog, consistent with the row gear menu of the list. -->
             <template v-if="isEdit">
               <v-divider class="my-4" />
-              <div class="text-subtitle-2 text-medium-emphasis mb-2">{{ t('user.actions') }}</div>
+              <div class="text-subtitle-2 text-medium-emphasis mb-2 actions-label">{{ t('user.actions') }}</div>
               <v-list border rounded density="compact" bg-color="transparent">
                 <v-list-item :prepend-icon="locked ? 'mdi-lock-open-variant' : 'mdi-lock'" :title="locked ? t('user.unlock') : t('user.lock')" @click="startAction(locked ? 'unlock' : 'lock')" />
                 <v-list-item :prepend-icon="isolated ? 'mdi-account-check' : 'mdi-account-off'" :title="isolated ? t('user.restore') : t('user.isolate')"
@@ -644,7 +644,7 @@ async function confirmAction() {
 .vmodal-head { display: flex; align-items: center; gap: 13px; padding: 22px 24px 8px; }
 .vmodal-head .mi { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -8px rgba(255, 90, 82, .6); }
 .vmodal-head h3 { font-family: var(--font); font-weight: 800; font-size: 20px; margin: 0; flex: 1; color: var(--ink); letter-spacing: -.02em; }
-.vmodal-head h3 .who { color: rgb(var(--v-theme-primary)); }
+.vmodal-head h3 .who { color: #ff5a52; }
 .vmodal-head .x { width: 36px; height: 36px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; display: grid; place-items: center; color: var(--ink-3); }
 .vmodal-head .x:hover { background: var(--hover); color: var(--ink); }
 
@@ -660,9 +660,11 @@ async function confirmAction() {
 /* Selected chips inside group/email fields → match the list's pill look. */
 .vmodal :deep(.v-chip) { border-radius: 8px; font-weight: 600; }
 
-/* Account-actions list (edit mode). */
+/* Account-actions list (edit mode) — use the Vibrant font, not Roboto. */
 .vmodal :deep(.v-list) { border-color: var(--border) !important; border-radius: 12px !important; }
 .vmodal :deep(.v-list-item) { border-radius: 9px; }
+.vmodal :deep(.v-list-item-title) { font-family: var(--font); font-weight: 600; font-size: 14px; }
+.vmodal :deep(.actions-label) { font-family: var(--font); font-weight: 700; }
 
 /* Footer + Vibrant buttons. */
 .vmodal-foot { display: flex; align-items: center; gap: 10px; padding: 14px 24px 22px; }
