@@ -13,9 +13,19 @@
   <main class="login-bg">
     <section class="card">
       <header class="card-head">
-        <select class="locale-select" aria-label="Language" :value="locale" @change="setLocale($event.target.value)">
-          <option v-for="loc in LOCALES" :key="loc.code" :value="loc.code">{{ loc.flag }} {{ loc.label }}</option>
-        </select>
+        <div class="locale-sel" :class="{ open: langOpen }">
+          <button type="button" class="locale-btn" aria-label="Language" @click="langOpen = !langOpen">
+            <span class="lflag">{{ currentLoc.flag }}</span>
+            <span class="llabel">{{ currentLoc.label }}</span>
+            <span class="lcaret">▾</span>
+          </button>
+          <div v-if="langOpen" class="locale-menu">
+            <button v-for="loc in LOCALES" :key="loc.code" type="button" class="locale-opt" :class="{ sel: loc.code === locale }" @click="pickLocale(loc.code)">
+              <span class="lflag">{{ loc.flag }}</span><span class="llabel">{{ loc.label }}</span>
+              <span v-if="loc.code === locale" class="lok">✓</span>
+            </button>
+          </div>
+        </div>
         <img src="@/assets/logo.svg" alt="Ligoj" class="logo" />
         <p class="subtitle">{{ msg['title-' + mode] }}</p>
       </header>
@@ -98,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 
 const LOCALES = [
   { code: 'en', label: 'English', flag: '\u{1F1EC}\u{1F1E7}' /* 🇬🇧 */ },
@@ -238,6 +248,12 @@ function setLocale(loc) {
     document.documentElement.lang = loc
   }
 }
+
+/* Custom language picker (replaces the native <select>). */
+const langOpen = ref(false)
+const currentLoc = computed(() => LOCALES.find((l) => l.code === locale.value) || LOCALES[0])
+function pickLocale(code) { setLocale(code); langOpen.value = false }
+function onDocClick(e) { if (!e.target.closest('.locale-sel')) langOpen.value = false }
 
 const formRef = ref(null)
 const mode = ref('login')
@@ -469,6 +485,7 @@ onMounted(async () => {
   // Reflect the active locale on <html lang> for accessibility / spell-check.
   if (typeof document !== 'undefined') {
     document.documentElement.lang = locale.value
+    document.addEventListener('click', onDocClick)
   }
 
   const hash = window.location.hash || ''
@@ -604,12 +621,19 @@ onMounted(async () => {
   text-align: center;
 }
 
-.locale-select {
-  position: absolute; top: 14px; right: 14px;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
-  padding: 5px 8px; font-size: .8rem; color: var(--ink-2); cursor: pointer; font-family: var(--sys);
-}
-.locale-select:focus { outline: none; border-color: var(--btn1); box-shadow: 0 0 0 4px rgba(255,148,54,.15); }
+.locale-sel { position: absolute; top: 14px; right: 14px; z-index: 5; }
+.locale-btn { display: flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); font-family: var(--sys); font-size: .82rem; font-weight: 600; cursor: pointer; transition: border-color .15s; }
+.locale-btn:hover { border-color: var(--border-2); }
+.lflag { font-size: 15px; line-height: 1; }
+.lcaret { color: var(--ink-3); font-size: .7rem; transition: transform .2s; }
+.locale-sel.open .lcaret { transform: rotate(180deg); }
+.locale-menu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 156px; background: var(--surface); border: 1px solid var(--border); border-radius: 11px; box-shadow: 0 16px 36px -14px rgba(0,0,0,.3); padding: 5px; animation: lmenu .12s ease; }
+@keyframes lmenu { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.locale-opt { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 0; background: transparent; border-radius: 8px; color: var(--ink); font-family: var(--sys); font-size: .85rem; font-weight: 600; cursor: pointer; text-align: left; }
+.locale-opt:hover { background: #faf7f1; }
+.locale-opt.sel { color: var(--btn2); }
+.llabel { white-space: nowrap; }
+.lok { margin-left: auto; color: var(--btn2); font-weight: 800; }
 
 .logo { width: 52px; height: 52px; animation: floatY 4.5s ease-in-out infinite; }
 @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }

@@ -56,9 +56,20 @@
         <div class="pref-row">
           <v-icon class="pref-ic">mdi-translate</v-icon>
           <div class="pt"><div class="ptt">{{ t('profile.language') }}</div></div>
-          <select class="psel" :value="i18n.locale" @change="i18n.setLocale($event.target.value)">
-            <option v-for="opt in languageItems" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
-          </select>
+          <div class="langsel" :class="{ open: langOpen }">
+            <button type="button" class="langsel-btn" @click="langOpen = !langOpen">
+              <span class="flag">{{ FLAGS[i18n.locale] || '🌐' }}</span>
+              <span>{{ currentLang.title }}</span>
+              <v-icon size="small" class="caret">mdi-chevron-down</v-icon>
+            </button>
+            <div v-if="langOpen" class="langsel-menu">
+              <button v-for="opt in languageItems" :key="opt.value" type="button" class="langsel-opt" :class="{ sel: opt.value === i18n.locale }" @click="pickLang(opt.value)">
+                <span class="flag">{{ FLAGS[opt.value] || '🌐' }}</span>
+                <span>{{ opt.title }}</span>
+                <v-icon v-if="opt.value === i18n.locale" size="small" class="ok">mdi-check</v-icon>
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="pref-row">
@@ -124,9 +135,14 @@ function onCompactChange(value) {
 }
 
 const LOCALE_LABELS = { en: 'English', fr: 'Français' }
+const FLAGS = { en: '🇬🇧', fr: '🇫🇷' }
 const languageItems = computed(() =>
   i18n.SUPPORTED_LOCALES.map((value) => ({ value, title: LOCALE_LABELS[value] || value })),
 )
+const currentLang = computed(() => languageItems.value.find((o) => o.value === i18n.locale) || { value: i18n.locale, title: i18n.locale })
+const langOpen = ref(false)
+function pickLang(v) { i18n.setLocale(v); langOpen.value = false }
+function onDocClick(e) { if (!e.target.closest('.langsel')) langOpen.value = false }
 
 const STORAGE_KEY = 'ligoj.skipUnsavedConfirmation'
 const skipUnsavedConfirmation = ref(
@@ -157,11 +173,17 @@ onMounted(() => {
   // redesign page is shown. AppLayout.vue is never modified; the font is
   // applied via the `html.ui2026` hook below and removed on leave, so the
   // default UI is untouched.
-  if (typeof document !== 'undefined') document.documentElement.classList.add('ui2026')
+  if (typeof document !== 'undefined') {
+    document.documentElement.classList.add('ui2026')
+    document.addEventListener('click', onDocClick)
+  }
 })
 
 onBeforeUnmount(() => {
-  if (typeof document !== 'undefined') document.documentElement.classList.remove('ui2026')
+  if (typeof document !== 'undefined') {
+    document.documentElement.classList.remove('ui2026')
+    document.removeEventListener('click', onDocClick)
+  }
 })
 </script>
 
@@ -174,6 +196,7 @@ onBeforeUnmount(() => {
   --muted: rgba(var(--v-theme-on-surface), .60);
   --line: rgba(var(--v-theme-on-surface), .12);
   --pill: rgba(var(--v-theme-on-surface), .05);
+  --hover: rgba(var(--v-theme-on-surface), .07);
   --primary: rgb(var(--v-theme-primary));
   --on-primary: rgb(var(--v-theme-on-primary));
   --ok: #1d9d63;
@@ -226,8 +249,19 @@ onBeforeUnmount(() => {
 .pref-row + .pref-row, .pref-theme-label { border-top: 1px solid var(--line); }
 .pref-ic { color: var(--muted); }
 .pref-row .pt { flex: 1; } .ptt { font-weight: 700; font-size: 14px; color: var(--ink); } .pth { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-.psel { padding: 9px 12px; border-radius: 11px; border: 1px solid var(--line); background: var(--pill); font-family: inherit; font-size: 14px; color: var(--ink); outline: none; min-width: 200px; }
-.psel:focus { border-color: var(--primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent); }
+.langsel { position: relative; min-width: 210px; }
+.langsel-btn { width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 11px; border: 1px solid var(--line); background: var(--pill); color: var(--ink); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; transition: border-color .15s; }
+.langsel-btn:hover { border-color: var(--primary); }
+.langsel-btn .flag { font-size: 17px; line-height: 1; }
+.langsel-btn .caret { margin-left: auto; color: var(--muted); transition: transform .2s; }
+.langsel.open .langsel-btn .caret { transform: rotate(180deg); }
+.langsel-menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 18px 44px -18px rgba(0,0,0,.5); padding: 6px; animation: langmenu .13s ease; }
+@keyframes langmenu { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.langsel-opt { width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px 11px; border: 0; background: transparent; border-radius: 8px; color: var(--ink); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; text-align: left; }
+.langsel-opt:hover { background: var(--hover); }
+.langsel-opt.sel { color: var(--primary); }
+.langsel-opt .flag { font-size: 17px; line-height: 1; }
+.langsel-opt .ok { margin-left: auto; color: var(--primary); }
 
 .sw { width: 46px; height: 26px; border-radius: 20px; background: var(--line); position: relative; cursor: pointer; transition: background .2s; flex: none; }
 .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .2s; }
