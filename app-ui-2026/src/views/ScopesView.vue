@@ -81,7 +81,7 @@
     </v-dialog>
 
     <LigojConfirmDialog v-model="deleteDialog" :title="t('containerScope.deleteTitle')" :icon="TYPE_ICONS.SCOPE" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmDelete">
-      {{ t('containerScope.deleteConfirm', { name: deleteTarget?.name }) }}
+      {{ t('containerScope.deleteConfirmBefore') }}<strong class="text-error">{{ deleteTarget?.name }}</strong>{{ t('containerScope.deleteConfirmAfter') }}
     </LigojConfirmDialog>
   </div>
 </template>

@@ -103,6 +103,8 @@ export default {
   'delegate.subtitle2026': 'Déléguez des droits d\'administration et d\'écriture.',
   'delegate.searchPlaceholder': 'Rechercher une délégation…',
   'containerScope.subtitle2026': 'Définissez les bases LDAP des groupes et entités.',
+  'containerScope.deleteConfirmBefore': 'Êtes-vous certain de supprimer ',
+  'containerScope.deleteConfirmAfter': ' ?',
   // 2026 redesign — VibrantDataTable chrome (not provided by the host).
   'common.rows': 'Lignes',
   'common.of': 'sur',
