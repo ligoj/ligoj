@@ -79,6 +79,7 @@ const NAV = [
     { label: 'Groupes', route: '/id/group', match: '/id/group' },
     { label: 'Entités', route: '/id/company', match: '/id/company' },
     { label: 'Délégués', route: '/id/delegate', match: '/id/delegate' },
+    { label: 'Portées', route: '/id/scope', match: '/id/scope' },
   ] },
   { label: 'Projets', icon: 'mdi-folder', soon: true },
   { label: 'Administration', icon: 'mdi-cog', soon: true },
@@ -91,6 +92,7 @@ const title = computed(() => {
   if (route.path.startsWith('/id/group')) return 'Groupes'
   if (route.path.startsWith('/id/company')) return 'Entités'
   if (route.path.startsWith('/id/delegate')) return 'Délégués'
+  if (route.path.startsWith('/id/scope')) return 'Portées'
   if (route.path.startsWith('/id')) return 'Utilisateurs'
   return 'Accueil'
 })
