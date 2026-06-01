@@ -14,6 +14,7 @@
     <!-- Decorative multi-colour aurora (orange / coral / blue — echoing the
          Ligoj logo). Purely cosmetic, hidden from a11y tree. -->
     <div class="aurora" aria-hidden="true"><span class="b b1" /><span class="b b2" /><span class="b b3" /></div>
+    <div class="card-wrap">
     <section class="card">
       <header class="card-head">
         <div class="locale-sel" :class="{ open: langOpen }">
@@ -108,6 +109,7 @@
         </div>
       </div>
     </section>
+    </div>
 
     <!-- Toast stack: floats over the card, doesn't shift layout -->
     <div class="toast-stack" role="region" aria-live="polite" aria-label="Notifications">
@@ -572,6 +574,21 @@ onBeforeUnmount(() => {
 @keyframes blob2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-54px,-40px) scale(1.08); } }
 @keyframes blob3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(46px,-40px) scale(1.1); } }
 
+/* Neon halo around the login card — flowing orange→coral→blue gradient with
+   a crisp glowing line + a soft outer bloom, gently pulsing. */
+.card-wrap { position: relative; z-index: 1; width: 100%; max-width: 420px; }
+.card-wrap::before, .card-wrap::after {
+  content: ""; position: absolute; inset: -2px; border-radius: 26px; z-index: 0; pointer-events: none;
+  background: linear-gradient(120deg, var(--c-orange), var(--c-coral), var(--c-blue), var(--c-orange));
+  background-size: 300% 300%;
+  animation: neonFlow 7s ease-in-out infinite, neonPulse 3.2s ease-in-out infinite;
+}
+.card-wrap::before { filter: blur(4px); opacity: .9; }            /* crisp neon line */
+.card-wrap::after { inset: -10px; filter: blur(26px); opacity: .55; } /* outer bloom */
+@keyframes neonFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes neonPulse { 0%, 100% { opacity: .55; } 50% { opacity: .9; } }
+.card-wrap > .card { width: 100%; max-width: none; }
+
 .card {
   position: relative; z-index: 1;
   width: 100%;
@@ -696,7 +713,7 @@ input:disabled, input[readonly] { background: var(--hover); color: var(--ink-3);
 @keyframes toast-in { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora .b, .logo, .submit::after, .card, .card-body > .alert, .field, .submit, .links { animation: none; }
+  .aurora .b, .card-wrap::before, .card-wrap::after, .logo, .submit::after, .card, .card-body > .alert, .field, .submit, .links { animation: none; }
   .card, .card-body > .alert, .field, .submit, .links { opacity: 1; }
 }
 </style>
