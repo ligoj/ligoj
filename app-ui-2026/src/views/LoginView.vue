@@ -604,8 +604,6 @@ onBeforeUnmount(() => {
   overflow: hidden;
   animation: rise .5s cubic-bezier(.2,.7,.3,1);
 }
-/* Gradient accent strip across the top of the card. */
-.card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--c-orange), var(--c-coral) 45%, var(--c-blue)); z-index: 2; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
 .card-head {
