@@ -11,6 +11,9 @@
 -->
 <template>
   <main class="login-bg">
+    <!-- Decorative multi-colour aurora (orange / coral / blue — echoing the
+         Ligoj logo). Purely cosmetic, hidden from a11y tree. -->
+    <div class="aurora" aria-hidden="true"><span class="b b1" /><span class="b b2" /><span class="b b3" /></div>
     <section class="card">
       <header class="card-head">
         <div class="locale-sel" :class="{ open: langOpen }">
@@ -537,6 +540,11 @@ onBeforeUnmount(() => {
   --warn: rgb(var(--v-theme-warning));
   --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
   --sys: var(--v26-sys, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  /* Brand aurora colours (logo orange + coral + blue), fixed for a premium,
+     vivid pre-auth backdrop in both light and dark. */
+  --c-orange: #ff9436;
+  --c-coral: #ff5a52;
+  --c-blue: #2f6df6;
 
   position: fixed;
   inset: 0;
@@ -546,20 +554,23 @@ onBeforeUnmount(() => {
   justify-content: center;
   padding: 24px;
   background:
-    radial-gradient(700px 420px at 12% 0%, rgba(var(--v-theme-secondary), .22), transparent 55%),
-    radial-gradient(700px 480px at 100% 8%, rgba(var(--v-theme-primary), .28), transparent 55%),
+    radial-gradient(620px 420px at 6% -6%, color-mix(in srgb, var(--c-orange) 42%, transparent), transparent 60%),
+    radial-gradient(520px 360px at 26% 16%, color-mix(in srgb, var(--c-coral) 26%, transparent), transparent 58%),
+    radial-gradient(720px 480px at 100% 2%, color-mix(in srgb, var(--c-blue) 40%, transparent), transparent 60%),
+    radial-gradient(560px 460px at 92% 104%, color-mix(in srgb, var(--c-blue) 26%, transparent), transparent 58%),
     var(--bg);
   font-family: var(--sys);
   color: var(--ink);
 }
-/* drifting aurora blobs */
-.login-bg::before, .login-bg::after {
-  content: ""; position: absolute; border-radius: 50%; filter: blur(72px); opacity: .42; z-index: 0; pointer-events: none;
-}
-.login-bg::before { width: 440px; height: 440px; background: var(--accent); top: -150px; left: -110px; animation: blob1 15s ease-in-out infinite; }
-.login-bg::after { width: 500px; height: 500px; background: var(--primary); bottom: -190px; right: -130px; animation: blob2 19s ease-in-out infinite; }
+/* drifting aurora blobs (orange / coral / blue) */
+.aurora { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.aurora .b { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .55; }
+.aurora .b1 { width: 460px; height: 460px; background: var(--c-orange); top: -160px; left: -120px; animation: blob1 15s ease-in-out infinite; }
+.aurora .b2 { width: 360px; height: 360px; background: var(--c-coral); top: 38%; left: -150px; opacity: .4; animation: blob3 17s ease-in-out infinite; }
+.aurora .b3 { width: 540px; height: 540px; background: var(--c-blue); bottom: -200px; right: -150px; animation: blob2 19s ease-in-out infinite; }
 @keyframes blob1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(70px,46px) scale(1.12); } }
 @keyframes blob2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-54px,-40px) scale(1.08); } }
+@keyframes blob3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(46px,-40px) scale(1.1); } }
 
 .card {
   position: relative; z-index: 1;
@@ -571,10 +582,13 @@ onBeforeUnmount(() => {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 24px;
-  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .45);
+  /* Premium: neutral drop + faint warm & cool colour bloom around the card. */
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .45), 0 8px 60px -20px rgba(255, 148, 54, .25), 0 8px 60px -20px rgba(47, 109, 246, .22);
   overflow: hidden;
   animation: rise .5s cubic-bezier(.2,.7,.3,1);
 }
+/* Gradient accent strip across the top of the card. */
+.card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--c-orange), var(--c-coral) 45%, var(--c-blue)); z-index: 2; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
 .card-head {
@@ -682,6 +696,7 @@ input:disabled, input[readonly] { background: var(--hover); color: var(--ink-3);
 @keyframes toast-in { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .login-bg::before, .login-bg::after, .logo, .submit::after, .card, .card-body > .alert, .field, .submit, .links { animation: none; opacity: 1; }
+  .aurora .b, .logo, .submit::after, .card, .card-body > .alert, .field, .submit, .links { animation: none; }
+  .card, .card-body > .alert, .field, .submit, .links { opacity: 1; }
 }
 </style>
