@@ -5,20 +5,17 @@
          user" button and the row gear menu. model-value is bound one-way
          so a close request (Cancel / Esc / scrim) can be vetoed by the
          unsaved-changes guard before it actually closes. -->
-    <v-dialog :model-value="modelValue" @update:model-value="onDialogModel" max-width="700" scrollable>
-      <v-card>
-        <!-- Edit mode includes the user id (login) as a primary-color
-             span so the user sees who they're editing the moment the
-             dialog opens, matching the convention used by the group
-             details and group-members dialogs. Sourced from the prop
-             — `form.id` would lag until the load completes. -->
-        <v-card-title class="d-flex align-center ga-2">
-          <v-icon color="primary">{{ TYPE_ICONS.USER }}</v-icon>
-          <span>{{ isEdit ? t('user.edit') : t('user.new') }}</span>
-          <span v-if="isEdit" class="text-primary">{{ userId }}</span>
-        </v-card-title>
+    <v-dialog :model-value="modelValue" @update:model-value="onDialogModel" max-width="600" scrollable>
+      <v-card class="vmodal">
+        <!-- Vibrant dialog header: warm gradient icon tile + title (+ the
+             edited login in accent), matching the 2026 mockup .modal-head. -->
+        <div class="vmodal-head">
+          <span class="mi"><v-icon color="#fff">{{ TYPE_ICONS.USER }}</v-icon></span>
+          <h3>{{ isEdit ? t('user.edit') : t('user.new') }} <span v-if="isEdit" class="who">{{ userId }}</span></h3>
+          <button class="x" :aria-label="t('common.cancel')" @click="requestClose"><v-icon size="20">mdi-close</v-icon></button>
+        </div>
 
-        <v-card-text>
+        <v-card-text class="vmodal-body">
           <v-alert v-if="demoMode" type="info" variant="tonal" density="compact" class="mb-4">
             {{ t('user.demoEdit') }}
           </v-alert>
@@ -101,16 +98,17 @@
           </template>
         </v-card-text>
 
-        <v-card-actions>
-          <v-btn v-if="isEdit" color="error" variant="tonal" :disabled="loading" @click="confirmDelete = true">
-            <v-icon start>mdi-delete</v-icon> {{ t('common.delete') }}
-          </v-btn>
-          <v-spacer />
-          <v-btn variant="text" @click="requestClose">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="primary" variant="elevated" :loading="saving" :disabled="loading" @click="save">
-            <v-icon start>mdi-content-save</v-icon> {{ t('common.save') }}
-          </v-btn>
-        </v-card-actions>
+        <div class="vmodal-foot">
+          <button v-if="isEdit" class="mbtn ghost-danger" :disabled="loading" @click="confirmDelete = true">
+            <v-icon size="18">mdi-delete</v-icon>{{ t('common.delete') }}
+          </button>
+          <span class="foot-sp" />
+          <button class="mbtn ghost" @click="requestClose">{{ t('common.cancel') }}</button>
+          <button class="mbtn primary" :disabled="loading || saving" @click="save">
+            <span v-if="saving" class="mspin" aria-hidden="true" />
+            <v-icon v-else size="18">mdi-content-save</v-icon>{{ t('common.save') }}
+          </button>
+        </div>
       </v-card>
     </v-dialog>
 
@@ -623,4 +621,61 @@ async function confirmAction() {
   color: rgb(var(--v-theme-on-surface)) !important;
   opacity: 0.7;
 }
+</style>
+
+<style scoped>
+/* 2026 "Vibrant" re-skin of the dialog chrome + fields. Vars are defined on
+   .vmodal (the teleported card root) so they cascade to all descendants —
+   unlike vars on the page root, which never reach teleported content. */
+.vmodal {
+  --ink: rgb(var(--v-theme-on-surface));
+  --ink-2: rgba(var(--v-theme-on-surface), .72);
+  --ink-3: rgba(var(--v-theme-on-surface), .5);
+  --border: rgba(var(--v-theme-on-surface), .14);
+  --border-2: rgba(var(--v-theme-on-surface), .26);
+  --hover: rgba(var(--v-theme-on-surface), .06);
+  --surface: rgb(var(--v-theme-surface));
+  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
+  border-radius: 20px !important;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .55) !important;
+}
+
+/* Header */
+.vmodal-head { display: flex; align-items: center; gap: 13px; padding: 22px 24px 8px; }
+.vmodal-head .mi { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -8px rgba(255, 90, 82, .6); }
+.vmodal-head h3 { font-family: var(--font); font-weight: 800; font-size: 20px; margin: 0; flex: 1; color: var(--ink); letter-spacing: -.02em; }
+.vmodal-head h3 .who { color: rgb(var(--v-theme-primary)); }
+.vmodal-head .x { width: 36px; height: 36px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; display: grid; place-items: center; color: var(--ink-3); }
+.vmodal-head .x:hover { background: var(--hover); color: var(--ink); }
+
+.vmodal-body { padding: 12px 24px 6px !important; }
+
+/* Fields — clean rounded outlined inputs (less "thin Material"). */
+.vmodal :deep(.v-field) { border-radius: 12px; font-family: var(--font); }
+.vmodal :deep(.v-field__prepend-inner .v-icon) { opacity: .55; }
+.vmodal :deep(.v-text-field .v-field__input),
+.vmodal :deep(.v-autocomplete .v-field__input),
+.vmodal :deep(.v-combobox .v-field__input) { font-size: 14px; }
+.vmodal :deep(.v-label) { font-weight: 600; }
+/* Selected chips inside group/email fields → match the list's pill look. */
+.vmodal :deep(.v-chip) { border-radius: 8px; font-weight: 600; }
+
+/* Account-actions list (edit mode). */
+.vmodal :deep(.v-list) { border-color: var(--border) !important; border-radius: 12px !important; }
+.vmodal :deep(.v-list-item) { border-radius: 9px; }
+
+/* Footer + Vibrant buttons. */
+.vmodal-foot { display: flex; align-items: center; gap: 10px; padding: 14px 24px 22px; }
+.foot-sp { flex: 1; }
+.mbtn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px; padding: 10px 17px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s, border-color .15s; }
+.mbtn.primary { color: #fff; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55); }
+.mbtn.primary:hover:not(:disabled) { filter: brightness(1.04); }
+.mbtn.primary:disabled { opacity: .6; cursor: default; }
+.mbtn.ghost { color: var(--ink-2); background: transparent; border-color: var(--border); }
+.mbtn.ghost:hover { background: var(--hover); border-color: var(--border-2); }
+.mbtn.ghost-danger { color: rgb(var(--v-theme-error)); background: transparent; border-color: rgba(var(--v-theme-error), .35); }
+.mbtn.ghost-danger:hover:not(:disabled) { background: rgba(var(--v-theme-error), .08); }
+.mbtn.ghost-danger:disabled { opacity: .5; cursor: default; }
+.mspin { width: 15px; height: 15px; border: 2px solid rgba(255, 255, 255, .5); border-top-color: #fff; border-radius: 50%; animation: mspin .7s linear infinite; }
+@keyframes mspin { to { transform: rotate(360deg); } }
 </style>
