@@ -1,5 +1,8 @@
 <template>
-  <div class="shell" :class="{ 'nav-collapsed': collapsed }">
+  <!-- Login is full-bleed: render it bare, without the app shell. -->
+  <router-view v-if="isLogin" />
+
+  <div v-else class="shell" :class="{ 'nav-collapsed': collapsed }">
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="brand" @click="go('/')">
@@ -37,7 +40,7 @@
       <span class="crumb">{{ title }}</span>
       <span class="sp" />
       <button class="user" @click="go('/profile')"><v-icon size="small">mdi-account</v-icon>{{ auth.userName || 'invité' }}</button>
-      <button class="icon-btn" title="Se déconnecter" @click="auth.logout?.()"><v-icon>mdi-logout</v-icon></button>
+      <button class="icon-btn" title="Se déconnecter" @click="logout"><v-icon>mdi-logout</v-icon></button>
     </header>
 
     <main class="main"><router-view /></main>
@@ -63,9 +66,21 @@ const NAV = [
 ]
 
 const collapsed = ref(false)
+const isLogin = computed(() => route.name === 'login')
 const title = computed(() => (route.path === '/profile' ? 'Profil' : 'Accueil'))
 
 function go(path) { if (route.path !== path) router.push(path) }
+
+// Preview logout: clear the backend session then land on the Vibrant login
+// (with a ?logout flag so it shows the "logged out" toast). We don't reuse
+// the core `auth.logout()` here — it does a top-level nav to Spring's
+// /logout, which would leave the SPA; in this standalone preview we want to
+// stay in-app. Best-effort against a local (non-OIDC) provider.
+async function logout() {
+  try { await fetch('logout', { method: 'POST', credentials: 'include' }) } catch { /* ignore */ }
+  try { await auth.fetchSession() } catch { /* ignore */ }
+  router.push({ path: '/login', query: { logout: null } })
+}
 
 let toastT
 const toastMsg = ref('')

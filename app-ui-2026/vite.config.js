@@ -32,6 +32,10 @@ export default defineConfig({
     proxy: {
       '/ligoj/rest': { target: 'http://localhost:8080', changeOrigin: true },
       '/ligoj/login': { target: 'http://localhost:8080', changeOrigin: true },
+      // CAPTCHA image used by the login's recovery / reset modes.
+      '/ligoj/captcha.png': { target: 'http://localhost:8080', changeOrigin: true },
+      // Backend logout (Spring Security) — used by the shell's logout button.
+      '/ligoj/logout': { target: 'http://localhost:8080', changeOrigin: true },
     },
   },
 })

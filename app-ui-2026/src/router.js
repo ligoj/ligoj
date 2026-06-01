@@ -2,10 +2,12 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import DashboardView from '@2026/views/DashboardView.vue'
 import ProfileView from '@2026/views/ProfileView.vue'
+import LoginView from '@2026/views/LoginView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: DashboardView },
   { path: '/profile', name: 'profile', component: ProfileView },
+  { path: '/login', name: 'login', component: LoginView },
 ]
 
 const router = createRouter({
