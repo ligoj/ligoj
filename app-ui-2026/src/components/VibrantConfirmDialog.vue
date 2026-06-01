@@ -79,6 +79,23 @@ function onCancel() {
 .vconfirm.tone-warning { --accent: rgb(var(--v-theme-warning)); --accent-grad: rgb(var(--v-theme-warning)); }
 .vconfirm.tone-success { --accent: rgb(var(--v-theme-success)); --accent-grad: rgb(var(--v-theme-success)); }
 
+/* Destructive / cautionary confirmations shake on appear to flag the
+   irreversible action. Neutral (brand) confirmations stay calm. The shake
+   lives on the inner card, distinct from v-dialog's own scale transition on
+   the overlay content, so the two don't fight. */
+.vconfirm.tone-error, .vconfirm.tone-warning { animation: vc-shake .5s cubic-bezier(.36, .07, .19, .97) both; transform-origin: center; }
+@keyframes vc-shake {
+  0% { transform: translateX(0); }
+  12%, 84% { transform: translateX(-5px); }
+  24%, 72% { transform: translateX(6px); }
+  36%, 60% { transform: translateX(-7px); }
+  48% { transform: translateX(7px); }
+  100% { transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vconfirm.tone-error, .vconfirm.tone-warning { animation: none; }
+}
+
 .vc-head { display: flex; align-items: center; gap: 12px; padding: 20px 22px 6px; }
 .vc-ic { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: none; background: var(--accent-grad); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--accent) 65%, transparent); }
 .vc-head h3 { font-family: var(--font); font-weight: 800; font-size: 18px; letter-spacing: -.02em; margin: 0; color: var(--ink); }
