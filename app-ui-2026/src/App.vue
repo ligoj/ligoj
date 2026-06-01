@@ -19,7 +19,7 @@
         <span class="brand-word">Ligoj</span>
       </div>
       <nav class="nav">
-        <a v-for="it in NAV" :key="it.label" class="nav-item" :class="{ active: it.route === route.path }"
+        <a v-for="it in NAV" :key="it.label" class="nav-item" :class="{ active: isNavActive(it) }"
           @click="it.route ? go(it.route) : toast()">
           <v-icon>{{ it.icon }}</v-icon>
           <span>{{ it.label }}</span>
@@ -60,14 +60,23 @@ const auth = useAuthStore()
 
 const NAV = [
   { label: 'Accueil', icon: 'mdi-home', route: '/' },
-  { label: 'Identité', icon: 'mdi-account-group', soon: true },
+  // `match` makes the item active across a whole section (e.g. /id/user,
+  // /id/group… once those land), not just the exact landing route.
+  { label: 'Identité', icon: 'mdi-account-group', route: '/id/user', match: '/id' },
   { label: 'Projets', icon: 'mdi-folder', soon: true },
   { label: 'Administration', icon: 'mdi-cog', soon: true },
 ]
 
 const collapsed = ref(false)
 const isLogin = computed(() => route.name === 'login')
-const title = computed(() => (route.path === '/profile' ? 'Profil' : 'Accueil'))
+const title = computed(() => {
+  if (route.path === '/profile') return 'Profil'
+  if (route.path.startsWith('/id')) return 'Utilisateurs'
+  return 'Accueil'
+})
+function isNavActive(it) {
+  return it.match ? route.path.startsWith(it.match) : it.route === route.path
+}
 
 function go(path) { if (route.path !== path) router.push(path) }
 
