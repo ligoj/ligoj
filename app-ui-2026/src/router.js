@@ -13,6 +13,8 @@ import ProjectDetailView from '@2026/views/ProjectDetailView.vue'
 import SystemPluginsView from '@2026/views/SystemPluginsView.vue'
 import SystemNodesView from '@2026/views/SystemNodesView.vue'
 import SystemConfigurationView from '@2026/views/SystemConfigurationView.vue'
+import SystemRolesView from '@2026/views/SystemRolesView.vue'
+import SystemUsersView from '@2026/views/SystemUsersView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: DashboardView },
@@ -32,6 +34,8 @@ const routes = [
   { path: '/system/plugin', name: 'system-plugin', component: SystemPluginsView },
   { path: '/system/node', name: 'system-node', component: SystemNodesView },
   { path: '/system/configuration', name: 'system-configuration', component: SystemConfigurationView },
+  { path: '/system/role', name: 'system-role', component: SystemRolesView },
+  { path: '/system/user', name: 'system-user', component: SystemUsersView },
 ]
 
 const router = createRouter({

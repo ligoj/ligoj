@@ -102,6 +102,8 @@ const NAV = [
     { label: 'Plugins', route: '/system/plugin', match: '/system/plugin' },
     { label: 'Nœuds', route: '/system/node', match: '/system/node' },
     { label: 'Configuration', route: '/system/configuration', match: '/system/configuration' },
+    { label: 'Rôles', route: '/system/role', match: '/system/role' },
+    { label: 'Utilisateurs', route: '/system/user', match: '/system/user' },
   ] },
 ]
 
@@ -118,6 +120,8 @@ const title = computed(() => {
   if (route.path.startsWith('/system/plugin')) return 'Plugins'
   if (route.path.startsWith('/system/node')) return 'Nœuds'
   if (route.path.startsWith('/system/configuration')) return 'Configuration'
+  if (route.path.startsWith('/system/role')) return 'Rôles'
+  if (route.path.startsWith('/system/user')) return 'Utilisateurs système'
   if (route.path.startsWith('/system')) return 'Administration'
   return 'Accueil'
 })
