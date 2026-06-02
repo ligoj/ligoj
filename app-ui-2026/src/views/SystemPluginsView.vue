@@ -1,10 +1,11 @@
 <!--
   SystemPluginsView — 2026 "Vibrant" plugin manager. Ports plugin-ui's
   SystemPluginView logic (rest/system/plugin: list / search / install /
-  upgrade / delete / check-versions / restart) onto the Vibrant chrome:
-  .ph header + warm CTA, VibrantDataTable, a .vmodal install dialog and the
-  VibrantConfirmDialog for the destructive/restart actions. Mockup ref:
-  design/ligoj-2026-prototype.html → viewPlugins.
+  upgrade / delete / check-versions / restart) onto a richer Vibrant chrome:
+  KPI stat cards, a custom repository picker (same language-picker pattern as
+  the login/profile), VibrantDataTable rows with a coloured type pill, a
+  two-line name/artifact cell, a glowing status dot and count chips, plus a
+  .vmodal install dialog and VibrantConfirmDialog. Mockup ref: viewPlugins.
 -->
 <template>
   <div class="plugins">
@@ -14,36 +15,62 @@
         <p class="sub"><b>{{ rows.length }}</b> {{ t('system.plugin.countLabel') }}</p>
       </div>
       <div class="ph-actions">
-        <label class="repo">
-          <v-icon size="16">mdi-source-repository</v-icon>
-          <select v-model="repository" @change="load">
-            <option v-for="r in REPOSITORIES" :key="r.id" :value="r.id">{{ r.label }}</option>
-          </select>
-        </label>
+        <!-- Custom repository picker (mirrors the login/profile locale picker). -->
+        <div class="vsel" :class="{ open: repoOpen }" ref="repoSel">
+          <button type="button" class="vsel-btn" @click="repoOpen = !repoOpen">
+            <v-icon size="16">mdi-source-repository</v-icon>
+            <span class="vlabel">{{ currentRepo.label }}</span>
+            <span class="vcaret">▾</span>
+          </button>
+          <div v-if="repoOpen" class="vsel-menu">
+            <button v-for="r in REPOSITORIES" :key="r.id" type="button" class="vsel-opt" :class="{ sel: r.id === repository }" @click="pickRepo(r.id)">
+              <v-icon size="16">{{ r.icon }}</v-icon><span class="vlabel">{{ r.label }}</span>
+              <span v-if="r.id === repository" class="vok">✓</span>
+            </button>
+          </div>
+        </div>
         <button class="btn ghost" :disabled="checking" @click="askCheckVersions"><v-icon size="18">mdi-magnify-plus-outline</v-icon>{{ t('system.plugin.checkVersions') }}</button>
         <button class="btn ghost-danger" :disabled="restarting" @click="askRestart"><v-icon size="18">mdi-restart</v-icon>{{ t('system.plugin.restart') }}</button>
         <button class="btn" @click="openInstall"><v-icon size="18">mdi-plus</v-icon>{{ t('system.plugin.install') }}</button>
       </div>
     </header>
 
+    <!-- KPI stat cards -->
+    <div class="stats">
+      <div v-for="(s, i) in stats" :key="s.key" class="stat" :style="{ '--c': s.color, 'animation-delay': (i * 50) + 'ms' }">
+        <span class="sicon"><v-icon size="22">{{ s.icon }}</v-icon></span>
+        <div class="sbody">
+          <div class="snum">{{ s.value }}</div>
+          <div class="slabel">{{ s.label }}</div>
+        </div>
+      </div>
+    </div>
+
     <p v-if="error" class="errline"><v-icon size="16">mdi-alert-outline</v-icon>{{ error }}</p>
 
     <VibrantDataTable :headers="headers" :items="rows" :items-length="rows.length" :loading="loading" item-value="id" default-sort="name" :empty-text="t('common.noData')">
-      <template #cell.type="{ item }">
-        <span class="tglyph" :class="item.type" :title="item.type"><v-icon size="17">{{ typeIcon(item.type) }}</v-icon></span>
-      </template>
       <template #cell.name="{ item }">
-        <span class="pname">{{ item.name || '—' }}</span>
+        <div class="avatar-cell">
+          <span class="tglyph" :class="item.type"><v-icon size="18">{{ typeIcon(item.type) }}</v-icon></span>
+          <div class="ac-txt">
+            <div class="ac-name">{{ item.name || '—' }}</div>
+            <code class="ac-key">{{ item.artifact }}</code>
+          </div>
+        </div>
       </template>
-      <template #cell.id="{ item }"><code class="mono">{{ item.artifact }}</code></template>
-      <template #cell.vendor="{ item }"><span class="muted">{{ item.vendor || '—' }}</span></template>
+      <template #cell.type="{ item }">
+        <span class="pill" :class="item.type">{{ typeLabel(item.type) }}</span>
+      </template>
       <template #cell.version="{ item }">
         <span class="mono ver">{{ item.version || '—' }}</span>
         <span v-if="item.latestLocalVersion" class="vchip local" :title="t('system.plugin.cancelLocal')" @click.stop="cancelLocal(item)">{{ item.latestLocalVersion }}<v-icon size="13">mdi-close</v-icon></span>
         <span v-if="item.newVersion && item.newVersion !== item.latestLocalVersion" class="vchip up" :title="t('system.plugin.upgradeAvailable')" @click.stop="installOne(item.artifact)"><v-icon size="13">mdi-arrow-up</v-icon>{{ item.newVersion }}</span>
       </template>
-      <template #cell.nodes="{ item }"><span v-if="item.type !== 'feature'" class="num">{{ item.nodes ?? 0 }}</span><span v-else class="muted">—</span></template>
-      <template #cell.subscriptions="{ item }"><span v-if="item.type !== 'feature'" class="num">{{ item.subscriptions ?? 0 }}</span><span v-else class="muted">—</span></template>
+      <template #cell.nodes="{ item }"><span v-if="item.type !== 'feature'" class="cchip">{{ item.nodes ?? 0 }}</span><span v-else class="muted">—</span></template>
+      <template #cell.subscriptions="{ item }"><span v-if="item.type !== 'feature'" class="cchip">{{ item.subscriptions ?? 0 }}</span><span v-else class="muted">—</span></template>
+      <template #cell.status="{ item }">
+        <span v-if="item.deleted" class="sdot warn" :title="t('system.plugin.deletionScheduled')" /><span v-else class="sdot ok" :title="t('system.plugin.active')" />
+      </template>
       <template #actions="{ item }">
         <v-icon v-if="item.deleted" size="18" color="warning" :title="t('system.plugin.deletionScheduled')">mdi-cancel</v-icon>
         <button v-else class="iconbtn danger" :title="t('system.plugin.delete')" @click.stop="askRemove(item.artifact)"><v-icon size="18">mdi-delete-outline</v-icon></button>
@@ -99,29 +126,33 @@ const i18n = useI18nStore()
 const t = i18n.t
 
 const REPOSITORIES = computed(() => [
-  { id: 'central', label: t('system.plugin.repoCentral') },
-  { id: 'nexus', label: t('system.plugin.repoNexus') },
+  { id: 'central', label: t('system.plugin.repoCentral'), icon: 'mdi-apache-kafka' },
+  { id: 'nexus', label: t('system.plugin.repoNexus'), icon: 'mdi-package-variant-closed' },
 ])
 const repository = ref('central')
+const currentRepo = computed(() => REPOSITORIES.value.find((r) => r.id === repository.value) || REPOSITORIES.value[0])
+const repoOpen = ref(false)
+const repoSel = ref(null)
+function pickRepo(id) { repository.value = id; repoOpen.value = false; load() }
+function onDocClick(e) { if (repoSel.value && !repoSel.value.contains(e.target)) repoOpen.value = false }
+
 const items = ref([])
 const loading = ref(false)
 const error = ref(null)
 const checking = ref(false)
 const restarting = ref(false)
 
+const TYPE_COLOR = { service: '#2f6df6', tool: '#d9701a', feature: '#1d9d63' }
+
 const headers = computed(() => [
-  { key: 'type', title: '', sortable: false, width: '44px', align: 'center' },
   { key: 'name', title: t('system.plugin.headerName'), sortable: true, icon: 'mdi-puzzle-outline' },
-  { key: 'id', title: t('system.plugin.headerArtifact'), sortable: true, icon: 'mdi-identifier' },
-  { key: 'vendor', title: t('system.plugin.headerVendor'), sortable: true, icon: 'mdi-domain' },
+  { key: 'type', title: t('system.plugin.headerType'), sortable: true, align: 'center', icon: 'mdi-shape-outline' },
   { key: 'version', title: t('system.plugin.headerVersion'), sortable: false, icon: 'mdi-tag-outline' },
   { key: 'nodes', title: t('system.plugin.headerNodes'), sortable: true, align: 'center', icon: 'mdi-server' },
   { key: 'subscriptions', title: t('system.plugin.headerSubscriptions'), sortable: true, align: 'center', icon: 'mdi-link-variant' },
+  { key: 'status', title: '', sortable: false, align: 'center', width: '56px' },
 ])
 
-/* Flatten the backend rows (item.plugin.*) into table-friendly rows. */
-/* The backend often leaves `name` blank — derive a readable label from the
-   artifact (plugin-id-ldap → "Id Ldap") so the column never shows just "—". */
 function prettyName(artifact, name) {
   if (name) return name
   return String(artifact || '').replace(/^plugin-/, '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
@@ -140,12 +171,22 @@ const rows = computed(() => items.value.map((it) => ({
   deleted: it.deleted,
 })))
 
+const stats = computed(() => {
+  const by = (ty) => rows.value.filter((r) => r.type === ty).length
+  return [
+    { key: 'total', label: t('system.plugin.statTotal'), value: rows.value.length, icon: 'mdi-puzzle', color: 'rgb(var(--v-theme-secondary))' },
+    { key: 'service', label: t('system.plugin.statServices'), value: by('service'), icon: 'mdi-puzzle-outline', color: TYPE_COLOR.service },
+    { key: 'tool', label: t('system.plugin.statTools'), value: by('tool'), icon: 'mdi-hammer-wrench', color: TYPE_COLOR.tool },
+    { key: 'feature', label: t('system.plugin.statFeatures'), value: by('feature'), icon: 'mdi-wrench-outline', color: TYPE_COLOR.feature },
+  ]
+})
+
 function typeIcon(type) {
   if (type === 'feature') return 'mdi-wrench-outline'
-  if (type === 'service') return 'mdi-puzzle-outline'
   if (type === 'tool') return 'mdi-hammer-wrench'
   return 'mdi-puzzle-outline'
 }
+function typeLabel(type) { return t('system.plugin.type.' + (type || 'service')) }
 
 async function load() {
   loading.value = true
@@ -182,7 +223,7 @@ watch(installSearch, (q) => {
     } finally { searching.value = false }
   }, 300)
 })
-onBeforeUnmount(() => clearTimeout(searchTimer))
+onBeforeUnmount(() => { clearTimeout(searchTimer); document.removeEventListener('click', onDocClick) })
 
 async function doInstall() {
   if (!installSelection.value.length) return
@@ -206,6 +247,7 @@ function askCheckVersions() { ask({ title: t('system.plugin.confirmCheckTitle'),
 function askRemove(artifact) { ask({ title: t('system.plugin.confirmDeleteTitle'), text: t('system.plugin.confirmDeleteText', { artifact }), label: t('common.delete'), color: 'error', icon: 'mdi-delete-outline', action: async () => { await api.del(`rest/system/plugin/${artifact}`); await load() } }) }
 
 onMounted(() => {
+  document.addEventListener('click', onDocClick)
   app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: t('system.breadcrumb') }, { title: t('system.plugin.title') }], { refresh: load })
   load()
 })
@@ -214,10 +256,13 @@ onMounted(() => {
 <style scoped>
 .plugins {
   --surface: rgb(var(--v-theme-surface));
+  --card: rgb(var(--v-theme-surface));
   --ink: rgb(var(--v-theme-on-surface));
   --ink-2: rgba(var(--v-theme-on-surface), .72);
   --ink-3: rgba(var(--v-theme-on-surface), .55);
   --border: rgba(var(--v-theme-on-surface), .12);
+  --border-2: rgba(var(--v-theme-on-surface), .26);
+  --hover: rgba(var(--v-theme-on-surface), .06);
   --pill: rgba(var(--v-theme-on-surface), .06);
   --accent: rgb(var(--v-theme-secondary));
   --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
@@ -229,8 +274,6 @@ onMounted(() => {
 .ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
 .ph-txt .sub b { color: var(--ink-2); font-family: var(--mono); }
 .ph-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.repo { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-3); font-family: var(--font); font-weight: 600; font-size: 13px; }
-.repo select { border: 0; background: transparent; outline: 0; font-family: var(--font); font-weight: 700; font-size: 13px; color: var(--ink); cursor: pointer; }
 .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px; padding: 10px 16px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; color: #fff; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55); transition: filter .15s; }
 .btn:hover:not(:disabled) { filter: brightness(1.04); }
 .btn:disabled { opacity: .55; cursor: default; }
@@ -238,25 +281,59 @@ onMounted(() => {
 .btn.ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 .btn.ghost-danger { background: transparent; color: rgb(var(--v-theme-error)); border-color: rgba(var(--v-theme-error), .35); box-shadow: none; }
 .btn.ghost-danger:hover:not(:disabled) { background: rgba(var(--v-theme-error), .08); }
+
+/* Custom repository picker (login/profile locale-picker pattern) */
+.vsel { position: relative; }
+.vsel-btn { display: flex; align-items: center; gap: 7px; padding: 9px 13px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; transition: border-color .15s; }
+.vsel-btn:hover { border-color: var(--border-2); }
+.vcaret { color: var(--ink-3); font-size: 11px; transition: transform .2s; }
+.vsel.open .vcaret { transform: rotate(180deg); }
+.vsel-menu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 190px; background: var(--surface); border: 1px solid var(--border); border-radius: 13px; box-shadow: 0 16px 36px -14px rgba(0, 0, 0, .3); padding: 5px; z-index: 20; animation: vmenu .12s ease; }
+@keyframes vmenu { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.vsel-opt { width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px 11px; border: 0; background: transparent; border-radius: 9px; color: var(--ink); font-family: var(--font); font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: left; }
+.vsel-opt:hover { background: var(--hover); }
+.vsel-opt.sel { color: var(--accent); }
+.vlabel { white-space: nowrap; }
+.vok { margin-left: auto; color: var(--accent); font-weight: 800; }
+
+/* KPI stat cards */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.stat { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--border); background: linear-gradient(135deg, color-mix(in srgb, var(--c) 10%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); opacity: 0; transform: translateY(10px); animation: rise .5s cubic-bezier(.2, .7, .3, 1) forwards; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+.sicon { width: 46px; height: 46px; border-radius: 13px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
+.snum { font-family: var(--mono); font-weight: 700; font-size: 26px; line-height: 1; color: var(--ink); }
+.slabel { font-size: 12.5px; font-weight: 600; color: var(--ink-3); margin-top: 4px; }
+
 .errline { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: rgb(var(--v-theme-error)); margin: 0 0 14px; }
 
-.tglyph { width: 30px; height: 30px; border-radius: 9px; display: inline-grid; place-items: center; background: var(--pill); color: var(--ink-2); }
-.tglyph.service { background: rgba(47, 109, 246, .14); color: #2f6df6; }
-.tglyph.tool { background: rgba(255, 122, 24, .14); color: #d9701a; }
-.tglyph.feature { background: rgba(29, 157, 99, .14); color: #1d9d63; }
-.pname { font-family: var(--font); font-weight: 700; font-size: 13.5px; color: var(--ink); }
+/* table cells */
+.avatar-cell { display: flex; align-items: center; gap: 12px; }
+.tglyph { width: 36px; height: 36px; border-radius: 11px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, #8a92a3, #5b6472); }
+.tglyph.service { background: linear-gradient(135deg, #2f6df6, #2552c9); }
+.tglyph.tool { background: linear-gradient(135deg, #ff9436, #d9701a); }
+.tglyph.feature { background: linear-gradient(135deg, #1d9d63, #15784b); }
+.ac-name { font-family: var(--font); font-weight: 700; font-size: 14px; color: var(--ink); line-height: 1.2; }
+.ac-key { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+.pill { display: inline-flex; align-items: center; font-family: var(--font); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; padding: 3px 10px; border-radius: 999px; color: var(--ink-2); background: var(--pill); }
+.pill.service { color: #2f6df6; background: rgba(47, 109, 246, .13); }
+.pill.tool { color: #d9701a; background: rgba(255, 122, 24, .14); }
+.pill.feature { color: #1d9d63; background: rgba(29, 157, 99, .14); }
 .mono { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
 .ver { font-weight: 700; }
 .muted { color: var(--ink-3); }
-.num { font-family: var(--mono); font-weight: 700; color: var(--ink-2); }
+.cchip { display: inline-grid; place-items: center; min-width: 26px; height: 24px; padding: 0 8px; border-radius: 8px; font-family: var(--mono); font-weight: 700; font-size: 12px; color: var(--ink-2); background: var(--pill); }
+.sdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; position: relative; }
+.sdot::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; background: currentColor; opacity: .2; }
+.sdot.ok { background: #1d9d63; color: #1d9d63; }
+.sdot.warn { background: #d98a16; color: #d98a16; }
 .vchip { display: inline-flex; align-items: center; gap: 2px; font-family: var(--mono); font-size: 10.5px; font-weight: 700; border-radius: 7px; padding: 1px 6px; margin-left: 6px; cursor: pointer; }
 .vchip.local { color: var(--accent); background: rgba(var(--v-theme-secondary), .14); }
 .vchip.up { color: #1d9d63; background: rgba(29, 157, 99, .14); }
 .iconbtn { width: 32px; height: 32px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; display: grid; place-items: center; color: var(--ink-3); transition: background .15s, color .15s; }
 .iconbtn.danger:hover { background: rgba(var(--v-theme-error), .1); color: rgb(var(--v-theme-error)); }
 
-/* .vmodal chrome (shared language) */
-.vmodal { --hover: rgba(var(--v-theme-on-surface), .06); --border-2: rgba(var(--v-theme-on-surface), .26); border-radius: 20px !important; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .55) !important; }
+/* .vmodal chrome */
+.vmodal { border-radius: 20px !important; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .55) !important; }
 .vmodal-head { display: flex; align-items: center; gap: 13px; padding: 22px 24px 8px; }
 .vmodal-head .mi { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -8px rgba(255, 90, 82, .6); }
 .vmodal-head h3 { font-family: var(--font); font-weight: 800; font-size: 20px; margin: 0; flex: 1; color: var(--ink); letter-spacing: -.02em; }
