@@ -152,9 +152,104 @@ onBeforeUnmount(() => {
 .loadbar i { display: block; height: 100%; width: 40%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, white)); animation: slide 1.1s ease-in-out infinite; }
 @keyframes slide { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
 
-.swagger-host { border: 1px solid var(--border); border-radius: 18px; background: #fff; overflow: hidden; box-shadow: 0 18px 40px -30px rgba(0, 0, 0, .45); min-height: 60vh; }
+.swagger-host { border: 1px solid var(--border); border-radius: 18px; background: var(--surface); overflow: hidden; box-shadow: 0 18px 40px -30px rgba(0, 0, 0, .45); min-height: 60vh; padding: 4px 20px 18px; }
 .swagger-host #swagger-ui { min-height: 60vh; }
-/* Trim Swagger UI's own top bar (we provide the page header). */
-.swagger-host :deep(.swagger-ui .topbar) { display: none; }
-.swagger-host :deep(.swagger-ui .info) { margin: 20px 0; }
+</style>
+
+<!--
+  Unscoped (but confined under .apihome) re-skin of the backend's Swagger UI:
+  it ships a hardcoded DARK theme (root rgb(28,32,34)) that clashes with the
+  2026 shell. We re-theme it onto the Vibrant tokens so it follows light/dark.
+  The .apihome custom props cascade into the runtime-built Swagger DOM (it's a
+  descendant), and the extra `.apihome` selector segment lifts specificity above
+  Swagger's own `.swagger-ui …` rules regardless of stylesheet injection order.
+-->
+<style>
+.apihome .swagger-ui { background: transparent !important; color: var(--ink) !important; font-family: var(--font) !important; }
+.apihome .swagger-ui .topbar { display: none !important; }
+.apihome .swagger-ui .wrapper { padding: 0 !important; max-width: none !important; }
+
+/* Generic text + links */
+.apihome .swagger-ui,
+.apihome .swagger-ui .info .title,
+.apihome .swagger-ui .info p,
+.apihome .swagger-ui .info li,
+.apihome .swagger-ui .opblock-tag,
+.apihome .swagger-ui label,
+.apihome .swagger-ui table thead tr th,
+.apihome .swagger-ui .parameter__name,
+.apihome .swagger-ui .parameter__type,
+.apihome .swagger-ui .response-col_status,
+.apihome .swagger-ui .response-col_description,
+.apihome .swagger-ui .opblock-title_normal,
+.apihome .swagger-ui .tab li { color: var(--ink) !important; }
+.apihome .swagger-ui .info p,
+.apihome .swagger-ui .parameter__type,
+.apihome .swagger-ui .opblock-summary-description { color: var(--ink-3) !important; }
+.apihome .swagger-ui a, .apihome .swagger-ui .info a { color: var(--accent) !important; }
+
+/* Info block + version/OAS pills */
+.apihome .swagger-ui .info { margin: 18px 0 22px !important; }
+.apihome .swagger-ui .info .title small { background: var(--pill) !important; border-radius: 999px; }
+.apihome .swagger-ui .info .title small pre { color: var(--ink-2) !important; }
+
+/* Servers / Authorize bar → Vibrant card */
+.apihome .swagger-ui .scheme-container { background: var(--card) !important; box-shadow: none !important; border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; margin: 0 0 18px; }
+.apihome .swagger-ui .scheme-container .schemes-title { color: var(--ink-2) !important; }
+
+/* Inputs / selects / textareas → Vibrant fields */
+.apihome .swagger-ui .filter .operation-filter-input,
+.apihome .swagger-ui input[type=text],
+.apihome .swagger-ui input[type=password],
+.apihome .swagger-ui input[type=email],
+.apihome .swagger-ui input[type=search],
+.apihome .swagger-ui textarea,
+.apihome .swagger-ui select { background: var(--surface) !important; color: var(--ink) !important; border: 1px solid var(--border) !important; border-radius: 11px !important; font-family: var(--font) !important; box-shadow: none !important; }
+.apihome .swagger-ui textarea { font-family: var(--mono) !important; }
+.apihome .swagger-ui .filter .operation-filter-input { padding: 11px 14px !important; }
+
+/* Tag section header */
+.apihome .swagger-ui .opblock-tag { border-bottom: 1px solid var(--border) !important; font-family: var(--font) !important; font-weight: 800 !important; font-size: 18px !important; letter-spacing: -.02em; padding: 20px 4px 12px !important; }
+.apihome .swagger-ui .opblock-tag:hover { background: transparent !important; }
+.apihome .swagger-ui .opblock-tag small { color: var(--ink-3) !important; font-weight: 500; }
+
+/* Operation blocks → rounded Vibrant cards */
+.apihome .swagger-ui .opblock { border-radius: 14px !important; border: 1px solid var(--border) !important; background: var(--card) !important; box-shadow: 0 2px 10px rgba(0,0,0,.04) !important; margin: 0 0 10px !important; }
+.apihome .swagger-ui .opblock .opblock-summary { border: 0 !important; padding: 7px 10px !important; }
+.apihome .swagger-ui .opblock-summary-path,
+.apihome .swagger-ui .opblock-summary-path__deprecated { font-family: var(--mono) !important; color: var(--ink) !important; }
+.apihome .swagger-ui .opblock .opblock-summary-method { border-radius: 9px !important; font-family: var(--font) !important; font-weight: 800 !important; min-width: 82px; text-shadow: none !important; box-shadow: none !important; }
+
+/* Method tints + badge colours */
+.apihome .swagger-ui .opblock.opblock-get { background: color-mix(in srgb, #2f6df6 7%, var(--card)) !important; border-color: rgba(47,109,246,.32) !important; }
+.apihome .swagger-ui .opblock.opblock-get .opblock-summary-method { background: #2f6df6 !important; }
+.apihome .swagger-ui .opblock.opblock-post { background: color-mix(in srgb, #1d9d63 8%, var(--card)) !important; border-color: rgba(29,157,99,.32) !important; }
+.apihome .swagger-ui .opblock.opblock-post .opblock-summary-method { background: #1d9d63 !important; }
+.apihome .swagger-ui .opblock.opblock-put { background: color-mix(in srgb, #d9701a 8%, var(--card)) !important; border-color: rgba(217,112,26,.32) !important; }
+.apihome .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #d9701a !important; }
+.apihome .swagger-ui .opblock.opblock-delete { background: color-mix(in srgb, #df4d42 8%, var(--card)) !important; border-color: rgba(223,77,66,.32) !important; }
+.apihome .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #df4d42 !important; }
+
+/* Expanded sections / tables */
+.apihome .swagger-ui .opblock .opblock-section-header { background: var(--pill) !important; box-shadow: none !important; border-radius: 10px; }
+.apihome .swagger-ui .opblock .opblock-section-header h4,
+.apihome .swagger-ui .opblock .opblock-section-header label { color: var(--ink) !important; }
+.apihome .swagger-ui table.parameters td, .apihome .swagger-ui table.responses-table td,
+.apihome .swagger-ui table thead tr th { border-color: var(--border) !important; }
+.apihome .swagger-ui .response-col_links { color: var(--ink-3) !important; }
+.apihome .swagger-ui .parameter__name.required span { color: #df4d42 !important; }
+
+/* Buttons */
+.apihome .swagger-ui .btn { border-radius: 11px !important; font-family: var(--font) !important; font-weight: 700 !important; box-shadow: none !important; }
+.apihome .swagger-ui .btn.authorize { color: #1d9d63 !important; border-color: #1d9d63 !important; background: color-mix(in srgb, #1d9d63 8%, transparent) !important; }
+.apihome .swagger-ui .btn.authorize svg { fill: #1d9d63 !important; }
+.apihome .swagger-ui .btn.execute { background: linear-gradient(135deg,#ff9436,#ff5a52) !important; border-color: transparent !important; color: #fff !important; }
+.apihome .swagger-ui .btn.try-out__btn { color: var(--ink-2) !important; border: 1px solid var(--border-2) !important; background: var(--surface) !important; }
+.apihome .swagger-ui .btn.cancel { color: #df4d42 !important; border-color: #df4d42 !important; background: transparent !important; }
+
+/* Models + code + arrows */
+.apihome .swagger-ui .model, .apihome .swagger-ui .model-title, .apihome .swagger-ui section.models h4 { color: var(--ink-2) !important; }
+.apihome .swagger-ui section.models { border-color: var(--border) !important; background: var(--card) !important; border-radius: 14px !important; }
+.apihome .swagger-ui .highlight-code, .apihome .swagger-ui .microlight, .apihome .swagger-ui code { font-family: var(--mono) !important; }
+.apihome .swagger-ui .opblock-summary svg, .apihome .swagger-ui .expand-operation svg, .apihome .swagger-ui .model-toggle:after { fill: var(--ink-3) !important; }
 </style>
