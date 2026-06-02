@@ -18,7 +18,9 @@
       <div class="ph-actions">
         <button class="btn" @click="openCreate"><v-icon size="18">mdi-plus</v-icon>{{ t('user.new') }}</button>
         <button class="btn-ghost" :disabled="exporting" @click="onExport"><v-icon size="18">mdi-download</v-icon>{{ t('common.export') || 'Exporter' }}</button>
-        <button class="btn-ghost" @click="importInput?.click()"><v-icon size="18">mdi-upload</v-icon>{{ t('common.import') || 'Importer' }}</button>
+        <button class="btn-ghost" :disabled="importing" @click="importInput?.click()">
+          <span v-if="importing" class="ispin" aria-hidden="true" /><v-icon v-else size="18">mdi-upload</v-icon>{{ importing ? (t('common.importing') || 'Import…') : (t('common.import') || 'Importer') }}
+        </button>
         <input ref="importInput" type="file" accept=".csv,.tsv,text/csv" hidden @change="onImport" />
       </div>
     </header>
@@ -147,6 +149,7 @@ const editDialog = ref(false)
 const editUserId = ref(null)
 const importInput = ref(null)
 const exporting = ref(false)
+const importing = ref(false)
 
 const headers = computed(() => [
   { title: t('user.login'), label: t('user.login'), key: 'id', sortable: true },
@@ -250,11 +253,21 @@ async function onImport(e) {
   const file = e.target.files?.[0]
   if (!file) return
   if (dt.demoMode.value) { errorStore.push({ message: t('user.demoMode'), status: 0 }); e.target.value = ''; return }
+  importing.value = true
   const fd = new FormData()
   fd.append('csv-file', file)
-  await api.upload('rest/service/id/user/import/csv/full', fd)
-  e.target.value = ''
-  dt.load({ page: 1, itemsPerPage: lastOptions.itemsPerPage || 25 })
+  try {
+    // useApi.upload returns null on a non-2xx (the global ErrorSnackbar already
+    // surfaced the cause via handleResponse); a non-null result = accepted.
+    const res = await api.upload('rest/service/id/user/import/csv/full', fd)
+    if (res !== null) {
+      errorStore.success(t('common.importSuccess', { file: file.name }))
+      dt.load({ page: 1, itemsPerPage: lastOptions.itemsPerPage || 25 })
+    }
+  } finally {
+    importing.value = false
+    e.target.value = ''
+  }
 }
 
 onMounted(() => {
@@ -299,6 +312,8 @@ onMounted(() => {
 .btn-ghost { color: var(--ink-2); background: var(--surface); border-color: var(--border); }
 .btn-ghost:hover:not(:disabled) { border-color: var(--border-2); background: var(--hover); }
 .btn-ghost:disabled { opacity: .55; cursor: default; }
+.ispin { width: 15px; height: 15px; border: 2px solid var(--border-2); border-top-color: var(--ink-2); border-radius: 50%; animation: ispin .7s linear infinite; }
+@keyframes ispin { to { transform: rotate(360deg); } }
 .btn-danger { color: #fff; background: rgb(var(--v-theme-error)); }
 .btn-danger:hover { filter: brightness(1.06); }
 

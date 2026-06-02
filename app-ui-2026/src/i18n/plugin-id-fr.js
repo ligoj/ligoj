@@ -291,4 +291,6 @@ export default {
   'common.noData': 'Aucune donnée',
   'common.export': 'Exporter',
   'common.import': 'Importer',
+  'common.importSuccess': 'Import terminé : {file}',
+  'common.importing': 'Import en cours…',
 }
