@@ -11,6 +11,7 @@
   <div class="plugins">
     <header class="ph">
       <div class="ph-txt">
+        <nav class="crumbs"><span class="crumb"><v-icon size="13">mdi-cog-outline</v-icon>{{ t('system.breadcrumb') }}</span><span class="csep">›</span><span class="crumb cur">{{ t('system.plugin.title') }}</span></nav>
         <h1>{{ t('system.plugin.title') }}</h1>
         <p class="sub"><b>{{ rows.length }}</b> {{ t('system.plugin.countLabel') }}</p>
       </div>
@@ -38,11 +39,14 @@
     <!-- KPI stat cards -->
     <div class="stats">
       <div v-for="(s, i) in stats" :key="s.key" class="stat" :style="{ '--c': s.color, 'animation-delay': (i * 50) + 'ms' }">
-        <span class="sicon"><v-icon size="22">{{ s.icon }}</v-icon></span>
-        <div class="sbody">
-          <div class="snum">{{ s.value }}</div>
-          <div class="slabel">{{ s.label }}</div>
+        <div class="stop">
+          <span class="sicon"><v-icon size="22">{{ s.icon }}</v-icon></span>
+          <div class="sbody">
+            <div class="snum">{{ s.value }}<span v-if="s.key !== 'total' && rows.length" class="spct">{{ Math.round(s.pct) }}%</span></div>
+            <div class="slabel">{{ s.label }}</div>
+          </div>
         </div>
+        <div class="sbar"><i :style="{ width: s.pct + '%' }" /></div>
       </div>
     </div>
 
@@ -147,12 +151,12 @@ const restarting = ref(false)
 const TYPE_COLOR = { service: '#2f6df6', tool: '#d9701a', feature: '#1d9d63' }
 
 const headers = computed(() => [
-  { key: 'name', title: t('system.plugin.headerName'), sortable: true, icon: 'mdi-puzzle-outline' },
-  { key: 'type', title: t('system.plugin.headerType'), sortable: true, align: 'center', icon: 'mdi-shape-outline' },
-  { key: 'version', title: t('system.plugin.headerVersion'), sortable: false, icon: 'mdi-tag-outline' },
-  { key: 'nodes', title: t('system.plugin.headerNodes'), sortable: true, align: 'center', icon: 'mdi-server' },
-  { key: 'subscriptions', title: t('system.plugin.headerSubscriptions'), sortable: true, align: 'center', icon: 'mdi-link-variant' },
-  { key: 'status', title: '', sortable: false, align: 'center', width: '56px' },
+  { key: 'name', label: t('system.plugin.headerName'), sortable: true, icon: 'mdi-puzzle-outline' },
+  { key: 'type', label: t('system.plugin.headerType'), sortable: true, align: 'center', icon: 'mdi-shape-outline' },
+  { key: 'version', label: t('system.plugin.headerVersion'), sortable: false, icon: 'mdi-tag-outline' },
+  { key: 'nodes', label: t('system.plugin.headerNodes'), sortable: true, align: 'center', icon: 'mdi-server' },
+  { key: 'subscriptions', label: t('system.plugin.headerSubscriptions'), sortable: true, align: 'center', icon: 'mdi-link-variant' },
+  { key: 'status', label: '', sortable: false, align: 'center', width: '56px' },
 ])
 
 function prettyName(artifact, name) {
@@ -175,12 +179,14 @@ const rows = computed(() => items.value.map((it) => ({
 
 const stats = computed(() => {
   const by = (ty) => rows.value.filter((r) => r.type === ty).length
+  const total = rows.value.length || 1
+  const pct = (v, k) => k === 'total' ? 100 : Math.round((v / total) * 100)
   return [
     { key: 'total', label: t('system.plugin.statTotal'), value: rows.value.length, icon: 'mdi-puzzle', color: 'rgb(var(--v-theme-secondary))' },
     { key: 'service', label: t('system.plugin.statServices'), value: by('service'), icon: 'mdi-puzzle-outline', color: TYPE_COLOR.service },
     { key: 'tool', label: t('system.plugin.statTools'), value: by('tool'), icon: 'mdi-hammer-wrench', color: TYPE_COLOR.tool },
     { key: 'feature', label: t('system.plugin.statFeatures'), value: by('feature'), icon: 'mdi-wrench-outline', color: TYPE_COLOR.feature },
-  ]
+  ].map((s) => ({ ...s, pct: pct(s.value, s.key) }))
 })
 
 function typeIcon(type) {
@@ -277,7 +283,11 @@ onMounted(() => {
   --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
   color: var(--ink);
 }
-.ph { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
+.ph { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.crumbs { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.crumb { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font); font-size: 11.5px; font-weight: 700; color: var(--ink-3); background: var(--pill); border-radius: 999px; padding: 3px 10px; }
+.crumb.cur { color: var(--accent); background: rgba(var(--v-theme-secondary), .12); }
+.csep { color: var(--ink-3); font-size: 12px; }
 .ph-txt h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.03em; font-size: 28px; margin: 0; }
 .ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
 .ph-txt .sub b { color: var(--ink-2); font-family: var(--mono); }
@@ -306,13 +316,17 @@ onMounted(() => {
 
 /* KPI stat cards */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px; }
-.stat { position: relative; display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--border); background: linear-gradient(135deg, color-mix(in srgb, var(--c) 9%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); overflow: hidden; opacity: 0; transform: translateY(10px); animation: rise .5s cubic-bezier(.2, .7, .3, 1) forwards; transition: transform .18s cubic-bezier(.2, .7, .3, 1), box-shadow .18s, border-color .18s; }
+.stat { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--border); background: linear-gradient(135deg, color-mix(in srgb, var(--c) 9%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); overflow: hidden; opacity: 0; transform: translateY(10px); animation: rise .5s cubic-bezier(.2, .7, .3, 1) forwards; transition: transform .18s cubic-bezier(.2, .7, .3, 1), box-shadow .18s, border-color .18s; }
 .stat::after { content: ""; position: absolute; right: -24px; top: -24px; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%); pointer-events: none; }
 .stat:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -20px color-mix(in srgb, var(--c) 55%, transparent); border-color: color-mix(in srgb, var(--c) 30%, var(--border)); }
 @keyframes rise { to { opacity: 1; transform: none; } }
+.stop { display: flex; align-items: center; gap: 14px; }
 .sicon { width: 46px; height: 46px; border-radius: 13px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
-.snum { font-family: var(--mono); font-weight: 700; font-size: 26px; line-height: 1; color: var(--ink); }
+.snum { display: flex; align-items: baseline; gap: 7px; font-family: var(--mono); font-weight: 700; font-size: 26px; line-height: 1; color: var(--ink); }
+.spct { font-size: 12px; font-weight: 700; color: color-mix(in srgb, var(--c) 70%, var(--ink-3)); }
 .slabel { font-size: 12.5px; font-weight: 600; color: var(--ink-3); margin-top: 4px; }
+.sbar { height: 6px; border-radius: 4px; background: var(--pill); overflow: hidden; }
+.sbar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 55%, white)); transition: width .5s cubic-bezier(.2, .7, .3, 1); }
 
 .errline { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: rgb(var(--v-theme-error)); margin: 0 0 14px; }
 

@@ -39,14 +39,25 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-if="loading && !items.length" class="state-row">
-            <td :colspan="colCount"><div class="state"><span class="spin" />{{ t('common.loading') || 'Chargement…' }}</div></td>
-          </tr>
+          <!-- Loading: shimmer skeleton rows (keeps the column rhythm). -->
+          <template v-if="loading && !items.length">
+            <tr v-for="n in 6" :key="'sk' + n" class="skel-row">
+              <td v-if="selectable" class="cbx-col"><span class="skbar sk-cbx" /></td>
+              <td v-for="h in headers" :key="h.key" :class="[h.align === 'center' && 'center', h.align === 'end' && 'end']"><span class="skbar" :style="{ width: skWidth(h, n) }" /></td>
+              <td v-if="$slots.actions" class="end gear-col"><span class="skbar sk-cbx" /></td>
+            </tr>
+          </template>
+          <!-- Empty: illustrated state. -->
           <tr v-else-if="!items.length" class="state-row">
-            <td :colspan="colCount"><div class="state muted">{{ emptyText || (t('common.noData') || 'Aucune donnée') }}</div></td>
+            <td :colspan="colCount">
+              <div class="empty">
+                <span class="empty-ic"><v-icon size="30">mdi-database-off-outline</v-icon></span>
+                <p>{{ emptyText || (t('common.noData') || 'Aucune donnée') }}</p>
+              </div>
+            </td>
           </tr>
           <template v-else>
-            <tr v-for="(item, i) in items" :key="rowKey(item, i)" :class="{ 'is-selected': isSelected(item) }" @click="$emit('row-click', item)">
+            <tr v-for="(item, i) in items" :key="rowKey(item, i)" class="row-in" :style="{ animationDelay: Math.min(i, 18) * 28 + 'ms' }" :class="{ 'is-selected': isSelected(item) }" @click="$emit('row-click', item)">
               <td v-if="selectable" class="cbx-col" @click.stop>
                 <span class="cbx" :class="{ on: isSelected(item) }" role="checkbox" :aria-checked="isSelected(item)" tabindex="0"
                   @click="toggleOne(item)" @keydown.enter.prevent="toggleOne(item)" @keydown.space.prevent="toggleOne(item)" />
@@ -183,6 +194,14 @@ defineExpose({
   reload() { emitOptions() },
 })
 
+/* Deterministic skeleton bar width: varied per column + row so the shimmer
+   looks organic without Math.random (stable across re-renders). */
+function skWidth(h, n) {
+  if (h.align === 'center' || h.align === 'end') return '40%'
+  const base = [82, 64, 73, 58, 90, 68][(n + (h.key?.length || 0)) % 6]
+  return base + '%'
+}
+
 // Trigger the first load (the parent listens to @update:options to fetch).
 // LigojDataTableServer did this implicitly via v-data-table-server; our
 // custom table must emit the initial options itself.
@@ -233,16 +252,31 @@ thead th.sortable:hover .sort-icon { opacity: .4; }
 tbody td { padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 13.5px; font-weight: 500; color: var(--ink); }
 tbody td.center { text-align: center; }
 tbody td.end { text-align: right; }
-tbody tr { transition: background .12s; cursor: pointer; }
+tbody tr { transition: background .14s; cursor: pointer; }
 tbody tr:hover { background: var(--hover); }
+/* Left accent bar on hover for a premium, scannable feel. */
+tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 0 var(--accent); }
 tbody tr.is-selected { background: rgba(var(--v-theme-primary), .07); }
+tbody tr.is-selected td:first-child { box-shadow: inset 3px 0 0 0 var(--accent); }
 tbody tr:last-child td { border-bottom: 0; }
 
+/* Staggered row entrance. */
+.row-in { animation: rowin .34s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes rowin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .row-in { animation: none; } }
+
 .state-row td { cursor: default; }
-.state { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 30px 0; color: var(--ink-2); font-weight: 600; font-size: 13.5px; }
-.state.muted { color: var(--ink-3); }
-.spin { width: 16px; height: 16px; border: 2px solid var(--border-2); border-top-color: var(--accent); border-radius: 50%; animation: vspin .7s linear infinite; }
-@keyframes vspin { to { transform: rotate(360deg); } }
+/* Illustrated empty state. */
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 48px 0; color: var(--ink-3); }
+.empty-ic { width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center; color: var(--ink-3); background: rgba(var(--v-theme-on-surface), .045); }
+.empty p { margin: 0; font-weight: 600; font-size: 14px; }
+
+/* Skeleton shimmer rows. */
+.skel-row td { cursor: default; }
+.skbar { display: block; height: 13px; border-radius: 7px; background: linear-gradient(100deg, var(--hover), rgba(var(--v-theme-on-surface), .12), var(--hover)); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+.skbar.sk-cbx { width: 18px; height: 18px; border-radius: 6px; margin: 0 auto; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skbar { animation: none; } }
 
 /* Custom rounded checkbox (matches mockup .cbx). */
 .cbx-col { width: 46px; text-align: center; }
