@@ -189,10 +189,30 @@ function ruleFor(p) { return (p.mandatory || p.required) ? [rules.required] : []
 
 /* Lazy-load the tool's sub-plugin bundle (e.g. service:id:ldap → id-ldap) so
    its i18n labels and custom parameter fields are available. Best effort. */
-function ensureToolPluginLoaded(nodeId) {
+async function ensureToolPluginLoaded(nodeId) {
   if (typeof nodeId !== 'string') return
   const pluginId = pluginIdFromKey(nodeId.split(':').filter(Boolean).slice(0, 3).join(':'))
-  if (pluginId) loadPlugin(pluginId).catch(() => { /* no bundle — keep rendering */ })
+  if (!pluginId || pluginRegistry.has(pluginId)) return
+  try {
+    await loadPlugin(pluginId)
+  } catch {
+    // The browser module-map permanently caches a failed dynamic import by
+    // URL — so if the bundle 404'd once early (e.g. before the session was
+    // ready), the host loader keeps re-importing the same poisoned URL and
+    // keeps failing. Retry with a cache-busting query and register the
+    // freshly-loaded definition ourselves so its custom parameter fields and
+    // i18n resolve. (requires/parents are already loaded at boot.)
+    if (pluginRegistry.has(pluginId)) return
+    try {
+      const url = `${import.meta.env.BASE_URL}main/${pluginId}/vue/index.js?cb=${Date.now()}`
+      const def = (await import(/* @vite-ignore */ url))?.default
+      if (def && typeof def === 'object') {
+        if (!def.id) def.id = pluginId
+        pluginRegistry.register(def.id, def)
+        if (typeof def.install === 'function') await def.install({ pluginId })
+      }
+    } catch { /* give up — default fields render */ }
+  }
 }
 
 /* Ask the owning plugin (sub-plugin first, then parent service plugin) for a
@@ -232,8 +252,11 @@ async function loadNodes(id) { loadingNodes.value = true; try { nodes.value = aw
 
 async function loadParameters(nodeId, mode) {
   loadingParams.value = true
-  // Pull the tool's plugin bundle so labels + custom fields resolve.
-  ensureToolPluginLoaded(selected.tool?.id || nodeId)
+  // AWAIT the tool's plugin bundle BEFORE assigning parameters, so the
+  // registry already holds it when the param fields first render — otherwise
+  // resolveParameterField() returns null on first paint and the custom field
+  // (e.g. id-ldap's IdGroupField) silently falls back to a plain text field.
+  await ensureToolPluginLoaded(selected.tool?.id || nodeId)
   try {
     const data = await api.get(`rest/node/${encodeURIComponent(nodeId)}/parameter/${mode.toUpperCase()}`)
     const raw = Array.isArray(data) ? data : (data?.data || [])
