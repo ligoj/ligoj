@@ -14,7 +14,7 @@
         <p class="sub"><b>{{ total }}</b> {{ t('project.countLabel') }}<span v-if="demoMode"> · {{ t('common.preview') || 'aperçu' }}</span></p>
       </div>
       <div class="ph-actions">
-        <button class="btn" @click="toast(t('project.createSoon'))"><v-icon size="18">mdi-plus</v-icon>{{ t('project.new') }}</button>
+        <button class="btn" @click="openNew"><v-icon size="18">mdi-plus</v-icon>{{ t('project.new') }}</button>
       </div>
     </header>
 
@@ -58,14 +58,19 @@
 
     <div v-else class="empty">{{ t('common.noData') || 'Aucune donnée' }}</div>
 
+    <ProjectEditDialog v-model="editDialog" :project="editTarget" @saved="onSaved" />
+
     <div class="toast" :class="{ show: toastMsg }">{{ toastMsg }}</div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useApi, useAppStore, useI18nStore } from '@ligoj/host'
+import ProjectEditDialog from '@2026/views/ProjectEditDialog.vue'
 
+const router = useRouter()
 const api = useApi()
 const appStore = useAppStore()
 const i18n = useI18nStore()
@@ -158,7 +163,17 @@ async function load() {
 let toastT
 const toastMsg = ref('')
 function toast(msg) { toastMsg.value = msg; clearTimeout(toastT); toastT = setTimeout(() => (toastMsg.value = ''), 2200) }
-function openProject(p) { toast(t('project.detailSoon', { name: p.name })) }
+function openProject(p) { router.push(`/project/${p.id ?? p.pkey}`) }
+
+const editDialog = ref(false)
+const editTarget = ref(null)
+function openNew() { editTarget.value = null; editDialog.value = true }
+/* After a create/edit: jump straight to the new project's detail (so the
+   user lands on the cockpit they just populated); on edit, reload the grid. */
+function onSaved({ id, created }) {
+  if (created && id != null && typeof id !== 'object') router.push(`/project/${id}`)
+  else load()
+}
 
 onMounted(() => {
   appStore.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: t('project.title') }], { refresh: load })
