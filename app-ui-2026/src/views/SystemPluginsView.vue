@@ -110,7 +110,9 @@
       </v-card>
     </v-dialog>
 
-    <LigojConfirmDialog v-model="confirm.open" :title="confirm.title" :icon="confirm.icon" :icon-color="confirm.color" :message="confirm.text" :confirm-label="confirm.label" :confirm-color="confirm.color" :loading="confirm.busy" @confirm="runConfirm" />
+    <LigojConfirmDialog v-model="confirm.open" :title="confirm.title" :icon="confirm.icon" :icon-color="confirm.color" :message="confirm.text" :confirm-label="confirm.label" :confirm-color="confirm.color" :loading="confirm.busy" @confirm="runConfirm">
+      <template v-if="confirm.parts">{{ confirm.parts.before }}<strong class="text-error">{{ confirm.parts.name }}</strong>{{ confirm.parts.after }}</template>
+    </LigojConfirmDialog>
   </div>
 </template>
 
@@ -239,12 +241,18 @@ async function installOne(artifact) { await api.post(`rest/system/plugin/${encod
 async function cancelLocal(item) { await api.del(`rest/system/plugin/${item.artifact}/${item.latestLocalVersion}`); load() }
 
 /* ---- confirm (restart / check / delete) ---- */
-const confirm = reactive({ open: false, title: '', text: '', label: '', color: 'brand', icon: 'mdi-puzzle', busy: false, action: () => {} })
-function ask(o) { Object.assign(confirm, o, { busy: false, open: true }) }
+const confirm = reactive({ open: false, title: '', text: '', parts: null, label: '', color: 'brand', icon: 'mdi-puzzle', busy: false, action: () => {} })
+function ask(o) { Object.assign(confirm, { parts: null, ...o, busy: false, open: true }) }
+/* Split a translated sentence around a value so it can be rendered bold-red. */
+function splitAround(key, value, param) {
+  const full = t(key, { [param]: value })
+  const i = full.indexOf(value)
+  return i < 0 ? { before: full, name: '', after: '' } : { before: full.slice(0, i), name: value, after: full.slice(i + value.length) }
+}
 async function runConfirm() { confirm.busy = true; try { await confirm.action() } finally { confirm.busy = false; confirm.open = false } }
 function askRestart() { ask({ title: t('system.plugin.confirmRestartTitle'), text: t('system.plugin.confirmRestartText'), label: t('system.plugin.restart'), color: 'error', icon: 'mdi-restart', action: async () => { restarting.value = true; try { await api.put('rest/system/plugin/restart') } finally { restarting.value = false } } }) }
 function askCheckVersions() { ask({ title: t('system.plugin.confirmCheckTitle'), text: t('system.plugin.confirmCheckText', { repository: repository.value }), label: t('system.plugin.confirmCheckLabel'), color: 'brand', icon: 'mdi-magnify-plus-outline', action: async () => { checking.value = true; try { await api.put(`rest/system/plugin/cache?repository=${repository.value}`); await load() } finally { checking.value = false } } }) }
-function askRemove(artifact) { ask({ title: t('system.plugin.confirmDeleteTitle'), text: t('system.plugin.confirmDeleteText', { artifact }), label: t('common.delete'), color: 'error', icon: 'mdi-delete-outline', action: async () => { await api.del(`rest/system/plugin/${artifact}`); await load() } }) }
+function askRemove(artifact) { ask({ title: t('system.plugin.confirmDeleteTitle'), parts: splitAround('system.plugin.confirmDeleteText', artifact, 'artifact'), label: t('common.delete'), color: 'error', icon: 'mdi-delete-outline', action: async () => { await api.del(`rest/system/plugin/${artifact}`); await load() } }) }
 
 onMounted(() => {
   document.addEventListener('click', onDocClick)
@@ -284,7 +292,7 @@ onMounted(() => {
 
 /* Custom repository picker (login/profile locale-picker pattern) */
 .vsel { position: relative; }
-.vsel-btn { display: flex; align-items: center; gap: 7px; padding: 9px 13px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; transition: border-color .15s; }
+.vsel-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); font-family: var(--font); font-size: 14px; font-weight: 700; line-height: 1.2; cursor: pointer; transition: border-color .15s; }
 .vsel-btn:hover { border-color: var(--border-2); }
 .vcaret { color: var(--ink-3); font-size: 11px; transition: transform .2s; }
 .vsel.open .vcaret { transform: rotate(180deg); }
@@ -298,7 +306,9 @@ onMounted(() => {
 
 /* KPI stat cards */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px; }
-.stat { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--border); background: linear-gradient(135deg, color-mix(in srgb, var(--c) 10%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); opacity: 0; transform: translateY(10px); animation: rise .5s cubic-bezier(.2, .7, .3, 1) forwards; }
+.stat { position: relative; display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--border); background: linear-gradient(135deg, color-mix(in srgb, var(--c) 9%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); overflow: hidden; opacity: 0; transform: translateY(10px); animation: rise .5s cubic-bezier(.2, .7, .3, 1) forwards; transition: transform .18s cubic-bezier(.2, .7, .3, 1), box-shadow .18s, border-color .18s; }
+.stat::after { content: ""; position: absolute; right: -24px; top: -24px; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%); pointer-events: none; }
+.stat:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -20px color-mix(in srgb, var(--c) 55%, transparent); border-color: color-mix(in srgb, var(--c) 30%, var(--border)); }
 @keyframes rise { to { opacity: 1; transform: none; } }
 .sicon { width: 46px; height: 46px; border-radius: 13px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
 .snum { font-family: var(--mono); font-weight: 700; font-size: 26px; line-height: 1; color: var(--ink); }
