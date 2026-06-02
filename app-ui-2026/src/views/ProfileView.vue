@@ -67,8 +67,9 @@
 
         <div class="pref-theme-label"><v-icon class="pref-ic">mdi-palette</v-icon>{{ t('profile.theme') }}</div>
         <div class="tiles">
-          <button v-for="opt in PRESET_OPTIONS" :key="opt.id" type="button" class="swatch" :class="{ on: preset === opt.id }" :title="opt.description" @click="choosePreset(opt.id)">
+          <button v-for="(opt, i) in PRESET_OPTIONS" :key="opt.id" type="button" class="swatch" :class="{ on: preset === opt.id }" :style="{ '--i': i }" :title="opt.description" @click="choosePreset(opt.id)">
             <span class="swatch-circle" :style="{ background: bandBg(opt) }">
+              <span class="swatch-gloss" />
               <span v-if="preset === opt.id" class="swatch-check"><v-icon size="20">mdi-check</v-icon></span>
               <span class="swatch-mode" :class="{ dark: opt.dark }"><v-icon size="10">{{ opt.dark ? 'mdi-weather-night' : 'mdi-white-balance-sunny' }}</v-icon></span>
             </span>
@@ -205,21 +206,31 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .sw.on { background: var(--ok); } .sw.on::after { left: 23px; }
 
 .pref-theme-label { font-weight: 700; font-size: 14px; color: var(--ink); display: flex; align-items: center; gap: 8px; padding: 16px 0 12px; }
-/* macOS-style swatch grid: a big colour circle per theme + its name. */
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 18px 14px; }
-.swatch { display: flex; flex-direction: column; align-items: center; gap: 9px; border: 0; background: transparent; cursor: pointer; padding: 4px 2px; }
+/* macOS-style swatch grid: a polished colour orb per theme + its name. */
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 20px 14px; }
+.swatch { display: flex; flex-direction: column; align-items: center; gap: 10px; border: 0; background: transparent; cursor: pointer; padding: 4px 2px;
+  opacity: 0; transform: translateY(8px); animation: swrise .42s cubic-bezier(.2,.7,.3,1) forwards; animation-delay: calc(var(--i, 0) * 28ms); }
+@keyframes swrise { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .swatch { animation: none; opacity: 1; transform: none; } }
 .swatch-circle {
-  position: relative; width: 62px; height: 62px; border-radius: 50%;
-  box-shadow: inset 0 2px 3px rgba(255,255,255,.3), inset 0 -2px 4px rgba(0,0,0,.22), 0 4px 12px -4px rgba(0,0,0,.4);
-  transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s;
+  position: relative; width: 64px; height: 64px; border-radius: 50%; isolation: isolate;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), inset 0 -6px 12px -4px rgba(0,0,0,.35), 0 6px 16px -6px rgba(0,0,0,.45);
+  transition: transform .2s cubic-bezier(.2,.7,.3,1), box-shadow .2s;
 }
-.swatch:hover .swatch-circle { transform: scale(1.08); box-shadow: inset 0 2px 3px rgba(255,255,255,.3), inset 0 -2px 4px rgba(0,0,0,.22), 0 10px 22px -6px rgba(0,0,0,.5); }
-.swatch.on .swatch-circle { box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--primary), 0 8px 18px -6px rgba(0,0,0,.5); }
+/* Specular highlight → glossy 3D orb. */
+.swatch-gloss { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(58% 48% at 34% 26%, rgba(255,255,255,.6), rgba(255,255,255,.08) 45%, transparent 62%); }
+.swatch:hover .swatch-circle { transform: translateY(-2px) scale(1.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), inset 0 -6px 12px -4px rgba(0,0,0,.35), 0 14px 26px -8px rgba(0,0,0,.5); }
+.swatch.on .swatch-circle { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--primary), 0 0 22px -2px rgba(var(--v-theme-primary),.55), 0 8px 18px -6px rgba(0,0,0,.45); }
 .swatch:focus-visible { outline: none; }
-.swatch:focus-visible .swatch-circle { box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px rgba(var(--v-theme-primary), .5); }
-.swatch-check { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; border-radius: 50%; background: rgba(0,0,0,.28); text-shadow: 0 1px 4px rgba(0,0,0,.6); }
-.swatch-mode { position: absolute; right: -2px; bottom: -2px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: #d9701a; box-shadow: 0 0 0 2px var(--surface); }
-.swatch-mode.dark { background: #8b5cf6; }
-.swatch-name { font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--muted); text-align: center; line-height: 1.25; max-width: 96px; }
+.swatch:focus-visible .swatch-circle { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px rgba(var(--v-theme-primary), .6); }
+.swatch-check { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; border-radius: 50%; z-index: 2;
+  background: radial-gradient(circle, rgba(0,0,0,.34), rgba(0,0,0,.14)); text-shadow: 0 1px 5px rgba(0,0,0,.7); }
+/* Frosted mode chip (sun / moon) — subtle, not a solid sticker. */
+.swatch-mode { position: absolute; right: -1px; bottom: -1px; width: 19px; height: 19px; border-radius: 50%; display: grid; place-items: center; z-index: 3;
+  color: #c2691a; background: rgba(255,255,255,.92); backdrop-filter: blur(4px); box-shadow: 0 0 0 2px var(--surface), 0 2px 5px -1px rgba(0,0,0,.35); }
+.swatch-mode.dark { color: #7c4dff; }
+.swatch-name { font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--muted); text-align: center; line-height: 1.25; max-width: 98px; letter-spacing: -.005em; transition: color .15s; }
 .swatch.on .swatch-name { color: var(--ink); font-weight: 800; }
+.swatch:hover .swatch-name { color: var(--ink); }
 </style>
