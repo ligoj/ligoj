@@ -20,11 +20,12 @@
       </div>
       <nav class="nav">
         <template v-for="it in NAV" :key="it.label">
-          <a class="nav-item" :class="{ active: isNavActive(it) }"
+          <a class="nav-item" :class="{ active: isNavActive(it), 'has-children': it.children }"
             @click="it.children ? go(it.children[0].route) : (it.route ? go(it.route) : toast())">
             <v-icon>{{ it.icon }}</v-icon>
             <span>{{ it.label }}</span>
             <span v-if="it.soon" class="soon">bientôt</span>
+            <v-icon v-if="it.children" class="nav-caret" :class="{ open: isNavActive(it) }" size="18">mdi-chevron-down</v-icon>
           </a>
           <!-- Sub-menu (e.g. Identité → Utilisateurs / Groupes / …) shown
                while the section is active. -->
@@ -239,6 +240,10 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .nav-item:hover { background: rgba(255,255,255,.08); }
 .nav-item.active { background: rgba(255,255,255,.16); color: #fff; }
 .nav-item .soon { margin-left: auto; font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(255,255,255,.16); }
+.nav-item .nav-caret { margin-left: auto; color: rgba(255,255,255,.5); transition: transform .2s, color .15s; }
+.nav-item .nav-caret.open { transform: rotate(180deg); color: rgba(255,255,255,.85); }
+.nav-item.has-children:hover .nav-caret { color: rgba(255,255,255,.9); }
+.nav-item.has-children .soon + .nav-caret { margin-left: 6px; }
 .subnav { margin: 2px 0 6px; padding-left: 14px; display: flex; flex-direction: column; gap: 1px; }
 .sub-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 9px; cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 13px; color: rgba(255,255,255,.74); }
 .sub-item:hover { background: rgba(255,255,255,.07); color: #fff; }
