@@ -109,6 +109,10 @@ const NAV = [
     { label: 'Bench', route: '/system/bench', match: '/system/bench' },
     { label: 'Information', route: '/system/information', match: '/system/information' },
   ] },
+  { label: 'API', icon: 'mdi-api', match: '/api', children: [
+    { label: 'Explorateur', route: '/api' },
+    { label: 'Jetons', route: '/api/token', match: '/api/token' },
+  ] },
 ]
 
 const collapsed = ref(false)
@@ -130,6 +134,8 @@ const title = computed(() => {
   if (route.path.startsWith('/system/bench')) return 'Bench'
   if (route.path.startsWith('/system/information')) return 'Information'
   if (route.path.startsWith('/system')) return 'Administration'
+  if (route.path.startsWith('/api/token')) return 'Jetons d\'API'
+  if (route.path.startsWith('/api')) return 'API'
   return 'Accueil'
 })
 function isNavActive(it) {

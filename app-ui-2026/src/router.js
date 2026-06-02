@@ -18,6 +18,8 @@ import SystemUsersView from '@2026/views/SystemUsersView.vue'
 import SystemCacheView from '@2026/views/SystemCacheView.vue'
 import SystemBenchView from '@2026/views/SystemBenchView.vue'
 import SystemInfoView from '@2026/views/SystemInfoView.vue'
+import ApiHomeView from '@2026/views/ApiHomeView.vue'
+import ApiTokenView from '@2026/views/ApiTokenView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: DashboardView },
@@ -42,6 +44,8 @@ const routes = [
   { path: '/system/cache', name: 'system-cache', component: SystemCacheView },
   { path: '/system/bench', name: 'system-bench', component: SystemBenchView },
   { path: '/system/information', name: 'system-information', component: SystemInfoView },
+  { path: '/api', name: 'api-home', component: ApiHomeView },
+  { path: '/api/token', name: 'api-token', component: ApiTokenView },
 ]
 
 const router = createRouter({

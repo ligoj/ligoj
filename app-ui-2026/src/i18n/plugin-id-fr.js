@@ -249,6 +249,16 @@ export default {
   'system.cache.subInCaches': 'dans {n} caches',
   'system.cache.subRequests': 'requêtes',
   'system.cache.subAcrossActive': 'sur les caches actifs',
+  // 2026 redesign — API home + tokens.
+  'api.subtitle': 'Explorateur interactif de l\'API REST',
+  'api.downloadOpenapi': 'Télécharger OpenAPI',
+  'system.apiToken.subtitle': 'Clés d\'accès sans mot de passe pour l\'API REST',
+  'system.apiToken.countLabel': 'jetons d\'API',
+  'system.apiToken.statTokens': 'Jetons',
+  'system.apiToken.searchPlaceholder': 'Rechercher un jeton…',
+  'system.apiToken.deleteConfirmBefore': 'Révoquer le jeton ',
+  'system.apiToken.deleteConfirmAfter': ' ?',
+  'system.apiToken.empty': 'Aucun jeton d\'API',
   // 2026 redesign — System Bench view extras.
   'system.bench.subtitle': 'Benchmark de persistance base de données',
   'system.bench.total': 'Total',
