@@ -119,7 +119,9 @@ onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: 
 .ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-.card { border: 1px solid var(--border); border-radius: 18px; background: linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); overflow: hidden; }
+.card { border: 1px solid var(--border); border-radius: 18px; background: linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); overflow: hidden; transition: transform .16s, box-shadow .16s, border-color .16s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 22px 44px -22px color-mix(in srgb, var(--c) 55%, transparent); border-color: color-mix(in srgb, var(--c) 35%, var(--border)); }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
 .card-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px 10px; }
 .ch-ic { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
 .card-head h3 { font-family: var(--font); font-weight: 800; font-size: 17px; margin: 0; letter-spacing: -.02em; }
