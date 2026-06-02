@@ -66,6 +66,7 @@
     <main class="main"><router-view /></main>
 
     <div class="toast" :class="{ show: toastMsg }">{{ toastMsg }}</div>
+    <ErrorSnackbar />
   </div>
 </template>
 
@@ -75,6 +76,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
+import ErrorSnackbar from '@2026/components/ErrorSnackbar.vue'
 
 const route = useRoute()
 const router = useRouter()

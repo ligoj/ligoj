@@ -272,6 +272,8 @@ export default {
   'api.deprecated': 'deprecated',
   'api.expandAll': 'Expand all',
   'api.collapseAll': 'Collapse all',
+  'common.detailsToggle': 'Details',
+  'common.dismiss': 'Dismiss',
   'system.apiToken.subtitle': 'Password-less access keys for the REST API',
   'system.apiToken.countLabel': 'API tokens',
   'system.apiToken.statTokens': 'Tokens',

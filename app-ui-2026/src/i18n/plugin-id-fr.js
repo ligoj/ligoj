@@ -265,6 +265,8 @@ export default {
   'api.deprecated': 'déprécié',
   'api.expandAll': 'Tout déplier',
   'api.collapseAll': 'Tout replier',
+  'common.detailsToggle': 'Détails',
+  'common.dismiss': 'Fermer',
   'system.apiToken.subtitle': 'Clés d\'accès sans mot de passe pour l\'API REST',
   'system.apiToken.countLabel': 'jetons d\'API',
   'system.apiToken.statTokens': 'Jetons',
