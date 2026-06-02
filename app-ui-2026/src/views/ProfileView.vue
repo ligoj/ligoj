@@ -67,17 +67,26 @@
 
         <div class="pref-theme-label"><v-icon class="pref-ic">mdi-palette</v-icon>{{ t('profile.theme') }}</div>
         <div class="tiles">
-          <div v-for="opt in PRESET_OPTIONS" :key="opt.id" class="tile" :class="{ on: preset === opt.id }" @click="choosePreset(opt.id)">
-            <div class="sw-strip"><span v-for="(c, i) in opt.swatch" :key="i" :style="{ background: c }" /></div>
+          <button v-for="opt in PRESET_OPTIONS" :key="opt.id" type="button" class="tile" :class="{ on: preset === opt.id }" @click="choosePreset(opt.id)">
+            <!-- Mini UI mock built from the preset swatch: a sidebar (primary),
+                 a content area (surface) with an accent chip + dot and two
+                 muted text lines. Reads as a real theme preview. -->
+            <div class="tile-prev" :style="{ background: opt.swatch[2] }">
+              <span class="pv-side" :style="{ background: opt.swatch[0] }" />
+              <span class="pv-main">
+                <span class="pv-top"><span class="pv-dot" :style="{ background: opt.swatch[1] }" /><span class="pv-chip" :style="{ background: opt.swatch[1] }" /></span>
+                <span class="pv-line" /><span class="pv-line sm" />
+              </span>
+              <span v-if="preset === opt.id" class="pv-check"><v-icon size="13">mdi-check</v-icon></span>
+            </div>
             <div class="tile-b">
               <div class="tile-h">
-                <span class="moon">{{ opt.dark ? '🌙' : '☀️' }}</span>
                 <span class="tile-name">{{ opt.label }}</span>
-                <v-icon v-if="preset === opt.id" size="small" class="tile-check">mdi-check-circle</v-icon>
+                <span class="tile-mode" :class="{ dark: opt.dark }"><v-icon size="11">{{ opt.dark ? 'mdi-weather-night' : 'mdi-white-balance-sunny' }}</v-icon>{{ opt.dark ? t('profile.themeDark') : t('profile.themeLight') }}</span>
               </div>
               <div class="tile-desc">{{ opt.description }}</div>
             </div>
-          </div>
+          </button>
         </div>
       </section>
     </div>
@@ -198,14 +207,31 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .sw.on { background: var(--ok); } .sw.on::after { left: 23px; }
 
 .pref-theme-label { font-weight: 700; font-size: 14px; color: var(--ink); display: flex; align-items: center; gap: 8px; padding: 16px 0 12px; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(152px, 1fr)); gap: 10px; }
-.tile { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; background: var(--surface); }
-.tile:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -12px rgba(0,0,0,.5); }
-.tile.on { border-color: var(--primary); border-width: 2px; }
-.sw-strip { display: flex; height: 32px; } .sw-strip span { flex: 1; }
-.tile-b { padding: 7px 10px 9px; }
-.tile-h { display: flex; align-items: center; gap: 6px; }
-.tile-name { font-size: 12.5px; font-weight: 700; color: var(--ink); }
-.tile-check { margin-left: auto; color: var(--primary); }
-.tile-desc { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(184px, 1fr)); gap: 14px; }
+.tile { position: relative; text-align: left; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; cursor: pointer; padding: 0; background: var(--surface); box-shadow: 0 2px 8px rgba(0,0,0,.05); transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s, border-color .18s; }
+.tile:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -18px rgba(0,0,0,.45); border-color: var(--border-2, rgba(var(--v-theme-on-surface),.26)); }
+.tile.on { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary), 0 16px 32px -18px rgba(0,0,0,.5); }
+.tile:focus-visible { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), .4); }
+
+/* Mini UI mock preview. */
+.tile-prev { position: relative; display: flex; gap: 6px; height: 78px; padding: 9px; }
+.pv-side { width: 26%; border-radius: 6px; flex: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+.pv-main { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.pv-top { display: flex; align-items: center; gap: 6px; }
+.pv-dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.pv-chip { height: 12px; width: 46px; border-radius: 4px; }
+.pv-line { height: 9px; border-radius: 3px; background: rgba(128,128,128,.38); }
+.pv-line.sm { width: 62%; }
+.pv-main .pv-line:first-of-type { width: 88%; }
+/* a faux content card behind the lines */
+.tile-prev::after { content: ""; position: absolute; right: 9px; bottom: 9px; left: calc(26% + 15px); top: 33px; border-radius: 6px; background: rgba(128,128,128,.1); box-shadow: inset 0 0 0 1px rgba(128,128,128,.18); z-index: 0; }
+.pv-main { position: relative; z-index: 1; }
+.pv-check { position: absolute; top: 7px; right: 7px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--primary); box-shadow: 0 2px 8px -2px rgba(0,0,0,.5), 0 0 0 2px var(--surface); z-index: 2; }
+
+.tile-b { padding: 10px 12px 12px; border-top: 1px solid var(--line); }
+.tile-h { display: flex; align-items: center; gap: 8px; }
+.tile-name { font-family: var(--font); font-size: 13.5px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile-mode { display: inline-flex; align-items: center; gap: 3px; flex: none; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #d9701a; background: rgba(217,112,26,.13); padding: 2px 7px; border-radius: 999px; }
+.tile-mode.dark { color: #8b5cf6; background: rgba(139,92,246,.15); }
+.tile-desc { font-size: 11.5px; color: var(--muted); margin-top: 5px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 </style>

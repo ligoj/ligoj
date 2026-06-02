@@ -274,6 +274,8 @@ export default {
   'api.collapseAll': 'Collapse all',
   'common.detailsToggle': 'Details',
   'common.dismiss': 'Dismiss',
+  'profile.themeLight': 'Light',
+  'profile.themeDark': 'Dark',
   'notFound.title': 'Page not found',
   'notFound.message': 'The page you are looking for doesn\'t exist or has moved.',
   'notFound.back': 'Back to home',

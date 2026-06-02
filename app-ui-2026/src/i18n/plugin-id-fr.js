@@ -267,6 +267,8 @@ export default {
   'api.collapseAll': 'Tout replier',
   'common.detailsToggle': 'Détails',
   'common.dismiss': 'Fermer',
+  'profile.themeLight': 'Clair',
+  'profile.themeDark': 'Sombre',
   'notFound.title': 'Page introuvable',
   'notFound.message': 'La page demandée n\'existe pas ou a été déplacée.',
   'notFound.back': 'Retour à l\'accueil',
