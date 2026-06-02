@@ -201,6 +201,16 @@ html[data-style="neon"] .hero {
 }
 html[data-style="neon"] .hero h1, html[data-style="neon"] .hero-id, html[data-style="neon"] .hero-txt,
 html[data-style="neon"] .hero-txt p, html[data-style="neon"] .hero p { color: #e6efff !important; }
+/* Role chips on the (dark) banner — cyan-tinted so they read. */
+html[data-style="neon"] .rolechip {
+  background: rgba(0,255,240,.12) !important;
+  border: 1px solid rgba(0,255,240,.45) !important;
+  color: #b9f7f1 !important;
+}
+/* Sidebar footer "À propos" link was too dim on the near-black rail. */
+html[data-style="neon"] .ver { color: rgba(0,255,240,.85) !important; opacity: 1 !important; }
+html[data-style="neon"] .ver:hover { background: rgba(0,255,240,.12) !important; }
+html[data-style="neon"] .ver.active { background: rgba(0,255,240,.16) !important; color: #00fff0 !important; }
 /* Neon-glowing headings + KPI numbers. */
 html[data-style="neon"] .ph-txt h1, html[data-style="neon"] .hero-txt h1,
 html[data-style="neon"] .snum, html[data-style="neon"] .tb-num {
