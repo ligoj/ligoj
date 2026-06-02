@@ -21,15 +21,15 @@
       <nav class="nav">
         <template v-for="it in NAV" :key="it.label">
           <a class="nav-item" :class="{ active: isNavActive(it), 'has-children': it.children }"
-            @click="it.children ? go(it.children[0].route) : (it.route ? go(it.route) : toast())">
+            @click="onNavClick(it)">
             <v-icon>{{ it.icon }}</v-icon>
             <span>{{ it.label }}</span>
             <span v-if="it.soon" class="soon">bientôt</span>
-            <v-icon v-if="it.children" class="nav-caret" :class="{ open: isNavActive(it) }" size="18">mdi-chevron-down</v-icon>
+            <v-icon v-if="it.children" class="nav-caret" :class="{ open: isOpen(it) }" size="18">mdi-chevron-down</v-icon>
           </a>
-          <!-- Sub-menu (e.g. Identité → Utilisateurs / Groupes / …) shown
-               while the section is active. -->
-          <div v-if="it.children && isNavActive(it)" class="subnav">
+          <!-- Sub-menu (e.g. Identité → Utilisateurs / Groupes / …); expand
+               state is manual (toggled by clicking the parent). -->
+          <div v-if="it.children && isOpen(it)" class="subnav">
             <a v-for="c in it.children" :key="c.label" class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }"
               @click="c.route ? go(c.route) : toast()">
               <span class="dot" />
@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
@@ -141,6 +141,29 @@ const title = computed(() => {
 function isNavActive(it) {
   return it.match ? route.path.startsWith(it.match) : it.route === route.path
 }
+
+// Sub-menu expand/collapse is manual: clicking a parent toggles its section
+// (re-clicking an open section collapses it). The section you're currently in
+// auto-opens on navigation so the active page is always revealed.
+const openSections = reactive({})
+function isOpen(it) { return !!(it.children && openSections[it.label]) }
+function onNavClick(it) {
+  if (it.children) {
+    if (openSections[it.label]) {
+      openSections[it.label] = false
+    } else {
+      openSections[it.label] = true
+      if (it.children[0]?.route) go(it.children[0].route)
+    }
+  } else if (it.route) {
+    go(it.route)
+  } else {
+    toast()
+  }
+}
+watch(() => route.path, () => {
+  for (const it of NAV) if (it.children && isNavActive(it)) openSections[it.label] = true
+}, { immediate: true })
 
 function go(path) { if (route.path !== path) router.push(path) }
 
