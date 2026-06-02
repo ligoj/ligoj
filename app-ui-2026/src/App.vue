@@ -104,6 +104,9 @@ const NAV = [
     { label: 'Configuration', route: '/system/configuration', match: '/system/configuration' },
     { label: 'Rôles', route: '/system/role', match: '/system/role' },
     { label: 'Utilisateurs', route: '/system/user', match: '/system/user' },
+    { label: 'Cache', route: '/system/cache', match: '/system/cache' },
+    { label: 'Bench', route: '/system/bench', match: '/system/bench' },
+    { label: 'Information', route: '/system/information', match: '/system/information' },
   ] },
 ]
 
@@ -122,6 +125,9 @@ const title = computed(() => {
   if (route.path.startsWith('/system/configuration')) return 'Configuration'
   if (route.path.startsWith('/system/role')) return 'Rôles'
   if (route.path.startsWith('/system/user')) return 'Utilisateurs système'
+  if (route.path.startsWith('/system/cache')) return 'Cache'
+  if (route.path.startsWith('/system/bench')) return 'Bench'
+  if (route.path.startsWith('/system/information')) return 'Information'
   if (route.path.startsWith('/system')) return 'Administration'
   return 'Accueil'
 })

@@ -237,6 +237,22 @@ export default {
   'system.user.deleteTitle': 'Supprimer l\'utilisateur système',
   'system.user.deleteConfirmBefore': 'Retirer ',
   'system.user.deleteConfirmAfter': ' des comptes système ?',
+  // 2026 redesign — System Cache view extras.
+  'system.cache.countLabel': 'caches actifs',
+  'system.cache.statCaches': 'Caches',
+  'system.cache.statEntries': 'Entrées',
+  'system.cache.statHitRate': 'Taux de hits',
+  'system.cache.statAvgGet': 'Get moyen',
+  'system.cache.invalidateAll': 'Tout vider',
+  'system.cache.searchPlaceholder': 'Rechercher un cache…',
+  // 2026 redesign — System Bench view extras.
+  'system.bench.subtitle': 'Benchmark de persistance base de données',
+  'system.bench.total': 'Total',
+  'system.bench.idle': 'Lancez le bench pour mesurer chaque étape.',
+  'system.bench.ms': 'ms',
+  // 2026 redesign — System Information view extras.
+  'system.info.subtitle': 'Runtime, mémoire, fuseau horaire, session et build',
+  'system.info.copy': 'Copier',
   // 2026 redesign — VibrantDataTable chrome (not provided by the host).
   'common.rows': 'Lignes',
   'common.of': 'sur',
