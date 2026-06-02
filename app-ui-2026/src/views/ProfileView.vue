@@ -67,20 +67,12 @@
 
         <div class="pref-theme-label"><v-icon class="pref-ic">mdi-palette</v-icon>{{ t('profile.theme') }}</div>
         <div class="tiles">
-          <button v-for="opt in PRESET_OPTIONS" :key="opt.id" type="button" class="tile" :class="{ on: preset === opt.id }" @click="choosePreset(opt.id)">
-            <!-- Rich colour field built from the preset palette (canvas →
-                 primary → accent), with the exact swatch as three dots. -->
-            <div class="tile-band" :style="{ background: bandBg(opt) }">
-              <span class="band-dots"><i v-for="(c, i) in opt.swatch" :key="i" :style="{ background: c }" /></span>
-              <span v-if="preset === opt.id" class="band-check"><v-icon size="14">mdi-check</v-icon></span>
-            </div>
-            <div class="tile-b">
-              <div class="tile-h">
-                <span class="tile-name">{{ opt.label }}</span>
-                <span class="tile-mode" :class="{ dark: opt.dark }"><v-icon size="11">{{ opt.dark ? 'mdi-weather-night' : 'mdi-white-balance-sunny' }}</v-icon>{{ opt.dark ? t('profile.themeDark') : t('profile.themeLight') }}</span>
-              </div>
-              <div class="tile-desc">{{ opt.description }}</div>
-            </div>
+          <button v-for="opt in PRESET_OPTIONS" :key="opt.id" type="button" class="swatch" :class="{ on: preset === opt.id }" :title="opt.description" @click="choosePreset(opt.id)">
+            <span class="swatch-circle" :style="{ background: bandBg(opt) }">
+              <span v-if="preset === opt.id" class="swatch-check"><v-icon size="20">mdi-check</v-icon></span>
+              <span class="swatch-mode" :class="{ dark: opt.dark }"><v-icon size="10">{{ opt.dark ? 'mdi-weather-night' : 'mdi-white-balance-sunny' }}</v-icon></span>
+            </span>
+            <span class="swatch-name">{{ opt.label }}</span>
           </button>
         </div>
       </section>
@@ -213,24 +205,21 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .sw.on { background: var(--ok); } .sw.on::after { left: 23px; }
 
 .pref-theme-label { font-weight: 700; font-size: 14px; color: var(--ink); display: flex; align-items: center; gap: 8px; padding: 16px 0 12px; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(184px, 1fr)); gap: 14px; }
-.tile { position: relative; text-align: left; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; cursor: pointer; padding: 0; background: var(--surface); box-shadow: 0 2px 8px rgba(0,0,0,.05); transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s, border-color .18s; }
-.tile:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -18px rgba(0,0,0,.45); border-color: var(--border-2, rgba(var(--v-theme-on-surface),.26)); }
-.tile.on { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary), 0 16px 32px -18px rgba(0,0,0,.5); }
-.tile:focus-visible { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), .4); }
-
-/* Rich colour-field band (the theme palette as a smooth gradient). */
-.tile-band { position: relative; height: 86px; box-shadow: inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px rgba(0,0,0,.06); }
-/* a soft top-left sheen for depth */
-.tile-band::before { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 80% at 0% 0%, rgba(255,255,255,.28), transparent 55%); }
-.band-dots { position: absolute; left: 11px; bottom: 10px; display: flex; gap: 5px; }
-.band-dots i { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(255,255,255,.65), 0 1px 3px rgba(0,0,0,.3); }
-.band-check { position: absolute; top: 9px; right: 9px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: var(--primary); background: #fff; box-shadow: 0 3px 10px -2px rgba(0,0,0,.45); z-index: 2; }
-
-.tile-b { padding: 11px 13px 13px; border-top: 1px solid var(--line); }
-.tile-h { display: flex; align-items: center; gap: 8px; }
-.tile-name { font-family: var(--font); font-size: 13.5px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tile-mode { display: inline-flex; align-items: center; gap: 3px; flex: none; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #d9701a; background: rgba(217,112,26,.13); padding: 2px 7px; border-radius: 999px; }
-.tile-mode.dark { color: #8b5cf6; background: rgba(139,92,246,.15); }
-.tile-desc { font-size: 11.5px; color: var(--muted); margin-top: 5px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* macOS-style swatch grid: a big colour circle per theme + its name. */
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 18px 14px; }
+.swatch { display: flex; flex-direction: column; align-items: center; gap: 9px; border: 0; background: transparent; cursor: pointer; padding: 4px 2px; }
+.swatch-circle {
+  position: relative; width: 62px; height: 62px; border-radius: 50%;
+  box-shadow: inset 0 2px 3px rgba(255,255,255,.3), inset 0 -2px 4px rgba(0,0,0,.22), 0 4px 12px -4px rgba(0,0,0,.4);
+  transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s;
+}
+.swatch:hover .swatch-circle { transform: scale(1.08); box-shadow: inset 0 2px 3px rgba(255,255,255,.3), inset 0 -2px 4px rgba(0,0,0,.22), 0 10px 22px -6px rgba(0,0,0,.5); }
+.swatch.on .swatch-circle { box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--primary), 0 8px 18px -6px rgba(0,0,0,.5); }
+.swatch:focus-visible { outline: none; }
+.swatch:focus-visible .swatch-circle { box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px rgba(var(--v-theme-primary), .5); }
+.swatch-check { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; border-radius: 50%; background: rgba(0,0,0,.28); text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+.swatch-mode { position: absolute; right: -2px; bottom: -2px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: #d9701a; box-shadow: 0 0 0 2px var(--surface); }
+.swatch-mode.dark { background: #8b5cf6; }
+.swatch-name { font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--muted); text-align: center; line-height: 1.25; max-width: 96px; }
+.swatch.on .swatch-name { color: var(--ink); font-weight: 800; }
 </style>
