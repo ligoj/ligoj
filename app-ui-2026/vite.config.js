@@ -8,8 +8,32 @@ import { resolve } from 'path'
 // modified — this is a separate Vite project that only reads from it.
 const CORE = resolve(__dirname, '../app-ui/src/main/webapp/src')
 
+// Dev-only import map. Runtime-loaded plugin bundles import `vue`,
+// `vue-router`, `pinia`, `vuetify` and `@ligoj/host` as bare specifiers
+// (externalised in their own build). We point those at thin shim modules
+// (src/shims/*.js → `export * from '<dep>'`) so Vite resolves them to the
+// SAME instances the 2026 app uses — sharing the registry, pinia stores and
+// i18n store, so plugin install()/feature() contributions reach our views.
+// Injected only in `serve` mode; the production build would instead ship
+// pre-built /assets/*.js like app-ui's index.html.
+function pluginImportmap() {
+  const imports = {
+    vue: '/ligoj/src/shims/vue.js',
+    'vue-router': '/ligoj/src/shims/vue-router.js',
+    pinia: '/ligoj/src/shims/pinia.js',
+    vuetify: '/ligoj/src/shims/vuetify.js',
+    '@ligoj/host': '/ligoj/src/shims/host.js',
+  }
+  const tag = `<script type="importmap">${JSON.stringify({ imports })}</script>`
+  return {
+    name: 'ligoj-2026-plugin-importmap',
+    apply: 'serve',
+    transformIndexHtml: (html) => html.replace('</head>', `${tag}\n</head>`),
+  }
+}
+
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), pluginImportmap()],
   base: '/ligoj/',
   resolve: {
     alias: {
@@ -36,6 +60,11 @@ export default defineConfig({
       '/ligoj/captcha.png': { target: 'http://localhost:8080', changeOrigin: true },
       // Backend logout (Spring Security) — used by the shell's logout button.
       '/ligoj/logout': { target: 'http://localhost:8080', changeOrigin: true },
+      // Plugin Vue bundles, served by the backend's /main proxy servlet
+      // (e.g. /ligoj/main/id/vue/index.js). Lets the host's dynamic plugin
+      // loader import real plugin bundles so their i18n, parameter fields and
+      // subscription-detail renderers work — parity with the live app.
+      '/ligoj/main': { target: 'http://localhost:8080', changeOrigin: true },
     },
   },
 })

@@ -9,10 +9,14 @@ import { useI18nStore } from '@/stores/i18n.js'
 import { bootCompact } from '@/plugins/styles.js'
 import { bootPreset } from '@/plugins/presets.js'
 import router from '@2026/router.js'
-// plugin-id contributes a few i18n fragments (confirm sentences, status
-// labels) on top of the host's base user.* keys. The standalone app does
-// NOT run the dynamic plugin-loader, so we merge them explicitly here —
-// mirror of plugin-id/ui/src/index.js (i18n.merge at install time).
+// Dynamic plugin loader (shared with the live app via @ligoj/host). Loading
+// real plugin bundles unlocks their i18n bundles, custom parameter fields and
+// subscription-detail renderers in the 2026 app — parity with app-ui.
+import { loadAllPlugins } from '@/plugins/loader.js'
+import { registerBuiltinPlugins } from '@/plugins/index.js'
+// plugin-id contributes a few EXTRA i18n fragments (2026 chrome keys, status
+// labels). We still merge them explicitly so they're present before the
+// bundle loads and for keys the bundle doesn't carry.
 import pluginIdEn from '@2026/i18n/plugin-id-en.js'
 import pluginIdFr from '@2026/i18n/plugin-id-fr.js'
 
@@ -25,11 +29,25 @@ const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 setActivePinia(pinia)
-// Merge plugin-id translations once pinia is active (the i18n store needs it).
 const i18nStore = useI18nStore()
-i18nStore.merge(pluginIdEn, 'en')
-i18nStore.merge(pluginIdFr, 'fr')
 app.use(i18n)
 app.use(vuetify)
 app.use(router)
-app.mount('#app')
+
+// Register built-in plugin stubs, then eagerly load the core service plugins
+// (their routes/i18n/features must exist before navigation). Mirrors app-ui's
+// main.js. allSettled inside loadAllPlugins means a plugin that isn't
+// installed on this backend is skipped quietly. App.vue lazily loads the
+// remaining installed plugins from the session's appSettings.
+registerBuiltinPlugins()
+
+;(async () => {
+  try { await loadAllPlugins(['id', 'ui', 'prov']) } catch { /* keep booting */ }
+  // Merge the 2026 fragments AFTER plugin bundles so our clean 2026 chrome
+  // keys win over the plugin's own copies (e.g. the wizard step labels: the
+  // plugin-ui bundle ships "1. Service" while the 2026 dialog renders its
+  // own numbered badges and wants the bare "Service").
+  i18nStore.merge(pluginIdEn, 'en')
+  i18nStore.merge(pluginIdFr, 'fr')
+  app.mount('#app')
+})()

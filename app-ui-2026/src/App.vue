@@ -62,13 +62,29 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
+import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+
+// Backend-only plugins (no Vue bundle) — skip to avoid guaranteed 404s on
+// every session refresh. Mirrors app-ui's App.vue NO_UI_PLUGINS deny list.
+const NO_UI_PLUGINS = new Set(['iam-empty', 'iam-node', 'menu-node', 'welcome-data-rbac'])
+
+// Lazily load the remaining installed plugins (the core 'id'/'ui'/'prov' are
+// already loaded eagerly in main.js). `appSettings.plugins` lists FeaturePlugin
+// keys (e.g. 'service:id:ldap') — normalise to the loader's short id form.
+onMounted(async () => {
+  try { await auth.fetchSession() } catch { /* preview stays usable */ }
+  const optional = (auth.appSettings?.plugins || [])
+    .map(pluginIdFromKey)
+    .filter((id) => id && id !== 'id' && !NO_UI_PLUGINS.has(id))
+  if (optional.length) loadAllPlugins(optional)
+})
 
 const NAV = [
   { label: 'Accueil', icon: 'mdi-home', route: '/' },
