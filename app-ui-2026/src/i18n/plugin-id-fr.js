@@ -245,6 +245,10 @@ export default {
   'system.cache.statAvgGet': 'Get moyen',
   'system.cache.invalidateAll': 'Tout vider',
   'system.cache.searchPlaceholder': 'Rechercher un cache…',
+  'system.cache.subActive': 'actifs',
+  'system.cache.subInCaches': 'dans {n} caches',
+  'system.cache.subRequests': 'requêtes',
+  'system.cache.subAcrossActive': 'sur les caches actifs',
   // 2026 redesign — System Bench view extras.
   'system.bench.subtitle': 'Benchmark de persistance base de données',
   'system.bench.total': 'Total',

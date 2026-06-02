@@ -20,11 +20,15 @@
     <p v-if="error" class="errline"><v-icon size="16">mdi-alert-outline</v-icon>{{ error }}</p>
 
     <div class="grid">
-      <!-- System -->
-      <section class="card" :style="{ '--c': '#2f6df6' }">
-        <div class="card-head"><span class="ch-ic"><v-icon size="20">mdi-server-outline</v-icon></span><h3>{{ t('system.info.system') }}</h3></div>
+      <!-- System (hero) -->
+      <section class="card hero" :style="{ '--c': '#2f6df6' }">
+        <div class="card-head">
+          <span class="ch-ic"><v-icon size="20">mdi-server-outline</v-icon></span>
+          <h3>{{ t('system.info.system') }}</h3>
+          <span class="used-badge" :class="memLevel"><b>{{ memory.pctUsed }}<small>%</small></b><span>{{ t('system.info.memoryUsed') }}</span></span>
+        </div>
         <div class="card-body">
-          <div class="mem">
+          <div class="mem big">
             <div class="mem-top"><span class="mem-label">{{ t('system.info.memory') }}</span><span class="mem-val">{{ formatSize(memory.used) }} / {{ formatSize(memory.max) }}</span></div>
             <div class="mem-bar" :title="memoryTooltip">
               <i class="seg used" :style="{ width: memory.pctUsed + '%' }" />
@@ -36,9 +40,11 @@
               <span><span class="dot free" />{{ t('system.info.memoryFree') }} {{ memory.pctFree }}%</span>
             </div>
           </div>
-          <div class="frow"><span class="fk"><v-icon size="15">mdi-cpu-64-bit</v-icon>{{ t('system.info.cpu') }}</span><span class="fv mono">{{ cpu || '—' }}</span></div>
-          <div class="frow"><span class="fk"><v-icon size="15">mdi-clock-outline</v-icon>{{ t('system.info.localDate') }}</span><span class="fv mono">{{ dateIso || '—' }}</span></div>
-          <div class="frow"><span class="fk"><v-icon size="15">mdi-clock-outline</v-icon>{{ t('system.info.timestamp') }}</span><span class="fv mono">{{ dateTimestamp || '—' }}</span></div>
+          <div class="subgrid">
+            <div class="tile"><span class="tile-k"><v-icon size="15">mdi-cpu-64-bit</v-icon>{{ t('system.info.cpu') }}</span><span class="tile-v">{{ cpu || '—' }}</span></div>
+            <div class="tile"><span class="tile-k"><v-icon size="15">mdi-clock-outline</v-icon>{{ t('system.info.localDate') }}</span><span class="tile-v sm">{{ dateIso || '—' }}</span></div>
+            <div class="tile"><span class="tile-k"><v-icon size="15">mdi-timer-sand</v-icon>{{ t('system.info.timestamp') }}</span><span class="tile-v">{{ dateTimestamp || '—' }}</span></div>
+          </div>
         </div>
       </section>
 
@@ -102,6 +108,7 @@ const memory = reactive({ used: 0, committedFree: 0, free: 0, max: 0, pctUsed: 0
 const tz = reactive({ application: '', default: '', original: '' })
 
 const sessionId = computed(() => getCookie('JSESSIONID') || '')
+const memLevel = computed(() => (memory.pctUsed >= 85 ? 'err' : memory.pctUsed >= 70 ? 'warn' : ''))
 
 const build = computed(() => {
   const s = auth.appSettings || {}
@@ -194,18 +201,29 @@ onMounted(() => {
 .ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
 .errline { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: rgb(var(--v-theme-error)); margin: 0 0 14px; }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
 .card { border: 1px solid var(--border); border-radius: 18px; background: linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); overflow: hidden; }
+.card.hero { grid-column: 1 / -1; }
 .card-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px 12px; }
 .ch-ic { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
 .card-head h3 { font-family: var(--font); font-weight: 800; font-size: 17px; margin: 0; letter-spacing: -.02em; }
+.used-badge { margin-left: auto; display: flex; align-items: baseline; gap: 8px; padding: 6px 14px; border-radius: 12px; background: var(--pill); }
+.used-badge b { font-family: var(--mono); font-weight: 700; font-size: 22px; line-height: 1; color: var(--ink); }
+.used-badge b small { font-size: 13px; margin-left: 1px; }
+.used-badge span { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); }
+.used-badge.warn { background: rgba(217, 112, 26, .14); } .used-badge.warn b { color: #d9701a; }
+.used-badge.err { background: rgba(223, 77, 66, .14); } .used-badge.err b { color: #df4d42; }
 .card-body { padding: 4px 18px 18px; }
 
 .mem { margin-bottom: 12px; }
+.mem.big { margin-bottom: 16px; }
 .mem-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .mem-label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
 .mem-val { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); }
 .mem-bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: rgba(29, 157, 99, .25); }
+.mem.big .mem-bar { height: 20px; border-radius: 10px; }
 .mem-bar .seg { height: 100%; transition: width .5s cubic-bezier(.2, .7, .3, 1); }
 .mem-bar .seg.used { background: linear-gradient(90deg, #df4d42, #b3392f); }
 .mem-bar .seg.committed { background: linear-gradient(90deg, #d9701a, #e0a106); opacity: .85; }
@@ -216,7 +234,16 @@ onMounted(() => {
 .dot.committed { background: #d9701a; }
 .dot.free { background: #1d9d63; }
 
-.frow { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.subgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 720px) { .subgrid { grid-template-columns: 1fr; } }
+.tile { display: flex; flex-direction: column; gap: 6px; padding: 13px 15px; border-radius: 13px; border: 1px solid var(--border); background: var(--surface); }
+.tile-k { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.tile-k :deep(.v-icon) { opacity: .7; }
+.tile-v { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--ink); word-break: break-all; }
+.tile-v.sm { font-size: 12.5px; }
+
+.frow { display: flex; align-items: center; gap: 12px; padding: 9px 8px; margin: 0 -8px; border-radius: 9px; border-bottom: 1px solid var(--border); transition: background .14s; }
+.frow:hover { background: var(--hover); }
 .frow:last-child { border-bottom: 0; }
 .fk { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: var(--ink-3); flex: none; min-width: 130px; }
 .fk :deep(.v-icon) { opacity: .7; }
