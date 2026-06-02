@@ -8,6 +8,29 @@ import { resolve } from 'path'
 // modified — this is a separate Vite project that only reads from it.
 const CORE = resolve(__dirname, '../app-ui/src/main/webapp/src')
 
+// --- Backend proxy --------------------------------------------------------
+// Single configurable target so testers can run against their own populated
+// Ligoj. Point it at YOUR backend without editing code:
+//   LIGOJ_BACKEND=https://ligoj.acme npm run dev
+// `cookieDomainRewrite` rehosts the JSESSIONID on localhost so the shared
+// session survives the proxy; `secure:false` tolerates self-signed TLS.
+const BACKEND = process.env.LIGOJ_BACKEND || 'http://localhost:8080'
+const PROXY_PATHS = [
+  '/ligoj/rest',        // REST API
+  '/ligoj/login',       // Spring Security form login
+  '/ligoj/logout',      // Spring Security logout
+  '/ligoj/captcha.png', // login recovery / reset CAPTCHA
+  '/ligoj/main',        // runtime plugin Vue bundles (id/ui/prov…)
+]
+const BACKEND_PROXY = Object.fromEntries(
+  PROXY_PATHS.map((p) => [p, {
+    target: BACKEND,
+    changeOrigin: true,
+    secure: false,
+    cookieDomainRewrite: 'localhost',
+  }]),
+)
+
 // Dev-only import map. Runtime-loaded plugin bundles import `vue`,
 // `vue-router`, `pinia`, `vuetify` and `@ligoj/host` as bare specifiers
 // (externalised in their own build). We point those at thin shim modules
@@ -51,20 +74,9 @@ export default defineConfig({
     // outside this project's root. Allow the whole ligoj repo so Vite can
     // serve those files (otherwise the mdi webfont 403s and icons show tofu).
     fs: { allow: [resolve(__dirname, '..')] },
-    // Proxy the backend API to the running ligoj-api, mirroring app-ui's
-    // dev proxy so the shared auth session / REST endpoints work as-is.
-    proxy: {
-      '/ligoj/rest': { target: 'http://localhost:8080', changeOrigin: true },
-      '/ligoj/login': { target: 'http://localhost:8080', changeOrigin: true },
-      // CAPTCHA image used by the login's recovery / reset modes.
-      '/ligoj/captcha.png': { target: 'http://localhost:8080', changeOrigin: true },
-      // Backend logout (Spring Security) — used by the shell's logout button.
-      '/ligoj/logout': { target: 'http://localhost:8080', changeOrigin: true },
-      // Plugin Vue bundles, served by the backend's /main proxy servlet
-      // (e.g. /ligoj/main/id/vue/index.js). Lets the host's dynamic plugin
-      // loader import real plugin bundles so their i18n, parameter fields and
-      // subscription-detail renderers work — parity with the live app.
-      '/ligoj/main': { target: 'http://localhost:8080', changeOrigin: true },
-    },
+    // Proxy the backend API to a running Ligoj, mirroring app-ui's dev proxy
+    // so the shared auth session / REST endpoints work as-is. Point this at
+    // YOUR backend without editing code:  LIGOJ_BACKEND=https://ligoj.acme npm run dev
+    proxy: BACKEND_PROXY,
   },
 })
