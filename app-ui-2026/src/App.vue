@@ -43,7 +43,7 @@
         <a class="nav-item" :class="{ active: route.path === '/profile' }" @click="go('/profile')">
           <v-icon>mdi-account-circle</v-icon><span>Profil</span>
         </a>
-        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')">UI 2026 · aperçu</button>
+        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon>À propos</button>
       </div>
     </aside>
 
@@ -311,7 +311,7 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .sub-item .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .6; flex: none; }
 .sub-item .soon { margin-left: auto; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 20px; background: rgba(255,255,255,.14); }
 .sb-foot { padding: 10px; }
-.ver { display: block; width: 100%; text-align: left; font-family: var(--v26-mono); font-size: 11px; opacity: .55; padding: 8px 12px; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 8px; transition: opacity .15s, background .15s; }
+.ver { display: flex; align-items: center; gap: 7px; width: 100%; text-align: left; font-family: var(--v26-font); font-weight: 600; font-size: 13px; opacity: .7; padding: 9px 12px; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 8px; transition: opacity .15s, background .15s; }
 .ver:hover { opacity: .9; background: rgba(255,255,255,.08); }
 .ver.active { opacity: 1; background: rgba(255,255,255,.12); }
 
