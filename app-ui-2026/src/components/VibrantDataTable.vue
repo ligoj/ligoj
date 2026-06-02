@@ -288,7 +288,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .cbx.on { background: var(--accent); border-color: var(--accent); }
 .cbx.on::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translateY(-1px); }
 
-.gear-col { width: 64px; }
+.gear-col { width: 88px; white-space: nowrap; }
 
 /* Footer pagination (matches mockup .pg). */
 .pg { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 12px 16px; color: var(--ink-3); font-size: 13px; font-weight: 600; border-top: 1px solid var(--border); }

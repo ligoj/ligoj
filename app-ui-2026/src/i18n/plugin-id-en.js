@@ -198,6 +198,21 @@ export default {
   'system.node.statTotal': 'Nodes',
   'system.node.deleteConfirmBefore': 'Delete the node ',
   'system.node.deleteConfirmAfter': ' and its parameters?',
+  // 2026 redesign — System Configuration view extras (base system.config.* keys
+  // ship with the plugin-ui bundle; these add the Vibrant chrome labels).
+  'system.config.countLabel': 'configuration keys',
+  'system.config.filtered': 'shown',
+  'system.config.searchPlaceholder': 'Search a key, value or source…',
+  'system.config.filterAll': 'All keys',
+  'system.config.statTotal': 'Keys',
+  'system.config.statSecured': 'Secured',
+  'system.config.statOverridden': 'Overridden',
+  'system.config.statDatabase': 'Database',
+  'system.config.encryptToggle': 'Encryption tool',
+  'system.config.encryptHint': 'Encrypt a value to store it secured at rest.',
+  'system.config.copied': 'Copied to clipboard',
+  'system.config.deleteConfirmBefore': 'Remove the key ',
+  'system.config.deleteConfirmAfter': '?',
   'common.preview': 'preview',
   // 2026 redesign — VibrantDataTable chrome (not provided by the host).
   'common.rows': 'Rows',
