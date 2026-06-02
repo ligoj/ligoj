@@ -141,7 +141,7 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
   --primary: rgb(var(--v-theme-primary));
   --on-primary: rgb(var(--v-theme-on-primary));
   --ok: #1d9d63;
-  --font: "Bricolage Grotesque", system-ui, sans-serif;
+  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
   --mono: "JetBrains Mono", ui-monospace, monospace;
   color: var(--ink);
 }

@@ -54,7 +54,7 @@ function toast() { msg.value = 'Page à venir dans la refonte'; clearTimeout(tT)
   --line: rgba(var(--v-theme-on-surface), .12);
   --primary: rgb(var(--v-theme-primary));
   --on-primary: rgb(var(--v-theme-on-primary));
-  --font: "Bricolage Grotesque", system-ui, sans-serif;
+  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
   --mono: "JetBrains Mono", ui-monospace, monospace;
   color: var(--ink);
 }

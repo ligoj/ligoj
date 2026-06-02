@@ -32,10 +32,11 @@
 /* ============================================================ SHARP =====
  * Brutalist: zero radius, monospaced, hard 2px borders, no soft shadows. */
 html[data-style="sharp"] {
+  /* Override BOTH font tokens: --v26-font (display/headings) AND --v26-sys
+   * (body text, set on <body> in App.vue) so the whole shell switches. */
   --v26-font: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --v26-sys: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 }
-html[data-style="sharp"] .v-application,
-html[data-style="sharp"] body { font-family: var(--v26-font) !important; }
 
 html[data-style="sharp"] .panel, html[data-style="sharp"] .card, html[data-style="sharp"] .stat,
 html[data-style="sharp"] .panel-card, html[data-style="sharp"] .usage, html[data-style="sharp"] .crypto,
@@ -75,8 +76,8 @@ html[data-style="sharp"] .btn, html[data-style="sharp"] .mbtn.primary {
  * Editorial: serif type, hairline rules, no shadows, near-zero radius. */
 html[data-style="paper"] {
   --v26-font: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
+  --v26-sys: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
 }
-html[data-style="paper"] .v-application { font-family: var(--v26-font) !important; }
 html[data-style="paper"] .panel, html[data-style="paper"] .card, html[data-style="paper"] .stat,
 html[data-style="paper"] .panel-card, html[data-style="paper"] .usage, html[data-style="paper"] .crypto,
 html[data-style="paper"] .vmodal, html[data-style="paper"] .op, html[data-style="paper"] .tile,
