@@ -196,7 +196,7 @@ const headers = [
 
 /* Tool cards (ported from ProjectDetailView). */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
-.card { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.05); cursor: pointer; opacity: 0; transform: translateY(12px); animation: rise .5s cubic-bezier(.2,.7,.3,1) forwards; transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s; }
+.card { position: relative; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.05); cursor: pointer; opacity: 0; transform: translateY(12px); animation: rise .5s cubic-bezier(.2,.7,.3,1) forwards; transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s; }
 @keyframes rise { to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .card { animation: none; opacity: 1; transform: none; } }
 .card:hover { transform: translateY(-3px); box-shadow: 0 26px 50px -24px color-mix(in srgb, var(--c) 55%, transparent); }
@@ -211,7 +211,7 @@ const headers = [
 .card-head .kind { font-family: var(--mono); font-size: 11px; font-weight: 700; color: color-mix(in srgb, var(--c) 55%, var(--ink-3)); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
 .count { font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: color-mix(in srgb, var(--c) 65%, var(--ink)); background: var(--card); border: 1px solid color-mix(in srgb, var(--c) 22%, var(--border)); border-radius: 9px; padding: 5px 9px; white-space: nowrap; }
 .count small { opacity: .5; }
-.rows { padding: 8px 12px; }
+.rows { flex: 1; padding: 8px 12px; }
 .row { display: flex; align-items: center; gap: 10px; padding: 10px 8px; border-radius: 11px; transition: background .12s; }
 .row:hover { background: color-mix(in srgb, var(--c) 8%, var(--card)); }
 .row + .row { box-shadow: inset 0 1px 0 var(--border); }
