@@ -41,8 +41,11 @@
         </div>
         <div class="rows">
           <div class="toolset">
-            <span v-for="tool in (p.tools || []).slice(0, 6)" :key="tool" class="toolchip" :style="{ '--tc': toolColor(tool) }" :title="tool">{{ initials(tool) }}</span>
-            <span v-if="(p.tools || []).length > 6" class="toolmore">+{{ p.tools.length - 6 }}</span>
+            <template v-for="tool in (p.tools || []).slice(0, 8)" :key="tool">
+              <img v-if="toolLogo(tool) && !failedLogos.has(tool)" class="toollogo" :src="toolLogo(tool)" :alt="tool" :title="tool" loading="lazy" @error="failedLogos.add(tool)" />
+              <span v-else class="toolchip" :style="{ '--tc': toolColor(tool) }" :title="tool">{{ initials(tool) }}</span>
+            </template>
+            <span v-if="(p.tools || []).length > 8" class="toolmore">+{{ p.tools.length - 8 }}</span>
             <span v-if="!(p.tools || []).length" class="toolnone">{{ t('project.noTool') }}</span>
           </div>
         </div>
@@ -76,6 +79,24 @@ const TOOL_COLORS = {
 }
 function toolColor(name) { return TOOL_COLORS[name] || '#8a92a3' }
 function initials(name) { return (name || '?').replace(/[^a-zA-Z0-9 ]/g, '').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase() }
+
+/* Official brand logos (mockup map) via the Iconify CDN — full-colour
+   `logos:*`, monochrome `mdi:*` tinted with the tool colour. Falls back to a
+   coloured initials chip on error (see failedLogos). For REAL subscriptions
+   (with a node id) the host's NodeIcon would serve the plugin's embedded
+   logo; demo tools are keyed by name, so we use the brand catalogue here. */
+const LOGOS = {
+  Jira: 'logos:jira', Jenkins: 'logos:jenkins', SonarQube: 'logos:sonarqube',
+  Confluence: 'logos:confluence', 'AWS EC2': 'logos:aws-ec2', GitLab: 'logos:gitlab',
+  'Provisioning AWS': 'logos:aws', LDAP: 'mdi:folder-account-outline', 'Squash TM': 'mdi:clipboard-check-outline',
+}
+const failedLogos = ref(new Set())
+function toolLogo(name) {
+  const icon = LOGOS[name]
+  if (!icon) return null
+  const tint = icon.startsWith('logos:') ? '' : ('&color=' + encodeURIComponent((toolColor(name)).replace('#', '%23')))
+  return `https://api.iconify.design/${icon}.svg?height=26${tint}`
+}
 
 /* Sample projects from the validated mockup — shown when the backend has
    none, so the cockpit is never empty in the preview. */
@@ -191,7 +212,8 @@ onMounted(() => {
 
 .rows { padding: 14px 16px; }
 .toolset { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.toolchip { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 10px; color: #fff; background: var(--tc); box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--tc) 60%, transparent); }
+.toollogo { width: 28px; height: 28px; border-radius: 7px; object-fit: contain; background: #fff; padding: 3px; box-shadow: 0 0 0 1px var(--border), 0 2px 6px -3px rgba(0, 0, 0, .35); }
+.toolchip { width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 10px; color: #fff; background: var(--tc); box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--tc) 60%, transparent); }
 .toolmore { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--ink-3); }
 .toolnone { font-size: 12.5px; color: var(--ink-3); }
 
