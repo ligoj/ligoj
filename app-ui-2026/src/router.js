@@ -11,6 +11,7 @@ import ScopesView from '@2026/views/ScopesView.vue'
 import ProjectsView from '@2026/views/ProjectsView.vue'
 import ProjectDetailView from '@2026/views/ProjectDetailView.vue'
 import SystemPluginsView from '@2026/views/SystemPluginsView.vue'
+import SystemNodesView from '@2026/views/SystemNodesView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: DashboardView },
@@ -28,6 +29,7 @@ const routes = [
   { path: '/project', name: 'project', component: ProjectsView },
   { path: '/project/:id', name: 'project-detail', component: ProjectDetailView },
   { path: '/system/plugin', name: 'system-plugin', component: SystemPluginsView },
+  { path: '/system/node', name: 'system-node', component: SystemNodesView },
 ]
 
 const router = createRouter({

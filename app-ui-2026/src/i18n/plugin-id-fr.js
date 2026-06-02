@@ -173,6 +173,13 @@ export default {
   'system.plugin.statServices': 'Services',
   'system.plugin.statTools': 'Outils',
   'system.plugin.statFeatures': 'Fonctions',
+  'system.node.countLabel': 'nœuds déclarés',
+  'system.node.filtered': 'affichés',
+  'system.node.filterAll': 'Tous les types',
+  'system.node.instanceStep': 'Identité',
+  'system.node.statTotal': 'Nœuds',
+  'system.node.deleteConfirmBefore': 'Supprimer le nœud ',
+  'system.node.deleteConfirmAfter': ' et ses paramètres ?',
   'common.preview': 'aperçu',
   // 2026 redesign — VibrantDataTable chrome (not provided by the host).
   'common.rows': 'Lignes',

@@ -100,6 +100,7 @@ const NAV = [
   { label: 'Projets', icon: 'mdi-folder', route: '/project', match: '/project' },
   { label: 'Administration', icon: 'mdi-cog', match: '/system', children: [
     { label: 'Plugins', route: '/system/plugin', match: '/system/plugin' },
+    { label: 'Nœuds', route: '/system/node', match: '/system/node' },
   ] },
 ]
 
@@ -114,6 +115,7 @@ const title = computed(() => {
   if (route.path.startsWith('/id')) return 'Utilisateurs'
   if (route.path.startsWith('/project')) return 'Projets'
   if (route.path.startsWith('/system/plugin')) return 'Plugins'
+  if (route.path.startsWith('/system/node')) return 'Nœuds'
   if (route.path.startsWith('/system')) return 'Administration'
   return 'Accueil'
 })

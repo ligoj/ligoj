@@ -181,6 +181,13 @@ export default {
   'system.plugin.statServices': 'Services',
   'system.plugin.statTools': 'Tools',
   'system.plugin.statFeatures': 'Features',
+  'system.node.countLabel': 'declared nodes',
+  'system.node.filtered': 'shown',
+  'system.node.filterAll': 'All types',
+  'system.node.instanceStep': 'Identity',
+  'system.node.statTotal': 'Nodes',
+  'system.node.deleteConfirmBefore': 'Delete the node ',
+  'system.node.deleteConfirmAfter': ' and its parameters?',
   'common.preview': 'preview',
   // 2026 redesign — VibrantDataTable chrome (not provided by the host).
   'common.rows': 'Rows',
