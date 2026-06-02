@@ -67,6 +67,7 @@
 
     <div class="toast" :class="{ show: toastMsg }">{{ toastMsg }}</div>
     <ErrorSnackbar />
+    <LoginPromptDialog />
   </div>
 </template>
 
@@ -77,6 +78,7 @@ import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import ErrorSnackbar from '@2026/components/ErrorSnackbar.vue'
+import LoginPromptDialog from '@2026/components/LoginPromptDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
