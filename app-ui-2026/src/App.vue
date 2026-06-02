@@ -50,7 +50,14 @@
     <!-- App bar -->
     <header class="bar">
       <button class="icon-btn" @click="collapsed = !collapsed" title="Menu"><v-icon>mdi-menu</v-icon></button>
-      <span class="crumb">{{ title }}</span>
+      <nav class="bcrumbs" aria-label="breadcrumb">
+        <template v-for="(c, i) in displayCrumbs" :key="i">
+          <span v-if="i" class="bc-sep">›</span>
+          <a v-if="c.to && i < displayCrumbs.length - 1" class="bc link" @click="go(c.to)">{{ c.title }}</a>
+          <span v-else class="bc" :class="{ cur: i === displayCrumbs.length - 1 }">{{ c.title }}</span>
+        </template>
+      </nav>
+      <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
       <span class="sp" />
       <button class="user" @click="go('/profile')"><v-icon size="small">mdi-account</v-icon>{{ auth.userName || 'invité' }}</button>
       <button class="icon-btn" title="Se déconnecter" @click="logout"><v-icon>mdi-logout</v-icon></button>
@@ -66,11 +73,19 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
+import { useAppStore } from '@/stores/app.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const app = useAppStore()
+
+// Each page re-opts into the bar breadcrumbs/refresh via setBreadcrumbs() in
+// its onMounted; clear on every navigation so a page that doesn't set them
+// (Dashboard, Profil) falls back to the plain title instead of showing the
+// previous page's trail.
+router.beforeEach(() => { app.setBreadcrumbs([]) })
 
 // Backend-only plugins (no Vue bundle) — skip to avoid guaranteed 404s on
 // every session refresh. Mirrors app-ui's App.vue NO_UI_PLUGINS deny list.
@@ -166,6 +181,17 @@ watch(() => route.path, () => {
 }, { immediate: true })
 
 function go(path) { if (route.path !== path) router.push(path) }
+
+// Bar breadcrumb trail: the page-provided crumbs when present, else a single
+// crumb from the local title map (Dashboard/Profil don't set breadcrumbs).
+const displayCrumbs = computed(() => (app.breadcrumbs.length ? app.breadcrumbs : [{ title: title.value }]))
+const refreshing = ref(false)
+async function onRefresh() {
+  if (!app.refresh || refreshing.value) return
+  refreshing.value = true
+  try { await app.refresh() } catch { /* page surfaces its own error */ }
+  setTimeout(() => { refreshing.value = false }, 600)
+}
 
 // Preview logout: clear the backend session then land on the Vibrant login
 // (with a ?logout flag so it shows the "logged out" toast). We don't reuse
@@ -292,6 +318,17 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .icon-btn { width: 40px; height: 40px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; display: grid; place-items: center; color: var(--ink); }
 .icon-btn:hover { background: var(--hover); }
 .crumb { font-family: var(--v26-font); font-weight: 700; font-size: 16px; color: var(--ink); letter-spacing: -.01em; }
+.bcrumbs { display: flex; align-items: center; gap: 7px; min-width: 0; overflow: hidden; padding-left: 4px; }
+.bc { font-family: var(--v26-font); font-size: 15px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.bc.cur { color: var(--ink); font-weight: 700; letter-spacing: -.01em; }
+.bc.link { cursor: pointer; border-radius: 7px; padding: 3px 7px; transition: color .14s, background .14s; }
+.bc.link:hover { color: var(--ink); background: var(--hover); }
+.bc-sep { color: var(--muted); font-size: 13px; opacity: .55; }
+.refresh-btn .v-icon { transition: transform .2s; }
+.refresh-btn:hover .v-icon { color: rgb(var(--v-theme-secondary)); }
+.refresh-btn.spin .v-icon { animation: bc-spin .6s ease; }
+@keyframes bc-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .refresh-btn.spin .v-icon { animation: none; } }
 .sp { flex: 1; }
 .user { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; color: var(--ink); font-family: var(--v26-font); font-weight: 600; font-size: 14px; }
 .user:hover { background: var(--hover); }
