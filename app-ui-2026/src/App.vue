@@ -43,7 +43,7 @@
         <a class="nav-item" :class="{ active: route.path === '/profile' }" @click="go('/profile')">
           <v-icon>mdi-account-circle</v-icon><span>Profil</span>
         </a>
-        <div class="ver">UI 2026 · aperçu</div>
+        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')">UI 2026 · aperçu</button>
       </div>
     </aside>
 
@@ -155,6 +155,7 @@ const title = computed(() => {
   if (route.path.startsWith('/system')) return 'Administration'
   if (route.path.startsWith('/api/token')) return 'Jetons d\'API'
   if (route.path.startsWith('/api')) return 'API'
+  if (route.path.startsWith('/about')) return 'À propos'
   return 'Accueil'
 })
 function isNavActive(it) {
@@ -310,7 +311,9 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .sub-item .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .6; flex: none; }
 .sub-item .soon { margin-left: auto; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 20px; background: rgba(255,255,255,.14); }
 .sb-foot { padding: 10px; }
-.ver { font-family: var(--v26-mono); font-size: 11px; opacity: .55; padding: 8px 12px; }
+.ver { display: block; width: 100%; text-align: left; font-family: var(--v26-mono); font-size: 11px; opacity: .55; padding: 8px 12px; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 8px; transition: opacity .15s, background .15s; }
+.ver:hover { opacity: .9; background: rgba(255,255,255,.08); }
+.ver.active { opacity: 1; background: rgba(255,255,255,.12); }
 
 .bar {
   position: fixed; top: 0; left: var(--w); right: 0; height: var(--h); z-index: 20;

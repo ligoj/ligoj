@@ -20,6 +20,8 @@ import SystemBenchView from '@2026/views/SystemBenchView.vue'
 import SystemInfoView from '@2026/views/SystemInfoView.vue'
 import ApiHomeView from '@2026/views/ApiHomeView.vue'
 import ApiTokenView from '@2026/views/ApiTokenView.vue'
+import AboutView from '@2026/views/AboutView.vue'
+import NotFoundView from '@2026/views/NotFoundView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: DashboardView },
@@ -46,6 +48,8 @@ const routes = [
   { path: '/system/information', name: 'system-information', component: SystemInfoView },
   { path: '/api', name: 'api-home', component: ApiHomeView },
   { path: '/api/token', name: 'api-token', component: ApiTokenView },
+  { path: '/about', name: 'about', component: AboutView },
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
 ]
 
 const router = createRouter({
