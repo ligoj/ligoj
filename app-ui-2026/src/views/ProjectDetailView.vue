@@ -56,6 +56,10 @@
             <span class="st" :class="r.status" />
             <span class="rn">{{ r.name }}</span>
             <span class="pills">
+              <!-- Live plugin-rendered details (e.g. prov cost/quota chips)
+                   when the owning plugin bundle is loaded; falls back to the
+                   synthetic status/id pills otherwise. -->
+              <PluginFeatures v-if="r.sub" :subscription="r.sub" action="renderDetailsFeatures" />
               <span v-for="(p, k) in r.pills" :key="k" class="pill" :class="{ cost: r.cost }">{{ p }}</span>
             </span>
           </div>
@@ -84,7 +88,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useApi, useAppStore, useI18nStore, NodeIcon, VIcon } from '@ligoj/host'
+import { useApi, useAppStore, useI18nStore, NodeIcon, VIcon, PluginFeatures } from '@ligoj/host'
 import ProjectEditDialog from '@2026/views/ProjectEditDialog.vue'
 import SubscribeWizardDialog from '@2026/views/SubscribeWizardDialog.vue'
 
@@ -154,7 +158,7 @@ const groups = computed(() => {
     const frag = (node.id || '').split(':').pop()
     if (frag && frag !== node.id) pills.push(frag)
     pills.push(t('subscription.status.' + status))
-    byTool.get(key).rows.push({ name: node.name || node.id || ('#' + s.id), status, pills })
+    byTool.get(key).rows.push({ name: node.name || node.id || ('#' + s.id), status, pills, sub: s })
   }
   const out = [...byTool.values()]
   for (const g of out) {

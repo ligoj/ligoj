@@ -100,7 +100,13 @@
           <div class="sh"><span class="n">5</span><v-icon size="18">mdi-tune-variant</v-icon>{{ t('wizard.step.parameters') }}<v-progress-circular v-if="loadingParams" size="13" width="2" indeterminate class="ml-2" /></div>
           <p v-if="!loadingParams && selected.mode && selected.node && !parameters.length" class="muted">{{ t('wizard.params.emptySubscribe') }}</p>
           <div v-for="p in parameters" :key="p.id" class="pfield">
-            <v-text-field v-if="isTextParam(p)" v-model="paramValues[p.id]" :type="isPassword(p) ? 'password' : 'text'" :label="paramLabel(p)" :rules="ruleFor(p)" variant="outlined" density="comfortable" hide-details="auto" />
+            <!-- Plugin-supplied field (e.g. id-ldap's live group/OU
+                 autocomplete) takes precedence over the default type-based
+                 rendering — same hook as plugin-ui's wizard. Only resolves
+                 when the owning plugin bundle is loaded. -->
+            <component v-if="resolveParameterField(p)" :is="resolveParameterField(p)" v-model="paramValues[p.id]" :parameter="p" :form-values="paramValues" :mode="selected.mode"
+              :is-node="false" :node-id="selected.tool?.id" :instance-node-id="selected.node?.id" />
+            <v-text-field v-else-if="isTextParam(p)" v-model="paramValues[p.id]" :type="isPassword(p) ? 'password' : 'text'" :label="paramLabel(p)" :rules="ruleFor(p)" variant="outlined" density="comfortable" hide-details="auto" />
             <v-text-field v-else-if="typeKind(p) === 'integer'" v-model.number="paramValues[p.id]" type="number" :min="p.min" :max="p.max" :label="paramLabel(p)" :rules="ruleFor(p)" variant="outlined" density="comfortable" hide-details="auto" />
             <v-checkbox v-else-if="typeKind(p) === 'bool'" v-model="paramValues[p.id]" :label="paramLabel(p)" density="comfortable" hide-details />
             <v-select v-else-if="typeKind(p) === 'select'" v-model="paramValues[p.id]" :items="p.values || []" :label="paramLabel(p)" :rules="ruleFor(p)" variant="outlined" density="comfortable" hide-details="auto" />
@@ -123,7 +129,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { useApi, useErrorStore, useI18nStore, NodeIcon } from '@ligoj/host'
+import { useApi, useErrorStore, useI18nStore, NodeIcon, pluginRegistry, pluginIdFromKey, loadPlugin } from '@ligoj/host'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -181,6 +187,39 @@ function tOrNull(key) { const v = i18n.t(key); return v === key ? null : v }
 function paramLabel(p) { return `${tOrNull(p.id) ?? p.id}${(p.mandatory || p.required) ? ' *' : ''}` }
 function ruleFor(p) { return (p.mandatory || p.required) ? [rules.required] : [] }
 
+/* Lazy-load the tool's sub-plugin bundle (e.g. service:id:ldap → id-ldap) so
+   its i18n labels and custom parameter fields are available. Best effort. */
+function ensureToolPluginLoaded(nodeId) {
+  if (typeof nodeId !== 'string') return
+  const pluginId = pluginIdFromKey(nodeId.split(':').filter(Boolean).slice(0, 3).join(':'))
+  if (pluginId) loadPlugin(pluginId).catch(() => { /* no bundle — keep rendering */ })
+}
+
+/* Ask the owning plugin (sub-plugin first, then parent service plugin) for a
+   custom field component for parameter `p`. Returns null when none — the
+   default type-based field then renders. Mirrors plugin-ui's wizard. */
+function resolveParameterField(p) {
+  const nodeId = selected.tool?.id
+  if (!nodeId) return null
+  const ctx = { parameter: p, mode: selected.mode || null, isNode: false, formValues: paramValues, nodeId, instanceNodeId: selected.node?.id || null }
+  const candidates = []
+  const sub = pluginIdFromKey(nodeId)
+  if (sub) candidates.push(sub)
+  const parts = String(nodeId).split(':').filter(Boolean)
+  if (parts.length >= 2 && parts[1] && parts[1] !== sub) candidates.push(parts[1])
+  for (const id of candidates) {
+    const plugin = pluginRegistry.get(id)
+    if (typeof plugin?.feature !== 'function') continue
+    try {
+      const comp = plugin.feature('parameterField', ctx)
+      if (comp) return comp
+    } catch (err) {
+      if (!/no feature ["']parameterField["']/.test(err?.message || '')) console.warn(`[wizard] parameterField from ${id} threw`, err)
+    }
+  }
+  return null
+}
+
 /* ---- loaders ---- */
 async function fetchNodes(url) {
   const data = await api.get(url)
@@ -193,6 +232,8 @@ async function loadNodes(id) { loadingNodes.value = true; try { nodes.value = aw
 
 async function loadParameters(nodeId, mode) {
   loadingParams.value = true
+  // Pull the tool's plugin bundle so labels + custom fields resolve.
+  ensureToolPluginLoaded(selected.tool?.id || nodeId)
   try {
     const data = await api.get(`rest/node/${encodeURIComponent(nodeId)}/parameter/${mode.toUpperCase()}`)
     const raw = Array.isArray(data) ? data : (data?.data || [])
