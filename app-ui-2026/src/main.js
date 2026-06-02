@@ -19,6 +19,9 @@ import { registerBuiltinPlugins } from '@/plugins/index.js'
 // bundle loads and for keys the bundle doesn't carry.
 import pluginIdEn from '@2026/i18n/plugin-id-en.js'
 import pluginIdFr from '@2026/i18n/plugin-id-fr.js'
+// Theme "style" layer: reskins the 2026 components (font + radius + shadow +
+// glow) per <html data-style="…">, the dimension Fabrice's presets drive.
+import '@2026/styles/v26-styles.css'
 
 // Apply persisted preset + compact before mount (same as app-ui) so the
 // first paint already reflects the user's theme.

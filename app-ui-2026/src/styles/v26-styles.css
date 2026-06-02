@@ -1,0 +1,139 @@
+/*
+ * v26-styles.css — theme "style" layer for the 2026 UI.
+ *
+ * Fabrice's preset picker pairs a colour palette with a *style* (shape +
+ * typography language) exposed as <html data-style="…">. The standalone 2026
+ * shell already sets that attribute (bootPreset → applyStyle) but our custom
+ * components hardcode font + radius, so only colours changed. This file wires
+ * the style dimension back in, adapted to OUR Vibrant components: it swaps the
+ * global font token and overrides the radius / shadow / border / glow of the
+ * shared building blocks.
+ *
+ * Only NON-default styles are touched — the default / vibrant look (everything
+ * we built and validated) is left exactly as-is. Overrides use !important so
+ * they win over each view's scoped CSS regardless of injection order, and stay
+ * scoped under html[data-style="…"] so they never leak into the base theme.
+ *
+ * `--v26-font` / `--v26-mono` cascade from <html>, so swapping them here
+ * reskins every component that reads var(--font)/var(--v26-font).
+ *
+ * Shared surface classes reused across the 2026 views:
+ *   cards/panels : .panel .card .stat .panel-card .usage .crypto .vmodal .op
+ *                  .group-head .tile .secret .nf-card .crypto-body
+ *   controls     : .btn .btn-ghost .btn-danger .mbtn .iconbtn .search
+ *                  .numfield .cfield .vsel-btn .vsel-menu .mchip .link-btn .cbx .chk-box
+ *   glyph tiles  : .sicon .ch-ic .us-ic .ck-ic .mi .kglyph .cglyph .nglyph
+ *                  .rglyph .uglyph .help-ic .st-badge .nf-glyph .empty-ic
+ *   pills/badges : .crumb .pill .ratechip .tok .rchip .srcpill .code-badge
+ *                  .p-in .g-count .soon .seg .ver .hcode
+ *   bars         : .sbar .mbar .skbar .mem-bar
+ */
+
+/* ============================================================ SHARP =====
+ * Brutalist: zero radius, monospaced, hard 2px borders, no soft shadows. */
+html[data-style="sharp"] {
+  --v26-font: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+html[data-style="sharp"] .v-application,
+html[data-style="sharp"] body { font-family: var(--v26-font) !important; }
+
+html[data-style="sharp"] .panel, html[data-style="sharp"] .card, html[data-style="sharp"] .stat,
+html[data-style="sharp"] .panel-card, html[data-style="sharp"] .usage, html[data-style="sharp"] .crypto,
+html[data-style="sharp"] .vmodal, html[data-style="sharp"] .op, html[data-style="sharp"] .tile,
+html[data-style="sharp"] .secret, html[data-style="sharp"] .nf-card, html[data-style="sharp"] .crypto-body,
+html[data-style="sharp"] .btn, html[data-style="sharp"] .btn-ghost, html[data-style="sharp"] .btn-danger,
+html[data-style="sharp"] .mbtn, html[data-style="sharp"] .iconbtn, html[data-style="sharp"] .search,
+html[data-style="sharp"] .numfield, html[data-style="sharp"] .cfield, html[data-style="sharp"] .vsel-btn,
+html[data-style="sharp"] .vsel-menu, html[data-style="sharp"] .mchip, html[data-style="sharp"] .link-btn,
+html[data-style="sharp"] .cbx, html[data-style="sharp"] .chk-box,
+html[data-style="sharp"] .sicon, html[data-style="sharp"] .ch-ic, html[data-style="sharp"] .us-ic,
+html[data-style="sharp"] .ck-ic, html[data-style="sharp"] .mi, html[data-style="sharp"] .kglyph,
+html[data-style="sharp"] .cglyph, html[data-style="sharp"] .nglyph, html[data-style="sharp"] .rglyph,
+html[data-style="sharp"] .uglyph, html[data-style="sharp"] .help-ic, html[data-style="sharp"] .st-badge,
+html[data-style="sharp"] .nf-glyph, html[data-style="sharp"] .empty-ic,
+html[data-style="sharp"] .crumb, html[data-style="sharp"] .pill, html[data-style="sharp"] .ratechip,
+html[data-style="sharp"] .tok, html[data-style="sharp"] .rchip, html[data-style="sharp"] .srcpill,
+html[data-style="sharp"] .code-badge, html[data-style="sharp"] .p-in, html[data-style="sharp"] .g-count,
+html[data-style="sharp"] .soon, html[data-style="sharp"] .seg, html[data-style="sharp"] .ver,
+html[data-style="sharp"] .hcode, html[data-style="sharp"] .sbar, html[data-style="sharp"] .mbar,
+html[data-style="sharp"] .skbar, html[data-style="sharp"] .mem-bar,
+html[data-style="sharp"] .v-field, html[data-style="sharp"] .nav-item, html[data-style="sharp"] .sub-item {
+  border-radius: 0 !important;
+}
+html[data-style="sharp"] .panel, html[data-style="sharp"] .card, html[data-style="sharp"] .stat,
+html[data-style="sharp"] .panel-card, html[data-style="sharp"] .vmodal, html[data-style="sharp"] .op,
+html[data-style="sharp"] .usage, html[data-style="sharp"] .crypto, html[data-style="sharp"] .nf-card {
+  box-shadow: none !important;
+  border-width: 2px !important;
+  border-color: rgba(var(--v-theme-on-surface), .35) !important;
+}
+html[data-style="sharp"] .btn, html[data-style="sharp"] .mbtn.primary {
+  box-shadow: none !important;
+}
+
+/* ============================================================ PAPER =====
+ * Editorial: serif type, hairline rules, no shadows, near-zero radius. */
+html[data-style="paper"] {
+  --v26-font: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
+}
+html[data-style="paper"] .v-application { font-family: var(--v26-font) !important; }
+html[data-style="paper"] .panel, html[data-style="paper"] .card, html[data-style="paper"] .stat,
+html[data-style="paper"] .panel-card, html[data-style="paper"] .usage, html[data-style="paper"] .crypto,
+html[data-style="paper"] .vmodal, html[data-style="paper"] .op, html[data-style="paper"] .tile,
+html[data-style="paper"] .secret, html[data-style="paper"] .nf-card, html[data-style="paper"] .btn,
+html[data-style="paper"] .btn-ghost, html[data-style="paper"] .mbtn, html[data-style="paper"] .search,
+html[data-style="paper"] .numfield, html[data-style="paper"] .cfield, html[data-style="paper"] .vsel-btn {
+  border-radius: 3px !important;
+  box-shadow: none !important;
+}
+html[data-style="paper"] .panel, html[data-style="paper"] .card, html[data-style="paper"] .stat,
+html[data-style="paper"] .panel-card, html[data-style="paper"] .vmodal, html[data-style="paper"] .op {
+  border-color: rgba(var(--v-theme-on-surface), .18) !important;
+}
+
+/* ============================================================ NEON ======
+ * Cyberpunk: keep a tight radius, add a coloured glow to accent surfaces. */
+html[data-style="neon"] .btn, html[data-style="neon"] .mbtn.primary {
+  box-shadow: 0 0 0 1px rgba(255, 90, 82, .5), 0 0 18px -2px rgba(255, 90, 82, .7) !important;
+}
+html[data-style="neon"] .sicon, html[data-style="neon"] .ch-ic, html[data-style="neon"] .mi,
+html[data-style="neon"] .help-ic, html[data-style="neon"] .ck-ic {
+  box-shadow: 0 0 16px -2px var(--c, rgba(var(--v-theme-secondary), .8)) !important;
+}
+html[data-style="neon"] .panel, html[data-style="neon"] .card, html[data-style="neon"] .stat,
+html[data-style="neon"] .vmodal, html[data-style="neon"] .op {
+  border-color: rgba(var(--v-theme-secondary), .4) !important;
+  box-shadow: 0 0 24px -10px rgba(var(--v-theme-secondary), .5) !important;
+}
+html[data-style="neon"] .ph-txt h1, html[data-style="neon"] .snum {
+  text-shadow: 0 0 18px rgba(var(--v-theme-secondary), .55);
+}
+
+/* ============================================================ BENTO =====
+ * Apple-style oversized rounded squares. */
+html[data-style="bento"] .panel, html[data-style="bento"] .card, html[data-style="bento"] .stat,
+html[data-style="bento"] .panel-card, html[data-style="bento"] .usage, html[data-style="bento"] .crypto,
+html[data-style="bento"] .vmodal, html[data-style="bento"] .op, html[data-style="bento"] .tile,
+html[data-style="bento"] .secret, html[data-style="bento"] .nf-card {
+  border-radius: 28px !important;
+}
+html[data-style="bento"] .btn, html[data-style="bento"] .btn-ghost, html[data-style="bento"] .mbtn,
+html[data-style="bento"] .search, html[data-style="bento"] .numfield, html[data-style="bento"] .cfield,
+html[data-style="bento"] .vsel-btn {
+  border-radius: 16px !important;
+}
+
+/* ============================================================ GLASS =====
+ * Frosted translucent panels (light touch — colours come from the palette). */
+html[data-style="glass"] .panel, html[data-style="glass"] .card, html[data-style="glass"] .stat,
+html[data-style="glass"] .vmodal, html[data-style="glass"] .panel-card, html[data-style="glass"] .usage {
+  backdrop-filter: blur(10px) saturate(1.4);
+  background: rgba(var(--v-theme-surface), .55) !important;
+  border-color: rgba(255, 255, 255, .18) !important;
+}
+
+/* ============================================================ ARGON =====
+ * Pill-shaped buttons (Argon 2 vibe); cards stay our Vibrant base. */
+html[data-style="argon"] .btn, html[data-style="argon"] .btn-ghost, html[data-style="argon"] .mbtn {
+  border-radius: 999px !important;
+}
