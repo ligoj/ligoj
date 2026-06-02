@@ -68,16 +68,11 @@
         <div class="pref-theme-label"><v-icon class="pref-ic">mdi-palette</v-icon>{{ t('profile.theme') }}</div>
         <div class="tiles">
           <button v-for="opt in PRESET_OPTIONS" :key="opt.id" type="button" class="tile" :class="{ on: preset === opt.id }" @click="choosePreset(opt.id)">
-            <!-- Mini UI mock built from the preset swatch: a sidebar (primary),
-                 a content area (surface) with an accent chip + dot and two
-                 muted text lines. Reads as a real theme preview. -->
-            <div class="tile-prev" :style="{ background: opt.swatch[2] }">
-              <span class="pv-side" :style="{ background: opt.swatch[0] }" />
-              <span class="pv-main">
-                <span class="pv-top"><span class="pv-dot" :style="{ background: opt.swatch[1] }" /><span class="pv-chip" :style="{ background: opt.swatch[1] }" /></span>
-                <span class="pv-line" /><span class="pv-line sm" />
-              </span>
-              <span v-if="preset === opt.id" class="pv-check"><v-icon size="13">mdi-check</v-icon></span>
+            <!-- Rich colour field built from the preset palette (canvas →
+                 primary → accent), with the exact swatch as three dots. -->
+            <div class="tile-band" :style="{ background: bandBg(opt) }">
+              <span class="band-dots"><i v-for="(c, i) in opt.swatch" :key="i" :style="{ background: c }" /></span>
+              <span v-if="preset === opt.id" class="band-check"><v-icon size="14">mdi-check</v-icon></span>
             </div>
             <div class="tile-b">
               <div class="tile-h">
@@ -110,6 +105,17 @@ const initials = computed(() => (auth.userName || '?').slice(0, 2).toUpperCase()
 
 const preset = ref(detectPreset().id)
 function choosePreset(id) { preset.value = id; applyPreset(id, theme); persistPreset(id) }
+
+// Build a rich colour field for a preset tile from its swatch
+// [primary, accent, canvas]. Solid swatches blend canvas → primary → accent
+// for a smooth diagonal field; presets whose swatch already carries a CSS
+// gradient (Argon / Aurora) use that gradient directly.
+function bandBg(opt) {
+  const s = (opt.swatch || []).map((c) => c || '#888')
+  const grad = s.find((c) => String(c).includes('gradient'))
+  if (grad) return grad
+  return `linear-gradient(135deg, ${s[2]} 0%, ${s[0]} 58%, ${s[1] || s[0]} 100%)`
+}
 
 const compact = ref(detectCompact())
 function onCompactChange(value) { compact.value = !!value; applyCompact(compact.value); persistCompact(compact.value) }
@@ -213,22 +219,15 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .tile.on { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary), 0 16px 32px -18px rgba(0,0,0,.5); }
 .tile:focus-visible { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), .4); }
 
-/* Mini UI mock preview. */
-.tile-prev { position: relative; display: flex; gap: 6px; height: 78px; padding: 9px; }
-.pv-side { width: 26%; border-radius: 6px; flex: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
-.pv-main { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.pv-top { display: flex; align-items: center; gap: 6px; }
-.pv-dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
-.pv-chip { height: 12px; width: 46px; border-radius: 4px; }
-.pv-line { height: 9px; border-radius: 3px; background: rgba(128,128,128,.38); }
-.pv-line.sm { width: 62%; }
-.pv-main .pv-line:first-of-type { width: 88%; }
-/* a faux content card behind the lines */
-.tile-prev::after { content: ""; position: absolute; right: 9px; bottom: 9px; left: calc(26% + 15px); top: 33px; border-radius: 6px; background: rgba(128,128,128,.1); box-shadow: inset 0 0 0 1px rgba(128,128,128,.18); z-index: 0; }
-.pv-main { position: relative; z-index: 1; }
-.pv-check { position: absolute; top: 7px; right: 7px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--primary); box-shadow: 0 2px 8px -2px rgba(0,0,0,.5), 0 0 0 2px var(--surface); z-index: 2; }
+/* Rich colour-field band (the theme palette as a smooth gradient). */
+.tile-band { position: relative; height: 86px; box-shadow: inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px rgba(0,0,0,.06); }
+/* a soft top-left sheen for depth */
+.tile-band::before { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 80% at 0% 0%, rgba(255,255,255,.28), transparent 55%); }
+.band-dots { position: absolute; left: 11px; bottom: 10px; display: flex; gap: 5px; }
+.band-dots i { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(255,255,255,.65), 0 1px 3px rgba(0,0,0,.3); }
+.band-check { position: absolute; top: 9px; right: 9px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: var(--primary); background: #fff; box-shadow: 0 3px 10px -2px rgba(0,0,0,.45); z-index: 2; }
 
-.tile-b { padding: 10px 12px 12px; border-top: 1px solid var(--line); }
+.tile-b { padding: 11px 13px 13px; border-top: 1px solid var(--line); }
 .tile-h { display: flex; align-items: center; gap: 8px; }
 .tile-name { font-family: var(--font); font-size: 13.5px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tile-mode { display: inline-flex; align-items: center; gap: 3px; flex: none; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #d9701a; background: rgba(217,112,26,.13); padding: 2px 7px; border-radius: 999px; }
