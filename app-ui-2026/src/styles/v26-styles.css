@@ -69,7 +69,7 @@ html[data-style="paper"] .hero { background: #1c1812 !important; box-shadow: non
 html[data-style="paper"] .panel, html[data-style="paper"] .card, html[data-style="paper"] .stat,
 html[data-style="paper"] .panel-card, html[data-style="paper"] .usage, html[data-style="paper"] .crypto,
 html[data-style="paper"] .vmodal, html[data-style="paper"] .op, html[data-style="paper"] .tile,
-html[data-style="paper"] .secret, html[data-style="paper"] .nf-card {
+html[data-style="paper"] .secret, html[data-style="paper"] .nf-card, html[data-style="paper"] .pcard {
   background: rgb(253,250,244) !important;
   border: 1px solid rgba(28,24,18,.2) !important;
   border-radius: 3px !important;
@@ -92,7 +92,7 @@ html[data-style="sharp"] {
 html[data-style="sharp"] .panel, html[data-style="sharp"] .card, html[data-style="sharp"] .stat,
 html[data-style="sharp"] .panel-card, html[data-style="sharp"] .usage, html[data-style="sharp"] .crypto,
 html[data-style="sharp"] .vmodal, html[data-style="sharp"] .op, html[data-style="sharp"] .tile,
-html[data-style="sharp"] .secret, html[data-style="sharp"] .nf-card {
+html[data-style="sharp"] .secret, html[data-style="sharp"] .nf-card, html[data-style="sharp"] .pcard {
   border-radius: 0 !important;
   border: 3px solid rgb(var(--v-theme-on-surface)) !important;
   box-shadow: 6px 6px 0 0 rgb(var(--v-theme-on-surface)) !important;
@@ -159,35 +159,48 @@ html[data-style="neon"] .sidebar {
   box-shadow: 0 0 30px -6px rgba(255,43,214,.4) !important;
 }
 html[data-style="neon"] .brand-word { color: #00fff0 !important; text-shadow: 0 0 12px rgba(0,255,240,.7); }
-/* Neon gradient CTAs with a coloured glow. */
+/* Single-hue cyan CTAs with a clean glow (no cheap two-colour gradient). */
 html[data-style="neon"] .btn, html[data-style="neon"] .mbtn.primary {
-  background: linear-gradient(135deg, #00fff0, #ff2bd6) !important;
+  background: #00fff0 !important;
   color: #05010f !important;
-  box-shadow: 0 0 22px -2px rgba(0,255,240,.8), 0 0 22px -2px rgba(255,43,214,.6) !important;
+  border: 1px solid rgba(0,255,240,.6) !important;
+  box-shadow: 0 0 20px -3px rgba(0,255,240,.85) !important;
 }
-/* Glowing neon icon tiles. */
+html[data-style="neon"] .btn:hover, html[data-style="neon"] .mbtn.primary:hover {
+  filter: none !important; box-shadow: 0 0 28px -2px rgba(0,255,240,1) !important;
+}
+/* Ghost buttons → outlined neon. */
+html[data-style="neon"] .btn-ghost, html[data-style="neon"] .mbtn.ghost {
+  border-color: rgba(0,255,240,.45) !important; color: #00fff0 !important;
+}
+/* Glowing icon tiles — cyan family only (magenta stays a secondary accent). */
 html[data-style="neon"] .sicon, html[data-style="neon"] .ch-ic, html[data-style="neon"] .mi,
 html[data-style="neon"] .us-ic, html[data-style="neon"] .ck-ic, html[data-style="neon"] .help-ic,
 html[data-style="neon"] .kglyph, html[data-style="neon"] .cglyph, html[data-style="neon"] .nglyph,
 html[data-style="neon"] .rglyph, html[data-style="neon"] .uglyph, html[data-style="neon"] .nf-glyph {
-  background: linear-gradient(135deg, #00fff0, #ff2bd6) !important;
+  background: linear-gradient(135deg, #00fff0, #058ba0) !important;
   color: #05010f !important;
-  box-shadow: 0 0 18px -2px rgba(0,255,240,.8) !important;
+  box-shadow: 0 0 18px -3px rgba(0,255,240,.8) !important;
 }
 /* Dark glass cards with a neon edge + outer glow. */
 html[data-style="neon"] .panel, html[data-style="neon"] .card, html[data-style="neon"] .stat,
 html[data-style="neon"] .panel-card, html[data-style="neon"] .usage, html[data-style="neon"] .crypto,
 html[data-style="neon"] .vmodal, html[data-style="neon"] .op, html[data-style="neon"] .tile,
-html[data-style="neon"] .secret, html[data-style="neon"] .nf-card {
+html[data-style="neon"] .secret, html[data-style="neon"] .nf-card, html[data-style="neon"] .pcard {
   background: rgba(14,9,30,.85) !important;
-  border: 1px solid rgba(0,255,240,.35) !important;
-  box-shadow: 0 0 26px -12px rgba(0,255,240,.7), inset 0 0 0 1px rgba(255,43,214,.1) !important;
+  border: 1px solid rgba(0,255,240,.32) !important;
+  box-shadow: 0 0 26px -12px rgba(0,255,240,.6) !important;
 }
+/* Hero / profile banner: dark canvas needs explicit LIGHT text (the component
+ * sets color:var(--on-primary) which we mapped to near-black for cyan CTAs). */
 html[data-style="neon"] .hero {
-  background: linear-gradient(135deg, #120a33, #2a0a3a) !important;
+  background: linear-gradient(135deg, #140a38, #2c0a40) !important;
   border: 1px solid rgba(0,255,240,.4) !important;
-  box-shadow: 0 0 40px -16px rgba(0,255,240,.7) !important;
+  box-shadow: 0 0 40px -16px rgba(0,255,240,.6) !important;
+  color: #e6efff !important;
 }
+html[data-style="neon"] .hero h1, html[data-style="neon"] .hero-id, html[data-style="neon"] .hero-txt,
+html[data-style="neon"] .hero-txt p, html[data-style="neon"] .hero p { color: #e6efff !important; }
 /* Neon-glowing headings + KPI numbers. */
 html[data-style="neon"] .ph-txt h1, html[data-style="neon"] .hero-txt h1,
 html[data-style="neon"] .snum, html[data-style="neon"] .tb-num {
