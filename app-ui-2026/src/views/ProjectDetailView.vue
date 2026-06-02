@@ -27,7 +27,7 @@
       </div>
       <div class="ph-actions">
         <button v-if="!demoMode" class="btn ghost" @click="editDialog = true"><v-icon size="18">mdi-pencil</v-icon>{{ t('project.detail.edit') }}</button>
-        <button class="btn" @click="toast(t('project.detail.addSubscription'))"><v-icon size="18">mdi-plus</v-icon>{{ t('project.detail.addSubscription') }}</button>
+        <button class="btn" @click="openSubscribe"><v-icon size="18">mdi-plus</v-icon>{{ t('project.detail.addSubscription') }}</button>
       </div>
     </header>
 
@@ -71,10 +71,11 @@
     <div v-else class="empty">
       <v-icon size="44" color="rgba(var(--v-theme-on-surface),.25)">mdi-cloud-off-outline</v-icon>
       <p>{{ t('project.detail.noSubscriptions') }}</p>
-      <button class="btn" @click="toast(t('project.detail.addSubscription'))"><v-icon size="18">mdi-plus</v-icon>{{ t('project.detail.addSubscription') }}</button>
+      <button class="btn" @click="openSubscribe"><v-icon size="18">mdi-plus</v-icon>{{ t('project.detail.addSubscription') }}</button>
     </div>
 
     <ProjectEditDialog v-model="editDialog" :project="project" @saved="load" />
+    <SubscribeWizardDialog v-model="subscribeDialog" :project-id="project?.id" :project-name="project?.name" @saved="load" />
 
     <div class="toast" :class="{ show: toastMsg }">{{ toastMsg }}</div>
   </div>
@@ -85,6 +86,7 @@ import { ref, computed, onMounted, watch, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi, useAppStore, useI18nStore, NodeIcon, VIcon } from '@ligoj/host'
 import ProjectEditDialog from '@2026/views/ProjectEditDialog.vue'
+import SubscribeWizardDialog from '@2026/views/SubscribeWizardDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -253,6 +255,12 @@ function setCrumbs(name) {
 }
 
 const editDialog = ref(false)
+const subscribeDialog = ref(false)
+/* The wizard needs a real project id; demo projects can't subscribe. */
+function openSubscribe() {
+  if (demoMode.value) { toast(t('project.detail.demoSubscribe')); return }
+  subscribeDialog.value = true
+}
 
 let toastT
 const toastMsg = ref('')
