@@ -171,6 +171,7 @@ export default {
   'wizard.error.newNodeRejected': 'Backend rejected the new instance — see the notification for details.',
   'wizard.success.subscriptionCreated': 'Subscription created',
   'wizard.rule.required': 'Required',
+  'system.plugin.countLabel': 'installed plug-ins',
   'common.preview': 'preview',
   // 2026 redesign — VibrantDataTable chrome (not provided by the host).
   'common.rows': 'Rows',

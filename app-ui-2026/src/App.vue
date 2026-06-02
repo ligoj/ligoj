@@ -98,7 +98,9 @@ const NAV = [
     { label: 'Portées', route: '/id/scope', match: '/id/scope' },
   ] },
   { label: 'Projets', icon: 'mdi-folder', route: '/project', match: '/project' },
-  { label: 'Administration', icon: 'mdi-cog', soon: true },
+  { label: 'Administration', icon: 'mdi-cog', match: '/system', children: [
+    { label: 'Plugins', route: '/system/plugin', match: '/system/plugin' },
+  ] },
 ]
 
 const collapsed = ref(false)
@@ -111,6 +113,8 @@ const title = computed(() => {
   if (route.path.startsWith('/id/scope')) return 'Portées'
   if (route.path.startsWith('/id')) return 'Utilisateurs'
   if (route.path.startsWith('/project')) return 'Projets'
+  if (route.path.startsWith('/system/plugin')) return 'Plugins'
+  if (route.path.startsWith('/system')) return 'Administration'
   return 'Accueil'
 })
 function isNavActive(it) {
