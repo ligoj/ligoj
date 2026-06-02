@@ -55,25 +55,24 @@
     <VibrantDataTable :headers="headers" :items="rows" :items-length="rows.length" :loading="loading" item-value="id" default-sort="name" :empty-text="t('common.noData')">
       <template #cell.name="{ item }">
         <div class="avatar-cell">
-          <span class="tglyph" :class="item.type"><v-icon size="18">{{ typeIcon(item.type) }}</v-icon></span>
+          <span v-if="item.node" class="logo-tile"><NodeIcon :node="item.node" /></span>
+          <span v-else class="tglyph" :class="item.type"><v-icon size="18">{{ typeIcon(item.type) }}</v-icon></span>
           <div class="ac-txt">
             <div class="ac-name">{{ item.name || '—' }}</div>
-            <code class="ac-key">{{ item.artifact }}</code>
+            <code class="ac-sub">{{ item.artifact }}</code>
           </div>
         </div>
       </template>
-      <template #cell.type="{ item }">
-        <span class="pill" :class="item.type">{{ typeLabel(item.type) }}</span>
-      </template>
+      <template #cell.key="{ item }"><code class="mono">{{ item.key || '—' }}</code></template>
       <template #cell.version="{ item }">
         <span class="mono ver">{{ item.version || '—' }}</span>
         <span v-if="item.latestLocalVersion" class="vchip local" :title="t('system.plugin.cancelLocal')" @click.stop="cancelLocal(item)">{{ item.latestLocalVersion }}<v-icon size="13">mdi-close</v-icon></span>
         <span v-if="item.newVersion && item.newVersion !== item.latestLocalVersion" class="vchip up" :title="t('system.plugin.upgradeAvailable')" @click.stop="installOne(item.artifact)"><v-icon size="13">mdi-arrow-up</v-icon>{{ item.newVersion }}</span>
       </template>
-      <template #cell.nodes="{ item }"><span v-if="item.type !== 'feature'" class="cchip">{{ item.nodes ?? 0 }}</span><span v-else class="muted">—</span></template>
-      <template #cell.subscriptions="{ item }"><span v-if="item.type !== 'feature'" class="cchip">{{ item.subscriptions ?? 0 }}</span><span v-else class="muted">—</span></template>
-      <template #cell.status="{ item }">
-        <span v-if="item.deleted" class="sdot warn" :title="t('system.plugin.deletionScheduled')" /><span v-else class="sdot ok" :title="t('system.plugin.active')" />
+      <template #cell.statut="{ item }"><span class="chip" :class="item.status">{{ statusLabel(item.status) }}</span></template>
+      <template #cell.enabled="{ item }">
+        <span v-if="item.node" class="switch" :class="{ on: item.enabled, busy: togglingKey === item.key }" role="switch" :aria-checked="item.enabled" :title="t('system.plugin.toggleHint')" @click.stop="toggleEnabled(item)" />
+        <span v-else class="muted">—</span>
       </template>
       <template #actions="{ item }">
         <v-icon v-if="item.deleted" size="18" color="warning" :title="t('system.plugin.deletionScheduled')">mdi-cancel</v-icon>
@@ -122,7 +121,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import { useApi, useAppStore, useI18nStore } from '@ligoj/host'
+import { useApi, useAppStore, useI18nStore, NodeIcon } from '@ligoj/host'
 import VibrantDataTable from '@2026/components/VibrantDataTable.vue'
 import LigojConfirmDialog from '@2026/components/VibrantConfirmDialog.vue'
 
@@ -152,30 +151,35 @@ const TYPE_COLOR = { service: '#2f6df6', tool: '#d9701a', feature: '#1d9d63' }
 
 const headers = computed(() => [
   { key: 'name', label: t('system.plugin.headerName'), sortable: true, icon: 'mdi-puzzle-outline' },
-  { key: 'type', label: t('system.plugin.headerType'), sortable: true, align: 'center', icon: 'mdi-shape-outline' },
+  { key: 'key', label: t('system.plugin.headerKey'), sortable: true, icon: 'mdi-identifier' },
   { key: 'version', label: t('system.plugin.headerVersion'), sortable: false, icon: 'mdi-tag-outline' },
-  { key: 'nodes', label: t('system.plugin.headerNodes'), sortable: true, align: 'center', icon: 'mdi-server' },
-  { key: 'subscriptions', label: t('system.plugin.headerSubscriptions'), sortable: true, align: 'center', icon: 'mdi-link-variant' },
-  { key: 'status', label: '', sortable: false, align: 'center', width: '56px' },
+  { key: 'statut', label: t('system.plugin.headerStatus'), sortable: true, align: 'center', icon: 'mdi-shape-outline' },
+  { key: 'enabled', label: t('system.plugin.headerEnabled'), sortable: false, align: 'center', icon: 'mdi-power', width: '110px' },
 ])
 
 function prettyName(artifact, name) {
   if (name) return name
   return String(artifact || '').replace(/^plugin-/, '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
-const rows = computed(() => items.value.map((it) => ({
-  id: it.plugin?.artifact || it.plugin?.id,
-  artifact: it.plugin?.artifact || it.plugin?.id || '',
-  type: (it.plugin?.type || '').toLowerCase(),
-  name: prettyName(it.plugin?.artifact || it.plugin?.id, it.plugin?.name),
-  vendor: it.plugin?.vendor || '',
-  version: it.plugin?.version || '',
-  latestLocalVersion: it.latestLocalVersion,
-  newVersion: it.newVersion,
-  nodes: it.nodes,
-  subscriptions: it.subscriptions,
-  deleted: it.deleted,
-})))
+const rows = computed(() => items.value.map((it) => {
+  const enabled = it.node ? (it.node.enabled !== false) : true
+  return {
+    id: it.plugin?.artifact || it.plugin?.id,
+    artifact: it.plugin?.artifact || it.plugin?.id || '',
+    type: (it.plugin?.type || '').toLowerCase(),
+    name: prettyName(it.plugin?.artifact || it.plugin?.id, it.node?.name || it.plugin?.name),
+    key: it.node?.id || '',
+    version: it.plugin?.version || '',
+    latestLocalVersion: it.latestLocalVersion,
+    newVersion: it.newVersion,
+    nodes: it.nodes,
+    subscriptions: it.subscriptions,
+    deleted: it.deleted,
+    node: it.node || null,
+    enabled,
+    status: it.deleted ? 'warn' : (enabled ? 'ok' : 'idle'),
+  }
+}))
 
 const stats = computed(() => {
   const by = (ty) => rows.value.filter((r) => r.type === ty).length
@@ -195,6 +199,26 @@ function typeIcon(type) {
   return 'mdi-puzzle-outline'
 }
 function typeLabel(type) { return t('system.plugin.type.' + (type || 'service')) }
+function statusLabel(s) { return t('system.plugin.status.' + s) }
+
+/* Enable/disable the plugin's associated node (real action via PUT rest/node,
+   keeping parameters via untouchedParameters). Disabling asks for confirm. */
+const togglingKey = ref('')
+function toggleEnabled(item) {
+  if (!item.node) return
+  if (item.enabled) {
+    ask({ title: t('system.plugin.confirmDisableTitle'), parts: splitAround('system.plugin.confirmDisableText', item.name, 'name'), label: t('system.plugin.disable'), color: 'warning', icon: 'mdi-power', action: () => doToggle(item, false) })
+  } else {
+    doToggle(item, true)
+  }
+}
+async function doToggle(item, enable) {
+  togglingKey.value = item.key
+  try {
+    await api.put('rest/node', { id: item.node.id, node: item.node.refined?.id, name: item.node.name, mode: item.node.mode || 'all', enabled: enable, untouchedParameters: true })
+    await load()
+  } finally { togglingKey.value = '' }
+}
 
 async function load() {
   loading.value = true
@@ -336,7 +360,23 @@ onMounted(() => {
 .tglyph.tool { background: linear-gradient(135deg, #ff9436, #d9701a); }
 .tglyph.feature { background: linear-gradient(135deg, #1d9d63, #15784b); }
 .ac-name { font-family: var(--font); font-weight: 700; font-size: 14px; color: var(--ink); line-height: 1.2; }
-.ac-key { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+.ac-key, .ac-sub { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+/* Brand logo tile (white, like the cockpit tool logos). */
+.logo-tile { width: 36px; height: 36px; border-radius: 11px; flex: none; display: grid; place-items: center; background: #fff; box-shadow: 0 0 0 1px var(--border), 0 2px 6px -3px rgba(0, 0, 0, .3); }
+.logo-tile :deep(img.tool-icon) { width: 22px; height: 22px; object-fit: contain; }
+.logo-tile :deep(i) { font-size: 20px; color: #475569; }
+/* Status chip (mockup .chip). */
+.chip { display: inline-flex; align-items: center; font-family: var(--font); font-weight: 700; font-size: 11.5px; padding: 3px 11px; border-radius: 999px; }
+.chip.ok { color: #1d9d63; background: rgba(29, 157, 99, .14); }
+.chip.warn { color: #d98a16; background: rgba(217, 138, 22, .16); }
+.chip.err { color: #df4d42; background: rgba(223, 77, 66, .14); }
+.chip.idle { color: var(--ink-3); background: var(--pill); }
+/* Toggle switch (mockup .switch). */
+.switch { display: inline-block; width: 44px; height: 25px; border-radius: 20px; background: var(--border-2); position: relative; cursor: pointer; transition: background .2s, opacity .2s; vertical-align: middle; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .35); transition: left .2s; }
+.switch.on { background: #1d9d63; }
+.switch.on::after { left: 22px; }
+.switch.busy { opacity: .5; pointer-events: none; }
 .pill { display: inline-flex; align-items: center; font-family: var(--font); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; padding: 3px 10px; border-radius: 999px; color: var(--ink-2); background: var(--pill); }
 .pill.service { color: #2f6df6; background: rgba(47, 109, 246, .13); }
 .pill.tool { color: #d9701a; background: rgba(255, 122, 24, .14); }
