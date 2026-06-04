@@ -120,12 +120,13 @@ const DEMO_KPIS = [
   { l: 'Projets', v: '124', c: '#2f6df6', icon: 'mdi-folder-multiple-outline' },
   { l: 'Outils', v: '18', c: '#1d9d63', icon: 'mdi-hammer-wrench' },
   { l: 'Souscriptions', v: '2 348', c: '#8b5cf6', icon: 'mdi-connection' },
-  { l: 'Alertes', v: '3', c: '#df4d42', icon: 'mdi-alert-outline' },
+  { l: 'Utilisateurs', v: '342', c: '#d9701a', icon: 'mdi-account-multiple-outline' },
 ]
 
 /* --- real data: aggregate projects' subscriptions by tool (node) --- */
 const projects = ref([])
 const projectsTotal = ref(0)
+const usersTotal = ref(0)
 async function load() {
   try {
     const data = await api.get('rest/project?rows=100&page=1&sidx=name&sord=asc')
@@ -133,6 +134,11 @@ async function load() {
     projects.value = rows
     projectsTotal.value = data?.recordsTotal ?? rows.length
   } catch { projects.value = [] }
+
+  try {
+    const u = await api.get('rest/system/user?rows=1&page=1')
+    usersTotal.value = u?.recordsTotal ?? (Array.isArray(u?.data) ? u.data.length : 0)
+  } catch { usersTotal.value = 0 }
 }
 // Functional service families (identity, knowledge, bug/ticket, test mgmt);
 // everything else (build, scm, qa, prov…) reads as technical.
@@ -171,6 +177,7 @@ const kpis = computed(() => {
     { l: 'Projets', v: projectsTotal.value.toLocaleString('fr-FR'), c: '#2f6df6', icon: 'mdi-folder-multiple-outline' },
     { l: 'Outils', v: realTools.value.length, c: '#1d9d63', icon: 'mdi-hammer-wrench' },
     { l: 'Souscriptions', v: subsTotal.toLocaleString('fr-FR'), c: '#8b5cf6', icon: 'mdi-connection' },
+    { l: 'Utilisateurs', v: usersTotal.value.toLocaleString('fr-FR'), c: '#d9701a', icon: 'mdi-account-multiple-outline' },
   ]
 })
 
