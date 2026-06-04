@@ -97,8 +97,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useApi, useAppStore, useDataTable, useI18nStore } from '@ligoj/host'
-import VibrantDataTable from '@2026/components/VibrantDataTable.vue'
-import LigojConfirmDialog from '@2026/components/VibrantConfirmDialog.vue'
+import VibrantDataTable from '@/components/VibrantDataTable.vue'
+import LigojConfirmDialog from '@/components/VibrantConfirmDialog.vue'
 
 const api = useApi()
 const app = useAppStore()

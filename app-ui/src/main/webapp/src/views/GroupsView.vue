@@ -1,24 +1,26 @@
 <!--
-  CompaniesView — 2026 "Vibrant" Companies/Entities list (plugin-id). Same
-  recipe as GroupsView (VibrantDataTable + reused CompanyEditPanel in a
-  Vibrant dialog + VibrantConfirmDialog), on service/id/company. No members.
+  GroupsView — 2026 "Vibrant" Groups list (plugin-id). Mirrors UsersView:
+  VibrantDataTable + reused logic (useDataTable on service/id/group), Vibrant
+  page header/toolbar, gear popmenu, and the reused GroupEditPanel (in a
+  Vibrant dialog) + the global GroupMembersDialog mounted locally (the
+  standalone app doesn't run the plugin install() that normally mounts it).
 -->
 <template>
-  <div class="companies">
+  <div class="groups">
     <header class="ph">
       <div class="ph-txt">
-        <h1>{{ t('company.title') }}</h1>
-        <p class="sub">{{ t('company.subtitle2026') }}</p>
+        <h1>{{ t('group.title') }}</h1>
+        <p class="sub">{{ t('group.subtitle2026') }}</p>
       </div>
       <div class="ph-actions">
-        <button class="btn" @click="openCreate"><v-icon size="18">mdi-plus</v-icon>{{ t('company.new') }}</button>
+        <button class="btn" @click="openCreate"><v-icon size="18">mdi-plus</v-icon>{{ t('group.new') }}</button>
       </div>
     </header>
 
     <div class="toolbar">
       <label class="search">
         <v-icon size="18">mdi-magnify</v-icon>
-        <input v-model="dt.search.value" :placeholder="t('company.searchPlaceholder') || t('common.search')" @input="onSearch" />
+        <input v-model="dt.search.value" :placeholder="t('group.searchPlaceholder') || t('common.search')" @input="onSearch" />
       </label>
       <span class="tb-sp" />
       <v-slide-x-transition>
@@ -31,16 +33,16 @@
 
     <v-alert v-if="dt.error.value" type="warning" variant="tonal" class="mb-4" rounded="lg">
       <v-alert-title>{{ t('user.noProvider') }}</v-alert-title>
-      {{ dt.error.value === 'internal' ? t('company.noProvider') : dt.error.value }}
+      {{ dt.error.value === 'internal' ? t('group.noProvider') : dt.error.value }}
     </v-alert>
     <v-alert v-if="dt.demoMode.value" type="info" variant="tonal" density="compact" class="mb-4" rounded="lg">
       {{ t('user.demoMode') }}
     </v-alert>
 
     <VibrantDataTable v-if="!dt.error.value" :headers="headers" :items="dt.items.value" :items-length="dt.totalItems.value" :loading="dt.loading.value"
-      selectable v-model="selected" item-value="name" default-sort="name" @update:options="loadData" @row-click="(item) => openDetails(item.name)">
+      selectable v-model="selected" item-value="name" default-sort="name" @update:options="loadData" @row-click="(item) => openEdit(item.name)">
       <template #cell.name="{ item }">
-        <span class="cname"><v-icon size="16" class="cname-ic">mdi-office-building-outline</v-icon><span>{{ item.name }}</span></span>
+        <span class="gname"><v-icon size="16" class="gname-ic">mdi-account-group</v-icon><span>{{ item.name }}</span></span>
       </template>
       <template #cell.scope="{ item }">
         <span v-if="item.scope" class="tagdot"><span class="d" :style="{ background: scopeColor(item.scope) }" />{{ item.scope }}</span>
@@ -56,10 +58,11 @@
       <template #actions="{ item }">
         <v-menu location="bottom end">
           <template #activator="{ props }">
-            <button class="iconbtn" v-bind="props" :aria-label="t('common.view')" @click.stop><v-icon size="18">mdi-cog</v-icon></button>
+            <button class="iconbtn" v-bind="props" :aria-label="t('group.actions') || t('id.group.manage')" @click.stop><v-icon size="18">mdi-cog</v-icon></button>
           </template>
           <div class="popmenu">
-            <button @click="openDetails(item.name)"><v-icon size="18">mdi-eye-outline</v-icon>{{ t('common.view') }}</button>
+            <button @click="onManageMembers(item.name)"><v-icon size="18">mdi-account-multiple</v-icon>{{ t('id.group.manage') }}</button>
+            <button @click="openEdit(item.name)"><v-icon size="18">mdi-eye-outline</v-icon>{{ t('common.view') }}</button>
             <div class="sep" />
             <button class="danger" @click="startDelete(item)"><v-icon size="18">mdi-delete</v-icon>{{ t('common.delete') }}</button>
           </div>
@@ -67,23 +70,27 @@
       </template>
     </VibrantDataTable>
 
+    <!-- Group view / create dialog (Vibrant chrome around the reused panel). -->
     <v-dialog v-model="editDialog" max-width="600" scrollable>
       <v-card class="vmodal">
         <div class="vmodal-head">
-          <span class="mi"><v-icon color="#fff">{{ editingId ? 'mdi-eye-outline' : 'mdi-office-building' }}</v-icon></span>
-          <h3>{{ editingId ? t('company.detailsTitle') : t('company.new') }} <span v-if="editingId" class="who">{{ editingId }}</span></h3>
+          <span class="mi"><v-icon color="#fff">{{ editingId ? 'mdi-eye-outline' : 'mdi-account-group' }}</v-icon></span>
+          <h3>{{ editingId ? t('group.detailsTitle') : t('group.new') }} <span v-if="editingId" class="who">{{ editingId }}</span></h3>
           <button class="x" :aria-label="t('common.cancel')" @click="editDialog = false"><v-icon size="20">mdi-close</v-icon></button>
         </div>
-        <CompanyEditPanel v-if="editDialog" :key="editingId ?? 'new'" :company-id="editingId" @saved="onEditSaved" @deleted="onEditDeleted" @cancel="editDialog = false" />
+        <GroupEditPanel v-if="editDialog" :key="editingId ?? 'new'" :group-id="editingId" @saved="onEditSaved" @deleted="onEditDeleted" @cancel="editDialog = false" />
       </v-card>
     </v-dialog>
 
-    <LigojConfirmDialog v-model="deleteDialog" :title="t('company.deleteTitle')" :icon="TYPE_ICONS.COMPANY" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmDelete">
-      {{ t('company.deleteConfirmBefore') }}<strong class="text-error">{{ deleteTarget?.name }}</strong>{{ t('company.deleteConfirmAfter') }}
+    <LigojConfirmDialog v-model="deleteDialog" :title="t('group.deleteTitle')" :icon="TYPE_ICONS.GROUP" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmDelete">
+      {{ t('group.deleteConfirmBefore') }}<strong class="text-error">{{ deleteTarget?.name }}</strong>{{ t('group.deleteConfirmAfter') }}
     </LigojConfirmDialog>
-    <LigojConfirmDialog v-model="bulkDeleteDialog" :title="t('common.bulkDeleteTitle')" :icon="TYPE_ICONS.COMPANY" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmBulkDelete">
+    <LigojConfirmDialog v-model="bulkDeleteDialog" :title="t('common.bulkDeleteTitle')" :icon="TYPE_ICONS.GROUP" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmBulkDelete">
       {{ t('common.bulkDeleteConfirmBefore') }}<strong class="text-error">{{ selected.length }}</strong>{{ t('common.bulkDeleteConfirmAfter') }}
     </LigojConfirmDialog>
+
+    <!-- Members management dialog (consumes useGroupMembersDialog state). -->
+    <GroupMembersDialog />
   </div>
 </template>
 
@@ -92,8 +99,10 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDataTable, useApi, useAppStore, useErrorStore, useI18nStore } from '@ligoj/host'
 import { TYPE_ICONS } from '../composables/delegateTypes.js'
+import { useGroupMembersDialog } from '../composables/useGroupMembersDialog.js'
 import VibrantDataTable from '../components/VibrantDataTable.vue'
-import CompanyEditPanel from '../components/CompanyEditPanel.vue'
+import GroupEditPanel from '../components/GroupEditPanel2026.vue'
+import GroupMembersDialog from '../components/GroupMembersDialog2026.vue'
 import LigojConfirmDialog from '../components/VibrantConfirmDialog.vue'
 
 const route = useRoute()
@@ -102,13 +111,16 @@ const api = useApi()
 const errorStore = useErrorStore()
 const i18n = useI18nStore()
 const t = i18n.t
+const membersDialog = useGroupMembersDialog()
 
-const DEMO_COMPANIES = [
-  { name: 'Ligoj', scope: 'Internal', count: 12, locked: false },
-  { name: 'AcmeCorp', scope: 'External', count: 5, locked: false },
-  { name: 'TechSolutions', scope: 'External', count: 3, locked: false },
+const DEMO_GROUPS = [
+  { name: 'Engineering', scope: 'Group', count: 4, locked: false },
+  { name: 'Marketing', scope: 'Group', count: 1, locked: false },
+  { name: 'DevOps', scope: 'Group', count: 2, locked: false },
+  { name: 'Management', scope: 'Group', count: 2, locked: false },
+  { name: 'Sales', scope: 'Group', count: 1, locked: false },
 ]
-const dt = useDataTable('service/id/company', { defaultSort: 'name', demoData: DEMO_COMPANIES })
+const dt = useDataTable('service/id/group', { defaultSort: 'name', demoData: DEMO_GROUPS })
 let searchTimeout = null
 let lastOptions = { page: 1, itemsPerPage: 25, sortBy: [] }
 
@@ -127,7 +139,9 @@ const headers = computed(() => [
   { label: t('group.locked'), key: 'locked', align: 'center', width: '90px' },
 ])
 
-function scopeColor(scope) { return /intern/i.test(scope) ? '#2563eb' : '#e6a019' }
+function scopeColor(scope) {
+  return /intern/i.test(scope) ? '#2563eb' : '#e6a019'
+}
 
 function loadData(options) { lastOptions = options; dt.load(options) }
 function onSearch() {
@@ -135,41 +149,45 @@ function onSearch() {
   searchTimeout = setTimeout(() => dt.load({ page: 1, itemsPerPage: lastOptions.itemsPerPage || 25 }), 300)
 }
 
+function onManageMembers(name) {
+  membersDialog.openFor(name, { onChanged: () => dt.load(lastOptions) })
+}
+
 function openCreate() { editingId.value = null; editDialog.value = true }
-function openDetails(name) { editingId.value = name; editDialog.value = true }
+function openEdit(name) { editingId.value = name; editDialog.value = true }
 function onEditSaved() { editDialog.value = false; editingId.value = null; dt.load(lastOptions) }
 function onEditDeleted() { editDialog.value = false; editingId.value = null; dt.load(lastOptions) }
 
 function startDelete(item) { deleteTarget.value = item; deleteDialog.value = true }
 async function confirmDelete() {
-  if (dt.demoMode.value) { errorStore.push({ message: t('company.demoDelete'), status: 0 }); deleteDialog.value = false; return }
+  if (dt.demoMode.value) { errorStore.push({ message: t('group.demoDelete'), status: 0 }); deleteDialog.value = false; return }
   deleting.value = true
-  await api.del(`rest/service/id/company/${deleteTarget.value.name}`)
+  await api.del(`rest/service/id/group/${deleteTarget.value.name}`)
   deleting.value = false; deleteDialog.value = false; deleteTarget.value = null
   dt.load(lastOptions)
 }
 function startBulkDelete() { bulkDeleteDialog.value = true }
 async function confirmBulkDelete() {
-  if (dt.demoMode.value) { errorStore.push({ message: t('company.demoDelete'), status: 0 }); bulkDeleteDialog.value = false; return }
+  if (dt.demoMode.value) { errorStore.push({ message: t('group.demoDelete'), status: 0 }); bulkDeleteDialog.value = false; return }
   deleting.value = true
-  for (const name of selected.value) await api.del(`rest/service/id/company/${name}`)
+  for (const name of selected.value) await api.del(`rest/service/id/group/${name}`)
   deleting.value = false; bulkDeleteDialog.value = false; selected.value = []
   dt.load(lastOptions)
 }
 
 onMounted(() => {
   appStore.setBreadcrumbs(
-    [{ title: t('nav.home'), to: '/' }, { title: t('nav.identity') }, { title: t('company.title') }],
+    [{ title: t('nav.home'), to: '/' }, { title: t('nav.identity') }, { title: t('group.title') }],
     { refresh: () => dt.load(lastOptions) },
   )
   const id = route.params?.id
-  if (id === 'new' || route.path?.endsWith('/company/new')) openCreate()
-  else if (id) openDetails(String(id))
+  if (id === 'new' || route.path?.endsWith('/group/new')) openCreate()
+  else if (id) openEdit(String(id))
 })
 </script>
 
 <style scoped>
-.companies {
+.groups {
   --surface: rgb(var(--v-theme-surface));
   --ink: rgb(var(--v-theme-on-surface));
   --ink-2: rgba(var(--v-theme-on-surface), .72);
@@ -203,8 +221,8 @@ onMounted(() => {
 .bulkbar { display: flex; align-items: center; gap: 12px; }
 .bulk-count { font-weight: 700; font-size: 13px; color: var(--ink-2); }
 
-.cname { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
-.cname-ic { color: var(--ink-3); }
+.gname { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.gname-ic { color: var(--ink-3); }
 .mono { font-family: var(--mono); font-size: 13px; font-weight: 600; }
 .tagdot { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
 .tagdot .d { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
@@ -212,12 +230,13 @@ onMounted(() => {
 
 .iconbtn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid transparent; background: transparent; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-2); transition: background .12s; }
 .iconbtn:hover { background: var(--hover); }
-.popmenu { min-width: 200px; background: rgb(var(--v-theme-surface)); border: 1px solid rgba(var(--v-theme-on-surface), .12); border-radius: 12px; box-shadow: 0 16px 44px -14px rgba(0, 0, 0, .45); padding: 6px; }
+.popmenu { min-width: 210px; background: rgb(var(--v-theme-surface)); border: 1px solid rgba(var(--v-theme-on-surface), .12); border-radius: 12px; box-shadow: 0 16px 44px -14px rgba(0, 0, 0, .45); padding: 6px; }
 .popmenu button { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; cursor: pointer; font-family: var(--font); font-size: 13.5px; font-weight: 600; color: rgb(var(--v-theme-on-surface)); padding: 10px 12px; border-radius: 8px; text-align: left; }
 .popmenu button:hover { background: rgba(var(--v-theme-on-surface), .06); }
 .popmenu button.danger { color: rgb(var(--v-theme-error)); }
 .popmenu .sep { height: 1px; background: rgba(var(--v-theme-on-surface), .12); margin: 5px 4px; }
 
+/* Reused Vibrant dialog chrome (shared language with UserEditDialog). */
 .vmodal { border-radius: 20px !important; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .55) !important; }
 .vmodal-head { display: flex; align-items: center; gap: 13px; padding: 22px 24px 8px; }
 .vmodal-head .mi { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -8px rgba(255, 90, 82, .6); }

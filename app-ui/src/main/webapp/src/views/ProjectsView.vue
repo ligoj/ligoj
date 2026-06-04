@@ -80,9 +80,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi, useAppStore, useI18nStore } from '@ligoj/host'
-import ProjectEditDialog from '@2026/views/ProjectEditDialog.vue'
-import VibrantDataTable from '@2026/components/VibrantDataTable.vue'
-import VibrantConfirmDialog from '@2026/components/VibrantConfirmDialog.vue'
+import ProjectEditDialog from '@/views/ProjectEditDialog2026.vue'
+import VibrantDataTable from '@/components/VibrantDataTable.vue'
+import VibrantConfirmDialog from '@/components/VibrantConfirmDialog.vue'
 
 const router = useRouter()
 const api = useApi()

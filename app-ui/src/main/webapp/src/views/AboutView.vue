@@ -1,196 +1,130 @@
+<!--
+  AboutView — 2026 "Vibrant" about page (/about). Ports the core AboutView
+  content (app build info from auth.appSettings, frontend stack, project links,
+  resources) into the Vibrant card grid. Reached from the sidebar footer.
+-->
 <template>
-  <div>
-    <h1 class="text-h4 mb-6 d-flex align-center ga-3">
-      <img :src="ligojLogo" alt="" class="ligoj-title-logo" />
-      <span>{{ t('about.title', { name: appName }) }}</span>
-    </h1>
+  <div class="about">
+    <header class="ph">
+      <div class="ph-txt">
+        <nav class="crumbs"><span class="crumb cur"><v-icon size="13">mdi-information-outline</v-icon>{{ t('about.title', { name: appName }) }}</span></nav>
+        <h1>{{ t('about.title', { name: appName }) }}</h1>
+        <p class="sub">{{ t('about.subtitle') }}</p>
+      </div>
+    </header>
 
-    <v-row>
-      <v-col cols="12" md="6">
-        <v-row>
-          <v-col cols="12" md="12">
-            <v-card>
-              <v-card-title>
-                <v-icon class="mr-2">mdi-information</v-icon>
-                {{ t('about.app') }}
-              </v-card-title>
-              <v-card-text>
-                <v-table density="compact">
-                  <tbody>
-                    <tr>
-                      <td class="font-weight-medium">{{ t('about.version') }}</td>
-                      <td>{{ auth.appSettings.buildVersion || '-' }}</td>
-                    </tr>
-                    <tr>
-                      <td class="font-weight-medium">{{ t('about.buildDate') }}</td>
-                      <td>{{ buildDate }}</td>
-                    </tr>
-                    <tr>
-                      <td class="font-weight-medium">{{ t('about.buildNumber') }}</td>
-                      <td>{{ auth.appSettings.buildNumber || '-' }}</td>
-                    </tr>
-                  </tbody>
-                </v-table>
-              </v-card-text>
-            </v-card>
-          </v-col>
+    <div class="grid">
+      <section class="card" :style="{ '--c': '#2f6df6' }">
+        <div class="card-head"><span class="ch-ic"><v-icon size="20">mdi-information</v-icon></span><h3>{{ t('about.app') }}</h3></div>
+        <div class="card-body">
+          <div class="frow"><span class="fk">{{ t('about.version') }}</span><span class="fv mono">{{ build.version }}</span></div>
+          <div class="frow"><span class="fk">{{ t('about.buildDate') }}</span><span class="fv mono">{{ build.date }}</span></div>
+          <div class="frow"><span class="fk">{{ t('about.buildNumber') }}</span><span class="fv mono"><span class="vtxt" :title="build.number">{{ build.number }}</span></span></div>
+        </div>
+      </section>
 
-          <v-col cols="12" md="12">
+      <section class="card" :style="{ '--c': '#1d9d63' }">
+        <div class="card-head"><span class="ch-ic"><v-icon size="20">mdi-monitor-dashboard</v-icon></span><h3>{{ t('about.frontend') }}</h3></div>
+        <div class="card-body">
+          <div class="frow"><span class="fk">{{ t('about.framework') }}</span><span class="fv">Vue 3 + Vuetify 4</span></div>
+          <div class="frow"><span class="fk">{{ t('about.buildTool') }}</span><span class="fv">Vite 8</span></div>
+          <div class="frow"><span class="fk">{{ t('about.state') }}</span><span class="fv">Pinia 3</span></div>
+        </div>
+      </section>
 
-            <v-card>
-              <v-card-title>
-                <v-icon class="mr-2">mdi-monitor-dashboard</v-icon>
-                {{ t('about.frontend') }}
-              </v-card-title>
-              <v-card-text>
-                <v-table density="compact">
-                  <tbody>
-                    <tr>
-                      <td class="font-weight-medium">{{ t('about.framework') }}</td>
-                      <td>Vue 3 + Vuetify 4</td>
-                    </tr>
-                    <tr>
-                      <td class="font-weight-medium">{{ t('about.buildTool') }}</td>
-                      <td>Vite 8</td>
-                    </tr>
-                    <tr>
-                      <td class="font-weight-medium">{{ t('about.state') }}</td>
-                      <td>Pinia 3</td>
-                    </tr>
-                  </tbody>
-                </v-table>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
+      <section class="card" :style="{ '--c': '#8b5cf6' }">
+        <div class="card-head"><span class="ch-ic"><v-icon size="20">mdi-source-branch</v-icon></span><h3>{{ t('about.project') }}</h3></div>
+        <div class="card-body">
+          <a class="lrow" href="https://github.com/ligoj/ligoj" target="_blank" rel="noopener noreferrer">
+            <v-icon size="20" class="lr-ic">mdi-github</v-icon>
+            <span class="lr-txt"><span class="lr-title">{{ t('about.github') }}</span><span class="lr-sub">github.com/ligoj/ligoj</span></span>
+            <v-icon size="16" class="lr-go">mdi-open-in-new</v-icon>
+          </a>
+          <a class="lrow" @click="licenseDialog = true">
+            <v-icon size="20" class="lr-ic">mdi-license</v-icon>
+            <span class="lr-txt"><span class="lr-title">{{ t('about.license') }}</span><span class="lr-sub">MIT</span></span>
+            <v-icon size="16" class="lr-go">mdi-chevron-right</v-icon>
+          </a>
+          <a class="lrow" href="https://www.kloudy.fr/" target="_blank" rel="noopener noreferrer">
+            <v-icon size="20" class="lr-ic">mdi-hammer-wrench</v-icon>
+            <span class="lr-txt">
+              <span class="lr-title">{{ t('about.builtBy') }}</span>
+              <span class="lr-sub d-flex align-center ga-2">
+                <span class="kloudy-name">Kloudy</span>
+                <img :src="brandColor" alt="Kloudy" class="kloudy-logo" />
+              </span>
+            </span>
+            <v-icon size="16" class="lr-go">mdi-open-in-new</v-icon>
+          </a>
+        </div>
+      </section>
 
-      </v-col>
+      <section class="card" :style="{ '--c': '#d9701a' }">
+        <div class="card-head"><span class="ch-ic"><v-icon size="20">mdi-bookshelf</v-icon></span><h3>{{ t('about.resources') }}</h3></div>
+        <div class="card-body">
+          <a class="lrow" @click="go('/api')">
+            <v-icon size="20" class="lr-ic">mdi-api</v-icon>
+            <span class="lr-txt"><span class="lr-title">{{ t('about.api') }}</span><span class="lr-sub">{{ t('about.apiHint') }}</span></span>
+            <v-icon size="16" class="lr-go">mdi-chevron-right</v-icon>
+          </a>
+          <a class="lrow" @click="go('/system/information')">
+            <v-icon size="20" class="lr-ic">mdi-server-outline</v-icon>
+            <span class="lr-txt"><span class="lr-title">{{ t('system.info.title') }}</span><span class="lr-sub">{{ t('system.info.subtitle') }}</span></span>
+            <v-icon size="16" class="lr-go">mdi-chevron-right</v-icon>
+          </a>
+        </div>
+      </section>
+    </div>
 
-      <v-col cols="12" md="6">
-        <v-row>
-          <v-col cols="12" md="12">
-            <v-card>
-              <v-card-title>
-                <v-icon class="mr-2">mdi-source-branch</v-icon>
-                {{ t('about.project') }}
-              </v-card-title>
-              <v-card-text>
-                <v-list density="compact">
-                  <v-list-item href="https://github.com/ligoj/ligoj" target="_blank" rel="noopener noreferrer">
-                    <template #prepend><v-icon>mdi-github</v-icon></template>
-                    <v-list-item-title>{{ t('about.github') }}</v-list-item-title>
-                    <v-list-item-subtitle>github.com/ligoj/ligoj</v-list-item-subtitle>
-                    <template #append><v-icon size="small">mdi-open-in-new</v-icon></template>
-                  </v-list-item>
-                  <v-list-item @click="licenseDialog = true">
-                    <template #prepend><v-icon>mdi-license</v-icon></template>
-                    <v-list-item-title>{{ t('about.license') }}</v-list-item-title>
-                    <v-list-item-subtitle>MIT</v-list-item-subtitle>
-                    <template #append><v-icon size="small">mdi-chevron-right</v-icon></template>
-                  </v-list-item>
-                  <v-list-item href="https://www.kloudy.fr/" target="_blank" rel="noopener noreferrer" class="built-by-row">
-                    <template #prepend><v-icon>mdi-hammer-wrench</v-icon></template>
-                    <v-list-item-title class="d-flex align-center ga-2">
-                      <span>{{ t('about.builtBy') }}</span>
-                      <img :src="brandWhite" alt="Kloudy" class="brand-img brand-img--rest" />
-                      <img :src="brandColor" alt="" aria-hidden="true" class="brand-img brand-img--hover" />
-                    </v-list-item-title>
-                    <template #append><v-icon size="small">mdi-open-in-new</v-icon></template>
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </v-col>
-
-
-          <v-col cols="12" md="12">
-
-            <v-card>
-              <v-card-title>
-                <v-icon class="mr-2">mdi-bookshelf</v-icon>
-                {{ t('about.resources') }}
-              </v-card-title>
-              <v-card-text>
-                <v-list density="compact">
-                  <v-list-item to="/api" link>
-                    <template #prepend><v-icon>mdi-api</v-icon></template>
-                    <v-list-item-title>{{ t('about.api') }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ t('about.apiHint') }}</v-list-item-subtitle>
-                    <template #append><v-icon size="small">mdi-chevron-right</v-icon></template>
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </v-col>
-
-        </v-row>
-      </v-col>
-
-    </v-row>
-
-    <!-- MIT license dialog. The license text is small enough to inline as
-         a constant — pulling it from the deployed JAR's LICENSE file
-         would need a backend round-trip the About view doesn't currently
-         make. `scrollable` keeps the dialog body within the viewport on
-         shorter screens. -->
-    <v-dialog v-model="licenseDialog" max-width="720" scrollable>
-      <v-card>
-        <v-card-title class="d-flex align-center ga-2">
-          <img :src="ligojLogo" alt="" class="ligoj-dialog-logo" />
-          <v-icon>mdi-license</v-icon>
-          <span>Ligoj — {{ t('about.license') }} (MIT)</span>
-        </v-card-title>
-        <v-card-text>
-          <pre class="ligoj-license">{{ licenseText }}</pre>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn variant="text" @click="licenseDialog = false">{{ t('common.close') }}</v-btn>
-        </v-card-actions>
-      </v-card>
+    <v-dialog v-model="licenseDialog" max-width="680" scrollable>
+      <div class="lic" :style="{ '--c': '#8b5cf6' }">
+        <header class="lic-head">
+          <span class="lic-orb"><v-icon size="20">mdi-license</v-icon></span>
+          <div class="lic-htxt">
+            <h3>{{ t('about.license') }} — MIT</h3>
+            <p>Ligoj</p>
+          </div>
+          <button class="lic-x" :aria-label="t('common.close')" @click="licenseDialog = false">
+            <v-icon size="20">mdi-close</v-icon>
+          </button>
+        </header>
+        <div class="lic-body"><pre class="ligoj-license">{{ licenseText }}</pre></div>
+        <footer class="lic-foot">
+          <button class="lic-btn" @click="licenseDialog = false">{{ t('common.close') }}</button>
+        </footer>
+      </div>
     </v-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth.js'
-import { useAppStore } from '@/stores/app.js'
-import { useI18nStore } from '@/stores/i18n.js'
-// Vite resolves this to a hashed URL at build time and a dev-server URL
-// at run time — works in both modes without hard-coding `/ligoj/...`.
-// Same asset the sidebar brand uses (AppLayout.vue).
-import ligojLogo from '@/assets/logo.svg'
-// Kloudy brand mark for the "Built by" row. The `-white` variant is
-// the desaturated default (sits quietly in a neutral list item); the
-// other variant is the full-color version surfaced on hover / focus.
-// Both PNGs are small enough (< 1 KB) that vite inlines them as
-// data URLs at build time — zero extra HTTP request.
-import brandWhite from '@/assets/brand-white.png'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAppStore, useAuthStore, useI18nStore } from '@ligoj/host'
 import brandColor from '@/assets/brand.png'
 
+const router = useRouter()
+const app = useAppStore()
 const auth = useAuthStore()
-const appStore = useAppStore()
 const i18n = useI18nStore()
 const t = i18n.t
 
+const appName = computed(() => auth.appSettings?.name || 'Ligoj')
+const build = computed(() => {
+  const s = auth.appSettings || {}
+  const ts = parseInt(s.buildTimestamp, 10)
+  return {
+    version: s.buildVersion || '—',
+    number: s.buildNumber || '—',
+    date: Number.isNaN(ts) ? '—' : new Date(ts).toISOString().slice(0, 10),
+  }
+})
+function go(path) { router.push(path) }
+
 const licenseDialog = ref(false)
 
-/**
- * Display name. Sourced from the backend's `ApplicationSettings#name`
- * (driven by the `ligoj.name` Spring property); falls back to "Ligoj"
- * when the session hasn't loaded yet or the backend pre-dates the field.
- * Threaded into the page title, license dialog header, and the
- * copyright line of the inlined MIT text below.
- */
-const appName = computed(() => auth.appSettings?.name || 'Ligoj')
-
-/* MIT license inlined verbatim — kept here so the About view doesn't
- * have to fetch the LICENSE file from the backend (and so the dialog
- * works offline / in the dev server). Mirrors the repo's root LICENSE
- * with one substitution: the copyright line uses `${appName}` so a
- * rebranded deployment sees its own name. The repo LICENSE itself is
- * not regenerated from this — change both in lockstep. */
+// Inlined MIT license text — kept here so the About view does not have
+// to fetch the LICENSE file from the backend (works offline / in dev).
 const LICENSE_TEMPLATE = (name) => `MIT License
 
 Copyright (c) ${name} Contributors
@@ -215,74 +149,98 @@ SOFTWARE.`
 
 const licenseText = computed(() => LICENSE_TEMPLATE(appName.value))
 
-const buildDate = computed(() => {
-  const ts = auth.appSettings.buildTimestamp
-  if (!ts) return '-'
-  return new Date(Number(ts)).toLocaleDateString('fr-FR', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
-})
-
-onMounted(() => {
-  appStore.setBreadcrumbs([
-    { title: t('nav.home'), to: '/' },
-    { title: t('nav.about') },
-  ])
-})
+onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: t('about.title', { name: appName.value }) }]))
 </script>
 
 <style scoped>
-/* Monospaced + wrapped license text. `pre` defaults to no-wrap, which
- * would give horizontal scrolling for the long all-caps disclaimer line
- * inside the dialog body. */
-.ligoj-license {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 0.82rem;
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin: 0;
+.about {
+  --surface: rgb(var(--v-theme-surface));
+  --card: rgb(var(--v-theme-surface));
+  --ink: rgb(var(--v-theme-on-surface));
+  --ink-2: rgba(var(--v-theme-on-surface), .72);
+  --ink-3: rgba(var(--v-theme-on-surface), .55);
+  --border: rgba(var(--v-theme-on-surface), .12);
+  --hover: rgba(var(--v-theme-on-surface), .06);
+  --pill: rgba(var(--v-theme-on-surface), .06);
+  --accent: rgb(var(--v-theme-secondary));
+  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
+  color: var(--ink);
 }
+.ph { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.crumbs { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.crumb { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font); font-size: 11.5px; font-weight: 700; color: var(--accent); background: rgba(var(--v-theme-secondary), .12); border-radius: 999px; padding: 3px 10px; }
+.ph-txt h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.03em; font-size: 28px; margin: 0; }
+.ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
 
-/* Brand logo next to the page title and dialog header. Sized to match
- * the inherited text height so the baseline reads cleanly with the
- * `<h1 class="text-h4">` and the dialog's `<v-card-title>`. */
-.ligoj-title-logo {
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-}
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.card { border: 1px solid var(--border); border-radius: 18px; background: linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); overflow: hidden; transition: transform .16s, box-shadow .16s, border-color .16s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 22px 44px -22px color-mix(in srgb, var(--c) 55%, transparent); border-color: color-mix(in srgb, var(--c) 35%, var(--border)); }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+.card-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px 10px; }
+.ch-ic { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
+.card-head h3 { font-family: var(--font); font-weight: 800; font-size: 17px; margin: 0; letter-spacing: -.02em; }
+.card-body { padding: 2px 18px 16px; }
 
-.ligoj-dialog-logo {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
+.frow { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.frow:last-child { border-bottom: 0; }
+.fk { font-size: 13px; font-weight: 600; color: var(--ink-3); flex: none; }
+.fv { font-size: 13.5px; color: var(--ink); margin-left: auto; text-align: right; min-width: 0; overflow: hidden; }
+.fv.mono { font-family: var(--mono); font-size: 12.5px; }
+.vtxt { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 
-/* "Built by" row — two-image swap. Both PNGs render at the inherited
- * text line-height so the brand mark scales with the row typography
- * (and ignores the row's font-size variations across the active
- * theme/preset). `:hover` and `:focus-visible` both swap so the
- * keyboard-navigation state matches mouse hover. */
-.built-by-row .brand-img {
-  height: 1.4em;
+.lrow { display: flex; align-items: center; gap: 12px; padding: 11px 10px; margin: 0 -10px; border-radius: 11px; cursor: pointer; text-decoration: none; color: inherit; transition: background .14s; }
+.lrow:hover { background: var(--hover); }
+.lrow.static { cursor: default; }
+.lrow.static:hover { background: transparent; }
+.lr-ic { color: var(--ink-2); flex: none; }
+.lr-txt { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.lr-title { font-family: var(--font); font-weight: 700; font-size: 13.5px; color: var(--ink); }
+.lr-sub { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lr-go { color: var(--ink-3); flex: none; }
+.kloudy-name { font-weight: 800; color: #d9701a; }
+.kloudy-logo {
+  height: 1.1em;
   width: auto;
   vertical-align: middle;
-  /* Keep both images on a stable baseline so the swap doesn't shift
-   * the row height by a pixel. */
-  display: inline-block;
 }
-
-.built-by-row .brand-img--hover {
-  display: none;
+/* License dialog — reskinned to match the Vibrant card language */
+.lic {
+  --surface: rgb(var(--v-theme-surface));
+  --card: rgb(var(--v-theme-surface));
+  --ink: rgb(var(--v-theme-on-surface));
+  --ink-3: rgba(var(--v-theme-on-surface), .55);
+  --border: rgba(var(--v-theme-on-surface), .12);
+  --hover: rgba(var(--v-theme-on-surface), .06);
+  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  max-height: 82vh;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--card)), var(--card));
+  box-shadow: 0 32px 64px -24px color-mix(in srgb, var(--c) 45%, transparent);
+  overflow: hidden;
 }
-
-.built-by-row:hover .brand-img--rest,
-.built-by-row:focus-visible .brand-img--rest {
-  display: none;
-}
-
-.built-by-row:hover .brand-img--hover,
-.built-by-row:focus-visible .brand-img--hover {
-  display: inline-block;
+.lic-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.lic-orb { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
+.lic-htxt { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.lic-htxt h3 { font-family: var(--font); font-weight: 800; font-size: 17px; margin: 0; letter-spacing: -.02em; }
+.lic-htxt p { margin: 1px 0 0; font-size: 12px; color: var(--ink-3); font-weight: 600; }
+.lic-x { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border: 0; border-radius: 10px; background: transparent; color: var(--ink-3); cursor: pointer; transition: background .14s, color .14s; }
+.lic-x:hover { background: var(--hover); color: var(--ink); }
+.lic-body { padding: 16px 18px; overflow-y: auto; }
+.lic-foot { display: flex; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--border); }
+.lic-btn { font-family: var(--font); font-weight: 700; font-size: 13px; color: var(--ink); padding: 8px 16px; border: 1px solid var(--border); border-radius: 10px; background: transparent; cursor: pointer; transition: background .14s, border-color .14s; }
+.lic-btn:hover { background: var(--hover); border-color: color-mix(in srgb, var(--c) 35%, var(--border)); }
+.ligoj-license {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
 }
 </style>

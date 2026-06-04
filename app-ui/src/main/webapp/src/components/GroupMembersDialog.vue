@@ -30,7 +30,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18nStore } from '@ligoj/host'
-import GroupMembersPanel from './GroupMembersPanel.vue'
+import GroupMembersPanel from './GroupMembersPanel2026.vue'
 import { useGroupMembersDialog } from '../composables/useGroupMembersDialog.js'
 
 const { t } = useI18nStore()

@@ -85,7 +85,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useDataTable, useApi, useAppStore, useErrorStore, useI18nStore } from '@ligoj/host'
 import { TYPE_ICONS } from '../composables/delegateTypes.js'
 import VibrantDataTable from '../components/VibrantDataTable.vue'
-import DelegateEditDialog from './DelegateEditDialog.vue'
+import DelegateEditDialog from './DelegateEditDialog2026.vue'
 import LigojConfirmDialog from '../components/VibrantConfirmDialog.vue'
 
 const appStore = useAppStore()

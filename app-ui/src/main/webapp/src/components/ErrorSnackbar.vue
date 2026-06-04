@@ -1,69 +1,90 @@
+<!--
+  ErrorSnackbar — 2026 "Vibrant" global notification stack. The core `useApi`
+  auto-pushes every non-2xx response onto `useErrorStore().errors` (and pages
+  can call errorStore.success/info), but the standalone 2026 shell never
+  rendered that queue, so API failures were silent. This subscribes to the
+  store and renders a bottom-right stack of theme-adaptive toasts (severity
+  icon + colour, optional expandable technical details, manual dismiss). The
+  store handles auto-dismiss timeouts; we only render + allow closing.
+-->
 <template>
-  <div class="error-snackbar-stack">
-    <v-snackbar
-      v-for="entry in errorStore.errors"
-      :key="entry.id"
-      :model-value="true"
-      :color="entry.severity || 'error'"
-      location="bottom right"
-      timeout="-1"
-      multi-line
-    >
-      <div class="d-flex flex-column">
-        <!-- Optional title row: backend `code` resolved through i18n,
-             or one of the catalogue keys (`error.400`, `error.404`, …). -->
-        <div v-if="entry.title" class="font-weight-medium mb-1">
-          <span v-if="entry.status" class="opacity-80 mr-1">{{ entry.status }}</span>
-          {{ entry.title }}
+  <div class="snacks" aria-live="polite" aria-atomic="false">
+    <transition-group name="snack">
+      <div v-for="e in errorStore.errors" :key="e.id" class="snack" :class="e.severity" role="status">
+        <span class="s-ic"><v-icon size="20">{{ icon(e.severity) }}</v-icon></span>
+        <div class="s-body">
+          <div v-if="e.title" class="s-title">{{ e.title }}</div>
+          <div class="s-msg">{{ e.message }}</div>
+          <button v-if="e.details" class="s-more" @click="toggle(e.id)">
+            <v-icon size="14" :class="{ open: open.has(e.id) }">mdi-chevron-down</v-icon>{{ t('common.detailsToggle') || 'Détails' }}
+          </button>
+          <pre v-if="e.details && open.has(e.id)" class="s-details">{{ e.details }}</pre>
         </div>
-        <div v-else-if="entry.status" class="font-weight-bold mr-1">{{ entry.status }}</div>
-
-        <!-- Primary message. Whitespace preserved so the legacy
-             `\n` separators in interpolated strings still read. -->
-        <div class="text-pre-line">{{ entry.message }}</div>
-
-        <!-- Optional cause chain — legacy's "[…]" technical detail
-             toggle. Hidden until the user clicks "Details". The store
-             walks `cause.cause.cause…` into a `›`-separated string. -->
-        <template v-if="entry.details">
-          <a class="text-caption text-decoration-underline mt-1 cursor-pointer" @click.stop="toggle(entry.id)">
-            {{ openDetails.has(entry.id) ? t('common.close') : '[...]' }}
-          </a>
-          <div v-if="openDetails.has(entry.id)" class="text-caption text-pre-line opacity-90 mt-1">
-            › {{ entry.details }}
-          </div>
-        </template>
+        <button class="s-x" :title="t('common.dismiss') || 'Fermer'" @click="errorStore.dismiss(e.id)"><v-icon size="16">mdi-close</v-icon></button>
       </div>
-
-      <template #actions>
-        <v-btn variant="text" icon="mdi-close" size="small" @click="errorStore.dismiss(entry.id)" />
-      </template>
-    </v-snackbar>
+    </transition-group>
   </div>
 </template>
 
 <script setup>
 import { reactive } from 'vue'
-import { useErrorStore } from '@/stores/error.js'
-import { useI18nStore } from '@/stores/i18n.js'
+import { useErrorStore, useI18nStore } from '@ligoj/host'
 
 const errorStore = useErrorStore()
-const { t } = useI18nStore()
+const i18n = useI18nStore()
+const t = i18n.t
 
-// Toggle state lives in the component (not the store) — it's pure UI,
-// and a closed toast shouldn't leave residue in the store.
-const openDetails = reactive(new Set())
-function toggle(id) {
-  if (openDetails.has(id)) openDetails.delete(id)
-  else openDetails.add(id)
+const open = reactive(new Set())
+function toggle(id) { open.has(id) ? open.delete(id) : open.add(id) }
+
+const ICONS = {
+  error: 'mdi-alert-circle',
+  warning: 'mdi-alert',
+  success: 'mdi-check-circle',
+  info: 'mdi-information',
 }
+function icon(sev) { return ICONS[sev] || ICONS.info }
 </script>
 
 <style scoped>
-.text-pre-line {
-  white-space: pre-line;
+.snacks {
+  position: fixed; bottom: 22px; right: 22px; z-index: 70;
+  display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
+  max-width: min(420px, calc(100vw - 44px)); pointer-events: none;
+  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
 }
-.cursor-pointer {
-  cursor: pointer;
+.snack {
+  pointer-events: auto; position: relative; width: 100%;
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 14px 14px 16px; border-radius: 14px;
+  background: rgb(var(--v-theme-surface)); color: rgb(var(--v-theme-on-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), .1);
+  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, .45);
+  border-left: 4px solid var(--c, rgb(var(--v-theme-on-surface)));
+}
+.snack.error { --c: #df4d42; }
+.snack.warning { --c: #d9701a; }
+.snack.success { --c: #1d9d63; }
+.snack.info { --c: #2f6df6; }
+.s-ic { flex: none; color: var(--c); margin-top: 1px; }
+.s-body { flex: 1; min-width: 0; }
+.s-title { font-family: var(--font); font-weight: 800; font-size: 14px; letter-spacing: -.01em; margin-bottom: 2px; }
+.s-msg { font-family: var(--font); font-size: 13.5px; font-weight: 500; line-height: 1.45; color: rgba(var(--v-theme-on-surface), .82); word-break: break-word; }
+.s-more { display: inline-flex; align-items: center; gap: 4px; margin-top: 7px; border: 0; background: transparent; cursor: pointer; font-family: var(--font); font-weight: 700; font-size: 12px; color: var(--c); padding: 2px 4px; border-radius: 6px; }
+.s-more .v-icon { transition: transform .2s; }
+.s-more .v-icon.open { transform: rotate(180deg); }
+.s-details { margin: 8px 0 0; max-height: 180px; overflow: auto; font-family: var(--mono); font-size: 11.5px; line-height: 1.5; color: rgba(var(--v-theme-on-surface), .7); background: rgba(var(--v-theme-on-surface), .05); border-radius: 9px; padding: 9px 11px; white-space: pre-wrap; word-break: break-word; }
+.s-x { flex: none; width: 28px; height: 28px; border: 0; background: transparent; border-radius: 8px; cursor: pointer; display: grid; place-items: center; color: rgba(var(--v-theme-on-surface), .5); transition: background .14s, color .14s; }
+.s-x:hover { background: rgba(var(--v-theme-on-surface), .08); color: rgb(var(--v-theme-on-surface)); }
+
+/* Enter/leave + reflow transitions. */
+.snack-enter-active { transition: transform .28s cubic-bezier(.2, .7, .3, 1), opacity .28s; }
+.snack-leave-active { transition: transform .2s ease, opacity .2s; position: absolute; right: 0; width: 100%; }
+.snack-enter-from { transform: translateX(24px); opacity: 0; }
+.snack-leave-to { transform: translateX(24px); opacity: 0; }
+.snack-move { transition: transform .24s cubic-bezier(.2, .7, .3, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .snack-enter-active, .snack-leave-active, .snack-move { transition: none; }
 }
 </style>

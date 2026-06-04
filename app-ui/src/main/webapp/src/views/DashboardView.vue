@@ -95,7 +95,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useApi, useAuthStore, NodeIcon } from '@ligoj/host'
-import VibrantDataTable from '@2026/components/VibrantDataTable.vue'
+import VibrantDataTable from '@/components/VibrantDataTable.vue'
 
 const api = useApi()
 const auth = useAuthStore()

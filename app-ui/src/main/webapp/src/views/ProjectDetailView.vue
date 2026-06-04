@@ -105,9 +105,9 @@
 import { ref, reactive, computed, onMounted, watch, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi, useAppStore, useI18nStore, NodeIcon, VIcon, PluginFeatures } from '@ligoj/host'
-import ProjectEditDialog from '@2026/views/ProjectEditDialog.vue'
-import SubscribeWizardDialog from '@2026/views/SubscribeWizardDialog.vue'
-import AuditDialog from '@2026/components/AuditDialog.vue'
+import ProjectEditDialog from '@/views/ProjectEditDialog2026.vue'
+import SubscribeWizardDialog from '@/views/SubscribeWizardDialog2026.vue'
+import AuditDialog from '@/components/AuditDialog.vue'
 
 const route = useRoute()
 const router = useRouter()

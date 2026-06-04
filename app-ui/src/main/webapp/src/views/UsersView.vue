@@ -115,7 +115,7 @@ import VibrantDataTable from '../components/VibrantDataTable.vue'
 // Vibrant replacement for the host's (stock-Vuetify) confirm dialog; aliased
 // so the existing <LigojConfirmDialog> tags need no change.
 import LigojConfirmDialog from '../components/VibrantConfirmDialog.vue'
-import UserEditDialog from './UserEditDialog.vue'
+import UserEditDialog from './UserEditDialog2026.vue'
 
 const appStore = useAppStore()
 const api = useApi()
