@@ -40,13 +40,20 @@
             <span class="lr-txt"><span class="lr-title">{{ t('about.github') }}</span><span class="lr-sub">github.com/ligoj/ligoj</span></span>
             <v-icon size="16" class="lr-go">mdi-open-in-new</v-icon>
           </a>
-          <div class="lrow static">
+          <a class="lrow" @click="licenseDialog = true">
             <v-icon size="20" class="lr-ic">mdi-license</v-icon>
             <span class="lr-txt"><span class="lr-title">{{ t('about.license') }}</span><span class="lr-sub">MIT</span></span>
-          </div>
+            <v-icon size="16" class="lr-go">mdi-chevron-right</v-icon>
+          </a>
           <a class="lrow" href="https://www.kloudy.fr/" target="_blank" rel="noopener noreferrer">
             <v-icon size="20" class="lr-ic">mdi-hammer-wrench</v-icon>
-            <span class="lr-txt"><span class="lr-title">{{ t('about.builtBy') }}</span><span class="lr-sub">Kloudy</span></span>
+            <span class="lr-txt">
+              <span class="lr-title">{{ t('about.builtBy') }}</span>
+              <span class="lr-sub d-flex align-center ga-2">
+                <span class="kloudy-name">Kloudy</span>
+                <img :src="brandColor" alt="Kloudy" class="kloudy-logo" />
+              </span>
+            </span>
             <v-icon size="16" class="lr-go">mdi-open-in-new</v-icon>
           </a>
         </div>
@@ -68,13 +75,33 @@
         </div>
       </section>
     </div>
+
+    <v-dialog v-model="licenseDialog" max-width="680" scrollable>
+      <div class="lic" :style="{ '--c': '#8b5cf6' }">
+        <header class="lic-head">
+          <span class="lic-orb"><v-icon size="20">mdi-license</v-icon></span>
+          <div class="lic-htxt">
+            <h3>{{ t('about.license') }} — MIT</h3>
+            <p>Ligoj</p>
+          </div>
+          <button class="lic-x" :aria-label="t('common.close')" @click="licenseDialog = false">
+            <v-icon size="20">mdi-close</v-icon>
+          </button>
+        </header>
+        <div class="lic-body"><pre class="ligoj-license">{{ licenseText }}</pre></div>
+        <footer class="lic-foot">
+          <button class="lic-btn" @click="licenseDialog = false">{{ t('common.close') }}</button>
+        </footer>
+      </div>
+    </v-dialog>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore, useAuthStore, useI18nStore } from '@ligoj/host'
+import brandColor from '@/assets/brand.png'
 
 const router = useRouter()
 const app = useAppStore()
@@ -93,6 +120,34 @@ const build = computed(() => {
   }
 })
 function go(path) { router.push(path) }
+
+const licenseDialog = ref(false)
+
+// Inlined MIT license text — kept here so the About view does not have
+// to fetch the LICENSE file from the backend (works offline / in dev).
+const LICENSE_TEMPLATE = (name) => `MIT License
+
+Copyright (c) ${name} Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.`
+
+const licenseText = computed(() => LICENSE_TEMPLATE(appName.value))
 
 onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: t('about.title', { name: appName.value }) }]))
 </script>
@@ -143,4 +198,49 @@ onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: 
 .lr-title { font-family: var(--font); font-weight: 700; font-size: 13.5px; color: var(--ink); }
 .lr-sub { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lr-go { color: var(--ink-3); flex: none; }
+.kloudy-name { font-weight: 800; color: #d9701a; }
+.kloudy-logo {
+  height: 1.1em;
+  width: auto;
+  vertical-align: middle;
+}
+/* License dialog — reskinned to match the Vibrant card language */
+.lic {
+  --surface: rgb(var(--v-theme-surface));
+  --card: rgb(var(--v-theme-surface));
+  --ink: rgb(var(--v-theme-on-surface));
+  --ink-3: rgba(var(--v-theme-on-surface), .55);
+  --border: rgba(var(--v-theme-on-surface), .12);
+  --hover: rgba(var(--v-theme-on-surface), .06);
+  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  max-height: 82vh;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--card)), var(--card));
+  box-shadow: 0 32px 64px -24px color-mix(in srgb, var(--c) 45%, transparent);
+  overflow: hidden;
+}
+.lic-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.lic-orb { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
+.lic-htxt { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.lic-htxt h3 { font-family: var(--font); font-weight: 800; font-size: 17px; margin: 0; letter-spacing: -.02em; }
+.lic-htxt p { margin: 1px 0 0; font-size: 12px; color: var(--ink-3); font-weight: 600; }
+.lic-x { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border: 0; border-radius: 10px; background: transparent; color: var(--ink-3); cursor: pointer; transition: background .14s, color .14s; }
+.lic-x:hover { background: var(--hover); color: var(--ink); }
+.lic-body { padding: 16px 18px; overflow-y: auto; }
+.lic-foot { display: flex; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--border); }
+.lic-btn { font-family: var(--font); font-weight: 700; font-size: 13px; color: var(--ink); padding: 8px 16px; border: 1px solid var(--border); border-radius: 10px; background: transparent; cursor: pointer; transition: background .14s, border-color .14s; }
+.lic-btn:hover { background: var(--hover); border-color: color-mix(in srgb, var(--c) 35%, var(--border)); }
+.ligoj-license {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
 </style>
