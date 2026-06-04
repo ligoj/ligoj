@@ -3,52 +3,20 @@ import { useAuthStore } from '@/stores/auth.js'
 import ProfileView from '@/views/ProfileView.vue'
 import AboutView from '@/views/AboutView.vue'
 import PluginView from '@/views/PluginView.vue'
-import DashboardView from '@/views/DashboardView.vue'
-import ProjectsView from '@/views/ProjectsView.vue'
-import ProjectDetailView from '@/views/ProjectDetailView.vue'
-import UsersView from '@/views/UsersView.vue'
-import GroupsView from '@/views/GroupsView.vue'
-import CompaniesView from '@/views/CompaniesView.vue'
-import DelegatesView from '@/views/DelegatesView.vue'
-import ScopesView from '@/views/ScopesView.vue'
-import SystemNodesView from '@/views/SystemNodesView.vue'
-import SystemConfigurationView from '@/views/SystemConfigurationView.vue'
-import SystemCacheView from '@/views/SystemCacheView.vue'
-import SystemBenchView from '@/views/SystemBenchView.vue'
-import SystemInfoView from '@/views/SystemInfoView.vue'
-import SystemPluginsView from '@/views/SystemPluginsView.vue'
-import SystemRolesView from '@/views/SystemRolesView.vue'
-import SystemUsersView from '@/views/SystemUsersView.vue'
-import ApiHomeView from '@/views/ApiHomeView.vue'
-import ApiTokenView from '@/views/ApiTokenView.vue'
 
+// Host shell routes only. Every domain screen (dashboard `/`, `/project*`,
+// `/id/*`, `/system/*`, `/api*`) is now owned by a plugin and registered
+// through `install({ router })` at load time — see plugin-ui / plugin-id.
+// `main.js` awaits `loadAllPlugins(REQUIRED_PLUGINS)` BEFORE `app.use(router)`
+// and `mount`, so those plugin routes exist by the time the first navigation
+// resolves. The catch-all keeps any not-yet-registered path falling back to
+// the lazy plugin loader.
 const routes = [
-  { path: '/', name: 'home', component: DashboardView },
   { path: '/profile', name: 'profile', component: ProfileView },
   { path: '/about', name: 'about', component: AboutView },
 
-  { path: '/project', name: 'projects', component: ProjectsView },
-  { path: '/project/:id', name: 'project-detail', component: ProjectDetailView },
-
-  { path: '/id/user', name: 'users', component: UsersView },
-  { path: '/id/group', name: 'groups', component: GroupsView },
-  { path: '/id/company', name: 'companies', component: CompaniesView },
-  { path: '/id/delegate', name: 'delegates', component: DelegatesView },
-  { path: '/id/scope', name: 'scopes', component: ScopesView },
-
-  { path: '/system/node', name: 'system-nodes', component: SystemNodesView },
-  { path: '/system/configuration', name: 'system-config', component: SystemConfigurationView },
-  { path: '/system/cache', name: 'system-cache', component: SystemCacheView },
-  { path: '/system/bench', name: 'system-bench', component: SystemBenchView },
-  { path: '/system/information', name: 'system-info', component: SystemInfoView },
-  { path: '/system/plugin', name: 'system-plugins', component: SystemPluginsView },
-  { path: '/system/role', name: 'system-roles', component: SystemRolesView },
-  { path: '/system/user', name: 'system-users', component: SystemUsersView },
-
-  { path: '/api', name: 'api-home', component: ApiHomeView },
-  { path: '/api/token', name: 'api-token', component: ApiTokenView },
-
-  // Catch-all: any unknown route falls back to the plugin loader.
+  // Catch-all: anything not registered by a plugin falls back to the
+  // plugin loader (which lazy-loads the owning plugin, or 404s cleanly).
   { path: '/:pathMatch(.*)*', name: 'not-found', component: PluginView },
 ]
 

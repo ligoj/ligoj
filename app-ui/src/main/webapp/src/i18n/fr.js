@@ -473,4 +473,37 @@ export default {
   'common.copied': 'Copié !',
   'common.operation': 'Opération',
   'common.trigger': 'Déclencher',
+
+  // 2026 redesign: shared import-progress label
+  'common.importing': "Import en cours…",
+
+  // 2026 redesign: shared audit/preview/table chrome
+  'common.audit': "Audit",
+  'common.auditTitle': "Données d'audit",
+  'common.createdBy': "Créé par",
+  'common.createdDate': "Créé le",
+  'common.lastModifiedBy': "Modifié par",
+  'common.lastModifiedDate': "Modifié le",
+  'common.noData': "Aucune donnée",
+  'common.preview': "aperçu",
+  'common.reduce': "Réduire",
+  'subscription.deleteConfirm': "Supprimer cette souscription ?",
+
+  // 2026 redesign: dynamic chrome keys (subscription.status.*, theme, notFound, pager)
+  'subscription.status.ok': "actif",
+  'subscription.status.warn': "instable",
+  'subscription.status.err': "hors-ligne",
+  'subscription.status.idle': "inactif",
+  'common.detailsToggle': "Détails",
+  'common.dismiss': "Fermer",
+  'profile.themeLight': "Clair",
+  'profile.themeDark': "Sombre",
+  'notFound.title': "Page introuvable",
+  'notFound.message': "La page demandée n'existe pas ou a été déplacée.",
+  'notFound.back': "Retour à l'accueil",
+  'about.subtitle': "Version, stack technique et liens du projet",
+  'common.rows': "Lignes",
+  'common.of': "sur",
+  'common.previous': "Précédent",
+  'common.next': "Suivant",
 }

@@ -95,8 +95,7 @@ export default defineComponent({
 
     return () => {
       // Touch the tick so the render function tracks lazy-load completion.
-      // eslint-disable-next-line no-unused-expressions
-      loadTick.value
+      void loadTick.value
       const id = nodePluginId(props.subscription?.node)
       if (!id) return null
       const plugin = registry.get(id)

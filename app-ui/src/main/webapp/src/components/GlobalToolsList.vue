@@ -66,8 +66,7 @@ export default defineComponent({
 
     return () => {
       // Touch the tick so reactivity tracks lazy-load completion.
-      // eslint-disable-next-line no-unused-expressions
-      loadTick.value
+      void loadTick.value
       const nodes = []
       for (const tool of auth.globalTools || []) {
         const pluginId = pluginIdForTool(tool)

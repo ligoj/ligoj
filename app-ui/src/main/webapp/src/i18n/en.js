@@ -482,4 +482,37 @@ export default {
   'common.copied': 'Copied!',
   'common.operation': 'Operation',
   'common.trigger': 'Trigger',
+
+  // 2026 redesign: shared import-progress label
+  'common.importing': "Importing…",
+
+  // 2026 redesign: shared audit/preview/table chrome
+  'common.audit': "Audit",
+  'common.auditTitle': "Audit data",
+  'common.createdBy': "Created by",
+  'common.createdDate': "Created on",
+  'common.lastModifiedBy': "Modified by",
+  'common.lastModifiedDate': "Modified on",
+  'common.noData': "No data",
+  'common.preview': "preview",
+  'common.reduce': "Collapse",
+  'subscription.deleteConfirm': "Delete this subscription?",
+
+  // 2026 redesign: dynamic chrome keys (subscription.status.*, theme, notFound, pager)
+  'subscription.status.ok': "up",
+  'subscription.status.warn': "unstable",
+  'subscription.status.err': "down",
+  'subscription.status.idle': "idle",
+  'common.detailsToggle': "Details",
+  'common.dismiss': "Dismiss",
+  'profile.themeLight': "Light",
+  'profile.themeDark': "Dark",
+  'notFound.title': "Page not found",
+  'notFound.message': "The page you are looking for doesn't exist or has moved.",
+  'notFound.back': "Back to home",
+  'about.subtitle': "Version, stack and project links",
+  'common.rows': "Rows",
+  'common.of': "of",
+  'common.previous': "Previous",
+  'common.next': "Next",
 }

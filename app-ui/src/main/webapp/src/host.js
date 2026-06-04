@@ -26,6 +26,16 @@ export { default as LigojConfirmDialog } from './components/LigojConfirmDialog.v
 export { default as NodeIcon, nodeIcon } from './components/NodeIcon.vue'
 export { default as NodeModeChip } from './components/NodeModeChip.vue'
 export { default as PluginFeatures } from './components/PluginFeatures.vue'
+// 2026 "Vibrant" shared primitives. They live in the host (not a plugin)
+// because BOTH plugin-ui and plugin-id consume them and a plugin cannot
+// import from a sibling plugin — so the host owns them and re-exports here,
+// same as LigojDataTable / LigojConfirmDialog above. VibrantDataTable is the
+// presentation-only table (the caller keeps its own useDataTable);
+// VibrantConfirmDialog is a drop-in for LigojConfirmDialog (same
+// props/slots/events); LigojIcon is the compact-mode-aware <v-icon> wrapper.
+export { default as VibrantDataTable } from './components/VibrantDataTable.vue'
+export { default as VibrantConfirmDialog } from './components/VibrantConfirmDialog.vue'
+export { default as LigojIcon } from './components/LigojIcon.vue'
 export { nodeType, isInstance, nodePluginId } from './utils/nodeType.js'
 // Registry lookup so a plugin can collaborate with sibling/sub-plugins
 // (e.g. `plugin-id` delegating to `plugin-id-ldap` for tool-specific row

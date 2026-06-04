@@ -8,9 +8,6 @@ import { loadAllPlugins } from './plugins/loader.js'
 import { registerBuiltinPlugins } from './plugins/index.js'
 import { bootCompact } from './plugins/styles.js'
 import { bootPreset } from './plugins/presets.js'
-import { useI18nStore } from './stores/i18n.js'
-import plugin2026Fr from './i18n/plugin-id-fr.js'
-import plugin2026En from './i18n/plugin-id-en.js'
 
 // Apply the persisted theme preset (color palette + shape style) and
 // the orthogonal compact toggle BEFORE the SPA mounts so the first
@@ -28,11 +25,10 @@ app.use(pinia)
 setActivePinia(pinia)
 app.use(i18n)
 
-// Merge the 2026 redesign i18n bundles (same pattern as the standalone
-// app-ui-2026 boot), now that pinia is active.
-const i18nStore = useI18nStore()
-i18nStore.merge(plugin2026Fr, 'fr')
-i18nStore.merge(plugin2026En, 'en')
+// Domain i18n now ships WITH each plugin: plugin-id / plugin-ui (and the
+// other plugins) merge their own en/fr bundles in `install()`. The host
+// keeps only the generic keys in `i18n/{en,fr}.js`. The old
+// `i18n/plugin-id-*.js` monolith merged here is gone.
 
 // Built-in plugin stubs (bundled with the host).
 registerBuiltinPlugins()
