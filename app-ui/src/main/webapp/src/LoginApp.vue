@@ -1,10 +1,31 @@
+<!--
+  LoginApp2026 — 2026 "Vibrant" re-skin of the login screen.
+
+  PILOT of the UI 2026 redesign (feature/ui-2026). The <template> and
+  <script setup> are DUPLICATED verbatim from LoginApp.vue so all the
+  real behaviour is preserved (login / recovery / reset modes, CAPTCHA,
+  field validation, toasts, OIDC short-circuit, locale switch). Only the
+  <style> is reworked to the Vibrant design. The original LoginApp.vue is
+  left untouched and remains the default login served by the backend;
+  this variant is reachable via its own Vite entry (login-2026.html).
+-->
 <template>
   <main class="login-bg">
     <section class="card">
       <header class="card-head">
-        <select class="locale-select" aria-label="Language" :value="locale" @change="setLocale($event.target.value)">
-          <option v-for="loc in LOCALES" :key="loc.code" :value="loc.code">{{ loc.flag }} {{ loc.label }}</option>
-        </select>
+        <div class="locale-sel" :class="{ open: langOpen }">
+          <button type="button" class="locale-btn" aria-label="Language" @click="langOpen = !langOpen">
+            <span class="lflag">{{ currentLoc.flag }}</span>
+            <span class="llabel">{{ currentLoc.label }}</span>
+            <span class="lcaret">▾</span>
+          </button>
+          <div v-if="langOpen" class="locale-menu">
+            <button v-for="loc in LOCALES" :key="loc.code" type="button" class="locale-opt" :class="{ sel: loc.code === locale }" @click="pickLocale(loc.code)">
+              <span class="lflag">{{ loc.flag }}</span><span class="llabel">{{ loc.label }}</span>
+              <span v-if="loc.code === locale" class="lok">✓</span>
+            </button>
+          </div>
+        </div>
         <img src="@/assets/logo.svg" alt="Ligoj" class="logo" />
         <p class="subtitle">{{ msg['title-' + mode] }}</p>
       </header>
@@ -87,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 
 const LOCALES = [
   { code: 'en', label: 'English', flag: '\u{1F1EC}\u{1F1E7}' /* 🇬🇧 */ },
@@ -227,6 +248,12 @@ function setLocale(loc) {
     document.documentElement.lang = loc
   }
 }
+
+/* Custom language picker (replaces the native <select>). */
+const langOpen = ref(false)
+const currentLoc = computed(() => LOCALES.find((l) => l.code === locale.value) || LOCALES[0])
+function pickLocale(code) { setLocale(code); langOpen.value = false }
+function onDocClick(e) { if (!e.target.closest('.locale-sel')) langOpen.value = false }
 
 const formRef = ref(null)
 const mode = ref('login')
@@ -458,6 +485,7 @@ onMounted(async () => {
   // Reflect the active locale on <html lang> for accessibility / spell-check.
   if (typeof document !== 'undefined') {
     document.documentElement.lang = locale.value
+    document.addEventListener('click', onDocClick)
   }
 
   const hash = window.location.hash || ''
@@ -536,14 +564,31 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* ===== 2026 "Vibrant" theme — self-contained (pre-auth page) ===== */
 * {
   box-sizing: border-box;
 }
 
 .login-bg {
-  /* Pin to the viewport exactly, not min-height — combined with the
-   * unscoped body reset below this prevents the page-level vertical
-   * scrollbar that the default 8 px body margin used to produce. */
+  --bg: #f4f1ec;
+  --surface: #fff;
+  --border: #e9e3d8;
+  --border-2: #ddd5c6;
+  --ink: #1c1a17;
+  --ink-2: #5a554c;
+  --ink-3: #8d877b;
+  --ink-4: #b4ad9f;
+  --btn1: #ff9436;
+  --btn2: #ff5a52;
+  --primary: #27348a;
+  --ok: #1d9d63;
+  --err: #df4d42;
+  --info: #2f6df6;
+  --warn: #e0901a;
+  --font: "Bricolage Grotesque", system-ui, sans-serif;
+  --sys: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  position: relative;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -551,102 +596,294 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
-  color: #222;
+  background:
+    radial-gradient(700px 420px at 12% 0%, color-mix(in srgb, var(--btn1) 22%, transparent), transparent 55%),
+    radial-gradient(700px 480px at 100% 8%, color-mix(in srgb, var(--primary) 28%, transparent), transparent 55%),
+    var(--bg);
+  font-family: var(--sys);
+  color: var(--ink);
+}
+
+/* drifting aurora blobs */
+.login-bg::before,
+.login-bg::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+  opacity: .45;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.login-bg::before {
+  width: 440px;
+  height: 440px;
+  background: var(--btn1);
+  top: -150px;
+  left: -110px;
+  animation: blob1 15s ease-in-out infinite;
+}
+
+.login-bg::after {
+  width: 500px;
+  height: 500px;
+  background: var(--primary);
+  bottom: -190px;
+  right: -130px;
+  animation: blob2 19s ease-in-out infinite;
+}
+
+@keyframes blob1 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(70px, 46px) scale(1.12);
+  }
+}
+
+@keyframes blob2 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-54px, -40px) scale(1.08);
+  }
 }
 
 .card {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 420px;
-  /* The card may grow tall in reset mode (extra password + captcha
-   * fields). Cap it at the viewport and let scrolling happen inside
-   * the card body — the outer page never scrolls. */
   max-height: calc(100vh - 48px);
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 30px 70px -30px rgba(28, 26, 23, .45);
   overflow: hidden;
+  animation: rise .5s cubic-bezier(.2, .7, .3, 1);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .card-head {
   position: relative;
-  padding: 24px 24px 0;
+  padding: 30px 28px 6px;
   text-align: center;
 }
 
-.locale-select {
+.locale-sel {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 0.8rem;
-  color: #333;
-  cursor: pointer;
-  line-height: 1.4;
-  /* Native browser chrome looks fine — no need to style the arrow. */
+  top: 14px;
+  right: 14px;
+  z-index: 5;
 }
 
-.locale-select:focus {
-  outline: none;
-  border-color: #1a237e;
-  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
+.locale-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--sys);
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+
+.locale-btn:hover {
+  border-color: var(--border-2);
+}
+
+.lflag {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.lcaret {
+  color: var(--ink-3);
+  font-size: .7rem;
+  transition: transform .2s;
+}
+
+.locale-sel.open .lcaret {
+  transform: rotate(180deg);
+}
+
+.locale-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 156px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  box-shadow: 0 16px 36px -14px rgba(0, 0, 0, .3);
+  padding: 5px;
+  animation: lmenu .12s ease;
+}
+
+@keyframes lmenu {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.locale-opt {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--ink);
+  font-family: var(--sys);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.locale-opt:hover {
+  background: #faf7f1;
+}
+
+.locale-opt.sel {
+  color: var(--btn2);
+}
+
+.llabel {
+  white-space: nowrap;
+}
+
+.lok {
+  margin-left: auto;
+  color: var(--btn2);
+  font-weight: 800;
 }
 
 .logo {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
+  animation: floatY 4.5s ease-in-out infinite;
 }
 
-h1 {
-  margin: 8px 0 4px;
-  font-size: 1.5rem;
-  color: #1a237e;
+@keyframes floatY {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-7px);
+  }
 }
 
 .subtitle {
-  margin: 0 0 8px;
-  color: #666;
-  font-size: 0.9rem;
+  font-family: var(--font);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  font-size: 1.45rem;
+  color: var(--ink);
+  margin: 14px 0 0;
 }
 
 .card-body {
-  padding: 16px 24px 24px;
-  /* Grows to fill the card and scrolls internally if the form (e.g.
-   * reset mode with extra fields) overflows the viewport. */
+  padding: 18px 28px 26px;
   flex: 1 1 auto;
   overflow-y: auto;
 }
 
+/* staggered reveal of form pieces */
+.card-body>.alert,
+.field,
+.submit,
+.links {
+  opacity: 0;
+  animation: fadeUp .5s cubic-bezier(.2, .7, .3, 1) forwards;
+}
+
+.field:nth-of-type(1) {
+  animation-delay: .08s;
+}
+
+.field:nth-of-type(2) {
+  animation-delay: .15s;
+}
+
+.field:nth-of-type(3) {
+  animation-delay: .22s;
+}
+
+.field:nth-of-type(4) {
+  animation-delay: .29s;
+}
+
+.submit {
+  animation-delay: .30s;
+}
+
+.links {
+  animation-delay: .38s;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .alert {
   margin: 0 0 16px;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 11px 13px;
+  border-radius: 11px;
+  font-size: .9rem;
   border: 1px solid transparent;
 }
 
 .alert-info {
-  background: #e3f2fd;
-  color: #0277bd;
-  border-color: #b3e5fc;
-}
-
-.alert-success {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border-color: #c8e6c9;
-}
-
-.alert-error {
-  background: #ffebee;
-  color: #c62828;
-  border-color: #ffcdd2;
+  background: color-mix(in srgb, var(--info) 10%, var(--surface));
+  color: #1b4fd6;
+  border-color: color-mix(in srgb, var(--info) 25%, transparent);
 }
 
 .field {
@@ -656,34 +893,37 @@ h1 {
 
 .label {
   display: block;
-  margin-bottom: 4px;
-  font-size: 0.85rem;
-  color: #555;
+  margin-bottom: 6px;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--ink-2);
 }
 
 input[type="text"],
 input[type="password"],
 input[type="email"] {
   width: 100%;
-  padding: 10px 12px;
+  padding: 11px 13px;
   font-size: 1rem;
-  border: 1px solid #bbb;
-  border-radius: 6px;
-  background: #fff;
-  color: #222;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: #fdfcfa;
+  color: var(--ink);
+  transition: border-color .15s, box-shadow .15s, background .15s;
+  font-family: var(--sys);
 }
 
 input:focus {
   outline: none;
-  border-color: #1a237e;
-  box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
+  border-color: var(--btn1);
+  box-shadow: 0 0 0 4px rgba(255, 148, 54, .15);
+  background: var(--surface);
 }
 
 input:disabled,
 input[readonly] {
-  background: #f5f5f5;
-  color: #888;
+  background: #f3efe7;
+  color: var(--ink-3);
 }
 
 .input-wrap {
@@ -693,22 +933,20 @@ input[readonly] {
 
 .toggle {
   position: absolute;
-  right: 4px;
+  right: 6px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
   padding: 6px 8px;
-  color: #666;
+  color: var(--ink-3);
   line-height: 0;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .toggle:hover {
-  color: #1a237e;
+  color: var(--btn2);
 }
 
 .toggle-icon {
@@ -717,16 +955,17 @@ input[readonly] {
 
 .field-hint {
   display: block;
-  margin-top: 4px;
-  font-size: 0.8rem;
-  color: #777;
+  margin-top: 5px;
+  font-size: .8rem;
+  color: var(--ink-3);
 }
 
 .field-error {
   display: block;
-  margin-top: 4px;
-  font-size: 0.8rem;
-  color: #c62828;
+  margin-top: 5px;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--err);
 }
 
 .captcha-field {
@@ -741,61 +980,89 @@ input[readonly] {
 }
 
 .captcha-img {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  height: 42px;
   min-width: 150px;
   cursor: pointer;
 }
 
 .icon-btn {
-  background: none;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 32px;
-  height: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  width: 34px;
+  height: 34px;
   font-size: 1rem;
   cursor: pointer;
-  color: #555;
+  color: var(--ink-2);
 }
 
 .icon-btn:hover {
-  background: #f0f0f0;
+  background: #faf7f1;
 }
 
 .submit {
+  position: relative;
+  overflow: hidden;
   width: 100%;
-  padding: 12px;
+  padding: 13px;
+  font-family: var(--font);
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 800;
   color: #fff;
-  background: #1a237e;
+  background: linear-gradient(135deg, var(--btn1), var(--btn2));
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background 0.15s;
+  box-shadow: 0 14px 28px -12px rgba(255, 90, 82, .7);
+  transition: filter .15s;
+  margin-top: 4px;
 }
 
 .submit:hover:not(:disabled) {
-  background: #0d47a1;
+  filter: brightness(1.05);
 }
 
 .submit:disabled {
-  opacity: 0.65;
+  opacity: .65;
   cursor: not-allowed;
+}
+
+.submit::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .4), transparent);
+  transform: skewX(-20deg);
+  animation: shine 3.6s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0% {
+    left: -60%;
+  }
+
+  45%,
+  100% {
+    left: 150%;
+  }
 }
 
 .spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, .45);
   border-top-color: #fff;
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: spin .7s linear infinite;
 }
 
 @keyframes spin {
@@ -805,15 +1072,17 @@ input[readonly] {
 }
 
 .links {
-  margin-top: 12px;
+  margin-top: 14px;
   text-align: center;
 }
 
 .link {
   background: none;
   border: none;
-  color: #0d47a1;
-  font-size: 0.9rem;
+  color: var(--btn2);
+  font-family: var(--sys);
+  font-weight: 700;
+  font-size: .9rem;
   cursor: pointer;
   padding: 4px 8px;
 }
@@ -843,11 +1112,12 @@ input[readonly] {
   min-width: 260px;
   max-width: 420px;
   padding: 12px 14px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  font-size: .9rem;
+  font-weight: 600;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .4);
   color: #fff;
-  animation: toast-in 0.18s ease-out;
+  animation: toast-in .18s ease-out;
 }
 
 .toast-message {
@@ -864,7 +1134,7 @@ input[readonly] {
   font-size: 1.1rem;
   line-height: 1;
   padding: 0 2px;
-  opacity: 0.85;
+  opacity: .85;
 }
 
 .toast-close:hover {
@@ -872,19 +1142,19 @@ input[readonly] {
 }
 
 .toast--error {
-  background: #c62828;
+  background: var(--err);
 }
 
 .toast--success {
-  background: #2e7d32;
+  background: var(--ok);
 }
 
 .toast--info {
-  background: #0277bd;
+  background: var(--info);
 }
 
 .toast--warning {
-  background: #ef6c00;
+  background: var(--warn);
 }
 
 @keyframes toast-in {
@@ -898,13 +1168,27 @@ input[readonly] {
     opacity: 1;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+
+  .login-bg::before,
+  .login-bg::after,
+  .logo,
+  .submit::after,
+  .card,
+  .card-body>.alert,
+  .field,
+  .submit,
+  .links {
+    animation: none;
+    opacity: 1;
+  }
+}
 </style>
 
 <!--
   Unscoped: zero out the default html/body margin so .login-bg's 100vh
-  fits the viewport exactly. Without this, the browser adds 8 px of
-  body margin and the page gets a vertical scrollbar regardless of
-  what we do to the inner layout.
+  fits the viewport exactly (same reset as LoginApp.vue).
 -->
 <style>
 html,

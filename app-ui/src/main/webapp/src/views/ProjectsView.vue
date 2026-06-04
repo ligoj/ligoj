@@ -25,7 +25,8 @@
       </label>
     </div>
 
-    <VibrantDataTable :headers="headers" :items="filtered" :items-length="filtered.length" :loading="loading" item-value="id" :empty-text="t('common.noData') || 'Aucune donnée'" @row-click="openProject">
+    <VibrantDataTable :headers="headers" :items="filtered" :items-length="filtered.length" :loading="loading" item-value="id" :empty-text="t('common.noData') || 'Aucune donnée'"
+      @row-click="openProject">
       <template #cell.name="{ item }">
         <div class="name-cell">
           <div class="folder-glyph"><v-icon color="#2f6df6" size="20">mdi-folder</v-icon></div>
@@ -60,15 +61,8 @@
 
     <ProjectEditDialog v-model="editDialog" :project="editTarget" @saved="onSaved" />
 
-    <VibrantConfirmDialog
-      v-model="deleteDialog"
-      :title="t('project.deleteTitle') || 'Supprimer le projet'"
-      icon="mdi-folder-remove"
-      confirm-color="error"
-      :confirm-label="t('common.delete')"
-      :loading="deleting"
-      @confirm="confirmDelete"
-    >
+    <VibrantConfirmDialog v-model="deleteDialog" :title="t('project.deleteTitle') || 'Supprimer le projet'" icon="mdi-folder-remove" confirm-color="error" :confirm-label="t('common.delete')"
+      :loading="deleting" @confirm="confirmDelete">
       <span>{{ t('project.deleteConfirm', { name: deleteTarget?.name }) || `Supprimer le projet « ${deleteTarget?.name} » ?` }}</span>
     </VibrantConfirmDialog>
 
@@ -80,7 +74,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi, useAppStore, useI18nStore } from '@ligoj/host'
-import ProjectEditDialog from '@/views/ProjectEditDialog2026.vue'
+import ProjectEditDialog from '@/views/ProjectEditDialog.vue'
 import VibrantDataTable from '@/components/VibrantDataTable.vue'
 import VibrantConfirmDialog from '@/components/VibrantConfirmDialog.vue'
 
@@ -114,12 +108,12 @@ const filtered = computed(() => {
 })
 
 const headers = computed(() => [
-  { key: 'name',         label: t('common.name'),       sortable: true },
-  { key: 'description',  label: t('common.description'), sortable: false },
-  { key: 'teamLeader',   label: t('project.teamLeader') || 'Team leader', sortable: true },
-  { key: 'createdDate',  label: t('common.createdDate') || 'Created',     sortable: true },
-  { key: 'subs',         label: t('project.subsShort'), sortable: true, align: 'center', width: '90px' },
-  { key: 'actions',      label: '',                     sortable: false, align: 'end',    width: '120px' },
+  { key: 'name', label: t('common.name'), sortable: true },
+  { key: 'description', label: t('common.description'), sortable: false },
+  { key: 'teamLeader', label: t('project.teamLeader') || 'Team leader', sortable: true },
+  { key: 'createdDate', label: t('common.createdDate') || 'Created', sortable: true },
+  { key: 'subs', label: t('project.subsShort'), sortable: true, align: 'center', width: '90px' },
+  { key: 'actions', label: '', sortable: false, align: 'end', width: '120px' },
 ])
 
 /* Map a raw Ligoj project (DataTables row) to the card's shape. */
@@ -223,33 +217,210 @@ onMounted(() => {
   --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
   color: var(--ink);
 }
-.ph { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
-.ph-txt h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.03em; font-size: 28px; margin: 0; color: var(--ink); }
-.ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
-.ph-txt .sub b { color: var(--ink-2); font-family: var(--mono); }
-.btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px; padding: 11px 17px; border-radius: 12px; cursor: pointer; border: 0; color: #fff; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55); transition: filter .15s; }
-.btn:hover { filter: brightness(1.04); }
 
-.toolbar { margin-bottom: 18px; }
-.search { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 520px; padding: 9px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-3); transition: border-color .15s, box-shadow .15s; }
-.search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(var(--v-theme-secondary), .15); }
-.search input { flex: 1; border: 0; outline: 0; background: transparent; font-family: var(--font); font-size: 14px; color: var(--ink); }
-.search input::placeholder { color: var(--ink-3); }
+.ph {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.ph-txt h1 {
+  font-family: var(--font);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  font-size: 28px;
+  margin: 0;
+  color: var(--ink);
+}
+
+.ph-txt .sub {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.ph-txt .sub b {
+  color: var(--ink-2);
+  font-family: var(--mono);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 11px 17px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 0;
+  color: #fff;
+  background: linear-gradient(135deg, #ff9436, #ff5a52);
+  box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55);
+  transition: filter .15s;
+}
+
+.btn:hover {
+  filter: brightness(1.04);
+}
+
+.toolbar {
+  margin-bottom: 18px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 9px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-3);
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(var(--v-theme-secondary), .15);
+}
+
+.search input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.search input::placeholder {
+  color: var(--ink-3);
+}
 
 /* Table cells (folder glyph + name stack, team leader pill, subs chip). */
-.name-cell { display: inline-flex; align-items: center; gap: 12px; }
-.folder-glyph { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, #2f6df6 12%, var(--card)); box-shadow: 0 2px 6px -3px rgba(47, 109, 246, .35); flex: none; }
-.name-stack { display: flex; flex-direction: column; min-width: 0; }
-.name-main { font-family: var(--font); font-weight: 800; font-size: 14px; color: var(--ink); letter-spacing: -.02em; }
-.name-key { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
-.tl-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ink-2); }
-.subs-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; padding: 3px 9px; border-radius: 999px; background: var(--pill); font-family: var(--mono); font-weight: 700; font-size: 12px; color: var(--ink-2); }
-.muted { color: var(--ink-3); }
-.mono { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
-.iconbtn { width: 32px; height: 32px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-3); transition: background .15s, color .15s; }
-.iconbtn:hover { background: var(--hover); color: var(--ink); }
-.iconbtn.danger:hover { color: rgb(var(--v-theme-error)); }
+.name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
 
-.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--ink); color: var(--surface); padding: 11px 18px; border-radius: 12px; font-weight: 700; font-size: 14px; z-index: 60; opacity: 0; transition: .25s; pointer-events: none; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .5); }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.folder-glyph {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, #2f6df6 12%, var(--card));
+  box-shadow: 0 2px 6px -3px rgba(47, 109, 246, .35);
+  flex: none;
+}
+
+.name-stack {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name-main {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ink);
+  letter-spacing: -.02em;
+}
+
+.name-key {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.tl-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.subs-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--pill);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.iconbtn {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink-3);
+  transition: background .15s, color .15s;
+}
+
+.iconbtn:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.iconbtn.danger:hover {
+  color: rgb(var(--v-theme-error));
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--ink);
+  color: var(--surface);
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 60;
+  opacity: 0;
+  transition: .25s;
+  pointer-events: none;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .5);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 </style>

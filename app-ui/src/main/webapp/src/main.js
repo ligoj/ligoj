@@ -9,10 +9,8 @@ import { registerBuiltinPlugins } from './plugins/index.js'
 import { bootCompact } from './plugins/styles.js'
 import { bootPreset } from './plugins/presets.js'
 import { useI18nStore } from './stores/i18n.js'
-// 2026 redesign i18n fragments (chrome keys, status labels) merged
-// explicitly so the /next/* views have their labels before mount.
-import plugin2026Fr from './i18n/plugin-id-fr-2026.js'
-import plugin2026En from './i18n/plugin-id-en-2026.js'
+import plugin2026Fr from './i18n/plugin-id-fr.js'
+import plugin2026En from './i18n/plugin-id-en.js'
 
 // Apply the persisted theme preset (color palette + shape style) and
 // the orthogonal compact toggle BEFORE the SPA mounts so the first
@@ -43,9 +41,9 @@ registerBuiltinPlugins()
 // Kept small on purpose — plugins whose absence is recoverable load lazily.
 const REQUIRED_PLUGINS = ['id', 'ui', 'prov']
 
-;(async () => {
-  await loadAllPlugins(REQUIRED_PLUGINS)
-  app.use(vuetify)
-  app.use(router)
-  app.mount('#app')
-})()
+  ; (async () => {
+    await loadAllPlugins(REQUIRED_PLUGINS)
+    app.use(vuetify)
+    app.use(router)
+    app.mount('#app')
+  })()

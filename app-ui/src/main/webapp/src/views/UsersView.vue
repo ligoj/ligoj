@@ -19,7 +19,8 @@
         <button class="btn" @click="openCreate"><v-icon size="18">mdi-plus</v-icon>{{ t('user.new') }}</button>
         <button class="btn-ghost" :disabled="exporting" @click="onExport"><v-icon size="18">mdi-download</v-icon>{{ t('common.export') || 'Exporter' }}</button>
         <button class="btn-ghost" :disabled="importing" @click="importInput?.click()">
-          <span v-if="importing" class="ispin" aria-hidden="true" /><v-icon v-else size="18">mdi-upload</v-icon>{{ importing ? (t('common.importing') || 'Import…') : (t('common.import') || 'Importer') }}
+          <span v-if="importing" class="ispin" aria-hidden="true" /><v-icon v-else size="18">mdi-upload</v-icon>{{ importing ? (t('common.importing') || 'Import…') : (t('common.import') || 'Importer')
+          }}
         </button>
         <input ref="importInput" type="file" accept=".csv,.tsv,text/csv" hidden @change="onImport" />
       </div>
@@ -48,8 +49,8 @@
       {{ t('user.demoMode') }}
     </v-alert>
 
-    <VibrantDataTable v-if="!dt.error.value" :headers="headers" :items="dt.items.value" :items-length="dt.totalItems.value" :loading="dt.loading.value"
-      selectable v-model="selected" item-value="id" default-sort="id" @update:options="loadData" @row-click="(item) => openEdit(item.id)">
+    <VibrantDataTable v-if="!dt.error.value" :headers="headers" :items="dt.items.value" :items-length="dt.totalItems.value" :loading="dt.loading.value" selectable v-model="selected" item-value="id"
+      default-sort="id" @update:options="loadData" @row-click="(item) => openEdit(item.id)">
       <template #cell.id="{ item }">
         <span class="login"><v-icon size="16" class="login-ic">mdi-account-circle</v-icon><span class="mono">{{ item.id }}</span></span>
       </template>
@@ -83,8 +84,11 @@
             <button @click="openEdit(item.id)"><v-icon size="18">mdi-pencil</v-icon>{{ t('user.edit') }}</button>
             <button class="danger" @click="startDelete(item)"><v-icon size="18">mdi-delete</v-icon>{{ t('common.delete') }}</button>
             <div class="sep" />
-            <button @click="startUserAction(item, item.locked ? 'unlock' : 'lock')"><v-icon size="18">{{ item.locked ? 'mdi-lock-open-variant' : 'mdi-lock' }}</v-icon>{{ item.locked ? t('user.unlock') : t('user.lock') }}</button>
-            <button @click="startUserAction(item, item.isolated ? 'restore' : 'isolate')"><v-icon size="18">{{ item.isolated ? 'mdi-account-check' : 'mdi-account-off' }}</v-icon>{{ item.isolated ? t('user.restore') : t('user.isolate') }}</button>
+            <button @click="startUserAction(item, item.locked ? 'unlock' : 'lock')"><v-icon size="18">{{ item.locked ? 'mdi-lock-open-variant' : 'mdi-lock' }}</v-icon>{{ item.locked ? t('user.unlock')
+              :
+              t('user.lock') }}</button>
+            <button @click="startUserAction(item, item.isolated ? 'restore' : 'isolate')"><v-icon size="18">{{ item.isolated ? 'mdi-account-check' : 'mdi-account-off' }}</v-icon>{{ item.isolated ?
+              t('user.restore') : t('user.isolate') }}</button>
             <button @click="startUserAction(item, 'resetPassword')"><v-icon size="18">mdi-lock-reset</v-icon>{{ t('user.resetPassword') }}</button>
           </div>
         </v-menu>
@@ -92,10 +96,12 @@
     </VibrantDataTable>
 
     <!-- Single-user delete: name in bold red via the default slot. -->
-    <LigojConfirmDialog v-model="deleteDialog" :title="t('user.deleteTitle')" :icon="TYPE_ICONS.USER" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmDeleteUser">
+    <LigojConfirmDialog v-model="deleteDialog" :title="t('user.deleteTitle')" :icon="TYPE_ICONS.USER" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting"
+      @confirm="confirmDeleteUser">
       {{ t('user.deleteConfirmBefore') }}<strong class="text-error">{{ deleteTarget?.id }}</strong>{{ t('user.deleteConfirmAfter') }}
     </LigojConfirmDialog>
-    <LigojConfirmDialog v-model="bulkDeleteDialog" :title="t('common.bulkDeleteTitle')" :icon="TYPE_ICONS.USER" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmBulkDelete">
+    <LigojConfirmDialog v-model="bulkDeleteDialog" :title="t('common.bulkDeleteTitle')" :icon="TYPE_ICONS.USER" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting"
+      @confirm="confirmBulkDelete">
       {{ t('common.bulkDeleteConfirmBefore') }}<strong class="text-error">{{ selected.length }}</strong>{{ t('common.bulkDeleteConfirmAfter') }}
     </LigojConfirmDialog>
     <LigojConfirmDialog v-model="actionDialog" :title="t('user.' + actionType)" :icon="TYPE_ICONS.USER" :confirm-label="t('common.confirm')" :loading="actionLoading" @confirm="confirmUserAction">
@@ -115,7 +121,7 @@ import VibrantDataTable from '../components/VibrantDataTable.vue'
 // Vibrant replacement for the host's (stock-Vuetify) confirm dialog; aliased
 // so the existing <LigojConfirmDialog> tags need no change.
 import LigojConfirmDialog from '../components/VibrantConfirmDialog.vue'
-import UserEditDialog from './UserEditDialog2026.vue'
+import UserEditDialog from './UserEditDialog.vue'
 
 const appStore = useAppStore()
 const api = useApi()
@@ -296,60 +302,295 @@ onMounted(() => {
 }
 
 /* Page header (.ph). */
-.ph { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
-.ph-txt h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.03em; font-size: 28px; margin: 0; color: var(--ink); }
-.ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
-.ph-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-
-.btn, .btn-ghost, .btn-danger {
-  display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px;
-  padding: 11px 17px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s, border-color .15s, box-shadow .15s;
+.ph {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
 }
+
+.ph-txt h1 {
+  font-family: var(--font);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  font-size: 28px;
+  margin: 0;
+  color: var(--ink);
+}
+
+.ph-txt .sub {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.ph-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn,
+.btn-ghost,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 11px 17px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: filter .15s, background .15s, border-color .15s, box-shadow .15s;
+}
+
 /* Vibrant brand CTA — warm orange→coral gradient (validated mockup --btn1/--btn2),
    not a cross-hue orange→indigo which read as cheap. Soft, short shadow. */
-.btn { color: #fff; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55); }
-.btn:hover { filter: brightness(1.04); box-shadow: 0 10px 22px -10px rgba(255, 90, 82, .65); }
-.btn-ghost { color: var(--ink-2); background: var(--surface); border-color: var(--border); }
-.btn-ghost:hover:not(:disabled) { border-color: var(--border-2); background: var(--hover); }
-.btn-ghost:disabled { opacity: .55; cursor: default; }
-.ispin { width: 15px; height: 15px; border: 2px solid var(--border-2); border-top-color: var(--ink-2); border-radius: 50%; animation: ispin .7s linear infinite; }
-@keyframes ispin { to { transform: rotate(360deg); } }
-.btn-danger { color: #fff; background: rgb(var(--v-theme-error)); }
-.btn-danger:hover { filter: brightness(1.06); }
+.btn {
+  color: #fff;
+  background: linear-gradient(135deg, #ff9436, #ff5a52);
+  box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55);
+}
+
+.btn:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 10px 22px -10px rgba(255, 90, 82, .65);
+}
+
+.btn-ghost {
+  color: var(--ink-2);
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--border-2);
+  background: var(--hover);
+}
+
+.btn-ghost:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.ispin {
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--border-2);
+  border-top-color: var(--ink-2);
+  border-radius: 50%;
+  animation: ispin .7s linear infinite;
+}
+
+@keyframes ispin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn-danger {
+  color: #fff;
+  background: rgb(var(--v-theme-error));
+}
+
+.btn-danger:hover {
+  filter: brightness(1.06);
+}
 
 /* Toolbar (.toolbar) + search. */
-.toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.tb-sp { flex: 1; }
-.search { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 520px; padding: 9px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-3); transition: border-color .15s, box-shadow .15s; }
-.search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(var(--v-theme-secondary), .15); }
-.search input { flex: 1; border: 0; outline: 0; background: transparent; font-family: var(--font); font-size: 14px; color: var(--ink); }
-.search input::placeholder { color: var(--ink-3); }
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
 
-.bulkbar { display: flex; align-items: center; gap: 12px; }
-.bulk-count { font-weight: 700; font-size: 13px; color: var(--ink-2); }
+.tb-sp {
+  flex: 1;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 9px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-3);
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(var(--v-theme-secondary), .15);
+}
+
+.search input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.search input::placeholder {
+  color: var(--ink-3);
+}
+
+.bulkbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bulk-count {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-2);
+}
 
 /* Cells. */
-.login { display: inline-flex; align-items: center; gap: 8px; }
-.login-ic { color: var(--ink-3); }
-.mono { font-family: var(--mono); font-size: 13px; font-weight: 600; }
-.mails { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 5px; }
-.mailchip { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); background: var(--pill); border: 1px solid var(--border); border-radius: 8px; padding: 3px 9px; }
-.mailchip :deep(.v-icon) { opacity: .6; }
-.groups { display: inline-flex; align-items: center; flex-wrap: nowrap; gap: 5px; overflow: hidden; }
-.chip { display: inline-flex; align-items: center; font-size: 12px; font-weight: 700; color: var(--ink-2); background: var(--pill); border: 1px solid var(--border); border-radius: 20px; padding: 3px 11px; white-space: nowrap; }
-.more { font-size: 12px; font-weight: 700; color: var(--ink-3); }
-.dash { color: var(--ink-3); }
+.login {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-ic {
+  color: var(--ink-3);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mails {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.mailchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: var(--pill);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px 9px;
+}
+
+.mailchip :deep(.v-icon) {
+  opacity: .6;
+}
+
+.groups {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 5px;
+  overflow: hidden;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+  background: var(--pill);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 11px;
+  white-space: nowrap;
+}
+
+.more {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.dash {
+  color: var(--ink-3);
+}
 
 /* Gear button + popmenu (matches mockup .iconbtn / .popmenu). */
-.iconbtn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid transparent; background: transparent; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-2); transition: background .12s; }
-.iconbtn:hover { background: var(--hover); }
+.iconbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink-2);
+  transition: background .12s;
+}
+
+.iconbtn:hover {
+  background: var(--hover);
+}
+
 /* NOTE: v-menu teleports this content to <body>, OUTSIDE the .users scope,
    so the local --surface/--ink/--border vars don't resolve here. Use the
    global Vuetify theme tokens directly, or the menu renders transparent
    ("floating in the background"). */
-.popmenu { min-width: 210px; background: rgb(var(--v-theme-surface)); border: 1px solid rgba(var(--v-theme-on-surface), .12); border-radius: 12px; box-shadow: 0 16px 44px -14px rgba(0, 0, 0, .45); padding: 6px; }
-.popmenu button { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; cursor: pointer; font-family: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif); font-size: 13.5px; font-weight: 600; color: rgb(var(--v-theme-on-surface)); padding: 10px 12px; border-radius: 8px; text-align: left; }
-.popmenu button:hover { background: rgba(var(--v-theme-on-surface), .06); }
-.popmenu button.danger { color: rgb(var(--v-theme-error)); }
-.popmenu .sep { height: 1px; background: rgba(var(--v-theme-on-surface), .12); margin: 5px 4px; }
+.popmenu {
+  min-width: 210px;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), .12);
+  border-radius: 12px;
+  box-shadow: 0 16px 44px -14px rgba(0, 0, 0, .45);
+  padding: 6px;
+}
+
+.popmenu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.popmenu button:hover {
+  background: rgba(var(--v-theme-on-surface), .06);
+}
+
+.popmenu button.danger {
+  color: rgb(var(--v-theme-error));
+}
+
+.popmenu .sep {
+  height: 1px;
+  background: rgba(var(--v-theme-on-surface), .12);
+  margin: 5px 4px;
+}
 </style>

@@ -168,7 +168,6 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         login: resolve(__dirname, 'login.html'),
-        login2026: resolve(__dirname, 'login-2026.html'),
         loginByApiKey: resolve(__dirname, 'login-by-api-key.html'),
         host: resolve(__dirname, 'src/host.js'),
       },
@@ -234,7 +233,6 @@ export default defineConfig({
         // `/ligoj/login/oauth2` proxy below keeps its own settings.
         bypass(req) {
           if (req.url?.startsWith('/ligoj/login.html')) return req.url
-          if (req.url?.startsWith('/ligoj/login-2026.html')) return req.url
           if (req.url?.startsWith('/ligoj/login-by-api-key.html')) return req.url
         },
       },

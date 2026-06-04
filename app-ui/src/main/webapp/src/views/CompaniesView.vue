@@ -37,8 +37,8 @@
       {{ t('user.demoMode') }}
     </v-alert>
 
-    <VibrantDataTable v-if="!dt.error.value" :headers="headers" :items="dt.items.value" :items-length="dt.totalItems.value" :loading="dt.loading.value"
-      selectable v-model="selected" item-value="name" default-sort="name" @update:options="loadData" @row-click="(item) => openDetails(item.name)">
+    <VibrantDataTable v-if="!dt.error.value" :headers="headers" :items="dt.items.value" :items-length="dt.totalItems.value" :loading="dt.loading.value" selectable v-model="selected" item-value="name"
+      default-sort="name" @update:options="loadData" @row-click="(item) => openDetails(item.name)">
       <template #cell.name="{ item }">
         <span class="cname"><v-icon size="16" class="cname-ic">mdi-office-building-outline</v-icon><span>{{ item.name }}</span></span>
       </template>
@@ -78,10 +78,12 @@
       </v-card>
     </v-dialog>
 
-    <LigojConfirmDialog v-model="deleteDialog" :title="t('company.deleteTitle')" :icon="TYPE_ICONS.COMPANY" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmDelete">
+    <LigojConfirmDialog v-model="deleteDialog" :title="t('company.deleteTitle')" :icon="TYPE_ICONS.COMPANY" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting"
+      @confirm="confirmDelete">
       {{ t('company.deleteConfirmBefore') }}<strong class="text-error">{{ deleteTarget?.name }}</strong>{{ t('company.deleteConfirmAfter') }}
     </LigojConfirmDialog>
-    <LigojConfirmDialog v-model="bulkDeleteDialog" :title="t('common.bulkDeleteTitle')" :icon="TYPE_ICONS.COMPANY" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting" @confirm="confirmBulkDelete">
+    <LigojConfirmDialog v-model="bulkDeleteDialog" :title="t('common.bulkDeleteTitle')" :icon="TYPE_ICONS.COMPANY" :confirm-label="t('common.delete')" confirm-color="error" :loading="deleting"
+      @confirm="confirmBulkDelete">
       {{ t('common.bulkDeleteConfirmBefore') }}<strong class="text-error">{{ selected.length }}</strong>{{ t('common.bulkDeleteConfirmAfter') }}
     </LigojConfirmDialog>
   </div>
@@ -93,7 +95,7 @@ import { useRoute } from 'vue-router'
 import { useDataTable, useApi, useAppStore, useErrorStore, useI18nStore } from '@ligoj/host'
 import { TYPE_ICONS } from '../composables/delegateTypes.js'
 import VibrantDataTable from '../components/VibrantDataTable.vue'
-import CompanyEditPanel from '../components/CompanyEditPanel2026.vue'
+import CompanyEditPanel from '../components/CompanyEditPanel.vue'
 import LigojConfirmDialog from '../components/VibrantConfirmDialog.vue'
 
 const route = useRoute()
@@ -184,45 +186,273 @@ onMounted(() => {
   --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
   color: var(--ink);
 }
-.ph { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
-.ph-txt h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.03em; font-size: 28px; margin: 0; color: var(--ink); }
-.ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
-.ph-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.btn, .btn-danger { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px; padding: 11px 17px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: filter .15s; }
-.btn { color: #fff; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55); }
-.btn:hover { filter: brightness(1.04); }
-.btn-danger { color: #fff; background: rgb(var(--v-theme-error)); }
-.btn-danger:hover { filter: brightness(1.06); }
 
-.toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.tb-sp { flex: 1; }
-.search { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 520px; padding: 9px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-3); transition: border-color .15s, box-shadow .15s; }
-.search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(var(--v-theme-secondary), .15); }
-.search input { flex: 1; border: 0; outline: 0; background: transparent; font-family: var(--font); font-size: 14px; color: var(--ink); }
-.search input::placeholder { color: var(--ink-3); }
-.bulkbar { display: flex; align-items: center; gap: 12px; }
-.bulk-count { font-weight: 700; font-size: 13px; color: var(--ink-2); }
+.ph {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
 
-.cname { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
-.cname-ic { color: var(--ink-3); }
-.mono { font-family: var(--mono); font-size: 13px; font-weight: 600; }
-.tagdot { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
-.tagdot .d { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.dash { color: var(--ink-3); }
+.ph-txt h1 {
+  font-family: var(--font);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  font-size: 28px;
+  margin: 0;
+  color: var(--ink);
+}
 
-.iconbtn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid transparent; background: transparent; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-2); transition: background .12s; }
-.iconbtn:hover { background: var(--hover); }
-.popmenu { min-width: 200px; background: rgb(var(--v-theme-surface)); border: 1px solid rgba(var(--v-theme-on-surface), .12); border-radius: 12px; box-shadow: 0 16px 44px -14px rgba(0, 0, 0, .45); padding: 6px; }
-.popmenu button { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; cursor: pointer; font-family: var(--font); font-size: 13.5px; font-weight: 600; color: rgb(var(--v-theme-on-surface)); padding: 10px 12px; border-radius: 8px; text-align: left; }
-.popmenu button:hover { background: rgba(var(--v-theme-on-surface), .06); }
-.popmenu button.danger { color: rgb(var(--v-theme-error)); }
-.popmenu .sep { height: 1px; background: rgba(var(--v-theme-on-surface), .12); margin: 5px 4px; }
+.ph-txt .sub {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
 
-.vmodal { border-radius: 20px !important; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .55) !important; }
-.vmodal-head { display: flex; align-items: center; gap: 13px; padding: 22px 24px 8px; }
-.vmodal-head .mi { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -8px rgba(255, 90, 82, .6); }
-.vmodal-head h3 { font-family: var(--font); font-weight: 800; font-size: 20px; margin: 0; flex: 1; color: var(--ink); letter-spacing: -.02em; }
-.vmodal-head h3 .who { color: #ff5a52; }
-.vmodal-head .x { width: 36px; height: 36px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; display: grid; place-items: center; color: var(--ink-3); }
-.vmodal-head .x:hover { background: var(--hover); color: var(--ink); }
+.ph-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 11px 17px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: filter .15s;
+}
+
+.btn {
+  color: #fff;
+  background: linear-gradient(135deg, #ff9436, #ff5a52);
+  box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55);
+}
+
+.btn:hover {
+  filter: brightness(1.04);
+}
+
+.btn-danger {
+  color: #fff;
+  background: rgb(var(--v-theme-error));
+}
+
+.btn-danger:hover {
+  filter: brightness(1.06);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tb-sp {
+  flex: 1;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 9px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-3);
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(var(--v-theme-secondary), .15);
+}
+
+.search input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.search input::placeholder {
+  color: var(--ink-3);
+}
+
+.bulkbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bulk-count {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.cname {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.cname-ic {
+  color: var(--ink-3);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tagdot {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tagdot .d {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dash {
+  color: var(--ink-3);
+}
+
+.iconbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink-2);
+  transition: background .12s;
+}
+
+.iconbtn:hover {
+  background: var(--hover);
+}
+
+.popmenu {
+  min-width: 200px;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), .12);
+  border-radius: 12px;
+  box-shadow: 0 16px 44px -14px rgba(0, 0, 0, .45);
+  padding: 6px;
+}
+
+.popmenu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.popmenu button:hover {
+  background: rgba(var(--v-theme-on-surface), .06);
+}
+
+.popmenu button.danger {
+  color: rgb(var(--v-theme-error));
+}
+
+.popmenu .sep {
+  height: 1px;
+  background: rgba(var(--v-theme-on-surface), .12);
+  margin: 5px 4px;
+}
+
+.vmodal {
+  border-radius: 20px !important;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .55) !important;
+}
+
+.vmodal-head {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 22px 24px 8px;
+}
+
+.vmodal-head .mi {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: linear-gradient(135deg, #ff9436, #ff5a52);
+  box-shadow: 0 8px 18px -8px rgba(255, 90, 82, .6);
+}
+
+.vmodal-head h3 {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 20px;
+  margin: 0;
+  flex: 1;
+  color: var(--ink);
+  letter-spacing: -.02em;
+}
+
+.vmodal-head h3 .who {
+  color: #ff5a52;
+}
+
+.vmodal-head .x {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+}
+
+.vmodal-head .x:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
 </style>
