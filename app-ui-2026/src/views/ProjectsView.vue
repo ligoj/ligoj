@@ -25,40 +25,52 @@
       </label>
     </div>
 
-    <div v-if="loading && !items.length" class="grid">
-      <div v-for="n in 6" :key="n" class="card skeleton" />
-    </div>
-
-    <div v-else-if="filtered.length" class="grid">
-      <article v-for="(p, i) in filtered" :key="p.id ?? p.pkey" class="card" :style="{ '--c': '#2f6df6', 'animation-delay': (i * 45) + 'ms' }" @click="openProject(p)">
-        <div class="card-head">
-          <div class="glyph"><v-icon color="#2f6df6" size="24">mdi-folder</v-icon></div>
-          <div class="t">
-            <div class="name">{{ p.name }}</div>
-            <div class="kind">{{ p.pkey }}</div>
-          </div>
-          <div class="count">{{ p.subs }} <small>{{ t('project.subsShort') }}</small></div>
-        </div>
-        <div class="rows">
-          <div class="toolset">
-            <template v-for="tool in (p.tools || []).slice(0, 8)" :key="tool">
-              <img v-if="toolLogo(tool) && !failedLogos.has(tool)" class="toollogo" :src="toolLogo(tool)" :alt="tool" :title="tool" loading="lazy" @error="failedLogos.add(tool)" />
-              <span v-else class="toolchip" :style="{ '--tc': toolColor(tool) }" :title="tool">{{ initials(tool) }}</span>
-            </template>
-            <span v-if="(p.tools || []).length > 8" class="toolmore">+{{ p.tools.length - 8 }}</span>
-            <span v-if="!(p.tools || []).length" class="toolnone">{{ t('project.noTool') }}</span>
+    <VibrantDataTable :headers="headers" :items="filtered" :items-length="filtered.length" :loading="loading" item-value="id" :empty-text="t('common.noData') || 'Aucune donnée'" @row-click="openProject">
+      <template #cell.name="{ item }">
+        <div class="name-cell">
+          <div class="folder-glyph"><v-icon color="#2f6df6" size="20">mdi-folder</v-icon></div>
+          <div class="name-stack">
+            <div class="name-main">{{ item.name }}</div>
+            <div class="name-key">{{ item.pkey }}</div>
           </div>
         </div>
-        <div class="card-foot">
-          <a class="morelink">{{ t('project.open') }} →</a>
-          <span v-if="p.health != null" class="health"><span class="barh"><i :style="{ width: Math.round(p.health * 100) + '%' }" /></span>{{ Math.round(p.health * 100) }}%</span>
-        </div>
-      </article>
-    </div>
-
-    <div v-else class="empty">{{ t('common.noData') || 'Aucune donnée' }}</div>
+      </template>
+      <template #cell.teamLeader="{ item }">
+        <span v-if="item.teamLeader" class="tl-pill"><v-icon size="14">mdi-account-circle</v-icon>{{ item.teamLeader }}</span>
+        <span v-else class="muted">—</span>
+      </template>
+      <template #cell.createdDate="{ item }">
+        <span v-if="item.createdDate" class="mono">{{ fmtDate(item.createdDate) }}</span>
+        <span v-else class="muted">—</span>
+      </template>
+      <template #cell.subs="{ item }">
+        <span class="subs-chip">{{ item.subs }}</span>
+      </template>
+      <template #cell.actions="{ item }">
+        <button class="iconbtn" @click.stop="openEdit(item)">
+          <v-icon size="18">mdi-pencil-outline</v-icon>
+          <v-tooltip activator="parent" :text="t('common.edit')" location="top" />
+        </button>
+        <button class="iconbtn danger" @click.stop="startDelete(item)">
+          <v-icon size="18">mdi-delete-outline</v-icon>
+          <v-tooltip activator="parent" :text="t('common.delete')" location="top" />
+        </button>
+      </template>
+    </VibrantDataTable>
 
     <ProjectEditDialog v-model="editDialog" :project="editTarget" @saved="onSaved" />
+
+    <VibrantConfirmDialog
+      v-model="deleteDialog"
+      :title="t('project.deleteTitle') || 'Supprimer le projet'"
+      icon="mdi-folder-remove"
+      confirm-color="error"
+      :confirm-label="t('common.delete')"
+      :loading="deleting"
+      @confirm="confirmDelete"
+    >
+      <span>{{ t('project.deleteConfirm', { name: deleteTarget?.name }) || `Supprimer le projet « ${deleteTarget?.name} » ?` }}</span>
+    </VibrantConfirmDialog>
 
     <div class="toast" :class="{ show: toastMsg }">{{ toastMsg }}</div>
   </div>
@@ -69,6 +81,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi, useAppStore, useI18nStore } from '@ligoj/host'
 import ProjectEditDialog from '@2026/views/ProjectEditDialog.vue'
+import VibrantDataTable from '@2026/components/VibrantDataTable.vue'
+import VibrantConfirmDialog from '@2026/components/VibrantConfirmDialog.vue'
 
 const router = useRouter()
 const api = useApi()
@@ -76,42 +90,15 @@ const appStore = useAppStore()
 const i18n = useI18nStore()
 const t = i18n.t
 
-/* Tool brand colours (mockup palette) — used to tint the toolset chips. */
-const TOOL_COLORS = {
-  Jira: '#2563eb', Jenkins: '#d33833', LDAP: '#15a06a', SonarQube: '#4e9bcd',
-  Confluence: '#e6a019', 'AWS EC2': '#7cb518', GitLab: '#7759c2',
-  'Provisioning AWS': '#ff7a18', 'Squash TM': '#e0524a',
-}
-function toolColor(name) { return TOOL_COLORS[name] || '#8a92a3' }
-function initials(name) { return (name || '?').replace(/[^a-zA-Z0-9 ]/g, '').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase() }
-
-/* Official brand logos (mockup map) via the Iconify CDN — full-colour
-   `logos:*`, monochrome `mdi:*` tinted with the tool colour. Falls back to a
-   coloured initials chip on error (see failedLogos). For REAL subscriptions
-   (with a node id) the host's NodeIcon would serve the plugin's embedded
-   logo; demo tools are keyed by name, so we use the brand catalogue here. */
-const LOGOS = {
-  Jira: 'logos:jira', Jenkins: 'logos:jenkins', SonarQube: 'logos:sonarqube',
-  Confluence: 'logos:confluence', 'AWS EC2': 'logos:aws-ec2', GitLab: 'logos:gitlab',
-  'Provisioning AWS': 'logos:aws', LDAP: 'mdi:folder-account-outline', 'Squash TM': 'mdi:clipboard-check-outline',
-}
-const failedLogos = ref(new Set())
-function toolLogo(name) {
-  const icon = LOGOS[name]
-  if (!icon) return null
-  const tint = icon.startsWith('logos:') ? '' : ('&color=' + encodeURIComponent((toolColor(name)).replace('#', '%23')))
-  return `https://api.iconify.design/${icon}.svg?height=26${tint}`
-}
-
 /* Sample projects from the validated mockup — shown when the backend has
    none, so the cockpit is never empty in the preview. */
 const DEMO_PROJECTS = [
-  { pkey: 'bnpp-kyc', name: 'BNPP — KYC', tools: ['Jira', 'Jenkins', 'SonarQube', 'GitLab'], subs: 14, health: .78 },
-  { pkey: 'airbus-keycopter', name: 'Airbus — Keycopter', tools: ['Jira', 'Jenkins', 'Confluence'], subs: 9, health: .9 },
-  { pkey: 'edf-consoweb', name: 'EDF — Consoweb', tools: ['Jira', 'SonarQube', 'LDAP'], subs: 11, health: .84 },
-  { pkey: 'datasync-fw', name: 'Datasync Framework', tools: ['Provisioning AWS', 'AWS EC2', 'GitLab'], subs: 7, health: .66 },
-  { pkey: 'acoss-kpi', name: 'Acoss — Portail KPI', tools: ['Squash TM', 'Jira', 'Confluence'], subs: 8, health: .81 },
-  { pkey: 'anru-agora', name: 'ANRU — Agora', tools: ['Jira', 'LDAP'], subs: 5, health: .93 },
+  { pkey: 'bnpp-kyc', name: 'BNPP — KYC', description: 'Customer KYC orchestration', teamLeader: 'Aïcha Dubois', createdDate: '2024-03-12', tools: ['Jira', 'Jenkins', 'SonarQube', 'GitLab'], subs: 14, health: .78 },
+  { pkey: 'airbus-keycopter', name: 'Airbus — Keycopter', description: 'Rotor telemetry platform', teamLeader: 'Julien Mercier', createdDate: '2024-06-28', tools: ['Jira', 'Jenkins', 'Confluence'], subs: 9, health: .9 },
+  { pkey: 'edf-consoweb', name: 'EDF — Consoweb', description: 'Energy consumption portal', teamLeader: 'Sophie Lefèvre', createdDate: '2024-09-04', tools: ['Jira', 'SonarQube', 'LDAP'], subs: 11, health: .84 },
+  { pkey: 'datasync-fw', name: 'Datasync Framework', description: 'Cross-cloud data sync toolkit', teamLeader: 'Karim Benali', createdDate: '2025-01-17', tools: ['Provisioning AWS', 'AWS EC2', 'GitLab'], subs: 7, health: .66 },
+  { pkey: 'acoss-kpi', name: 'Acoss — Portail KPI', description: 'Indicator reporting dashboard', teamLeader: 'Marie Garnier', createdDate: '2025-02-23', tools: ['Squash TM', 'Jira', 'Confluence'], subs: 8, health: .81 },
+  { pkey: 'anru-agora', name: 'ANRU — Agora', description: 'Urban renewal collaboration hub', teamLeader: 'Thomas Rousseau', createdDate: '2025-04-09', tools: ['Jira', 'LDAP'], subs: 5, health: .93 },
 ]
 
 const items = ref([])
@@ -126,12 +113,25 @@ const filtered = computed(() => {
   return items.value.filter((p) => (p.name || '').toLowerCase().includes(q) || (p.pkey || '').toLowerCase().includes(q))
 })
 
+const headers = computed(() => [
+  { key: 'name',         label: t('common.name'),       sortable: true },
+  { key: 'description',  label: t('common.description'), sortable: false },
+  { key: 'teamLeader',   label: t('project.teamLeader') || 'Team leader', sortable: true },
+  { key: 'createdDate',  label: t('common.createdDate') || 'Created',     sortable: true },
+  { key: 'subs',         label: t('project.subsShort'), sortable: true, align: 'center', width: '90px' },
+  { key: 'actions',      label: '',                     sortable: false, align: 'end',    width: '120px' },
+])
+
 /* Map a raw Ligoj project (DataTables row) to the card's shape. */
 function mapProject(p) {
   const subs = Array.isArray(p.subscriptions) ? p.subscriptions : []
   const tools = [...new Set(subs.map((s) => s?.node?.name || s?.node?.id || s?.name).filter(Boolean))]
+  const leader = p.teamLeader
   return {
     id: p.id, name: p.name, pkey: p.pkey,
+    description: p.description || '',
+    teamLeader: typeof leader === 'object' ? (leader?.fullName || leader?.id || '') : (leader || ''),
+    createdDate: p.createdDate ?? p.creationDate ?? null,
     subs: p.nbSubscriptions ?? subs.length ?? 0,
     tools,
     health: typeof p.health === 'number' ? p.health : null,
@@ -165,9 +165,36 @@ const toastMsg = ref('')
 function toast(msg) { toastMsg.value = msg; clearTimeout(toastT); toastT = setTimeout(() => (toastMsg.value = ''), 2200) }
 function openProject(p) { router.push(`/project/${p.id ?? p.pkey}`) }
 
+function fmtDate(d) {
+  if (!d) return ''
+  const date = typeof d === 'number' ? new Date(d) : new Date(String(d))
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10)
+}
+
 const editDialog = ref(false)
 const editTarget = ref(null)
+const deleteDialog = ref(false)
+const deleteTarget = ref(null)
+const deleting = ref(false)
 function openNew() { editTarget.value = null; editDialog.value = true }
+function openEdit(p) { editTarget.value = p; editDialog.value = true }
+
+function startDelete(p) { deleteTarget.value = p; deleteDialog.value = true }
+async function confirmDelete() {
+  if (!deleteTarget.value) return
+  if (demoMode.value) {
+    deleteDialog.value = false
+    toast(t('project.demoDelete') || 'Aperçu — suppression non persistée')
+    return
+  }
+  deleting.value = true
+  try {
+    await api.del(`rest/project/${deleteTarget.value.id}`)
+    deleteDialog.value = false
+    deleteTarget.value = null
+    await load()
+  } finally { deleting.value = false }
+}
 /* After a create/edit: jump straight to the new project's detail (so the
    user lands on the cockpit they just populated); on edit, reload the grid. */
 function onSaved({ id, created }) {
@@ -209,36 +236,19 @@ onMounted(() => {
 .search input { flex: 1; border: 0; outline: 0; background: transparent; font-family: var(--font); font-size: 14px; color: var(--ink); }
 .search input::placeholder { color: var(--ink-3); }
 
-/* Card cockpit (mockup .grid/.card/...). */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px; }
-.card { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, .05); cursor: pointer; opacity: 0; transform: translateY(12px); animation: rise .5s cubic-bezier(.2, .7, .3, 1) forwards; transition: transform .18s cubic-bezier(.2, .7, .3, 1), box-shadow .18s; }
-@keyframes rise { to { opacity: 1; transform: none; } }
-.card:hover { transform: translateY(-4px); box-shadow: 0 26px 50px -22px color-mix(in srgb, var(--c) 55%, transparent); }
-.card.skeleton { height: 180px; cursor: default; animation: none; opacity: 1; transform: none; background: linear-gradient(100deg, var(--card), color-mix(in srgb, var(--ink) 4%, var(--card)), var(--card)); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
-@keyframes shimmer { to { background-position: -200% 0; } }
-
-.card-head { display: flex; align-items: center; gap: 13px; padding: 18px 16px 16px; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 16%, var(--card)), color-mix(in srgb, var(--c) 5%, var(--card))); border-bottom: 1px solid color-mix(in srgb, var(--c) 16%, var(--border)); }
-.glyph { width: 46px; height: 46px; border-radius: 14px; flex: none; display: grid; place-items: center; background: var(--card); box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--c) 50%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--c) 22%, var(--border)); }
-.card-head .t { flex: 1; min-width: 0; }
-.card-head .name { font-family: var(--font); font-weight: 800; font-size: 17px; letter-spacing: -.03em; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.card-head .kind { font-family: var(--mono); font-size: 11.5px; font-weight: 700; color: color-mix(in srgb, var(--c) 55%, var(--ink-3)); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
-.count { font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: color-mix(in srgb, var(--c) 65%, var(--ink)); background: var(--card); border: 1px solid color-mix(in srgb, var(--c) 22%, var(--border)); border-radius: 9px; padding: 5px 9px; white-space: nowrap; }
-.count small { opacity: .5; }
-
-.rows { padding: 14px 16px; }
-.toolset { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.toollogo { width: 28px; height: 28px; border-radius: 7px; object-fit: contain; background: #fff; padding: 3px; box-shadow: 0 0 0 1px var(--border), 0 2px 6px -3px rgba(0, 0, 0, .35); }
-.toolchip { width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 10px; color: #fff; background: var(--tc); box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--tc) 60%, transparent); }
-.toolmore { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--ink-3); }
-.toolnone { font-size: 12.5px; color: var(--ink-3); }
-
-.card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 16px 16px; }
-.morelink { font-size: 12.5px; font-weight: 800; color: color-mix(in srgb, var(--c) 55%, var(--ink)); }
-.health { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--ink-3); }
-.barh { width: 80px; height: 7px; border-radius: 5px; background: var(--pill); overflow: hidden; }
-.barh i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 60%, white)); }
-
-.empty { padding: 60px 0; text-align: center; color: var(--ink-3); font-weight: 600; }
+/* Table cells (folder glyph + name stack, team leader pill, subs chip). */
+.name-cell { display: inline-flex; align-items: center; gap: 12px; }
+.folder-glyph { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, #2f6df6 12%, var(--card)); box-shadow: 0 2px 6px -3px rgba(47, 109, 246, .35); flex: none; }
+.name-stack { display: flex; flex-direction: column; min-width: 0; }
+.name-main { font-family: var(--font); font-weight: 800; font-size: 14px; color: var(--ink); letter-spacing: -.02em; }
+.name-key { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+.tl-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ink-2); }
+.subs-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; padding: 3px 9px; border-radius: 999px; background: var(--pill); font-family: var(--mono); font-weight: 700; font-size: 12px; color: var(--ink-2); }
+.muted { color: var(--ink-3); }
+.mono { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
+.iconbtn { width: 32px; height: 32px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-3); transition: background .15s, color .15s; }
+.iconbtn:hover { background: var(--hover); color: var(--ink); }
+.iconbtn.danger:hover { color: rgb(var(--v-theme-error)); }
 
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--ink); color: var(--surface); padding: 11px 18px; border-radius: 12px; font-weight: 700; font-size: 14px; z-index: 60; opacity: 0; transition: .25s; pointer-events: none; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .5); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
