@@ -26,6 +26,7 @@
         </p>
       </div>
       <div class="ph-actions">
+        <button v-if="project && !demoMode" class="btn ghost" @click="auditDialog = true"><v-icon size="18">mdi-clock-outline</v-icon>{{ t('common.audit') || 'Audit' }}</button>
         <button v-if="!demoMode" class="btn ghost" @click="editDialog = true"><v-icon size="18">mdi-pencil</v-icon>{{ t('project.detail.edit') }}</button>
         <button class="btn" @click="openSubscribe"><v-icon size="18">mdi-plus</v-icon>{{ t('project.detail.addSubscription') }}</button>
       </div>
@@ -52,7 +53,7 @@
           <div class="count">{{ g.rows.length }} <small>{{ t('project.detail.activeShort') }}</small></div>
         </div>
         <div class="rows">
-          <div v-for="(r, j) in g.rows.slice(0, 4)" :key="j" class="row">
+          <div v-for="(r, j) in (expanded[g.key] ? g.rows : g.rows.slice(0, 4))" :key="j" class="row">
             <span class="st" :class="r.status" />
             <span class="rn">{{ r.name }}</span>
             <span class="pills">
@@ -62,8 +63,15 @@
               <PluginFeatures v-if="r.sub" :subscription="r.sub" action="renderDetailsFeatures" />
               <span v-for="(p, k) in r.pills" :key="k" class="pill" :class="{ cost: r.cost }">{{ p }}</span>
             </span>
+            <button v-if="r.sub?.id" class="rowcog" :title="t('common.actions') || 'Actions'" @click.stop="openRowMenu($event, r.sub)">
+              <v-icon size="16">mdi-cog</v-icon>
+            </button>
           </div>
-          <div v-if="g.rows.length > 4" class="rowmore">+{{ g.rows.length - 4 }} {{ t('project.detail.more') }}</div>
+          <button v-if="g.rows.length > 4" class="rowmore" @click.stop="toggle(g.key)">
+            <v-icon size="14">{{ expanded[g.key] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            <span v-if="expanded[g.key]">{{ t('common.reduce') || 'Réduire' }}</span>
+            <span v-else>+{{ g.rows.length - 4 }} {{ t('project.detail.more') }}</span>
+          </button>
         </div>
         <div class="card-foot">
           <a class="morelink">{{ t('project.detail.configure') }} →</a>
@@ -80,17 +88,26 @@
 
     <ProjectEditDialog v-model="editDialog" :project="project" @saved="load" />
     <SubscribeWizardDialog v-model="subscribeDialog" :project-id="project?.id" :project-name="project?.name" @saved="load" />
+    <AuditDialog v-model="auditDialog" :target="project" />
+
+    <div v-if="rowMenu.open" class="rowmenu-bg" @click="closeRowMenu">
+      <div class="rowmenu" :style="{ top: rowMenu.y + 'px', left: (rowMenu.x - 180) + 'px' }" @click.stop>
+        <button @click="configureSub"><v-icon size="16">mdi-cog-outline</v-icon>{{ t('project.detail.configure') || 'Configurer' }}</button>
+        <button class="danger" @click="deleteSub"><v-icon size="16">mdi-delete-outline</v-icon>{{ t('common.delete') || 'Supprimer' }}</button>
+      </div>
+    </div>
 
     <div class="toast" :class="{ show: toastMsg }">{{ toastMsg }}</div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, h } from 'vue'
+import { ref, reactive, computed, onMounted, watch, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi, useAppStore, useI18nStore, NodeIcon, VIcon, PluginFeatures } from '@ligoj/host'
 import ProjectEditDialog from '@2026/views/ProjectEditDialog.vue'
 import SubscribeWizardDialog from '@2026/views/SubscribeWizardDialog.vue'
+import AuditDialog from '@2026/components/AuditDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -260,10 +277,33 @@ function setCrumbs(name) {
 
 const editDialog = ref(false)
 const subscribeDialog = ref(false)
+const auditDialog = ref(false)
 /* The wizard needs a real project id; demo projects can't subscribe. */
 function openSubscribe() {
   if (demoMode.value) { toast(t('project.detail.demoSubscribe')); return }
   subscribeDialog.value = true
+}
+
+// expanded[g.key] === true → la card affiche toutes ses rows.
+const expanded = reactive({})
+function toggle(key) { expanded[key] = !expanded[key] }
+
+const rowMenu = ref({ open: false, x: 0, y: 0, sub: null })
+function openRowMenu(ev, sub) {
+  const r = ev.currentTarget.getBoundingClientRect()
+  rowMenu.value = { open: true, x: r.right, y: r.bottom + 4, sub }
+}
+function closeRowMenu() { rowMenu.value.open = false }
+function configureSub() {
+  if (rowMenu.value.sub?.id != null) router.push(`/subscription/${rowMenu.value.sub.id}`)
+  closeRowMenu()
+}
+async function deleteSub() {
+  const s = rowMenu.value.sub
+  closeRowMenu()
+  if (!s?.id || demoMode.value) return
+  if (!confirm(t('subscription.deleteConfirm') || 'Supprimer cet abonnement ?')) return
+  try { await api.del(`rest/subscription/${s.id}`) } finally { load() }
 }
 
 let toastT
@@ -337,7 +377,10 @@ onMounted(load)
 .pills { display: flex; gap: 5px; flex: none; }
 .pill { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--ink-2); background: var(--pill); border: 1px solid var(--border); border-radius: 8px; padding: 2px 7px; }
 .pill.cost { color: #b85b00; background: #fff3e6; border-color: #ffe0bf; }
-.rowmore { font-size: 12px; font-weight: 700; color: var(--ink-3); padding: 6px 8px 2px; }
+.rowmore { display: inline-flex; align-items: center; gap: 5px; font-family: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif); font-size: 12.5px; font-weight: 700; color: var(--ink-3); padding: 6px 10px; margin-top: 4px; border: 0; background: rgba(var(--v-theme-on-surface), .05); border-radius: 8px; cursor: pointer; transition: background .14s, color .14s; }
+.rowmore:hover { background: rgba(var(--v-theme-on-surface), .1); color: var(--ink); }
+.rowcog { width: 28px; height: 28px; border: 0; background: transparent; border-radius: 8px; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-3); margin-left: auto; transition: background .14s, color .14s; }
+.rowcog:hover { background: rgba(var(--v-theme-on-surface), .08); color: var(--ink); }
 
 .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px 14px; }
 .morelink { font-size: 12.5px; font-weight: 800; color: color-mix(in srgb, var(--c) 55%, var(--ink)); cursor: pointer; }
@@ -350,4 +393,11 @@ onMounted(load)
 
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--ink); color: var(--surface); padding: 11px 18px; border-radius: 12px; font-weight: 700; font-size: 14px; z-index: 60; opacity: 0; transition: .25s; pointer-events: none; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .5); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.rowmenu-bg { position: fixed; inset: 0; z-index: 70; }
+.rowmenu { position: fixed; min-width: 180px; padding: 5px; border-radius: 12px; background: rgb(var(--v-theme-surface)); border: 1px solid rgba(var(--v-theme-on-surface), .12); box-shadow: 0 18px 38px -16px rgba(0,0,0,.45); display: flex; flex-direction: column; gap: 1px; }
+.rowmenu button { display: inline-flex; align-items: center; gap: 9px; padding: 9px 11px; border: 0; background: transparent; border-radius: 8px; cursor: pointer; color: var(--ink); font-family: var(--font); font-size: 13.5px; font-weight: 600; text-align: left; }
+.rowmenu button:hover { background: rgba(var(--v-theme-on-surface), .07); }
+.rowmenu button.danger { color: rgb(var(--v-theme-error)); }
+.rowmenu button.danger:hover { background: rgba(var(--v-theme-error), .08); }
 </style>
