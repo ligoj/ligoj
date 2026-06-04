@@ -32,7 +32,8 @@
           <div v-if="it.children && isOpen(it)" class="subnav">
             <a v-for="c in it.children" :key="c.label" class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }"
               @click="c.route ? go(c.route) : toast()">
-              <span class="dot" />
+              <LigojIcon v-if="c.icon" :icon="c.icon" size="16" />
+              <span v-else class="dot" />
               <span>{{ c.label }}</span>
               <span v-if="c.soon" class="soon">bientôt</span>
             </a>
@@ -79,6 +80,7 @@ import { useAppStore } from '@/stores/app.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import ErrorSnackbar from '@2026/components/ErrorSnackbar.vue'
 import LoginPromptDialog from '@2026/components/LoginPromptDialog.vue'
+import LigojIcon from '@2026/components/LigojIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -111,26 +113,26 @@ const NAV = [
   // `match` makes the item active across a whole section; `children` render
   // a sub-menu while the section is active.
   { label: 'Identité', icon: 'mdi-account-group', match: '/id', children: [
-    { label: 'Utilisateurs', route: '/id/user', match: '/id/user' },
-    { label: 'Groupes', route: '/id/group', match: '/id/group' },
-    { label: 'Entités', route: '/id/company', match: '/id/company' },
-    { label: 'Délégués', route: '/id/delegate', match: '/id/delegate' },
-    { label: 'Portées', route: '/id/scope', match: '/id/scope' },
+    { label: 'Utilisateurs', icon: 'mdi-account', route: '/id/user', match: '/id/user' },
+    { label: 'Groupes', icon: 'mdi-account-group', route: '/id/group', match: '/id/group' },
+    { label: 'Entités', icon: 'mdi-domain', route: '/id/company', match: '/id/company' },
+    { label: 'Délégués', icon: 'mdi-account-arrow-right', route: '/id/delegate', match: '/id/delegate' },
+    { label: 'Portées', icon: 'mdi-file-tree', route: '/id/scope', match: '/id/scope' },
   ] },
   { label: 'Projets', icon: 'mdi-folder', route: '/project', match: '/project' },
   { label: 'Administration', icon: 'mdi-cog', match: '/system', children: [
-    { label: 'Plugins', route: '/system/plugin', match: '/system/plugin' },
-    { label: 'Nœuds', route: '/system/node', match: '/system/node' },
-    { label: 'Configuration', route: '/system/configuration', match: '/system/configuration' },
-    { label: 'Rôles', route: '/system/role', match: '/system/role' },
-    { label: 'Utilisateurs', route: '/system/user', match: '/system/user' },
-    { label: 'Cache', route: '/system/cache', match: '/system/cache' },
-    { label: 'Bench', route: '/system/bench', match: '/system/bench' },
-    { label: 'Information', route: '/system/information', match: '/system/information' },
+    { label: 'Plugins', icon: 'mdi-puzzle', route: '/system/plugin', match: '/system/plugin' },
+    { label: 'Nœuds', icon: 'mdi-server-network', route: '/system/node', match: '/system/node' },
+    { label: 'Configuration', icon: 'mdi-cog-outline', route: '/system/configuration', match: '/system/configuration' },
+    { label: 'Rôles', icon: 'mdi-shield-account', route: '/system/role', match: '/system/role' },
+    { label: 'Utilisateurs', icon: 'mdi-account-supervisor', route: '/system/user', match: '/system/user' },
+    { label: 'Cache', icon: 'mdi-database-clock', route: '/system/cache', match: '/system/cache' },
+    { label: 'Bench', icon: 'mdi-speedometer', route: '/system/bench', match: '/system/bench' },
+    { label: 'Information', icon: 'mdi-information', route: '/system/information', match: '/system/information' },
   ] },
   { label: 'API', icon: 'mdi-api', match: '/api', children: [
-    { label: 'Explorateur', route: '/api' },
-    { label: 'Jetons', route: '/api/token', match: '/api/token' },
+    { label: 'Explorateur', icon: 'mdi-compass', route: '/api' },
+    { label: 'Jetons', icon: 'mdi-key', route: '/api/token', match: '/api/token' },
   ] },
 ]
 
