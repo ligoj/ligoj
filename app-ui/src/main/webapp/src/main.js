@@ -8,6 +8,11 @@ import { loadAllPlugins } from './plugins/loader.js'
 import { registerBuiltinPlugins } from './plugins/index.js'
 import { bootCompact } from './plugins/styles.js'
 import { bootPreset } from './plugins/presets.js'
+import { useI18nStore } from './stores/i18n.js'
+// Host transverse i18n bundle (nav, common chrome, dashboard, about,
+// profile, 404) merged before mount. Per-plugin keys ship with each plugin.
+import hostFr from './i18n/host-fr.js'
+import hostEn from './i18n/host-en.js'
 
 // Apply the persisted theme preset (color palette + shape style) and
 // the orthogonal compact toggle BEFORE the SPA mounts so the first
@@ -24,6 +29,11 @@ const pinia = createPinia()
 app.use(pinia)
 setActivePinia(pinia)
 app.use(i18n)
+
+// Merge the host transverse i18n bundle now that pinia is active.
+const i18nStore = useI18nStore()
+i18nStore.merge(hostFr, 'fr')
+i18nStore.merge(hostEn, 'en')
 
 // Built-in plugin stubs (bundled with the host).
 registerBuiltinPlugins()

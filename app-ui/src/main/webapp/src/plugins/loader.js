@@ -54,6 +54,20 @@ async function _loadPlugin(pluginId) {
   // path isn't served here. BASE_URL is `/ligoj/` in both dev and prod.
   const url = `${import.meta.env.BASE_URL}main/${pluginId}/vue/index.js`
 
+  // Vite extracts `<style scoped>` blocks of the plugin views into a
+  // separate `index.css` next to the JS bundle. Inject a stylesheet link
+  // alongside the JS import so scoped styles are applied. A 404 here
+  // (plugin without any extracted CSS) is silently ignored — browsers
+  // already log it once and it doesn't break anything.
+  const cssUrl = `${import.meta.env.BASE_URL}main/${pluginId}/vue/index.css`
+  if (!document.querySelector(`link[data-plugin-css="${pluginId}"]`)) {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = cssUrl
+    link.setAttribute('data-plugin-css', pluginId)
+    document.head.appendChild(link)
+  }
+
   try {
     const module = await import(/* @vite-ignore */ url)
     const definition = module.default
