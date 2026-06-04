@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ligoj — Cockpit 2026 · Nocturne (maquette)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0d14; --bg2:#0e131d;
+    --surface:rgba(22,28,40,.66); --surface-solid:#141a26;
+    --border:rgba(255,255,255,.08); --border-2:rgba(255,255,255,.14);
+    --ink:#eef2f8; --ink-2:#aeb8c7; --ink-3:#79859a; --ink-4:#566174;
+    --ok:#37d399; --warn:#f3b14b; --err:#ff6b63; --idle:#5a6577;
+    --radius:18px; --font:"Sora",system-ui,sans-serif; --mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box;} html,body{margin:0;}
+  body{
+    font-family:var(--font); color:var(--ink); letter-spacing:-.01em; -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(900px 480px at 8% -6%, rgba(47,109,246,.20), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, rgba(139,92,246,.16), transparent 55%),
+      radial-gradient(700px 600px at 60% 120%, rgba(55,211,153,.10), transparent 60%),
+      linear-gradient(180deg,var(--bg2),var(--bg) 400px);
+    background-attachment:fixed; min-height:100vh;
+  }
+  .mono{font-family:var(--mono); font-feature-settings:"tnum" 1; letter-spacing:0;}
+
+  header.topbar{position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:18px; padding:14px 28px;
+    background:rgba(10,13,20,.55); backdrop-filter:blur(16px) saturate(140%); -webkit-backdrop-filter:blur(16px) saturate(140%);
+    border-bottom:1px solid var(--border);}
+  .brand{display:flex; align-items:center; gap:11px; font-weight:800; font-size:18px; letter-spacing:-.03em;}
+  .brand .mark{width:30px; height:30px; border-radius:9px; display:grid; place-items:center; color:#fff; font-weight:800;
+    background:linear-gradient(135deg,#3b82f6,#8b5cf6); box-shadow:0 0 22px -4px rgba(79,110,246,.8); transform:rotate(-4deg);}
+  .nav{display:flex; gap:4px; margin-left:8px;}
+  .nav a{padding:7px 13px; border-radius:9px; color:var(--ink-3); text-decoration:none; font-weight:600; font-size:14px;}
+  .nav a.active{background:rgba(255,255,255,.07); color:#cfe0ff;}
+  .nav a:hover:not(.active){color:var(--ink-2);}
+  .spacer{flex:1;}
+  .icon-btn{width:36px; height:36px; border-radius:10px; border:1px solid var(--border); background:var(--surface);
+    display:grid; place-items:center; color:var(--ink-2); cursor:pointer;}
+  .icon-btn:hover{color:#fff; border-color:var(--border-2);}
+  .avatar{display:flex; align-items:center; gap:9px; padding:4px 10px 4px 4px; border:1px solid var(--border); border-radius:40px; background:var(--surface); cursor:pointer;}
+  .avatar .dot{width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#8b5cf6); color:#fff; display:grid; place-items:center; font-weight:700; font-size:12px;}
+  .avatar span{font-weight:600; font-size:13px; color:var(--ink-2);}
+
+  main{max-width:1380px; margin:0 auto; padding:30px 28px 80px;}
+  .hero{display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:24px; flex-wrap:wrap;}
+  .hero h1{font-size:32px; line-height:1.04; font-weight:800; letter-spacing:-.04em; margin:0 0 6px;
+    background:linear-gradient(90deg,#fff,#aab8d4); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .hero .sub{color:var(--ink-3); font-size:15px; font-weight:500;} .hero .sub b{color:var(--ink-2);}
+  .kpis{display:flex; gap:12px; flex-wrap:wrap;}
+  .kpi{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 17px; min-width:118px;
+    backdrop-filter:blur(8px); position:relative; overflow:hidden;}
+  .kpi::after{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent); box-shadow:0 0 16px var(--accent);}
+  .kpi .v{font-family:var(--mono); font-weight:700; font-size:23px; letter-spacing:-.02em;}
+  .kpi .l{color:var(--ink-3); font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-top:3px;}
+
+  .toolbar{display:flex; align-items:center; gap:12px; margin:6px 0 22px; flex-wrap:wrap;}
+  .seg{display:flex; background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:11px; padding:3px; gap:2px;}
+  .seg button{border:0; background:transparent; padding:7px 14px; border-radius:8px; cursor:pointer; font-family:var(--font); font-weight:600; font-size:13px; color:var(--ink-3);}
+  .seg button.on{background:rgba(255,255,255,.10); color:#fff;}
+  .search{position:relative; flex:1; min-width:220px; max-width:360px;}
+  .search input{width:100%; padding:10px 14px 10px 38px; border-radius:11px; border:1px solid var(--border); background:rgba(255,255,255,.04); color:var(--ink); font-family:var(--font); font-size:14px; outline:none;}
+  .search input::placeholder{color:var(--ink-4);}
+  .search input:focus{border-color:rgba(79,110,246,.6); box-shadow:0 0 0 4px rgba(79,110,246,.18);}
+  .search svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--ink-4);}
+  .tcount{color:var(--ink-3); font-size:13px; font-weight:600; margin-left:auto;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(338px,1fr)); gap:18px;}
+  .card{position:relative; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    backdrop-filter:blur(10px); overflow:hidden; transition:transform .18s cubic-bezier(.2,.7,.3,1),border-color .18s,box-shadow .18s;
+    opacity:0; transform:translateY(10px); animation:rise .55s cubic-bezier(.2,.7,.3,1) forwards;}
+  @keyframes rise{to{opacity:1; transform:none;}}
+  .card::before{content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--c),transparent 70%); box-shadow:0 0 18px var(--c);}
+  .card:hover{transform:translateY(-3px); border-color:var(--border-2); box-shadow:0 24px 60px -26px color-mix(in srgb,var(--c) 70%,transparent), 0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent);}
+  .card-head{display:flex; align-items:center; gap:12px; padding:16px 16px 12px;}
+  .glyph{width:42px; height:42px; border-radius:12px; flex:none; display:grid; place-items:center; font-weight:800; font-size:18px; color:#fff;
+    background:linear-gradient(135deg, color-mix(in srgb,var(--c) 90%,black), color-mix(in srgb,var(--c) 60%,black));
+    box-shadow:0 0 22px -6px var(--c), inset 0 1px 0 rgba(255,255,255,.25);}
+  .card-head .t{flex:1; min-width:0;}
+  .card-head .name{font-weight:700; font-size:16px; letter-spacing:-.02em;}
+  .card-head .kind{font-size:11.5px; font-weight:600; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; margin-top:1px;}
+  .count{font-family:var(--mono); font-size:12.5px; font-weight:700; color:var(--ink-2); background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:8px; padding:5px 9px; white-space:nowrap;}
+  .count small{color:var(--ink-4);}
+  .rows{padding:4px 8px 8px;}
+  .row{display:flex; align-items:center; gap:10px; padding:9px 8px; border-radius:10px; cursor:pointer; transition:background .12s;}
+  .row:hover{background:rgba(255,255,255,.04);} .row+.row{box-shadow:inset 0 1px 0 rgba(255,255,255,.04);}
+  .st{width:8px; height:8px; border-radius:50%; flex:none; position:relative;}
+  .st::after{content:""; position:absolute; inset:-4px; border-radius:50%; background:currentColor; opacity:.25; filter:blur(2px);}
+  .st.ok{background:var(--ok); color:var(--ok);} .st.warn{background:var(--warn); color:var(--warn);}
+  .st.err{background:var(--err); color:var(--err);} .st.idle{background:var(--idle); color:var(--idle);}
+  .row .rn{flex:1; min-width:0; font-size:13.5px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .pills{display:flex; gap:5px; flex:none;}
+  .pill{font-family:var(--mono); font-size:11px; font-weight:600; color:var(--ink-2); background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:7px; padding:2px 7px;}
+  .pill.cost{color:#9ec1ff; background:rgba(79,110,246,.14); border-color:rgba(79,110,246,.3);}
+  .row .go{color:var(--ink-4); flex:none; opacity:0; transform:translateX(-3px); transition:.15s;}
+  .row:hover .go{opacity:1; transform:none; color:var(--ink-2);}
+  .card-foot{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 16px 14px;}
+  .morelink{font-size:12.5px; font-weight:700; color:var(--ink-3); text-decoration:none;} .morelink:hover{color:#fff;}
+  .health{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--ink-3);}
+  .bar{width:86px; height:6px; border-radius:4px; background:rgba(255,255,255,.07); overflow:hidden;}
+  .bar i{display:block; height:100%; border-radius:4px; background:linear-gradient(90deg,var(--ok),#7ef0c0); box-shadow:0 0 10px var(--ok);}
+  .foot-note{text-align:center; color:var(--ink-4); font-size:12.5px; margin-top:40px;}
+  .foot-note code{font-family:var(--mono); background:rgba(255,255,255,.05); border:1px solid var(--border); padding:2px 6px; border-radius:6px;}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="mark">L</div> Ligoj</div>
+  <nav class="nav"><a href="#" class="active">Accueil</a><a href="#">Projets</a><a href="#">Identité</a><a href="#">Administration</a></nav>
+  <div class="spacer"></div>
+  <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+  <button class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+  <div class="avatar"><div class="dot">LA</div><span>ligoj-admin</span></div>
+</header>
+<main>
+  <div class="hero">
+    <div><h1>Tableau de bord</h1><div class="sub">Bonjour <b>ligoj-admin</b> — <b>3</b> outils demandent votre attention.</div></div>
+    <div class="kpis">
+      <div class="kpi" style="--accent:#3b82f6"><div class="v">124</div><div class="l">Projets</div></div>
+      <div class="kpi" style="--accent:#37d399"><div class="v">18</div><div class="l">Outils</div></div>
+      <div class="kpi" style="--accent:#8b5cf6"><div class="v">2 348</div><div class="l">Souscriptions</div></div>
+      <div class="kpi" style="--accent:#ff6b63"><div class="v">3</div><div class="l">Alertes</div></div>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="seg"><button class="on">▦ Cartes</button><button>▤ Liste</button></div>
+    <div class="seg"><button class="on">Fonctionnel</button><button>Technique</button></div>
+    <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input placeholder="Rechercher un projet ou un outil…"/></div>
+    <span class="tcount" id="tcount"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="foot-note">Maquette statique · thème <b>Nocturne</b> · données fictives — <code>dashboard-2026-nocturne.html</code></div>
+</main>
+<script>
+const TOOLS=[
+ {name:'Jira',kind:'Gestion de tickets',c:'#4c8dff',glyph:'J',total:649,active:576,health:.82,rows:[{n:'Airbus — Keycopter',s:'ok',p:['38 ouv.','73 clos']},{n:'ANRU — Agora',s:'ok',p:['28 ouv.']},{n:'BNPP — KYC',s:'warn',p:['12 ouv.']},{n:'EDF — Consoweb',s:'ok',p:['185 clos']}]},
+ {name:'Jenkins',kind:'Intégration continue',c:'#ff5a52',glyph:'J',total:292,active:189,health:.61,rows:[{n:'Airbus — Keycopter',s:'ok',p:['#1842']},{n:'BNPP — KYC',s:'err',p:['échec']},{n:'EDF — PPA Sonar',s:'ok',p:['#77']},{n:'EPO — EPO',s:'warn',p:['instable']}]},
+ {name:'LDAP',kind:'Annuaire',c:'#2fd398',glyph:'L',total:1896,active:1167,health:.94,rows:[{n:'gfi-support-lille',s:'ok',p:['10 mbr.']},{n:'outils-delivery-core',s:'ok',p:['5 mbr.']},{n:'3suisses-3s-pt',s:'ok',p:['3 mbr.']},{n:'abertis-tareas',s:'idle',p:['5 mbr.']}]},
+ {name:'SonarQube',kind:'Qualité de code',c:'#56b6e3',glyph:'S',total:84,active:49,health:.7,rows:[{n:'bnpp-pse-android',s:'warn',p:['B']},{n:'BNPP — Accueil iPad',s:'ok',p:['A']},{n:'BNPP — KYC',s:'ok',p:['A']},{n:'CA — Caroline',s:'err',p:['C']}]},
+ {name:'Confluence',kind:'Documentation',c:'#f0ad2e',glyph:'C',total:522,active:462,health:.88,rows:[{n:'Espace — Delivery',s:'ok',p:['2.3 k']},{n:'Espace — Archi',s:'ok',p:['912']},{n:'Espace — RH',s:'idle',p:['144']}]},
+ {name:'AWS EC2',kind:'Provisioning',c:'#9ad13a',glyph:'E',total:177,active:13,health:.55,rows:[{n:'i-06755957da1276',s:'ok',p:['running']},{n:'i-0f9c42a5c54b51',s:'ok',p:['running']},{n:'i-0eb8922dcfe39f',s:'warn',p:['pending']},{n:'i-0ecb5acac04b50',s:'err',p:['stopped']}]},
+ {name:'GitLab',kind:'Source & MR',c:'#a08bff',glyph:'G',total:552,active:224,health:.9,rows:[{n:'platform / core',s:'ok',p:['4 MR']},{n:'platform / ui',s:'ok',p:['2 MR']},{n:'infra / terraform',s:'warn',p:['CI…']}]},
+ {name:'Provisioning AWS',kind:'Coûts cloud',c:'#ff9436',glyph:'A',total:20,active:8,health:.76,rows:[{n:'Datasync Framework',s:'ok',p:['8 CPU','303 $'],cost:true},{n:'Loader SAP GP074',s:'warn',p:['428 $'],cost:true},{n:'Digitale2 Carto',s:'ok',p:['992 $'],cost:true}]},
+ {name:'Squash TM',kind:'Tests',c:'#ff6b63',glyph:'S',total:178,active:155,health:.8,rows:[{n:'Acoss — Portail KPI',s:'ok',p:['120']},{n:'ATR — APS Migration',s:'ok',p:['64']},{n:'Bayer — AnimPlus',s:'warn',p:['à jour ?']}]},
+];
+const grid=document.getElementById('grid'); const tcount=document.getElementById('tcount');
+tcount.textContent=TOOLS.length+' outils · '+TOOLS.reduce((a,t)=>a+t.active,0)+' souscriptions actives';
+grid.innerHTML=TOOLS.map((t,i)=>`<article class="card" style="--c:${t.c}; animation-delay:${i*55}ms">
+  <div class="card-head"><div class="glyph">${t.glyph}</div><div class="t"><div class="name">${t.name}</div><div class="kind">${t.kind}</div></div><div class="count">${t.total.toLocaleString('fr-FR')} <small>/ ${t.active}</small></div></div>
+  <div class="rows">${t.rows.map(r=>`<div class="row"><span class="st ${r.s}"></span><span class="rn">${r.n}</span><span class="pills">${r.p.map(p=>`<span class="pill${r.cost?' cost':''}">${p}</span>`).join('')}</span><svg class="go" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></div>`).join('')}</div>
+  <div class="card-foot"><a class="morelink" href="#">Voir les ${t.total.toLocaleString('fr-FR')} →</a><span class="health"><span class="bar"><i style="width:${Math.round(t.health*100)}%"></i></span>${Math.round(t.health*100)}%</span></div>
+</article>`).join('');
+</script>
+</body>
+</html>

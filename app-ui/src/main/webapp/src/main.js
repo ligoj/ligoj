@@ -8,6 +8,11 @@ import { loadAllPlugins } from './plugins/loader.js'
 import { registerBuiltinPlugins } from './plugins/index.js'
 import { bootCompact } from './plugins/styles.js'
 import { bootPreset } from './plugins/presets.js'
+import { useI18nStore } from './stores/i18n.js'
+// 2026 redesign i18n fragments (chrome keys, status labels) merged
+// explicitly so the /next/* views have their labels before mount.
+import plugin2026Fr from './i18n/plugin-id-fr-2026.js'
+import plugin2026En from './i18n/plugin-id-en-2026.js'
 
 // Apply the persisted theme preset (color palette + shape style) and
 // the orthogonal compact toggle BEFORE the SPA mounts so the first
@@ -24,6 +29,12 @@ const pinia = createPinia()
 app.use(pinia)
 setActivePinia(pinia)
 app.use(i18n)
+
+// Merge the 2026 redesign i18n bundles (same pattern as the standalone
+// app-ui-2026 boot), now that pinia is active.
+const i18nStore = useI18nStore()
+i18nStore.merge(plugin2026Fr, 'fr')
+i18nStore.merge(plugin2026En, 'en')
 
 // Built-in plugin stubs (bundled with the host).
 registerBuiltinPlugins()

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ligoj — Cockpit 2026 · Editorial (maquette)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f4ee; --paper:#fffdf8; --line:#e6e0d4; --line-2:#d8d1c2;
+    --ink:#23201a; --ink-2:#5f594e; --ink-3:#938c7e; --ink-4:#b7b0a1;
+    --ok:#2f7d54; --warn:#bf7d1a; --err:#c0473d; --idle:#bcb5a6;
+    --serif:"Fraunces",Georgia,serif; --sans:"Hanken Grotesk",system-ui,sans-serif; --mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box;} html,body{margin:0;}
+  body{font-family:var(--sans); color:var(--ink); -webkit-font-smoothing:antialiased; background:var(--bg);
+    background-image:radial-gradient(circle at 1px 1px, rgba(0,0,0,.025) 1px, transparent 0); background-size:22px 22px; min-height:100vh;}
+  .mono{font-family:var(--mono); font-feature-settings:"tnum" 1;}
+
+  header.topbar{display:flex; align-items:center; gap:20px; padding:20px 40px; border-bottom:1px solid var(--line);}
+  .brand{font-family:var(--serif); font-weight:600; font-size:22px; letter-spacing:-.01em; display:flex; align-items:center; gap:10px;}
+  .brand .mark{width:30px; height:30px; border-radius:50%; background:var(--ink); color:var(--paper); display:grid; place-items:center; font-family:var(--serif); font-weight:600; font-size:16px;}
+  .nav{display:flex; gap:22px; margin-left:14px;}
+  .nav a{color:var(--ink-3); text-decoration:none; font-weight:600; font-size:13.5px; letter-spacing:.02em; padding:4px 0; border-bottom:2px solid transparent;}
+  .nav a.active{color:var(--ink); border-color:var(--ink);}
+  .spacer{flex:1;}
+  .icon-btn{width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--paper); display:grid; place-items:center; color:var(--ink-2); cursor:pointer;}
+  .icon-btn:hover{border-color:var(--line-2); color:var(--ink);}
+  .avatar{display:flex; align-items:center; gap:9px; font-weight:600; font-size:13px; color:var(--ink-2);}
+  .avatar .dot{width:30px; height:30px; border-radius:50%; background:var(--ink); color:var(--paper); display:grid; place-items:center; font-weight:700; font-size:12px; font-family:var(--mono);}
+
+  main{max-width:1320px; margin:0 auto; padding:46px 40px 90px;}
+  .hero{display:flex; align-items:flex-end; justify-content:space-between; gap:30px; margin-bottom:14px; flex-wrap:wrap;}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); margin-bottom:10px;}
+  .hero h1{font-family:var(--serif); font-size:52px; line-height:.95; font-weight:500; letter-spacing:-.02em; margin:0; font-optical-sizing:auto;}
+  .hero h1 em{font-style:italic; color:var(--ink-2);}
+  .hero .sub{color:var(--ink-2); font-size:15px; margin-top:14px; max-width:420px; line-height:1.5;}
+  .kpis{display:flex; gap:0; border:1px solid var(--line); border-radius:4px; overflow:hidden; background:var(--paper);}
+  .kpi{padding:16px 22px; min-width:108px; border-right:1px solid var(--line);}
+  .kpi:last-child{border-right:0;}
+  .kpi .v{font-family:var(--serif); font-weight:600; font-size:30px; line-height:1; letter-spacing:-.01em;}
+  .kpi .l{color:var(--ink-3); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-top:8px;}
+
+  .rule{height:1px; background:var(--line); margin:34px 0 6px;}
+  .toolbar{display:flex; align-items:center; gap:18px; margin:18px 0 28px; flex-wrap:wrap;}
+  .seg{display:flex; gap:18px;}
+  .seg button{border:0; background:transparent; padding:4px 0; cursor:pointer; font-family:var(--sans); font-weight:600; font-size:13.5px; color:var(--ink-3); border-bottom:2px solid transparent;}
+  .seg button.on{color:var(--ink); border-color:var(--ink);}
+  .search{position:relative; flex:1; min-width:220px; max-width:340px; margin-left:auto;}
+  .search input{width:100%; padding:9px 12px 9px 34px; border:1px solid var(--line); border-radius:3px; background:var(--paper); font-family:var(--sans); font-size:14px; color:var(--ink); outline:none;}
+  .search input::placeholder{color:var(--ink-4);}
+  .search input:focus{border-color:var(--ink-3);}
+  .search svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--ink-4);}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(348px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+  .card{position:relative; background:var(--paper); padding:22px 22px 18px; transition:background .15s;
+    opacity:0; transform:translateY(8px); animation:rise .5s ease forwards;}
+  @keyframes rise{to{opacity:1; transform:none;}}
+  .card:hover{background:#fff;}
+  .card-head{display:flex; align-items:baseline; gap:10px; margin-bottom:4px;}
+  .swatch{width:9px; height:9px; border-radius:50%; background:var(--c); flex:none; transform:translateY(-1px);}
+  .card-head .name{font-family:var(--serif); font-weight:600; font-size:21px; letter-spacing:-.01em; flex:1;}
+  .count{font-family:var(--mono); font-size:12px; font-weight:600; color:var(--ink-2);}
+  .count small{color:var(--ink-4);}
+  .kind{font-size:11px; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:.1em; margin-bottom:14px;}
+  .rows{display:flex; flex-direction:column;}
+  .row{display:flex; align-items:center; gap:11px; padding:9px 0; border-top:1px solid var(--line); cursor:pointer;}
+  .row:hover .rn{color:#000;}
+  .st{width:7px; height:7px; border-radius:50%; flex:none;}
+  .st.ok{background:var(--ok);} .st.warn{background:var(--warn);} .st.err{background:var(--err);} .st.idle{background:var(--idle);}
+  .row .rn{flex:1; min-width:0; font-size:13.5px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .12s;}
+  .pills{display:flex; gap:10px; flex:none;}
+  .pill{font-family:var(--mono); font-size:11px; font-weight:500; color:var(--ink-3);}
+  .pill.cost{color:var(--warn);}
+  .card-foot{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:14px; padding-top:13px; border-top:1px solid var(--ink); border-top-color:rgba(35,32,26,.12);}
+  .morelink{font-family:var(--serif); font-style:italic; font-size:14px; font-weight:500; color:var(--ink); text-decoration:none; border-bottom:1px solid var(--line-2);}
+  .morelink:hover{border-color:var(--ink);}
+  .health{font-family:var(--mono); font-size:11px; font-weight:600; color:var(--ink-3); display:flex; align-items:center; gap:7px;}
+  .bar{width:64px; height:4px; background:var(--line); position:relative;}
+  .bar i{position:absolute; inset:0 auto 0 0; background:var(--ink);}
+  .foot-note{text-align:center; color:var(--ink-4); font-size:12.5px; margin-top:46px; font-family:var(--serif); font-style:italic;}
+  .foot-note code{font-family:var(--mono); font-style:normal; background:var(--paper); border:1px solid var(--line); padding:2px 6px; border-radius:4px;}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="mark">L</div> Ligoj</div>
+  <nav class="nav"><a href="#" class="active">Accueil</a><a href="#">Projets</a><a href="#">Identité</a><a href="#">Administration</a></nav>
+  <div class="spacer"></div>
+  <button class="icon-btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+  <div class="avatar"><div class="dot">LA</div><span>ligoj-admin</span></div>
+</header>
+<main>
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Vendredi 29 mai 2026</div>
+      <h1>Bonjour,<br><em>ligoj-admin.</em></h1>
+      <div class="sub">Trois outils demandent votre attention aujourd'hui. Tout le reste fonctionne nominalement.</div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="v">124</div><div class="l">Projets</div></div>
+      <div class="kpi"><div class="v">18</div><div class="l">Outils</div></div>
+      <div class="kpi"><div class="v">2 348</div><div class="l">Souscript.</div></div>
+      <div class="kpi"><div class="v">3</div><div class="l">Alertes</div></div>
+    </div>
+  </div>
+  <div class="rule"></div>
+  <div class="toolbar">
+    <div class="seg"><button class="on">Fonctionnel</button><button>Technique</button></div>
+    <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input placeholder="Rechercher…"/></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="foot-note">Maquette statique · thème Editorial · données fictives — <code>dashboard-2026-editorial.html</code></div>
+</main>
+<script>
+const TOOLS=[
+ {name:'Jira',kind:'Gestion de tickets',c:'#2563eb',total:649,active:576,health:.82,rows:[{n:'Airbus — Keycopter',s:'ok',p:['38 ouv.','73 clos']},{n:'ANRU — Agora',s:'ok',p:['28 ouv.']},{n:'BNPP — KYC',s:'warn',p:['12 ouv.']},{n:'EDF — Consoweb',s:'ok',p:['185 clos']}]},
+ {name:'Jenkins',kind:'Intégration continue',c:'#d33833',total:292,active:189,health:.61,rows:[{n:'Airbus — Keycopter',s:'ok',p:['#1842']},{n:'BNPP — KYC',s:'err',p:['échec']},{n:'EDF — PPA Sonar',s:'ok',p:['#77']},{n:'EPO — EPO',s:'warn',p:['instable']}]},
+ {name:'LDAP',kind:'Annuaire',c:'#15a06a',total:1896,active:1167,health:.94,rows:[{n:'gfi-support-lille',s:'ok',p:['10 mbr.']},{n:'outils-delivery-core',s:'ok',p:['5 mbr.']},{n:'3suisses-3s-pt',s:'ok',p:['3 mbr.']},{n:'abertis-tareas',s:'idle',p:['5 mbr.']}]},
+ {name:'SonarQube',kind:'Qualité de code',c:'#4e9bcd',total:84,active:49,health:.7,rows:[{n:'bnpp-pse-android',s:'warn',p:['B']},{n:'BNPP — Accueil iPad',s:'ok',p:['A']},{n:'BNPP — KYC',s:'ok',p:['A']},{n:'CA — Caroline',s:'err',p:['C']}]},
+ {name:'Confluence',kind:'Documentation',c:'#e6a019',total:522,active:462,health:.88,rows:[{n:'Espace — Delivery',s:'ok',p:['2.3 k']},{n:'Espace — Archi',s:'ok',p:['912']},{n:'Espace — RH',s:'idle',p:['144']}]},
+ {name:'AWS EC2',kind:'Provisioning',c:'#7cb518',total:177,active:13,health:.55,rows:[{n:'i-06755957da1276',s:'ok',p:['running']},{n:'i-0f9c42a5c54b51',s:'ok',p:['running']},{n:'i-0eb8922dcfe39f',s:'warn',p:['pending']},{n:'i-0ecb5acac04b50',s:'err',p:['stopped']}]},
+ {name:'GitLab',kind:'Source & MR',c:'#7759c2',total:552,active:224,health:.9,rows:[{n:'platform / core',s:'ok',p:['4 MR']},{n:'platform / ui',s:'ok',p:['2 MR']},{n:'infra / terraform',s:'warn',p:['CI…']}]},
+ {name:'Provisioning AWS',kind:'Coûts cloud',c:'#ff7a18',total:20,active:8,health:.76,rows:[{n:'Datasync Framework',s:'ok',p:['8 CPU','303 $'],cost:true},{n:'Loader SAP GP074',s:'warn',p:['428 $'],cost:true},{n:'Digitale2 Carto',s:'ok',p:['992 $'],cost:true}]},
+ {name:'Squash TM',kind:'Tests',c:'#e0524a',total:178,active:155,health:.8,rows:[{n:'Acoss — Portail KPI',s:'ok',p:['120']},{n:'ATR — APS Migration',s:'ok',p:['64']},{n:'Bayer — AnimPlus',s:'warn',p:['à jour ?']}]},
+];
+const grid=document.getElementById('grid');
+grid.innerHTML=TOOLS.map((t,i)=>`<article class="card" style="--c:${t.c}; animation-delay:${i*50}ms">
+  <div class="card-head"><span class="swatch"></span><span class="name">${t.name}</span><span class="count">${t.total.toLocaleString('fr-FR')} <small>/ ${t.active}</small></span></div>
+  <div class="kind">${t.kind}</div>
+  <div class="rows">${t.rows.map(r=>`<div class="row"><span class="st ${r.s}"></span><span class="rn">${r.n}</span><span class="pills">${r.p.map(p=>`<span class="pill${r.cost?' cost':''}">${p}</span>`).join('')}</span></div>`).join('')}</div>
+  <div class="card-foot"><a class="morelink" href="#">Voir tout</a><span class="health"><span class="bar"><i style="width:${Math.round(t.health*100)}%"></i></span>${Math.round(t.health*100)}%</span></div>
+</article>`).join('');
+</script>
+</body>
+</html>
