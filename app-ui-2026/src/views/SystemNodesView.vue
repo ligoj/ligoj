@@ -42,7 +42,7 @@
 
     <p v-if="error" class="errline"><v-icon size="16">mdi-alert-outline</v-icon>{{ error }}</p>
 
-    <VibrantDataTable :headers="headers" :items="filtered" :items-length="filtered.length" :loading="loading" item-value="id" :empty-text="t('common.noData')">
+    <VibrantDataTable :headers="headers" :items="filtered" :items-length="filtered.length" :loading="loading" item-value="id" :empty-text="t('common.noData')" @row-click="startEdit">
       <template #cell.name="{ item }">
         <div class="avatar-cell">
           <span class="nglyph"><NodeIcon :node="item" /></span>
@@ -56,8 +56,14 @@
       </template>
       <template #actions="{ item }">
         <template v-if="isInstance(item)">
-          <button class="iconbtn" :title="t('common.edit')" @click.stop="startEdit(item)"><v-icon size="18">mdi-pencil-outline</v-icon></button>
-          <button class="iconbtn danger" :title="t('common.delete')" @click.stop="startDelete(item)"><v-icon size="18">mdi-delete-outline</v-icon></button>
+          <button class="iconbtn" @click.stop="startEdit(item)">
+            <v-icon size="18">mdi-pencil-outline</v-icon>
+            <v-tooltip activator="parent" :text="t('common.edit')" location="top" />
+          </button>
+          <button class="iconbtn danger" @click.stop="startDelete(item)">
+            <v-icon size="18">mdi-delete-outline</v-icon>
+            <v-tooltip activator="parent" :text="t('common.delete')" location="top" />
+          </button>
         </template>
       </template>
     </VibrantDataTable>

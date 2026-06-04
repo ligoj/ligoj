@@ -37,7 +37,7 @@
     <p v-if="error" class="errline"><v-icon size="16">mdi-alert-outline</v-icon>{{ error }}</p>
 
     <VibrantDataTable :headers="headers" :items="filtered" :items-length="filtered.length" :loading="loading" item-value="name" default-sort="name"
-      :empty-text="t('system.apiToken.empty')">
+      :empty-text="t('system.apiToken.empty')" @row-click="(item) => openShow(item.name, 'load')">
       <template #cell.name="{ item }">
         <div class="avatar-cell">
           <span class="kglyph"><v-icon size="18">mdi-key-variant</v-icon></span>
@@ -45,9 +45,18 @@
         </div>
       </template>
       <template #actions="{ item }">
-        <button class="iconbtn" :title="t('system.apiToken.show')" @click.stop="openShow(item.name, 'load')"><v-icon size="18">mdi-eye-outline</v-icon></button>
-        <button class="iconbtn" :title="t('system.apiToken.regenerate')" @click.stop="openShow(item.name, 'regen')"><v-icon size="18">mdi-refresh</v-icon></button>
-        <button class="iconbtn danger" :title="t('system.apiToken.revoke')" @click.stop="startDelete(item.name)"><v-icon size="18">mdi-delete-outline</v-icon></button>
+        <button class="iconbtn" @click.stop="openShow(item.name, 'load')">
+          <v-icon size="18">mdi-eye-outline</v-icon>
+          <v-tooltip activator="parent" :text="t('system.apiToken.show')" location="top" />
+        </button>
+        <button class="iconbtn" @click.stop="openShow(item.name, 'regen')">
+          <v-icon size="18">mdi-refresh</v-icon>
+          <v-tooltip activator="parent" :text="t('system.apiToken.regenerate')" location="top" />
+        </button>
+        <button class="iconbtn danger" @click.stop="startDelete(item.name)">
+          <v-icon size="18">mdi-delete-outline</v-icon>
+          <v-tooltip activator="parent" :text="t('system.apiToken.revoke')" location="top" />
+        </button>
       </template>
     </VibrantDataTable>
 

@@ -64,8 +64,9 @@
       </template>
       <template #cell.averageGetTime="{ item }"><span class="num" :class="{ zero: !item.averageGetTime }">{{ item.averageGetTime ?? '—' }}</span></template>
       <template #actions="{ item }">
-        <button class="iconbtn" :title="t('system.cache.invalidate')" :disabled="invalidating === item.id" @click.stop="invalidate(item)">
+        <button class="iconbtn" :disabled="invalidating === item.id" @click.stop="invalidate(item)">
           <span v-if="invalidating === item.id" class="ispin" aria-hidden="true" /><v-icon v-else size="18">mdi-broom</v-icon>
+          <v-tooltip activator="parent" :text="t('system.cache.invalidate')" location="top" />
         </button>
       </template>
     </VibrantDataTable>

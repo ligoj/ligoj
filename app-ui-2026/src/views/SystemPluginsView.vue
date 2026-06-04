@@ -76,7 +76,10 @@
       </template>
       <template #actions="{ item }">
         <v-icon v-if="item.deleted" size="18" color="warning" :title="t('system.plugin.deletionScheduled')">mdi-cancel</v-icon>
-        <button v-else class="iconbtn danger" :title="t('system.plugin.delete')" @click.stop="askRemove(item.artifact)"><v-icon size="18">mdi-delete-outline</v-icon></button>
+        <button v-else class="iconbtn danger" @click.stop="askRemove(item.artifact)">
+          <v-icon size="18">mdi-delete-outline</v-icon>
+          <v-tooltip activator="parent" :text="t('system.plugin.delete')" location="top" />
+        </button>
       </template>
     </VibrantDataTable>
 

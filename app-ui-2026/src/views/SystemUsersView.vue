@@ -52,8 +52,14 @@
         </span>
       </template>
       <template #actions="{ item }">
-        <button class="iconbtn" :title="t('common.edit')" @click.stop="openEdit(item)"><v-icon size="18">mdi-pencil-outline</v-icon></button>
-        <button class="iconbtn danger" :title="t('common.delete')" @click.stop="startDelete(item)"><v-icon size="18">mdi-delete-outline</v-icon></button>
+        <button class="iconbtn" @click.stop="openEdit(item)">
+          <v-icon size="18">mdi-pencil-outline</v-icon>
+          <v-tooltip activator="parent" :text="t('common.edit')" location="top" />
+        </button>
+        <button class="iconbtn danger" @click.stop="startDelete(item)">
+          <v-icon size="18">mdi-delete-outline</v-icon>
+          <v-tooltip activator="parent" :text="t('common.delete')" location="top" />
+        </button>
       </template>
     </VibrantDataTable>
 

@@ -57,7 +57,7 @@
             </td>
           </tr>
           <template v-else>
-            <tr v-for="(item, i) in items" :key="rowKey(item, i)" class="row-in" :style="{ animationDelay: Math.min(i, 18) * 28 + 'ms' }" :class="{ 'is-selected': isSelected(item) }" @click="$emit('row-click', item)">
+            <tr v-for="(item, i) in items" :key="rowKey(item, i)" class="row-in" :style="{ animationDelay: Math.min(i, 18) * 28 + 'ms' }" :class="{ 'is-selected': isSelected(item), clickable: hasRowClick }" @click="hasRowClick && $emit('row-click', item)">
               <td v-if="selectable" class="cbx-col" @click.stop>
                 <span class="cbx" :class="{ on: isSelected(item) }" role="checkbox" :aria-checked="isSelected(item)" tabindex="0"
                   @click="toggleOne(item)" @keydown.enter.prevent="toggleOne(item)" @keydown.space.prevent="toggleOne(item)" />
@@ -93,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, getCurrentInstance } from 'vue'
 import { useI18nStore } from '@ligoj/host'
 
 const props = defineProps({
@@ -113,6 +113,14 @@ const emit = defineEmits(['update:options', 'update:modelValue', 'row-click'])
 
 const i18n = useI18nStore()
 const t = i18n.t
+
+// `row-click` is opt-in: rows show the pointer cursor and emit the
+// click only when the caller actually listens for it. Avoids the
+// dead-pointer UX where rows look clickable but do nothing.
+// NB: `row-click` is a declared emit, so its listener is stripped from
+// $attrs — we read the binding off the creating vnode props instead.
+const instance = getCurrentInstance()
+const hasRowClick = computed(() => !!instance.vnode.props?.onRowClick)
 
 const page = ref(1)
 const itemsPerPage = ref(props.perPageOptions.includes(25) ? 25 : props.perPageOptions[0])
@@ -252,10 +260,11 @@ thead th.sortable:hover .sort-icon { opacity: .4; }
 tbody td { padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 13.5px; font-weight: 500; color: var(--ink); }
 tbody td.center { text-align: center; }
 tbody td.end { text-align: right; }
-tbody tr { transition: background .14s; cursor: pointer; }
+tbody tr { transition: background .14s; }
+tbody tr.clickable { cursor: pointer; }
 tbody tr:hover { background: var(--hover); }
 /* Left accent bar on hover for a premium, scannable feel. */
-tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 0 var(--accent); }
+tbody tr.clickable:hover td:first-child { box-shadow: inset 3px 0 0 0 var(--accent); }
 tbody tr.is-selected { background: rgba(var(--v-theme-primary), .07); }
 tbody tr.is-selected td:first-child { box-shadow: inset 3px 0 0 0 var(--accent); }
 tbody tr:last-child td { border-bottom: 0; }

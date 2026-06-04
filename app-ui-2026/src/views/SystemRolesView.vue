@@ -38,7 +38,7 @@
     <p v-if="error" class="errline"><v-icon size="16">mdi-alert-outline</v-icon>{{ error }}</p>
 
     <VibrantDataTable :headers="headers" :items="paged" :items-length="filtered.length" :loading="loading" item-value="id" default-sort="name"
-      :empty-text="t('common.noData')" @update:options="onOptions">
+      :empty-text="t('common.noData')" @update:options="onOptions" @row-click="openEdit">
       <template #cell.name="{ item }">
         <div class="avatar-cell">
           <span class="rglyph" :class="{ admin: isUnrestricted(item) }"><v-icon size="18">mdi-shield-account-outline</v-icon></span>
@@ -58,8 +58,14 @@
         </span>
       </template>
       <template #actions="{ item }">
-        <button class="iconbtn" :title="t('common.edit')" @click.stop="openEdit(item)"><v-icon size="18">mdi-pencil-outline</v-icon></button>
-        <button class="iconbtn danger" :title="t('common.delete')" @click.stop="startDelete(item)"><v-icon size="18">mdi-delete-outline</v-icon></button>
+        <button class="iconbtn" @click.stop="openEdit(item)">
+          <v-icon size="18">mdi-pencil-outline</v-icon>
+          <v-tooltip activator="parent" :text="t('common.edit')" location="top" />
+        </button>
+        <button class="iconbtn danger" @click.stop="startDelete(item)">
+          <v-icon size="18">mdi-delete-outline</v-icon>
+          <v-tooltip activator="parent" :text="t('common.delete')" location="top" />
+        </button>
       </template>
     </VibrantDataTable>
 
