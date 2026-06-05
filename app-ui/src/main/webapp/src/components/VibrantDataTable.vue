@@ -35,7 +35,24 @@
                 </v-icon>
               </span>
             </th>
-            <th v-if="$slots.actions" class="end gear-col" />
+            <!-- Trailing gear column: hosts the per-row #actions cells, and
+                 (when tools=true) the table tools cog in its header — Export
+                 as CSV / Copy to clipboard, the 2026 equivalent of
+                 LigojDataTableServer's TableToolsMenu. -->
+            <th v-if="showGearCol" class="end gear-col">
+              <v-menu v-if="tools" location="bottom end">
+                <template #activator="{ props: act }">
+                  <button class="lj-iconbtn" v-bind="act" :aria-label="t('common.tableTools') || 'Table tools'" @click.stop>
+                    <v-progress-circular v-if="exporting || copying" size="15" width="2" indeterminate />
+                    <v-icon v-else size="18">mdi-cog</v-icon>
+                  </button>
+                </template>
+                <div class="lj-popmenu">
+                  <button :disabled="exporting || copying" @click="exportCsv"><v-icon size="18">mdi-file-download-outline</v-icon>{{ t('common.exportCsv') || t('common.export') || 'Export CSV' }}</button>
+                  <button :disabled="exporting || copying" @click="copyToClipboard"><v-icon size="18">mdi-content-copy</v-icon>{{ t('common.copyClipboard') || 'Copy to clipboard' }}</button>
+                </div>
+              </v-menu>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -44,7 +61,7 @@
             <tr v-for="n in 6" :key="'sk' + n" class="skel-row">
               <td v-if="selectable" class="cbx-col"><span class="skbar sk-cbx" /></td>
               <td v-for="h in headers" :key="h.key" :class="[h.align === 'center' && 'center', h.align === 'end' && 'end']"><span class="skbar" :style="{ width: skWidth(h, n) }" /></td>
-              <td v-if="$slots.actions" class="end gear-col"><span class="skbar sk-cbx" /></td>
+              <td v-if="showGearCol" class="end gear-col"><span class="skbar sk-cbx" /></td>
             </tr>
           </template>
           <!-- Empty: illustrated state. -->
@@ -65,7 +82,7 @@
               <td v-for="h in headers" :key="h.key" :class="[h.align === 'center' && 'center', h.align === 'end' && 'end']">
                 <slot :name="`cell.${h.key}`" :item="item" :value="item[h.key]">{{ item[h.key] }}</slot>
               </td>
-              <td v-if="$slots.actions" class="end gear-col" @click.stop>
+              <td v-if="showGearCol" class="end gear-col" @click.stop>
                 <slot name="actions" :item="item" />
               </td>
             </tr>
@@ -93,8 +110,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, getCurrentInstance } from 'vue'
+import { ref, computed, watch, onMounted, getCurrentInstance, useSlots } from 'vue'
 import { useI18nStore } from '@ligoj/host'
+import { buildCsv, buildTsv } from '@/composables/useTableTools.js'
 
 const props = defineProps({
   headers: { type: Array, required: true },
@@ -108,11 +126,95 @@ const props = defineProps({
   defaultOrder: { type: String, default: 'asc' },
   perPageOptions: { type: Array, default: () => [10, 25, 50, 100] },
   emptyText: { type: String, default: '' },
+  /* Table tools (Export CSV / Copy to clipboard) cog in the trailing
+     header — on by default, same contract as LigojDataTableServer. */
+  tools: { type: Boolean, default: true },
+  filename: { type: String, default: 'table.csv' },
+  /* Returns the FULL dataset for export (server-side tables only see the
+     current page in `items`). Typically `dt.loadAll`. Falls back to the
+     visible `items` when omitted. */
+  fetchAll: { type: Function, default: null },
 })
 const emit = defineEmits(['update:options', 'update:modelValue', 'row-click'])
 
 const i18n = useI18nStore()
 const t = i18n.t
+const slots = useSlots()
+
+/* The trailing gear column appears when the caller renders per-row actions
+   OR the tools cog is enabled. */
+const showGearCol = computed(() => !!slots.actions || props.tools)
+
+/* Export / Copy.
+ *
+ * NB: VibrantDataTable's `headers` are DATA-only (the per-row actions live in
+ * the separate gear column via #actions), so — unlike LigojDataTableServer,
+ * whose headers included a trailing actions column — we must NOT drop the last
+ * header. We therefore call the pure `buildCsv`/`buildTsv` builders with an
+ * appended dummy column so their built-in skip-last lands on the dummy and
+ * every real data column is exported. Headers also use `label`, mapped to the
+ * `title` the builders read. */
+const exporting = ref(false)
+const copying = ref(false)
+
+/* Columns to export: every keyed header (minus opt-outs), each titled by its
+   label. A dummy trailing column absorbs buildCsv/buildTsv's skip-last so no
+   real data column is dropped. The export reads each cell from a flattened
+   row (see exportRows), so the builder's own getAt just does a flat lookup. */
+function exportCols() {
+  const mapped = props.headers
+    .filter((h) => (h.key ?? h.value) && h.exportable !== false)
+    .map((h) => ({ key: h.key ?? h.value, title: h.title ?? h.label ?? h.key }))
+  return [...mapped, { key: '__actions__', title: '' }]
+}
+/* Flatten each row to plain string/number cells. A header may supply an
+   `exportValue(row)` to control its CSV/clipboard text (e.g. join an array of
+   emails, map a boolean to a localized status) — otherwise the raw value is
+   used (buildCsv stringifies objects as JSON, fine for scalar columns). */
+async function exportRows() {
+  const rows = props.fetchAll ? await props.fetchAll() : props.items
+  if (!Array.isArray(rows)) return []
+  const cols = props.headers.filter((h) => (h.key ?? h.value) && h.exportable !== false)
+  return rows.map((row) => {
+    const flat = {}
+    for (const h of cols) {
+      const key = h.key ?? h.value
+      flat[key] = typeof h.exportValue === 'function' ? h.exportValue(row) : row[key]
+    }
+    return flat
+  })
+}
+async function exportCsv() {
+  exporting.value = true
+  try {
+    const csv = buildCsv(await exportRows(), exportCols())
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = props.filename || 'table.csv'
+    document.body.appendChild(a); a.click(); a.remove()
+    URL.revokeObjectURL(url)
+  } finally {
+    exporting.value = false
+  }
+}
+async function copyToClipboard() {
+  copying.value = true
+  try {
+    const tsv = buildTsv(await exportRows(), exportCols())
+    try {
+      await navigator.clipboard.writeText(tsv)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = tsv; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.top = '-1000px'
+      document.body.appendChild(ta); ta.select()
+      try { document.execCommand('copy') } catch { /* ignore */ }
+      ta.remove()
+    }
+  } finally {
+    copying.value = false
+  }
+}
 
 // `row-click` is opt-in: rows show the pointer cursor and emit the
 // click only when the caller actually listens for it. Avoids the
@@ -127,7 +229,7 @@ const itemsPerPage = ref(props.perPageOptions.includes(25) ? 25 : props.perPageO
 const sortKey = ref(props.defaultSort)
 const sortOrder = ref(props.defaultOrder)
 
-const colCount = computed(() => props.headers.length + (props.selectable ? 1 : 0) + 1)
+const colCount = computed(() => props.headers.length + (props.selectable ? 1 : 0) + (showGearCol.value ? 1 : 0))
 const pageCount = computed(() => Math.max(1, Math.ceil((props.itemsLength || 0) / itemsPerPage.value)))
 
 const rangeLabel = computed(() => {
@@ -302,6 +404,10 @@ tbody tr:last-child td { border-bottom: 0; }
 .cbx.on::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translateY(-1px); }
 
 .gear-col { width: 88px; white-space: nowrap; }
+/* Tools cog sits flush-right in the gear-column header, aligned over the
+   per-row action buttons below it. */
+thead th.gear-col { text-align: right; padding-top: 8px; padding-bottom: 8px; }
+thead th.gear-col .lj-iconbtn { display: inline-grid; }
 
 /* Footer pagination (matches mockup .pg). */
 .pg { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 12px 16px; color: var(--ink-3); font-size: 13px; font-weight: 600; border-top: 1px solid var(--border); }

@@ -515,4 +515,8 @@ export default {
   'common.of': "of",
   'common.previous': "Previous",
   'common.next': "Next",
+  // table tools (VibrantDataTable cog menu)
+  'common.exportCsv': "Export as CSV",
+  'common.copyClipboard': "Copy to clipboard",
+  'common.tableTools': "Table tools",
 }
