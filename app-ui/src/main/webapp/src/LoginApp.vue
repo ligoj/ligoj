@@ -1042,7 +1042,7 @@ input[readonly] {
   height: 100%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .4), transparent);
   transform: skewX(-20deg);
-  animation: shine 3.6s ease-in-out infinite;
+  animation: shine 3.6s ease-in-out 1;
 }
 
 @keyframes shine {
