@@ -27,13 +27,16 @@
           <!-- Sub-menu (e.g. Identité → Utilisateurs / Groupes / …); expand
                state is manual (toggled by clicking the parent). -->
           <div v-if="it.children && isOpen(it)" class="subnav">
-            <a v-for="c in it.children" :key="c.label" class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }"
-              @click="c.route ? go(c.route) : toast()">
-              <LigojIcon v-if="c.icon" :icon="c.icon" size="16" />
-              <span v-else class="dot" />
-              <span>{{ c.label }}</span>
-              <span v-if="c.soon" class="soon">bientôt</span>
-            </a>
+            <template v-for="c in it.children" :key="c.label">
+              <div v-if="c.divider" class="sub-sep"><span>{{ c.divider }}</span></div>
+              <a class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }"
+                @click="c.route ? go(c.route) : toast()">
+                <LigojIcon v-if="c.icon" :icon="c.icon" size="16" />
+                <span v-else class="dot" />
+                <span>{{ c.label }}</span>
+                <span v-if="c.soon" class="soon">bientôt</span>
+              </a>
+            </template>
           </div>
         </template>
       </nav>
@@ -74,7 +77,9 @@ import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
+import { useI18nStore } from '@/stores/i18n.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
+import registry from '@/plugins/registry.js'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
 import LoginPromptDialog from '@/components/LoginPromptDialog.vue'
 import LigojIcon from '@/components/LigojIcon.vue'
@@ -83,6 +88,7 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const app = useAppStore()
+const i18n = useI18nStore()
 const appName = computed(() => auth.appSettings?.name || 'Ligoj')
 
 // Each page re-opts into the bar breadcrumbs/refresh via setBreadcrumbs() in
@@ -108,7 +114,7 @@ onMounted(async () => {
   if (optional.length) loadAllPlugins(optional)
 })
 
-const NAV = [
+const BASE_NAV = [
   { label: 'Accueil', icon: 'mdi-home', route: '/' },
   // `match` makes the item active across a whole section; `children` render
   // a sub-menu while the section is active.
@@ -135,6 +141,63 @@ const NAV = [
     { label: 'Jetons', icon: 'mdi-key', route: '/api/token', match: '/api/token' },
   ] },
 ]
+
+/**
+ * Plugin contributions to the Administration menu, via the `renderAdmin`
+ * render-delegation feature. The 2026 redesign rebuilt the sidebar from a
+ * static NAV array and dropped the old `AdminNavExtras` mount, so these
+ * vanished — this restores them the 2026 way.
+ *
+ * Each contributing plugin returns `<v-list-item>` VNodes built with
+ * `h(VListItem, { prependIcon, title, to })`; we read those props off the
+ * VNodes and turn them into native sidebar sub-items (so they get the 2026
+ * `.sub-item` styling + active-state logic, instead of an off-theme Vuetify
+ * list). `registry.version` + `i18n.locale` are read for reactivity, so a
+ * plugin loaded lazily after first paint (or a locale switch) re-runs this.
+ */
+const pluginAdminChildren = computed(() => {
+  void registry.version.value
+  void i18n.locale
+  const items = []
+  for (const plugin of registry.list()) {
+    if (typeof plugin?.feature !== 'function') continue
+    let out
+    try {
+      out = plugin.feature('renderAdmin')
+    } catch (err) {
+      if (!/no feature ["']renderAdmin["']/.test(err?.message || '')) {
+        console.warn(`[App] ${plugin.id}.renderAdmin threw`, err)
+      }
+      continue
+    }
+    if (out == null) continue
+    // Each contributing plugin's entries are preceded by a labeled divider
+    // carrying the plugin's display name (its "ownership notice"), so admins
+    // see which plugin owns the entries below it.
+    const owner = plugin.label || plugin.id
+    let first = true
+    for (const node of Array.isArray(out) ? out.filter(Boolean) : [out]) {
+      const p = node?.props
+      if (!p?.to) continue
+      items.push({
+        label: p.title || p.to,
+        icon: p.prependIcon || 'mdi-circle-small',
+        route: p.to,
+        match: p.to,
+        ...(first ? { divider: owner } : {}),
+      })
+      first = false
+    }
+  }
+  return items
+})
+
+const NAV = computed(() =>
+  BASE_NAV.map((it) => {
+    const extra = it.match === '/system' ? pluginAdminChildren.value : []
+    return extra.length ? { ...it, children: [...it.children, ...extra] } : it
+  }),
+)
 
 const collapsed = ref(false)
 const title = computed(() => {
@@ -183,7 +246,7 @@ function onNavClick(it) {
   }
 }
 watch(() => route.path, () => {
-  for (const it of NAV) if (it.children && isNavActive(it)) openSections[it.label] = true
+  for (const it of NAV.value) if (it.children && isNavActive(it)) openSections[it.label] = true
 }, { immediate: true })
 
 function go(path) { if (route.path !== path) router.push(path) }
@@ -306,6 +369,8 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .nav-item.has-children:hover .nav-caret { color: rgba(255,255,255,.9); }
 .nav-item.has-children .soon + .nav-caret { margin-left: 6px; }
 .subnav { margin: 2px 0 6px; padding-left: 14px; display: flex; flex-direction: column; gap: 1px; }
+.sub-sep { display: flex; align-items: center; gap: 8px; margin: 8px 12px 3px 6px; font-family: var(--v26-font); font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.42); }
+.sub-sep::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,.12); }
 .sub-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--lj-radius-sm, 9px); cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 13px; color: rgba(255,255,255,.74); }
 .sub-item:hover { background: rgba(255,255,255,.07); color: #fff; }
 .sub-item.active { background: rgba(255,255,255,.14); color: #fff; }
