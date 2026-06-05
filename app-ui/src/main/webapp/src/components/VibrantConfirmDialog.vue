@@ -66,13 +66,15 @@ function onCancel() {
   --border: rgba(var(--v-theme-on-surface), .14);
   --border-2: rgba(var(--v-theme-on-surface), .26);
   --hover: rgba(var(--v-theme-on-surface), .06);
-  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
-  --sys: var(--v26-sys, -apple-system, BlinkMacSystemFont, sans-serif);
+  /* Shape / type from the active style's design tokens (see
+   * assets/vuetify-overrides.css); fall back to the 2026 defaults. */
+  --font: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --sys: var(--lj-font, -apple-system, BlinkMacSystemFont, sans-serif);
   /* tone-driven accent (the confirm button + icon tile) */
   --accent: #ff5a52;
   --accent-grad: linear-gradient(135deg, #ff9436, #ff5a52);
-  border-radius: 18px !important;
-  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .55) !important;
+  border-radius: var(--lj-radius, 18px) !important;
+  box-shadow: var(--lj-shadow-lg, 0 30px 80px -30px rgba(0, 0, 0, .55)) !important;
   font-family: var(--sys);
 }
 .vconfirm.tone-error { --accent: rgb(var(--v-theme-error)); --accent-grad: rgb(var(--v-theme-error)); }
@@ -97,14 +99,14 @@ function onCancel() {
 }
 
 .vc-head { display: flex; align-items: center; gap: 12px; padding: 20px 22px 6px; }
-.vc-ic { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: none; background: var(--accent-grad); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--accent) 65%, transparent); }
-.vc-head h3 { font-family: var(--font); font-weight: 800; font-size: 18px; letter-spacing: -.02em; margin: 0; color: var(--ink); }
+.vc-ic { width: 40px; height: 40px; border-radius: var(--lj-radius-sm, 11px); display: grid; place-items: center; flex: none; background: var(--accent-grad); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--accent) 65%, transparent); }
+.vc-head h3 { font-family: var(--font); font-weight: var(--lj-weight-bold, 800); font-size: 18px; letter-spacing: var(--lj-tracking, -.02em); margin: 0; color: var(--ink); }
 
 .vc-body { padding: 8px 22px 4px; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
 .vc-body :deep(strong) { font-weight: 800; }
 
 .vc-foot { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 16px 22px 20px; }
-.vc-btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px; padding: 10px 17px; border-radius: 11px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s, border-color .15s; }
+.vc-btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px; padding: 10px 17px; border-radius: var(--lj-radius-sm, 11px); text-transform: var(--lj-uppercase, none); cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s, border-color .15s; }
 .vc-btn.ghost { color: var(--ink-2); background: transparent; border-color: var(--border); }
 .vc-btn.ghost:hover:not(:disabled) { background: var(--hover); border-color: var(--border-2); }
 .vc-btn.confirm { color: #fff; background: var(--accent-grad); box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--accent) 60%, transparent); }

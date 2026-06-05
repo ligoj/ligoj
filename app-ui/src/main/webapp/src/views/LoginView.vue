@@ -537,8 +537,18 @@ onBeforeUnmount(() => {
   --err: rgb(var(--v-theme-error));
   --info: rgb(var(--v-theme-info));
   --warn: rgb(var(--v-theme-warning));
-  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --font: var(--lj-font, var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif));
   --sys: var(--v26-sys, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  /* Shape/type from the active style's design tokens (assets/vuetify-overrides.css)
+   * so this hand-rolled login re-shapes with the theme, not just recolors.
+   * Fallbacks keep the original look when no style attribute is set. */
+  --radius: var(--lj-radius, 24px);
+  --radius-sm: var(--lj-radius-sm, 11px);
+  --shadow: var(--lj-shadow, 0 12px 30px -10px rgba(0, 0, 0, .4));
+  --shadow-lg: var(--lj-shadow-lg, 0 30px 70px -30px rgba(0, 0, 0, .45), 0 8px 60px -20px rgba(255, 148, 54, .25), 0 8px 60px -20px rgba(47, 109, 246, .22));
+  --border-w: var(--lj-border-width, 1px);
+  --border-c: var(--lj-border-color, var(--border));
+  --bold: var(--lj-weight-bold, 800);
   /* Brand aurora colours (logo orange + coral + blue), fixed for a premium,
      vivid pre-auth backdrop in both light and dark. */
   --c-orange: #ff9436;
@@ -717,10 +727,10 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 24px;
+  border: var(--border-w) var(--lj-border-style, solid) var(--border-c);
+  border-radius: var(--radius);
   /* Premium: neutral drop + faint warm & cool colour bloom around the card. */
-  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .45), 0 8px 60px -20px rgba(255, 148, 54, .25), 0 8px 60px -20px rgba(47, 109, 246, .22);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   animation: rise .5s cubic-bezier(.2, .7, .3, 1);
 }
@@ -755,8 +765,8 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 7px;
   padding: 6px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
+  border-radius: var(--lj-radius-sm, 10px);
+  border: var(--border-w) var(--lj-border-style, solid) var(--border-c);
   background: var(--surface);
   color: var(--ink-2);
   font-family: var(--sys);
@@ -791,9 +801,9 @@ onBeforeUnmount(() => {
   right: 0;
   min-width: 156px;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  box-shadow: 0 16px 36px -14px rgba(0, 0, 0, .3);
+  border: var(--border-w) var(--lj-border-style, solid) var(--border-c);
+  border-radius: var(--lj-radius, 11px);
+  box-shadow: var(--shadow-lg);
   padding: 5px;
   animation: lmenu .12s ease;
 }
@@ -818,7 +828,7 @@ onBeforeUnmount(() => {
   padding: 8px 10px;
   border: 0;
   background: transparent;
-  border-radius: 8px;
+  border-radius: var(--lj-radius-sm, 8px);
   color: var(--ink);
   font-family: var(--sys);
   font-size: .85rem;
@@ -866,7 +876,7 @@ onBeforeUnmount(() => {
 
 .subtitle {
   font-family: var(--font);
-  font-weight: 800;
+  font-weight: var(--bold);
   letter-spacing: -.03em;
   font-size: 1.45rem;
   color: var(--ink);
@@ -927,7 +937,7 @@ onBeforeUnmount(() => {
 .alert {
   margin: 0 0 16px;
   padding: 11px 13px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   font-size: .9rem;
   border: 1px solid transparent;
 }
@@ -957,8 +967,8 @@ input[type="email"] {
   width: 100%;
   padding: 11px 13px;
   font-size: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 11px;
+  border: var(--border-w) var(--lj-border-style, solid) var(--border-c);
+  border-radius: var(--radius-sm);
   background: var(--input-bg);
   color: var(--ink);
   transition: border-color .15s, box-shadow .15s, background .15s;
@@ -1032,8 +1042,8 @@ input[readonly] {
 }
 
 .captcha-img {
-  border: 1px solid var(--border);
-  border-radius: 9px;
+  border: var(--border-w) var(--lj-border-style, solid) var(--border-c);
+  border-radius: var(--lj-radius-sm, 9px);
   height: 42px;
   min-width: 150px;
   cursor: pointer;
@@ -1042,8 +1052,8 @@ input[readonly] {
 
 .icon-btn {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 9px;
+  border: var(--border-w) var(--lj-border-style, solid) var(--border-c);
+  border-radius: var(--lj-radius-sm, 9px);
   width: 34px;
   height: 34px;
   font-size: 1rem;
@@ -1062,12 +1072,12 @@ input[readonly] {
   padding: 13px;
   font-family: var(--font);
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: var(--bold);
   color: #fff;
   /* Same warm orange→coral brand gradient as the "Nouvel utilisateur" CTA. */
   background: linear-gradient(135deg, #ff9436, #ff5a52);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--lj-radius-sm, 12px);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1166,10 +1176,10 @@ input[readonly] {
   min-width: 260px;
   max-width: 420px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--lj-radius-sm, 12px);
   font-size: .9rem;
   font-weight: 600;
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .4);
+  box-shadow: var(--shadow);
   color: #fff;
   animation: toast-in .18s ease-out;
 }

@@ -219,7 +219,11 @@ function toast(msg = 'Page à venir dans la refonte') {
 /* Global: Vibrant display font across the whole UI-2026 app. This app is
    standalone, so applying it globally is safe (the current app-ui is a
    separate project and untouched). */
-:root { --v26-font: "Bricolage Grotesque", system-ui, sans-serif; --v26-sys: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; --v26-mono: "JetBrains Mono", ui-monospace, monospace; }
+/* The shell font tokens defer to the active style's `--lj-font` / `--lj-mono`
+ * (defined per `[data-style]` in assets/vuetify-overrides.css) so the sidebar,
+ * brand, breadcrumbs and user menu re-typeface with the theme. The literals
+ * are the fallback when no style attribute is set. */
+:root { --v26-font: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif); --v26-sys: var(--lj-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); --v26-mono: var(--lj-mono, "JetBrains Mono", ui-monospace, monospace); }
 html, body, #app { margin: 0; height: 100%; }
 body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); }
 .v-application, .v-navigation-drawer, .v-app-bar { font-family: var(--v26-sys); }
@@ -231,9 +235,9 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .v-select__content,
 .v-autocomplete__content,
 .v-combobox__content {
-  border-radius: 14px !important;
-  box-shadow: 0 18px 48px -16px rgba(0, 0, 0, .5) !important;
-  border: 1px solid rgba(var(--v-theme-on-surface), .12);
+  border-radius: var(--lj-radius, 14px) !important;
+  box-shadow: var(--lj-shadow-lg, 0 18px 48px -16px rgba(0, 0, 0, .5)) !important;
+  border: 1px solid var(--lj-border-color, rgba(var(--v-theme-on-surface), .12));
   overflow: hidden;
 }
 .v-select__content .v-list,
@@ -241,12 +245,12 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .v-combobox__content .v-list {
   background: rgb(var(--v-theme-surface)) !important;
   padding: 6px !important;
-  font-family: var(--v26-font);
+  font-family: var(--lj-font, var(--v26-font));
 }
 .v-select__content .v-list-item,
 .v-autocomplete__content .v-list-item,
 .v-combobox__content .v-list-item {
-  border-radius: 9px !important;
+  border-radius: var(--lj-radius-sm, 9px) !important;
   min-height: 42px !important;
   margin-bottom: 2px;
 }
@@ -293,7 +297,7 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .brand-logo { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
 .brand-word { font-family: var(--v26-font); font-weight: 800; font-size: 20px; letter-spacing: -.02em; }
 .nav { padding: 10px; flex: 1; }
-.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 14px; color: rgba(255,255,255,.86); margin-bottom: 2px; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--lj-radius-sm, 10px); cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 14px; color: rgba(255,255,255,.86); margin-bottom: 2px; }
 .nav-item:hover { background: rgba(255,255,255,.08); }
 .nav-item.active { background: rgba(255,255,255,.16); color: #fff; }
 .nav-item .soon { margin-left: auto; font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(255,255,255,.16); }
@@ -302,7 +306,7 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .nav-item.has-children:hover .nav-caret { color: rgba(255,255,255,.9); }
 .nav-item.has-children .soon + .nav-caret { margin-left: 6px; }
 .subnav { margin: 2px 0 6px; padding-left: 14px; display: flex; flex-direction: column; gap: 1px; }
-.sub-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 9px; cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 13px; color: rgba(255,255,255,.74); }
+.sub-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--lj-radius-sm, 9px); cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 13px; color: rgba(255,255,255,.74); }
 .sub-item:hover { background: rgba(255,255,255,.07); color: #fff; }
 .sub-item.active { background: rgba(255,255,255,.14); color: #fff; }
 .sub-item .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .6; flex: none; }

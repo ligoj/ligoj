@@ -51,16 +51,24 @@ function icon(sev) { return ICONS[sev] || ICONS.info }
   position: fixed; bottom: 22px; right: 22px; z-index: 70;
   display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
   max-width: min(420px, calc(100vw - 44px)); pointer-events: none;
-  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
-  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
+  --font: var(--lj-font, var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif));
+  --mono: var(--lj-mono, var(--v26-mono, "JetBrains Mono", ui-monospace, monospace));
+  /* Shape/type from the active style's design tokens (assets/vuetify-overrides.css)
+   * so this hand-rolled toast stack re-shapes with the theme, not just recolors.
+   * Fallbacks keep the original look when no style attribute is set. */
+  --radius: var(--lj-radius, 14px);
+  --shadow-lg: var(--lj-shadow-lg, 0 18px 40px -16px rgba(0, 0, 0, .45));
+  --border-w: var(--lj-border-width, 1px);
+  --border-c: var(--lj-border-color, rgba(var(--v-theme-on-surface), .1));
+  --bold: var(--lj-weight-bold, 800);
 }
 .snack {
   pointer-events: auto; position: relative; width: 100%;
   display: flex; align-items: flex-start; gap: 12px;
-  padding: 14px 14px 14px 16px; border-radius: 14px;
+  padding: 14px 14px 14px 16px; border-radius: var(--radius);
   background: rgb(var(--v-theme-surface)); color: rgb(var(--v-theme-on-surface));
-  border: 1px solid rgba(var(--v-theme-on-surface), .1);
-  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, .45);
+  border: var(--border-w) var(--lj-border-style, solid) var(--border-c);
+  box-shadow: var(--shadow-lg);
   border-left: 4px solid var(--c, rgb(var(--v-theme-on-surface)));
 }
 .snack.error { --c: #df4d42; }
@@ -69,13 +77,13 @@ function icon(sev) { return ICONS[sev] || ICONS.info }
 .snack.info { --c: #2f6df6; }
 .s-ic { flex: none; color: var(--c); margin-top: 1px; }
 .s-body { flex: 1; min-width: 0; }
-.s-title { font-family: var(--font); font-weight: 800; font-size: 14px; letter-spacing: -.01em; margin-bottom: 2px; }
+.s-title { font-family: var(--font); font-weight: var(--bold); font-size: 14px; letter-spacing: -.01em; margin-bottom: 2px; }
 .s-msg { font-family: var(--font); font-size: 13.5px; font-weight: 500; line-height: 1.45; color: rgba(var(--v-theme-on-surface), .82); word-break: break-word; }
-.s-more { display: inline-flex; align-items: center; gap: 4px; margin-top: 7px; border: 0; background: transparent; cursor: pointer; font-family: var(--font); font-weight: 700; font-size: 12px; color: var(--c); padding: 2px 4px; border-radius: 6px; }
+.s-more { display: inline-flex; align-items: center; gap: 4px; margin-top: 7px; border: 0; background: transparent; cursor: pointer; font-family: var(--font); font-weight: 700; font-size: 12px; color: var(--c); padding: 2px 4px; border-radius: var(--lj-radius-sm, 6px); }
 .s-more .v-icon { transition: transform .2s; }
 .s-more .v-icon.open { transform: rotate(180deg); }
-.s-details { margin: 8px 0 0; max-height: 180px; overflow: auto; font-family: var(--mono); font-size: 11.5px; line-height: 1.5; color: rgba(var(--v-theme-on-surface), .7); background: rgba(var(--v-theme-on-surface), .05); border-radius: 9px; padding: 9px 11px; white-space: pre-wrap; word-break: break-word; }
-.s-x { flex: none; width: 28px; height: 28px; border: 0; background: transparent; border-radius: 8px; cursor: pointer; display: grid; place-items: center; color: rgba(var(--v-theme-on-surface), .5); transition: background .14s, color .14s; }
+.s-details { margin: 8px 0 0; max-height: 180px; overflow: auto; font-family: var(--mono); font-size: 11.5px; line-height: 1.5; color: rgba(var(--v-theme-on-surface), .7); background: rgba(var(--v-theme-on-surface), .05); border-radius: var(--lj-radius-sm, 9px); padding: 9px 11px; white-space: pre-wrap; word-break: break-word; }
+.s-x { flex: none; width: 28px; height: 28px; border: 0; background: transparent; border-radius: var(--lj-radius-sm, 8px); cursor: pointer; display: grid; place-items: center; color: rgba(var(--v-theme-on-surface), .5); transition: background .14s, color .14s; }
 .s-x:hover { background: rgba(var(--v-theme-on-surface), .08); color: rgb(var(--v-theme-on-surface)); }
 
 /* Enter/leave + reflow transitions. */

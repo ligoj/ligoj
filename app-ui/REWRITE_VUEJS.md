@@ -95,47 +95,21 @@ Each plugin provides at least on `node`:
 
 The application is plugin aware, so with dynamical resources.
 
-## `cascade.js` focus
+**What a legacy plugin looks like** (this is what you port FROM). Each plugin
+is a separate GitHub repo `ligoj/plugin-<id>`, served by a Spring Boot app that
+adds its `src/main/resources/META-INF/resources/<plugin-path>/` to the classpath
+— so assets are path-scoped, loaded dynamically, no host rebuild. Per plugin:
+- `<plugin_short_id>.html` — Handlebars view
+- `<plugin_short_id>.js` — the AMD controller (`define(function(){…})`); this is
+  the file you read to recover `renderFeatures` / `renderKey` / `renderDetailsKey`
+  behaviour. Many are `define({})` (parent with no own UI).
+- `<plugin_short_id>.css`, `nls/messages.js` (+ `nls/fr/messages.js`) — styles + i18n.
 
-This library located in `cascade.js` file handles:
-- Convention over configuration routing and injection
-- i18n along with handlebars
-- Inherited contexts from parent hierarchy
-- AMD modules loading with require.js
-- Transaction management to prevent UI update of a destroyed context
-- Auto change title from i18n configuration of current module
-
-Current behavior:
-- User requests URL `#/plugin_path`
-- Cascade loads the Cascade module `main` (shared common module with utilities, etc.), then `plugin_path`
-- Loading a Cascade module `plugin_path` :
-  - Get the ressources :
-    - `<plugin_path>/<plugin_short_id>.html` (the view, contains handlebars templates)
-    - `<plugin_path>/<plugin_short_id>.js` (the controller)
-    - `<plugin_path>/<plugin_short_id>.css` (the styles)
-    - `<plugin_path>/nls/messages.js` (always loaded)
-    - `<plugin_path>/nls/fr/messages.js` (depends on current locale)
-  - Initialize the context
-  - Merge view, the locale files, and the context
-  - Inject the styles
-  - Inject the merged view in the DOM of the current parent
-  - Inject the controller script in the DOM of the current parent
-  - Execute the `initialize` function if present of this module
-
-The assets of `plugin_path` are not parts of the main application, but are brought by plugins. Each plugin is scoped to a specific path, and contains its own assets : css, js, html, etc.
-Each plugin is in its own GitHub repository `ligoj/<plugin-repository-id>`. See `<plugin-repo-id>/src/main/resources/META-INF/resources/` in this workspace for sample.
-
-The plugins are not parts of the main application, they are made available by another Spring Boot application that add to the classpath the resources. That's why the `plugin_path` is important to scope the module assets.
-
-For the unload of a module, the `unload` function is called if present of this module and the DOM is cleaned.
-
-## `error.mod.js` focus
-
-This script handles all errors and exceptions. It displays the correct message in the UI and log the error in the console.
-
-## `security.mod.js` focus
-
-This script is a guard and a DOM protection layer. It checks the security of the current user and prevents access to restricted resources.
+`cascade.js` (the legacy custom MVVM/AMD loader) wires routing-by-convention,
+Handlebars i18n, inherited parent contexts, and per-module `initialize`/`unload`.
+`error.mod.js` = global error→toast; `security.mod.js` = a DOM access guard.
+The Vue port replaces all of this — you only need the legacy `.js`/`nls` files
+as the behavioural spec for the plugin you're migrating.
 
 # Target design
 
@@ -181,6 +155,48 @@ Core components are in `~/git/ligoj/app-ui/src/main/webapp/src/components`. They
 
 What's actually shipped in this branch — record here so the next plugin migration starts from reality, not the wish list.
 
+## 2026 redesign & host-as-shell
+
+The "2026 Vibrant" redesign is the canonical UI. Its components were
+originally landed in the host (`app-ui/.../src/{views,components}`) but the
+domain screens have since been **relocated into the plugins** — the host is now
+a pure shell + shared component surface.
+
+- **Host keeps**: the chrome (`App.vue` sidebar/topbar, `LoginView`/login apps,
+  `ProfileView`, `AboutView`, `PluginView`, `ErrorSnackbar`, `AdminNavExtras`,
+  `GlobalToolsList`) and the **shared component surface** re-exported from
+  `host.js` (`LigojDataTable*`, `LigojConfirmDialog`, `NodeIcon`, `NodeModeChip`,
+  `PluginFeatures`, `ImportExportBar`, and the 2026 `VibrantDataTable` /
+  `VibrantConfirmDialog` / `LigojIcon`). Host `router/index.js` = `/profile`,
+  `/about`, catch-all only.
+- **plugin-id owns** identity screens: `UserListView`, `GroupListView`,
+  `CompanyListView`, `DelegateListView`, `ContainerScopeView` + the edit
+  dialogs/panels + `GroupMembers{Dialog,Panel}`.
+- **plugin-ui owns** the rest: `HomeView` (dashboard), `ProjectListView`,
+  `ProjectDetailView`, `System*View`, `Api*View`, `SubscribeWizardView`,
+  `ProjectEditDialog`, `NodeEditDialog`, `AuditDialog`.
+
+**Canonical route scheme** (what `App.vue` nav links to): dashboard `/`,
+`/project` + `/project/:id`, `/id/{user,group,company,delegate,scope}`,
+`/system/{node,plugin,role,user,configuration,cache,bench,information}`,
+`/api` + `/api/token`. Legacy `/home/*` and `/id/container-scope` are kept as
+Vue Router `alias` entries so old bookmarks resolve (an `alias` does NOT add a
+separate `addRoute` path — route-count assertions are unaffected).
+
+**Relocating a host 2026 view into a plugin** — the recipe used for the move:
+1. Copy the `.vue` into the plugin (keep the plugin's existing filename if one
+   exists, so its `index.js` routes + contract test stay stable).
+2. Rewrite imports: `@/components/Vibrant*` → `@ligoj/host` (alias as needed,
+   e.g. `import { VibrantConfirmDialog as LigojConfirmDialog } from '@ligoj/host'`);
+   `@/views|components/X` → relative, applying any rename.
+3. Split i18n: domain keys → the plugin's `i18n/{en,fr}`; generic chrome keys
+   (`common.*`, `subscription.*`) → host `i18n/{en,fr}`. **Watch for
+   dynamically-built keys** (`t('subscription.status.' + s)`,
+   `t('system.plugin.type.' + x)`) — a static `t('…')` scan misses them; grep
+   the bundle for the prefixes before deleting it.
+4. Delete the host copy + any now-orphaned host composable (verify nothing else
+   imports it — the relocated cluster tends to be self-contained).
+
 ## Reference implementations (read these first)
 
 | Plugin           | Role                                                    | What it demonstrates                                                                                                                                                |
@@ -210,11 +226,17 @@ Ported to the `ui/` Vue stack on this branch (each emits to
 | plugin-km (+ -confluence)                         | service + tool | space link + space chip                                                       |
 | plugin-qa (+ -sonarqube)                          | service + tool | dashboard link + project chip                                                 |
 | plugin-mail (+ -smtp)                             | service + tool | i18n-only (SMTP node is global, mode NONE)                                    |
+| plugin-storage (+ -owncloud)                      | service + tool | ownCloud files-app link + directory chip                                      |
+| plugin-security (+ -fortify)                      | service + tool | Fortify SSC flex link + project-version chip                                  |
+| plugin-scm (+ -git / -github)                     | service + tool | repo home link + repo chip (github: `github.com/<user>/<repo>`)               |
 
-All delegating service parents (vm/bt/build/km/qa/mail) share one shape:
-no routes/component (legacy HTML empty / `define({})`), i18n +
-`subPluginIdFor` delegation; each tool's vitest imports its sibling
-parent's `index.js` to exercise parent→tool delegation.
+All delegating service parents (vm/bt/build/km/qa/mail/storage/security/scm)
+share one shape: no routes/component (legacy HTML empty / `define({})`), i18n +
+`subPluginIdFor` delegation; each tool's vitest imports its sibling parent's
+`index.js` to exercise parent→tool delegation. **Parent-test gotcha:**
+`registry.register(id, def)` requires `id` + `install` on the def and silently
+rejects otherwise — a delegation test's fake tool must be a full manifest
+`{ id, install(){}, feature }`, not just `{ feature }`.
 
 ## Infrastructure decisions
 
@@ -224,11 +246,13 @@ parent's `index.js` to exercise parent→tool delegation.
 - **Theme system**: 12 themes in `plugins/vuetify.js`; user picks via `ProfileView`. Persisted in `localStorage` under `ligoj-theme`.
 - **Build chain**: Vite 8 with rolldown. `manualChunks` rejected — use `output.codeSplitting.groups`. ESLint 9+ flat config (`eslint.config.js`); no `.eslintrc.cjs`.
 - **Lint baseline**: `js.configs.recommended` + `pluginVue.configs['flat/essential']` (NOT `flat/recommended`). `vue/valid-v-slot` runs with `{ allowModifiers: true }` because Vuetify data-table cell templates use dotted slot names (`#item.foo`).
-- **Host-exposed Vuetify primitives**: `host.js` re-exports `VBtn`, `VChip`, `VIcon`, `VTooltip`. Plugin `feature()` actions build VNodes with `h(VBtn, …)` without bundling their own Vuetify copy.
+- **Host-exposed Vuetify primitives**: `host.js` re-exports `VBtn`, `VChip`, `VIcon`, `VTooltip`, `VListItem`, `VDivider`. Plugin `feature()` actions build VNodes with `h(VBtn, …)` without bundling their own Vuetify copy.
+- **2026 "Vibrant" shared components** live in the host and are re-exported from `host.js`: `VibrantDataTable` (presentation-only table; caller keeps its own `useDataTable`), `VibrantConfirmDialog` (drop-in for `LigojConfirmDialog` — same props/slots/events), `LigojIcon` (compact-mode-aware `<v-icon>` wrapper). They live in the host (not a plugin) because BOTH plugin-ui and plugin-id consume them and a plugin cannot import from a sibling plugin. See "2026 redesign & host-as-shell".
+- **Host is a shell**: the host owns only the chrome (App.vue sidebar/topbar, login, profile, about, error snackbar, plugin loader, shared component surface). EVERY domain screen lives in a plugin. The host `router/index.js` registers only `/profile`, `/about`, and the catch-all → `PluginView`; all other routes come from plugins' `install({ router })`.
 
 ## Plugin loading model (current)
 
-- **Pre-loaded** in `main.js`: `REQUIRED_PLUGINS = ['id', 'ui', 'prov']`. The host's sidebar nav references `/id/*` and `/prov/*` routes statically, so these must register their routes before the router mounts.
+- **Pre-loaded** in `main.js`: `REQUIRED_PLUGINS = ['id', 'ui', 'prov']`. `main.js` `await loadAllPlugins(REQUIRED_PLUGINS)` BEFORE `app.use(router)` + `mount`, so the routes these plugins register in `install({ router })` exist by the first navigation. The host shell's sidebar (`App.vue`) links to those plugin-owned paths (`/`, `/project`, `/id/*`, `/system/*`, `/api*`); they resolve because the plugins are pre-loaded.
 - **Lazy-loaded** in `App.vue` on session ready: `auth.appSettings.plugins` is run through `pluginIdFromKey(...)` (strips `service:` / `feature:` prefix, swaps `:` for `-`) before being passed to `loadAllPlugins`. The backend's `FeaturePlugin.getKey()` returns `service:id:ldap`; the loader needs `id-ldap`.
 - **Just-in-time** via `loadPlugin(id)`: triggered by the wizard's `ensureToolPluginLoaded(nodeId)` whenever it fetches parameters, and by `PluginFeatures` when it encounters an unloaded subscription plugin.
 - **Declared dependencies** via `requires: ['id']` on the plugin manifest. The loader awaits these BEFORE calling `install()`, so parent i18n is merged and registry slot exists by the time the sub-plugin runs. `plugin-id-ldap` uses this — `plugin-id` could be dropped from `REQUIRED_PLUGINS` without breaking LDAP.
@@ -240,7 +264,7 @@ One file, three modes — used by everything that creates or edits subscriptions
 
 | Mode          | Trigger                                  | Steps shown                                        | Result                                                                                                              |
 | ------------- | ---------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `subscribe`   | `/subscribe` route (from project detail) | Service → Tool → Instance → Mode → Params          | POST `rest/subscription`                                                                                            |
+| `subscribe`   | Dialog in `ProjectDetailView` (not a route) | Service → Tool → Instance → Mode → Params       | POST `rest/subscription`                                                                                            |
 | `edit-node`   | "Edit" in `SystemNodeView` (dialog)      | Read-only chain + editable Name + Params           | PUT `rest/node` (uses `node` field, not `refined` — `NodeEditionVo` has no `setRefined`, Jackson drops `refined:`). |
 | `create-node` | "New node" in `SystemNodeView` (dialog)  | Service → Tool → new-instance form + Mode + Params | POST `rest/node` with full payload (id, name, **`node`** (parent), mode, parameters).                               |
 
@@ -469,6 +493,7 @@ Imported from the host bundle via the import map; treat as the public API and do
 | `APP_BASE`                                                         | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths.                                                                                                                             |
 | `pluginRegistry` / `callFeature`                                   | Direct registry access for parent-to-child delegation (`subPluginIdFor`, `delegateToToolPlugin`). `callFeature` throws on missing plugin; prefer `pluginRegistry.get(id)?.feature?.(...)` when graceful degradation matters.                              |
 | `loadPlugin` / `pluginIdFromKey`                                   | Lazy-load a sibling plugin at runtime. The wizard uses these to `ensureToolPluginLoaded(nodeId)` before rendering parameter labels, so i18n inheritance works even if discovery hasn't run. `pluginIdFromKey('service:id:ldap')` → `'id-ldap'`.           |
+| `VibrantDataTable` / `VibrantConfirmDialog` / `LigojIcon`          | 2026 "Vibrant" shared components. `VibrantDataTable` = presentation-only table (caller keeps its own `useDataTable`, listens to `@update:options`); `VibrantConfirmDialog` = drop-in for `LigojConfirmDialog`; `LigojIcon` = compact-mode `<v-icon>` wrapper. Host-owned so both plugin-ui and plugin-id can use them. |
 
 ## 5. Translations
 

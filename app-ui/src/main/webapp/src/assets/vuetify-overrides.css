@@ -15,6 +15,281 @@
 }
 
 /* ===========================================================================
+ * Design tokens — the shape/elevation/typography language each style speaks.
+ *
+ * The color Theme catalog (vuetify.js) only sets palette. These `--lj-*`
+ * tokens carry everything ELSE that makes a style feel distinct: corner
+ * radius, shadow/elevation, border weight, spacing rhythm, font family +
+ * weight + letter-spacing. Defaults below = the stock Vuetify feel; each
+ * `[data-style="<id>"]` block further down re-binds the subset it cares
+ * about, and shared components (VibrantDataTable, VibrantConfirmDialog, the
+ * dialogs, the shell) consume `var(--lj-*)` instead of hardcoding values —
+ * so switching style now visibly changes shadows, radii, borders, spacing
+ * and type everywhere, not just colors.
+ *
+ * Naming: --lj-radius (cards/panels), --lj-radius-sm (buttons/chips/fields),
+ * --lj-radius-lg (oversized tiles), --lj-shadow (resting surface),
+ * --lj-shadow-lg (overlays/dialogs), --lj-border (1px hairline width+style),
+ * --lj-border-strong, --lj-space (base cell/section padding), --lj-gap,
+ * --lj-font (UI), --lj-mono, --lj-weight-bold (heading weight),
+ * --lj-tracking (heading letter-spacing), --lj-uppercase (label transform).
+ * ========================================================================= */
+:root {
+  --lj-radius: 12px;
+  --lj-radius-sm: 8px;
+  --lj-radius-lg: 18px;
+  --lj-shadow: 0 2px 6px rgba(0, 0, 0, .06);
+  --lj-shadow-lg: 0 18px 40px -24px rgba(0, 0, 0, .45);
+  --lj-border-width: 1px;
+  --lj-border-style: solid;
+  --lj-border: var(--lj-border-width) var(--lj-border-style) rgba(var(--v-theme-on-surface), .12);
+  --lj-border-color: rgba(var(--v-theme-on-surface), .12);
+  --lj-space: 14px;
+  --lj-gap: 8px;
+  --lj-font: "Bricolage Grotesque", system-ui, -apple-system, sans-serif;
+  --lj-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --lj-weight-bold: 800;
+  --lj-tracking: -0.02em;
+  --lj-uppercase: none;
+  --lj-transition: .16s cubic-bezier(.2, .7, .3, 1);
+}
+
+/* ===========================================================================
+ * .lj-surface — the local design-variable block, factored out.
+ *
+ * Every 2026 view used to copy-paste this same `--surface / --ink / --radius
+ * / ...` block into its scoped root (`.users`, `.scopes`, `.pdetail`, …),
+ * and the copies had DRIFTED (--hover .05 vs .06, --radius 12/16/18, button
+ * padding 11/17 vs 10/16). Adding `class="… lj-surface"` to a view root now
+ * pulls ONE canonical set of locals (themselves deferring to the global
+ * `--lj-*` tokens above). This is the single source of truth for the
+ * per-view palette/shape vars; the shared Lj* components consume the same
+ * names so they inherit the view's surface automatically.
+ *
+ * It is a normal (unscoped) class so it also works on a teleported card
+ * (dialogs): put `lj-surface` on the `.v-card` inside the dialog and the
+ * vars travel with the teleported content.
+ * ========================================================================= */
+.lj-surface {
+  --surface: rgb(var(--v-theme-surface));
+  --card: rgb(var(--v-theme-surface));
+  --ink: rgb(var(--v-theme-on-surface));
+  --ink-2: rgba(var(--v-theme-on-surface), .72);
+  --ink-3: rgba(var(--v-theme-on-surface), .55);
+  --border: rgba(var(--v-theme-on-surface), .12);
+  --border-2: rgba(var(--v-theme-on-surface), .26);
+  --hover: rgba(var(--v-theme-on-surface), .06);
+  --pill: rgba(var(--v-theme-on-surface), .06);
+  --primary: rgb(var(--v-theme-primary));
+  --accent: rgb(var(--v-theme-secondary));
+  --font: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --mono: var(--lj-mono, "JetBrains Mono", ui-monospace, monospace);
+  --radius: var(--lj-radius, 12px);
+  --radius-sm: var(--lj-radius-sm, 8px);
+  --radius-lg: var(--lj-radius-lg, 20px);
+  --shadow: var(--lj-shadow, 0 2px 8px rgba(0, 0, 0, .05));
+  --shadow-lg: var(--lj-shadow-lg, 0 30px 80px -30px rgba(0, 0, 0, .55));
+  --border-w: var(--lj-border-width, 1px);
+  --border-c: var(--lj-border-color, var(--border));
+  --bold: var(--lj-weight-bold, 800);
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+/* ===========================================================================
+ * Row-action menu — factored out as global classes (pattern 6).
+ *
+ * `.lj-iconbtn` is the 32px ghost trigger; `.lj-popmenu` is the dropdown the
+ * `v-menu` teleports to <body>. Because the menu content lives OUTSIDE any
+ * view's scope, it references the GLOBAL `--lj-*` tokens + Vuetify theme
+ * colours directly (never the view-local `--surface` etc., which wouldn't
+ * resolve there). Wrapping a v-menu activator+content in a component is
+ * awkward, so these stay plain classes the views apply.
+ * ========================================================================= */
+.lj-iconbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--lj-radius-sm, 8px);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  color: rgba(var(--v-theme-on-surface), .72);
+  transition: background .12s, color .12s;
+}
+.lj-iconbtn:hover {
+  background: rgba(var(--v-theme-on-surface), .06);
+  color: rgb(var(--v-theme-on-surface));
+}
+.lj-popmenu {
+  min-width: 200px;
+  background: rgb(var(--v-theme-surface));
+  border: var(--lj-border-width, 1px) var(--lj-border-style, solid) var(--lj-border-color, rgba(var(--v-theme-on-surface), .12));
+  border-radius: var(--lj-radius, 12px);
+  box-shadow: var(--lj-shadow-lg, 0 16px 44px -14px rgba(0, 0, 0, .45));
+  padding: 6px;
+}
+.lj-popmenu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  padding: 10px 12px;
+  border-radius: var(--lj-radius-sm, 8px);
+  text-align: left;
+}
+.lj-popmenu button:hover { background: rgba(var(--v-theme-on-surface), .06); }
+.lj-popmenu button:disabled { opacity: .4; cursor: not-allowed; }
+.lj-popmenu button.danger { color: rgb(var(--v-theme-error)); }
+.lj-popmenu .sep { height: 1px; background: rgba(var(--v-theme-on-surface), .12); margin: 5px 4px; }
+
+/* default style = the stock Vuetify shape language (flatter, tighter). */
+[data-style="default"] {
+  --lj-radius: 4px;
+  --lj-radius-sm: 4px;
+  --lj-radius-lg: 6px;
+  --lj-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+  --lj-shadow-lg: 0 8px 24px -8px rgba(0, 0, 0, .35);
+  --lj-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --lj-weight-bold: 600;
+  --lj-tracking: 0;
+}
+
+/* sharp / brutalist — zero radius, hard thick borders, mono, ALL-CAPS labels, no shadow. */
+[data-style="sharp"] {
+  --lj-radius: 0;
+  --lj-radius-sm: 0;
+  --lj-radius-lg: 0;
+  --lj-shadow: none;
+  --lj-shadow-lg: 6px 6px 0 0 rgba(var(--v-theme-on-surface), .9);
+  --lj-border-width: 2px;
+  --lj-border-color: rgba(var(--v-theme-on-surface), .85);
+  --lj-font: var(--lj-mono);
+  --lj-weight-bold: 700;
+  --lj-tracking: 0.02em;
+  --lj-uppercase: uppercase;
+  --lj-space: 12px;
+}
+
+/* vibrant — lifted cards, generous radius, soft deep shadow. */
+[data-style="vibrant"] {
+  --lj-radius: 14px;
+  --lj-radius-sm: 10px;
+  --lj-radius-lg: 20px;
+  --lj-shadow: 0 10px 28px -18px rgba(0, 0, 0, .5);
+  --lj-shadow-lg: 0 30px 70px -28px rgba(0, 0, 0, .55);
+  --lj-weight-bold: 800;
+  --lj-tracking: -0.03em;
+  --lj-space: 16px;
+}
+
+/* argon — pill-ish, gentle gradients (colors handled below), medium lift. */
+[data-style="argon"] {
+  --lj-radius: 12px;
+  --lj-radius-sm: 999px; /* pill buttons/chips */
+  --lj-radius-lg: 16px;
+  --lj-shadow: 0 8px 22px -14px rgba(50, 50, 93, .35);
+  --lj-shadow-lg: 0 24px 56px -24px rgba(50, 50, 93, .45);
+  --lj-weight-bold: 700;
+  --lj-space: 16px;
+}
+
+/* glass / aurora — large radius, translucent hairline, blur (in style block). */
+[data-style="glass"] {
+  --lj-radius: 18px;
+  --lj-radius-sm: 12px;
+  --lj-radius-lg: 24px;
+  --lj-shadow: 0 8px 32px -12px rgba(0, 0, 0, .4);
+  --lj-shadow-lg: 0 30px 80px -30px rgba(0, 0, 0, .55);
+  --lj-border-color: rgba(255, 255, 255, .22);
+  --lj-space: 16px;
+}
+
+/* bento — oversized rounded squares, airy spacing, soft big shadow. */
+[data-style="bento"] {
+  --lj-radius: 28px;
+  --lj-radius-sm: 16px;
+  --lj-radius-lg: 34px;
+  --lj-shadow: 0 16px 36px -22px rgba(0, 0, 0, .4);
+  --lj-shadow-lg: 0 34px 80px -30px rgba(0, 0, 0, .45);
+  --lj-weight-bold: 800;
+  --lj-tracking: -0.03em;
+  --lj-space: 22px;
+  --lj-gap: 14px;
+}
+
+/* neon / cyberpunk — small radius, glow shadow, mono, tight tracking. */
+[data-style="neon"] {
+  --lj-radius: 6px;
+  --lj-radius-sm: 6px;
+  --lj-radius-lg: 8px;
+  --lj-shadow: 0 0 0 1px rgba(0, 255, 240, .12), 0 0 24px rgba(162, 89, 255, .18);
+  --lj-shadow-lg: 0 0 0 1px rgba(0, 255, 240, .2), 0 0 48px rgba(255, 43, 214, .25);
+  --lj-border-color: rgba(0, 255, 240, .28);
+  --lj-font: var(--lj-mono);
+  --lj-weight-bold: 700;
+  --lj-tracking: 0.06em;
+  --lj-uppercase: uppercase;
+}
+
+/* paper — flat, hairline rules, no shadow, warm/editorial, serif-ish. */
+[data-style="paper"] {
+  --lj-radius: 2px;
+  --lj-radius-sm: 2px;
+  --lj-radius-lg: 3px;
+  --lj-shadow: none;
+  --lj-shadow-lg: 0 2px 0 0 rgba(0, 0, 0, .15);
+  --lj-border-width: 1px;
+  --lj-border-color: rgba(0, 0, 0, .18);
+  --lj-font: "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --lj-weight-bold: 700;
+  --lj-tracking: 0;
+  --lj-space: 16px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Token consumption on stock Vuetify surfaces. These give EVERY style a
+ * baseline shape/elevation/type identity even before the hand-tuned
+ * per-style blocks below add their flourishes. Kept low-specificity (single
+ * class, no !important) so the bespoke `[data-style]` rules still win where
+ * they set an explicit value, and so component-local styles can override.
+ * `.v-card--variant-flat` etc. keep Vuetify's own variant logic for color;
+ * we only touch shape + elevation + type here.
+ * ------------------------------------------------------------------------- */
+.v-application { font-family: var(--lj-font); }
+
+.v-card {
+  border-radius: var(--lj-radius);
+  box-shadow: var(--lj-shadow);
+}
+.v-card .v-card-title {
+  font-family: var(--lj-font);
+  font-weight: var(--lj-weight-bold);
+  letter-spacing: var(--lj-tracking);
+}
+.v-btn {
+  border-radius: var(--lj-radius-sm);
+  text-transform: var(--lj-uppercase);
+  font-family: var(--lj-font);
+}
+.v-chip { border-radius: var(--lj-radius-sm); }
+.v-field { border-radius: var(--lj-radius-sm); }
+/* Dialogs / menus float, so they take the heavier elevation token. */
+.v-overlay__content > .v-card,
+.v-overlay__content > .v-list {
+  border-radius: var(--lj-radius);
+  box-shadow: var(--lj-shadow-lg);
+}
+
+/* ===========================================================================
  * Style catalog
  *
  * Selected by `<html data-style="<id>">` — see `src/plugins/styles.js`. The

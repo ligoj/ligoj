@@ -149,28 +149,39 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
   --primary: rgb(var(--v-theme-primary));
   --on-primary: rgb(var(--v-theme-on-primary));
   --ok: #1d9d63;
-  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
-  --mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Shape/type from the active style's design tokens (assets/vuetify-overrides.css)
+   * so this hand-rolled 2026 view re-shapes with the theme, not just recolors.
+   * Fallbacks keep the original look when no style attribute is set. */
+  --font: var(--lj-font, var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif));
+  --mono: var(--lj-mono, "JetBrains Mono", ui-monospace, monospace);
+  --radius: var(--lj-radius, 18px);
+  --radius-sm: var(--lj-radius-sm, 10px);
+  --radius-lg: var(--lj-radius-lg, 22px);
+  --shadow: var(--lj-shadow, 0 1px 3px rgba(0,0,0,.05), 0 10px 28px -22px rgba(0,0,0,.5));
+  --border-w: var(--lj-border-width, 1px);
+  --border-c: var(--lj-border-color, var(--line));
+  --bold: var(--lj-weight-bold, 800);
   color: var(--ink);
+  font-family: var(--font);
 }
 .mono { font-family: var(--mono); }
 
-.hero { display: flex; align-items: center; gap: 18px; padding: 24px 26px; margin-bottom: 20px; border-radius: 22px; color: var(--on-primary);
+.hero { display: flex; align-items: center; gap: 18px; padding: 24px 26px; margin-bottom: 20px; border-radius: var(--radius-lg); color: var(--on-primary);
   background: radial-gradient(600px 200px at 100% -40%, rgba(255,255,255,.18), transparent 70%), linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 60%, #000));
   box-shadow: 0 18px 40px -22px color-mix(in srgb, var(--primary) 80%, transparent); }
-.hero-avatar { width: 64px; height: 64px; flex: none; border-radius: 20px; display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 22px; background: rgba(255,255,255,.18); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
-.hero-id h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.03em; font-size: 28px; margin: 0; line-height: 1.05; }
+.hero-avatar { width: 64px; height: 64px; flex: none; border-radius: var(--radius); display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 22px; background: rgba(255,255,255,.18); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+.hero-id h1 { font-family: var(--font); font-weight: var(--bold); letter-spacing: var(--lj-tracking, -.03em); font-size: 28px; margin: 0; line-height: 1.05; }
 .hero-id p { margin: 3px 0 9px; font-size: 14px; opacity: .85; font-weight: 500; }
 .hero-roles { display: flex; flex-wrap: wrap; gap: 6px; }
-.rolechip { font-size: 11.5px; font-weight: 700; letter-spacing: .02em; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,.2); color: var(--on-primary); }
+.rolechip { font-size: 11.5px; font-weight: 700; letter-spacing: .02em; padding: 3px 10px; border-radius: var(--radius-sm); background: rgba(255,255,255,.2); color: var(--on-primary); }
 
 .p-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .pcard--full { grid-column: 1 / -1; }
 @media (max-width: 960px) { .p-grid { grid-template-columns: 1fr; } }
 
-.pcard { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px; box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 10px 28px -22px rgba(0,0,0,.5); }
-.pcard h3 { font-family: var(--font); font-weight: 800; font-size: 18px; margin: 0 0 16px; display: flex; align-items: center; gap: 10px; color: var(--ink); }
-.pcard h3 .ic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, var(--primary) 16%, transparent); color: var(--primary); }
+.pcard { background: var(--surface); border: var(--border-w) var(--lj-border-style, solid) var(--border-c); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow); }
+.pcard h3 { font-family: var(--font); font-weight: var(--bold); font-size: 18px; margin: 0 0 16px; display: flex; align-items: center; gap: 10px; color: var(--ink); }
+.pcard h3 .ic { width: 32px; height: 32px; border-radius: var(--radius-sm); display: grid; place-items: center; background: color-mix(in srgb, var(--primary) 16%, transparent); color: var(--primary); }
 
 .infoline { display: flex; align-items: center; gap: 12px; padding: 12px 0; text-decoration: none; }
 .infoline + .infoline { border-top: 1px solid var(--line); }
@@ -180,7 +191,7 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 
 .subhead { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 10px; }
 .perm-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; }
-.perm { font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--pill); border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; }
+.perm { font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--pill); border: var(--border-w) var(--lj-border-style, solid) var(--border-c); border-radius: var(--radius-sm); padding: 5px 10px; }
 
 .pref-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
 .pref-row + .pref-row, .pref-theme-label { border-top: 1px solid var(--line); }
@@ -188,14 +199,14 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .pref-row .pt { flex: 1; } .ptt { font-weight: 700; font-size: 14px; color: var(--ink); } .pth { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
 
 .langsel { position: relative; min-width: 210px; }
-.langsel-btn { width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 11px; border: 1px solid var(--line); background: var(--pill); color: var(--ink); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; transition: border-color .15s; }
+.langsel-btn { width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: var(--radius-sm); border: var(--border-w) var(--lj-border-style, solid) var(--border-c); background: var(--pill); color: var(--ink); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; transition: border-color .15s; }
 .langsel-btn:hover { border-color: var(--primary); }
 .langsel-btn .flag { font-size: 17px; line-height: 1; }
 .langsel-btn .caret { margin-left: auto; color: var(--muted); transition: transform .2s; }
 .langsel.open .langsel-btn .caret { transform: rotate(180deg); }
-.langsel-menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 18px 44px -18px rgba(0,0,0,.5); padding: 6px; animation: langmenu .13s ease; }
+.langsel-menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20; background: var(--surface); border: var(--border-w) var(--lj-border-style, solid) var(--border-c); border-radius: var(--radius); box-shadow: var(--lj-shadow-lg, 0 18px 44px -18px rgba(0,0,0,.5)); padding: 6px; animation: langmenu .13s ease; }
 @keyframes langmenu { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-.langsel-opt { width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px 11px; border: 0; background: transparent; border-radius: 8px; color: var(--ink); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; text-align: left; }
+.langsel-opt { width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px 11px; border: 0; background: transparent; border-radius: var(--radius-sm); color: var(--ink); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; text-align: left; }
 .langsel-opt:hover { background: var(--hover); }
 .langsel-opt.sel { color: var(--primary); }
 .langsel-opt .flag { font-size: 17px; line-height: 1; }

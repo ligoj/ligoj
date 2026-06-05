@@ -154,7 +154,7 @@ export default defineComponent({
   padding: 0.05em 0.4em;
   background: rgba(var(--v-theme-primary), 0.15);
   color: rgb(var(--v-theme-primary));
-  border-radius: 4px;
+  border-radius: var(--lj-radius-sm, 4px);
   font-size: 0.85em;
   font-weight: 500;
   line-height: 1.4;

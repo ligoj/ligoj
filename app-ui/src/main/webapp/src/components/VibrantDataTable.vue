@@ -227,22 +227,26 @@ onMounted(emitOptions)
   --thead: rgba(var(--v-theme-on-surface), .035);
   --hover: rgba(var(--v-theme-on-surface), .05);
   --accent: rgb(var(--v-theme-primary));
-  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
-  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
+  /* Shape / type from the active style's design tokens (see
+   * assets/vuetify-overrides.css). Fall back to the panel defaults so the
+   * component still renders standalone (tests / Storybook). */
+  --font: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --mono: var(--lj-mono, "JetBrains Mono", ui-monospace, monospace);
 
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 18px;
+  border: var(--lj-border-width, 1px) var(--lj-border-style, solid) var(--lj-border-color, var(--border));
+  border-radius: var(--lj-radius, 18px);
   overflow: hidden;
-  box-shadow: 0 18px 40px -30px rgba(0, 0, 0, .45);
+  box-shadow: var(--lj-shadow, 0 18px 40px -30px rgba(0, 0, 0, .45));
+  font-family: var(--font);
 }
 .tscroll { overflow-x: auto; }
 
 .vtable { width: 100%; border-collapse: collapse; }
 
 thead th {
-  text-align: left; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-  color: var(--ink-3); padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--thead); white-space: nowrap; user-select: none;
+  text-align: left; font-size: 11.5px; font-weight: var(--lj-weight-bold, 700); text-transform: uppercase; letter-spacing: .04em;
+  color: var(--ink-3); padding: var(--lj-space, 14px) 16px; border-bottom: var(--lj-border-width, 1px) var(--lj-border-style, solid) var(--lj-border-color, var(--border)); background: var(--thead); white-space: nowrap; user-select: none;
 }
 thead th.center { text-align: center; }
 thead th.end { text-align: right; }
@@ -277,7 +281,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .state-row td { cursor: default; }
 /* Illustrated empty state. */
 .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 48px 0; color: var(--ink-3); }
-.empty-ic { width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center; color: var(--ink-3); background: rgba(var(--v-theme-on-surface), .045); }
+.empty-ic { width: 60px; height: 60px; border-radius: var(--lj-radius, 18px); display: grid; place-items: center; color: var(--ink-3); background: rgba(var(--v-theme-on-surface), .045); }
 .empty p { margin: 0; font-weight: 600; font-size: 14px; }
 
 /* Skeleton shimmer rows. */
@@ -290,7 +294,7 @@ tbody tr:last-child td { border-bottom: 0; }
 /* Custom rounded checkbox (matches mockup .cbx). */
 .cbx-col { width: 46px; text-align: center; }
 .cbx {
-  width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--border-2); display: inline-grid; place-items: center;
+  width: 18px; height: 18px; border-radius: calc(var(--lj-radius-sm, 8px) * .6); border: 2px solid var(--border-2); display: inline-grid; place-items: center;
   cursor: pointer; background: var(--surface); vertical-align: middle; transition: background .12s, border-color .12s;
 }
 .cbx:hover { border-color: var(--accent); }
@@ -304,10 +308,10 @@ tbody tr:last-child td { border-bottom: 0; }
 .pg-rows { display: inline-flex; align-items: center; gap: 6px; }
 .pp-sel select {
   font-family: var(--font); font-size: 13px; font-weight: 700; color: var(--ink); background: var(--surface);
-  border: 1px solid var(--border); border-radius: 8px; padding: 3px 6px; cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--lj-radius-sm, 8px); padding: 3px 6px; cursor: pointer;
 }
 .pg-nav { display: inline-flex; gap: 6px; }
-.iconbtn { width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: transparent; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-2); transition: background .12s, color .12s; }
+.iconbtn { width: 32px; height: 32px; border-radius: var(--lj-radius-sm, 9px); border: 1px solid var(--border); background: transparent; cursor: pointer; display: inline-grid; place-items: center; color: var(--ink-2); transition: background .12s, color .12s; }
 .iconbtn:hover:not(:disabled) { background: var(--hover); color: var(--ink); }
 .iconbtn:disabled { opacity: .4; cursor: not-allowed; }
 </style>

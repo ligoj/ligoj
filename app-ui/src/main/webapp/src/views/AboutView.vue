@@ -4,14 +4,12 @@
   resources) into the Vibrant card grid. Reached from the sidebar footer.
 -->
 <template>
-  <div class="about">
-    <header class="ph">
-      <div class="ph-txt">
-        <nav class="crumbs"><span class="crumb cur"><v-icon size="13">mdi-information-outline</v-icon>{{ t('about.title', { name: appName }) }}</span></nav>
-        <h1>{{ t('about.title', { name: appName }) }}</h1>
-        <p class="sub">{{ t('about.subtitle') }}</p>
-      </div>
-    </header>
+  <div class="about lj-surface">
+    <LjPageHeader
+      :title="t('about.title', { name: appName })"
+      :subtitle="t('about.subtitle')"
+      :crumbs="[{ icon: 'mdi-information-outline', label: t('about.title', { name: appName }), current: true }]"
+    />
 
     <div class="grid">
       <section class="card" :style="{ '--c': '#2f6df6' }">
@@ -100,7 +98,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAppStore, useAuthStore, useI18nStore } from '@ligoj/host'
+import { useAppStore, useAuthStore, useI18nStore, LjPageHeader } from '@ligoj/host'
 import brandColor from '@/assets/brand.png'
 
 const router = useRouter()
@@ -163,23 +161,28 @@ onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: 
   --hover: rgba(var(--v-theme-on-surface), .06);
   --pill: rgba(var(--v-theme-on-surface), .06);
   --accent: rgb(var(--v-theme-secondary));
-  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
-  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
+  --font: var(--lj-font, var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif));
+  --mono: var(--lj-mono, var(--v26-mono, "JetBrains Mono", ui-monospace, monospace));
+  /* Shape/type from the active style's design tokens (assets/vuetify-overrides.css)
+   * so this hand-rolled view re-shapes with the theme, not just recolors.
+   * Fallbacks keep the original look when no style attribute is set. */
+  --radius: var(--lj-radius, 18px);
+  --radius-sm: var(--lj-radius-sm, 12px);
+  --shadow: var(--lj-shadow, 0 2px 8px rgba(0, 0, 0, .04));
+  --border-w: var(--lj-border-width, 1px);
+  --border-c: var(--lj-border-color, var(--border));
+  --bold: var(--lj-weight-bold, 800);
   color: var(--ink);
 }
-.ph { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
-.crumbs { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
-.crumb { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font); font-size: 11.5px; font-weight: 700; color: var(--accent); background: rgba(var(--v-theme-secondary), .12); border-radius: 999px; padding: 3px 10px; }
-.ph-txt h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.03em; font-size: 28px; margin: 0; }
-.ph-txt .sub { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); font-weight: 500; }
+/* Page header now rendered by the shared <LjPageHeader> (host). */
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-.card { border: 1px solid var(--border); border-radius: 18px; background: linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--card)), var(--card)); box-shadow: 0 2px 8px rgba(0, 0, 0, .04); overflow: hidden; transition: transform .16s, box-shadow .16s, border-color .16s; }
+.card { border: var(--border-w) var(--lj-border-style, solid) var(--border-c); border-radius: var(--radius); background: linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--card)), var(--card)); box-shadow: var(--shadow); overflow: hidden; transition: transform .16s, box-shadow .16s, border-color .16s; }
 .card:hover { transform: translateY(-3px); box-shadow: 0 22px 44px -22px color-mix(in srgb, var(--c) 55%, transparent); border-color: color-mix(in srgb, var(--c) 35%, var(--border)); }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
 .card-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px 10px; }
-.ch-ic { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
-.card-head h3 { font-family: var(--font); font-weight: 800; font-size: 17px; margin: 0; letter-spacing: -.02em; }
+.ch-ic { width: 40px; height: 40px; border-radius: var(--radius-sm); flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
+.card-head h3 { font-family: var(--font); font-weight: var(--bold); font-size: 17px; margin: 0; letter-spacing: -.02em; }
 .card-body { padding: 2px 18px 16px; }
 
 .frow { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
@@ -189,7 +192,7 @@ onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: 
 .fv.mono { font-family: var(--mono); font-size: 12.5px; }
 .vtxt { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 
-.lrow { display: flex; align-items: center; gap: 12px; padding: 11px 10px; margin: 0 -10px; border-radius: 11px; cursor: pointer; text-decoration: none; color: inherit; transition: background .14s; }
+.lrow { display: flex; align-items: center; gap: 12px; padding: 11px 10px; margin: 0 -10px; border-radius: var(--lj-radius-sm, 11px); cursor: pointer; text-decoration: none; color: inherit; transition: background .14s; }
 .lrow:hover { background: var(--hover); }
 .lrow.static { cursor: default; }
 .lrow.static:hover { background: transparent; }
@@ -212,28 +215,34 @@ onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: 
   --ink-3: rgba(var(--v-theme-on-surface), .55);
   --border: rgba(var(--v-theme-on-surface), .12);
   --hover: rgba(var(--v-theme-on-surface), .06);
-  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
-  --mono: var(--v26-mono, "JetBrains Mono", ui-monospace, monospace);
+  --font: var(--lj-font, var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif));
+  --mono: var(--lj-mono, var(--v26-mono, "JetBrains Mono", ui-monospace, monospace));
+  --radius: var(--lj-radius, 18px);
+  --radius-sm: var(--lj-radius-sm, 12px);
+  --shadow-lg: var(--lj-shadow-lg, 0 32px 64px -24px color-mix(in srgb, var(--c) 45%, transparent));
+  --border-w: var(--lj-border-width, 1px);
+  --border-c: var(--lj-border-color, var(--border));
+  --bold: var(--lj-weight-bold, 800);
   color: var(--ink);
   display: flex;
   flex-direction: column;
   max-height: 82vh;
-  border: 1px solid var(--border);
-  border-radius: 18px;
+  border: var(--border-w) var(--lj-border-style, solid) var(--border-c);
+  border-radius: var(--radius);
   background: linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--card)), var(--card));
-  box-shadow: 0 32px 64px -24px color-mix(in srgb, var(--c) 45%, transparent);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
 .lic-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
-.lic-orb { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
+.lic-orb { width: 40px; height: 40px; border-radius: var(--radius-sm); flex: none; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000)); box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c) 65%, transparent); }
 .lic-htxt { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.lic-htxt h3 { font-family: var(--font); font-weight: 800; font-size: 17px; margin: 0; letter-spacing: -.02em; }
+.lic-htxt h3 { font-family: var(--font); font-weight: var(--bold); font-size: 17px; margin: 0; letter-spacing: -.02em; }
 .lic-htxt p { margin: 1px 0 0; font-size: 12px; color: var(--ink-3); font-weight: 600; }
-.lic-x { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border: 0; border-radius: 10px; background: transparent; color: var(--ink-3); cursor: pointer; transition: background .14s, color .14s; }
+.lic-x { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border: 0; border-radius: var(--lj-radius-sm, 10px); background: transparent; color: var(--ink-3); cursor: pointer; transition: background .14s, color .14s; }
 .lic-x:hover { background: var(--hover); color: var(--ink); }
 .lic-body { padding: 16px 18px; overflow-y: auto; }
 .lic-foot { display: flex; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--border); }
-.lic-btn { font-family: var(--font); font-weight: 700; font-size: 13px; color: var(--ink); padding: 8px 16px; border: 1px solid var(--border); border-radius: 10px; background: transparent; cursor: pointer; transition: background .14s, border-color .14s; }
+.lic-btn { font-family: var(--font); font-weight: 700; font-size: 13px; color: var(--ink); padding: 8px 16px; border: var(--border-w) var(--lj-border-style, solid) var(--border-c); border-radius: var(--lj-radius-sm, 10px); background: transparent; cursor: pointer; transition: background .14s, border-color .14s; }
 .lic-btn:hover { background: var(--hover); border-color: color-mix(in srgb, var(--c) 35%, var(--border)); }
 .ligoj-license {
   font-family: var(--mono);

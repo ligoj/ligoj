@@ -115,19 +115,27 @@ function cancel() {
   --border-2: rgba(var(--v-theme-on-surface), .26);
   --hover: rgba(var(--v-theme-on-surface), .06);
   --accent: rgb(var(--v-theme-secondary));
-  --font: var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif);
-  border-radius: 20px !important; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .55) !important;
+  --font: var(--lj-font, var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif));
+  /* Shape/type from the active style's design tokens (assets/vuetify-overrides.css)
+   * so this hand-rolled dialog re-shapes with the theme, not just recolors.
+   * Fallbacks keep the original look when no style attribute is set. */
+  --radius: var(--lj-radius, 20px);
+  --radius-sm: var(--lj-radius-sm, 12px);
+  --shadow-lg: var(--lj-shadow-lg, 0 30px 80px -30px rgba(0, 0, 0, .55));
+  --border-w: var(--lj-border-width, 1px);
+  --bold: var(--lj-weight-bold, 800);
+  border-radius: var(--radius) !important; box-shadow: var(--shadow-lg) !important;
 }
 .vmodal-head { display: flex; align-items: center; gap: 13px; padding: 22px 24px 6px; }
-.vmodal-head .mi { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -8px rgba(255, 90, 82, .6); }
-.vmodal-head h3 { font-family: var(--font); font-weight: 800; font-size: 20px; margin: 0; flex: 1; color: var(--ink); letter-spacing: -.02em; }
+.vmodal-head .mi { width: 42px; height: 42px; border-radius: var(--radius-sm); display: grid; place-items: center; flex: none; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -8px rgba(255, 90, 82, .6); }
+.vmodal-head h3 { font-family: var(--font); font-weight: var(--bold); font-size: 20px; margin: 0; flex: 1; color: var(--ink); letter-spacing: -.02em; }
 .vmodal-body { padding: 10px 24px 4px !important; }
 .lp-intro { margin: 0 0 14px; font-size: 13.5px; color: var(--ink-2); font-weight: 500; line-height: 1.5; }
-.vmodal :deep(.v-field) { border-radius: 12px; font-family: var(--font); }
+.vmodal :deep(.v-field) { border-radius: var(--radius-sm); font-family: var(--font); }
 .vmodal :deep(.v-field__prepend-inner .v-icon) { opacity: .55; }
 .vmodal-foot { display: flex; align-items: center; gap: 10px; padding: 12px 24px 22px; }
 .foot-sp { flex: 1; }
-.mbtn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px; padding: 10px 17px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s, border-color .15s; }
+.mbtn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-weight: 700; font-size: 14px; padding: 10px 17px; border-radius: var(--radius-sm); cursor: pointer; border: var(--border-w) var(--lj-border-style, solid) transparent; transition: filter .15s, background .15s, border-color .15s; }
 .mbtn.primary { color: #fff; background: linear-gradient(135deg, #ff9436, #ff5a52); box-shadow: 0 8px 18px -10px rgba(255, 90, 82, .55); }
 .mbtn.primary:hover:not(:disabled) { filter: brightness(1.04); }
 .mbtn.ghost { color: var(--ink-2); background: transparent; border-color: var(--border); }

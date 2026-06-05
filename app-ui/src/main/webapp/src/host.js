@@ -36,6 +36,16 @@ export { default as PluginFeatures } from './components/PluginFeatures.vue'
 export { default as VibrantDataTable } from './components/VibrantDataTable.vue'
 export { default as VibrantConfirmDialog } from './components/VibrantConfirmDialog.vue'
 export { default as LigojIcon } from './components/LigojIcon.vue'
+// 2026 chrome primitives, factored out of the per-view scoped CSS so every
+// plugin shares one styled implementation (and one source of truth for the
+// design tokens). Pair with the global `.lj-surface` utility class
+// (assets/vuetify-overrides.css) on the view root, which supplies the
+// --surface/--ink/--radius/... vars these components read.
+export { default as LjPageHeader } from './components/LjPageHeader.vue'
+export { default as LjButton } from './components/LjButton.vue'
+export { default as LjSearch } from './components/LjSearch.vue'
+export { default as LjDialog } from './components/LjDialog.vue'
+export { default as LjSegmented } from './components/LjSegmented.vue'
 export { nodeType, isInstance, nodePluginId } from './utils/nodeType.js'
 // Registry lookup so a plugin can collaborate with sibling/sub-plugins
 // (e.g. `plugin-id` delegating to `plugin-id-ldap` for tool-specific row
