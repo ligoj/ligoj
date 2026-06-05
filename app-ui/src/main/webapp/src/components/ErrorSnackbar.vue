@@ -11,7 +11,7 @@
   <div class="snacks" aria-live="polite" aria-atomic="false">
     <transition-group name="snack">
       <div v-for="e in errorStore.errors" :key="e.id" class="snack" :class="e.severity" role="status">
-        <span class="s-ic"><v-icon size="20">{{ icon(e.severity) }}</v-icon></span>
+        <span class="s-ic"><NodeIcon v-if="e.node" :node="e.node" /><v-icon v-else size="20">{{ icon(e.severity) }}</v-icon></span>
         <div class="s-body">
           <div v-if="e.title" class="s-title">{{ e.title }}</div>
           <div class="s-msg">{{ e.message }}</div>
@@ -28,7 +28,7 @@
 
 <script setup>
 import { reactive } from 'vue'
-import { useErrorStore, useI18nStore } from '@ligoj/host'
+import { useErrorStore, useI18nStore, NodeIcon } from '@ligoj/host'
 
 const errorStore = useErrorStore()
 const i18n = useI18nStore()
@@ -75,7 +75,11 @@ function icon(sev) { return ICONS[sev] || ICONS.info }
 .snack.warning { --c: #d9701a; }
 .snack.success { --c: #1d9d63; }
 .snack.info { --c: #2f6df6; }
-.s-ic { flex: none; color: var(--c); margin-top: 1px; }
+.s-ic { flex: none; color: var(--c); margin-top: 1px; display: inline-flex; align-items: center; }
+/* When a node icon is shown instead of the severity glyph, keep it compact
+   and aligned with the message (NodeIcon renders an <img>/<i> via @ligoj/host). */
+.s-ic :deep(img.tool-icon) { width: 20px; height: 20px; object-fit: contain; }
+.s-ic :deep(i) { font-size: 20px; }
 .s-body { flex: 1; min-width: 0; }
 .s-title { font-family: var(--font); font-weight: var(--bold); font-size: 14px; letter-spacing: -.01em; margin-bottom: 2px; }
 .s-msg { font-family: var(--font); font-size: 13.5px; font-weight: 500; line-height: 1.45; color: rgba(var(--v-theme-on-surface), .82); word-break: break-word; }

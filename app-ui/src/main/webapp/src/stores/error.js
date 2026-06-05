@@ -48,6 +48,9 @@ export const useErrorStore = defineStore('error', () => {
       title: e.title || null,
       details: e.details || null,
       status: e.status || null,
+      // Optional Ligoj node whose icon the snackbar renders instead of the
+      // generic severity glyph (used for "node saved" confirmations).
+      node: e.node || null,
       severity,
       timestamp: Date.now(),
     }
@@ -159,6 +162,48 @@ export const useErrorStore = defineStore('error', () => {
   }
 
   /**
+   * A data-integrity violation, surfaced by the backend's
+   * `DataIntegrityViolationExceptionMapper` as a `integrity-*` code. The
+   * HTTP status varies (the mapper emits 412, but some flows wrap it as
+   * 400/409/500) and the DB dialect matters: MySQL/MariaDB give the mapper
+   * a parseable message so it returns `integrity-unicity`/`integrity-foreign`
+   * with a `<entry>/<name>` message, whereas PostgreSQL's different wording
+   * may fall through to `integrity-unknown` carrying the raw SQL. We key off
+   * the code (not the status) so all three are handled uniformly.
+   */
+  function isIntegrityCode(code) {
+    return typeof code === 'string' && code.startsWith('integrity-')
+  }
+
+  function pushIntegrityError(body, status) {
+    const i18n = useI18nStore()
+    const split = (body.message || '').split('/')
+    if (body.code === 'integrity-foreign') {
+      push({
+        title: i18n.t('error.412'),
+        message: i18n.t('error.412-foreign-details', { from: split[0] ?? '', to: split[1] ?? '' }),
+        status, severity: 'warning',
+      })
+    } else if (body.code === 'integrity-unicity') {
+      push({
+        title: i18n.t('error.412'),
+        message: i18n.t('error.412-unicity-details', { entry: split[0] ?? '', name: split[1] ?? '' }),
+        status, severity: 'warning',
+      })
+    } else {
+      // `integrity-unknown` — the mapper couldn't parse the DB message (e.g.
+      // PostgreSQL). Show the friendly generic line, but keep the raw SQL /
+      // cause chain in the expandable details so admins can still diagnose.
+      push({
+        title: i18n.t('error.412'),
+        message: i18n.t('error.412-unknown-details'),
+        details: buildCauseChain(body.cause) || body.message || null,
+        status, severity: 'warning',
+      })
+    }
+  }
+
+  /**
    * Hydrate the `validationErrors` map from a JSR-303 body. Each entry
    * keeps the raw `rule` and any `parameters` plus a pre-resolved
    * `message` so a form can render the field error without re-calling
@@ -221,6 +266,15 @@ export const useErrorStore = defineStore('error', () => {
     const status = response.status
     const { json, text } = await readBody(response)
     const i18n = useI18nStore()
+
+    /* ------------- data integrity (any status) ------------- */
+    // Handle `integrity-*` codes before the per-status branches: the same
+    // violation can arrive as 412 (the mapper's native status) or, when
+    // wrapped upstream, as 400/409/500 — all should read the same.
+    if (json && isIntegrityCode(json.code)) {
+      pushIntegrityError(json, status)
+      return response
+    }
 
     /* ------------- 0 / network -------------- */
     if (status === 0) {
@@ -343,27 +397,10 @@ export const useErrorStore = defineStore('error', () => {
     }
 
     /* ------------- 412 ---------------------- */
-    if (status === 412 && json) {
-      const split = (json.message || '').split('/')
-      if (json.code === 'integrity-foreign') {
-        push({
-          title: i18n.t('error.412'),
-          message: i18n.t('error.412-foreign-details', { from: split[0] ?? '', to: split[1] ?? '' }),
-          status, severity: 'warning',
-        })
-      } else if (json.code === 'integrity-unicity') {
-        push({
-          title: i18n.t('error.412'),
-          message: i18n.t('error.412-unicity-details', { entry: split[0] ?? '', name: split[1] ?? '' }),
-          status, severity: 'warning',
-        })
-      } else {
-        push({
-          title: i18n.t('error.412'),
-          message: i18n.t('error.412-unknown-details'),
-          status, severity: 'warning',
-        })
-      }
+    if (status === 412) {
+      // Integrity codes are already handled above; anything else at 412 is
+      // an unexpected precondition failure — show the generic line.
+      pushIntegrityError(json || {}, status)
       return response
     }
 

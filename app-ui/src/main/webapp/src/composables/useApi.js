@@ -4,7 +4,7 @@ export function useApi() {
   const errorStore = useErrorStore()
 
   async function request(url, options = {}) {
-    const { silent, ...rest } = options
+    const { silent, raw, ...rest } = options
     const opts = {
       credentials: 'include',
       ...rest,
@@ -16,6 +16,10 @@ export function useApi() {
 
     const response = await fetch(url, opts)
     if (!silent) await errorStore.handleResponse(response)
+    // `raw` returns the Response itself so callers can branch on
+    // `response.ok` — needed when the parsed body is ambiguous, e.g. a
+    // 204 No Content success returns the same `null` as an error.
+    if (raw) return response
     if (!response.ok) return null
 
     const ct = response.headers.get('content-type')

@@ -150,6 +150,46 @@ describe('useErrorStore', () => {
     expect(store.errors[0].title).toBe('Validation error')
   })
 
+  it('handleResponse maps a 412 integrity-unicity to the duplicate-entry toast', async () => {
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 412,
+      body: { code: 'integrity-unicity', message: '2003/PRIMARY' },
+    }))
+    expect(store.errors).toHaveLength(1)
+    expect(store.errors[0].title).toBe('Data integrity')
+    expect(store.errors[0].severity).toBe('warning')
+    expect(store.errors[0].message).toBe('Unable to proceed this operation because of duplicate entry 2003 (PRIMARY)')
+  })
+
+  it('handleResponse handles integrity codes regardless of HTTP status (PostgreSQL 400/500)', async () => {
+    // PostgreSQL flows can surface the mapper's integrity-unknown under a
+    // non-412 status; it must still read as a data-integrity warning, with
+    // the raw SQL kept in the expandable details rather than the message.
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 400,
+      body: {
+        code: 'integrity-unknown',
+        message: 'could not execute statement [ERROR: duplicate key ...]',
+        cause: { message: 'ERROR: duplicate key value violates unique constraint "uk_x"' },
+      },
+    }))
+    expect(store.errors).toHaveLength(1)
+    expect(store.errors[0].title).toBe('Data integrity')
+    expect(store.errors[0].severity).toBe('warning')
+    expect(store.errors[0].message).toBe('Unable to proceed this operation because of an unknown data integrity issue')
+    expect(store.errors[0].details).toBe('ERROR: duplicate key value violates unique constraint "uk_x"')
+  })
+
+  it('push carries a node so the snackbar can brand a confirmation', () => {
+    const store = useErrorStore()
+    const node = { id: 'service:prov:aws:test', name: 'AWS test' }
+    store.success('Node saved', { node })
+    expect(store.errors[0].severity).toBe('success')
+    expect(store.errors[0].node).toEqual(node)
+  })
+
   it('handleResponse maps 403 to the localised Authorization toast', async () => {
     const store = useErrorStore()
     await store.handleResponse(mockResponse({ status: 403 }))
