@@ -422,7 +422,7 @@ buttons.push(...delegateToToolPlugin(subscription, 'renderFeatures'))
 return buttons
 ```
 
-Also at the top of `index.js`, inject the sibling stylesheet manually — Vite's library mode emits a separate `index.css` but does NOT auto-inject it on dynamic-import:
+Also at the top of `index.js`, inject the sibling stylesheet manually — Vite's library mode emits a separate `index.css` but does NOT auto-inject it on dynamic-import. Propagate the loader's `?v=<digest>` cache token onto the CSS URL (`new URL()` resolution drops the query): versioned `/main/*` URLs are long-cached by the host (`Application#pluginCacheFilter`), unversioned ones are revalidated on every load.
 
 ```js
 if (typeof document !== 'undefined') {
@@ -431,7 +431,11 @@ if (typeof document !== 'undefined') {
     const link = document.createElement('link')
     link.id = id
     link.rel = 'stylesheet'
-    link.href = new URL(/* @vite-ignore */ './index.css', import.meta.url).href
+    const cssUrl = new URL(/* @vite-ignore */ './index.css', import.meta.url)
+    // Carry over the loader's `?v=<digest>` token so the stylesheet is
+    // long-cached and busted together with the bundle.
+    cssUrl.search = new URL(import.meta.url).search
+    link.href = cssUrl.href
     document.head.appendChild(link)
   }
 }

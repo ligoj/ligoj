@@ -1,5 +1,6 @@
 import registry from './registry.js'
 import router from '@/router/index.js'
+import { pluginAssetVersion } from './asset-version.js'
 
 const loaded = new Set()
 // Tracks in-flight loads so concurrent calls to `loadPlugin(<id>)` share
@@ -52,7 +53,12 @@ async function _loadPlugin(pluginId) {
   // (Application#pluginProxyServlet), which forwards to the ligoj-api
   // backend on :8081 where plugin JARs actually live. The raw /webjars/*
   // path isn't served here. BASE_URL is `/ligoj/` in both dev and prod.
-  const url = `${import.meta.env.BASE_URL}main/${pluginId}/vue/index.js`
+  //
+  // `?v=<digest|timestamp>` versions the stable URL so the server can
+  // long-cache the bundle (Application#pluginCacheFilter) while plugin
+  // upgrades rotate the digest — see plugins/asset-version.js.
+  const v = pluginAssetVersion()
+  const url = `${import.meta.env.BASE_URL}main/${pluginId}/vue/index.js${v ? `?v=${v}` : ''}`
 
   try {
     const module = await import(/* @vite-ignore */ url)

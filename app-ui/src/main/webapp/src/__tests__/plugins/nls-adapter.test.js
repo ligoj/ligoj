@@ -80,8 +80,13 @@ describe('NLS Adapter', () => {
     const result = await loadNlsMessages('test-plugin', 'fr')
     expect(result).toEqual({ hello: 'monde', welcome: 'Welcome' })
     expect(globalThis.fetch).toHaveBeenCalledTimes(2)
-    expect(globalThis.fetch).toHaveBeenNthCalledWith(1, '/main/test-plugin/nls/messages.js', { credentials: 'include' })
-    expect(globalThis.fetch).toHaveBeenNthCalledWith(2, '/main/test-plugin/nls/fr/messages.js', { credentials: 'include' })
+    // URLs may carry the `?v=<digest|timestamp>` cache token (always a
+    // timestamp under vitest where import.meta.env.DEV is true) — see
+    // plugins/asset-version.js.
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(1,
+      expect.stringMatching(/^\/main\/test-plugin\/nls\/messages\.js(\?v=[\w%.-]+)?$/), { credentials: 'include' })
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(2,
+      expect.stringMatching(/^\/main\/test-plugin\/nls\/fr\/messages\.js(\?v=[\w%.-]+)?$/), { credentials: 'include' })
   })
 
   it('returns root messages when locale is en (does not fetch locale file)', async () => {
