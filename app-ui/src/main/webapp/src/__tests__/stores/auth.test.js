@@ -16,6 +16,39 @@ describe('useAuthStore', () => {
     expect(store.isAdmin).toBe(false)
   })
 
+  describe('return-route after session expiry', () => {
+    beforeEach(() => { sessionStorage.clear() })
+
+    function setHash(h) {
+      Object.defineProperty(window, 'location', {
+        configurable: true, writable: true, value: { ...window.location, hash: h, href: '' },
+      })
+    }
+
+    it('redirectToLogin remembers a deep route, consumed once', () => {
+      setHash('#/system/plugin')
+      const store = useAuthStore()
+      store.redirectToLogin()
+      expect(sessionStorage.getItem('ligoj-return-url')).toBe('/system/plugin')
+      expect(store.consumeReturnRoute()).toBe('/system/plugin')
+      // Consumed: a second read returns null (no redirect loop).
+      expect(store.consumeReturnRoute()).toBeNull()
+      expect(sessionStorage.getItem('ligoj-return-url')).toBeNull()
+    })
+
+    it('does not remember the home route', () => {
+      setHash('#/')
+      useAuthStore().redirectToLogin()
+      expect(sessionStorage.getItem('ligoj-return-url')).toBeNull()
+    })
+
+    it('logout clears any remembered route', () => {
+      sessionStorage.setItem('ligoj-return-url', '/id/user')
+      useAuthStore().logout()
+      expect(sessionStorage.getItem('ligoj-return-url')).toBeNull()
+    })
+  })
+
   it('fetchSession sets session on success', async () => {
     const sessionData = {
       userName: 'admin',

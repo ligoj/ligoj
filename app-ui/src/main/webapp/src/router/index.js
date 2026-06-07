@@ -25,7 +25,7 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach(async () => {
+router.beforeEach(async (to) => {
   const auth = useAuthStore()
   if (!auth.isAuthenticated) {
     const ok = await auth.fetchSession()
@@ -33,6 +33,12 @@ router.beforeEach(async () => {
       auth.redirectToLogin()
       return false
     }
+    // Just (re)authenticated — e.g. returning from the login page after the
+    // session expired. Send the user back to the page they were on, which the
+    // full-page login redirect would otherwise drop (Spring lands the SPA on
+    // its root, losing the hash route).
+    const back = auth.consumeReturnRoute()
+    if (back && back !== to.fullPath) return back
   }
 })
 

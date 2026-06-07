@@ -40,6 +40,13 @@ const NAV_CONFIG = [
   },
 ]
 
+/**
+ * sessionStorage key holding the SPA route the user was on when the session
+ * expired, so we can send them back there after re-authenticating. Survives the
+ * full-page login redirect (same origin) and the OAuth round-trip.
+ */
+const RETURN_KEY = 'ligoj-return-url'
+
 export const useAuthStore = defineStore('auth', () => {
   const session = ref(null)
   const loading = ref(false)
@@ -210,7 +217,33 @@ export const useAuthStore = defineStore('auth', () => {
    * Always absolute — relative URLs would chain bad path segments if
    * the browser is currently sitting on a misrouted SPA-fallback URL.
    */
+  /**
+   * Remember the current SPA route (hash path) so the user is sent back to it
+   * after logging in again. Skips the home route and login-related paths.
+   */
+  function rememberReturnRoute() {
+    try {
+      const path = (typeof location !== 'undefined' ? location.hash.replace(/^#/, '') : '') || '/'
+      if (path && path !== '/' && !path.startsWith('/login')) {
+        sessionStorage.setItem(RETURN_KEY, path)
+      }
+    } catch { /* sessionStorage unavailable (SSR / private mode) */ }
+  }
+
+  /**
+   * Read and clear the remembered return route. Returns <code>null</code> when
+   * none was stored (fresh login, or in-page re-auth that never left the page).
+   */
+  function consumeReturnRoute() {
+    try {
+      const v = sessionStorage.getItem(RETURN_KEY)
+      if (v) sessionStorage.removeItem(RETURN_KEY)
+      return v || null
+    } catch { return null }
+  }
+
   function redirectToLogin() {
+    rememberReturnRoute()
     const base = import.meta.env.BASE_URL || '/'
     if (needsOAuthRedirect.value) {
       // The OAuth registration id is the segment Spring exposes via
@@ -237,6 +270,9 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     const base = import.meta.env.BASE_URL || '/'
     session.value = null
+    // An explicit logout is not a session expiry — don't bounce back to the
+    // previous page after the next login.
+    try { sessionStorage.removeItem(RETURN_KEY) } catch { /* ignore */ }
     window.location.href = `${base}logout`
   }
 
@@ -247,6 +283,7 @@ export const useAuthStore = defineStore('auth', () => {
     navItems,
     isAllowed, isAllowedApi,
     fetchSession, logout, redirectToLogin, lastSessionStatus, needsOAuthRedirect,
+    consumeReturnRoute,
     authPromptOpen, openAuthPrompt, closeAuthPrompt,
   }
 })

@@ -415,9 +415,10 @@ async function doLogin() {
     return
   }
   pushToast('success', msg['success-login'])
-  // Stay inside the SPA: refresh the session then route to the dashboard.
+  // Stay inside the SPA: refresh the session then route back to the page the
+  // user was on before the session expired (if any), else the dashboard.
   try { await auth.fetchSession() } catch { /* ignore */ }
-  router.push('/')
+  router.push(auth.consumeReturnRoute() || '/')
 }
 
 async function doReset() {
