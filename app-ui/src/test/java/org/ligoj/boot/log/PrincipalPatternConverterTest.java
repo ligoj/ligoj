@@ -45,10 +45,10 @@ class PrincipalPatternConverterTest {
 	@Test
 	void formatAuthenticated() {
 		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken("fdaugan", "N/A"));
+				.setAuthentication(new UsernamePasswordAuthenticationToken("jdoe", "N/A"));
 		final var buffer = new StringBuilder();
 		PrincipalPatternConverter.newInstance(null).format(null, buffer);
-		Assertions.assertEquals("fdaugan", buffer.toString());
+		Assertions.assertEquals("jdoe", buffer.toString());
 	}
 
 	/**
@@ -59,9 +59,9 @@ class PrincipalPatternConverterTest {
 	@Test
 	void patternLayoutResolvesPrincipal() {
 		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken("fdaugan", "N/A"));
+				.setAuthentication(new UsernamePasswordAuthenticationToken("jdoe", "N/A"));
 		final var layout = PatternLayout.newBuilder().setPattern("[%principal] %msg").build();
 		final var event = Log4jLogEvent.newBuilder().setMessage(new SimpleMessage("hello")).build();
-		Assertions.assertEquals("[fdaugan] hello", layout.toSerializable(event));
+		Assertions.assertEquals("[jdoe] hello", layout.toSerializable(event));
 	}
 }
