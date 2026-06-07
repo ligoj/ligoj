@@ -2089,6 +2089,29 @@ For example `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 | ligoj.log.file.size    | `10 MB`             | Max log file size                  |
 | ligoj.log.file.enabled | `true`              | Enablement of log file             |
 
+## Logs
+
+Both containers embed a [Log4j2](https://logging.apache.org/log4j/2.x/) configuration, reloaded every 60 seconds when changed:
+
+- `ligoj-api`: [app-api/src/main/resources/log4j2.json](app-api/src/main/resources/log4j2.json)
+- `ligoj-ui`: [app-ui/src/main/resources/log4j2.json](app-ui/src/main/resources/log4j2.json)
+
+The log destinations (console and an optional rolling file inside `LIGOJ_HOME`) are tuned with the `ligoj.log.*` system variables described above, and the verbosity with `-Dlog.level=...` plus the per-category `logging.level.<category>` application properties.
+A fully custom configuration can be supplied with the standard `-Dlog4j2.configurationFile=/path/to/log4j2.json` system property.
+
+### Principal identifier
+
+Every log line includes the identifier of the principal (the authenticated user) that triggered it, rendered by the Ligoj-specific `%principal` pattern token between brackets, right after the log level:
+
+```log
+2026-06-07 10:15:42.123 INFO  [jdoe] Catalog update for service:prov:aws, force=false
+2026-06-07 10:15:43.456 INFO  [-] Plugin repository cache refreshed
+```
+
+- The principal is read lazily, at log time, from the Spring Security context attached to the logging thread — no MDC propagation is involved.
+- Unauthenticated and anonymous accesses, the boot sequence and background threads without a propagated security context (schedulers, ...) are rendered as `-`. Background tasks restoring the requester context — such as the asynchronous catalog import — keep the original principal.
+- The token is provided by the `org.ligoj.boot.log.PrincipalPatternConverter` Log4j2 plugin, deliberately duplicated in each container module ([app-api](app-api/src/main/java/org/ligoj/boot/log/PrincipalPatternConverter.java) and [app-ui](app-ui/src/main/java/org/ligoj/boot/log/PrincipalPatternConverter.java)) to keep them self-contained. It is auto-discovered through the `Log4j2Plugins.dat` descriptor generated at build time — no extra configuration. There is no standard library equivalent: `log4j-web` only provides the servlet lifecycle binding and the `${web:…}` lookup (servlet-context scope), and nothing populates the `%X` MDC with the Spring Security principal. The token is available for any custom `PatternLayout`. For example, to also display the thread: `%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level [%principal] %logger{36} - %msg%n`.
+
 # Troubleshooting
 
 ## Messages `WARN  constraint "uk_..." of relation "..." does not exist, skipping`
