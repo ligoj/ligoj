@@ -147,7 +147,7 @@ SOFTWARE.`
 
 const licenseText = computed(() => LICENSE_TEMPLATE(appName.value))
 
-onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: t('about.title', { name: appName.value }) }]))
+onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: t('about.title', { name: appName.value }), icon: 'mdi-information-outline' }]))
 </script>
 
 <style scoped>

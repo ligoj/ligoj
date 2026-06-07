@@ -129,70 +129,6 @@ const intellijLight = {
   },
 }
 
-// IntelliJ Darcula — JetBrains' iconic dark theme.
-const intellijDarcula = {
-  dark: true,
-  colors: {
-    primary: '#4f9eee',
-    secondary: '#cc7832',
-    accent: '#ffc66d',
-    error: '#cc4040',
-    warning: '#ffc66d',
-    info: '#4f9eee',
-    success: '#6a8759',
-    background: '#2b2b2b',
-    surface: '#3c3f41',
-  },
-}
-
-// Dracula — popular cross-editor palette.
-const dracula = {
-  dark: true,
-  colors: {
-    primary: '#bd93f9',
-    secondary: '#ff79c6',
-    accent: '#8be9fd',
-    error: '#ff5555',
-    warning: '#f1fa8c',
-    info: '#8be9fd',
-    success: '#50fa7b',
-    background: '#282a36',
-    surface: '#44475a',
-  },
-}
-
-// Monokai — Sublime / TextMate classic.
-const monokai = {
-  dark: true,
-  colors: {
-    primary: '#66d9ef',
-    secondary: '#f92672',
-    accent: '#ae81ff',
-    error: '#f92672',
-    warning: '#f4bf75',
-    info: '#66d9ef',
-    success: '#a6e22e',
-    background: '#272822',
-    surface: '#383830',
-  },
-}
-
-// Nord — Arctic, north-bluish palette.
-const nord = {
-  dark: true,
-  colors: {
-    primary: '#88c0d0',
-    secondary: '#81a1c1',
-    accent: '#b48ead',
-    error: '#bf616a',
-    warning: '#ebcb8b',
-    info: '#5e81ac',
-    success: '#a3be8c',
-    background: '#2e3440',
-    surface: '#3b4252',
-  },
-}
-
 // One Dark — Atom's signature scheme (now used by many editors).
 const oneDark = {
   dark: true,
@@ -237,7 +173,10 @@ const md3Dark = {
     primary: '#d0bcff',
     secondary: '#ccc2dc',
     accent: '#efb8c8',
-    error: '#f2b8b5',
+    // MD3's dark error tone (#f2b8b5) is a light pink meant for error TEXT;
+    // Ligoj uses `error` as a solid danger-button background with white text,
+    // so use a saturated red that stays readable under white labels.
+    error: '#d32f2f',
     warning: '#e9c46a',
     info: '#9ecaff',
     success: '#7fd0a6',
@@ -254,10 +193,6 @@ const themes = {
   githubLight,
   vscodeDark,
   intellijLight,
-  intellijDarcula,
-  dracula,
-  monokai,
-  nord,
   oneDark,
   md3Light,
   md3Dark,
@@ -276,10 +211,6 @@ export const THEME_OPTIONS = [
   { id: 'githubLight',     label: 'GitHub Light',     dark: false, swatch: ['#0969da', '#1a7f37', '#ffffff'] },
   { id: 'vscodeDark',      label: 'VS Code Dark+',    dark: true,  swatch: ['#007acc', '#4ec9b0', '#1e1e1e'] },
   { id: 'intellijLight',   label: 'IntelliJ Light',   dark: false, swatch: ['#4a86e8', '#008000', '#ffffff'] },
-  { id: 'intellijDarcula', label: 'IntelliJ Darcula', dark: true,  swatch: ['#4f9eee', '#ffc66d', '#2b2b2b'] },
-  { id: 'dracula',         label: 'Dracula',          dark: true,  swatch: ['#bd93f9', '#ff79c6', '#282a36'] },
-  { id: 'monokai',         label: 'Monokai',          dark: true,  swatch: ['#66d9ef', '#f92672', '#272822'] },
-  { id: 'nord',            label: 'Nord',             dark: true,  swatch: ['#88c0d0', '#b48ead', '#2e3440'] },
   { id: 'oneDark',         label: 'One Dark',         dark: true,  swatch: ['#61afef', '#c678dd', '#282c34'] },
   { id: 'md3Light',        label: 'Material You',     dark: false, swatch: ['#6750a4', '#7d5260', '#eaddff'] },
   { id: 'md3Dark',         label: 'Material You Dark', dark: true, swatch: ['#d0bcff', '#efb8c8', '#141218'] },
@@ -323,13 +254,6 @@ const PRESET_TO_THEME = {
   'ligoj-classic':    'ligojLight',
   'ligoj-dark':       'ligojDark',
   'vscode-dark':      'vscodeDark',
-  'monokai':          'monokai',
-  'nord':             'nord',
-  'darcula-classic':  'intellijDarcula',
-  'pulse':            'githubLight',
-  'argon':            'ligojLight',
-  'aurora':           'ligojDark',
-  'darcula-bento':    'intellijDarcula',
   'solarized-press':  'solarizedLight',
   'solarized-brutal': 'solarizedDark',
   'paper':            'githubLight',

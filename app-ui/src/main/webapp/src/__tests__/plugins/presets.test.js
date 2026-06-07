@@ -18,12 +18,8 @@ describe('PRESET_OPTIONS', () => {
     const required = [
       ['ligojLight',      'default'], // Ligoj Light + Vuetify
       ['vscodeDark',      'default'], // VS Code Dark+ + Vuetify
-      ['monokai',         'default'], // Monokai + Vuetify
-      ['nord',            'default'], // Nord + Vuetify
       ['solarizedLight',  'sharp'],   // Solarized Light + Sharp
       ['solarizedDark',   'sharp'],   // Solarized Dark + Sharp
-      ['githubLight',     'vibrant'], // GitHub Light + Vibrant
-      ['intellijDarcula', 'bento'],   // IntelliJ Darcula + Bento
       ['ligojDark',       'neon'],    // Ligoj Dark + Neon
     ]
     for (const [theme, style] of required) {
