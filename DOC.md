@@ -292,6 +292,7 @@ The watched components are:
 - The HTML components having `data-secured-service`, `data-secured-role` or `data-secured-method` attribute. See [data-secured-*](#data-secured-)
 
 The matched URL starts after the `#/` fragment part. Samples:
+
 * `^system/bench`: Browser URL `#/system/bench`
 * `^system/.*`: Browser URL `#/system`
 
@@ -378,7 +379,7 @@ always performed by the `ligoj-api` container.
 The decision follows this matrix:
 
 | URL               | Session | API Key | [PreAuth](#pre-authenticated-access) | Login | Auth.     | Response | Notes                                             |
-| ----------------- | ------- | ------- | ------------------------------------ | ----- | --------- | -------- | ------------------------------------------------- |
+|-------------------|---------|---------|--------------------------------------|-------|-----------|----------|---------------------------------------------------|
 | public            | *       | *       | *                                    | *     | *         | `200`    | Whitelisted page                                  |
 | /rest/*           | Yes     | *       | *                                    | *     | Granted   | `200`    | Authorization is checked by `ligoj-api`           |
 | /rest/*           | No      | No      | Not configured                       | *     | Refused   | `401`    | Unauthorized by `ligoj-api`                       |
@@ -406,7 +407,7 @@ When these arguments are empty, the `PreAuth` filter is not enabled. When enable
 You should use the right [plugin-id](https://github.com/ligoj/plugin-id) implementation to get the user details.
 
 | Property                      | Role                                                                         | Sample                                                |
-| ----------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
+|-------------------------------|------------------------------------------------------------------------------|-------------------------------------------------------|
 | security.pre-auth-principal   | Request header name containing the identity of the authenticated user        | -Dsecurity.pre-auth-principal=SM_USER                 |
 | security.pre-auth-credentials | Request header name containing the token to verify                           | -Dsecurity.pre-auth-credentials=SM_TOKEN              |
 | security.pre-auth-logout      | Optional logout relative or absolute URL when user requests to be logged out | -Dsecurity.pre-auth-logout="https://signin.sample.com |
@@ -414,7 +415,7 @@ You should use the right [plugin-id](https://github.com/ligoj/plugin-id) impleme
 For AWS Cognito placed on an ALB, use [plugin-id-cognito](https://github.com/ligoj/plugin-id-cognito), and these properties:
 
 | Property                      | Value                     |
-| ----------------------------- | ------------------------- |
+|-------------------------------|---------------------------|
 | security.pre-auth-principal   | `X-Amzn-Oidc-Identity`    |
 | security.pre-auth-credentials | `X-Amzn-Oidc-Accesstoken` |
 | security.pre-auth-logout      | (Cognito subdomain)       |
@@ -472,7 +473,7 @@ IAM provider such as [plugin-iam-node](https://github.com/ligoj/plugin-iam-node)
 The enabled login mode is configured only at launch time of the `ligoj-ui` container with `-Dsecurity=${MODE}` argument. The behavior is described in the below table:
 
 | Mode        | Implementation                                                | Login screen     | Behavior                                                                             |
-| ----------- | ------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------ |
+|-------------|---------------------------------------------------------------|------------------|--------------------------------------------------------------------------------------|
 | `Trusted`   | `org.ligoj.app.http.security.TrustedAuthenticationProvider`   | Ligoj login page | Login is always accepted, `ligoj-api` container is not involved. Useful for testing. |
 | `Rest`      | `org.ligoj.app.http.security.RestAuthenticationProvider`      | Ligoj login page | Login operation is delegated to a REST endpoint, by default one of `ligoj-api`.      |
 | `OAuth2Bff` | `org.ligoj.app.http.security.OAuth2BffAuthenticationProvider` | OIDC Provider    | Login and logout operations are delegated to external OAuth2 identity provider       |
@@ -576,7 +577,7 @@ These fields are automatically set by the transaction manager in successful API 
 Values resolution priorities
 
 | Priority | Source                               | Note                                                                                                |
-| -------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+|----------|--------------------------------------|-----------------------------------------------------------------------------------------------------|
 | 1        | Spring Command-line arguments        | `--ligoj.property=value` when running the application                                               |
 | 2        | Java System properties               | `-Dligoj.property=value`                                                                            |
 | 3        | OS environment variables             | `LIGOJ_PROPERTY=value`                                                                              |
@@ -922,7 +923,7 @@ All Web resources are in the directory `META-INF/resources/webjars/service/${ser
 All entities to be installed on setup are in the directory `csv`.
 
 | Pattern file                        | Sample              | Role                                                                                                                                                              |
-| ----------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-------------------------------------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | ${base_java}/${Tool}Resource.class  | SlackResource.class | Plugin definition                                                                                                                                                 |
 | ${base_web}/img/${tool}.png         | img/slack.png       | 16x icon                                                                                                                                                          |
 | ${base_web}/img/${tool}x64.png      | img/slack.png       | 64x icon                                                                                                                                                          |
@@ -946,7 +947,7 @@ These extensions may:
 - Add security levels
 
 | Layer | Scope  | Enablement                                                                                                                                                                             |
-| ----- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | UI    | Global | Create a file `META-INF/resource/webjars/bootstrap.private.js`. This JS code will be added to the initial JS code. For example, it's possible to register events, add a menu entry,... |
 
 ## Subscription
@@ -1006,7 +1007,7 @@ using 'trimmed' nouns such as: `passwd` (`password`), `param` (`parameter`), `ge
 Use patterns for packages or name for files of the same type as described in the below table.
 
 | Type                   | Package convention                           | Name convention                                                             |
-| ---------------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
+|------------------------|----------------------------------------------|-----------------------------------------------------------------------------|
 | All                    | ASCII                                        | ASCII                                                                       |
 | All                    | JavaScript syntax                            | See JS linter                                                               |
 | All                    | Java syntax                                  | Lower case package, [a-z]+ in `src/main/java` or `src/test/java`            |
@@ -1331,7 +1332,7 @@ sudo docker logs -f ligoj-api
 ### Docker environment variables
 
 | Docker env   | Default value                  | Note                                                                             |
-| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
+|--------------|--------------------------------|----------------------------------------------------------------------------------|
 | CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration.                                                        |
 | CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
 | SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
@@ -1464,7 +1465,7 @@ It is anyway possible to revert to this mode to regain access to Ligoj in case i
 System property `security` value determines the authentication mode:
 
 | `security` mode | Login screen  | Identity Provider                                                   |
-| --------------- | ------------- | ------------------------------------------------------------------- |
+|-----------------|---------------|---------------------------------------------------------------------|
 | `Trusted`       | Ligoj         | Authentication required but always accepted                         |
 | `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
 | `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
@@ -1835,6 +1836,48 @@ ligoj plugin restart --wait 60
 
 *Note* To build your own plugins or rebuild them from their sources, documentation is available on the GitHub [plugin-api](https://github.com/ligoj/ligoj-api) repository.
 
+## Plugin code signing
+
+Plugin JARs can carry an embedded code signature (`jarsigner`), unrelated to the detached GPG signature (`.asc`) required by Maven Central: the GPG signature secures the *download*, the code signature
+travels *inside* the JAR and is verified again at every startup.
+
+### Signing at release
+
+One-time setup on the release machine — generate the vendor code-signing keypair, then export its certificate for the runtime truststore:
+
+```sh
+keytool -genkeypair -keystore ~/.ligoj/code-signing.p12 -storetype PKCS12 -alias ligoj \
+  -keyalg RSA -keysize 3072 -validity 3650 -dname "CN=Ligoj, O=Ligoj"
+keytool -exportcert -keystore ~/.ligoj/code-signing.p12 -alias ligoj -file ligoj-vendor.cer
+keytool -importcert -keystore truststore.p12 -storetype PKCS12 -alias ligoj -file ligoj-vendor.cer -noprompt
+```
+
+The `code-sign` profile of `plugin-parent` is automatically activated when `~/.ligoj/code-signing.p12` exists: `maven-jarsigner-plugin` signs the main JAR at the `package` phase — before the GPG
+signature, so the deployed artifact is the signed one. The keystore password is read from the `LIGOJ_SIGN_STOREPASS` environment variable (or the `ligoj.sign.storepass` property); the signature is
+RFC3161-timestamped (`ligoj.sign.tsa`, defaults to DigiCert) so it outlives the certificate expiry.
+
+### Verification at startup
+
+The `PluginsClassLoader` verifies every installed plugin JAR before it joins the classpath, and reports one of:
+
+| Status     | Meaning                                                                                             |
+|------------|-----------------------------------------------------------------------------------------------------|
+| `UNSIGNED` | No code signature.                                                                                  |
+| `INVALID`  | Broken signature: tampered content (digest mismatch), partially signed entries, unreadable archive. |
+| `SIGNED`   | Valid and complete signature, but the certificate is not trusted (or no truststore is configured).  |
+| `VERIFIED` | Valid signature whose certificate is pinned in — or chains to — the configured truststore.          |
+
+| System property                              | Default    | Note                                                                                                    |
+|----------------------------------------------|------------|---------------------------------------------------------------------------------------------------------|
+| `ligoj.plugin.signature.truststore`          | -          | Path to the PKCS12/JKS truststore holding the trusted vendor certificates. Required for `VERIFIED`.     |
+| `ligoj.plugin.signature.truststore.password` | `changeit` | Truststore password.                                                                                    |
+| `ligoj.plugin.signature.required`            | `false`    | When `true`, rejects from the classpath the plug-ins below `VERIFIED` (or `SIGNED` without truststore). |
+
+### Display
+
+The plugin administration view (`Administration → Plugins`) shows a *Vendor* column: a green shield with the certificate identity for `VERIFIED` plug-ins, an orange shield for `SIGNED` (valid but
+untrusted certificate), a red shield for `INVALID`, and the self-declared manifest vendor greyed out when there is no signature at all.
+
 ## Customization of the UI
 
 Two assets can be replaced to rebrand the application: `logo.svg` (the
@@ -1867,7 +1910,7 @@ deployment starts already rebranded — no runtime CLI step, no shared
 volume. Two source locations are honoured:
 
 | File in the image               | Source path in the repo                      | Notes                                                                                                                                                                                                                                                                        |
-| ------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `favicon.ico` (WAR root)        | `app-ui/src/main/webapp/favicon.ico`         | Served at `/ligoj/favicon.ico` by Spring's resource handler. The container's `HEALTHCHECK` probes this URL — keep the file valid.                                                                                                                                            |
 | `logo.svg` (Vite-bundled asset) | `app-ui/src/main/webapp/src/assets/logo.svg` | Imported through Vite. Replace BEFORE `docker build` so the new mark is bundled into the SPA chunks. When the SVG is under ~4 KB, Vite inlines it as a `data:image/svg+xml;base64,…` URI in the JS — no separate file in the dist; the browser never makes a second request. |
 
@@ -2014,7 +2057,7 @@ ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from=
 Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot properties (can be injected in `CUSTOM_OPTS`) can be dynamically modified from the administration console:
 
 | Name                                                  | Default value                            | Note                                                                                                 |
-| ----------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+|-------------------------------------------------------|------------------------------------------|------------------------------------------------------------------------------------------------------|
 | api.token.purge                                       | `0 0 4 * * ?`                            | CRON expression for expired API tokens purge. See [API Token](#api-tokens) section.                  |
 | api.token.iterations                                  | `31`                                     | API token hash iterations. See [API Token](#api-tokens) section.                                     |
 | api.token.digest                                      | `SHA-512`                                | API token hash algorithm. See [API Token](#api-tokens) section.                                      |
@@ -2084,7 +2127,7 @@ These variables are only relevant when set as Java System property.
 For example `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 
 | Name                   | Default value       | Note                               |
-| ---------------------- | ------------------- | ---------------------------------- |
+|------------------------|---------------------|------------------------------------|
 | ligoj.log.file.name    | `./api-rolling.log` | File inside `LIGOJ_HOME` directory |
 | ligoj.log.file.size    | `10 MB`             | Max log file size                  |
 | ligoj.log.file.enabled | `true`              | Enablement of log file             |
@@ -2096,12 +2139,14 @@ Both containers embed a [Log4j2](https://logging.apache.org/log4j/2.x/) configur
 - `ligoj-api`: [app-api/src/main/resources/log4j2.json](app-api/src/main/resources/log4j2.json)
 - `ligoj-ui`: [app-ui/src/main/resources/log4j2.json](app-ui/src/main/resources/log4j2.json)
 
-The log destinations (console and an optional rolling file inside `LIGOJ_HOME`) are tuned with the `ligoj.log.*` system variables described above, and the verbosity with `-Dlog.level=...` plus the per-category `logging.level.<category>` application properties.
+The log destinations (console and an optional rolling file inside `LIGOJ_HOME`) are tuned with the `ligoj.log.*` system variables described above, and the verbosity with `-Dlog.level=...` plus the
+per-category `logging.level.<category>` application properties.
 A fully custom configuration can be supplied with the standard `-Dlog4j2.configurationFile=/path/to/log4j2.json` system property.
 
 ### Principal identifier
 
-Every log line includes the identifier of the principal (the authenticated user) that triggered it, rendered by the Ligoj-specific `%principal` pattern token between brackets, right after the log level:
+Every log line includes the identifier of the principal (the authenticated user) that triggered it, rendered by the Ligoj-specific `%principal` pattern token between brackets, right after the log
+level:
 
 ```log
 2026-06-07 10:15:42.123 INFO  [jdoe] Catalog update for service:prov:aws, force=false
@@ -2109,8 +2154,13 @@ Every log line includes the identifier of the principal (the authenticated user)
 ```
 
 - The principal is read lazily, at log time, from the Spring Security context attached to the logging thread — no MDC propagation is involved.
-- Unauthenticated and anonymous accesses, the boot sequence and background threads without a propagated security context (schedulers, ...) are rendered as `-`. Background tasks restoring the requester context — such as the asynchronous catalog import — keep the original principal.
-- The token is provided by the `org.ligoj.boot.log.PrincipalPatternConverter` Log4j2 plugin, deliberately duplicated in each container module ([app-api](app-api/src/main/java/org/ligoj/boot/log/PrincipalPatternConverter.java) and [app-ui](app-ui/src/main/java/org/ligoj/boot/log/PrincipalPatternConverter.java)) to keep them self-contained. It is auto-discovered through the `Log4j2Plugins.dat` descriptor generated at build time — no extra configuration. There is no standard library equivalent: `log4j-web` only provides the servlet lifecycle binding and the `${web:…}` lookup (servlet-context scope), and nothing populates the `%X` MDC with the Spring Security principal. The token is available for any custom `PatternLayout`. For example, to also display the thread: `%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level [%principal] %logger{36} - %msg%n`.
+- Unauthenticated and anonymous accesses, the boot sequence and background threads without a propagated security context (schedulers, ...) are rendered as `-`. Background tasks restoring the requester
+  context — such as the asynchronous catalog import — keep the original principal.
+- The token is provided by the `org.ligoj.boot.log.PrincipalPatternConverter` Log4j2 plugin, deliberately duplicated in each container
+  module ([app-api](app-api/src/main/java/org/ligoj/boot/log/PrincipalPatternConverter.java) and [app-ui](app-ui/src/main/java/org/ligoj/boot/log/PrincipalPatternConverter.java)) to keep them
+  self-contained. It is auto-discovered through the `Log4j2Plugins.dat` descriptor generated at build time — no extra configuration. There is no standard library equivalent: `log4j-web` only provides
+  the servlet lifecycle binding and the `${web:…}` lookup (servlet-context scope), and nothing populates the `%X` MDC with the Spring Security principal. The token is available for any custom
+  `PatternLayout`. For example, to also display the thread: `%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level [%principal] %logger{36} - %msg%n`.
 
 # Troubleshooting
 
