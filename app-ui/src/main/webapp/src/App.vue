@@ -51,11 +51,17 @@
     <!-- App bar -->
     <header class="bar">
       <button class="icon-btn" @click="collapsed = !collapsed" title="Menu"><v-icon>mdi-menu</v-icon></button>
+      <!-- The single breadcrumb, in the 2026 chip style (relocated here from the
+           per-view LjPageHeader, which no longer renders its own trail). -->
       <nav class="bcrumbs" aria-label="breadcrumb">
         <template v-for="(c, i) in displayCrumbs" :key="i">
           <span v-if="i" class="bc-sep">›</span>
-          <a v-if="c.to && i < displayCrumbs.length - 1" class="bc link" @click="go(c.to)">{{ c.title }}</a>
-          <span v-else class="bc" :class="{ cur: i === displayCrumbs.length - 1 }">{{ c.title }}</span>
+          <a v-if="c.to && i < displayCrumbs.length - 1" class="bc-chip link" @click="go(c.to)">
+            <v-icon v-if="crumbIcon(c, false)" size="13">{{ crumbIcon(c, false) }}</v-icon>{{ c.title }}
+          </a>
+          <span v-else class="bc-chip" :class="{ cur: i === displayCrumbs.length - 1 }">
+            <v-icon v-if="crumbIcon(c, i === displayCrumbs.length - 1)" size="13">{{ crumbIcon(c, i === displayCrumbs.length - 1) }}</v-icon>{{ c.title }}
+          </span>
         </template>
       </nav>
       <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
@@ -254,6 +260,46 @@ function go(path) { if (route.path !== path) router.push(path) }
 // Bar breadcrumb trail: the page-provided crumbs when present, else a single
 // crumb from the local title map (Dashboard/Profil don't set breadcrumbs).
 const displayCrumbs = computed(() => (app.breadcrumbs.length ? app.breadcrumbs : [{ title: title.value }]))
+
+/* Breadcrumb chip icon — every crumb, INCLUDING the leaf (current page).
+ * Resolution order:
+ *  1. an explicit `icon` on the crumb (e.g. About);
+ *  2. the home crumb → a home glyph;
+ *  3. the leaf (current page) → its icon from the sidebar NAV tree, matched by
+ *     the active route (covers /system/plugin → Plug-ins, /prov/catalog →
+ *     Catalog, /id/user → Utilisateurs, ...);
+ *  4. a section crumb → the well-known roots (System / API), else the NAV group
+ *     owning the route, else the owning plugin's `meta.icon` (e.g. Provisioning
+ *     → plugin-prov's mdi-server-network). */
+function navIconForPath(path) {
+  let best = null
+  let bestLen = -1
+  for (const g of NAV.value) {
+    for (const e of [g, ...(g.children || [])]) {
+      const key = e.match || e.route
+      if (!key) continue
+      if (path === e.route || path === e.match || (e.match && path.startsWith(e.match + '/'))) {
+        if (key.length > bestLen) { best = e; bestLen = key.length }
+      }
+    }
+  }
+  return best ? best.icon : null
+}
+function crumbIcon(c, isLeaf) {
+  if (c.icon) return c.icon
+  if (c.to === '/') return 'mdi-home-outline'
+  if (isLeaf) {
+    const leaf = navIconForPath(route.path)
+    if (leaf) return leaf
+  }
+  if (c.title === i18n.t('system.breadcrumb')) return 'mdi-cog-outline'
+  if (c.title === i18n.t('api.title')) return 'mdi-api'
+  const group = NAV.value.find((g) => g.match && (route.path === g.match || route.path.startsWith(g.match + '/')))
+  if (group) return group.icon
+  const pluginId = route.path.split('/').filter(Boolean)[0]
+  const plugin = pluginId ? registry.get(pluginId) : null
+  return plugin?.meta?.icon || null
+}
 const refreshing = ref(false)
 async function onRefresh() {
   if (!app.refresh || refreshing.value) return
@@ -355,6 +401,15 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
   background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 70%, #000));
   transition: transform .22s ease;
 }
+/* Material You: the MD3 primary is a LIGHT tone (notably in dark mode), which
+   washes out the rail under its white nav text. Use a dark MD3 neutral
+   navigation rail instead, for both md3 light and dark — and force a light
+   inherited text color (the `.ver` "À propos" button inherits it; otherwise it
+   resolves to the dark `--on-primary` of the light MD3 primary → black text). */
+[data-style="md3"] .sidebar {
+  background: linear-gradient(180deg, #211f26, #16141b);
+  color: rgba(255, 255, 255, .92);
+}
 .nav-collapsed .sidebar { transform: translateX(-100%); }
 .brand { display: flex; align-items: center; gap: 12px; padding: 15px 16px; cursor: pointer; }
 .brand-logo { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
@@ -392,11 +447,12 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .icon-btn:hover { background: var(--hover); }
 .crumb { font-family: var(--v26-font); font-weight: 700; font-size: 16px; color: var(--ink); letter-spacing: -.01em; }
 .bcrumbs { display: flex; align-items: center; gap: 7px; min-width: 0; overflow: hidden; padding-left: 4px; }
-.bc { font-family: var(--v26-font); font-size: 15px; font-weight: 600; color: var(--muted); white-space: nowrap; }
-.bc.cur { color: var(--ink); font-weight: 700; letter-spacing: -.01em; }
-.bc.link { cursor: pointer; border-radius: 7px; padding: 3px 7px; transition: color .14s, background .14s; }
-.bc.link:hover { color: var(--ink); background: var(--hover); }
-.bc-sep { color: var(--muted); font-size: 13px; opacity: .55; }
+/* 2026 chip-style breadcrumb (relocated from LjPageHeader). */
+.bc-chip { display: inline-flex; align-items: center; gap: 4px; font-family: var(--v26-font); font-size: 12px; font-weight: 700; white-space: nowrap; color: rgba(var(--v-theme-on-surface), .6); background: rgba(var(--v-theme-on-surface), .07); border-radius: 999px; padding: 4px 11px; transition: color .14s, background .14s; }
+a.bc-chip.link { cursor: pointer; }
+a.bc-chip.link:hover { color: rgb(var(--v-theme-on-surface)); background: rgba(var(--v-theme-on-surface), .13); }
+.bc-chip.cur { color: rgb(var(--v-theme-secondary)); background: rgba(var(--v-theme-secondary), .14); }
+.bc-sep { color: rgba(var(--v-theme-on-surface), .4); font-size: 13px; }
 .refresh-btn .v-icon { transition: transform .2s; }
 .refresh-btn:hover .v-icon { color: rgb(var(--v-theme-secondary)); }
 .refresh-btn.spin .v-icon { animation: bc-spin .6s ease; }

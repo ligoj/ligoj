@@ -19,14 +19,10 @@
 <template>
   <header class="ph">
     <div class="ph-txt">
-      <nav v-if="crumbs && crumbs.length" class="crumbs">
-        <template v-for="(c, i) in crumbs" :key="i">
-          <span class="crumb" :class="{ cur: c.current }">
-            <v-icon v-if="c.icon" size="13">{{ c.icon }}</v-icon>{{ c.label }}
-          </span>
-          <span v-if="i < crumbs.length - 1" class="csep">›</span>
-        </template>
-      </nav>
+      <!-- Breadcrumb intentionally NOT rendered here: the single breadcrumb now
+           lives in the top app bar (App.vue), in the 2026 chip style. The
+           `crumbs` prop is kept for API compatibility (views still pass it) but
+           no longer paints a second, duplicated trail. -->
       <h1>{{ title }}</h1>
       <p v-if="subtitle || $slots.subtitle" class="sub"><slot name="subtitle">{{ subtitle }}</slot></p>
     </div>
@@ -53,20 +49,6 @@ defineProps({
   margin-bottom: 18px;
 }
 .ph-txt { min-width: 0; }
-.crumbs { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; flex-wrap: wrap; }
-.crumb {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-family: var(--font, "Bricolage Grotesque", system-ui, sans-serif);
-  font-size: 11.5px; font-weight: 700;
-  color: var(--ink-3, rgba(var(--v-theme-on-surface), .55));
-  background: var(--pill, rgba(var(--v-theme-on-surface), .06));
-  border-radius: 999px; padding: 3px 10px;
-}
-.crumb.cur {
-  color: var(--accent, rgb(var(--v-theme-secondary)));
-  background: rgba(var(--v-theme-secondary), .12);
-}
-.csep { color: var(--ink-3, rgba(var(--v-theme-on-surface), .4)); font-size: 13px; }
 .ph-txt h1 {
   font-family: var(--font, "Bricolage Grotesque", system-ui, sans-serif);
   font-weight: var(--bold, var(--lj-weight-bold, 800));
