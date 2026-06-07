@@ -255,6 +255,26 @@
   --lj-space: 16px;
 }
 
+/* md3 — Material Design 3 / Material You. Rounded corner tokens (medium 12 /
+ * large 16 / extra-large 28), Roboto type (lazily loaded in styles.js), MD3
+ * tonal elevation, "emphasized" motion easing and longer ripples. The extra
+ * rules (state layers, pill buttons, ripple tuning) live in the dedicated
+ * block near the end of this file. */
+[data-style="md3"] {
+  --lj-radius: 16px;
+  --lj-radius-sm: 12px;
+  --lj-radius-lg: 28px;
+  --lj-shadow: 0 1px 3px 1px rgba(0, 0, 0, .15), 0 1px 2px 0 rgba(0, 0, 0, .3);
+  --lj-shadow-lg: 0 8px 12px 6px rgba(0, 0, 0, .15), 0 4px 4px 0 rgba(0, 0, 0, .3);
+  --lj-border-color: rgba(var(--v-theme-on-surface), .12);
+  --lj-font: "Roboto Flex", "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --lj-weight-bold: 500;
+  --lj-tracking: 0;
+  --lj-space: 16px;
+  /* MD3 "emphasized" easing + standard duration for expressive motion. */
+  --lj-transition: .3s cubic-bezier(.2, 0, 0, 1);
+}
+
 /* ---------------------------------------------------------------------------
  * Token consumption on stock Vuetify surfaces. These give EVERY style a
  * baseline shape/elevation/type identity even before the hand-tuned
@@ -900,4 +920,187 @@
   background: var(--paper-bg) !important;
   border-bottom: 1px solid var(--paper-rule) !important;
   box-shadow: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Material Design 3 (Material You) — the user-requested flourishes:
+ * fonts, transitions (motion) and ripples / state layers, plus the MD3
+ * rounded shape language. Colors come from the md3Light / md3Dark Vuetify
+ * themes; this block adds the MOTION and INTERACTION layer on top.
+ * ------------------------------------------------------------------------- */
+
+/* MD3 reference easing curves (expressive / standard motion). */
+[data-style="md3"] {
+  --md3-emphasized: cubic-bezier(.2, 0, 0, 1);
+  --md3-standard: cubic-bezier(.2, 0, 0, 1);
+  --md3-emphasized-decelerate: cubic-bezier(.05, .7, .1, 1);
+}
+
+/* Roboto everywhere (falls back to system when the web font is offline). */
+[data-style="md3"],
+[data-style="md3"] .v-application,
+[data-style="md3"] .v-btn,
+[data-style="md3"] .v-field,
+[data-style="md3"] .v-list-item-title,
+[data-style="md3"] .v-card-title,
+[data-style="md3"] .v-toolbar-title {
+  font-family: var(--lj-font) !important;
+}
+
+/* --- Motion: animate the interactive surfaces with MD3 emphasized easing. */
+[data-style="md3"] .v-btn,
+[data-style="md3"] .v-card,
+[data-style="md3"] .v-chip,
+[data-style="md3"] .v-field,
+[data-style="md3"] .v-list-item,
+[data-style="md3"] .v-navigation-drawer .v-list-item,
+[data-style="md3"] .v-tab {
+  transition:
+    background-color .28s var(--md3-standard),
+    box-shadow .28s var(--md3-standard),
+    border-color .28s var(--md3-standard),
+    transform .28s var(--md3-emphasized) !important;
+}
+
+/* Buttons lift on hover, settle on press — MD3 elevation + a touch of scale. */
+[data-style="md3"] .v-btn {
+  border-radius: 20px; /* MD3 full-height pill buttons */
+  letter-spacing: .0892857143em; /* MD3 label-large tracking */
+  text-transform: none;
+}
+[data-style="md3"] .v-btn:hover {
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, .15), 0 1px 2px 0 rgba(0, 0, 0, .3);
+}
+[data-style="md3"] .v-btn:active {
+  transform: scale(.97);
+}
+[data-style="md3"] .v-btn--icon {
+  border-radius: 50%;
+}
+
+/* FAB-ish primary CTA gets the larger MD3 corner. */
+[data-style="md3"] .v-card {
+  border-radius: var(--lj-radius);
+}
+[data-style="md3"] .v-dialog > .v-card,
+[data-style="md3"] .v-overlay__content > .v-card {
+  border-radius: var(--lj-radius-lg); /* 28px MD3 dialog corner */
+}
+
+/* Text fields → MD3 "filled" feel: rounded top, flat bottom. */
+[data-style="md3"] .v-field {
+  border-radius: 4px 4px 0 0;
+}
+
+/* --- State layers: MD3 overlays a tonal layer on hover/focus/press.
+ * Vuetify already renders `.v-btn__overlay` / `.v-list-item__overlay`; we
+ * tune the opacities to the MD3 spec (hover .08, focus/press .10-.12). */
+[data-style="md3"] .v-btn:hover > .v-btn__overlay,
+[data-style="md3"] .v-list-item:hover > .v-list-item__overlay {
+  opacity: .08;
+}
+[data-style="md3"] .v-btn:focus-visible > .v-btn__overlay,
+[data-style="md3"] .v-list-item:focus-visible > .v-list-item__overlay {
+  opacity: .12;
+}
+
+/* --- Ripples on real Vuetify components (v-list-item, the v-btn inside
+ * file inputs / selects, checkboxes): soften + slow to the MD3 feel. We only
+ * tune timing/opacity here — Vuetify's directive drives the geometry. */
+[data-style="md3"] .v-ripple__animation--in {
+  transition:
+    transform .42s var(--md3-emphasized-decelerate),
+    opacity .11s var(--md3-standard) !important;
+  opacity: .12;
+}
+[data-style="md3"] .v-ripple__animation--out {
+  transition: opacity .45s var(--md3-standard) !important;
+}
+
+/* --- Ripples on the 2026 custom controls. The visible buttons of the shell
+ * are plain elements (LjButton `.lj-btn`, the icon buttons `.lj-iconbtn`, the
+ * sidebar `.nav-item` / `.sub-item`), NOT Vuetify components — so they carry
+ * no `v-ripple` directive. Give them a pure-CSS centered ripple: a circular
+ * `::after` that snaps small+visible on press, then expands and fades on
+ * release (the classic Material CSS ripple, no JS needed). */
+[data-style="md3"] .lj-btn,
+[data-style="md3"] .lj-iconbtn,
+[data-style="md3"] .nav-item,
+[data-style="md3"] .sub-item {
+  position: relative;
+  overflow: hidden;
+}
+[data-style="md3"] .lj-btn::after,
+[data-style="md3"] .lj-iconbtn::after,
+[data-style="md3"] .nav-item::after,
+[data-style="md3"] .sub-item::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  /* Rest state = expanded + invisible. The release transitions TO this: the
+   * expansion (.9s) finishes well before the fade (1.6s) so the growing
+   * circle stays clearly visible the whole way out. */
+  transform: translate(-50%, -50%) scale(3);
+  transform-origin: center;
+  pointer-events: none;
+  transition: transform .9s var(--md3-emphasized), opacity 1.6s linear;
+}
+[data-style="md3"] .lj-btn:active::after,
+[data-style="md3"] .lj-iconbtn:active::after,
+[data-style="md3"] .nav-item:active::after,
+[data-style="md3"] .sub-item:active::after {
+  /* Press: snap to a small but VISIBLE, fairly opaque disc at the center. */
+  opacity: .34;
+  transform: translate(-50%, -50%) scale(.18);
+  transition: none;
+}
+/* The label/icon must sit above the ripple layer. */
+[data-style="md3"] .lj-btn > *,
+[data-style="md3"] .lj-iconbtn > *,
+[data-style="md3"] .nav-item > *,
+[data-style="md3"] .sub-item > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Selected navigation item → MD3 "active indicator" pill. */
+[data-style="md3"] .v-navigation-drawer .v-list-item {
+  border-radius: 999px;
+  margin: 2px 8px;
+}
+[data-style="md3"] .v-navigation-drawer .v-list-item--active {
+  background: rgba(var(--v-theme-secondary), .22);
+}
+
+/* Honour the user's reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  [data-style="md3"] .v-btn,
+  [data-style="md3"] .v-card,
+  [data-style="md3"] .v-chip,
+  [data-style="md3"] .v-field,
+  [data-style="md3"] .v-list-item,
+  [data-style="md3"] .v-ripple__animation--in,
+  [data-style="md3"] .v-ripple__animation--out,
+  [data-style="md3"] .lj-btn::after,
+  [data-style="md3"] .lj-iconbtn::after,
+  [data-style="md3"] .nav-item::after,
+  [data-style="md3"] .sub-item::after {
+    transition: none !important;
+  }
+  [data-style="md3"] .v-btn:active {
+    transform: none;
+  }
+  /* Keep the ripple invisible rather than flashing without animation. */
+  [data-style="md3"] .lj-btn:active::after,
+  [data-style="md3"] .lj-iconbtn:active::after,
+  [data-style="md3"] .nav-item:active::after,
+  [data-style="md3"] .sub-item:active::after {
+    opacity: 0;
+  }
 }

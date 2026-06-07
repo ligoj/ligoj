@@ -209,6 +209,43 @@ const oneDark = {
   },
 }
 
+/*
+ * Material Design 3 (Material You) baseline palettes. Primary/secondary/
+ * tertiary follow the MD3 baseline tonal scheme (the purple "Material You"
+ * default); error/warning/info/success map MD3's semantic tones onto
+ * Vuetify's extra slots. Paired with the `md3` shape style (Roboto, rounded
+ * corners, state-layer ripples, emphasized motion) in `styles.js`.
+ */
+const md3Light = {
+  dark: false,
+  colors: {
+    primary: '#6750a4',
+    secondary: '#625b71',
+    accent: '#7d5260',
+    error: '#b3261e',
+    warning: '#9a6700',
+    info: '#00639b',
+    success: '#2e6a4f',
+    background: '#fef7ff',
+    surface: '#fef7ff',
+  },
+}
+
+const md3Dark = {
+  dark: true,
+  colors: {
+    primary: '#d0bcff',
+    secondary: '#ccc2dc',
+    accent: '#efb8c8',
+    error: '#f2b8b5',
+    warning: '#e9c46a',
+    info: '#9ecaff',
+    success: '#7fd0a6',
+    background: '#141218',
+    surface: '#141218',
+  },
+}
+
 const themes = {
   ligojLight,
   ligojDark,
@@ -222,6 +259,8 @@ const themes = {
   monokai,
   nord,
   oneDark,
+  md3Light,
+  md3Dark,
 }
 
 /**
@@ -242,6 +281,8 @@ export const THEME_OPTIONS = [
   { id: 'monokai',         label: 'Monokai',          dark: true,  swatch: ['#66d9ef', '#f92672', '#272822'] },
   { id: 'nord',            label: 'Nord',             dark: true,  swatch: ['#88c0d0', '#b48ead', '#2e3440'] },
   { id: 'oneDark',         label: 'One Dark',         dark: true,  swatch: ['#61afef', '#c678dd', '#282c34'] },
+  { id: 'md3Light',        label: 'Material You',     dark: false, swatch: ['#6750a4', '#7d5260', '#eaddff'] },
+  { id: 'md3Dark',         label: 'Material You Dark', dark: true, swatch: ['#d0bcff', '#efb8c8', '#141218'] },
 ]
 
 /**
@@ -293,6 +334,8 @@ const PRESET_TO_THEME = {
   'solarized-brutal': 'solarizedDark',
   'paper':            'githubLight',
   'cyber-ligoj':      'ligojDark',
+  'material-you':      'md3Light',
+  'material-you-dark': 'md3Dark',
 }
 
 export default createVuetify({

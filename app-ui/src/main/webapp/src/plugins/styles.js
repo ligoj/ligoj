@@ -76,6 +76,15 @@ export const STYLE_OPTIONS = [
     radius: '18px',
   },
 
+  /* --- design systems --- */
+  {
+    id: 'md3',
+    label: 'Material Design 3',
+    description: 'Google Material You — Roboto, rounded shapes, state-layer ripples, emphasized motion.',
+    previews: ['#6750a4', '#7d5260', '#eaddff'],
+    radius: '16px',
+  },
+
   /* --- niche / experimental --- */
   {
     id: 'bento',
@@ -134,6 +143,24 @@ export function applyStyle(id) {
   if (typeof document === 'undefined') return
   const safeId = STYLE_OPTIONS.some((s) => s.id === id) ? id : 'default'
   document.documentElement.dataset.style = safeId
+  if (safeId === 'md3') ensureMd3Font()
+}
+
+/**
+ * Lazily load the Roboto family used by the Material Design 3 style. Only
+ * fetched the first time the md3 style is applied (not for the other styles),
+ * idempotent via a stable link id. The CSS falls back to system fonts when the
+ * network is unavailable, so this is a progressive enhancement.
+ */
+function ensureMd3Font() {
+  if (typeof document === 'undefined') return
+  const id = 'ligoj-md3-font'
+  if (document.getElementById(id)) return
+  const link = document.createElement('link')
+  link.id = id
+  link.rel = 'stylesheet'
+  link.href = 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,700&display=swap'
+  document.head.appendChild(link)
 }
 
 /**

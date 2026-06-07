@@ -127,6 +127,26 @@ export const PRESET_OPTIONS = [
     swatch: ['#4f9eee', '#cc7832', '#2b2b2b'],
   },
 
+  /* --- design systems --- */
+  {
+    id: 'material-you',
+    label: 'Material You',
+    description: 'Material Design 3 — Roboto, rounded shapes, state-layer ripples, emphasized motion.',
+    theme: 'md3Light',
+    style: 'md3',
+    dark: false,
+    swatch: ['#6750a4', '#7d5260', '#eaddff'],
+  },
+  {
+    id: 'material-you-dark',
+    label: 'Material You Dark',
+    description: 'Material Design 3 on a dark canvas.',
+    theme: 'md3Dark',
+    style: 'md3',
+    dark: true,
+    swatch: ['#d0bcff', '#efb8c8', '#141218'],
+  },
+
   /* --- experimental / niche --- */
   {
     id: 'solarized-press',
