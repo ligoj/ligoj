@@ -24,3 +24,6 @@ app-ui/src/main/webapp/src/main/resources/static/
 .claude/settings.json
 node_modules/.vite/vitest/*/results.json
 .claude/*.lock
+
+# Transient plugin vendors truststore injected by release.sh into the Docker build context
+app-api/plugin-vendors/plugin-vendors-default.p12

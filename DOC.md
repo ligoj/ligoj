@@ -379,7 +379,7 @@ always performed by the `ligoj-api` container.
 The decision follows this matrix:
 
 | URL               | Session | API Key | [PreAuth](#pre-authenticated-access) | Login | Auth.     | Response | Notes                                             |
-|-------------------|---------|---------|--------------------------------------|-------|-----------|----------|---------------------------------------------------|
+| ----------------- | ------- | ------- | ------------------------------------ | ----- | --------- | -------- | ------------------------------------------------- |
 | public            | *       | *       | *                                    | *     | *         | `200`    | Whitelisted page                                  |
 | /rest/*           | Yes     | *       | *                                    | *     | Granted   | `200`    | Authorization is checked by `ligoj-api`           |
 | /rest/*           | No      | No      | Not configured                       | *     | Refused   | `401`    | Unauthorized by `ligoj-api`                       |
@@ -407,7 +407,7 @@ When these arguments are empty, the `PreAuth` filter is not enabled. When enable
 You should use the right [plugin-id](https://github.com/ligoj/plugin-id) implementation to get the user details.
 
 | Property                      | Role                                                                         | Sample                                                |
-|-------------------------------|------------------------------------------------------------------------------|-------------------------------------------------------|
+| ----------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
 | security.pre-auth-principal   | Request header name containing the identity of the authenticated user        | -Dsecurity.pre-auth-principal=SM_USER                 |
 | security.pre-auth-credentials | Request header name containing the token to verify                           | -Dsecurity.pre-auth-credentials=SM_TOKEN              |
 | security.pre-auth-logout      | Optional logout relative or absolute URL when user requests to be logged out | -Dsecurity.pre-auth-logout="https://signin.sample.com |
@@ -415,7 +415,7 @@ You should use the right [plugin-id](https://github.com/ligoj/plugin-id) impleme
 For AWS Cognito placed on an ALB, use [plugin-id-cognito](https://github.com/ligoj/plugin-id-cognito), and these properties:
 
 | Property                      | Value                     |
-|-------------------------------|---------------------------|
+| ----------------------------- | ------------------------- |
 | security.pre-auth-principal   | `X-Amzn-Oidc-Identity`    |
 | security.pre-auth-credentials | `X-Amzn-Oidc-Accesstoken` |
 | security.pre-auth-logout      | (Cognito subdomain)       |
@@ -473,7 +473,7 @@ IAM provider such as [plugin-iam-node](https://github.com/ligoj/plugin-iam-node)
 The enabled login mode is configured only at launch time of the `ligoj-ui` container with `-Dsecurity=${MODE}` argument. The behavior is described in the below table:
 
 | Mode        | Implementation                                                | Login screen     | Behavior                                                                             |
-|-------------|---------------------------------------------------------------|------------------|--------------------------------------------------------------------------------------|
+| ----------- | ------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------ |
 | `Trusted`   | `org.ligoj.app.http.security.TrustedAuthenticationProvider`   | Ligoj login page | Login is always accepted, `ligoj-api` container is not involved. Useful for testing. |
 | `Rest`      | `org.ligoj.app.http.security.RestAuthenticationProvider`      | Ligoj login page | Login operation is delegated to a REST endpoint, by default one of `ligoj-api`.      |
 | `OAuth2Bff` | `org.ligoj.app.http.security.OAuth2BffAuthenticationProvider` | OIDC Provider    | Login and logout operations are delegated to external OAuth2 identity provider       |
@@ -577,7 +577,7 @@ These fields are automatically set by the transaction manager in successful API 
 Values resolution priorities
 
 | Priority | Source                               | Note                                                                                                |
-|----------|--------------------------------------|-----------------------------------------------------------------------------------------------------|
+| -------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | 1        | Spring Command-line arguments        | `--ligoj.property=value` when running the application                                               |
 | 2        | Java System properties               | `-Dligoj.property=value`                                                                            |
 | 3        | OS environment variables             | `LIGOJ_PROPERTY=value`                                                                              |
@@ -923,7 +923,7 @@ All Web resources are in the directory `META-INF/resources/webjars/service/${ser
 All entities to be installed on setup are in the directory `csv`.
 
 | Pattern file                        | Sample              | Role                                                                                                                                                              |
-|-------------------------------------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ${base_java}/${Tool}Resource.class  | SlackResource.class | Plugin definition                                                                                                                                                 |
 | ${base_web}/img/${tool}.png         | img/slack.png       | 16x icon                                                                                                                                                          |
 | ${base_web}/img/${tool}x64.png      | img/slack.png       | 64x icon                                                                                                                                                          |
@@ -947,7 +947,7 @@ These extensions may:
 - Add security levels
 
 | Layer | Scope  | Enablement                                                                                                                                                                             |
-|-------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | UI    | Global | Create a file `META-INF/resource/webjars/bootstrap.private.js`. This JS code will be added to the initial JS code. For example, it's possible to register events, add a menu entry,... |
 
 ## Subscription
@@ -1007,7 +1007,7 @@ using 'trimmed' nouns such as: `passwd` (`password`), `param` (`parameter`), `ge
 Use patterns for packages or name for files of the same type as described in the below table.
 
 | Type                   | Package convention                           | Name convention                                                             |
-|------------------------|----------------------------------------------|-----------------------------------------------------------------------------|
+| ---------------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
 | All                    | ASCII                                        | ASCII                                                                       |
 | All                    | JavaScript syntax                            | See JS linter                                                               |
 | All                    | Java syntax                                  | Lower case package, [a-z]+ in `src/main/java` or `src/test/java`            |
@@ -1152,10 +1152,24 @@ This directory will contain:
 - temporary and persistent data of plug-ins
 - hook scripts
 - (optional) the secret file to encrypt secrets in the database using AES-256
+- (optional) the `plugin-vendors.p12` truststore of the trusted plugin vendor certificates, see below
 
 ```shell
 mkdir -p /var/lib/ligoj
 ```
+
+#### Plugin vendors truststore
+
+To get the plugin code signatures reported as `VERIFIED` in the plugin administration view — and optionally to refuse unverified plug-ins — drop the truststore holding the trusted vendor certificates as `plugin-vendors.p12` inside the data directory. This file contains only certificates, no private key. Either copy the one distributed by your plugin vendor, or build it from a vendor certificate (`.cer`):
+
+```shell
+keytool -importcert -keystore /var/lib/ligoj/plugin-vendors.p12 -storetype PKCS12 \
+  -storepass changeit -alias ligoj -file ligoj-vendor.cer -noprompt
+```
+
+Without this file, the application still starts and verifies the signature integrity, but the signer identities stay reported as untrusted (`SIGNED` at best). See [Plugin code signing](#plugin-code-signing) for the complete feature: signing at release, verification statuses and the related `ligoj.plugin.signature.*` system properties (truststore location and password override, strict `required` mode).
+
+Note the `ligoj-api` image may bundle a default truststore (`plugin-vendors-default.p12`, built from the `plugin-vendors/*.cer` certificates present at image build — see `app-api/prepare-build-sample.sh` — or provided prebuilt as `plugin-vendors/plugin-vendors-default.p12` in the build context): at container startup it is automatically installed as `plugin-vendors.p12` in the data directory when this file does not exist yet — an existing file is never overridden. Disable this behavior with the `INSTALL_PLUGIN_VENDORS=false` container environment variable.
 
 ### Database creation
 
@@ -1332,7 +1346,7 @@ sudo docker logs -f ligoj-api
 ### Docker environment variables
 
 | Docker env   | Default value                  | Note                                                                             |
-|--------------|--------------------------------|----------------------------------------------------------------------------------|
+| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
 | CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration.                                                        |
 | CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
 | SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
@@ -1465,7 +1479,7 @@ It is anyway possible to revert to this mode to regain access to Ligoj in case i
 System property `security` value determines the authentication mode:
 
 | `security` mode | Login screen  | Identity Provider                                                   |
-|-----------------|---------------|---------------------------------------------------------------------|
+| --------------- | ------------- | ------------------------------------------------------------------- |
 | `Trusted`       | Ligoj         | Authentication required but always accepted                         |
 | `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
 | `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
@@ -1843,13 +1857,13 @@ travels *inside* the JAR and is verified again at every startup.
 
 ### Signing at release
 
-One-time setup on the release machine — generate the vendor code-signing keypair, then export its certificate for the runtime truststore:
+One-time setup on the release machine — generate the vendor code-signing keypair (private key, stays on the release machine), then export its certificate and build the `plugin-vendors.p12` truststore distributed to the installations:
 
 ```sh
 keytool -genkeypair -keystore ~/.ligoj/code-signing.p12 -storetype PKCS12 -alias ligoj \
   -keyalg RSA -keysize 3072 -validity 3650 -dname "CN=Ligoj, O=Ligoj"
 keytool -exportcert -keystore ~/.ligoj/code-signing.p12 -alias ligoj -file ligoj-vendor.cer
-keytool -importcert -keystore truststore.p12 -storetype PKCS12 -alias ligoj -file ligoj-vendor.cer -noprompt
+keytool -importcert -keystore ~/.ligoj/plugin-vendors.p12 -storetype PKCS12 -alias ligoj -file ligoj-vendor.cer -noprompt
 ```
 
 The `code-sign` profile of `plugin-parent` is automatically activated when `~/.ligoj/code-signing.p12` exists: `maven-jarsigner-plugin` signs the main JAR at the `package` phase — before the GPG
@@ -1861,17 +1875,19 @@ RFC3161-timestamped (`ligoj.sign.tsa`, defaults to DigiCert) so it outlives the 
 The `PluginsClassLoader` verifies every installed plugin JAR before it joins the classpath, and reports one of:
 
 | Status     | Meaning                                                                                             |
-|------------|-----------------------------------------------------------------------------------------------------|
+| ---------- | --------------------------------------------------------------------------------------------------- |
 | `UNSIGNED` | No code signature.                                                                                  |
 | `INVALID`  | Broken signature: tampered content (digest mismatch), partially signed entries, unreadable archive. |
 | `SIGNED`   | Valid and complete signature, but the certificate is not trusted (or no truststore is configured).  |
 | `VERIFIED` | Valid signature whose certificate is pinned in — or chains to — the configured truststore.          |
 
-| System property                              | Default    | Note                                                                                                    |
-|----------------------------------------------|------------|---------------------------------------------------------------------------------------------------------|
-| `ligoj.plugin.signature.truststore`          | -          | Path to the PKCS12/JKS truststore holding the trusted vendor certificates. Required for `VERIFIED`.     |
-| `ligoj.plugin.signature.truststore.password` | `changeit` | Truststore password.                                                                                    |
-| `ligoj.plugin.signature.required`            | `false`    | When `true`, rejects from the classpath the plug-ins below `VERIFIED` (or `SIGNED` without truststore). |
+| System property                              | Default                            | Note                                                                                                                 |
+| -------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `ligoj.plugin.signature.truststore`          | `${ligoj.home}/plugin-vendors.p12` | Path to the PKCS12/JKS truststore holding the trusted vendor certificates (no private key). Required for `VERIFIED`. |
+| `ligoj.plugin.signature.truststore.password` | `changeit`                         | Truststore password.                                                                                                 |
+| `ligoj.plugin.signature.required`            | `false`                            | When `true`, rejects from the classpath the plug-ins below `VERIFIED` (or `SIGNED` without truststore).              |
+
+The simplest deployment is therefore to drop the truststore as `plugin-vendors.p12` inside the `LIGOJ_HOME` directory of the `ligoj-api` container — no property needed, see the [data directory preparation](#preparation-of-the-ligoj-data-directory). The startup log states whether the truststore was read (`Plugin code-signing truststore read from ... with N trusted entries`) or not: a missing truststore at the default location is an `INFO` notice (signatures then cap at `SIGNED`), while a missing truststore at an explicitly configured location is reported as an `ERROR`.
 
 ### Display
 
@@ -1910,7 +1926,7 @@ deployment starts already rebranded — no runtime CLI step, no shared
 volume. Two source locations are honoured:
 
 | File in the image               | Source path in the repo                      | Notes                                                                                                                                                                                                                                                                        |
-|---------------------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `favicon.ico` (WAR root)        | `app-ui/src/main/webapp/favicon.ico`         | Served at `/ligoj/favicon.ico` by Spring's resource handler. The container's `HEALTHCHECK` probes this URL — keep the file valid.                                                                                                                                            |
 | `logo.svg` (Vite-bundled asset) | `app-ui/src/main/webapp/src/assets/logo.svg` | Imported through Vite. Replace BEFORE `docker build` so the new mark is bundled into the SPA chunks. When the SVG is under ~4 KB, Vite inlines it as a `data:image/svg+xml;base64,…` URI in the JS — no separate file in the dist; the browser never makes a second request. |
 
@@ -2057,7 +2073,7 @@ ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from=
 Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot properties (can be injected in `CUSTOM_OPTS`) can be dynamically modified from the administration console:
 
 | Name                                                  | Default value                            | Note                                                                                                 |
-|-------------------------------------------------------|------------------------------------------|------------------------------------------------------------------------------------------------------|
+| ----------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | api.token.purge                                       | `0 0 4 * * ?`                            | CRON expression for expired API tokens purge. See [API Token](#api-tokens) section.                  |
 | api.token.iterations                                  | `31`                                     | API token hash iterations. See [API Token](#api-tokens) section.                                     |
 | api.token.digest                                      | `SHA-512`                                | API token hash algorithm. See [API Token](#api-tokens) section.                                      |
@@ -2127,7 +2143,7 @@ These variables are only relevant when set as Java System property.
 For example `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 
 | Name                   | Default value       | Note                               |
-|------------------------|---------------------|------------------------------------|
+| ---------------------- | ------------------- | ---------------------------------- |
 | ligoj.log.file.name    | `./api-rolling.log` | File inside `LIGOJ_HOME` directory |
 | ligoj.log.file.size    | `10 MB`             | Max log file size                  |
 | ligoj.log.file.enabled | `true`              | Enablement of log file             |

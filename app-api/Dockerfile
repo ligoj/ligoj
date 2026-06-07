@@ -31,6 +31,12 @@ ARG GIT_COMMIT=0
 ARG GIT_BRANCH=UNKNOWN_BRANCH
 ARG GIT_COMMIT_TIME=1970-01-01T00:00:00Z
 
+# Password of the bundled plugin-vendors-default.p12 truststore built by
+# prepare-build.sh from plugin-vendors/*.cer (public certificates only, so the
+# default is fine). Must match ligoj.plugin.signature.truststore.password when
+# overridden.
+ARG PLUGIN_VENDORS_STOREPASS="changeit"
+
 # Build. Custom build-time setup (proxies, etc.) lives in prepare-build.sh.
 COPY . .
 RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
@@ -44,6 +50,14 @@ RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
         -DscmBranch="$GIT_BRANCH" \
         -Dtimestamp="$GIT_COMMIT_TIME" \
         clean package
+
+# Plugin vendors truststore escape hatch: a prebuilt `plugin-vendors/plugin-vendors-default.p12`
+# provided in the build context is bundled as-is, taking precedence over the one
+# prepare-build.sh may have generated from `plugin-vendors/*.cer`.
+RUN if [ -f plugin-vendors/plugin-vendors-default.p12 ]; then \
+      echo "Bundling the prebuilt plugin-vendors/plugin-vendors-default.p12 truststore"; \
+      cp -f plugin-vendors/plugin-vendors-default.p12 plugin-vendors-default.p12; \
+    fi
 
 # ---------- Runtime stage ----------
 FROM --platform=${TARGETPLATFORM} eclipse-temurin:${JAVA_VERSION}-jre AS runtime
@@ -81,6 +95,11 @@ WORKDIR "${SERVER_HOME}"
 COPY --chown=ligoj:ligoj --from=builder /build/target/*.war ${ARTIFACT_ID}.war
 # Dockerfile is included as a glob placeholder (same trick as the build stage).
 COPY --chown=ligoj:ligoj Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
+# Default plugin vendors truststore produced by prepare-build.sh from
+# plugin-vendors/*.cer, when any. Installed into LIGOJ_HOME at startup (see
+# INSTALL_PLUGIN_VENDORS below). Dockerfile is the guaranteed-existing glob
+# placeholder so the COPY never fails when the truststore was not built.
+COPY --chown=ligoj:ligoj --from=builder /build/Dockerfile /build/plugin-vendors-default.p12* ./
 # TODO: move ligoj.policy out of src/test/resources into src/main/resources.
 COPY --chown=ligoj:ligoj src/test/resources/ligoj.policy "${SERVER_HOME}/ligoj.policy"
 
@@ -90,6 +109,7 @@ ENV CONTEXT_URL="/ligoj-api" \
     SERVER_HOST="0.0.0.0" \
     SERVER_PORT="8081" \
     LIGOJ_HOME=/home/ligoj \
+    INSTALL_PLUGIN_VENDORS="true" \
     CUSTOM_OPTS="-Djdbc.host=ligoj-db -Dmanagement.endpoint.sbom.application.location=classpath:bom.json" \
     CRYPTO="-Dapp.crypto.password=public" \
     SERVER_HOME="${SERVER_HOME}" \
@@ -132,6 +152,9 @@ USER ligoj:ligoj
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["sh", "-c", "\
 mkdir -p \"$LIGOJ_HOME\" && \
+{ [ \"$INSTALL_PLUGIN_VENDORS\" != 'false' ] && [ -f plugin-vendors-default.p12 ] && [ ! -f \"$LIGOJ_HOME/plugin-vendors.p12\" ] && \
+  cp plugin-vendors-default.p12 \"$LIGOJ_HOME/plugin-vendors.p12\" && \
+  echo 'Bundled plugin-vendors.p12 installed into LIGOJ_HOME' || true; } && \
 { [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || \
   echo 'No prepare-cmd.sh; skipping custom startup.'; } && \
 exec java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
