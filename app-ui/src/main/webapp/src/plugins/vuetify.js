@@ -7,6 +7,11 @@ import '@mdi/font/css/materialdesignicons.css'
 // Self-hosted Bricolage Grotesque (replaces the former Google Fonts <link>);
 // the main app referenced the family in CSS but never loaded the webfont.
 import '@/assets/fonts/bricolage.css'
+// Self-hosted Roboto (used by the Material Design 3 style) — replaces the
+// former fonts.googleapis.com/gstatic.com <link>. The @font-face is declared
+// globally but the browser only downloads the woff2 when "Roboto" is actually
+// rendered (i.e. the md3 style is active), so non-MD3 users pay nothing.
+import '@/assets/fonts/roboto.css'
 // Project-wide Vuetify CSS tweaks (imported after `vuetify/styles` so
 // our rules win the cascade).
 import '@/assets/vuetify-overrides.css'

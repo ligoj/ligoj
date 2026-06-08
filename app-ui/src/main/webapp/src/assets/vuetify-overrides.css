@@ -256,10 +256,10 @@
 }
 
 /* md3 — Material Design 3 / Material You. Rounded corner tokens (medium 12 /
- * large 16 / extra-large 28), Roboto type (lazily loaded in styles.js), MD3
- * tonal elevation, "emphasized" motion easing and longer ripples. The extra
- * rules (state layers, pill buttons, ripple tuning) live in the dedicated
- * block near the end of this file. */
+ * large 16 / extra-large 28), Roboto type (self-hosted via assets/fonts/
+ * roboto.css, imported in vuetify.js), MD3 tonal elevation, "emphasized" motion
+ * easing and longer ripples. The extra rules (state layers, pill buttons,
+ * ripple tuning) live in the dedicated block near the end of this file. */
 [data-style="md3"] {
   --lj-radius: 16px;
   --lj-radius-sm: 12px;
@@ -267,7 +267,7 @@
   --lj-shadow: 0 1px 3px 1px rgba(0, 0, 0, .15), 0 1px 2px 0 rgba(0, 0, 0, .3);
   --lj-shadow-lg: 0 8px 12px 6px rgba(0, 0, 0, .15), 0 4px 4px 0 rgba(0, 0, 0, .3);
   --lj-border-color: rgba(var(--v-theme-on-surface), .12);
-  --lj-font: "Roboto Flex", "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --lj-font: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
   --lj-weight-bold: 500;
   --lj-tracking: 0;
   --lj-space: 16px;
@@ -936,7 +936,7 @@
   --md3-emphasized-decelerate: cubic-bezier(.05, .7, .1, 1);
 }
 
-/* Roboto everywhere (falls back to system when the web font is offline). */
+/* Roboto everywhere (self-hosted; falls back to system fonts if unavailable). */
 [data-style="md3"],
 [data-style="md3"] .v-application,
 [data-style="md3"] .v-btn,
