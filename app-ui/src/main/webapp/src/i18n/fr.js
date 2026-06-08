@@ -34,6 +34,7 @@ export default {
   'common.add': 'Ajouter',
   'common.close': 'Fermer',
   'common.actions': 'Actions',
+  'common.alreadyExists': 'Existe déjà',
   'common.name': 'Nom',
   'common.description': 'Description',
   'common.status': 'Statut',

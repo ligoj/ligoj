@@ -46,6 +46,7 @@ export { default as LjButton } from './components/LjButton.vue'
 export { default as LjSearch } from './components/LjSearch.vue'
 export { default as LjDialog } from './components/LjDialog.vue'
 export { default as LjSegmented } from './components/LjSegmented.vue'
+export { default as LjAvailabilityField } from './components/LjAvailabilityField.vue'
 export { nodeType, isInstance, nodePluginId } from './utils/nodeType.js'
 // Registry lookup so a plugin can collaborate with sibling/sub-plugins
 // (e.g. `plugin-id` delegating to `plugin-id-ldap` for tool-specific row
