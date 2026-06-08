@@ -256,8 +256,8 @@
 }
 
 /* md3 — Material Design 3 / Material You. Rounded corner tokens (medium 12 /
- * large 16 / extra-large 28), Roboto type (self-hosted via assets/fonts/
- * roboto.css, imported in vuetify.js), MD3 tonal elevation, "emphasized" motion
+ * large 16 / extra-large 28), Roboto type (self-hosted via the @fontsource/
+ * roboto npm package, imported in vuetify.js), MD3 tonal elevation, "emphasized" motion
  * easing and longer ripples. The extra rules (state layers, pill buttons,
  * ripple tuning) live in the dedicated block near the end of this file. */
 [data-style="md3"] {

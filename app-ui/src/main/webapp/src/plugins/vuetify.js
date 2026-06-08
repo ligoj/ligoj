@@ -4,14 +4,33 @@ import * as directives from 'vuetify/directives'
 import { en, fr } from 'vuetify/locale'
 import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
-// Self-hosted Bricolage Grotesque (replaces the former Google Fonts <link>);
-// the main app referenced the family in CSS but never loaded the webfont.
-import '@/assets/fonts/bricolage.css'
-// Self-hosted Roboto (used by the Material Design 3 style) — replaces the
-// former fonts.googleapis.com/gstatic.com <link>. The @font-face is declared
-// globally but the browser only downloads the woff2 when "Roboto" is actually
-// rendered (i.e. the md3 style is active), so non-MD3 users pay nothing.
-import '@/assets/fonts/roboto.css'
+// Self-hosted webfonts via @fontsource (npm) — the woff2 live in node_modules
+// (gitignored) and Vite bundles them locally at build time, so there is NO
+// external fonts.googleapis.com / fonts.gstatic.com reference AND no font binary
+// is committed to the repo. We import only the subsets the UI needs (latin /
+// latin-ext / vietnamese); each weight's woff2 is still fetched lazily by the
+// browser when that weight is actually rendered.
+//
+// Bricolage Grotesque — the UI font (weights 600/700/800).
+import '@fontsource/bricolage-grotesque/latin-600.css'
+import '@fontsource/bricolage-grotesque/latin-700.css'
+import '@fontsource/bricolage-grotesque/latin-800.css'
+import '@fontsource/bricolage-grotesque/latin-ext-600.css'
+import '@fontsource/bricolage-grotesque/latin-ext-700.css'
+import '@fontsource/bricolage-grotesque/latin-ext-800.css'
+import '@fontsource/bricolage-grotesque/vietnamese-600.css'
+import '@fontsource/bricolage-grotesque/vietnamese-700.css'
+import '@fontsource/bricolage-grotesque/vietnamese-800.css'
+// Roboto — the Material Design 3 style font (weights 400/500/700).
+import '@fontsource/roboto/latin-400.css'
+import '@fontsource/roboto/latin-500.css'
+import '@fontsource/roboto/latin-700.css'
+import '@fontsource/roboto/latin-ext-400.css'
+import '@fontsource/roboto/latin-ext-500.css'
+import '@fontsource/roboto/latin-ext-700.css'
+import '@fontsource/roboto/vietnamese-400.css'
+import '@fontsource/roboto/vietnamese-500.css'
+import '@fontsource/roboto/vietnamese-700.css'
 // Project-wide Vuetify CSS tweaks (imported after `vuetify/styles` so
 // our rules win the cascade).
 import '@/assets/vuetify-overrides.css'
