@@ -4,6 +4,9 @@ import * as directives from 'vuetify/directives'
 import { en, fr } from 'vuetify/locale'
 import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
+// Self-hosted Bricolage Grotesque (replaces the former Google Fonts <link>);
+// the main app referenced the family in CSS but never loaded the webfont.
+import '@/assets/fonts/bricolage.css'
 // Project-wide Vuetify CSS tweaks (imported after `vuetify/styles` so
 // our rules win the cascade).
 import '@/assets/vuetify-overrides.css'
