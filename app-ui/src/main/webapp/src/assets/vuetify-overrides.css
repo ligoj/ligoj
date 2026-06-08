@@ -369,6 +369,19 @@
   padding: 4px 8px !important;
   font-size: 0.82rem !important;
 }
+/* Compact also drops decorative icons for a denser layout: breadcrumb chips,
+   second-level (sub-menu) entries, and input prepend-inner icons. Hiding the
+   element (not just the glyph) also reclaims its horizontal space. */
+[data-compact="true"] .bc-chip .v-icon {
+  display: none !important;
+}
+[data-compact="true"] .sub-item > .v-icon,
+[data-compact="true"] .sub-item .dot {
+  display: none !important;
+}
+[data-compact="true"] .v-field__prepend-inner {
+  display: none !important;
+}
 
 /* ============================== sharp ====================================
  * Brutalist. Zero radius, monospaced labels, harsh borders, uppercase
