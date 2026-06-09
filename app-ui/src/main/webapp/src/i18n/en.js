@@ -21,6 +21,9 @@ export default {
   'nav.about': 'About',
   'nav.logout': 'Logout',
   'nav.refresh': 'Refresh',
+  'nav.api': 'API',
+  'nav.apiExplorer': 'Explorer',
+  'nav.apiTokens': 'Tokens',
 
   // Common
   'common.search': 'Search',

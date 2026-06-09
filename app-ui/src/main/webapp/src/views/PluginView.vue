@@ -70,7 +70,7 @@ async function activate(path) {
   } catch {
     // Plugin doesn't exist — show 404
     notFound.value = true
-    appStore.setBreadcrumbs([
+    appStore.setBreadcrumbs(() => [
       { title: 'Home', to: '/' },
       { title: 'Not Found' },
     ])

@@ -73,6 +73,6 @@ const cards = computed(() => {
 })
 
 onMounted(() => {
-  appStore.setBreadcrumbs([{ title: t('nav.home'), to: '/' }])
+  appStore.setBreadcrumbs(() => [{ title: t('nav.home'), to: '/' }])
 })
 </script>

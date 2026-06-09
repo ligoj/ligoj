@@ -86,11 +86,13 @@ import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 import { useTheme } from 'vuetify'
 import { useAuthStore } from '@/stores/auth.js'
 import { useI18nStore } from '@/stores/i18n.js'
+import { useAppStore } from '@/stores/app.js'
 import { PRESET_OPTIONS, detectPreset, applyPreset, persistPreset } from '@/plugins/presets.js'
 import { detectCompact, applyCompact, persistCompact } from '@/plugins/styles.js'
 
 const auth = useAuthStore()
 const i18n = useI18nStore()
+const app = useAppStore()
 const theme = useTheme()
 const t = i18n.t
 
@@ -134,7 +136,12 @@ function onSkipUnsavedChange(value) {
   }
 }
 
-onMounted(() => { if (typeof document !== 'undefined') document.addEventListener('click', onDocClick) })
+onMounted(() => {
+  if (typeof document !== 'undefined') document.addEventListener('click', onDocClick)
+  // Factory form so the trail re-localizes on a language switch; explicit icon
+  // since /profile isn't in the sidebar NAV the leaf-icon resolver reads.
+  app.setBreadcrumbs(() => [{ title: t('nav.home'), to: '/' }, { title: t('nav.profile'), icon: 'mdi-account-circle' }])
+})
 onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEventListener('click', onDocClick) })
 </script>
 

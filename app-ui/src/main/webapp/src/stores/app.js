@@ -29,10 +29,27 @@ export const useAppStore = defineStore('app', () => {
    */
   const refresh = ref(null)
 
+  /**
+   * Last breadcrumb FACTORY. When `setBreadcrumbs` is given a function instead
+   * of an array, we keep it so `refreshBreadcrumbs()` can re-run it on a locale
+   * change — the crumb titles use `t()` inside the factory and would otherwise
+   * stay frozen in the language active at mount time. Plain-array callers stay
+   * static (factory cleared).
+   */
+  let breadcrumbFactory = null
+
   function setBreadcrumbs(items, opts = {}) {
-    breadcrumbs.value = items
+    breadcrumbFactory = typeof items === 'function' ? items : null
+    breadcrumbs.value = breadcrumbFactory ? (breadcrumbFactory() || []) : items
     refresh.value = typeof opts.refresh === 'function' ? opts.refresh : null
-    if (items.length) setTitle(items.slice(-1)[0].title)
+    if (breadcrumbs.value.length) setTitle(breadcrumbs.value.slice(-1)[0].title)
+  }
+
+  /** Re-run the breadcrumb factory (if any) — call on locale change. */
+  function refreshBreadcrumbs() {
+    if (!breadcrumbFactory) return
+    breadcrumbs.value = breadcrumbFactory() || []
+    if (breadcrumbs.value.length) setTitle(breadcrumbs.value.slice(-1)[0].title)
   }
 
   function setRefresh(fn) {
@@ -78,7 +95,7 @@ export const useAppStore = defineStore('app', () => {
   return {
     sidebarOpen, title, appName, breadcrumbs, currentPlugin, refresh,
     headerItems,
-    setBreadcrumbs, setRefresh, setTitle, setAppName, toggleSidebar,
+    setBreadcrumbs, refreshBreadcrumbs, setRefresh, setTitle, setAppName, toggleSidebar,
     registerHeaderItem,
   }
 })

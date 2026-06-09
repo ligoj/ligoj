@@ -42,9 +42,9 @@
       </nav>
       <div class="sb-foot">
         <a class="nav-item" :class="{ active: route.path === '/profile' }" @click="go('/profile')">
-          <v-icon>mdi-account-circle</v-icon><span>Profil</span>
+          <v-icon>mdi-account-circle</v-icon><span>{{ i18n.t('nav.profile') }}</span>
         </a>
-        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon>À propos</button>
+        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon>{{ i18n.t('nav.about') }}</button>
       </div>
     </aside>
 
@@ -110,6 +110,11 @@ const NO_UI_PLUGINS = new Set(['iam-empty', 'iam-node', 'menu-node', 'welcome-da
 // Lazily load the remaining installed plugins (the core 'id'/'ui'/'prov' are
 // already loaded eagerly in main.js). `appSettings.plugins` lists FeaturePlugin
 // keys (e.g. 'service:id:ldap') — normalise to the loader's short id form.
+// Breadcrumb titles are resolved at the view's mount time; re-run the active
+// view's breadcrumb factory when the language changes so they re-localize
+// (the sidebar NAV + page content already react via their own `t()` calls).
+watch(() => i18n.locale, () => app.refreshBreadcrumbs())
+
 onMounted(async () => {
   const ok = await auth.fetchSession()
   if (!ok) { auth.redirectToLogin(); return }
@@ -120,31 +125,33 @@ onMounted(async () => {
   if (optional.length) loadAllPlugins(optional)
 })
 
+// `labelKey` (not a literal `label`) so the sidebar localizes reactively — the
+// NAV computed resolves it through `i18n.t()` (which tracks the active locale).
 const BASE_NAV = [
-  { label: 'Accueil', icon: 'mdi-home', route: '/' },
+  { labelKey: 'nav.home', icon: 'mdi-home', route: '/' },
   // `match` makes the item active across a whole section; `children` render
   // a sub-menu while the section is active.
-  { label: 'Identité', icon: 'mdi-account-group', match: '/id', children: [
-    { label: 'Utilisateurs', icon: 'mdi-account', route: '/id/user', match: '/id/user' },
-    { label: 'Groupes', icon: 'mdi-account-group', route: '/id/group', match: '/id/group' },
-    { label: 'Entités', icon: 'mdi-domain', route: '/id/company', match: '/id/company' },
-    { label: 'Délégués', icon: 'mdi-account-arrow-right', route: '/id/delegate', match: '/id/delegate' },
-    { label: 'Portées', icon: 'mdi-file-tree', route: '/id/scope', match: '/id/scope' },
+  { labelKey: 'nav.identity', icon: 'mdi-account-group', match: '/id', children: [
+    { labelKey: 'nav.users', icon: 'mdi-account', route: '/id/user', match: '/id/user' },
+    { labelKey: 'nav.groups', icon: 'mdi-account-group', route: '/id/group', match: '/id/group' },
+    { labelKey: 'nav.companies', icon: 'mdi-domain', route: '/id/company', match: '/id/company' },
+    { labelKey: 'nav.delegates', icon: 'mdi-account-arrow-right', route: '/id/delegate', match: '/id/delegate' },
+    { labelKey: 'nav.containerScopes', icon: 'mdi-file-tree', route: '/id/scope', match: '/id/scope' },
   ] },
-  { label: 'Projets', icon: 'mdi-folder', route: '/project', match: '/project' },
-  { label: 'Administration', icon: 'mdi-cog', match: '/system', children: [
-    { label: 'Plugins', icon: 'mdi-puzzle', route: '/system/plugin', match: '/system/plugin' },
-    { label: 'Nœuds', icon: 'mdi-server-network', route: '/system/node', match: '/system/node' },
-    { label: 'Configuration', icon: 'mdi-cog-outline', route: '/system/configuration', match: '/system/configuration' },
-    { label: 'Rôles', icon: 'mdi-shield-account', route: '/system/role', match: '/system/role' },
-    { label: 'Utilisateurs', icon: 'mdi-account-supervisor', route: '/system/user', match: '/system/user' },
-    { label: 'Cache', icon: 'mdi-database-clock', route: '/system/cache', match: '/system/cache' },
-    { label: 'Bench', icon: 'mdi-speedometer', route: '/system/bench', match: '/system/bench' },
-    { label: 'Information', icon: 'mdi-information', route: '/system/information', match: '/system/information' },
+  { labelKey: 'nav.projects', icon: 'mdi-folder', route: '/project', match: '/project' },
+  { labelKey: 'nav.system', icon: 'mdi-cog', match: '/system', children: [
+    { labelKey: 'nav.plugins', icon: 'mdi-puzzle', route: '/system/plugin', match: '/system/plugin' },
+    { labelKey: 'nav.nodes', icon: 'mdi-server-network', route: '/system/node', match: '/system/node' },
+    { labelKey: 'nav.configuration', icon: 'mdi-cog-outline', route: '/system/configuration', match: '/system/configuration' },
+    { labelKey: 'nav.roles', icon: 'mdi-shield-account', route: '/system/role', match: '/system/role' },
+    { labelKey: 'nav.systemUsers', icon: 'mdi-account-supervisor', route: '/system/user', match: '/system/user' },
+    { labelKey: 'nav.cache', icon: 'mdi-database-clock', route: '/system/cache', match: '/system/cache' },
+    { labelKey: 'nav.bench', icon: 'mdi-speedometer', route: '/system/bench', match: '/system/bench' },
+    { labelKey: 'nav.information', icon: 'mdi-information', route: '/system/information', match: '/system/information' },
   ] },
-  { label: 'API', icon: 'mdi-api', match: '/api', children: [
-    { label: 'Explorateur', icon: 'mdi-compass', route: '/api' },
-    { label: 'Jetons', icon: 'mdi-key', route: '/api/token', match: '/api/token' },
+  { labelKey: 'nav.api', icon: 'mdi-api', match: '/api', children: [
+    { labelKey: 'nav.apiExplorer', icon: 'mdi-compass', route: '/api' },
+    { labelKey: 'nav.apiTokens', icon: 'mdi-key', route: '/api/token', match: '/api/token' },
   ] },
 ]
 
@@ -198,12 +205,18 @@ const pluginAdminChildren = computed(() => {
   return items
 })
 
-const NAV = computed(() =>
-  BASE_NAV.map((it) => {
-    const extra = it.match === '/system' ? pluginAdminChildren.value : []
-    return extra.length ? { ...it, children: [...it.children, ...extra] } : it
-  }),
-)
+const NAV = computed(() => {
+  void i18n.locale // re-localize the labels when the language changes
+  return BASE_NAV.map((it) => {
+    const out = { ...it, label: i18n.t(it.labelKey) }
+    if (it.children) {
+      const kids = it.children.map((c) => ({ ...c, label: i18n.t(c.labelKey) }))
+      const extra = it.match === '/system' ? pluginAdminChildren.value : []
+      out.children = extra.length ? [...kids, ...extra] : kids
+    }
+    return out
+  })
+})
 
 const collapsed = ref(false)
 const title = computed(() => {

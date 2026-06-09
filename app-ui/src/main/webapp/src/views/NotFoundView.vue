@@ -30,7 +30,7 @@ const t = i18n.t
 const attempted = computed(() => '#' + route.fullPath)
 function go() { router.push('/') }
 
-onMounted(() => app.setBreadcrumbs([{ title: t('nav.home'), to: '/' }, { title: t('notFound.title') }]))
+onMounted(() => app.setBreadcrumbs(() => [{ title: t('nav.home'), to: '/' }, { title: t('notFound.title') }]))
 </script>
 
 <style scoped>
