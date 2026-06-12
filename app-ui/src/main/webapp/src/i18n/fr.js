@@ -187,6 +187,7 @@ export default {
   'profile.roles': 'Rôles',
   'profile.permissions': 'Permissions',
   'profile.uiAuth': 'Autorisations UI ({{count}})',
+  'profile.apiAuth': 'Autorisations API ({{count}})',
   'profile.preferences': 'Préférences',
   'profile.apiTokens': 'Tokens API',
   'profile.apiTokensHint': 'Créer ou révoquer des clés pour l\'API REST',

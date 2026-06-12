@@ -30,6 +30,13 @@
         <div class="perm-list">
           <code v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i" class="perm">{{ pattern }}</code>
         </div>
+        <div class="subhead subhead--api">{{ t('profile.apiAuth', { count: auth.apiAuthorizations.length }) }}</div>
+        <div class="perm-list">
+          <code v-for="(entry, i) in auth.apiAuthorizations" :key="'api-' + i" class="perm perm--api">
+            <span class="method" :class="methodClass(entry.method)">{{ entry.method || '?' }}</span>
+            <span class="pattern">{{ entry.pattern }}</span>
+          </code>
+        </div>
       </section>
 
       <section class="pcard pcard--full">
@@ -97,6 +104,10 @@ const theme = useTheme()
 const t = i18n.t
 
 const initials = computed(() => (auth.userName || '?').slice(0, 2).toUpperCase())
+
+function methodClass(method) {
+  return method ? `method--${method.toLowerCase()}` : ''
+}
 
 const preset = ref(detectPreset().id)
 function choosePreset(id) { preset.value = id; applyPreset(id, theme); persistPreset(id) }
@@ -197,8 +208,38 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .infoline.link .v { color: var(--primary); cursor: pointer; }
 
 .subhead { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 10px; }
+.subhead--api { margin-top: 16px; }
 .perm-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; }
 .perm { font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--pill); border: var(--border-w) var(--lj-border-style, solid) var(--border-c); border-radius: var(--radius-sm); padding: 5px 10px; }
+.perm--api {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+}
+.perm--api .method {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: var(--font);
+  text-transform: uppercase;
+  flex: none;
+  background: rgba(var(--v-theme-on-surface), .45); /* fallback méthode inconnue */
+}
+.perm--api .pattern {
+  font-family: var(--mono);
+  color: var(--muted);
+}
+.perm--api .method--get { background: #2196f3; }
+.perm--api .method--post { background: #4caf50; }
+.perm--api .method--put { background: #ff9800; }
+.perm--api .method--patch { background: #9c27b0; }
+.perm--api .method--delete { background: #f44336; }
+.perm--api .method--head,
+.perm--api .method--options { background: #607d8b; }
 
 .pref-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
 .pref-row + .pref-row, .pref-theme-label { border-top: 1px solid var(--line); }
