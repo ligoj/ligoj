@@ -28,13 +28,19 @@
         <h3><span class="ic"><v-icon>mdi-key</v-icon></span>{{ t('profile.permissions') }}</h3>
         <div class="subhead">{{ t('profile.uiAuth', { count: auth.uiAuthorizations.length }) }}</div>
         <div class="perm-list">
-          <code v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i" class="perm">{{ pattern }}</code>
+          <code v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i" class="perm">
+            <span v-for="(token, j) in tokenizePattern(pattern)" :key="j"
+                  :class="'token token--' + token.type">{{ token.value }}</span>
+          </code>
         </div>
         <div class="subhead subhead--api">{{ t('profile.apiAuth', { count: auth.apiAuthorizations.length }) }}</div>
         <div class="perm-list">
           <code v-for="(entry, i) in auth.apiAuthorizations" :key="'api-' + i" class="perm perm--api">
             <span class="method" :class="methodClass(entry.method)">{{ entry.method || '?' }}</span>
-            <span class="pattern">{{ entry.pattern }}</span>
+            <span class="pattern">
+              <span v-for="(token, j) in apiTokens(entry.pattern)" :key="j"
+                    :class="'token token--' + token.type">{{ token.value }}</span>
+            </span>
           </code>
         </div>
       </section>
@@ -107,6 +113,40 @@ const initials = computed(() => (auth.userName || '?').slice(0, 2).toUpperCase()
 
 function methodClass(method) {
   return method ? `method--${method.toLowerCase()}` : ''
+}
+
+// Detect regex special tokens; everything else stays literal.
+const TOKEN_RE = /(\\.|\^|\$|\.[*+?]|\.|\*|\+|\?|\([^)]*\)|\[[^\]]*\]|\{[\d,]+\})/g
+
+function tokenizePattern(pattern) {
+  if (!pattern) return []
+  const tokens = []
+  let lastIndex = 0
+  let match
+  TOKEN_RE.lastIndex = 0
+  while ((match = TOKEN_RE.exec(pattern)) !== null) {
+    if (match.index > lastIndex) {
+      tokens.push({ type: 'literal', value: pattern.slice(lastIndex, match.index) })
+    }
+    tokens.push({ type: 'regex', value: match[0] })
+    lastIndex = TOKEN_RE.lastIndex
+  }
+  if (lastIndex < pattern.length) {
+    tokens.push({ type: 'literal', value: pattern.slice(lastIndex) })
+  }
+  return tokens
+}
+
+// Strip the `^rest/` / `^rest$` prefix common to every API permission;
+// it's the same for every entry so it carries no information.
+function prettyApiPattern(pattern) {
+  if (!pattern) return ''
+  if (pattern === '^rest$') return '/'
+  return pattern.replace(/^\^rest\//, '/')
+}
+
+function apiTokens(pattern) {
+  return tokenizePattern(prettyApiPattern(pattern))
 }
 
 const preset = ref(detectPreset().id)
@@ -240,6 +280,12 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .perm--api .method--delete { background: #f44336; }
 .perm--api .method--head,
 .perm--api .method--options { background: #607d8b; }
+.token { white-space: pre; }
+.token--literal { color: var(--ink); }
+.token--regex {
+  color: rgb(var(--v-theme-primary));
+  font-weight: 600;
+}
 
 .pref-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
 .pref-row + .pref-row, .pref-theme-label { border-top: 1px solid var(--line); }
