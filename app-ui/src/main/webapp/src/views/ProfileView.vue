@@ -68,14 +68,14 @@
 
       <section class="pcard">
         <h3><span class="ic"><v-icon>mdi-key</v-icon></span>{{ t('profile.permissions') }}</h3>
-        <div class="subhead">{{ t('profile.uiAuth', { count: auth.uiAuthorizations.length }) }}</div>
+        <div class="subhead d-flex align-center">{{ t('profile.uiAuth') }}<v-chip size="x-small" variant="tonal" color="primary" class="ms-2">{{ auth.uiAuthorizations.length }}</v-chip></div>
         <div class="perm-list">
           <code v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i" class="perm">
             <span v-for="(token, j) in tokenizePattern(pattern)" :key="j"
                   :class="'token token--' + token.type">{{ token.value }}</span>
           </code>
         </div>
-        <div class="subhead subhead--api d-flex">{{ t('profile.apiAuth', { count: auth.apiAuthorizations.length }) }}
+        <div class="subhead subhead--api d-flex align-center">{{ t('profile.apiAuth') }}<v-chip size="x-small" variant="tonal" color="primary" class="ms-2">{{ auth.apiAuthorizations.length }}</v-chip>
           <a class="text-info ms-auto text-decoration-none" href="#/api/token">
             <span class="v">{{ t('profile.apiTokensHint') }}<v-icon size="small">mdi-chevron-right</v-icon></span>
           </a>
