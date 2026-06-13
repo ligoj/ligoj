@@ -44,7 +44,7 @@
         <a class="nav-item" :class="{ active: route.path === '/profile' }" @click="go('/profile')">
           <v-icon>mdi-account-circle</v-icon><span>{{ i18n.t('nav.profile') }}</span>
         </a>
-        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon>{{ i18n.t('nav.about') }}</button>
+        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon><span>{{ i18n.t('nav.about') }}</span><span v-if="appVersion" class="ver-num">{{ appVersion }}</span></button>
       </div>
     </aside>
 
@@ -96,6 +96,7 @@ const auth = useAuthStore()
 const app = useAppStore()
 const i18n = useI18nStore()
 const appName = computed(() => auth.appSettings?.name || 'Ligoj')
+const appVersion = computed(() => auth.appSettings?.buildVersion || '')
 
 // Each page re-opts into the bar breadcrumbs/refresh via setBreadcrumbs() in
 // its onMounted; clear on every navigation so a page that doesn't set them
@@ -448,6 +449,8 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
 .ver { display: flex; align-items: center; gap: 7px; width: 100%; text-align: left; font-family: var(--v26-font); font-weight: 600; font-size: 13px; opacity: .7; padding: 9px 12px; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 8px; transition: opacity .15s, background .15s; }
 .ver:hover { opacity: .9; background: rgba(255,255,255,.08); }
 .ver.active { opacity: 1; background: rgba(255,255,255,.12); }
+/* App version — thin, dimmed, pushed to the right edge of the button. */
+.ver-num { margin-left: auto; font-weight: 200; font-size: 11px; opacity: .7; font-family: var(--v26-mono, var(--v26-font)); letter-spacing: .01em; }
 
 .bar {
   position: fixed; top: 0; left: var(--w); right: 0; height: var(--h); z-index: 20;
