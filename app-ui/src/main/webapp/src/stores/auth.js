@@ -54,7 +54,9 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!session.value)
   const userName = computed(() => session.value?.userName ?? '')
   const roles = computed(() => session.value?.roles ?? [])
-  const isAdmin = computed(() => roles.value.includes('ADMIN'))
+  // The session exposes an explicit `admin` flag; keep the legacy ADMIN-role
+  // check as a fallback for older backends that don't emit it.
+  const isAdmin = computed(() => session.value?.admin === true || roles.value.includes('ADMIN'))
   const uiAuthorizations = computed(() => session.value?.uiAuthorizations ?? [])
   const apiAuthorizations = computed(() => session.value?.apiAuthorizations ?? [])
   const appSettings = computed(() => session.value?.applicationSettings ?? {})

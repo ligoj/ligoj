@@ -5,7 +5,10 @@
       <div class="hero-id">
         <h1>{{ auth.userName || 'invité' }}</h1>
         <p>{{ t('profile.title') }}</p>
-        <div class="hero-roles"><span v-for="role in auth.roles" :key="role" class="rolechip">{{ role }}</span></div>
+        <div class="hero-roles">
+          <span v-if="auth.isAdmin" class="rolechip rolechip--admin"><v-icon size="13">mdi-shield-account</v-icon>{{ t('profile.administrator') }}<v-tooltip activator="parent" location="top" :text="t('profile.adminTooltip')" /></span>
+          <span v-for="role in auth.roles" :key="role" class="rolechip">{{ role }}</span>
+        </div>
       </div>
     </header>
 
@@ -285,6 +288,16 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, .2);
   color: var(--on-primary);
+}
+
+/* Administrator badge — accent + shield icon, set apart from plain roles. */
+.rolechip--admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(var(--v-theme-secondary), .9);
+  color: rgb(var(--v-theme-on-secondary));
+  cursor: default;
 }
 
 .p-grid {

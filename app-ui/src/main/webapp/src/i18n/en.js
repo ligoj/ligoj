@@ -185,6 +185,8 @@ export default {
   'profile.account': 'Account',
   'profile.username': 'Username',
   'profile.roles': 'Roles',
+  'profile.administrator': 'Administrator',
+  'profile.adminTooltip': 'You have administrator privileges — full access to all features and settings.',
   'profile.permissions': 'Permissions',
   'profile.uiAuth': 'UI Authorizations',
   'profile.apiAuth': 'API Authorizations',

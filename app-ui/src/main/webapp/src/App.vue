@@ -66,7 +66,7 @@
       </nav>
       <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
       <span class="sp" />
-      <button class="user" @click="go('/profile')"><v-icon size="small">mdi-account</v-icon>{{ auth.userName || 'invité' }}</button>
+      <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' : 'mdi-account' }}</v-icon>{{ auth.userName || 'invité' }}<v-tooltip v-if="auth.isAdmin" activator="parent" location="bottom" :text="i18n.t('profile.adminTooltip')" /></button>
       <button class="icon-btn" title="Se déconnecter" @click="logout"><v-icon>mdi-logout</v-icon></button>
     </header>
 
