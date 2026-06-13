@@ -217,6 +217,12 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      // Spring Boot Actuator endpoints (management.endpoints.web.base-path),
+      // surfaced by the Actuator admin view. Same backend as `rest`.
+      '/ligoj/manage': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
       '/ligoj/login': {
         target: 'http://localhost:8080',
         changeOrigin: true,
