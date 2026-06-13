@@ -190,7 +190,7 @@ export default {
   'profile.apiAuth': 'API Authorizations ({{count}})',
   'profile.preferences': 'Preferences',
   'profile.apiTokens': 'API tokens',
-  'profile.apiTokensHint': 'Create or revoke keys for the REST API',
+  'profile.apiTokensHint': 'Manage API keys',
   'profile.theme': 'Theme',
   'profile.compact': 'Compact mode',
   'profile.compactHint': 'Tighter spacing, smaller fonts, denser tables',
