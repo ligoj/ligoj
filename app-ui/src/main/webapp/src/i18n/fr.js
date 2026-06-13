@@ -215,6 +215,8 @@ export default {
   'about.resources': 'Ressources',
   'about.api': 'API REST',
   'about.apiHint': 'Points d\'accès, exemples et SwaggerUI en direct',
+  'about.apiTokens': 'Jetons API',
+  'about.apiTokensHint': 'Créer ou révoquer des clés pour l\'API REST',
 
   // Login
   'login.title': 'Ligoj',

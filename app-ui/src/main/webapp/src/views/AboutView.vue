@@ -65,6 +65,11 @@
             <span class="lr-txt"><span class="lr-title">{{ t('about.api') }}</span><span class="lr-sub">{{ t('about.apiHint') }}</span></span>
             <v-icon size="16" class="lr-go">mdi-chevron-right</v-icon>
           </a>
+          <a class="lrow" @click="go('/api/token')">
+            <v-icon size="20" class="lr-ic">mdi-key</v-icon>
+            <span class="lr-txt"><span class="lr-title">{{ t('about.apiTokens') }}</span><span class="lr-sub">{{ t('about.apiTokensHint') }}</span></span>
+            <v-icon size="16" class="lr-go">mdi-chevron-right</v-icon>
+          </a>
           <a class="lrow" @click="go('/system/information')">
             <v-icon size="20" class="lr-ic">mdi-server-outline</v-icon>
             <span class="lr-txt"><span class="lr-title">{{ t('system.info.title') }}</span><span class="lr-sub">{{ t('system.info.subtitle') }}</span></span>

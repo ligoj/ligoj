@@ -215,6 +215,8 @@ export default {
   'about.resources': 'Resources',
   'about.api': 'REST API',
   'about.apiHint': 'Endpoints, examples, and live SwaggerUI',
+  'about.apiTokens': 'API tokens',
+  'about.apiTokensHint': 'Create or revoke keys for the REST API',
 
   // Login
   'login.title': 'Ligoj',

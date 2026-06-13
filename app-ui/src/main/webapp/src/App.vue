@@ -150,10 +150,9 @@ const BASE_NAV = [
     { labelKey: 'nav.bench', icon: 'mdi-speedometer', route: '/system/bench', match: '/system/bench' },
     { labelKey: 'nav.information', icon: 'mdi-information', route: '/system/information', match: '/system/information' },
   ] },
-  { labelKey: 'nav.api', icon: 'mdi-api', match: '/api', children: [
-    { labelKey: 'nav.apiExplorer', icon: 'mdi-compass', route: '/api' },
-    { labelKey: 'nav.apiTokens', icon: 'mdi-key', route: '/api/token', match: '/api/token' },
-  ] },
+  // API (Explorer + Tokens) is intentionally not in the sidebar — it's reached
+  // from the About page's Resources card. The /api and /api/token routes still
+  // exist (registered by plugin-ui).
 ]
 
 /**
