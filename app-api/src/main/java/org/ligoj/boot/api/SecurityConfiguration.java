@@ -6,6 +6,7 @@ package org.ligoj.boot.api;
 import org.ligoj.app.resource.security.FederatedUserDetailsService;
 import org.ligoj.bootstrap.core.security.ApiTokenAuthenticationFilter;
 import org.ligoj.bootstrap.core.security.AuthorizingFilter;
+import org.ligoj.bootstrap.core.security.SecurityHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
@@ -57,40 +58,32 @@ public class SecurityConfiguration {
 	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 		final var authenticationManager = http.getSharedObject(AuthenticationManager.class);
 		final var matcher = PathPatternRequestMatcher.withDefaults();
-		return http.authorizeHttpRequests(authorize ->
-						authorize.requestMatchers(
-										matcher.matcher("/rest"),
-										matcher.matcher("/rest/api-docs"),
-										matcher.matcher("/manage/info"),
-										matcher.matcher("/rest/openapi.json")).authenticated()
+		return http
+				.authorizeHttpRequests(authorize -> authorize
+						.requestMatchers(matcher.matcher("/rest"), matcher.matcher("/rest/api-docs"), matcher.matcher("/manage/info"),
+								matcher.matcher("/rest/openapi.json"))
+						.authenticated()
 
-								// Unsecured access
-								.requestMatchers(
-										EndpointRequest.to("health"),
-										matcher.matcher("/rest/redirect"),
-										matcher.matcher("/manage/health"),
-										matcher.matcher("/webjars/public/**")).permitAll()
-								.requestMatchers(
-										matcher.matcher("/rest/security/login"),
-										matcher.matcher("/rest/service/password/reset/**"),
-										matcher.matcher("/rest/service/password/recovery/**"))
-								.anonymous()
+						// Unsecured access
+						.requestMatchers(EndpointRequest.to("health"), matcher.matcher("/rest/redirect"), matcher.matcher("/manage/health"),
+								matcher.matcher("/webjars/public/**"))
+						.permitAll()
+						.requestMatchers(matcher.matcher("/rest/security/login"), matcher.matcher("/rest/service/password/reset/**"),
+								matcher.matcher("/rest/service/password/recovery/**"))
+						.anonymous()
 
-								.requestMatchers(
-										matcher.matcher("/manage/**")).hasAuthority("ADMIN")
+						.requestMatchers(matcher.matcher("/manage/**")).hasAuthority(SecurityHelper.ADMIN)
 
-								// Everything else is authenticated
-								.anyRequest().fullyAuthenticated())
+						// Everything else is authenticated
+						.anyRequest().fullyAuthenticated())
 
-				.requestCache(RequestCacheConfigurer::disable)
-				.csrf(AbstractHttpConfigurer::disable)
+				.requestCache(RequestCacheConfigurer::disable).csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(a -> a.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).securityContext(Customizer.withDefaults())
 				.exceptionHandling(a -> a.authenticationEntryPoint(http403ForbiddenEntryPoint()))
 
 				// Security filters
 				.addFilterAt(apiTokenFilter(authenticationManager), AbstractPreAuthenticatedProcessingFilter.class)
-				.addFilterAfter(authorizingFilter(), SwitchUserFilter.class)
-				.build();
+				.addFilterAfter(authorizingFilter(), SwitchUserFilter.class).build();
 	}
 
 	/**
@@ -121,8 +114,7 @@ public class SecurityConfiguration {
 	 * @throws Exception From the authentication builder.
 	 */
 	@Bean
-	public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration)
-			throws Exception {
+	public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration) throws Exception {
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 
