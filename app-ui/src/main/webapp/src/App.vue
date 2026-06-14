@@ -10,15 +10,16 @@
             <path d="M151 117L131 117L131 155L151 155L151 117Z" id="l3" />
             <path d="M53 10L91 10L91 117L53 117L53 10Z" id="l4" />
           </defs>
-          <use fill="#034b80" href="#l2" /><use fill="#ff6900" href="#l3" />
-          <use fill="#4589ca" href="#l4" /><use fill="#ff6900" href="#l1" />
+          <use fill="#034b80" href="#l2" />
+          <use fill="#ff6900" href="#l3" />
+          <use fill="#4589ca" href="#l4" />
+          <use fill="#ff6900" href="#l1" />
         </svg>
         <span class="brand-word">{{ appName }}</span>
       </div>
       <nav class="nav">
         <template v-for="it in NAV" :key="it.label">
-          <a class="nav-item" :class="{ active: isNavActive(it), 'has-children': it.children }"
-            @click="onNavClick(it)">
+          <a class="nav-item" :class="{ active: isNavActive(it), 'has-children': it.children }" @click="onNavClick(it)">
             <v-icon>{{ it.icon }}</v-icon>
             <span>{{ it.label }}</span>
             <span v-if="it.soon" class="soon">bientôt</span>
@@ -29,8 +30,7 @@
           <div v-if="it.children && isOpen(it)" class="subnav">
             <template v-for="c in it.children" :key="c.label">
               <div v-if="c.divider" class="sub-sep"><span>{{ c.divider }}</span></div>
-              <a class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }"
-                @click="c.route ? go(c.route) : toast()">
+              <a class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }" @click="c.route ? go(c.route) : toast()">
                 <LigojIcon v-if="c.icon" :icon="c.icon" size="16" />
                 <span v-else class="dot" />
                 <span>{{ c.label }}</span>
@@ -44,7 +44,8 @@
         <a class="nav-item" :class="{ active: route.path === '/profile' }" @click="go('/profile')">
           <v-icon>mdi-account-circle</v-icon><span>{{ i18n.t('nav.profile') }}</span>
         </a>
-        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon><span>{{ i18n.t('nav.about') }}</span><span v-if="appVersion" class="ver-num">{{ appVersion }}</span></button>
+        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon><span>{{ i18n.t('nav.about') }}</span><span
+            v-if="appVersion" class="ver-num">{{ appVersion }}</span></button>
       </div>
     </aside>
 
@@ -66,7 +67,8 @@
       </nav>
       <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
       <span class="sp" />
-      <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' : 'mdi-account' }}</v-icon>{{ auth.userName || 'invité' }}<v-tooltip v-if="auth.isAdmin" activator="parent" location="bottom" :text="i18n.t('profile.adminTooltip')" /></button>
+      <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' :
+          'mdi-account' }}</v-icon>{{ auth.userName || 'invité' }}<v-tooltip v-if="auth.isAdmin" activator="parent" location="bottom" :text="i18n.t('profile.adminTooltip')" /></button>
       <button class="icon-btn" title="Se déconnecter" @click="logout"><v-icon>mdi-logout</v-icon></button>
     </header>
 
@@ -132,24 +134,28 @@ const BASE_NAV = [
   { labelKey: 'nav.home', icon: 'mdi-home', route: '/' },
   // `match` makes the item active across a whole section; `children` render
   // a sub-menu while the section is active.
-  { labelKey: 'nav.identity', icon: 'mdi-account-group', match: '/id', children: [
-    { labelKey: 'nav.users', icon: 'mdi-account', route: '/id/user', match: '/id/user' },
-    { labelKey: 'nav.groups', icon: 'mdi-account-group', route: '/id/group', match: '/id/group' },
-    { labelKey: 'nav.companies', icon: 'mdi-domain', route: '/id/company', match: '/id/company' },
-    { labelKey: 'nav.delegates', icon: 'mdi-account-arrow-right', route: '/id/delegate', match: '/id/delegate' },
-    { labelKey: 'nav.containerScopes', icon: 'mdi-file-tree', route: '/id/scope', match: '/id/scope' },
-  ] },
+  {
+    labelKey: 'nav.identity', icon: 'mdi-account-group', match: '/id', children: [
+      { labelKey: 'nav.users', icon: 'mdi-account', route: '/id/user', match: '/id/user' },
+      { labelKey: 'nav.groups', icon: 'mdi-account-group', route: '/id/group', match: '/id/group' },
+      { labelKey: 'nav.companies', icon: 'mdi-domain', route: '/id/company', match: '/id/company' },
+      { labelKey: 'nav.delegates', icon: 'mdi-account-arrow-right', route: '/id/delegate', match: '/id/delegate' },
+      { labelKey: 'nav.containerScopes', icon: 'mdi-file-tree', route: '/id/scope', match: '/id/scope' },
+    ]
+  },
   { labelKey: 'nav.projects', icon: 'mdi-folder', route: '/project', match: '/project' },
-  { labelKey: 'nav.system', icon: 'mdi-cog', match: '/system', children: [
-    { labelKey: 'nav.plugins', icon: 'mdi-puzzle', route: '/system/plugin', match: '/system/plugin' },
-    { labelKey: 'nav.nodes', icon: 'mdi-server-network', route: '/system/node', match: '/system/node' },
-    { labelKey: 'nav.configuration', icon: 'mdi-cog-outline', route: '/system/configuration', match: '/system/configuration' },
-    { labelKey: 'nav.roles', icon: 'mdi-shield-account', route: '/system/role', match: '/system/role' },
-    { labelKey: 'nav.systemUsers', icon: 'mdi-account-supervisor', route: '/system/user', match: '/system/user' },
-    { labelKey: 'nav.cache', icon: 'mdi-database-clock', route: '/system/cache', match: '/system/cache' },
-    { labelKey: 'nav.bench', icon: 'mdi-speedometer', route: '/system/bench', match: '/system/bench' },
-    { labelKey: 'nav.information', icon: 'mdi-information', route: '/system/information', match: '/system/information' },
-  ] },
+  {
+    labelKey: 'nav.system', icon: 'mdi-cog', match: '/system', children: [
+      { labelKey: 'nav.plugins', icon: 'mdi-puzzle', route: '/system/plugin', match: '/system/plugin' },
+      { labelKey: 'nav.nodes', icon: 'mdi-server-network', route: '/system/node', match: '/system/node' },
+      { labelKey: 'nav.configuration', icon: 'mdi-cog-outline', route: '/system/configuration', match: '/system/configuration' },
+      { labelKey: 'nav.roles', icon: 'mdi-shield-account', route: '/system/role', match: '/system/role' },
+      { labelKey: 'nav.systemUsers', icon: 'mdi-account-supervisor', route: '/system/user', match: '/system/user' },
+      { labelKey: 'nav.cache', icon: 'mdi-database-clock', route: '/system/cache', match: '/system/cache' },
+      { labelKey: 'nav.bench', icon: 'mdi-speedometer', route: '/system/bench', match: '/system/bench' },
+      { labelKey: 'nav.information', icon: 'mdi-information', route: '/system/information', match: '/system/information' },
+    ]
+  },
   // API (Explorer + Tokens) is intentionally not in the sidebar — it's reached
   // from the About page's Resources card. The /api and /api/token routes still
   // exist (registered by plugin-ui).
@@ -345,10 +351,29 @@ function toast(msg = 'Page à venir dans la refonte') {
  * (defined per `[data-style]` in assets/vuetify-overrides.css) so the sidebar,
  * brand, breadcrumbs and user menu re-typeface with the theme. The literals
  * are the fallback when no style attribute is set. */
-:root { --v26-font: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif); --v26-sys: var(--lj-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); --v26-mono: var(--lj-mono, "JetBrains Mono", ui-monospace, monospace); }
-html, body, #app { margin: 0; height: 100%; }
-body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); }
-.v-application, .v-navigation-drawer, .v-app-bar { font-family: var(--v26-sys); }
+:root {
+  --v26-font: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --v26-sys: var(--lj-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  --v26-mono: var(--lj-mono, "JetBrains Mono", ui-monospace, monospace);
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--v26-sys);
+  background: rgb(var(--v-theme-background));
+}
+
+.v-application,
+.v-navigation-drawer,
+.v-app-bar {
+  font-family: var(--v26-sys);
+}
 
 /* ---- Vibrant re-skin of Vuetify select / autocomplete dropdown menus ----
    These overlays teleport to <body>, outside any view scope, so they're
@@ -362,6 +387,7 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
   border: 1px solid var(--lj-border-color, rgba(var(--v-theme-on-surface), .12));
   overflow: hidden;
 }
+
 .v-select__content .v-list,
 .v-autocomplete__content .v-list,
 .v-combobox__content .v-list {
@@ -369,6 +395,7 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
   padding: 6px !important;
   font-family: var(--lj-font, var(--v26-font));
 }
+
 .v-select__content .v-list-item,
 .v-autocomplete__content .v-list-item,
 .v-combobox__content .v-list-item {
@@ -376,6 +403,7 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
   min-height: 42px !important;
   margin-bottom: 2px;
 }
+
 .v-select__content .v-list-item-title,
 .v-autocomplete__content .v-list-item-title,
 .v-combobox__content .v-list-item-title {
@@ -383,6 +411,7 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
   font-weight: 600;
   font-size: 13.5px;
 }
+
 /* Selected option → warm accent tint. */
 .v-select__content .v-list-item--active,
 .v-autocomplete__content .v-list-item--active,
@@ -390,8 +419,11 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
   color: #ff5a52;
   background: rgba(255, 90, 82, .1);
 }
+
 .v-select__content .v-list-item--active .v-list-item__overlay,
-.v-autocomplete__content .v-list-item--active .v-list-item__overlay { opacity: 0; }
+.v-autocomplete__content .v-list-item--active .v-list-item__overlay {
+  opacity: 0;
+}
 </style>
 
 <style scoped>
@@ -403,17 +435,27 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
   --hover: rgba(var(--v-theme-on-surface), .06);
   --primary: rgb(var(--v-theme-primary));
   --on-primary: rgb(var(--v-theme-on-primary));
-  --w: 264px; --h: 56px;
-  min-height: 100vh; color: var(--ink);
+  --w: 264px;
+  --h: 56px;
+  min-height: 100vh;
+  color: var(--ink);
   background: rgb(var(--v-theme-background));
 }
 
 .sidebar {
-  position: fixed; top: 0; left: 0; bottom: 0; width: var(--w); z-index: 30;
-  display: flex; flex-direction: column; color: var(--on-primary);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--w);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  color: var(--on-primary);
   background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 70%, #000));
   transition: transform .22s ease;
 }
+
 /* Material You: the MD3 primary is a LIGHT tone (notably in dark mode), which
    washes out the rail under its white nav text. Use a dark MD3 neutral
    navigation rail instead, for both md3 light and dark — and force a light
@@ -423,65 +465,380 @@ body { font-family: var(--v26-sys); background: rgb(var(--v-theme-background)); 
   background: linear-gradient(180deg, #211f26, #16141b);
   color: rgba(255, 255, 255, .92);
 }
-.nav-collapsed .sidebar { transform: translateX(-100%); }
-.brand { display: flex; align-items: center; gap: 12px; padding: 15px 16px; cursor: pointer; }
-.brand-logo { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
-.brand-word { font-family: var(--v26-font); font-weight: 800; font-size: 20px; letter-spacing: -.02em; }
-.nav { padding: 10px; flex: 1; }
-.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--lj-radius-sm, 10px); cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 14px; color: rgba(255,255,255,.86); margin-bottom: 2px; }
-.nav-item:hover { background: rgba(255,255,255,.08); }
-.nav-item.active { background: rgba(255,255,255,.16); color: #fff; }
-.nav-item .soon { margin-left: auto; font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(255,255,255,.16); }
-.nav-item .nav-caret { margin-left: auto; color: rgba(255,255,255,.5); transition: transform .2s, color .15s; }
-.nav-item .nav-caret.open { transform: rotate(180deg); color: rgba(255,255,255,.85); }
-.nav-item.has-children:hover .nav-caret { color: rgba(255,255,255,.9); }
-.nav-item.has-children .soon + .nav-caret { margin-left: 6px; }
-.subnav { margin: 2px 0 6px; padding-left: 14px; display: flex; flex-direction: column; gap: 1px; }
-.sub-sep { display: flex; align-items: center; gap: 8px; margin: 8px 12px 3px 6px; font-family: var(--v26-font); font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.42); }
-.sub-sep::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,.12); }
-.sub-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--lj-radius-sm, 9px); cursor: pointer; font-family: var(--v26-font); font-weight: 600; font-size: 13px; color: rgba(255,255,255,.74); }
-.sub-item:hover { background: rgba(255,255,255,.07); color: #fff; }
-.sub-item.active { background: rgba(255,255,255,.14); color: #fff; }
-.sub-item .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .6; flex: none; }
-.sub-item .soon { margin-left: auto; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 20px; background: rgba(255,255,255,.14); }
-.sb-foot { padding: 10px; }
-.ver { display: flex; align-items: center; gap: 7px; width: 100%; text-align: left; font-family: var(--v26-font); font-weight: 600; font-size: 13px; opacity: .7; padding: 9px 12px; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 8px; transition: opacity .15s, background .15s; }
-.ver:hover { opacity: .9; background: rgba(255,255,255,.08); }
-.ver.active { opacity: 1; background: rgba(255,255,255,.12); }
+
+.nav-collapsed .sidebar {
+  transform: translateX(-100%);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 16px;
+  cursor: pointer;
+}
+
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .25));
+}
+
+.brand-word {
+  font-family: var(--v26-font);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -.02em;
+}
+
+.nav {
+  padding: 10px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--lj-radius-sm, 10px);
+  cursor: pointer;
+  font-family: var(--v26-font);
+  font-weight: 600;
+  font-size: 14px;
+  color: rgba(255, 255, 255, .86);
+  margin-bottom: 2px;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, .08);
+}
+
+.nav-item.active {
+  background: rgba(255, 255, 255, .16);
+  color: #fff;
+}
+
+.nav-item .soon {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .16);
+}
+
+.nav-item .nav-caret {
+  margin-left: auto;
+  color: rgba(255, 255, 255, .5);
+  transition: transform .2s, color .15s;
+}
+
+.nav-item .nav-caret.open {
+  transform: rotate(180deg);
+  color: rgba(255, 255, 255, .85);
+}
+
+.nav-item.has-children:hover .nav-caret {
+  color: rgba(255, 255, 255, .9);
+}
+
+.nav-item.has-children .soon+.nav-caret {
+  margin-left: 6px;
+}
+
+.subnav {
+  margin: 2px 0 6px;
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sub-sep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 12px 3px 6px;
+  font-family: var(--v26-font);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .42);
+}
+
+.sub-sep::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, .12);
+}
+
+.sub-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--lj-radius-sm, 9px);
+  cursor: pointer;
+  font-family: var(--v26-font);
+  font-weight: 600;
+  font-size: 13px;
+  color: rgba(255, 255, 255, .74);
+}
+
+.sub-item:hover {
+  background: rgba(255, 255, 255, .07);
+  color: #fff;
+}
+
+.sub-item.active {
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+}
+
+.sub-item .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .6;
+  flex: none;
+}
+
+.sub-item .soon {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .14);
+}
+
+.sb-foot {
+  padding: 10px;
+}
+
+.ver {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  text-align: left;
+  font-family: var(--v26-font);
+  font-weight: 600;
+  font-size: 13px;
+  opacity: .7;
+  padding: 9px 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: opacity .15s, background .15s;
+}
+
+.ver:hover {
+  opacity: .9;
+  background: rgba(255, 255, 255, .08);
+}
+
+.ver.active {
+  opacity: 1;
+  background: rgba(255, 255, 255, .12);
+}
+
 /* App version — thin, dimmed, pushed to the right edge of the button. */
-.ver-num { margin-left: auto; font-weight: 200; font-size: 11px; opacity: .7; font-family: var(--v26-mono, var(--v26-font)); letter-spacing: .01em; }
+.ver-num {
+  margin-left: auto;
+  font-weight: 200;
+  font-size: 11px;
+  opacity: .7;
+  font-family: var(--v26-mono, var(--v26-font));
+  letter-spacing: .01em;
+}
 
 .bar {
-  position: fixed; top: 0; left: var(--w); right: 0; height: var(--h); z-index: 20;
-  display: flex; align-items: center; gap: 8px; padding: 0 14px;
-  background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  position: fixed;
+  top: 0;
+  left: var(--w);
+  right: 0;
+  height: var(--h);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
   transition: left .22s ease;
 }
-.nav-collapsed .bar { left: 0; }
-.icon-btn { width: 40px; height: 40px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; display: grid; place-items: center; color: var(--ink); }
-.icon-btn:hover { background: var(--hover); }
-.crumb { font-family: var(--v26-font); font-weight: 700; font-size: 16px; color: var(--ink); letter-spacing: -.01em; }
-.bcrumbs { display: flex; align-items: center; gap: 7px; min-width: 0; overflow: hidden; padding-left: 4px; }
+
+.nav-collapsed .bar {
+  left: 0;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+}
+
+.icon-btn:hover {
+  background: var(--hover);
+}
+
+.crumb {
+  font-family: var(--v26-font);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+
+.bcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  overflow: hidden;
+  padding-left: 4px;
+}
+
 /* 2026 chip-style breadcrumb (relocated from LjPageHeader). */
-.bc-chip { display: inline-flex; align-items: center; gap: 4px; font-family: var(--v26-font); font-size: 12px; font-weight: 700; white-space: nowrap; color: rgba(var(--v-theme-on-surface), .6); background: rgba(var(--v-theme-on-surface), .07); border-radius: 999px; padding: 4px 11px; transition: color .14s, background .14s; }
-a.bc-chip.link { cursor: pointer; }
-a.bc-chip.link:hover { color: rgb(var(--v-theme-on-surface)); background: rgba(var(--v-theme-on-surface), .13); }
-.bc-chip.cur { color: rgb(var(--v-theme-secondary)); background: rgba(var(--v-theme-secondary), .14); }
-.bc-sep { color: rgba(var(--v-theme-on-surface), .4); font-size: 13px; }
-.refresh-btn .v-icon { transition: transform .2s; }
-.refresh-btn:hover .v-icon { color: rgb(var(--v-theme-secondary)); }
-.refresh-btn.spin .v-icon { animation: bc-spin .6s ease; }
-@keyframes bc-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .refresh-btn.spin .v-icon { animation: none; } }
-.sp { flex: 1; }
-.user { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border: 0; background: transparent; border-radius: 9px; cursor: pointer; color: var(--ink); font-family: var(--v26-font); font-weight: 600; font-size: 14px; }
-.user:hover { background: var(--hover); }
+.bc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--v26-font);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: rgba(var(--v-theme-on-surface), .6);
+  background: rgba(var(--v-theme-on-surface), .07);
+  border-radius: 999px;
+  padding: 4px 11px;
+  transition: color .14s, background .14s;
+}
 
-.main { margin-left: var(--w); padding: calc(var(--h) + 24px) 28px 64px; transition: margin-left .22s ease; }
-.nav-collapsed .main { margin-left: 0; }
+a.bc-chip.link {
+  cursor: pointer;
+}
 
-.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--ink); color: var(--surface); padding: 11px 18px; border-radius: 12px; font-weight: 700; font-size: 14px; z-index: 60; opacity: 0; transition: .25s; pointer-events: none; box-shadow: 0 12px 30px -10px rgba(0,0,0,.5); }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+a.bc-chip.link:hover {
+  color: rgb(var(--v-theme-on-surface));
+  background: rgba(var(--v-theme-on-surface), .13);
+}
 
-@media (max-width: 900px) { .sidebar { transform: translateX(-100%); } .bar { left: 0; } .main { margin-left: 0; } }
+.bc-chip.cur {
+  color: rgb(var(--v-theme-secondary));
+  background: rgba(var(--v-theme-secondary), .14);
+}
+
+.bc-sep {
+  color: rgba(var(--v-theme-on-surface), .4);
+  font-size: 13px;
+}
+
+.refresh-btn .v-icon {
+  transition: transform .2s;
+}
+
+.refresh-btn:hover .v-icon {
+  color: rgb(var(--v-theme-secondary));
+}
+
+.refresh-btn.spin .v-icon {
+  animation: bc-spin .6s ease;
+}
+
+@keyframes bc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .refresh-btn.spin .v-icon {
+    animation: none;
+  }
+}
+
+.sp {
+  flex: 1;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 0;
+  background: transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--v26-font);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.user:hover {
+  background: var(--hover);
+}
+
+.main {
+  margin-left: var(--w);
+  padding: calc(var(--h) + 24px) 28px 34px;
+  transition: margin-left .22s ease;
+}
+
+.nav-collapsed .main {
+  margin-left: 0;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--ink);
+  color: var(--surface);
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 60;
+  opacity: 0;
+  transition: .25s;
+  pointer-events: none;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .5);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .bar {
+    left: 0;
+  }
+
+  .main {
+    margin-left: 0;
+  }
+}
 </style>
