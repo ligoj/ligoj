@@ -6,7 +6,7 @@
 		"properties": {
 			"property": {
 				"name": "filename",
-				"value": "${sys:ligoj.home:-target}/${sys:ligoj.log.file.name:-api-rolling.log}"
+				"value": "${env:LIGOJ_HOME:-${sys:ligoj.home:-target}}/${sys:ligoj.log.file.name:-api-rolling.log}"
 			}
 		},
 		"ThresholdFilter": {

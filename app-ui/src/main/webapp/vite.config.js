@@ -223,6 +223,12 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      // app-ui's OWN actuator (UI container) — served locally by app-ui, NOT
+      // proxied to ligoj-api. Surfaces the UI container log to the Logs view.
+      '/ligoj/actuator': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
       '/ligoj/login': {
         target: 'http://localhost:8080',
         changeOrigin: true,
