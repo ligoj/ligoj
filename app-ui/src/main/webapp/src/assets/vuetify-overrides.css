@@ -1117,3 +1117,156 @@
     opacity: 0;
   }
 }
+
+/* ===========================================================================
+ * ligoj-classic — faithful Bootstrap + Material Design revival
+ *
+ * Selected by `<html data-style="ligoj-classic">` (preset "Reforged",
+ * id `reforged`). Reproduces the spirit of the legacy
+ * `themes/bootstrap-material-design` skin: purple primary, teal accents,
+ * flat indigo sidebar, Material ripples on press and a modal scale-in on dialogs.
+ * Colors are the exact legacy values. The ripple timing mirrors the old
+ * `ripples.css` (opacity .15s ease-in + transform .5s cubic-bezier(.4,0,.2,1)
+ * .1s); the dialog entrance + shadow mirror the old `.modal-content`. Every
+ * rule is scoped under the attribute so other presets stay untouched.
+ * ========================================================================= */
+
+/* a) Ripple on real Vuetify components — mirror the legacy ripples.css feel
+ * (Vuetify's v-ripple directive drives the geometry; we only tune timing). */
+[data-style="ligoj-classic"] .v-ripple__animation--in {
+  transition:
+    transform .5s cubic-bezier(.4, 0, .2, 1) .1s,
+    opacity .15s ease-in !important;
+  opacity: .18;
+}
+[data-style="ligoj-classic"] .v-ripple__animation--out {
+  transition: opacity .1s linear !important;
+}
+
+/* a') Ripple on the 2026 custom controls (plain elements with no v-ripple):
+ * same pure-CSS centered ripple as md3, tuned to the legacy feel. */
+[data-style="ligoj-classic"] .lj-btn,
+[data-style="ligoj-classic"] .lj-iconbtn,
+[data-style="ligoj-classic"] .nav-item,
+[data-style="ligoj-classic"] .sub-item {
+  position: relative;
+  overflow: hidden;
+}
+[data-style="ligoj-classic"] .lj-btn::after,
+[data-style="ligoj-classic"] .lj-iconbtn::after,
+[data-style="ligoj-classic"] .nav-item::after,
+[data-style="ligoj-classic"] .sub-item::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(3);
+  transform-origin: center;
+  pointer-events: none;
+  transition: transform .5s cubic-bezier(.4, 0, .2, 1), opacity .6s linear;
+}
+[data-style="ligoj-classic"] .lj-btn:active::after,
+[data-style="ligoj-classic"] .lj-iconbtn:active::after,
+[data-style="ligoj-classic"] .nav-item:active::after,
+[data-style="ligoj-classic"] .sub-item:active::after {
+  opacity: .2;
+  transform: translate(-50%, -50%) scale(.2);
+  transition: none;
+}
+[data-style="ligoj-classic"] .lj-btn > *,
+[data-style="ligoj-classic"] .lj-iconbtn > *,
+[data-style="ligoj-classic"] .nav-item > *,
+[data-style="ligoj-classic"] .sub-item > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* b) Dialog scale-in — faithful to the legacy `.modal-content` entrance
+ * (Material modal scale-in + deep elevation, 2px corners). */
+@keyframes lj-classic-dialog {
+  from { transform: scale(.7); opacity: 0; }
+  to   { transform: scale(1);  opacity: 1; }
+}
+[data-style="ligoj-classic"] .v-overlay__content > .v-card {
+  animation: lj-classic-dialog .3s cubic-bezier(.4, 0, .2, 1);
+  border-radius: 2px;
+  box-shadow:
+    0 27px 24px 0 rgba(0, 0, 0, .2),
+    0 40px 77px 0 rgba(0, 0, 0, .22);
+}
+
+/* c) Component colors — exact legacy values. */
+[data-style="ligoj-classic"] .v-chip {
+  background: #0aa89e;
+  color: #fff;
+}
+/* Checked checkbox + focused input underline/label → teal. */
+[data-style="ligoj-classic"] .v-selection-control--dirty .v-selection-control__input {
+  color: #039588;
+}
+[data-style="ligoj-classic"] .v-field--focused .v-field__outline {
+  color: #039588;
+}
+[data-style="ligoj-classic"] .v-field--focused .v-label.v-field-label {
+  color: #039588;
+}
+/* Menus (selects / dropdowns): light grey fill, teal text, purple active.
+ * Descendant selector: the menu's v-list sits under a .v-sheet wrapper inside
+ * .v-overlay__content, not as a direct child. */
+[data-style="ligoj-classic"] .v-overlay__content .v-list {
+  background: #eeeeee !important;
+}
+[data-style="ligoj-classic"] .v-overlay__content .v-list-item:not(.v-list-item--active) {
+  color: #039588;
+}
+[data-style="ligoj-classic"] .v-list-item--active {
+  background: #9c27b0 !important;
+  color: #fff !important;
+}
+/* Sidebar (the host chrome) → flat indigo. App.vue paints the rail with a
+ * gradient derived from --primary (line ~455); under this theme that primary
+ * is purple (#9c27b0), which reads garish, so we flatten it to a solid indigo
+ * #3f51b5 — the legacy "toolbar" color, moved onto the real chrome. The top
+ * bar (header.bar) is intentionally left light/default for an indigo-rail +
+ * light-content contrast, like the old UI. */
+[data-style="ligoj-classic"] .sidebar {
+  background: #3f51b5 !important;
+}
+[data-style="ligoj-classic"] .sidebar,
+[data-style="ligoj-classic"] .sidebar .v-icon,
+[data-style="ligoj-classic"] .sidebar .nav-item {
+  color: #fff !important;
+}
+/* Nav item states must stay legible on the indigo rail. */
+[data-style="ligoj-classic"] .sidebar .nav-item:hover {
+  background: rgba(255, 255, 255, .14) !important;
+}
+[data-style="ligoj-classic"] .sidebar .nav-item.active {
+  background: #5363bd !important;
+  color: #fff !important;
+}
+
+/* Honour the OS-level reduced-motion preference: cut this theme's ripple and
+ * dialog animations when the user asks for less motion, like the md3 block. */
+@media (prefers-reduced-motion: reduce) {
+  [data-style="ligoj-classic"] .v-overlay__content > .v-card { animation: none; }
+  [data-style="ligoj-classic"] .v-ripple__animation--in,
+  [data-style="ligoj-classic"] .v-ripple__animation--out,
+  [data-style="ligoj-classic"] .lj-btn::after,
+  [data-style="ligoj-classic"] .lj-iconbtn::after,
+  [data-style="ligoj-classic"] .nav-item::after,
+  [data-style="ligoj-classic"] .sub-item::after {
+    transition: none !important;
+  }
+  [data-style="ligoj-classic"] .lj-btn:active::after,
+  [data-style="ligoj-classic"] .lj-iconbtn:active::after,
+  [data-style="ligoj-classic"] .nav-item:active::after,
+  [data-style="ligoj-classic"] .sub-item:active::after {
+    opacity: 0;
+  }
+}

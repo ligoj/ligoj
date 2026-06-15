@@ -28,8 +28,8 @@ export const PRESET_OPTIONS = [
   /* --- classic / faithful --- */
   {
     id: 'ligoj-classic',
-    label: 'Ligoj Classic',
-    description: 'The original Ligoj light look — indigo + amber.',
+    label: 'Ligoj',
+    description: 'The default Ligoj light look — indigo + amber.',
     theme: 'ligojLight',
     style: 'default',
     dark: false,
@@ -43,6 +43,15 @@ export const PRESET_OPTIONS = [
     style: 'default',
     dark: true,
     swatch: ['#5c6bc0', '#ffb74d', '#121212'],
+  },
+  {
+    id: 'reforged',
+    label: 'Reforged',
+    description: 'Reforged Ligoj — faithful Bootstrap+Material palette, flat indigo rail.',
+    theme: 'ligojClassic',
+    style: 'ligoj-classic',
+    dark: false,
+    swatch: ['#3f51b5', '#9c27b0', '#0aa89e'],
   },
   {
     id: 'vscode-dark',

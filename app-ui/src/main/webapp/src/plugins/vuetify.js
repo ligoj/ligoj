@@ -212,9 +212,29 @@ const md3Dark = {
   },
 }
 
+// Ligoj Classic — faithful revival of the legacy Bootstrap + Material Design
+// skin (themes/bootstrap-material-design): purple primary, teal accents,
+// indigo toolbar. Paired with the `ligoj-classic` shape style in `styles.js`
+// (ripples + modal scale-in).
+const ligojClassic = {
+  dark: false,
+  colors: {
+    primary: '#9c27b0',
+    secondary: '#0aa89e',
+    accent: '#3f51b5',
+    error: '#f44336',
+    warning: '#ff9800',
+    info: '#039588',
+    success: '#4cae51',
+    background: '#fafafa',
+    surface: '#ffffff',
+  },
+}
+
 const themes = {
   ligojLight,
   ligojDark,
+  ligojClassic,
   solarizedLight,
   solarizedDark,
   githubLight,
@@ -233,6 +253,7 @@ const themes = {
 export const THEME_OPTIONS = [
   { id: 'ligojLight',      label: 'Ligoj Light',      dark: false, swatch: ['#1a237e', '#f57c00', '#fafafa'] },
   { id: 'ligojDark',       label: 'Ligoj Dark',       dark: true,  swatch: ['#5c6bc0', '#ffb74d', '#121212'] },
+  { id: 'ligojClassic',    label: 'Reforged',         dark: false, swatch: ['#9c27b0', '#0aa89e', '#3f51b5'] },
   { id: 'solarizedLight',  label: 'Solarized Light',  dark: false, swatch: ['#268bd2', '#b58900', '#fdf6e3'] },
   { id: 'solarizedDark',   label: 'Solarized Dark',   dark: true,  swatch: ['#268bd2', '#b58900', '#002b36'] },
   { id: 'githubLight',     label: 'GitHub Light',     dark: false, swatch: ['#0969da', '#1a7f37', '#ffffff'] },
@@ -279,6 +300,7 @@ function detectTheme() {
  */
 const PRESET_TO_THEME = {
   'ligoj-classic':    'ligojLight',
+  'reforged':         'ligojClassic',
   'ligoj-dark':       'ligojDark',
   'vscode-dark':      'vscodeDark',
   'solarized-press':  'solarizedLight',
