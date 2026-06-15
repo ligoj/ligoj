@@ -12,24 +12,6 @@
     />
 
     <div class="grid">
-      <section class="card" :style="{ '--c': '#2f6df6' }">
-        <div class="card-head"><span class="ch-ic"><v-icon size="20">mdi-information</v-icon></span><h3>{{ t('about.app') }}</h3></div>
-        <div class="card-body">
-          <div class="frow"><span class="fk">{{ t('about.version') }}</span><span class="fv mono">{{ build.version }}</span></div>
-          <div class="frow"><span class="fk">{{ t('about.buildDate') }}</span><span class="fv mono">{{ build.date }}</span></div>
-          <div class="frow"><span class="fk">{{ t('about.buildNumber') }}</span><span class="fv mono"><span class="vtxt" :title="build.number">{{ build.number }}</span></span></div>
-        </div>
-      </section>
-
-      <section class="card" :style="{ '--c': '#1d9d63' }">
-        <div class="card-head"><span class="ch-ic"><v-icon size="20">mdi-monitor-dashboard</v-icon></span><h3>{{ t('about.frontend') }}</h3></div>
-        <div class="card-body">
-          <div class="frow"><span class="fk">{{ t('about.framework') }}</span><span class="fv">Vue 3 + Vuetify 4</span></div>
-          <div class="frow"><span class="fk">{{ t('about.buildTool') }}</span><span class="fv">Vite 8</span></div>
-          <div class="frow"><span class="fk">{{ t('about.state') }}</span><span class="fv">Pinia 3</span></div>
-        </div>
-      </section>
-
       <section class="card" :style="{ '--c': '#8b5cf6' }">
         <div class="card-head"><span class="ch-ic"><v-icon size="20">mdi-source-branch</v-icon></span><h3>{{ t('about.project') }}</h3></div>
         <div class="card-body">
@@ -113,15 +95,6 @@ const i18n = useI18nStore()
 const t = i18n.t
 
 const appName = computed(() => auth.appSettings?.name || 'Ligoj')
-const build = computed(() => {
-  const s = auth.appSettings || {}
-  const ts = parseInt(s.buildTimestamp, 10)
-  return {
-    version: s.buildVersion || '—',
-    number: s.buildNumber || '—',
-    date: Number.isNaN(ts) ? '—' : new Date(ts).toISOString().slice(0, 10),
-  }
-})
 function go(path) { router.push(path) }
 
 const licenseDialog = ref(false)

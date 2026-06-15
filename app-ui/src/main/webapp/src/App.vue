@@ -41,9 +41,6 @@
         </template>
       </nav>
       <div class="sb-foot">
-        <a class="nav-item" :class="{ active: route.path === '/profile' }" @click="go('/profile')">
-          <v-icon>mdi-account-circle</v-icon><span>{{ i18n.t('nav.profile') }}</span>
-        </a>
         <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon><span>{{ i18n.t('nav.about') }}</span><span
             v-if="appVersion" class="ver-num">{{ appVersion }}</span></button>
       </div>
