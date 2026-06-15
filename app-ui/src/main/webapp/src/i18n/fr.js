@@ -196,6 +196,8 @@ export default {
   'profile.theme': 'Thème',
   'profile.compact': 'Mode compact',
   'profile.compactHint': 'Espacements resserrés, polices plus petites, tableaux plus denses',
+  'profile.reduceMotion': 'Réduire les animations',
+  'profile.reduceMotionHint': 'Désactive les effets ripple, les animations de dialogs et menus, et la barre de progression',
   'profile.skipUnsavedConfirmation': 'Quitter sans confirmation',
   'profile.skipUnsavedConfirmationHint': 'Quitte les formulaires modifiés sans demander confirmation',
   'profile.language': 'Langue',
