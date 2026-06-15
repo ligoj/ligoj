@@ -174,7 +174,18 @@ a pure shell + shared component surface.
   dialogs/panels + `GroupMembers{Dialog,Panel}`.
 - **plugin-ui owns** the rest: `HomeView` (dashboard), `ProjectListView`,
   `ProjectDetailView`, `System*View`, `Api*View`, `SubscribeWizardView`,
-  `ProjectEditDialog`, `NodeEditDialog`, `AuditDialog`.
+  `ProjectEditDialog`, `NodeEditDialog`, `AuditDialog`, the **Actuator admin
+  surface** (`ActuatorView` + `components/actuator/Act*.vue` renderers +
+  `LogPanel`), and the **shared subscriptions display** (`SubscriptionsPanel` /
+  `SubscriptionGroupCard` + `directives/appear.js`) reused by Home + ProjectDetail.
+
+A later session also added a family of **2026 chrome components** to the host
+(re-exported from `host.js`), consumed across plugins via the global
+`.lj-surface` design-token class: `LjPageHeader` (title/subtitle + breadcrumb
+chips + `#actions`), `LjButton` (primary/ghost/danger), `LjSearch`, `LjDialog`,
+`LjSegmented` (tab toggle), `LjStatus` (semantic status chip). Prefer these over
+hand-rolled chrome; `.lj-surface` supplies the `--ink/--pill/--radius/--mono/
+--surface/--card/--border*` vars every 2026 view reads.
 
 **Canonical route scheme** (what `App.vue` nav links to): dashboard `/`,
 `/project` + `/project/:id`, `/id/{user,group,company,delegate,scope}`,
@@ -949,6 +960,92 @@ const features = {
 
 ---
 
+# Spring Boot Actuator admin surface (plugin-ui)
+
+A full admin browser for the Spring Boot Actuator, nested under the System →
+Information view. Routes (plugin-ui `index.js`):
+`/system/information/actuator/:endpoint` (ActuatorView; the selected endpoint is
+the route param, default `info`). `/system/information/actuator` redirects to
+`…/info`; `/system/actuator` and `/system/logs` are back-compat redirects.
+
+**Two containers, two actuators — the path split is the #1 gotcha.** app-ui
+registers a `BackendProxyServlet` on `/manage/*`, `/rest/*`, `/main/*` that
+forwards to **app-api** (`/ligoj-api/...`). So:
+- API actuator → reached via `${APP_BASE}manage/*` (= `/ligoj/manage/*`, proxied
+  to app-api). The HAL index's `_links` hrefs come back under the *backend*
+  context (`/ligoj-api/manage/...`); `ActuatorView.toPath()` keeps the segment
+  after `/manage/` and rebuilds against `${APP_BASE}manage/`.
+- app-ui's OWN actuator (added `spring-boot-starter-actuator` to its pom) MUST
+  use base-path `/actuator` (NOT `/manage`, which is the proxy servlet), so it's
+  served locally at `/ligoj/actuator/*`. Dev needs a vite proxy `/ligoj/actuator`
+  → :8080 next to `/ligoj/manage`.
+
+**ActuatorView shell**: fetches the `${APP_BASE}manage` HAL index, lists each
+endpoint with a friendly label/icon, and renders the selection via a dedicated
+renderer (`components/actuator/registry.js` → `Act*.vue`) with a raw-JSON
+toggle + JSON download + copy. Special cases:
+- **Templated** endpoints (`configprops-prefix`, `metrics-requiredMetricName`,
+  `loggers-name`, `health-path`, `env-toMatch`, `sbom-id` — href has a
+  `{variable}`) are **filtered out** of the menu (not openable; their data is
+  reached through the base endpoint's renderer). The counter then reflects only
+  usable endpoints.
+- **Binary** (`heapdump`) → a direct download panel.
+- **Write/operation** endpoints (`restart`/`refresh`/`pause`/`resume`/`shutdown`,
+  POST-only) → a submit panel with a confirm step for the destructive ones
+  (treats a dropped connection as "triggered").
+- **`logfile`** → the embedded `LogPanel` (see below), not a blind download.
+- The catalog (`.act-list`) is sticky + `max-height:72vh; overflow:auto` so a
+  long list scrolls inside the menu instead of stretching the page.
+
+**Renderer contract** (`Act*.vue`): presentational; receive injected props
+`data` (parsed payload), `copy`, `fetch` (GET `manage/<sub>`), `post` (POST
+`manage/<sub>`, body). Shared `:deep` rules from ActuatorView give every renderer
+table no-horizontal-scroll + single-line ellipsis + hover-copy cells. `ActMetrics`
+fetches values async (eager highlights + per-meter values shown in the panel
+titles: progress bar / number+unit / multi-stat chips + tag chips). `ActLoggers`
+makes the configured level **editable at runtime** (POST `loggers/<name>`
+`{configuredLevel}`) with a confirmation snackbar that states it's runtime-only
+and shows the `logging.level.<name>=<LEVEL>` line to persist it.
+
+**Logs** (`components/LogPanel.vue`, shared by the `logfile` route): tabs API
+(`manage/logfile`) and UI (`actuator/logfile`), tail-fetched via HTTP
+`Range: bytes=-262144` with a Full-log toggle, filter, wrap, auto-refresh,
+download. The UI tab is **probed on mount** (`Range: bytes=0-1023`) and only
+shown when app-ui's actuator actually serves a log (no dead tab on older
+deployments).
+
+# Shared subscriptions display (`SubscriptionsPanel`)
+
+The subscriptions UI is one reusable component used by both `ProjectDetailView`
+and `HomeView` (the `viewOptions` Cartes/Liste toggle was duplicated; now it
+lives once in the panel):
+- `components/SubscriptionsPanel.vue` — toolbar (toggle + optional search +
+  optional collapse-all) over a grid of cards or a flat `VibrantDataTable`
+  (one row per subscription). Props: `groups`, `defaultView` ('list'|'cards'),
+  `searchable`, `collapsible`, `loading`, `cog`. Emits `rowmenu` ({event,sub})
+  and `row-appear` (sub). Slots `#toolbar` / `#empty`.
+- `components/SubscriptionGroupCard.vue` — one tool group as a 2026 card; root
+  class is **`.subcard` (NOT `.card`)** to dodge the parent view's scoped `.card`
+  rule (see gotchas). Collapse is a controlled prop so collapse-all works.
+- Both keep the per-subscription plugin DELEGATION (`PluginFeatures` with
+  `renderDetailsKey`/`renderDetailsFeatures`/`renderFeatures` + host cog).
+
+Group model (per tool): `{ key, name, kind, color, icon: ()=>h(NodeIcon,{node}),
+health, rows: [{ name, status:'ok|warn|err|idle', pills, cost?, sub }] }`.
+
+- **ProjectDetailView** builds groups from `rest/project/:id` (nested node) +
+  one upfront `rest/subscription/status/refresh`; default view `list`.
+- **HomeView** builds groups from `rest/subscription` (`SubscriptionResource#findAll`)
+  — a LIGHT model `{ nodes[], projects[], subscriptions[{id,project,node:<id string>}] }`.
+  The node is a string id, so rebuild the nested instance→tool→category chain
+  from the flat `nodes` list (`refined` = parent id) before passing to the
+  delegation. findAll returns NO parameters/data/status, so details are fetched
+  **lazily**: each row emits `row-appear` (the `directives/appear.js` `v-appear`
+  IntersectionObserver, fires once) → HomeView batches ids (debounced, chunked)
+  → `rest/subscription/status/refresh?id=…` → merges `{parameters,data,status}`
+  into a reactive `detailsById` map → groups recompute. A "Démo" checkbox
+  additively appends the mockup dataset on top of the real one.
+
 # Decisions and gotchas
 
 Battle scars worth respecting on the next migration.
@@ -974,6 +1071,31 @@ Battle scars worth respecting on the next migration.
 ## Vue Router 4
 
 - Returning `false` from `onBeforeRouteLeave` consumes the `next` callback. Don't capture it and call later — that triggers an "Unhandled error during execution of native event handler" warning. Instead capture the target route and use `router.push(to)` after confirm. `useFormGuard` is the reference implementation.
+
+## Vue components & breadcrumbs
+
+- **Scoped CSS bleeds onto a child component's ROOT element.** A Vue SFC's
+  `<style scoped>` rule applies to the *root* node of any child component it
+  renders (the child root carries both scope ids). So if a parent view has
+  `.card { … }` scoped and renders a child whose root is also `.card`, the
+  parent's rule hits the child. Fix: give a shared child component a unique root
+  class (`SubscriptionGroupCard` uses `.subcard`, not `.card`) and keep its
+  animation/chrome self-contained. Inner (non-root) child elements are NOT
+  affected — only the root.
+- **Two breadcrumb systems, set in two places.** The in-page `LjPageHeader
+  :crumbs` prop draws the header's breadcrumb chips; the **shell top-bar**
+  breadcrumb is driven separately by `useAppStore().setBreadcrumbs(factory,
+  { refresh })`. A view that sets only `:crumbs` leaves the shell bar showing the
+  *previous* route's trail. The store only re-runs the factory on **locale
+  change**, so when a page's own sub-selection changes (e.g. ActuatorView's
+  selected endpoint), re-call `setBreadcrumbs(factory)` from a `watch` — the
+  factory closes over the reactive selection.
+- **`v-appear` (IntersectionObserver) for lazy work.** `directives/appear.js`
+  fires its callback once when an element scrolls into view (guards
+  `typeof IntersectionObserver === 'undefined'` → fires immediately under jsdom).
+  Used for HomeView's lazy per-row detail fetch. A `v-show`-hidden element
+  (`display:none`) never intersects, so collapsed-card rows don't fire until
+  expanded — exactly the intent.
 
 ## Vuetify
 
@@ -1007,6 +1129,11 @@ Battle scars worth respecting on the next migration.
 - **`NodeEditionVo` parent field is `node`, NOT `refined`**. The class implements `Refining<String>` with an override `getRefined() { return getNode(); }` but **no `setRefined`**, so Jackson silently drops `refined:` on POST/PUT and the `@NotBlank` validation on `node` rejects the payload. The wizard's create-node / edit-node paths both use `node: parentId`.
 - **`UriColonDecodingFilter`** (in app-api's `Application.java`) is a servlet filter at `HIGHEST_PRECEDENCE` that substitutes `%3A` → `:` in the request URI before CXF matches routes. JAX-RS `@Path("{node:service:.+}/parameter/{mode}")` regexes are matched against the RAW URI, so a `encodeURIComponent`'d node id (`service%3Aid%3Aldap`) 404s without this filter. Don't decode other percent-encodings (especially `%2F`) — only `:` is safe per RFC 3986 sub-delim rules.
 - **Plugin discovery uses colon-keys** (`auth.appSettings.plugins` returns `['service:id', 'service:id:ldap', …]`). The frontend converts via `pluginIdFromKey('service:id:ldap')` → `'id-ldap'` before passing to `loadPlugin`. The loader's id validation regex `^[a-zA-Z0-9][\w-]*$` rejects raw colon-keys, so the transformation is non-negotiable.
+- **`rest/subscription` (findAll) is a LIGHT model and drops fields the UI needs.** `SubscriptionLightVo.node` is a string id (not the nested object); join against the response's `nodes[]`/`projects[]`. And `SubscribedNodeVo extends AbstractNodeVo`, which has **no `uiClasses`** — so `NodeIcon` fell back to the deleted `/main/service/<svc>/<tool>/img/<tool>.png` path. Fix applied: added `private String uiClasses` to `SubscribedNodeVo` + `subscribedNode.setUiClasses(node.getUiClasses())` in `SubscriptionResource.addNodeAsNeeded`, and the UI passes the full resolved node (not `{id}`) to `NodeIcon`. `NodeIcon`'s priority is `uiClasses` (mdi/fa) → id<3 frags (wrench) → PNG.
+- **Actuator responses aren't `application/json`.** They use `application/vnd.spring-boot.actuator.v3+json`, which `useApi` doesn't auto-parse — fetch `{ raw: true }` and `JSON.parse(await resp.text())` (fall back to text). The `logfile` endpoint is `text/plain`.
+- **A `Range` request against a missing endpoint returns the HTML error page as `206`, not `404`.** Spring forwards to the error page and the static handler serves it with `206 Partial Content` because of the `Range` header — so the client can't trust `206` alone. `LogPanel` checks `Content-Type`/sniffs for `<!doctype|html` and treats HTML as "unavailable".
+- **`env`/`configprops` mask values as `******`** (Actuator `Sanitizer`). Reveal with `management.endpoint.{env,configprops}.show-values=ALWAYS` (or `WHEN_AUTHORIZED`) in app-api. ActEnv additionally masks `secret|key|password` UI-side by design.
+- **`logfile` endpoint + custom Log4j2 = path mismatch.** Both apps log via a custom `log4j2.json` (rolling file `${sys:ligoj.home:-target}/<api|ui>-rolling.log`), so Spring Boot's `logging.file.name` is IGNORED and the endpoint 404s. Point it at the real file with `management.endpoint.logfile.external-file=${ligoj.home:target}/${ligoj.log.file.name:…-rolling.log}`. SECOND trap: Spring `${ligoj.home}` reads env **and** system properties, but Log4j2 `${sys:ligoj.home}` reads system properties ONLY — an env-var `LIGOJ_HOME` makes Log4j2 write to `target/` while the endpoint looks in `${ligoj.home}`. Make Log4j2 env-aware: `${env:LIGOJ_HOME:-${sys:ligoj.home:-target}}/…` (no-op when home is a `-D`).
 
 ## Plugin loader
 
