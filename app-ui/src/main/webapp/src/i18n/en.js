@@ -196,6 +196,8 @@ export default {
   'profile.theme': 'Theme',
   'profile.compact': 'Compact mode',
   'profile.compactHint': 'Tighter spacing, smaller fonts, denser tables',
+  'profile.reduceMotion': 'Reduce motion',
+  'profile.reduceMotionHint': 'Disable ripples, dialog and menu animations, and progress bar motion',
   'profile.skipUnsavedConfirmation': 'Skip leave confirmation',
   'profile.skipUnsavedConfirmationHint': 'Leave dirty forms without confirmation prompt',
   'profile.language': 'Language',

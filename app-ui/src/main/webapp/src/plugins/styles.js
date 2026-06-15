@@ -16,6 +16,7 @@
 
 const STORAGE_KEY = 'ligoj-style'
 const COMPACT_KEY = 'ligoj-compact'
+const REDUCE_MOTION_KEY = 'ligoj-reduce-motion'
 
 /**
  * Public style catalog. Order is the picker order: keep "default"
@@ -196,5 +197,47 @@ export function applyCompact(value) {
 export function bootCompact() {
   const v = detectCompact()
   applyCompact(v)
+  return v
+}
+
+/* ===========================================================================
+ * Reduce motion — orthogonal global toggle
+ *
+ * Same shape as the compact toggle: an accessibility preference that layers
+ * over every preset via `<html data-reduce-motion="true">`. The matching CSS
+ * lives at `[data-reduce-motion="true"]` in `assets/vuetify-overrides.css`
+ * and kills ripples, dialog/menu animations and progress-bar motion. It
+ * complements the OS-level `prefers-reduced-motion` media query by giving
+ * users an in-app switch independent of their system setting.
+ * ========================================================================= */
+
+export function detectReduceMotion() {
+  if (typeof localStorage === 'undefined') return false
+  return localStorage.getItem(REDUCE_MOTION_KEY) === 'true'
+}
+
+export function persistReduceMotion(value) {
+  if (typeof localStorage === 'undefined') return
+  localStorage.setItem(REDUCE_MOTION_KEY, value ? 'true' : 'false')
+}
+
+/**
+ * Flip `<html data-reduce-motion="…">`. We set/remove the attribute
+ * (instead of writing "false") so CSS rules can use the cleaner
+ * `[data-reduce-motion="true"]` selector without an extra "not('false')"
+ * guard.
+ */
+export function applyReduceMotion(value) {
+  if (typeof document === 'undefined') return
+  if (value) {
+    document.documentElement.dataset.reduceMotion = 'true'
+  } else {
+    delete document.documentElement.dataset.reduceMotion
+  }
+}
+
+export function bootReduceMotion() {
+  const v = detectReduceMotion()
+  applyReduceMotion(v)
   return v
 }

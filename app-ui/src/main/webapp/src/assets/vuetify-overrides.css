@@ -383,6 +383,35 @@
   display: none !important;
 }
 
+/* ========================== reduce motion ===============================
+ * Orthogonal global accessibility toggle — see `applyReduceMotion()` in
+ * `plugins/styles.js`. Lives at `[data-reduce-motion="true"]` so it layers
+ * over any preset. Kills ripples, dialog/menu appear animations (including
+ * the bespoke `vc-shake` on destructive VibrantConfirmDialog) and progress
+ * bar motion. The global reset below already neutralizes most of these via
+ * the near-zero duration; the targeted rules make the intent explicit and
+ * cover keyframe animations that ignore `transition-duration`.
+ * ======================================================================== */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: .001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: .001ms !important;
+  scroll-behavior: auto !important;
+}
+[data-reduce-motion="true"] .v-ripple__container {
+  display: none !important;
+}
+[data-reduce-motion="true"] .v-progress-linear__indeterminate,
+[data-reduce-motion="true"] .v-progress-circular__overlay {
+  animation: none !important;
+}
+[data-reduce-motion="true"] .vconfirm.tone-error,
+[data-reduce-motion="true"] .vconfirm.tone-warning {
+  animation: none !important;
+}
+
 /* ============================== sharp ====================================
  * Brutalist. Zero radius, monospaced labels, harsh borders, uppercase
  * buttons. Reads like a 90s admin panel reskinned for 2026 — a love-it-or-

@@ -6,7 +6,7 @@ import i18n from './plugins/i18n.js'
 import router from './router/index.js'
 import { loadAllPlugins } from './plugins/loader.js'
 import { registerBuiltinPlugins } from './plugins/index.js'
-import { bootCompact } from './plugins/styles.js'
+import { bootCompact, bootReduceMotion } from './plugins/styles.js'
 import { bootPreset } from './plugins/presets.js'
 
 // Apply the persisted theme preset (color palette + shape style) and
@@ -17,6 +17,7 @@ import { bootPreset } from './plugins/presets.js'
 // — set by `plugins/vuetify.js` from the same persisted preset id.
 bootPreset()
 bootCompact()
+bootReduceMotion()
 
 const app = createApp(App)
 const pinia = createPinia()
