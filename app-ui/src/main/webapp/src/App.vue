@@ -491,6 +491,12 @@ body {
 .nav {
   padding: 10px;
   flex: 1;
+  /* min-height:0 lets this flex child shrink below its content height so it can
+     scroll instead of pushing .sb-foot off-screen on short viewports. */
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .35) transparent;
 }
 
 .nav-item {
