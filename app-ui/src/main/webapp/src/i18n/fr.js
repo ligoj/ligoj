@@ -221,6 +221,23 @@ export default {
   'about.apiHint': 'Points d\'accès, exemples et SwaggerUI en direct',
   'about.apiTokens': 'Jetons API',
   'about.apiTokensHint': 'Créer ou révoquer des clés pour l\'API REST',
+  'about.reportBug': 'Signaler un bug',
+  'about.reportBugHint': 'Modèle pré-rempli + formulaire d\'issue GitHub',
+
+  // Bug report dialog
+  'bugReport.title': 'Signaler un bug',
+  'bugReport.hint': 'Copiez le modèle ci-dessous dans une nouvelle issue GitHub.',
+  'bugReport.copy': 'Copier',
+  'bugReport.copied': 'Copié !',
+  'bugReport.openIssue': 'Ouvrir une issue GitHub',
+  'bugReport.unknown': 'inconnue',
+  'bugReport.tplDescription': 'Description',
+  'bugReport.tplDescPlaceholder': '(décrivez le problème ici)',
+  'bugReport.tplContext': 'Contexte',
+  'bugReport.tplVersion': 'Version',
+  'bugReport.tplUrl': 'URL',
+  'bugReport.tplPlugins': 'Plugins installés',
+  'bugReport.tplNoPlugin': '(aucun)',
 
   // Login
   'login.title': 'Ligoj',

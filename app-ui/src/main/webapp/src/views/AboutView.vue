@@ -25,6 +25,11 @@
             <span class="lr-txt"><span class="lr-title">{{ t('about.license') }}</span><span class="lr-sub">MIT</span></span>
             <v-icon size="16" class="lr-go">mdi-chevron-right</v-icon>
           </a>
+          <a class="lrow" @click="bugDialog = true">
+            <v-icon size="20" class="lr-ic">mdi-bug-outline</v-icon>
+            <span class="lr-txt"><span class="lr-title">{{ t('about.reportBug') }}</span><span class="lr-sub">{{ t('about.reportBugHint') }}</span></span>
+            <v-icon size="16" class="lr-go">mdi-chevron-right</v-icon>
+          </a>
           <a class="lrow" href="https://www.kloudy.fr/" target="_blank" rel="noopener noreferrer">
             <v-icon size="20" class="lr-ic">mdi-hammer-wrench</v-icon>
             <span class="lr-txt">
@@ -79,6 +84,8 @@
         </footer>
       </div>
     </v-dialog>
+
+    <BugReportDialog v-model="bugDialog" />
   </div>
 </template>
 
@@ -86,6 +93,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore, useAuthStore, useI18nStore, LjPageHeader } from '@ligoj/host'
+import BugReportDialog from '@/components/BugReportDialog.vue'
 import brandColor from '@/assets/brand.png'
 
 const router = useRouter()
@@ -98,6 +106,7 @@ const appName = computed(() => auth.appSettings?.name || 'Ligoj')
 function go(path) { router.push(path) }
 
 const licenseDialog = ref(false)
+const bugDialog = ref(false)
 
 // Inlined MIT license text — kept here so the About view does not have
 // to fetch the LICENSE file from the backend (works offline / in dev).

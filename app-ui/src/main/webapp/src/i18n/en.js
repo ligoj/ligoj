@@ -221,6 +221,23 @@ export default {
   'about.apiHint': 'Endpoints, examples, and live SwaggerUI',
   'about.apiTokens': 'API tokens',
   'about.apiTokensHint': 'Create or revoke keys for the REST API',
+  'about.reportBug': 'Report a bug',
+  'about.reportBugHint': 'Pre-filled template + GitHub issue form',
+
+  // Bug report dialog
+  'bugReport.title': 'Report a bug',
+  'bugReport.hint': 'Copy the template below into a new GitHub issue.',
+  'bugReport.copy': 'Copy',
+  'bugReport.copied': 'Copied!',
+  'bugReport.openIssue': 'Open a GitHub issue',
+  'bugReport.unknown': 'unknown',
+  'bugReport.tplDescription': 'Description',
+  'bugReport.tplDescPlaceholder': '(describe the problem here)',
+  'bugReport.tplContext': 'Context',
+  'bugReport.tplVersion': 'Version',
+  'bugReport.tplUrl': 'URL',
+  'bugReport.tplPlugins': 'Installed plugins',
+  'bugReport.tplNoPlugin': '(none)',
 
   // Login
   'login.title': 'Ligoj',
