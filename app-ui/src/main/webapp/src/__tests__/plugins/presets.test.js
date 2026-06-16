@@ -60,6 +60,23 @@ describe('PRESET_OPTIONS', () => {
     }
   })
 
+  it('ships the "Reforged" preset (reforged) wired to ligojClassic + ligoj-classic style', () => {
+    const p = PRESET_OPTIONS.find((x) => x.id === 'reforged')
+    expect(p, 'preset reforged is missing').toBeTruthy()
+    expect(p.theme).toBe('ligojClassic')
+    expect(p.style).toBe('ligoj-classic')
+    // The style must exist in the catalog, else applyStyle() rejects it.
+    expect(STYLE_OPTIONS.some((s) => s.id === 'ligoj-classic')).toBe(true)
+  })
+
+  it('keeps the default preset (ligoj-classic) on ligojLight + default style, now labelled "Ligoj"', () => {
+    const def = PRESET_OPTIONS.find((x) => x.id === DEFAULT_PRESET_ID)
+    expect(def.id).toBe('ligoj-classic')
+    expect(def.label).toBe('Ligoj')
+    expect(def.theme).toBe('ligojLight')
+    expect(def.style).toBe('default')
+  })
+
   it('detectPreset returns the default when storage is empty', () => {
     // Vitest provides happy-dom by default, so localStorage exists.
     localStorage.removeItem('ligoj-preset')

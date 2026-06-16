@@ -35,6 +35,13 @@ export const STYLE_OPTIONS = [
     radius: '4px',
   },
   {
+    id: 'ligoj-classic',
+    label: 'Reforged',
+    description: 'Bootstrap Material revival — purple primary, teal accents, ripples, modal scale-in.',
+    previews: ['#9c27b0', '#0aa89e', '#3f51b5'],
+    radius: '4px',
+  },
+  {
     id: 'sharp',
     label: 'Sharp / Brutalist',
     description: 'Zero radius, monospaced labels, harsh borders.',
