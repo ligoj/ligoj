@@ -64,6 +64,7 @@
       </nav>
       <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
       <span class="sp" />
+      <button class="icon-btn" :title="i18n.t('about.reportBug')" @click="bugDialog = true"><v-icon>mdi-bug-outline</v-icon></button>
       <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' :
           'mdi-account' }}</v-icon>{{ auth.userName || 'invité' }}<v-tooltip v-if="auth.isAdmin" activator="parent" location="bottom" :text="i18n.t('profile.adminTooltip')" /></button>
       <button class="icon-btn" title="Se déconnecter" @click="logout"><v-icon>mdi-logout</v-icon></button>
@@ -74,6 +75,7 @@
     <div class="toast" :class="{ show: toastMsg }">{{ toastMsg }}</div>
     <ErrorSnackbar />
     <LoginPromptDialog />
+    <BugReportDialog v-model="bugDialog" />
   </div>
 </template>
 
@@ -88,6 +90,7 @@ import registry from '@/plugins/registry.js'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
 import LoginPromptDialog from '@/components/LoginPromptDialog.vue'
 import LigojIcon from '@/components/LigojIcon.vue'
+import BugReportDialog from '@/components/BugReportDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -222,6 +225,7 @@ const NAV = computed(() => {
 })
 
 const collapsed = ref(false)
+const bugDialog = ref(false)
 const title = computed(() => {
   if (route.path === '/profile') return 'Profil'
   if (route.path.startsWith('/id/group')) return 'Groupes'
