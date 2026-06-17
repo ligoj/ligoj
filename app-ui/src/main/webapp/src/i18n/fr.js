@@ -203,41 +203,10 @@ export default {
   'profile.language': 'Langue',
 
   // About
-  'about.title': 'À propos de {name}',
-  'about.app': 'Application',
-  'about.version': 'Version',
-  'about.buildDate': 'Date de build',
-  'about.buildNumber': 'Numéro de build',
-  'about.project': 'Projet',
-  'about.github': 'Dépôt GitHub',
-  'about.license': 'Licence',
-  'about.builtBy': 'Conçu et maintenu par',
-  'about.frontend': 'Frontend',
-  'about.framework': 'Framework',
-  'about.buildTool': 'Outil de build',
-  'about.state': 'État',
-  'about.resources': 'Ressources',
-  'about.api': 'API REST',
-  'about.apiHint': 'Points d\'accès, exemples et SwaggerUI en direct',
-  'about.apiTokens': 'Jetons API',
-  'about.apiTokensHint': 'Créer ou révoquer des clés pour l\'API REST',
   'about.reportBug': 'Signaler un bug',
   'about.reportBugHint': 'Modèle pré-rempli + formulaire d\'issue GitHub',
 
   // Bug report dialog
-  'bugReport.title': 'Signaler un bug',
-  'bugReport.hint': 'Copiez le modèle ci-dessous dans une nouvelle issue GitHub.',
-  'bugReport.copy': 'Copier',
-  'bugReport.copied': 'Copié !',
-  'bugReport.openIssue': 'Ouvrir une issue GitHub',
-  'bugReport.unknown': 'inconnue',
-  'bugReport.tplDescription': 'Description',
-  'bugReport.tplDescPlaceholder': '(décrivez le problème ici)',
-  'bugReport.tplContext': 'Contexte',
-  'bugReport.tplVersion': 'Version',
-  'bugReport.tplUrl': 'URL',
-  'bugReport.tplPlugins': 'Plugins installés',
-  'bugReport.tplNoPlugin': '(aucun)',
 
   // Login
   'login.title': 'Ligoj',
@@ -347,10 +316,6 @@ export default {
   'containerScope.demoDelete': 'Mode démo — Connectez un plugin IAM pour supprimer des portées',
 
   // Agreement
-  'agreement.title': 'Accord de sécurité',
-  'agreement.text': 'Vous êtes sur le point d\'effectuer une opération sensible. Veuillez lire et accepter l\'accord de sécurité avant de continuer.',
-  'agreement.checkbox': 'J\'ai lu et j\'accepte l\'accord de sécurité',
-  'agreement.accept': 'Accepter et continuer',
 
   // Import progress
   'import.progress': 'Import en cours...',
@@ -532,7 +497,6 @@ export default {
   'notFound.title': "Page introuvable",
   'notFound.message': "La page demandée n'existe pas ou a été déplacée.",
   'notFound.back': "Retour à l'accueil",
-  'about.subtitle': "Version, stack technique et liens du projet",
   'common.rows': "Lignes",
   'common.of': "sur",
   'common.previous': "Précédent",

@@ -23,6 +23,15 @@ export const useAppStore = defineStore('app', () => {
    */
   const headerItems = ref([])
   /**
+   * Shared flag driving the bug-report dialog. The dialog itself now lives in
+   * plugin-ui (mounted persistently via `registerHeaderItem`); the host shell
+   * (sidebar footer) and any plugin only flip this flag to open it — same
+   * decoupling pattern as `auth.authPromptOpen` for the login dialog.
+   */
+  const bugDialogOpen = ref(false)
+  function openBugDialog() { bugDialogOpen.value = true }
+  function closeBugDialog() { bugDialogOpen.value = false }
+  /**
    * Optional handler the app-bar renders as a Refresh button next to
    * the breadcrumbs. Cleared on every `setBreadcrumbs` call so each
    * page re-opts in explicitly via `setBreadcrumbs(items, { refresh })`.
@@ -94,8 +103,8 @@ export const useAppStore = defineStore('app', () => {
 
   return {
     sidebarOpen, title, appName, breadcrumbs, currentPlugin, refresh,
-    headerItems,
+    headerItems, bugDialogOpen,
     setBreadcrumbs, refreshBreadcrumbs, setRefresh, setTitle, setAppName, toggleSidebar,
-    registerHeaderItem,
+    registerHeaderItem, openBugDialog, closeBugDialog,
   }
 })
