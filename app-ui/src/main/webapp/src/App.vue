@@ -43,6 +43,7 @@
       <div class="sb-foot">
         <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon><span>{{ i18n.t('nav.about') }}</span><span
             v-if="appVersion" class="ver-num">{{ appVersion }}</span></button>
+        <button class="foot-bug" :aria-label="i18n.t('about.reportBug')" @click="bugDialog = true"><v-icon size="20">mdi-bug-outline</v-icon><v-tooltip activator="parent" location="top" :text="i18n.t('about.reportBug')" /></button>
       </div>
     </aside>
 
@@ -64,7 +65,6 @@
       </nav>
       <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
       <span class="sp" />
-      <button class="icon-btn" :title="i18n.t('about.reportBug')" @click="bugDialog = true"><v-icon>mdi-bug-outline</v-icon></button>
       <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' :
           'mdi-account' }}</v-icon>{{ auth.userName || 'invité' }}<v-tooltip v-if="auth.isAdmin" activator="parent" location="bottom" :text="i18n.t('profile.adminTooltip')" /></button>
       <button class="icon-btn" title="Se déconnecter" @click="logout"><v-icon>mdi-logout</v-icon></button>
@@ -625,13 +625,39 @@ body {
 
 .sb-foot {
   padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Bug-report trigger, sitting to the right of the version number next to the
+   About item (moved here from the top bar). Tinted orange so it stays visible
+   against the dark sidebar. */
+.foot-bug {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: #ff8c42;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color .15s, background .15s;
+}
+
+.foot-bug:hover {
+  color: #ffa45c;
+  background: rgba(255, 140, 66, .15);
 }
 
 .ver {
   display: flex;
   align-items: center;
   gap: 7px;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   text-align: left;
   font-family: var(--v26-font);
   font-weight: 600;
