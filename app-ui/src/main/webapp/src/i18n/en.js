@@ -203,41 +203,10 @@ export default {
   'profile.language': 'Language',
 
   // About
-  'about.title': 'About {name}',
-  'about.app': 'Application',
-  'about.version': 'Version',
-  'about.buildDate': 'Build Date',
-  'about.buildNumber': 'Build Number',
-  'about.project': 'Project',
-  'about.github': 'GitHub repository',
-  'about.license': 'License',
-  'about.builtBy': 'Built and maintained by',
-  'about.frontend': 'Frontend',
-  'about.framework': 'Framework',
-  'about.buildTool': 'Build Tool',
-  'about.state': 'State',
-  'about.resources': 'Resources',
-  'about.api': 'REST API',
-  'about.apiHint': 'Endpoints, examples, and live SwaggerUI',
-  'about.apiTokens': 'API tokens',
-  'about.apiTokensHint': 'Create or revoke keys for the REST API',
   'about.reportBug': 'Report a bug',
   'about.reportBugHint': 'Pre-filled template + GitHub issue form',
 
   // Bug report dialog
-  'bugReport.title': 'Report a bug',
-  'bugReport.hint': 'Copy the template below into a new GitHub issue.',
-  'bugReport.copy': 'Copy',
-  'bugReport.copied': 'Copied!',
-  'bugReport.openIssue': 'Open a GitHub issue',
-  'bugReport.unknown': 'unknown',
-  'bugReport.tplDescription': 'Description',
-  'bugReport.tplDescPlaceholder': '(describe the problem here)',
-  'bugReport.tplContext': 'Context',
-  'bugReport.tplVersion': 'Version',
-  'bugReport.tplUrl': 'URL',
-  'bugReport.tplPlugins': 'Installed plugins',
-  'bugReport.tplNoPlugin': '(none)',
 
   // Login
   'login.title': 'Ligoj',
@@ -356,10 +325,6 @@ export default {
   'containerScope.demoDelete': 'Demo mode — Connect an IAM plugin to delete scopes',
 
   // Agreement
-  'agreement.title': 'Security Agreement',
-  'agreement.text': 'You are about to perform a sensitive operation. Please read and accept the security agreement before continuing.',
-  'agreement.checkbox': 'I have read and accept the security agreement',
-  'agreement.accept': 'Accept & Continue',
 
   // Import progress
   'import.progress': 'Import in progress...',
@@ -541,7 +506,6 @@ export default {
   'notFound.title': "Page not found",
   'notFound.message': "The page you are looking for doesn't exist or has moved.",
   'notFound.back': "Back to home",
-  'about.subtitle': "Version, stack and project links",
   'common.rows': "Rows",
   'common.of': "of",
   'common.previous': "Previous",

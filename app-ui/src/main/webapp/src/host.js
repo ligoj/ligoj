@@ -36,9 +36,6 @@ export { default as PluginFeatures } from './components/PluginFeatures.vue'
 export { default as VibrantDataTable } from './components/VibrantDataTable.vue'
 export { default as VibrantConfirmDialog } from './components/VibrantConfirmDialog.vue'
 export { default as LigojIcon } from './components/LigojIcon.vue'
-// Bug-report dialog (prefilled issue template) — exported so plugins can open
-// the same dialog the host shell mounts (e.g. the System Information page).
-export { default as BugReportDialog } from './components/BugReportDialog.vue'
 // 2026 chrome primitives, factored out of the per-view scoped CSS so every
 // plugin shares one styled implementation (and one source of truth for the
 // design tokens). Pair with the global `.lj-surface` utility class

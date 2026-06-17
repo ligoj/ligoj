@@ -43,7 +43,7 @@
       <div class="sb-foot">
         <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon><span>{{ i18n.t('nav.about') }}</span><span
             v-if="appVersion" class="ver-num">{{ appVersion }}</span></button>
-        <button class="foot-bug" :aria-label="i18n.t('about.reportBug')" @click="bugDialog = true"><v-icon size="18">mdi-bug-outline</v-icon><v-tooltip activator="parent" location="top" :text="i18n.t('about.reportBug')" /></button>
+        <button class="foot-bug" :aria-label="i18n.t('about.reportBug')" @click="app.openBugDialog()"><v-icon size="18">mdi-bug-outline</v-icon><v-tooltip activator="parent" location="top" :text="i18n.t('about.reportBug')" /></button>
       </div>
     </aside>
 
@@ -74,8 +74,11 @@
 
     <div class="toast" :class="{ show: toastMsg }">{{ toastMsg }}</div>
     <ErrorSnackbar />
-    <LoginPromptDialog />
-    <BugReportDialog v-model="bugDialog" />
+    <!-- Persistent plugin-contributed mounts (e.g. plugin-ui's BugReportDialog
+         and LoginPromptDialog). They are v-dialogs teleported to <body>, so
+         this location only keeps them alive; they self-bind to their store
+         flags (app.bugDialogOpen / auth.authPromptOpen). -->
+    <component :is="item" v-for="(item, i) in app.headerItems" :key="i" />
   </div>
 </template>
 
@@ -88,9 +91,7 @@ import { useI18nStore } from '@/stores/i18n.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import registry from '@/plugins/registry.js'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
-import LoginPromptDialog from '@/components/LoginPromptDialog.vue'
 import LigojIcon from '@/components/LigojIcon.vue'
-import BugReportDialog from '@/components/BugReportDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -225,7 +226,6 @@ const NAV = computed(() => {
 })
 
 const collapsed = ref(false)
-const bugDialog = ref(false)
 const title = computed(() => {
   if (route.path === '/profile') return 'Profil'
   if (route.path.startsWith('/id/group')) return 'Groupes'

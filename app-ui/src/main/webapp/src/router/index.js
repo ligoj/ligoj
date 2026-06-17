@@ -1,7 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import ProfileView from '@/views/ProfileView.vue'
-import AboutView from '@/views/AboutView.vue'
 import PluginView from '@/views/PluginView.vue'
 
 // Host shell routes only. Every domain screen (dashboard `/`, `/project*`,
@@ -13,7 +12,7 @@ import PluginView from '@/views/PluginView.vue'
 // the lazy plugin loader.
 const routes = [
   { path: '/profile', name: 'profile', component: ProfileView },
-  { path: '/about', name: 'about', component: AboutView },
+  // `/about` is owned by plugin-ui (registered via its install()).
 
   // Catch-all: anything not registered by a plugin falls back to the
   // plugin loader (which lazy-loads the owning plugin, or 404s cleanly).
