@@ -43,7 +43,7 @@
       <div class="sb-foot">
         <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon><span>{{ i18n.t('nav.about') }}</span><span
             v-if="appVersion" class="ver-num">{{ appVersion }}</span></button>
-        <button class="foot-bug" :aria-label="i18n.t('about.reportBug')" @click="bugDialog = true"><v-icon size="20">mdi-bug-outline</v-icon><v-tooltip activator="parent" location="top" :text="i18n.t('about.reportBug')" /></button>
+        <button class="foot-bug" :aria-label="i18n.t('about.reportBug')" @click="bugDialog = true"><v-icon size="18">mdi-bug-outline</v-icon><v-tooltip activator="parent" location="top" :text="i18n.t('about.reportBug')" /></button>
       </div>
     </aside>
 
@@ -624,21 +624,23 @@ body {
 }
 
 .sb-foot {
-  padding: 10px;
+  padding: 10px 8px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 /* Bug-report trigger, sitting to the right of the version number next to the
    About item (moved here from the top bar). Tinted orange so it stays visible
-   against the dark sidebar. */
+   against every themed sidebar. `flex: none` keeps it from stealing room from
+   the version; the Reforged (`ligoj-classic`) theme's white-icon rule is
+   overridden in vuetify-overrides.css so the orange survives there too. */
 .foot-bug {
   flex: none;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border: 0;
   background: transparent;
   color: #ff8c42;
@@ -655,15 +657,19 @@ body {
 .ver {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   flex: 1;
   min-width: 0;
+  /* Keep "About" + version on a single line: the wider mono fonts used by the
+     sharp / neon styles otherwise overflow the footer width and wrap to two
+     lines. */
+  white-space: nowrap;
   text-align: left;
   font-family: var(--v26-font);
   font-weight: 600;
   font-size: 13px;
   opacity: .7;
-  padding: 9px 12px;
+  padding: 9px 8px;
   border: 0;
   background: transparent;
   color: inherit;
@@ -682,9 +688,13 @@ body {
   background: rgba(255, 255, 255, .12);
 }
 
-/* App version — thin, dimmed, pushed to the right edge of the button. */
+/* App version — thin, dimmed, pushed to the right edge of the button. Shrinks
+   with an ellipsis as a last resort so it never forces a wrap. */
 .ver-num {
   margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-weight: 200;
   font-size: 11px;
   opacity: .7;

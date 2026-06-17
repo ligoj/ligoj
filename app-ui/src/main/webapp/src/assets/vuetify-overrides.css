@@ -1271,6 +1271,11 @@
 [data-style="ligoj-classic"] .sidebar .nav-item {
   color: #fff !important;
 }
+/* …except the footer bug-report trigger, which keeps its orange tint (the
+   white rule above would otherwise flatten it into the rest of the icons). */
+[data-style="ligoj-classic"] .sidebar .foot-bug .v-icon {
+  color: #ff8c42 !important;
+}
 /* Nav item states must stay legible on the indigo rail. */
 [data-style="ligoj-classic"] .sidebar .nav-item:hover {
   background: rgba(255, 255, 255, .14) !important;
