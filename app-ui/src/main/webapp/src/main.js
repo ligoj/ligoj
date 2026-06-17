@@ -8,6 +8,7 @@ import { loadAllPlugins } from './plugins/loader.js'
 import { registerBuiltinPlugins } from './plugins/index.js'
 import { bootCompact, bootReduceMotion } from './plugins/styles.js'
 import { bootPreset } from './plugins/presets.js'
+import { installErrorReporter } from './plugins/errorReporter.js'
 
 // Apply the persisted theme preset (color palette + shape style) and
 // the orthogonal compact toggle BEFORE the SPA mounts so the first
@@ -21,6 +22,10 @@ bootReduceMotion()
 
 const app = createApp(App)
 const pinia = createPinia()
+
+// Capture browser JS errors and forward them to the backend as early as
+// possible, so failures during boot are reported too.
+installErrorReporter(app)
 
 app.use(pinia)
 setActivePinia(pinia)
