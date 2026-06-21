@@ -85,12 +85,18 @@ export function nodeIcon(node) {
     return h('i', { class: 'mdi mdi-wrench fa-fw' })
   }
 
-  const url = `${APP_BASE}main/service/${fragments[1]}/${fragments[2]}/img/${fragments[2]}.png`
+  // Prefer an SVG icon, fall back to the legacy PNG, then mark broken. Lets a
+  // plugin ship `img/{tool}.svg` while older plugins keep working with `.png`.
+  const base = `${APP_BASE}main/service/${fragments[1]}/${fragments[2]}/img/${fragments[2]}`
   return h('img', {
-    src: url,
+    src: `${base}.svg`,
     alt: '',
     class: 'tool-icon',
-    onError: (e) => { e.target.classList.add('broken') },
+    onError: (e) => {
+      const el = e.target
+      if (!el.dataset.pngFallback) { el.dataset.pngFallback = '1'; el.src = `${base}.png` }
+      else { el.classList.add('broken') }
+    },
   })
 }
 

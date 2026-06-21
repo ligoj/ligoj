@@ -37,11 +37,20 @@ describe('nodeIcon()', () => {
     expect(i.classes()).toContain('mdi-wrench')
   })
 
-  it('renders an <img> at the legacy main/service/.../img/{tool}.png path', () => {
+  it('renders an <img> at the main/service/.../img/{tool}.svg path (svg first)', () => {
     const w = renderHost({ id: 'service:scm:git:server-1' })
     const img = w.find('img')
     expect(img.exists()).toBe(true)
+    expect(img.attributes('src')).toMatch(/main\/service\/scm\/git\/img\/git\.svg$/)
+  })
+
+  it('falls back to the legacy .png on svg load error, then marks broken', async () => {
+    const w = renderHost({ id: 'service:scm:git:server-1' })
+    const img = w.find('img')
+    await img.trigger('error') // svg missing → swap to .png
     expect(img.attributes('src')).toMatch(/main\/service\/scm\/git\/img\/git\.png$/)
+    await img.trigger('error') // png missing too → broken
+    expect(img.classes()).toContain('broken')
   })
 
   it('renders a "$Foo" uiClasses as a text badge', () => {
