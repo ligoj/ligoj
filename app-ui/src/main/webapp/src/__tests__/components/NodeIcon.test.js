@@ -15,29 +15,16 @@ function renderHost(node) {
 }
 
 describe('nodeIcon()', () => {
-  it('renders an explicit mdi-* uiClasses with the mdi font prefix', () => {
+  it('renders the tool icon FILE (svg-first) for a 3+ fragment node, ignoring uiClasses', () => {
+    // uiClasses is present but must be ignored — the icon file wins for tools.
     const w = renderHost({ id: 'service:scm:git', uiClasses: 'mdi-git' })
-    const i = w.find('i')
-    expect(i.exists()).toBe(true)
-    expect(i.classes()).toContain('mdi')
-    expect(i.classes()).toContain('mdi-git')
-    expect(i.classes()).toContain('fa-fw')
+    expect(w.find('i').exists()).toBe(false)
+    const img = w.find('img')
+    expect(img.exists()).toBe(true)
+    expect(img.attributes('src')).toMatch(/main\/service\/scm\/git\/img\/git\.svg$/)
   })
 
-  it('renders the legacy `fa-*` token verbatim (caller owns FA loading)', () => {
-    const w = renderHost({ id: 'service:bt:jira:s1', uiClasses: 'fab fa-jira' })
-    // The FA→MDI map covers this one — `fab fa-jira` → mdi-jira.
-    const i = w.find('i')
-    expect(i.classes()).toContain('mdi-jira')
-  })
-
-  it('falls back to a wrench when id has fewer than 3 fragments and no uiClasses', () => {
-    const w = renderHost({ id: 'service:scm' })
-    const i = w.find('i')
-    expect(i.classes()).toContain('mdi-wrench')
-  })
-
-  it('renders an <img> at the main/service/.../img/{tool}.svg path (svg first)', () => {
+  it('renders an instance node with its tool icon file', () => {
     const w = renderHost({ id: 'service:scm:git:server-1' })
     const img = w.find('img')
     expect(img.exists()).toBe(true)
@@ -53,11 +40,29 @@ describe('nodeIcon()', () => {
     expect(img.classes()).toContain('broken')
   })
 
-  it('renders a "$Foo" uiClasses as a text badge', () => {
+  it('renders an explicit mdi-* uiClasses for a service-level node', () => {
+    const w = renderHost({ id: 'service:id', uiClasses: 'mdi-account-group' })
+    const i = w.find('i')
+    expect(i.classes()).toContain('mdi')
+    expect(i.classes()).toContain('mdi-account-group')
+    expect(i.classes()).toContain('fa-fw')
+  })
+
+  it('maps a legacy fa-* uiClasses to mdi for a service-level node', () => {
+    const w = renderHost({ id: 'service:id', uiClasses: 'far fa-id-badge' })
+    expect(w.find('i').classes()).toContain('mdi-badge-account-outline')
+  })
+
+  it('renders a "$Foo" uiClasses as a text badge (service-level)', () => {
     const w = renderHost({ id: 'service:foo', uiClasses: '$F1' })
     const span = w.find('.icon-text')
     expect(span.exists()).toBe(true)
     expect(span.text()).toBe('F1')
+  })
+
+  it('falls back to a wrench for a short id with no uiClasses', () => {
+    const w = renderHost({ id: 'service:scm' })
+    expect(w.find('i').classes()).toContain('mdi-wrench')
   })
 
   it('handles a string node (id only) just like an object with that id', () => {
@@ -67,15 +72,18 @@ describe('nodeIcon()', () => {
 })
 
 describe('<NodeIcon /> component', () => {
-  it('exposes the helper as the default-export component', () => {
-    const w = mount(NodeIcon, { props: { node: { id: 'service:scm:git', uiClasses: 'mdi-git' } } })
-    expect(w.find('i').classes()).toContain('mdi-git')
+  it('renders uiClasses for a service-level node', () => {
+    const w = mount(NodeIcon, { props: { node: { id: 'service:id', uiClasses: 'mdi-account' } } })
+    expect(w.find('i').classes()).toContain('mdi-account')
   })
 
   it('reacts to prop changes', async () => {
     const w = mount(NodeIcon, { props: { node: { id: 'service:scm', uiClasses: '' } } })
     expect(w.find('i').classes()).toContain('mdi-wrench')
     await w.setProps({ node: { id: 'service:bt:jira:i1', uiClasses: 'mdi-jira' } })
-    expect(w.find('i').classes()).toContain('mdi-jira')
+    // Tool/instance nodes render the icon FILE now, not the uiClasses font.
+    const img = w.find('img')
+    expect(img.exists()).toBe(true)
+    expect(img.attributes('src')).toMatch(/main\/service\/bt\/jira\/img\/jira\.svg$/)
   })
 })

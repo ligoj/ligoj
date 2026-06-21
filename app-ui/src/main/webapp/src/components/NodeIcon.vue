@@ -10,16 +10,18 @@
  *   - Inside render fns:   nodeIcon(someNode)            // returns a VNode
  *
  * Priority chain:
- *   1. node.uiClasses
+ *   1. id with 3+ fragments (a tool / instance) → an <img> of the tool's
+ *      icon FILE at /main/service/{service}/{tool}/img/{tool}.svg, falling
+ *      back to `.png`, then `.broken`. The icon file is authoritative for
+ *      tool/instance nodes — `uiClasses` is NOT consulted here (every tool
+ *      plugin ships an icon file).
+ *   2. otherwise (service-level / short ids) node.uiClasses:
  *      a. an explicit `mdi-*` or `fa-*` token → <i> with the matching
  *         font prefix and any remaining classes
  *      b. `$Foo` shorthand → small text badge
  *      c. otherwise the raw classes are spread on a <span> (legacy
  *         CSS-driven badges)
- *   2. id with fewer than 3 fragments (i.e. service-only) → wrench
- *   3. otherwise an <img> at
- *      /main/service/{service}/{tool}/img/{tool}.png
- *      with `.broken` set on load failure for graceful fallback.
+ *   3. nothing usable → wrench.
  *
  * The image URL is built against the host's build-time base
  * (`import.meta.env.BASE_URL` of *this* module, evaluated at host build
@@ -64,8 +66,28 @@ function convertFromFontAwesome(uiClasses) {
 export function nodeIcon(node) {
   const id = (typeof node === 'string' ? node : node?.id) || ''
   const fragments = id.split(':')
-  const uiClasses = convertFromFontAwesome((typeof node === 'object' && node?.uiClasses) || '')
 
+  // Tool / instance nodes (`service:<svc>:<tool>[:<instance>]`) render their
+  // tool ICON FILE — SVG first, PNG fallback, then a broken marker. `uiClasses`
+  // is intentionally NOT consulted for these: every tool plugin ships an icon
+  // file, which is the single source of truth for tool/instance icons.
+  if (fragments.length >= 3) {
+    const base = `${APP_BASE}main/service/${fragments[1]}/${fragments[2]}/img/${fragments[2]}`
+    return h('img', {
+      src: `${base}.svg`,
+      alt: '',
+      class: 'tool-icon',
+      onError: (e) => {
+        const el = e.target
+        if (!el.dataset.pngFallback) { el.dataset.pngFallback = '1'; el.src = `${base}.png` }
+        else { el.classList.add('broken') }
+      },
+    })
+  }
+
+  // Service-level (and other short-id) nodes have no tool icon file, so they
+  // keep the `uiClasses` font / text-badge rendering, falling back to a wrench.
+  const uiClasses = convertFromFontAwesome((typeof node === 'object' && node?.uiClasses) || '')
   if (uiClasses) {
     const parts = uiClasses.split(/\s+/).filter(Boolean)
     const explicit = parts.find((p) => p.startsWith('mdi-') || p.startsWith('fa-'))
@@ -81,23 +103,7 @@ export function nodeIcon(node) {
     return h('span', { class: parts.join(' ') })
   }
 
-  if (fragments.length < 3) {
-    return h('i', { class: 'mdi mdi-wrench fa-fw' })
-  }
-
-  // Prefer an SVG icon, fall back to the legacy PNG, then mark broken. Lets a
-  // plugin ship `img/{tool}.svg` while older plugins keep working with `.png`.
-  const base = `${APP_BASE}main/service/${fragments[1]}/${fragments[2]}/img/${fragments[2]}`
-  return h('img', {
-    src: `${base}.svg`,
-    alt: '',
-    class: 'tool-icon',
-    onError: (e) => {
-      const el = e.target
-      if (!el.dataset.pngFallback) { el.dataset.pngFallback = '1'; el.src = `${base}.png` }
-      else { el.classList.add('broken') }
-    },
-  })
+  return h('i', { class: 'mdi mdi-wrench fa-fw' })
 }
 
 export default defineComponent({
