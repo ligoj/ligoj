@@ -13,7 +13,8 @@
 
   Cells render through #cell.<key> slots (fallback: raw value); the trailing
   gear column renders through the #actions slot. Header cells can opt into
-  an mdi icon via header.icon.
+  an mdi icon via header.icon and a hover tooltip via header.tooltip (use the
+  tooltip with no label for an icon-only header).
 -->
 <template>
   <div class="panel">
@@ -33,6 +34,8 @@
                 <v-icon v-if="h.sortable" size="14" class="sort-icon" :class="{ active: sortKey === h.key }">
                   {{ sortKey === h.key && sortOrder === 'desc' ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
                 </v-icon>
+                <!-- Icon-only header: the label moves into a hover tooltip. -->
+                <v-tooltip v-if="h.tooltip" activator="parent" location="top" :text="h.tooltip" />
               </span>
             </th>
             <!-- Trailing gear column: hosts the per-row #actions cells, and
