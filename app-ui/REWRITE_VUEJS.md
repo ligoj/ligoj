@@ -507,6 +507,8 @@ Imported from the host bundle via the import map; treat as the public API and do
 | `VBtn` / `VChip` / `VIcon` / `VTooltip` / `VListItem` / `VDivider` | Re-exports of Vuetify primitives (the list-item / divider pair is for `renderGlobal` / `renderAdmin` menu VNodes). Plugins build their VNodes with `h(VBtn, …)` without bundling their own Vuetify (which would break shared theming and instance state). |
 | `APP_BASE`                                                         | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths.                                                                                                                             |
 | `pluginRegistry` / `callFeature`                                   | Direct registry access for parent-to-child delegation (`subPluginIdFor`, `delegateToToolPlugin`). `callFeature` throws on missing plugin; prefer `pluginRegistry.get(id)?.feature?.(...)` when graceful degradation matters.                              |
+| `renderServiceLink` / `renderDetailsChip`                          | Shared subscription-row VNode builders — the icon link button and the icon+text chip every tool plugin returned by hand. Set a plain `title:` (promoted to a v-tooltip implicitly). See "Subscription row delegation".                                    |
+| `toolPluginId` / `delegateFeature`                                 | Shared parent→tool delegation plumbing (`service:bt:jira:* → 'bt-jira'`, then call its `feature` returning `[]` on any failure). Parents alias their `subPluginIdFor` / `delegateToToolPlugin` to these.                                                  |
 | `loadPlugin` / `pluginIdFromKey`                                   | Lazy-load a sibling plugin at runtime. The wizard uses these to `ensureToolPluginLoaded(nodeId)` before rendering parameter labels, so i18n inheritance works even if discovery hasn't run. `pluginIdFromKey('service:id:ldap')` → `'id-ldap'`.           |
 | `VibrantDataTable` / `VibrantConfirmDialog` / `LigojIcon`          | 2026 "Vibrant" shared components. `VibrantDataTable` = presentation-only table (caller keeps its own `useDataTable`, listens to `@update:options`); `VibrantConfirmDialog` = drop-in for `LigojConfirmDialog`; `LigojIcon` = compact-mode `<v-icon>` wrapper. Host-owned so both plugin-ui and plugin-id can use them. |
 
@@ -788,30 +790,37 @@ Plugins implement these actions inside their `feature()` dispatcher. Three are w
 - **`renderDetailsKey(subscription)`** — stable resource chips for the details column (resource id, provider name, …).
 - **`renderDetailsFeatures(subscription)`** — live resource chips (counts, quotas) — refreshed by the `rest/subscription/status/refresh` round-trip described below.
 
-The function returns VNodes (single, array, or `null`). The host never interprets HTML — the plugin paints its own pixels:
+The function returns VNodes (single, array, or `null`). The host never interprets HTML — the plugin paints its own pixels. **Don't hand-roll the VBtn/VChip** — almost every tool plugin returned the *same* two shapes (an icon link button, an icon+text chip), so the host exports two builders (`@ligoj/host`):
 
 ```js
-import { h } from 'vue'
-import { VBtn, VIcon, useI18nStore } from '@ligoj/host'
+import { renderServiceLink, renderDetailsChip, useI18nStore } from '@ligoj/host'
 
 const features = {
   renderFeatures(subscription) {
     const { t } = useI18nStore()
-    return [
-      h(VBtn, {
-        icon: true, size: 'small', variant: 'text',
-        title: t('id.renderFeatures.manage'),
-        to: `/id/group?subscription=${subscription.id}`,
-      }, () => h(VIcon, { size: 'small' }, () => 'mdi-account-multiple')),
-    ]
+    // icon-only button. href → opens in a new tab (safe rel) automatically;
+    // also accepts { to } (router nav), { onClick }, { disabled }, { download }, { color }.
+    return [renderServiceLink({ icon: 'mdi-home', href: subscription.parameters['…:url'], title: t('…') })]
   },
   renderDetailsKey(subscription) {
     const count = subscription?.data?.members
     if (count == null) return null
-    return h(VChip, { size: 'small', variant: 'tonal' }, () => `${count} members`)
+    // icon + text chip. Also accepts { color }, { size }, { variant }.
+    return renderDetailsChip({ icon: 'mdi-account-multiple', text: count, title: t('…'), color: 'primary' })
   },
 }
 ```
+
+`renderServiceLink` / `renderDetailsChip` are the single source of truth for the button/chip shape — one definition instead of ~18 copies. (`plugin-qa-sonarqube` still hand-builds its bespoke metric badges with `h('span', { …, title })`, but those are unique to it.)
+
+### Tooltips are IMPLICIT — never import VTooltip in a plugin
+
+A plugin sets the plain **`title:`** prop on any VNode it returns; the host's `PluginFeatures.promoteTitleToTooltip` (`src/utils/promoteTitleToTooltip.js`) walks the returned tree and upgrades every `title:` into a themed `<v-tooltip>` (matching font/surface/shadow, no double native tooltip). Two properties make it cover everything:
+
+- **Recursion** — it descends into plain-element *array* children, so a `title:` nested inside a wrapper (e.g. a sonarqube metric badge inside `<span class="sq-metrics">`) is promoted too, not just the top-level delegation node. Component children are slot *functions* (not arrays), so a chip's own inner icon is never touched.
+- **Multi-line** — a `title:` carrying `"\n"` renders as one row per line, so a `name\nValue: X\nmeaning` hint reads cleanly. (This replaced the old per-plugin explicit `<v-tooltip>` wrappers — plugins now just join their lines with `"\n"`.)
+
+So the rule "ALWAYS render tooltips via v-tooltip" is satisfied *for free* on delegated output: write `title:`, get a v-tooltip. Only reach for an explicit `<v-tooltip>` in a plugin's own SFC templates (outside the delegation render path).
 
 A plugin that doesn't implement an action throws from its dispatcher; `PluginFeatures` swallows that specific error so the column degrades cleanly to "nothing rendered". Real exceptions surface via `console.warn`.
 
@@ -819,20 +828,20 @@ A plugin that doesn't implement an action throws from its dispatcher; `PluginFea
 
 ## Parent-to-child delegation
 
-`PluginFeatures` resolves to the **service-level** plugin (segment 2 of the node id — `service:id:ldap:local` → `'id'`). To get tool-specific contributions (`plugin-id-ldap`'s activity exports, etc.) on top of the parent's buttons, the parent's `renderFeatures` looks up its tool sub-plugin and merges:
+`PluginFeatures` resolves to the **service-level** plugin (segment 2 of the node id — `service:id:ldap:local` → `'id'`). To get tool-specific contributions (`plugin-id-ldap`'s activity exports, etc.) on top of the parent's buttons, the parent's `renderFeatures` looks up its tool sub-plugin and merges. Every service parent (`bt`, `build`, `km`, `qa`, `scm`, `security`, `storage`, `vm`, `id`, `mail`) used the *same* ~40-line `subPluginIdFor` + `delegateToToolPlugin` block, so that plumbing is now the host's shared `toolPluginId` / `delegateFeature` (`src/plugins/delegate.js`):
 
 ```js
-// Inside plugin-id/ui/src/service.js
-function subPluginIdFor(subscription) {
-  const parts = (subscription?.node?.id || '').split(':').filter(Boolean)
-  if (parts.length < 3) return null
-  return `${parts[1]}-${parts[2]}`              // service:id:ldap:* → 'id-ldap'
-}
+// Inside a parent's service.js (e.g. plugin-build)
+import { toolPluginId, delegateFeature } from '@ligoj/host'
+export const subPluginIdFor = toolPluginId                        // service:build:jenkins:* → 'build-jenkins'
+export const delegateToToolPlugin = (s, action) => delegateFeature(s, action, 'build')
+
+// Inside renderFeatures(subscription):
 const buttons = [/* parent's own */]
 buttons.push(...delegateToToolPlugin(subscription, 'renderFeatures'))
 ```
 
-The sub-plugin doesn't need to know about delegation — it just implements `renderFeatures` like any other plugin. The parent decides where in its output the child's VNodes go (typically appended).
+The named exports `subPluginIdFor` / `delegateToToolPlugin` are kept (parent vitest suites import them) but now just alias the host helpers. `delegateFeature` returns `[]` on every failure (no sub-plugin, no action, throw); unknown-action errors are swallowed, real ones surface under `[plugin:<label>]`. The sub-plugin doesn't need to know about delegation — it just implements `renderFeatures` like any other plugin. The parent decides where in its output the child's VNodes go (typically appended).
 
 ---
 
@@ -1029,9 +1038,39 @@ lives once in the panel):
   rule (see gotchas). Collapse is a controlled prop so collapse-all works.
 - Both keep the per-subscription plugin DELEGATION (`PluginFeatures` with
   `renderDetailsKey`/`renderDetailsFeatures`/`renderFeatures` + host cog).
+- `components/SubscriptionStatus.vue` — the status indicator used **everywhere a
+  node / subscription status is shown** (panel list + cards). A coloured dot
+  whose `v-tooltip` gathers, only when present: the service / tool (icon + id +
+  name) and instance (id + name) from the `node` chain, the status icon +
+  translated value, the subscription `mode` (link/create), `enabled`, audit
+  (created/modified by + date), and the `parameters` (name + value, secrets
+  masked). Accepts a full `subscription` OR a bare `node` (+ `status`). This
+  REPLACED the synthetic status / node-name chips that used to sit in the
+  details column, and the list dropped its `name` column — the row identity now
+  lives in this tooltip + the delegation chips. **`enabled === false`** (NodeVo:
+  plug-in/resource unavailable) renders a **black** dot regardless of any stale
+  status. **Click-to-refresh**: clicking the dot actively re-checks the status —
+  node → `POST rest/node/status/refresh/{id}` (`checkNodeStatus`, live probe,
+  instances only), subscription → `GET rest/subscription/status/{id}/refresh`
+  (`refreshStatus`); the result is shallow-merged over the base (a `data`
+  computed), the dot **blinks** while in flight, and the tooltip footer reads
+  "Click to refresh" / "Refreshing…". The component picks the endpoint itself
+  from `isSub` (uses `useApi`). **service / tool / feature nodes render no status**
+  (nothing to check) UNLESS `enabled === false`; only instances and subscriptions
+  show a dot. SystemNodeView shows the status column FIRST as an **icon-only header**
+  (label in a `v-tooltip` — VibrantDataTable headers support `tooltip`) and loads
+  `rest/node?status=true` so each `NodeVo.status` is the last known status; the
+  tooltip otherwise shows the node chain + mode + enabled (`mode` read from the
+  subscription OR the node). The status COLUMN itself (first, icon-only heart
+  header + tooltip + fixed 64px width) comes from the shared `statusHeader({ tooltip,
+  key?, sortable?, exportValue? })` helper in `plugin-ui/ui/src/useUiHelpers.js`,
+  reused by SystemNodeView, SubscriptionsPanel's list, and SystemPluginView (key
+  `'statut'`) — one definition instead of three.
 
 Group model (per tool): `{ key, name, kind, color, icon: ()=>h(NodeIcon,{node}),
-health, rows: [{ name, status:'ok|warn|err|idle', pills, cost?, sub }] }`.
+health, rows: [{ name, status:'ok|warn|err|idle', pills, cost?, sub }] }`. `pills`
+is now empty for real subscriptions (no status/node-name chips); demo rows keep
+their decorative pills.
 
 - **ProjectDetailView** builds groups from `rest/project/:id` (nested node) +
   one upfront `rest/subscription/status/refresh`; default view `list`.
@@ -1099,6 +1138,22 @@ Battle scars worth respecting on the next migration.
 
 ## Vuetify
 
+- **ALWAYS render tooltips with `v-tooltip` — never the native `title` box.** The
+  themed Vuetify tooltip matches the active preset (font / surface / shadow); the
+  browser's grey `title` popover is off-theme and is considered a bug.
+  - **SFC templates**: `<v-tooltip activator="parent" location="top" text="…">`
+    (or the default slot for rich / multi-line content), nested inside the element
+    it describes.
+  - **Render functions / plugin delegation**: wrap the activator —
+    `h(VTooltip, { location: 'top' }, { activator: ({ props }) => h(child, { ...props, … }), default: () => … })`.
+    Multi-line content goes in the `default` slot (one `<div>` per line), not a
+    `\n`-joined string (HTML collapses whitespace).
+  - **The one sanctioned `title:` use** is the host's
+    `PluginFeatures.promoteTitleToTooltip`, which upgrades a `title:` on a
+    **top-level** returned delegation VNode (e.g. a `renderFeatures` `VBtn`) into a
+    `v-tooltip` centrally. It does **NOT recurse**, so any **nested** tooltip
+    (a metric badge inside a wrapper span, a branch link, …) MUST be an explicit
+    `v-tooltip` — see `plugin-qa-sonarqube/ui/src/service.js` (`tip()` helper).
 - `v-dialog persistent` was removed from every dialog so ESC closes uniformly. ESC fires `update:model-value=false`, which our handlers treat as Cancel — never as Save.
 - `v-row dense` is deprecated in current Vuetify — use `density="comfortable"`.
 - `v-data-table` cell templates use dotted slot names (`#item.foo`). ESLint's `vue/valid-v-slot` treats the dot as a directive modifier and trips; the rule is configured with `{ allowModifiers: true }` in the project's `eslint.config.js`.
@@ -1134,6 +1189,7 @@ Battle scars worth respecting on the next migration.
 - **A `Range` request against a missing endpoint returns the HTML error page as `206`, not `404`.** Spring forwards to the error page and the static handler serves it with `206 Partial Content` because of the `Range` header — so the client can't trust `206` alone. `LogPanel` checks `Content-Type`/sniffs for `<!doctype|html` and treats HTML as "unavailable".
 - **`env`/`configprops` mask values as `******`** (Actuator `Sanitizer`). Reveal with `management.endpoint.{env,configprops}.show-values=ALWAYS` (or `WHEN_AUTHORIZED`) in app-api. ActEnv additionally masks `secret|key|password` UI-side by design.
 - **`logfile` endpoint + custom Log4j2 = path mismatch.** Both apps log via a custom `log4j2.json` (rolling file `${sys:ligoj.home:-target}/<api|ui>-rolling.log`), so Spring Boot's `logging.file.name` is IGNORED and the endpoint 404s. Point it at the real file with `management.endpoint.logfile.external-file=${ligoj.home:target}/${ligoj.log.file.name:…-rolling.log}`. SECOND trap: Spring `${ligoj.home}` reads env **and** system properties, but Log4j2 `${sys:ligoj.home}` reads system properties ONLY — an env-var `LIGOJ_HOME` makes Log4j2 write to `target/` while the endpoint looks in `${ligoj.home}`. Make Log4j2 env-aware: `${env:LIGOJ_HOME:-${sys:ligoj.home:-target}}/…` (no-op when home is a `-D`).
+- **Node operational status ≠ `NodeVo.enabled`.** `enabled` is plug-in/resource availability (a DOWN node can still be `enabled:true`). The operational UP/DOWN is the last `EventType.STATUS` event. `NodeVo` has an optional `status` field; `NodeResource#findAll?status=true` populates it from the page's nodes via the BULK `EventRepository.findLastEvents(user, Collection<nodeId>)` — one query for the whole page, not per-row (avoid the N+1; the single `findLastEvent(user, node)` is for one-off lookups). Live re-check endpoints: `POST node/status/refresh/{id}` (`checkNodeStatus`, a real probe) and `GET subscription/status/{id}/refresh` (`refreshStatus`); the cheaper stored value is `GET node/status/{id}`. All take the `%3A`-encoded id (decoded by `UriColonDecodingFilter`).
 
 ## Plugin loader
 

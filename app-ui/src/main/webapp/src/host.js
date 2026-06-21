@@ -61,6 +61,14 @@ export { default as pluginRegistry, callFeature } from './plugins/registry.js'
 // canonical backend plugin key (`service:id:ldap`) to the URL-safe form
 // the loader resolves to a webjar bundle (`id-ldap`).
 export { loadPlugin, pluginIdFromKey } from './plugins/loader.js'
+// Parent→tool delegation plumbing (used by every service-level parent
+// plugin to forward subscription-row hooks to its tool sub-plugin) and the
+// shared subscription-row VNode builders (icon link button + detail chip).
+// Centralised so plugins don't each re-implement the same ~40-line block /
+// 12-line h(VBtn|VChip,…) literal. Tooltips on the builders' output are
+// promoted implicitly by PluginFeatures (plugins never import VTooltip).
+export { toolPluginId, delegateFeature } from './plugins/delegate.js'
+export { renderServiceLink, renderDetailsChip } from './utils/pluginRender.js'
 
 // Vuetify primitives re-exported for plugins. A plugin's Vite build keeps
 // `@ligoj/host` external; importing VBtn/VIcon from here lets a plugin's

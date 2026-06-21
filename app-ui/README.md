@@ -223,6 +223,9 @@ for plugin in "plugin-ui" "plugin-id"; do
    npm run build --prefix ~/git/ligoj-plugins/$plugin/ui
 done
 
+for plugin in "plugin-ui" "plugin-id" "plugin-prov" "plugin-id-ldap" "plugin-prov-aws" "plugin-password" "plugin-inbox-sql" "plugin-vm" "plugin-vm-aws" "plugin-vm-azure" "plugin-qa" "plugin-qa-sonarqube" "plugin-prov-outscale" "plugin-build" "plugin-build-jenkins" "plugin-build-travis" "plugin-km" "plugin-km-confluence" "plugin-bt" "plugin-bt-jira" "plugin-prov-ovh" "plugin-prov-fe" "plugin-mail" "plugin-mail-smtp"; do
+   npm install --prefix ~/git/ligoj-plugins/$plugin/ui
+done
 for plugin in "plugin-ui" "plugin-id" "plugin-prov" "plugin-id-ldap" "plugin-prov-aws" "plugin-password" "plugin-inbox-sql" "plugin-vm" "plugin-vm-aws" "plugin-vm-azure" "plugin-qa" "plugin-qa-sonarqube" "plugin-prov-outscale" "plugin-build" "plugin-build-jenkins" "plugin-build-travis" "plugin-km" "plugin-km-confluence"; do
    npm run build --prefix ~/git/ligoj-plugins/$plugin/ui
 done
