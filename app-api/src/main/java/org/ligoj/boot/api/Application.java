@@ -3,7 +3,6 @@
  */
 package org.ligoj.boot.api;
 
-import com.hazelcast.spring.HazelcastObjectExtractionConfiguration;
 import org.apache.cxf.spring.boot.autoconfigure.openapi.OpenApiAutoConfiguration;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.ligoj.bootstrap.resource.system.plugin.WebjarsServlet;
@@ -17,6 +16,7 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -30,7 +30,6 @@ import java.util.Collections;
  */
 @SpringBootApplication(exclude = {
 		OpenApiAutoConfiguration.class,
-		HazelcastObjectExtractionConfiguration.class,
 })
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
 public class Application extends SpringBootServletInitializer {
@@ -72,6 +71,23 @@ public class Application extends SpringBootServletInitializer {
 		registrationBean.setName("CXFServlet");
 		registrationBean.setInitParameters(Collections.singletonMap("service-list-path", "web-services"));
 		registrationBean.setOrder(10);
+		return registrationBean;
+	}
+
+	/**
+	 * URI decoding filter — substitutes {@code %3A} → {@code :} in the request
+	 * path so JAX-RS {@code @Path} regexes that contain literal colons (e.g.
+	 * {@code service:.+}) still match when the client sent the id via
+	 * {@code encodeURIComponent}. Runs ahead of every other servlet filter.
+	 *
+	 * @return FilterRegistrationBean
+	 */
+	@Bean
+	public FilterRegistrationBean<UriColonDecodingFilter> uriColonDecodingFilter() {
+		final var registrationBean = new FilterRegistrationBean<>(new UriColonDecodingFilter());
+		registrationBean.setName("UriColonDecoding");
+		registrationBean.addUrlPatterns("/rest/*");
+		registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		return registrationBean;
 	}
 

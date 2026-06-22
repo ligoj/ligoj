@@ -1,17 +1,43 @@
+# =============================================================================
+# Ligoj — MySQL override
+# =============================================================================
+# Layer on top of compose.yml:
+#   podman compose -p ligoj -f compose.yml -f compose-mysql.yml up -d
+#
+# Customize via environment / .env:
+#   LIGOJ_DB_IMAGE       — MySQL image    (default: mysql:8.0.36)
+#   LIGOJ_DB_NAME        — database name  (default: ligoj)
+#   LIGOJ_DB_USER        — db user        (default: ligoj)
+#   LIGOJ_DB_PASSWORD    — db password    (default: ligoj)
+#   LIGOJ_HOME           — host data dir  (default: /home/ligoj)
+# =============================================================================
 services:
   db:
     container_name: ligoj-db
-    image: mysql:8.0.36
+    image: ${LIGOJ_DB_IMAGE:-mysql:8.0.36}
+    restart: always
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: yes
-      MYSQL_DATABASE: ligoj
-      MYSQL_USER: ligoj
-      MYSQL_PASSWORD: ligoj
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: ${LIGOJ_DB_NAME:-ligoj}
+      MYSQL_USER: ${LIGOJ_DB_USER:-ligoj}
+      MYSQL_PASSWORD: ${LIGOJ_DB_PASSWORD:-ligoj}
     expose:
       - 3306
     volumes:
       - ${LIGOJ_HOME:-/home/ligoj}/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u${LIGOJ_DB_USER:-ligoj}", "-p${LIGOJ_DB_PASSWORD:-ligoj}"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    networks:
+      ligoj-network:
+        aliases:
+          - db
+
   api:
-    container_name: ligoj-api
     environment:
-      CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db -Dcom.sun.jndi.ldap.connect.pool.initsize=1 -Dcom.sun.jndi.ldap.connect.pool.maxsize=1 -Dcom.sun.jndi.ldap.connect.pool.prefsize=1 -Dcom.sun.jndi.ldap.connect.pool.debug=all}
+      # MySQL is the app's default JDBC vendor; only the host needs setting.
+      CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db}

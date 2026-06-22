@@ -219,8 +219,26 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public FilterRegistrationBean<CacheBustingFilter> cacheFilter() {
 		final var registrationBean = new FilterRegistrationBean<>(new CacheBustingFilter(31556926));
-		registrationBean.addUrlPatterns("/dist/*", "/img/*", "/main/*", "/themes/*", "/favicon.ico");
+		registrationBean.addUrlPatterns("/dist/*", "/img/*", "/themes/*", "/favicon.ico");
 		registrationBean.setOrder(15);
+		return registrationBean;
+	}
+
+	/**
+	 * Configure the cache filter of the runtime plugin assets. Unlike the static assets above, plugin bundles
+	 * (<code>/main/&lt;plugin&gt;/vue/index.js</code>, nls, css) live at STABLE URLs whose content changes on every
+	 * plugin upgrade. The host requests them with a <code>?v=&lt;digest&gt;</code> token (the
+	 * <code>PluginsClassLoader</code> plugin digest exposed in the session as
+	 * <code>applicationSettings.digestVersion</code>, rotated on any plugin change) — such versioned requests are
+	 * cached for a year as immutable, while unversioned requests are revalidated on each load.
+	 *
+	 * @return plugin cache filter configuration.
+	 */
+	@Bean
+	public FilterRegistrationBean<CacheBustingFilter> pluginCacheFilter() {
+		final var registrationBean = new FilterRegistrationBean<>(new CacheBustingFilter(31556926, true));
+		registrationBean.addUrlPatterns("/main/*");
+		registrationBean.setOrder(16);
 		return registrationBean;
 	}
 

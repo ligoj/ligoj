@@ -57,4 +57,46 @@ class CacheBustingFilterTest {
 		newFilter(response);
 		Mockito.verify(response, Mockito.never()).setHeader(HttpHeaders.PRAGMA, "no-cache");
 	}
+
+	@Test
+	void test200Expiration() throws ServletException, IOException {
+		final var response = Mockito.mock(HttpServletResponse.class);
+		Mockito.when(response.getStatus()).thenReturn(200);
+		newFilter(response);
+		Mockito.verify(response).setHeader(HttpHeaders.CACHE_CONTROL, "public, max-age=1");
+	}
+
+	@Test
+	void test200NoExpiration() throws ServletException, IOException {
+		// Zero expiration → cacheable but revalidated on each use (stable-URL
+		// mutable resources such as the runtime plugin bundles).
+		final var response = Mockito.mock(HttpServletResponse.class);
+		Mockito.when(response.getStatus()).thenReturn(200);
+		final var request = Mockito.mock(HttpServletRequest.class);
+		new CacheBustingFilter(0).doFilter(request, response, Mockito.mock(FilterChain.class));
+		Mockito.verify(response).setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
+		Mockito.verify(response, Mockito.never()).setHeader(HttpHeaders.PRAGMA, "no-cache");
+	}
+
+	@Test
+	void test200VersionedOnlyWithoutVersion() throws ServletException, IOException {
+		// versionedOnly + unversioned request → revalidate on each use.
+		final var response = Mockito.mock(HttpServletResponse.class);
+		Mockito.when(response.getStatus()).thenReturn(200);
+		final var request = Mockito.mock(HttpServletRequest.class);
+		new CacheBustingFilter(31556926, true).doFilter(request, response, Mockito.mock(FilterChain.class));
+		Mockito.verify(response).setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
+	}
+
+	@Test
+	void test200VersionedOnlyWithVersion() throws ServletException, IOException {
+		// versionedOnly + `?v=<token>` → the content at this URL never changes
+		// (the token rotates instead), cache for a year as immutable.
+		final var response = Mockito.mock(HttpServletResponse.class);
+		Mockito.when(response.getStatus()).thenReturn(200);
+		final var request = Mockito.mock(HttpServletRequest.class);
+		Mockito.when(request.getParameter("v")).thenReturn("1B2M2Y8AsgTpgAmY7PhCfg==");
+		new CacheBustingFilter(31556926, true).doFilter(request, response, Mockito.mock(FilterChain.class));
+		Mockito.verify(response).setHeader(HttpHeaders.CACHE_CONTROL, "public, max-age=31556926, immutable");
+	}
 }

@@ -98,6 +98,7 @@ public class SecurityConfiguration {
 	static final String LOGIN_BY_API_KEY_API = "/login-by-api-key";
 	static final String LOGOUT_HTML = "/logout.html";
 	static final String INDEX_HTML = "/index.html";
+	static final String LOGIN_HTML = "/login.html";
 
 	/**
 	 * A 403 JSON management.
@@ -108,8 +109,8 @@ public class SecurityConfiguration {
 	@Bean
 	public RedirectAuthenticationEntryPoint ajaxFormLoginEntryPoint(AbstractAuthenticationProvider provider) {
 		final var ep = new RedirectAuthenticationEntryPoint(loginUrl);
-		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, "/index-prod.html", "/login.html", "/login-prd.html", "/v-index.html"));
-		ep.setRedirectStrategy(getRestFailureStrategy());
+		ep.setRedirectUrls(Set.of("/", "", INDEX_HTML, LOGIN_HTML));
+		ep.setRedirectStrategy(getRestFailureStrategy(provider));
 		ep.setForceRedirectUrl(provider.isForceRedirect());
 		return ep;
 	}
@@ -184,8 +185,7 @@ public class SecurityConfiguration {
 		final var matcher = PathPatternRequestMatcher.withDefaults();
 		http.authorizeHttpRequests(authorize -> authorize.requestMatchers(
 				// Login
-				matcher.matcher(HttpMethod.POST, LOGIN_API),
-				matcher.matcher(HttpMethod.GET, LOGIN_BY_API_KEY_API+ ".html"),
+				matcher.matcher(HttpMethod.POST, LOGIN_API), matcher.matcher(HttpMethod.GET, LOGIN_BY_API_KEY_API + ".html"),
 
 				// Public static resources
 				RegexRequestMatcher.regexMatcher(HttpMethod.GET, getWhiteListPages().pattern()),
@@ -229,10 +229,21 @@ public class SecurityConfiguration {
 
 	void configureLoginHandler(HttpSecurity http, AbstractAuthenticationProvider provider, String loginDeniedUrl) throws Exception {
 		if (isOauth2Bff()) {
-			http.oauth2Login(Customizer.withDefaults());
+			// Always land on the SPA root after a successful OIDC login.
+			// `true` forces this URL regardless of any saved request — the
+			// SPA owns the post-login routing itself, so a stale or
+			// dev-mode-mistargeted savedRequest (e.g. with the backend's
+			// host:port baked in from before the vite proxy was tuned)
+			// can never be replayed.
+			//
+			// On the failure side, Spring's default URL is `/login?error`
+			// — a path the SPA doesn't own. Send the user back to the
+			// Vue login page so they get a localized error message
+			// instead of the legacy form Spring would otherwise render.
+			http.oauth2Login(o -> o.defaultSuccessUrl("/", true).failureUrl("/login.html?denied"));
 		} else {
 			final var loginSuccessHandler = getSuccessHandler();
-			final var loginFailureHandler = getFailureHandler();
+			final var loginFailureHandler = getFailureHandler(provider);
 			provider.configureLogin(http, loginDeniedUrl, LOGIN_API, loginSuccessHandler, loginFailureHandler);
 		}
 	}
@@ -314,9 +325,9 @@ public class SecurityConfiguration {
 	 * @return authentication failure configuration.
 	 */
 	@Bean
-	public SimpleUrlAuthenticationFailureHandler getFailureHandler() {
+	public SimpleUrlAuthenticationFailureHandler getFailureHandler(AbstractAuthenticationProvider provider) {
 		final var handler = new SimpleUrlAuthenticationFailureHandler();
-		final var strategy = getRestFailureStrategy();
+		final var strategy = getRestFailureStrategy(provider);
 		handler.setRedirectStrategy(strategy);
 		handler.setDefaultFailureUrl("/");
 		return handler;
@@ -328,10 +339,11 @@ public class SecurityConfiguration {
 	 * @return REST failure configuration.
 	 */
 	@Bean
-	public RestRedirectStrategy getRestFailureStrategy() {
+	public RestRedirectStrategy getRestFailureStrategy(AbstractAuthenticationProvider provider) {
 		final var strategy = new RestRedirectStrategy();
 		strategy.setSuccess(false);
 		strategy.setStatus(401);
+		strategy.setForceRedirect(provider.isForceRedirect());
 		return strategy;
 	}
 

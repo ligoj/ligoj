@@ -1,0 +1,1306 @@
+/*
+ * Global Vuetify component tweaks. Kept tiny on purpose — anything
+ * bigger than a few rules belongs in a theme or a wrapper component.
+ */
+
+/* v-list-item & v-list-group: tighten the gap between the prepend
+ * icon (or avatar) and the title. Vuetify ships 32 px (24 px at
+ * `density="compact"`) which steals horizontal room in side menus
+ * and admin lists. !important is needed because Vuetify's density-
+ * scoped selectors out-specify a plain rule.
+ */
+:root {
+  --v-list-group-prepend: 12px;
+  --v-list-prepend-gap: 8px;
+}
+
+/* ===========================================================================
+ * Design tokens — the shape/elevation/typography language each style speaks.
+ *
+ * The color Theme catalog (vuetify.js) only sets palette. These `--lj-*`
+ * tokens carry everything ELSE that makes a style feel distinct: corner
+ * radius, shadow/elevation, border weight, spacing rhythm, font family +
+ * weight + letter-spacing. Defaults below = the stock Vuetify feel; each
+ * `[data-style="<id>"]` block further down re-binds the subset it cares
+ * about, and shared components (VibrantDataTable, VibrantConfirmDialog, the
+ * dialogs, the shell) consume `var(--lj-*)` instead of hardcoding values —
+ * so switching style now visibly changes shadows, radii, borders, spacing
+ * and type everywhere, not just colors.
+ *
+ * Naming: --lj-radius (cards/panels), --lj-radius-sm (buttons/chips/fields),
+ * --lj-radius-lg (oversized tiles), --lj-shadow (resting surface),
+ * --lj-shadow-lg (overlays/dialogs), --lj-border (1px hairline width+style),
+ * --lj-border-strong, --lj-space (base cell/section padding), --lj-gap,
+ * --lj-font (UI), --lj-mono, --lj-weight-bold (heading weight),
+ * --lj-tracking (heading letter-spacing), --lj-uppercase (label transform).
+ * ========================================================================= */
+:root {
+  --lj-radius: 12px;
+  --lj-radius-sm: 8px;
+  --lj-radius-lg: 18px;
+  --lj-shadow: 0 2px 6px rgba(0, 0, 0, .06);
+  --lj-shadow-lg: 0 18px 40px -24px rgba(0, 0, 0, .45);
+  --lj-border-width: 1px;
+  --lj-border-style: solid;
+  --lj-border: var(--lj-border-width) var(--lj-border-style) rgba(var(--v-theme-on-surface), .12);
+  --lj-border-color: rgba(var(--v-theme-on-surface), .12);
+  --lj-space: 14px;
+  --lj-gap: 8px;
+  --lj-font: "Bricolage Grotesque", system-ui, -apple-system, sans-serif;
+  --lj-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --lj-weight-bold: 800;
+  --lj-tracking: -0.02em;
+  --lj-uppercase: none;
+  --lj-transition: .16s cubic-bezier(.2, .7, .3, 1);
+}
+
+/* ===========================================================================
+ * .lj-surface — the local design-variable block, factored out.
+ *
+ * Every 2026 view used to copy-paste this same `--surface / --ink / --radius
+ * / ...` block into its scoped root (`.users`, `.scopes`, `.pdetail`, …),
+ * and the copies had DRIFTED (--hover .05 vs .06, --radius 12/16/18, button
+ * padding 11/17 vs 10/16). Adding `class="… lj-surface"` to a view root now
+ * pulls ONE canonical set of locals (themselves deferring to the global
+ * `--lj-*` tokens above). This is the single source of truth for the
+ * per-view palette/shape vars; the shared Lj* components consume the same
+ * names so they inherit the view's surface automatically.
+ *
+ * It is a normal (unscoped) class so it also works on a teleported card
+ * (dialogs): put `lj-surface` on the `.v-card` inside the dialog and the
+ * vars travel with the teleported content.
+ * ========================================================================= */
+.lj-surface {
+  --surface: rgb(var(--v-theme-surface));
+  --card: rgb(var(--v-theme-surface));
+  --ink: rgb(var(--v-theme-on-surface));
+  --ink-2: rgba(var(--v-theme-on-surface), .72);
+  --ink-3: rgba(var(--v-theme-on-surface), .55);
+  --border: rgba(var(--v-theme-on-surface), .12);
+  --border-2: rgba(var(--v-theme-on-surface), .26);
+  --hover: rgba(var(--v-theme-on-surface), .06);
+  --pill: rgba(var(--v-theme-on-surface), .06);
+  --primary: rgb(var(--v-theme-primary));
+  --accent: rgb(var(--v-theme-secondary));
+  --font: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif);
+  --mono: var(--lj-mono, "JetBrains Mono", ui-monospace, monospace);
+  --radius: var(--lj-radius, 12px);
+  --radius-sm: var(--lj-radius-sm, 8px);
+  --radius-lg: var(--lj-radius-lg, 20px);
+  --shadow: var(--lj-shadow, 0 2px 8px rgba(0, 0, 0, .05));
+  --shadow-lg: var(--lj-shadow-lg, 0 30px 80px -30px rgba(0, 0, 0, .55));
+  --border-w: var(--lj-border-width, 1px);
+  --border-c: var(--lj-border-color, var(--border));
+  --bold: var(--lj-weight-bold, 800);
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+/* ===========================================================================
+ * Row-action menu — factored out as global classes (pattern 6).
+ *
+ * `.lj-iconbtn` is the 32px ghost trigger; `.lj-popmenu` is the dropdown the
+ * `v-menu` teleports to <body>. Because the menu content lives OUTSIDE any
+ * view's scope, it references the GLOBAL `--lj-*` tokens + Vuetify theme
+ * colours directly (never the view-local `--surface` etc., which wouldn't
+ * resolve there). Wrapping a v-menu activator+content in a component is
+ * awkward, so these stay plain classes the views apply.
+ * ========================================================================= */
+.lj-iconbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--lj-radius-sm, 8px);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  color: rgba(var(--v-theme-on-surface), .72);
+  transition: background .12s, color .12s;
+}
+.lj-iconbtn:hover {
+  background: rgba(var(--v-theme-on-surface), .06);
+  color: rgb(var(--v-theme-on-surface));
+}
+.lj-popmenu {
+  min-width: 200px;
+  background: rgb(var(--v-theme-surface));
+  border: var(--lj-border-width, 1px) var(--lj-border-style, solid) var(--lj-border-color, rgba(var(--v-theme-on-surface), .12));
+  border-radius: var(--lj-radius, 12px);
+  box-shadow: var(--lj-shadow-lg, 0 16px 44px -14px rgba(0, 0, 0, .45));
+  padding: 6px;
+}
+.lj-popmenu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  padding: 10px 12px;
+  border-radius: var(--lj-radius-sm, 8px);
+  text-align: left;
+}
+.lj-popmenu button:hover { background: rgba(var(--v-theme-on-surface), .06); }
+.lj-popmenu button:disabled { opacity: .4; cursor: not-allowed; }
+.lj-popmenu button.danger { color: rgb(var(--v-theme-error)); }
+.lj-popmenu .sep { height: 1px; background: rgba(var(--v-theme-on-surface), .12); margin: 5px 4px; }
+
+/* default style = the stock Vuetify shape language (flatter, tighter). */
+[data-style="default"] {
+  --lj-radius: 4px;
+  --lj-radius-sm: 4px;
+  --lj-radius-lg: 6px;
+  --lj-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+  --lj-shadow-lg: 0 8px 24px -8px rgba(0, 0, 0, .35);
+  --lj-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --lj-weight-bold: 600;
+  --lj-tracking: 0;
+}
+
+/* sharp / brutalist — zero radius, hard thick borders, mono, ALL-CAPS labels, no shadow. */
+[data-style="sharp"] {
+  --lj-radius: 0;
+  --lj-radius-sm: 0;
+  --lj-radius-lg: 0;
+  --lj-shadow: none;
+  --lj-shadow-lg: 6px 6px 0 0 rgba(var(--v-theme-on-surface), .9);
+  --lj-border-width: 2px;
+  --lj-border-color: rgba(var(--v-theme-on-surface), .85);
+  --lj-font: var(--lj-mono);
+  --lj-weight-bold: 700;
+  --lj-tracking: 0.02em;
+  --lj-uppercase: uppercase;
+  --lj-space: 12px;
+}
+
+/* vibrant — lifted cards, generous radius, soft deep shadow. */
+[data-style="vibrant"] {
+  --lj-radius: 14px;
+  --lj-radius-sm: 10px;
+  --lj-radius-lg: 20px;
+  --lj-shadow: 0 10px 28px -18px rgba(0, 0, 0, .5);
+  --lj-shadow-lg: 0 30px 70px -28px rgba(0, 0, 0, .55);
+  --lj-weight-bold: 800;
+  --lj-tracking: -0.03em;
+  --lj-space: 16px;
+}
+
+/* argon — pill-ish, gentle gradients (colors handled below), medium lift. */
+[data-style="argon"] {
+  --lj-radius: 12px;
+  --lj-radius-sm: 999px; /* pill buttons/chips */
+  --lj-radius-lg: 16px;
+  --lj-shadow: 0 8px 22px -14px rgba(50, 50, 93, .35);
+  --lj-shadow-lg: 0 24px 56px -24px rgba(50, 50, 93, .45);
+  --lj-weight-bold: 700;
+  --lj-space: 16px;
+}
+
+/* glass / aurora — large radius, translucent hairline, blur (in style block). */
+[data-style="glass"] {
+  --lj-radius: 18px;
+  --lj-radius-sm: 12px;
+  --lj-radius-lg: 24px;
+  --lj-shadow: 0 8px 32px -12px rgba(0, 0, 0, .4);
+  --lj-shadow-lg: 0 30px 80px -30px rgba(0, 0, 0, .55);
+  --lj-border-color: rgba(255, 255, 255, .22);
+  --lj-space: 16px;
+}
+
+/* bento — oversized rounded squares, airy spacing, soft big shadow. */
+[data-style="bento"] {
+  --lj-radius: 28px;
+  --lj-radius-sm: 16px;
+  --lj-radius-lg: 34px;
+  --lj-shadow: 0 16px 36px -22px rgba(0, 0, 0, .4);
+  --lj-shadow-lg: 0 34px 80px -30px rgba(0, 0, 0, .45);
+  --lj-weight-bold: 800;
+  --lj-tracking: -0.03em;
+  --lj-space: 22px;
+  --lj-gap: 14px;
+}
+
+/* neon / cyberpunk — small radius, glow shadow, mono, tight tracking. */
+[data-style="neon"] {
+  --lj-radius: 6px;
+  --lj-radius-sm: 6px;
+  --lj-radius-lg: 8px;
+  --lj-shadow: 0 0 0 1px rgba(0, 255, 240, .12), 0 0 24px rgba(162, 89, 255, .18);
+  --lj-shadow-lg: 0 0 0 1px rgba(0, 255, 240, .2), 0 0 48px rgba(255, 43, 214, .25);
+  --lj-border-color: rgba(0, 255, 240, .28);
+  --lj-font: var(--lj-mono);
+  --lj-weight-bold: 700;
+  --lj-tracking: 0.06em;
+  --lj-uppercase: uppercase;
+}
+
+/* paper — flat, hairline rules, no shadow, warm/editorial, serif-ish. */
+[data-style="paper"] {
+  --lj-radius: 2px;
+  --lj-radius-sm: 2px;
+  --lj-radius-lg: 3px;
+  --lj-shadow: none;
+  --lj-shadow-lg: 0 2px 0 0 rgba(0, 0, 0, .15);
+  --lj-border-width: 1px;
+  --lj-border-color: rgba(0, 0, 0, .18);
+  --lj-font: "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --lj-weight-bold: 700;
+  --lj-tracking: 0;
+  --lj-space: 16px;
+}
+
+/* md3 — Material Design 3 / Material You. Rounded corner tokens (medium 12 /
+ * large 16 / extra-large 28), Roboto type (self-hosted via the @fontsource/
+ * roboto npm package, imported in vuetify.js), MD3 tonal elevation, "emphasized" motion
+ * easing and longer ripples. The extra rules (state layers, pill buttons,
+ * ripple tuning) live in the dedicated block near the end of this file. */
+[data-style="md3"] {
+  --lj-radius: 16px;
+  --lj-radius-sm: 12px;
+  --lj-radius-lg: 28px;
+  --lj-shadow: 0 1px 3px 1px rgba(0, 0, 0, .15), 0 1px 2px 0 rgba(0, 0, 0, .3);
+  --lj-shadow-lg: 0 8px 12px 6px rgba(0, 0, 0, .15), 0 4px 4px 0 rgba(0, 0, 0, .3);
+  --lj-border-color: rgba(var(--v-theme-on-surface), .12);
+  --lj-font: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --lj-weight-bold: 500;
+  --lj-tracking: 0;
+  --lj-space: 16px;
+  /* MD3 "emphasized" easing + standard duration for expressive motion. */
+  --lj-transition: .3s cubic-bezier(.2, 0, 0, 1);
+}
+
+/* ---------------------------------------------------------------------------
+ * Token consumption on stock Vuetify surfaces. These give EVERY style a
+ * baseline shape/elevation/type identity even before the hand-tuned
+ * per-style blocks below add their flourishes. Kept low-specificity (single
+ * class, no !important) so the bespoke `[data-style]` rules still win where
+ * they set an explicit value, and so component-local styles can override.
+ * `.v-card--variant-flat` etc. keep Vuetify's own variant logic for color;
+ * we only touch shape + elevation + type here.
+ * ------------------------------------------------------------------------- */
+.v-application { font-family: var(--lj-font); }
+
+.v-card {
+  border-radius: var(--lj-radius);
+  box-shadow: var(--lj-shadow);
+}
+.v-card .v-card-title {
+  font-family: var(--lj-font);
+  font-weight: var(--lj-weight-bold);
+  letter-spacing: var(--lj-tracking);
+}
+.v-btn {
+  border-radius: var(--lj-radius-sm);
+  text-transform: var(--lj-uppercase);
+  font-family: var(--lj-font);
+}
+.v-chip { border-radius: var(--lj-radius-sm); }
+.v-field { border-radius: var(--lj-radius-sm); }
+/* Dialogs / menus float, so they take the heavier elevation token. */
+.v-overlay__content > .v-card,
+.v-overlay__content > .v-list {
+  border-radius: var(--lj-radius);
+  box-shadow: var(--lj-shadow-lg);
+}
+
+/* ===========================================================================
+ * Style catalog
+ *
+ * Selected by `<html data-style="<id>">` — see `src/plugins/styles.js`. The
+ * "default" id is intentionally absent here: it means "no overrides, ship
+ * Vuetify as-is".
+ *
+ * Each style is a CSS-only skin: we never recompute a Vuetify theme, just
+ * paint on top with `[data-style="<id>"]` selectors. That keeps style
+ * orthogonal to the color Theme catalog — every (theme, style) pair is a
+ * valid combination.
+ *
+ * Layering rules of thumb when editing:
+ *   1. Set the body / `<v-application>` background FIRST.
+ *   2. Then override surface shapes: `.v-card`, `.v-app-bar`,
+ *      `.v-navigation-drawer`.
+ *   3. Then call-to-action shapes: `.v-btn`, `.v-chip`, `.v-field`.
+ *   4. Sidebar + active states last — those tend to need the most
+ *      specificity.
+ * ========================================================================= */
+
+/* ============================== compact ==================================
+ * Orthogonal global density toggle — see `applyCompact()` in
+ * `plugins/styles.js`. Lives at `[data-compact="true"]` (instead of in
+ * the style slot) so a user can pair it with any preset: "Pulse +
+ * compact", "Aurora + compact", and so on. Intentionally only touches
+ * SIZES / PADDINGS — never radii, colors, or shadows — so the active
+ * preset's identity stays visible.
+ * ======================================================================== */
+[data-compact="true"] {
+  font-size: 13px;
+}
+[data-compact="true"] .v-card .v-card-title {
+  padding: 8px 12px !important;
+  font-size: 0.95rem;
+}
+[data-compact="true"] .v-card .v-card-text {
+  padding: 8px 12px !important;
+}
+[data-compact="true"] .v-btn {
+  min-height: 28px !important;
+  padding-inline: 10px !important;
+  font-size: 0.8rem !important;
+}
+[data-compact="true"] .v-chip {
+  height: 20px !important;
+  font-size: 0.72rem !important;
+}
+[data-compact="true"] .v-list-item {
+  min-height: 32px !important;
+  padding-inline: 8px !important;
+}
+[data-compact="true"] .v-list-item-title {
+  font-size: 0.85rem !important;
+}
+[data-compact="true"] .v-data-table > .v-table__wrapper > table > tbody > tr > td,
+[data-compact="true"] .v-data-table > .v-table__wrapper > table > thead > tr > th {
+  padding: 4px 8px !important;
+  font-size: 0.82rem !important;
+}
+/* Compact also drops decorative icons for a denser layout: breadcrumb chips,
+   second-level (sub-menu) entries, and input prepend-inner icons. Hiding the
+   element (not just the glyph) also reclaims its horizontal space. */
+[data-compact="true"] .bc-chip .v-icon {
+  display: none !important;
+}
+[data-compact="true"] .sub-item > .v-icon,
+[data-compact="true"] .sub-item .dot {
+  display: none !important;
+}
+[data-compact="true"] .v-field__prepend-inner {
+  display: none !important;
+}
+
+/* ========================== reduce motion ===============================
+ * Orthogonal global accessibility toggle — see `applyReduceMotion()` in
+ * `plugins/styles.js`. Lives at `[data-reduce-motion="true"]` so it layers
+ * over any preset. Kills ripples, dialog/menu appear animations (including
+ * the bespoke `vc-shake` on destructive VibrantConfirmDialog) and progress
+ * bar motion. The global reset below already neutralizes most of these via
+ * the near-zero duration; the targeted rules make the intent explicit and
+ * cover keyframe animations that ignore `transition-duration`.
+ * ======================================================================== */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: .001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: .001ms !important;
+  scroll-behavior: auto !important;
+}
+[data-reduce-motion="true"] .v-ripple__container {
+  display: none !important;
+}
+[data-reduce-motion="true"] .v-progress-linear__indeterminate,
+[data-reduce-motion="true"] .v-progress-circular__overlay {
+  animation: none !important;
+}
+[data-reduce-motion="true"] .vconfirm.tone-error,
+[data-reduce-motion="true"] .vconfirm.tone-warning {
+  animation: none !important;
+}
+
+/* ============================== sharp ====================================
+ * Brutalist. Zero radius, monospaced labels, harsh borders, uppercase
+ * buttons. Reads like a 90s admin panel reskinned for 2026 — a love-it-or-
+ * hate-it style that's increasingly popular in dev tools.
+ * ======================================================================== */
+[data-style="sharp"] {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+[data-style="sharp"] .v-card,
+[data-style="sharp"] .v-btn,
+[data-style="sharp"] .v-chip,
+[data-style="sharp"] .v-field,
+[data-style="sharp"] .v-list-item,
+[data-style="sharp"] .v-navigation-drawer,
+[data-style="sharp"] .v-app-bar,
+[data-style="sharp"] .v-dialog > .v-overlay__content > .v-card {
+  border-radius: 0 !important;
+}
+[data-style="sharp"] .v-card {
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.88) !important;
+  border: 2px solid rgba(0, 0, 0, 0.88) !important;
+}
+[data-style="sharp"] .v-btn {
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  border: 2px solid rgba(0, 0, 0, 0.88) !important;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.88) !important;
+  transition: transform 0.06s linear, box-shadow 0.06s linear !important;
+}
+[data-style="sharp"] .v-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.88) !important;
+}
+[data-style="sharp"] .v-chip {
+  border: 2px solid rgba(0, 0, 0, 0.88) !important;
+  font-weight: 700;
+}
+[data-style="sharp"] .v-app-bar,
+[data-style="sharp"] .v-navigation-drawer {
+  box-shadow: none !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.88);
+  border-right: 2px solid rgba(0, 0, 0, 0.88);
+}
+
+/* ============================== vibrant ==================================
+ * Bold gradients, deep navy sidebar, lifted cards. The "Ligoj 2026"
+ * prototype mock-up turned into a style: cards round to 14 px, the
+ * primary action wears an animated orange→red gradient, the active
+ * sidebar row gets a left accent bar + tinted background. Headings
+ * carry the Inter typographic flavour for that 2026 SaaS look.
+ * ======================================================================== */
+[data-style="vibrant"] {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+[data-style="vibrant"] .v-card {
+  border-radius: 14px !important;
+  box-shadow: 0 12px 28px -8px rgba(26, 35, 126, 0.18) !important;
+  border: 1px solid rgba(26, 35, 126, 0.06) !important;
+}
+[data-style="vibrant"] .v-card .v-card-title {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: 1.15rem;
+}
+[data-style="vibrant"] .v-btn {
+  border-radius: 10px !important;
+  text-transform: none !important;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+[data-style="vibrant"] .v-btn--variant-elevated.bg-primary,
+[data-style="vibrant"] .v-btn--variant-flat.bg-primary,
+[data-style="vibrant"] .v-btn.bg-primary {
+  background: linear-gradient(135deg, #f57c00 0%, #e53935 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px rgba(229, 57, 53, 0.32) !important;
+  background-size: 200% 200%;
+  animation: ligoj-vibrant-shift 8s ease-in-out infinite;
+}
+@keyframes ligoj-vibrant-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+[data-style="vibrant"] .v-btn--variant-elevated.bg-error,
+[data-style="vibrant"] .v-btn.bg-error {
+  background: linear-gradient(135deg, #ef5350 0%, #b71c1c 100%) !important;
+  box-shadow: 0 8px 20px rgba(183, 28, 28, 0.32) !important;
+}
+[data-style="vibrant"] .v-chip {
+  border-radius: 999px !important;
+  font-weight: 600;
+}
+[data-style="vibrant"] .v-field {
+  border-radius: 10px !important;
+}
+[data-style="vibrant"] .v-navigation-drawer {
+  background: linear-gradient(180deg, #1a237e 0%, #0d1b5e 100%) !important;
+  color: #e8eaf6 !important;
+}
+[data-style="vibrant"] .v-navigation-drawer .v-list-item {
+  border-radius: 10px;
+  margin: 3px 10px;
+  color: #c5cae9 !important;
+}
+[data-style="vibrant"] .v-navigation-drawer .v-list-item--active {
+  background: rgba(245, 124, 0, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: inset 4px 0 0 #f57c00;
+}
+[data-style="vibrant"] .v-app-bar {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
+  backdrop-filter: saturate(1.2);
+}
+
+/* ============================== argon ====================================
+ * Argon Dashboard 2 PRO inspired. White surface, gradient stat cards in
+ * indigo / cyan / mint, pill-shaped icon badges, sidebar uses a soft
+ * grey panel with gradient-underlined active row. Lots of soft shadow.
+ * ======================================================================== */
+[data-style="argon"] {
+  font-family: 'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+/* No .v-application background override here — the theme's
+ * `--v-theme-background` token already owns the canvas color. Forcing
+ * a custom hex (e.g. the Argon-mock `#f8f9fe`) on top of a dark theme
+ * leaves headings in the theme's light on-background color, producing
+ * invisible "white on near-white" text. Argon's identity lives in the
+ * gradient stat cards + shadows below; that survives any theme. */
+[data-style="argon"] .v-card {
+  border-radius: 12px !important;
+  border: 0 !important;
+  box-shadow: 0 0 2rem 0 rgba(136, 152, 170, 0.15) !important;
+}
+[data-style="argon"] .v-card .v-card-title {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: #344767;
+}
+/* Stat-card hero treatment — every primary-color card becomes a
+ * gradient surface with white text and a floating icon disc. */
+[data-style="argon"] .v-card.bg-primary {
+  background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-card.bg-info {
+  background: linear-gradient(87deg, #11cdef 0, #1171ef 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-card.bg-success {
+  background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-card.bg-warning {
+  background: linear-gradient(87deg, #fb6340 0, #fbb140 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-btn {
+  border-radius: 8px !important;
+  text-transform: none !important;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+[data-style="argon"] .v-btn.bg-primary {
+  background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+  color: #ffffff !important;
+}
+[data-style="argon"] .v-chip {
+  border-radius: 30px !important;
+  font-weight: 600;
+  font-size: 0.72rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-inline: 10px !important;
+}
+[data-style="argon"] .v-field {
+  border-radius: 8px !important;
+  box-shadow: inset 0 1px 2px rgba(50, 50, 93, 0.1) !important;
+}
+[data-style="argon"] .v-navigation-drawer {
+  background: #ffffff !important;
+  box-shadow: 0 0 2rem 0 rgba(136, 152, 170, 0.15) !important;
+}
+[data-style="argon"] .v-navigation-drawer .v-list-item {
+  border-radius: 6px;
+  margin: 2px 12px;
+  color: #525f7f !important;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+[data-style="argon"] .v-navigation-drawer .v-list-item--active {
+  color: #5e72e4 !important;
+  background: rgba(94, 114, 228, 0.05) !important;
+}
+[data-style="argon"] .v-navigation-drawer .v-list-item--active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #5e72e4, #825ee4);
+}
+[data-style="argon"] .v-app-bar {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ============================== glass ====================================
+ * "Light Blue" inspired — dark aurora background, frosted glass surfaces,
+ * accent gradient buttons. Heavy backdrop-filter use means this style
+ * looks best on a recent Chromium / Firefox; fallbacks degrade to flat
+ * translucent dark panels.
+ * ======================================================================== */
+[data-style="glass"] {
+  color-scheme: dark;
+  --glass-bg: rgba(20, 22, 70, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-text: #e8eaf6;
+}
+[data-style="glass"] .v-application {
+  background:
+    radial-gradient(1200px 800px at 10% -10%, rgba(106, 130, 251, 0.35), transparent 60%),
+    radial-gradient(1000px 700px at 110% 110%, rgba(252, 92, 125, 0.28), transparent 60%),
+    linear-gradient(135deg, #14123a 0%, #1d1d4a 50%, #3a3a8e 100%) !important;
+  color: var(--glass-text) !important;
+  min-height: 100vh;
+}
+[data-style="glass"] .v-card,
+[data-style="glass"] .v-navigation-drawer,
+[data-style="glass"] .v-app-bar,
+[data-style="glass"] .v-dialog > .v-overlay__content > .v-card,
+[data-style="glass"] .v-menu > .v-overlay__content > .v-list {
+  border-radius: 18px !important;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  color: var(--glass-text) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+[data-style="glass"] .v-card .v-card-title,
+[data-style="glass"] .v-card .v-card-text {
+  color: var(--glass-text) !important;
+}
+[data-style="glass"] .v-btn {
+  border-radius: 12px !important;
+  text-transform: none !important;
+  font-weight: 600;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(10px);
+}
+[data-style="glass"] .v-btn--variant-elevated.bg-primary,
+[data-style="glass"] .v-btn--variant-flat.bg-primary,
+[data-style="glass"] .v-btn.bg-primary {
+  background: linear-gradient(135deg, #6a82fb 0%, #fc5c7d 100%) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 30px rgba(106, 130, 251, 0.45) !important;
+}
+[data-style="glass"] .v-chip {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: var(--glass-text) !important;
+}
+[data-style="glass"] .v-field {
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  --v-field-input-color: var(--glass-text);
+}
+[data-style="glass"] .v-navigation-drawer {
+  border-radius: 0 18px 18px 0 !important;
+}
+[data-style="glass"] .v-navigation-drawer .v-list-item {
+  border-radius: 12px;
+  margin: 3px 10px;
+  color: rgba(232, 234, 246, 0.7) !important;
+}
+[data-style="glass"] .v-navigation-drawer .v-list-item--active {
+  background: rgba(106, 130, 251, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(106, 130, 251, 0.4);
+}
+
+/* ============================== bento ====================================
+ * Apple-style oversized cards arranged like a bento box. Big rounded
+ * squares, heavy padding, large display headings, pastel-tinted surfaces.
+ * Works best paired with a light theme.
+ * ======================================================================== */
+[data-style="bento"] {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+/* Canvas background is left to the active color theme — overriding
+ * with a fixed light grey here broke contrast on dark themes (the
+ * theme's on-background stays light, so the page heading rendered as
+ * near-invisible white on the forced `#f5f5f7`). Bento's identity is
+ * its oversized rounded cards + display typography, both of which
+ * survive any color scheme. */
+[data-style="bento"] .v-card {
+  border-radius: 28px !important;
+  border: none !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  overflow: hidden;
+}
+[data-style="bento"] .v-card .v-card-title {
+  padding: 28px 28px 8px !important;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+[data-style="bento"] .v-card .v-card-text {
+  padding: 8px 28px 28px !important;
+  font-size: 1rem;
+}
+[data-style="bento"] .v-btn {
+  border-radius: 999px !important;
+  text-transform: none !important;
+  font-weight: 600;
+  padding-inline: 22px !important;
+  min-height: 44px !important;
+  letter-spacing: -0.005em;
+}
+[data-style="bento"] .v-chip {
+  border-radius: 14px !important;
+  font-weight: 600;
+}
+[data-style="bento"] .v-field {
+  border-radius: 16px !important;
+}
+[data-style="bento"] .v-list-item {
+  border-radius: 18px;
+  margin: 4px 10px;
+  min-height: 48px;
+}
+[data-style="bento"] .v-navigation-drawer {
+  border-right: none !important;
+}
+[data-style="bento"] .v-app-bar {
+  /* Ride the theme's surface token so dark themes get a dark
+   * translucent bar (instead of a fixed light grey washing out the
+   * inherited white text). `rgb(from … / 0.82)` keeps the Apple
+   * frosted-bar look on top. */
+  background: rgb(from rgb(var(--v-theme-surface)) r g b / 0.82) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: none !important;
+}
+
+/* ============================== neon =====================================
+ * Cyberpunk neon. Black canvas, cyan + magenta accents, glowing borders,
+ * scan-line accents on call-to-action buttons. Looks best with a dark
+ * color theme (Dracula / One Dark / Monokai).
+ * ======================================================================== */
+[data-style="neon"] {
+  color-scheme: dark;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --neon-cyan: #00fff0;
+  --neon-magenta: #ff2bd6;
+  --neon-violet: #a259ff;
+}
+[data-style="neon"] .v-application {
+  background:
+    radial-gradient(1000px 700px at 20% 0%, rgba(162, 89, 255, 0.18), transparent 60%),
+    radial-gradient(900px 600px at 100% 100%, rgba(255, 43, 214, 0.16), transparent 60%),
+    #05010f !important;
+  color: #e8f4ff !important;
+}
+[data-style="neon"] .v-card,
+[data-style="neon"] .v-navigation-drawer,
+[data-style="neon"] .v-app-bar {
+  border-radius: 6px !important;
+  background: rgba(10, 6, 26, 0.85) !important;
+  border: 1px solid rgba(0, 255, 240, 0.22) !important;
+  color: #e8f4ff !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 240, 0.06),
+    0 0 24px rgba(162, 89, 255, 0.12) !important;
+}
+[data-style="neon"] .v-card .v-card-title {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.95rem;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(0, 255, 240, 0.5);
+}
+[data-style="neon"] .v-btn {
+  border-radius: 6px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border: 1px solid var(--neon-cyan) !important;
+  color: var(--neon-cyan) !important;
+  background: transparent !important;
+  box-shadow: 0 0 0 1px rgba(0, 255, 240, 0.25), 0 0 16px rgba(0, 255, 240, 0.18) !important;
+  transition: box-shadow 0.15s, color 0.15s, background 0.15s;
+}
+[data-style="neon"] .v-btn:hover {
+  background: rgba(0, 255, 240, 0.08) !important;
+  box-shadow: 0 0 0 1px rgba(0, 255, 240, 0.5), 0 0 28px rgba(0, 255, 240, 0.5) !important;
+}
+[data-style="neon"] .v-btn.bg-primary,
+[data-style="neon"] .v-btn--variant-elevated.bg-primary {
+  background: linear-gradient(135deg, var(--neon-magenta), var(--neon-violet)) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 24px rgba(255, 43, 214, 0.55) !important;
+}
+[data-style="neon"] .v-chip {
+  border-radius: 4px !important;
+  background: rgba(0, 255, 240, 0.08) !important;
+  border: 1px solid rgba(0, 255, 240, 0.4) !important;
+  color: var(--neon-cyan) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem !important;
+  font-weight: 700;
+}
+[data-style="neon"] .v-field {
+  border-radius: 4px !important;
+  background: rgba(0, 255, 240, 0.04) !important;
+}
+[data-style="neon"] .v-navigation-drawer .v-list-item {
+  border-radius: 4px;
+  margin: 2px 8px;
+  color: rgba(232, 244, 255, 0.6) !important;
+}
+[data-style="neon"] .v-navigation-drawer .v-list-item--active {
+  background: rgba(255, 43, 214, 0.1) !important;
+  color: var(--neon-magenta) !important;
+  box-shadow: inset 3px 0 0 var(--neon-magenta), 0 0 16px rgba(255, 43, 214, 0.25);
+  text-shadow: 0 0 8px rgba(255, 43, 214, 0.55);
+}
+
+/* ============================== paper ====================================
+ * Warm minimalist print look. Cream background, ink-black text, a single
+ * accent color used for links and CTAs. No shadows — just hairline rules.
+ * Reads like a freshly-printed broadsheet.
+ * ======================================================================== */
+[data-style="paper"] {
+  font-family: 'Iowan Old Style', 'Palatino', Georgia, 'Times New Roman', serif;
+  --paper-bg: #f3ede1;
+  --paper-ink: #1a1a1a;
+  --paper-rule: #d8cdb8;
+  --paper-accent: #c8442a;
+}
+[data-style="paper"] .v-application {
+  background: var(--paper-bg) !important;
+  color: var(--paper-ink) !important;
+}
+[data-style="paper"] .v-card {
+  border-radius: 2px !important;
+  background: #fbf7ec !important;
+  border: 1px solid var(--paper-rule) !important;
+  box-shadow: none !important;
+}
+[data-style="paper"] .v-card .v-card-title {
+  font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.005em;
+  border-bottom: 1px solid var(--paper-rule);
+  padding-bottom: 12px !important;
+}
+/* Restore some breathing room under the bordered title — the default
+ * v-card-text top padding (16 px) read as too tight once the title
+ * grew the bottom hairline, making the first row of preferences feel
+ * stuck to the rule. */
+[data-style="paper"] .v-card .v-card-text {
+  padding-top: 22px !important;
+}
+/* Buttons: the hairline border is only appropriate on text-bearing
+ * "action" buttons (Save, Cancel, etc.). Icon-only buttons and every
+ * button mounted inside the app-bar (hamburger nav-icon, logout,
+ * refresh, notification bell…) read as ugly square borders around a
+ * tiny glyph — that was the user-reported "weird borders" bug. */
+[data-style="paper"] .v-btn:not(.v-btn--icon) {
+  border-radius: 2px !important;
+  text-transform: none !important;
+  font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  font-weight: 600;
+  border: 1px solid var(--paper-ink) !important;
+  box-shadow: none !important;
+  letter-spacing: 0;
+}
+[data-style="paper"] .v-app-bar .v-btn,
+[data-style="paper"] .v-btn--icon {
+  border: none !important;
+  box-shadow: none !important;
+}
+[data-style="paper"] .v-btn.bg-primary,
+[data-style="paper"] .v-btn--variant-elevated.bg-primary {
+  background: var(--paper-accent) !important;
+  color: #ffffff !important;
+  border-color: var(--paper-accent) !important;
+}
+[data-style="paper"] .v-chip {
+  border-radius: 2px !important;
+  background: transparent !important;
+  border: 1px solid var(--paper-rule) !important;
+  color: var(--paper-ink) !important;
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+[data-style="paper"] .v-field {
+  border-radius: 2px !important;
+  background: #fbf7ec !important;
+}
+[data-style="paper"] .v-list-item {
+  border-radius: 2px;
+  border-bottom: 1px solid var(--paper-rule);
+}
+[data-style="paper"] .v-list-item:last-child {
+  border-bottom: none;
+}
+[data-style="paper"] .v-navigation-drawer {
+  background: #ece4d2 !important;
+  border-right: 1px solid var(--paper-rule) !important;
+}
+/* AppLayout mounts the drawer with `color="primary" dark`, which forces
+ * white text on whatever background we paint. With the Paper cream
+ * background that produces invisible labels — explicitly re-anchor
+ * the drawer's text + icon color to the paper ink. Targets every
+ * Vuetify text/icon class that the dark-mode flip touches. */
+[data-style="paper"] .v-navigation-drawer,
+[data-style="paper"] .v-navigation-drawer .v-list-item,
+[data-style="paper"] .v-navigation-drawer .v-list-item-title,
+[data-style="paper"] .v-navigation-drawer .v-list-item-subtitle,
+[data-style="paper"] .v-navigation-drawer .v-icon {
+  color: var(--paper-ink) !important;
+}
+[data-style="paper"] .v-navigation-drawer .v-list-item--active {
+  background: transparent !important;
+  color: var(--paper-accent) !important;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+[data-style="paper"] .v-navigation-drawer .v-list-item--active .v-icon {
+  color: var(--paper-accent) !important;
+}
+[data-style="paper"] .v-app-bar {
+  background: var(--paper-bg) !important;
+  border-bottom: 1px solid var(--paper-rule) !important;
+  box-shadow: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Material Design 3 (Material You) — the user-requested flourishes:
+ * fonts, transitions (motion) and ripples / state layers, plus the MD3
+ * rounded shape language. Colors come from the md3Light / md3Dark Vuetify
+ * themes; this block adds the MOTION and INTERACTION layer on top.
+ * ------------------------------------------------------------------------- */
+
+/* MD3 reference easing curves (expressive / standard motion). */
+[data-style="md3"] {
+  --md3-emphasized: cubic-bezier(.2, 0, 0, 1);
+  --md3-standard: cubic-bezier(.2, 0, 0, 1);
+  --md3-emphasized-decelerate: cubic-bezier(.05, .7, .1, 1);
+}
+
+/* Roboto everywhere (self-hosted; falls back to system fonts if unavailable). */
+[data-style="md3"],
+[data-style="md3"] .v-application,
+[data-style="md3"] .v-btn,
+[data-style="md3"] .v-field,
+[data-style="md3"] .v-list-item-title,
+[data-style="md3"] .v-card-title,
+[data-style="md3"] .v-toolbar-title {
+  font-family: var(--lj-font) !important;
+}
+
+/* --- Motion: animate the interactive surfaces with MD3 emphasized easing. */
+[data-style="md3"] .v-btn,
+[data-style="md3"] .v-card,
+[data-style="md3"] .v-chip,
+[data-style="md3"] .v-field,
+[data-style="md3"] .v-list-item,
+[data-style="md3"] .v-navigation-drawer .v-list-item,
+[data-style="md3"] .v-tab {
+  transition:
+    background-color .28s var(--md3-standard),
+    box-shadow .28s var(--md3-standard),
+    border-color .28s var(--md3-standard),
+    transform .28s var(--md3-emphasized) !important;
+}
+
+/* Buttons lift on hover, settle on press — MD3 elevation + a touch of scale. */
+[data-style="md3"] .v-btn {
+  border-radius: 20px; /* MD3 full-height pill buttons */
+  letter-spacing: .0892857143em; /* MD3 label-large tracking */
+  text-transform: none;
+}
+[data-style="md3"] .v-btn:hover {
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, .15), 0 1px 2px 0 rgba(0, 0, 0, .3);
+}
+[data-style="md3"] .v-btn:active {
+  transform: scale(.97);
+}
+[data-style="md3"] .v-btn--icon {
+  border-radius: 50%;
+}
+
+/* FAB-ish primary CTA gets the larger MD3 corner. */
+[data-style="md3"] .v-card {
+  border-radius: var(--lj-radius);
+}
+[data-style="md3"] .v-dialog > .v-card,
+[data-style="md3"] .v-overlay__content > .v-card {
+  border-radius: var(--lj-radius-lg); /* 28px MD3 dialog corner */
+}
+
+/* Text fields → MD3 "filled" feel: rounded top, flat bottom. */
+[data-style="md3"] .v-field {
+  border-radius: 4px 4px 0 0;
+}
+
+/* --- State layers: MD3 overlays a tonal layer on hover/focus/press.
+ * Vuetify already renders `.v-btn__overlay` / `.v-list-item__overlay`; we
+ * tune the opacities to the MD3 spec (hover .08, focus/press .10-.12). */
+[data-style="md3"] .v-btn:hover > .v-btn__overlay,
+[data-style="md3"] .v-list-item:hover > .v-list-item__overlay {
+  opacity: .08;
+}
+[data-style="md3"] .v-btn:focus-visible > .v-btn__overlay,
+[data-style="md3"] .v-list-item:focus-visible > .v-list-item__overlay {
+  opacity: .12;
+}
+
+/* --- Ripples on real Vuetify components (v-list-item, the v-btn inside
+ * file inputs / selects, checkboxes): soften + slow to the MD3 feel. We only
+ * tune timing/opacity here — Vuetify's directive drives the geometry. */
+[data-style="md3"] .v-ripple__animation--in {
+  transition:
+    transform .42s var(--md3-emphasized-decelerate),
+    opacity .11s var(--md3-standard) !important;
+  opacity: .12;
+}
+[data-style="md3"] .v-ripple__animation--out {
+  transition: opacity .45s var(--md3-standard) !important;
+}
+
+/* --- Ripples on the 2026 custom controls. The visible buttons of the shell
+ * are plain elements (LjButton `.lj-btn`, the icon buttons `.lj-iconbtn`, the
+ * sidebar `.nav-item` / `.sub-item`), NOT Vuetify components — so they carry
+ * no `v-ripple` directive. Give them a pure-CSS centered ripple: a circular
+ * `::after` that snaps small+visible on press, then expands and fades on
+ * release (the classic Material CSS ripple, no JS needed). */
+[data-style="md3"] .lj-btn,
+[data-style="md3"] .lj-iconbtn,
+[data-style="md3"] .nav-item,
+[data-style="md3"] .sub-item {
+  position: relative;
+  overflow: hidden;
+}
+[data-style="md3"] .lj-btn::after,
+[data-style="md3"] .lj-iconbtn::after,
+[data-style="md3"] .nav-item::after,
+[data-style="md3"] .sub-item::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  /* Rest state = expanded + invisible. The release transitions TO this: the
+   * expansion (.9s) finishes well before the fade (1.6s) so the growing
+   * circle stays clearly visible the whole way out. */
+  transform: translate(-50%, -50%) scale(3);
+  transform-origin: center;
+  pointer-events: none;
+  transition: transform .9s var(--md3-emphasized), opacity 1.6s linear;
+}
+[data-style="md3"] .lj-btn:active::after,
+[data-style="md3"] .lj-iconbtn:active::after,
+[data-style="md3"] .nav-item:active::after,
+[data-style="md3"] .sub-item:active::after {
+  /* Press: snap to a small but VISIBLE, fairly opaque disc at the center. */
+  opacity: .34;
+  transform: translate(-50%, -50%) scale(.18);
+  transition: none;
+}
+/* The label/icon must sit above the ripple layer. */
+[data-style="md3"] .lj-btn > *,
+[data-style="md3"] .lj-iconbtn > *,
+[data-style="md3"] .nav-item > *,
+[data-style="md3"] .sub-item > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Selected navigation item → MD3 "active indicator" pill. */
+[data-style="md3"] .v-navigation-drawer .v-list-item {
+  border-radius: 999px;
+  margin: 2px 8px;
+}
+[data-style="md3"] .v-navigation-drawer .v-list-item--active {
+  background: rgba(var(--v-theme-secondary), .22);
+}
+
+/* Honour the user's reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  [data-style="md3"] .v-btn,
+  [data-style="md3"] .v-card,
+  [data-style="md3"] .v-chip,
+  [data-style="md3"] .v-field,
+  [data-style="md3"] .v-list-item,
+  [data-style="md3"] .v-ripple__animation--in,
+  [data-style="md3"] .v-ripple__animation--out,
+  [data-style="md3"] .lj-btn::after,
+  [data-style="md3"] .lj-iconbtn::after,
+  [data-style="md3"] .nav-item::after,
+  [data-style="md3"] .sub-item::after {
+    transition: none !important;
+  }
+  [data-style="md3"] .v-btn:active {
+    transform: none;
+  }
+  /* Keep the ripple invisible rather than flashing without animation. */
+  [data-style="md3"] .lj-btn:active::after,
+  [data-style="md3"] .lj-iconbtn:active::after,
+  [data-style="md3"] .nav-item:active::after,
+  [data-style="md3"] .sub-item:active::after {
+    opacity: 0;
+  }
+}
+
+/* ===========================================================================
+ * ligoj-classic — faithful Bootstrap + Material Design revival
+ *
+ * Selected by `<html data-style="ligoj-classic">` (preset "Reforged",
+ * id `reforged`). Reproduces the spirit of the legacy
+ * `themes/bootstrap-material-design` skin: purple primary, teal accents,
+ * flat indigo sidebar, Material ripples on press and a modal scale-in on dialogs.
+ * Colors are the exact legacy values. The ripple timing mirrors the old
+ * `ripples.css` (opacity .15s ease-in + transform .5s cubic-bezier(.4,0,.2,1)
+ * .1s); the dialog entrance + shadow mirror the old `.modal-content`. Every
+ * rule is scoped under the attribute so other presets stay untouched.
+ * ========================================================================= */
+
+/* a) Ripple on real Vuetify components — mirror the legacy ripples.css feel
+ * (Vuetify's v-ripple directive drives the geometry; we only tune timing). */
+[data-style="ligoj-classic"] .v-ripple__animation--in {
+  transition:
+    transform .5s cubic-bezier(.4, 0, .2, 1) .1s,
+    opacity .15s ease-in !important;
+  opacity: .18;
+}
+[data-style="ligoj-classic"] .v-ripple__animation--out {
+  transition: opacity .1s linear !important;
+}
+
+/* a') Ripple on the 2026 custom controls (plain elements with no v-ripple):
+ * same pure-CSS centered ripple as md3, tuned to the legacy feel. */
+[data-style="ligoj-classic"] .lj-btn,
+[data-style="ligoj-classic"] .lj-iconbtn,
+[data-style="ligoj-classic"] .nav-item,
+[data-style="ligoj-classic"] .sub-item {
+  position: relative;
+  overflow: hidden;
+}
+[data-style="ligoj-classic"] .lj-btn::after,
+[data-style="ligoj-classic"] .lj-iconbtn::after,
+[data-style="ligoj-classic"] .nav-item::after,
+[data-style="ligoj-classic"] .sub-item::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(3);
+  transform-origin: center;
+  pointer-events: none;
+  transition: transform .5s cubic-bezier(.4, 0, .2, 1), opacity .6s linear;
+}
+[data-style="ligoj-classic"] .lj-btn:active::after,
+[data-style="ligoj-classic"] .lj-iconbtn:active::after,
+[data-style="ligoj-classic"] .nav-item:active::after,
+[data-style="ligoj-classic"] .sub-item:active::after {
+  opacity: .2;
+  transform: translate(-50%, -50%) scale(.2);
+  transition: none;
+}
+[data-style="ligoj-classic"] .lj-btn > *,
+[data-style="ligoj-classic"] .lj-iconbtn > *,
+[data-style="ligoj-classic"] .nav-item > *,
+[data-style="ligoj-classic"] .sub-item > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* b) Dialog scale-in — faithful to the legacy `.modal-content` entrance
+ * (Material modal scale-in + deep elevation, 2px corners). */
+@keyframes lj-classic-dialog {
+  from { transform: scale(.7); opacity: 0; }
+  to   { transform: scale(1);  opacity: 1; }
+}
+[data-style="ligoj-classic"] .v-overlay__content > .v-card {
+  animation: lj-classic-dialog .3s cubic-bezier(.4, 0, .2, 1);
+  border-radius: 2px;
+  box-shadow:
+    0 27px 24px 0 rgba(0, 0, 0, .2),
+    0 40px 77px 0 rgba(0, 0, 0, .22);
+}
+
+/* c) Component colors — exact legacy values. */
+[data-style="ligoj-classic"] .v-chip {
+  background: #0aa89e;
+  color: #fff;
+}
+/* Checked checkbox + focused input underline/label → teal. */
+[data-style="ligoj-classic"] .v-selection-control--dirty .v-selection-control__input {
+  color: #039588;
+}
+[data-style="ligoj-classic"] .v-field--focused .v-field__outline {
+  color: #039588;
+}
+[data-style="ligoj-classic"] .v-field--focused .v-label.v-field-label {
+  color: #039588;
+}
+/* Menus (selects / dropdowns): light grey fill, teal text, purple active.
+ * Descendant selector: the menu's v-list sits under a .v-sheet wrapper inside
+ * .v-overlay__content, not as a direct child. */
+[data-style="ligoj-classic"] .v-overlay__content .v-list {
+  background: #eeeeee !important;
+}
+[data-style="ligoj-classic"] .v-overlay__content .v-list-item:not(.v-list-item--active) {
+  color: #039588;
+}
+[data-style="ligoj-classic"] .v-list-item--active {
+  background: #9c27b0 !important;
+  color: #fff !important;
+}
+/* Sidebar (the host chrome) → flat indigo. App.vue paints the rail with a
+ * gradient derived from --primary (line ~455); under this theme that primary
+ * is purple (#9c27b0), which reads garish, so we flatten it to a solid indigo
+ * #3f51b5 — the legacy "toolbar" color, moved onto the real chrome. The top
+ * bar (header.bar) is intentionally left light/default for an indigo-rail +
+ * light-content contrast, like the old UI. */
+[data-style="ligoj-classic"] .sidebar {
+  background: #3f51b5 !important;
+}
+[data-style="ligoj-classic"] .sidebar,
+[data-style="ligoj-classic"] .sidebar .v-icon,
+[data-style="ligoj-classic"] .sidebar .nav-item {
+  color: #fff !important;
+}
+/* …except the footer bug-report trigger, which keeps its orange tint (the
+   white rule above would otherwise flatten it into the rest of the icons). */
+[data-style="ligoj-classic"] .sidebar .foot-bug .v-icon {
+  color: #ff8c42 !important;
+}
+/* Nav item states must stay legible on the indigo rail. */
+[data-style="ligoj-classic"] .sidebar .nav-item:hover {
+  background: rgba(255, 255, 255, .14) !important;
+}
+[data-style="ligoj-classic"] .sidebar .nav-item.active {
+  background: #5363bd !important;
+  color: #fff !important;
+}
+
+/* Honour the OS-level reduced-motion preference: cut this theme's ripple and
+ * dialog animations when the user asks for less motion, like the md3 block. */
+@media (prefers-reduced-motion: reduce) {
+  [data-style="ligoj-classic"] .v-overlay__content > .v-card { animation: none; }
+  [data-style="ligoj-classic"] .v-ripple__animation--in,
+  [data-style="ligoj-classic"] .v-ripple__animation--out,
+  [data-style="ligoj-classic"] .lj-btn::after,
+  [data-style="ligoj-classic"] .lj-iconbtn::after,
+  [data-style="ligoj-classic"] .nav-item::after,
+  [data-style="ligoj-classic"] .sub-item::after {
+    transition: none !important;
+  }
+  [data-style="ligoj-classic"] .lj-btn:active::after,
+  [data-style="ligoj-classic"] .lj-iconbtn:active::after,
+  [data-style="ligoj-classic"] .nav-item:active::after,
+  [data-style="ligoj-classic"] .sub-item:active::after {
+    opacity: 0;
+  }
+}

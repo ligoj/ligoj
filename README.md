@@ -11,10 +11,20 @@ and [ligoj-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ligoj_ligoj&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ligoj_ligoj)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/abf810c094e44c0691f71174c707d6ed)](https://www.codacy.com/gh/ligoj/ligoj?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/ligoj&amp;utm_campaign=Badge_Grade)
-[![Maintainability](https://api.codeclimate.com/v1/badges/f6bc3a113fddfad9151a/maintainability)](https://codeclimate.com/github/ligoj/ligoj/maintainability)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/ligoj/badge)](https://www.codefactor.io/repository/github/ligoj/ligoj)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://fabdouglas.mit-license.org/)
-[![Sauce Test Status](https://saucelabs.com/buildstatus/fabdouglas)](https://saucelabs.com/u/fabdouglas)
+
+
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Vue.js-3.5-4FC08D?logo=vuedotjs&logoColor=white" alt="Vue 3">
+  <img src="https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/Vuetify-3.7-1867C0?logo=vuetify&logoColor=white" alt="Vuetify">
+  <img src="https://img.shields.io/badge/Pinia-2.2-FFD859?logo=pinia&logoColor=black" alt="Pinia">
+  <img src="https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white" alt="Java 21">
+  <img src="https://img.shields.io/badge/Tests-194-brightgreen?logo=vitest&logoColor=white" alt="194 tests">
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white" alt="Docker">
+</p>
 
 ### Big Thanks
 
@@ -22,16 +32,167 @@ Cross-browser Testing Platform and Open Source <3 Provided by [Sauce Labs][homep
 
 [homepage]: https://saucelabs.com
 
+
+---
+
+## Architecture
+
+```
+                     :8080                    :8081
+ Navigateur  ──────>  ligoj-ui  ──────────>  ligoj-api  ──────>  ligoj-db
+ (Vue 3 SPA)         Spring Boot             Spring Boot          MySQL 8
+                     + fichiers Vue          REST API
+                     + proxy REST            + plugins Java
+```
+
+| Service       | Image                    |  Port   | Description                   |
+| :------------ | :----------------------- | :-----: | :---------------------------- |
+| **ligoj-db**  | `mysql:8.0`              | &mdash; | Base de donnees               |
+| **ligoj-api** | `ligoj/ligoj-api:4.0.1`  |  8081   | API REST backend + plugins    |
+| **ligoj-ui**  | Build local (Dockerfile) |  8080   | Frontend Vue 3 + proxy Spring |
+
+---
+
+## Stack technique
+
+| Couche          | Technologie         | Version |                                   |
+| :-------------- | :------------------ | :-----: | :-------------------------------- |
+| Framework UI    | Vue.js              |   3.5   | Composition API, `<script setup>` |
+| Build           | Vite                |   6.0   | HMR < 100ms, build < 2s           |
+| UI Library      | Vuetify             |   3.7   | Material Design 3                 |
+| State           | Pinia               |   2.2   | Stores reactifs                   |
+| Router          | Vue Router          |   4.5   | Hash mode, guards auth            |
+| Icons           | MDI                 |   7.4   | 7 000+ icones Material            |
+| Tests unitaires | Vitest              |   4.0   | 141 tests                         |
+| Tests e2e       | Playwright          |  1.58   | 53 tests                          |
+| Runtime         | Java 21 Temurin     |   21    | Spring Boot                       |
+| Build Docker    | Node 22 + Maven 3.9 | &mdash; | Multi-stage                       |
+
+---
+
+## Tests
+
+| Suite                  | Framework  |   Tests |   Temps |
+| :--------------------- | :--------- | ------: | ------: |
+| Stores & composables   | Vitest     |      50 |   ~0.1s |
+| Plugin system          | Vitest     |      16 |   ~0.1s |
+| Plugin formatters      | Vitest     |      37 |   ~0.1s |
+| Plugin API & contracts | Vitest     |      40 |   ~0.1s |
+| Views                  | Vitest     |       3 |   ~0.1s |
+| **Unitaires (total)**  | **Vitest** | **141** | **~2s** |
+| End-to-end             | Playwright |      53 |    ~18s |
+| **Total**              |            | **194** |         |
+
+---
+
+## Pages disponibles (18 vues)
+
+| Page             | Route                   | Donnees               |
+| :--------------- | :---------------------- | :-------------------- |
+| Login            | `/login.html`           | API auth              |
+| Home page        | `/#/`                   | Cartes de navigation  |
+| Projects list    | `/#/home/project`       | 4 projets (MySQL)     |
+| Project details  | `/#/home/project/:id`   | Souscriptions         |
+| Users list       | `/#/id/user`            | API live              |
+| Groups list      | `/#/id/group`           | API live              |
+| Companies list   | `/#/id/company`         | API live              |
+| Delegates        | `/#/id/delegate`        | 5 delegations (MySQL) |
+| Container Scopes | `/#/id/container-scope` | Onglets group/company |
+| System info      | `/#/system/information` | System information    |
+| Profile          | `/#/profile`            | User profile          |
+
+> Sans plugin IAM (LDAP/AD), le systeme utilise `feature:iam:empty`. Les pages Identity affichent les donnees retournees par l'API (qui peuvent etre vides). Les pages Projects et Delegates utilisent les vraies donnees MySQL.
+
+### Fonctionnalites transversales
+
+|             | Fonctionnalite               |             | Fonctionnalite            |
+| :---------- | :--------------------------- | :---------- | :------------------------ |
+| **&check;** | Authentification / Logout    | **&check;** | Dark mode                 |
+| **&check;** | Session persistante          | **&check;** | Responsive mobile         |
+| **&check;** | Sidebar navigation           | **&check;** | Breadcrumbs               |
+| **&check;** | Recherche dans les tables    | **&check;** | Tri des colonnes          |
+| **&check;** | Pagination serveur           | **&check;** | Import/Export CSV         |
+| **&check;** | Bulk select/delete           | **&check;** | Form guards (dirty state) |
+| **&check;** | Gestion d'erreurs (snackbar) | **&check;** | Loading skeletons         |
+| **&check;** | i18n FR/EN                   | **&check;** | RBAC (autorisations UI)   |
+
 # Get started
 
-```
-curl https://raw.githubusercontent.com/ligoj/ligoj/master/docker-compose.yml -o docker-compose.yml -s && docker-compose up
+## Prerequisites
+
+The build is driven by `podman compose`, a thin wrapper that delegates to an
+external provider. **By default it prefers `docker-compose` over `podman-compose`
+when both are installed** — which means installing `podman-compose` alone is not
+enough on a machine that already has Docker Compose. Two steps:
+
+### 1. Install `podman-compose`
+
+```bash
+# Linux (Fedora/RHEL/Amazon Linux 2023)
+sudo dnf install -y podman podman-compose git
+
+# Linux (Debian/Ubuntu)
+sudo apt install -y podman python3-pip git && pip install --user podman-compose
+
+# macOS
+brew install podman podman-compose git && podman machine init && podman machine start
 ```
 
-Open your browser at: [Ligoj Home](http://localhost:8080/ligoj)
-User/password for the administrator role: `ligoj-admin` and `ligoj-user` for a regular user
+### 2. Tell Podman to prefer it
 
-You can install the plug-ins for RBAC security: plugin-id,plugin-id-ldap,plugin-id-ldap-embedded
+Use a drop-in file rather than editing `containers.conf` directly — Podman
+merges every `*.conf` it finds under `containers.conf.d/`, and a drop-in file
+can declare its own `[engine]` section without colliding with one already
+present in your main config (TOML rejects duplicate sections per file):
+
+```bash
+mkdir -p ~/.config/containers/containers.conf.d
+cat > ~/.config/containers/containers.conf.d/ligoj-compose.conf <<'EOF'
+[engine]
+compose_providers = ["podman-compose"]
+compose_warning_logs = false
+EOF
+```
+
+`compose_warning_logs = false` silences the `>>>> Executing external compose
+provider <<<<` banner.
+
+> If you previously appended `[engine]` directly to `~/.config/containers/containers.conf`
+> and got `Key 'engine' has already been defined`, remove that appended block
+> (and delete any duplicate `[engine]` section) before creating the drop-in
+> file above.
+
+### 3. Sanity check
+
+```bash
+which podman-compose                  # → /usr/bin/podman-compose (or similar)
+podman compose version | head -n1     # → podman-compose version 1.x.x
+```
+
+If step 3 instead prints `Docker Compose version vX.Y.Z` (preceded by the
+delegation banner), step 2 hasn't taken effect — check `containers.conf` and
+that `podman-compose` is on `PATH`.
+
+Why this matters: delegating to `docker-compose` triggers the warning
+*"Docker Compose is configured to build using Bake, but buildkit isn't enabled"*,
+makes `BUILDAH_FORMAT` a no-op, and falls back to the legacy Docker builder
+(`Sending build context to Docker daemon ...`) instead of buildah.
+
+## Run
+
+```bash
+git clone https://github.com/ligoj/ligoj.git && cd ligoj
+podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
+```
+
+Then open [Ligoj Home](http://localhost:8080/ligoj) in your browser.
+
+| Role          | Login         | Password      |
+| ------------- | ------------- | ------------- |
+| Administrator | `ligoj-admin` | `ligoj-admin` |
+| Regular user  | `ligoj-user`  | `ligoj-user`  |
+
+For RBAC security, install: `plugin-id`, `plugin-id-ldap`, `plugin-id-ldap-embedded`.
 
 ## Dev section
 
@@ -48,21 +209,23 @@ and [ligoj-ui](https://github.com/ligoj/ligoj/tree/master/app-ui).
 
 ### One script rebuild and run
 
-Docker, compose and git install, then build, then run.
+Assumes [Prerequisites](#prerequisites) are installed. Clones the repo, sets up a
+persistent home, then builds and starts the stack:
 
 ```bash
-sudo yum install -y docker git
-sudo pip3 install docker-compose
-sudo usermod -a -G docker ec2-user
-sudo systemctl enable docker.service
-sudo systemctl start docker.service
+sudo systemctl enable --now podman.socket   # Linux only, idempotent
+
 git clone https://github.com/ligoj/ligoj.git
 cd ligoj
+
 mkdir -p "$(pwd)/.ligoj"
-echo "LIGOJ_HOME=$(pwd)/.ligoj
-PODMAN_USERNS=keep-id" > .env
-podman compose -f compose.yml -f compose-override.yml -p ligoj up -d --build
-open http://localhost:8080/ligoj
+cat > .env <<EOF
+LIGOJ_HOME=$(pwd)/.ligoj
+PODMAN_USERNS=keep-id
+EOF
+
+podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
+xdg-open http://localhost:8080/ligoj 2>/dev/null || true
 ```
 
 ## Publish to AWS ECR
@@ -83,7 +246,7 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:4.0.0
 ## Custom Docker Compose variables
 
 | Variable               | Service | Phase | Default                               | Note                                                                                                                                                                                                                                 |
-|------------------------|---------|-------|---------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------- | ------- | ----- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | LIGOJ_HOME             | api     | RUN   | `/home/ligoj`                         | To map a persistent home                                                                                                                                                                                                             |
 | LIGOJ_REGISTRY         | *       | BUILD |                                       | To push to your registry. When provided, must ends with `/`.                                                                                                                                                                         |
 | LIGOJ_VERSION          | app-*   | BUILD | (version of application)              |                                                                                                                                                                                                                                      |
@@ -97,6 +260,10 @@ docker push $ECR_REGISTRY/ligoj/ligoj-ui:4.0.0
 | LIGOJ_WEB_CUSTOM_OPTS  | web     | RUN   | ``                                    | Additional Java properties, merged with `LIGOJ_WEB_JAVA_OPTIONS`                                                                                                                                                                     |
 | LIGOJ_BUILD_PLATFORM   | app-*   | BUILD | `linux/amd64`                         | Docker build platform.                                                                                                                                                                                                               |
 | LIGOJ_TARGET_PLATFORM  | app-*   | BUILD | `linux/amd64`                         | Docker run platform.                                                                                                                                                                                                                 |
+| MAVEN_INSECURE_TLS     | app-*   | BUILD | `false`                               | When `true`, disables Maven HTTPS cert + hostname validation. See [app-api/README](app-api/README.md#build-behind-a-private-maven-mirror-with-self-signed-tls).                                                                      |
+| GIT_COMMIT             | app-*   | BUILD | `0`                                   | Captured from host git, embedded as `${buildNumber}` in the WAR manifest and the `git.commit` OCI label. See [Embedding git provenance](#embedding-git-provenance).                                                                  |
+| GIT_BRANCH             | app-*   | BUILD | `UNKNOWN_BRANCH`                      | Captured from host git, embedded as `${scmBranch}`.                                                                                                                                                                                  |
+| GIT_COMMIT_TIME        | app-*   | BUILD | `1970-01-01T00:00:00Z`                | Captured from host git (ISO-8601), embedded as `${timestamp}`.                                                                                                                                                                       |
 
 Sample `.env` file:
 
@@ -112,52 +279,110 @@ LIGOJ_API_PREPARE_BUILD='export HTTP_PROXY=192.168.0.254:8000 && export HTTPS_PR
 ## Custom Docker Compose discovered scripts
 
 | Source             | Service | Destination  | Phase | Note                                                                                               |
-|--------------------|---------|--------------|-------|----------------------------------------------------------------------------------------------------|
+| ------------------ | ------- | ------------ | ----- | -------------------------------------------------------------------------------------------------- |
 | `prepare-build.sh` | app-*   | `WORKDIR`    | BUILD | Additional Bash commands executed inside the builder , before `mvn` but after `MAVEN_OPTS` is set. |
 | `prepare-run.sh`   | app-*   | `WORKDIR`    | RUN   | Additional Bash commands executed inside the final image, before `java`                            |
 | `.m2/`             | app-*   | `/root/.m2/` | BUILD | Custom Maven configuration: proxy, mirror, dependencies,...                                        |
 
-Sample `prepare-build.sh` file:
+Minimal `prepare-build.sh` (HTTP proxy):
 
-```ini
+```bash
 export http_proxy=192.168.0.254:8000
 export https_proxy=192.168.0.254:8000
 ```
 
+A more complete sample — importing private/self-signed CA certificates so Maven
+trusts an internal mirror — ships as
+[`app-api/prepare-build-sample.sh`](app-api/prepare-build-sample.sh) and
+[`app-ui/prepare-build-sample.sh`](app-ui/prepare-build-sample.sh). Copy the file
+to `prepare-build.sh` to activate it.
+
+## Embedding git provenance
+
+The build context sent to the Docker builder is `app-api/` / `app-ui/` — the
+repo's `.git/` directory lives at the *parent* and is therefore invisible to the
+builder. Without help, `buildnumber-maven-plugin` warns and falls back to
+`buildNumber=0` / `scmBranch=UNKNOWN_BRANCH`.
+
+Capture the values on the host and pass them through as build args:
+
+```bash
+export GIT_COMMIT=$(git rev-parse HEAD)
+export GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+export GIT_COMMIT_TIME=$(git log -1 --format=%cI)
+
+podman compose -p ligoj -f compose.yml -f compose-override.yml build
+```
+
+[compose.yml](compose.yml) interpolates these into `build.args`, both
+[Dockerfiles](app-api/Dockerfile) forward them to Maven as
+`-DbuildNumber=… -DscmBranch=… -Dtimestamp=…`, and a profile in each module's
+`pom.xml` activates on the presence of `-DbuildNumber=`, suppressing the SCM
+lookup the plugin would otherwise attempt (this is what silences the
+`Cannot get the revision information from the scm repository` warning).
+
+Local Maven builds (`mvn package` without `-DbuildNumber=…`) are unaffected —
+the plugin still reads the real `.git` on disk.
+
 ## Persistent Ligoj home
 
-By default, with Docker compose, the home is persistent it contains:
+With Docker compose, the Ligoj home directory is persistent and contains:
 
-- plugins installation
-- logs of containers
+- plugin installations
+- container logs
 - database data
 
 ```bash
 mkdir -p "$(pwd)/.ligoj"
-echo "LIGOJ_HOME=$(pwd)/.ligoj
-PODMAN_USERNS=keep-id" > .env
+cat > .env <<EOF
+LIGOJ_HOME=$(pwd)/.ligoj
+PODMAN_USERNS=keep-id
+EOF
 ```
 
 ## Use MySQL or PostgreSQL databases
 
-By default, the Docker compose overrides is loaded from `compose.override.yml` and contains MySQL configuration.
+`compose.yml` defines only the `api` and `ui` services. The database is picked
+by layering exactly one of these override files on top:
 
-For MySQL, the docker-compose command is:
+| Database               | Override file          | Image (default) | Data directory         |
+| ---------------------- | ---------------------- | --------------- | ---------------------- |
+| PostgreSQL *(default)* | `compose-override.yml` | `postgres:17`   | `$LIGOJ_HOME/postgres` |
+| MySQL                  | `compose-mysql.yml`    | `mysql:8.0.36`  | `$LIGOJ_HOME/mysql`    |
+
+> Running `podman compose -p ligoj up -d` *without* an override file fails on
+> purpose — the DB choice is always explicit. To auto-load the PG override
+> instead, rename `compose-override.yml` to `compose.override.yml` (the dot
+> form is picked up automatically by Compose).
+
+To avoid repeating the long flag list, define a small alias for your session:
 
 ```bash
+# Tell buildah to emit Docker-format images (OCI is the buildah default and not
+# accepted by every downstream registry). No-op if podman delegates to docker.
 export BUILDAH_FORMAT=docker
-podman-compose -p ligoj build
-podman-compose -p ligoj -f compose.yml  -f compose-mysql.yml up -d
-podman-compose -p ligoj -f compose.yml  -f compose-mysql.yml down
+
+# Pick ONE of these:
+alias lc='podman compose -p ligoj -f compose.yml -f compose-override.yml'  # PostgreSQL
+alias lc='podman compose -p ligoj -f compose.yml -f compose-mysql.yml'     # MySQL
+
+lc build     # build the images
+lc up -d     # start the stack
+lc logs -f   # tail the logs
+lc down      # stop the stack
 ```
 
-For PostgreSQL, the docker-compose command is:
+### Switching between databases
+
+Each override file uses its own bind-mount directory (see the table above), so
+the two databases coexist on disk and swapping back and forth is non-destructive.
+The schema is created automatically by Hibernate (`-Djpa.hbm2ddl=update`) on first
+start, so expect a longer first boot.
+
+To start from a clean slate, wipe the matching directory:
 
 ```bash
-export BUILDAH_FORMAT=docker
-podman-compose -p ligoj build
-podman-compose -p ligoj -f compose.yml  -f compose-override.yml up -d
-podman-compose -p ligoj -f compose.yml  -f compose-override.yml down
+rm -rf "${LIGOJ_HOME:-./.ligoj}/postgres"   # or .../mysql
 ```
 
 # API Description
@@ -185,11 +410,9 @@ Ligoj comes with a modular approach. For custom UI, the solutions are:
     # With Ligoj CLI
     ligoj configuration set --id "ligoj.file.path" --value "^/home/ligoj/META-INF/resources/webjars/.*,^/home/ligoj/statics/themes/.*"
     ligoj file put --from /path/to/icon.png  --path "/home/ligoj/META-INF/resources/webjars/home/img/logo.png"
-    ligoj file put --from /path/to/bg1.jpg  --path "/home/ligoj/statics/themes/bootstrap-material-design/img/bg1.jpg"
   
     # With local access of Ligoj home folder
     mkdir -p "${LIGOJ_HOME}/META-INF/resources/webjars/home/img" && cp /path/to/icon.png "$_/logo.png"
-    mkdir -p "${LIGOJ_HOME}/statics/themes/bootstrap-material-design/img" && cp /path/to/bg1.jpg "$_/bg1.jpg"
     ```
   
 # Software Bill of Materials (SBOM)

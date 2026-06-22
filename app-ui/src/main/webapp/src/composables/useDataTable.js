@@ -1,0 +1,160 @@
+import { ref } from 'vue'
+import { useErrorStore } from '@/stores/error.js'
+
+/**
+ * Composable for Vuetify v-data-table-server backed by legacy Ligoj DataTables API.
+ *
+ * Legacy API expects: rows, page (1-based), sidx, sord, search[value]
+ * Legacy API returns: { recordsTotal, recordsFiltered, data: [...] }
+ *
+ * `extraParams` lets a caller pin endpoint-specific query fields that
+ * shouldn't pollute the per-call options object — typically a server-
+ * side filter that doesn't change across pagination/sort/search
+ * (e.g. `?group=<name>` on the user-list endpoint when scoped to a
+ * group's members). Accepts either:
+ *   - an object  → merged once
+ *   - a function → invoked at each `load()`/`loadAll()`, so the
+ *                  values stay live with any upstream reactive ref
+ *                  (`() => ({ group: groupName.value })`)
+ * Null / empty-string values are dropped so a still-loading prop
+ * doesn't add an `?group=` empty filter to the URL.
+ */
+export function useDataTable(endpoint, { defaultSort = 'name', defaultOrder = 'asc', demoData = null, extraParams = null } = {}) {
+  const errorStore = useErrorStore()
+
+  /** Resolve the pinned extra params for the current call. */
+  function resolveExtraParams() {
+    if (!extraParams) return null
+    return typeof extraParams === 'function' ? extraParams() : extraParams
+  }
+
+  function appendExtraParams(searchParams) {
+    const extra = resolveExtraParams()
+    if (!extra) return
+    for (const [k, v] of Object.entries(extra)) {
+      if (v != null && v !== '') searchParams.set(k, String(v))
+    }
+  }
+  const items = ref([])
+  const totalItems = ref(0)
+  const loading = ref(false)
+  const error = ref(null)
+  const search = ref('')
+  const demoMode = ref(false)
+
+  async function load({ page = 1, itemsPerPage = 25, sortBy = [] } = {}) {
+    loading.value = true
+    error.value = null
+    demoMode.value = false
+    try {
+      const params = new URLSearchParams()
+      params.set('rows', String(itemsPerPage))
+      params.set('page', String(page))
+
+      const sort = sortBy.length ? sortBy[0] : null
+      params.set('sidx', sort?.key || defaultSort)
+      params.set('sord', sort?.order || defaultOrder)
+
+      if (search.value) {
+        params.set('search[value]', search.value)
+      }
+
+      appendExtraParams(params)
+
+      const resp = await fetch(`rest/${endpoint}?${params}`, { credentials: 'include' })
+      if (!resp.ok) {
+        // Route through the central error store first so the host
+        // surfaces a toast (and, for 401 + `{redirect:"local"}`, opens
+        // the in-page login dialog). We clone the response so we can
+        // still consume the body ourselves below for the demo-fallback
+        // / inline-error branches.
+        await errorStore.handleResponse(resp.clone())
+        const body = await resp.json().catch(() => ({}))
+        // If identity provider unavailable and demo data provided, use fallback
+        if (body.code === 'internal' && demoData) {
+          _applyDemoData(page, itemsPerPage, sortBy)
+          return
+        }
+        // 401 is owned by the global handler — the user is being
+        // prompted to re-authenticate via the LoginPromptDialog (or
+        // top-level-redirected to the OIDC entry). Setting an inline
+        // "HTTP 401" message on top of that just clutters the page.
+        if (resp.status !== 401) {
+          error.value = body.message || body.code || `HTTP ${resp.status}`
+        }
+        items.value = []
+        totalItems.value = 0
+        return
+      }
+      const data = await resp.json()
+      items.value = data.data || []
+      totalItems.value = data.recordsFiltered ?? data.recordsTotal ?? 0
+    } catch (e) {
+      error.value = e.message || 'Network error'
+      items.value = []
+      totalItems.value = 0
+    } finally {
+      loading.value = false
+    }
+  }
+
+  function _applyDemoData(page, itemsPerPage, sortBy) {
+    demoMode.value = true
+    let all = [...demoData]
+    // Client-side search
+    if (search.value) {
+      const q = search.value.toLowerCase()
+      all = all.filter(row => Object.values(row).some(v =>
+        String(v ?? '').toLowerCase().includes(q)
+      ))
+    }
+    // Client-side sort
+    const sort = sortBy?.length ? sortBy[0] : null
+    const key = sort?.key || defaultSort
+    const order = sort?.order || defaultOrder
+    all.sort((a, b) => {
+      const va = String(a[key] ?? '').toLowerCase()
+      const vb = String(b[key] ?? '').toLowerCase()
+      return order === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
+    })
+    totalItems.value = all.length
+    const start = (page - 1) * itemsPerPage
+    items.value = all.slice(start, start + itemsPerPage)
+  }
+
+  /**
+   * Fetch the full dataset in one shot, ignoring the table's current
+   * pagination state. Designed to plug straight into
+   * `<LigojDataTableServer :fetch-all="dt.loadAll" />` so the tools
+   * menu's CSV / clipboard exports always cover every row, not just
+   * the rendered page. The current `search` filter is applied so the
+   * export reflects what the user is actually looking at.
+   */
+  async function loadAll() {
+    if (demoMode.value && Array.isArray(demoData)) {
+      return [...demoData]
+    }
+    const params = new URLSearchParams()
+    // Single-page "give me everything" call. The legacy Ligoj backend
+    // tolerates this — the underlying repositories cap internally.
+    params.set('rows', '999999')
+    params.set('page', '1')
+    params.set('sidx', defaultSort)
+    params.set('sord', defaultOrder)
+    if (search.value) params.set('search[value]', search.value)
+    appendExtraParams(params)
+    try {
+      const resp = await fetch(`rest/${endpoint}?${params}`, { credentials: 'include' })
+      if (!resp.ok) {
+        if (Array.isArray(demoData)) return [...demoData]
+        return []
+      }
+      const data = await resp.json()
+      return Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
+    } catch {
+      return Array.isArray(demoData) ? [...demoData] : []
+    }
+  }
+
+  return { items, totalItems, loading, error, search, demoMode, load, loadAll }
+}

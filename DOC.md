@@ -3,51 +3,73 @@
 ![architecture](docs/assets/img/architecture.png)
 
 # Key features
+
 The backend container assumes the business role of the application, is stateless, scalable and based on extensive use of convention over configuration design.
 
 ## Relevant stack parts
+
 * Java
 * Spring baseline: core, security and data
-* CXF, not Spring-WS
+* Apache CXF, not Spring-WS
 * JPA
 
 # Philosophy
-The main ideas are Convention over Configuration and modularity. 
+
+The main ideas are Convention over Configuration and modularity.
 
 ## Convention over Configuration
-There is a default behaviour based on the convention, but it's always possible to override it.
+
+There is a default behavior based on convention, but it's always possible to override it.
 
 ## REST Endpoint
-By convention, the [status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) is determined for you (200, 204, 400, ...) and follows the best practices.
+
+By convention, the [status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) is determined for you (200, 204, 400, ...) and follows best practices.
+
 ## Exception handling
+
 Avoid using "try-catch" statements in your application. Let the error reach the filters that will generate the status code and REST payload for you. See [[Exception handling]].
 
 ## Validation handling
-Implicit validation management is handled before the REST controller is actually called. Properties mapping, types, and BVAL constraints are managed for you. This avoids a lot of useless code and tests. See [[Jackson Ext]] and [[CXF Ext]].
 
-## Entity equals/hashcode
-No `equals` or `hashcode` are required. The design above Spring-Data implies these methods are not required to build a consistent cache for Hibernate.
+Implicit validation management is handled before the REST controller is actually called. Properties mapping, types, and BVAL constraints are managed for you. This avoids a lot of unnecessary code and
+tests. See [[Jackson Ext]] and [[CXF Ext]].
 
-## getter/setter
+## Entity equals/hashCode
+
+No `equals` or `hashCode` are required. The design on top of Spring-Data implies these methods are not required to build a consistent cache for Hibernate.
+
+## Getter/setter
+
 Thanks to [Lombok](http://projectlombok.org/), don't write `getX` and `setX` anymore.
 
 ## Basic ORM operations
-Thanks to [Spring Data](https://projects.spring.io/spring-data-jpa/), basic operations such as `findAll` or `findOne` are available at zero cost. In addition, some operations have been added (`findAllBy`, `findOneExpected`, ...), see [[Spring-Data Ext]]
+
+Thanks to [Spring Data](https://projects.spring.io/spring-data-jpa/), basic operations such as `findAll` or `findOne` are available at zero cost. In addition, some operations have been added (
+`findAllBy`, `findOneExpected`, ...), see [[Spring-Data Ext]].
 
 ## Database mapping
-JPA to DDL generation is backed by Hibernate. We have added conventional `ManyToOne` column naming ensuring the proper compatibility with constraints (`@Unique`,...), case-insensitive databases and exception handling. See [[Hibernate Ext]].
+
+JPA-to-DDL generation is backed by Hibernate. We have added conventional `ManyToOne` column naming ensuring the proper compatibility with constraints (`@Unique`,...), case-insensitive databases and
+exception handling. See [[Hibernate Ext]].
 
 ## Security over REST
-With REST, comes some conventional meaning of `GET`, `POST`,... methods. The integrated RBAC security layer facilitates dynamical security configuration.
+
+With REST comes the conventional meaning of `GET`, `POST`, etc. methods. The integrated RBAC security layer facilitates dynamic security configuration.
 
 ## Modularity
-Split your code to make a micro-services grid. Instead of having a global configuration file (XML, YML,...), a centralized Spring-Boot java configuration, or some boilerplate code to register your features.
+
+Split your code to make a microservices grid, instead of having a global configuration file (XML, YML,...), a centralized Spring-Boot Java configuration, or some boilerplate code to register your
+features.
 
 ## Cache
-With Hazelcast, even with [Spring-Boot](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-hazelcast.html) you cannot easily split the `CacheConfig`. We have built a merged configuration that collects the available `CacheConfig` to register them to the `HazelcastInstance`. See [[Hibernate Ext]].
+
+With Hazelcast, even with Spring Boot, you cannot easily split the `CacheConfig`. We have built a merged configuration that collects the available `CacheConfig` to register them to the
+`HazelcastInstance`. See [[Hibernate Ext]].
 
 ## JPA
-JPA specification requires that your `orm.xml` accompanies your entities, even with `package` auto-discovery classes. But in a modular application, it's not possible to anticipate the entities you'll get in the classpath. See [[Hibernate Ext]].
+
+JPA specification requires that your `orm.xml` accompanies your entities, even with `package` auto-discovery classes. But in a modular application, it's not possible to anticipate the entities you'll
+get in the classpath. See [[Hibernate Ext]].
 
 # Features
 
@@ -59,22 +81,29 @@ private CsvForJpa csvForJpa;
 
 csvForJpa.insert("csv", Entity.class);
 ```
-See `CsvForJpa.java`
+
+See `CsvForJpa.java`.
 
 ### Description
-Maintaining data for the tests may be a pain. The current solutions are:
-* external data stored as a dump: hard to update, to manipulate data and to handle the generated identifier
-* fully coded in the tests with some `em.persist(..)` in the JUnit: the more data, the more amount of code, no global view of the data. On the other side, you gain a strongly typed dataset. 
 
-In addition of these solution, come the CSV format:
-* CSV is common, compact (more than JSON), and easy to handle: filtering, ordering, etc. with your favorite Excel like editor
+Maintaining test data can be a pain. The current solutions are:
+
+* external data stored as a dump: hard to update, to manipulate data and to handle the generated identifier
+* fully coded in the tests with some `em.persist(..)` in the JUnit tests: the more data, the larger the amount of code, no global view of the data. On the other hand, you gain a strongly typed
+  dataset.
+
+In addition to these solutions, there is the CSV format:
+
+* CSV is common, compact (more than JSON), and easy to handle: filtering, ordering, etc., with your favorite Excel-like editor
 * Mostly all database editors support import or export in CSV format
 * CSV parsing and generation are fast and simple and do not require many libraries
 
-The CSV format is not mandatory for your data, there is a built-in integration. 
+The CSV format is not mandatory for your data, there is a built-in integration.
 
 ### Sample
-Test classe
+
+Test class
+
 ```java
 public class MyTest {
   @Autowired
@@ -85,7 +114,9 @@ public class MyTest {
   }
 }
 ```
+
 Entities
+
 ```java
 public @Entity @Getter @Setter class PublicProfile {
   private @Id String id;
@@ -100,13 +131,16 @@ public @Entity @Getter @Setter class Person extends AbstractPersistable<Integer>
 ```
 
 CSV files `public-profile.csv`, `publicprofile.csv` are accepted
+
 ```csv
 jdoe;2018-04-01
 jdoe2;12/08/2012
 henry;2018-01-04T09:23:45.017+01:00
 alpha
 ```
+
 `person.csv`
+
 ```csv
 John;Doe;21;jdoe
 Jane;Doe;21;jdoe2
@@ -117,13 +151,16 @@ Henry;;henry
 This will read the file `csv/person.csv` and will persist one entry per row in `MyEntity` JPA entity. Then will do the same for `csv/public-profile.csv`.
 
 ### More complex usage
+
 Many options are available: separator, encoding and headers.
 
-As a CSV file contains only data of one entity, it could be difficult to handle the relation between two entities. In the previous sample, the relationship was conventional with `id` property, and the order was following the fields declaration order. For a more complex usage, header must be explicitly defined
+As a CSV file contains only data of one entity, it could be difficult to handle the relation between two entities. In the previous sample, the relationship was conventional with the `id` property, and
+the order followed the field declaration order. For more complex usage, headers must be explicitly defined.
 
 Entities
+
 ```java
-public @Entity @Getter @Setter class PublicProfile AbstractPersistable<Integer> {
+public @Entity @Getter @Setter class PublicProfile extends AbstractPersistable<Integer> {
   private String displayName;
 }
 public @Entity @Getter @Setter class PrivateProfile {
@@ -141,18 +178,23 @@ public @Entity @Getter @Setter class Person extends AbstractPersistable<Integer>
 ```
 
 CSV files `public-profile.csv`
+
 ```csv
 displayName
 jdoe
 jdoe2
 ```
+
 `private-profile.csv`
+
 ```csv
 login;mail
 login1;john.doe@sample.com
 login2;jane.doe@other.com
 ```
+
 `person.csv`
+
 ```csv
 firstName;lastName;age;publicProfile.displayName;privateProfile.mail;friendProfile.id!
 John;Doe;21;jdoe;john.doe@sample.com;1
@@ -160,15 +202,17 @@ Jane;Doe;21;jdoe2;jane.doe@other.com;2
 ```
 
 ### Code sheets
-* Order matters: 
-  * Inside the CSV, a row can reference itself and or a previous one
-  * Since an entity can refer to another one, the `class` parameters must follow this relationship
+
+* Order matters:
+    * Inside the CSV, a row can reference itself and or a previous one
+    * Since an entity can refer to another one, the `class` parameters must follow this relationship
 * Date formats: `yyyy-MM-dd'T'HH:mm:ssZ`, `yyyy-MM-dd'T'HH:mm:ss.SSSXXX`, `yyyy/MM/dd`, `dd/MM/yyyy` and optional `HH:mm`, `HH:mm:ss` and `/` or `-` separator variants.
 * Header format: `jpaProperty(.joinProperty)?!?`
-  * `jpaProperty`: Raw value, date, enumeration value (case insensitive),...
-  * `jpaProperty.joinProperty`: Join property. Implies a `SELECT * FROM JoinEntity WHERE joinProperty = :value`
-  * `jpaProperty.generatedId!`: Join to a generated `@Id` property/ Implies a `SELECT * FROM JoinEntity` and then select the n-th row. This way, you can join the table by its generated incremented identifier.
-* `CsvForJpa#insert(..)` insert the entries without deleting the previous ones.
+    * `jpaProperty`: Raw value, date, enumeration value (case-insensitive),...
+    * `jpaProperty.joinProperty`: Join property. Implies a `SELECT * FROM JoinEntity WHERE joinProperty = :value`
+    * `jpaProperty.generatedId!`: Join to a generated `@Id` property. Implies a `SELECT * FROM JoinEntity` and then select the n-th row. This way, you can join the table by its generated incremented
+      identifier.
+* `CsvForJpa#insert(..)` inserts the entries without deleting previous ones.
 * `CsvForJpa#reset(..)` will delete all previous JPA entries in the reversed `classes` order, and then will insert the JPA entries from the CSV.
 * `CsvForJpa#cleanup(..)` will delete all previous JPA entries in the reversed `classes` order.
 * `CsvForJpa#toJpa(..)` will only return the corresponding JPA entries.
@@ -178,141 +222,159 @@ Jane;Doe;21;jdoe2;jane.doe@other.com;2
 This section discusses the [O]RBAC mechanism implemented in this application. This is the most complex feature.
 
 The ordered implied security levels:
+
 * Authentication checks one of the enabled authentication providers
 * [URL access granted by static configuration](#url-access-granted-by-static-configuration)
 * [URL access granted by RBAC](#url-access-granted-by-rbac)
 * [Resource access](#resource-access) granted by ORBAC
-* Organization Role Based Access Control are related to identity plugins derived from [ligoj/plugin-id](https://github.com/ligoj/plugin-id). These plug-ins map user from a repository like LDAP to groups and permissions.
+* Organization Role Based Access Control are related to identity plugins derived from [ligoj/plugin-id](https://github.com/ligoj/plugin-id). These plug-ins map users from a repository like LDAP to
+  groups and permissions.
 
 All work with a `deny all` by default.
 
 ### Vocabulary
 
-Many terms are used in this documentation and the definitions will make the explanations lighter: 
-* User: a user defined in the IAM system
+Many terms are used in this documentation and the definitions will make the explanations lighter:
+
+* User: A user defined in the IAM system.
 * Principal: The current authenticated user.
 * Credentials: A set of information proving the identity of the principal.
-* Role: Simple logical name aggregating authorizations. Unauthenticated users have the `ROLE_ANONYMOUS` role
-* Role Assignment: A role associated to a user. A user can have any amount of role. The role `USER` (even if it is not defined) is granted to any authenticated user.
+* Role: Simple logical name aggregating authorizations. Unauthenticated users have the `ROLE_ANONYMOUS` role.
+* Role Assignment: A role associated with a user. A user can have any number of roles. The role `USER` (even if it is not defined) is granted to any authenticated user.
 * System Administrator: A principal user having an `api` authorization with the `.*` pattern.
-* Group: A set of users. A group can be within another groups. A user can be member of any number of groups. Note that a group may not be empty depending on the underlining IAM provider, but a virtual and invisible user may be kept for empty groups.
-* Company: A set of users. A company can be within another a single company. A user is member of exactly one company.
+* Group: A set of users. A group can be within another group. A user can be member of any number of groups. Note that a group may not be empty depending on the underlying IAM provider, but a virtual
+  and invisible user may be kept for empty groups.
+* Company: A set of users. A company can be within another company. A user is a member of exactly one company.
 * Container: Company or group.
-* Container scope: A logical LDAP like sub-tree to classify a container. At creation time of a container, this scope ensures the container is created in the correct hierarchy. At read time, it is used to display the containers by adding logical type to them.
+* Container scope: A logical LDAP-like sub-tree to classify a container. At creation time of a container, this scope ensures the container is created in the correct hierarchy. At read time, it is used
+  to display the containers by adding a logical type to them.
 * Node: A service, tool or tool instance, see the Subscription documentation.
 * Tree: An abstract hierarchical path. (to-do) A bit difficult to explain for now...
 * Resource: Container, user, node or a tree.
-* Delegate: Is a read permission given to a receiver for a container.
-  * A receiver can be any resource. The delegate receiver's type is either `USER`, `GROUP` or `COMPANY`.
-  * There is a `write` flag allowing to write in this container.
-  * There is also a "admin" flag allowing to the receiver to share this delegate to another visible resource.
-* Project: A team owning a set of subscriptions, see the Subscription documentation
-* Project leader: The main contact of the project, and default manager of the project
+* Delegate: A read permission given to a receiver for a container.
+    * A receiver can be any resource. The delegate receiver's type is either `USER`, `GROUP` or `COMPANY`.
+    * There is a `write` flag allowing to write in this container.
+    * There is also an "admin" flag allowing the receiver to share this delegate with another visible resource.
+* Project: A team owning a set of subscriptions, see the Subscription documentation.
+* Project leader: The main contact of the project, and default manager of the project.
 * Hook: A script executed when a specific event occurs.
 
 ### Authorization
 
 Access to URLs depends on the following properties:
-* `method`:  `GET`, `POST`, `PUT`, `DELETE` or `null` for all of them.
+
+* `method`: `GET`, `POST`, `PUT`, `DELETE` or `null` for all of them.
 * `pattern`: A regular expression of the URL to match:
-  * `.*`: any URL
-  * `^rest/.*`: any REST URL
-  * `^rest/my-resource/\d+`: access to `my-resource` by their identifier only.
-* `type`: 
-  * `ui`: This authorization is based on the fragment part of the URL
-  * `api`: The URL corresponds to a REST access. The matched URL starts with the path without the context and includes the query parameters.
+    * `.*`: any URL
+    * `^rest/.*`: any REST URL
+    * `^rest/my-resource/\d+`: access to `my-resource` by their identifier only.
+* `type`:
+    * `ui`: This authorization is based on the fragment part of the URL
+    * `api`: The URL corresponds to a REST access. The matched URL starts with the path without the context and includes the query parameters.
 
+### How it works?
 
-### How it works ?
-
-
-The `ui` authorization is based on the fragment part of the URL, so only checked by the browser. This is not really a security, and is only relevant to disable, hide or remove the UI component the principal should not see. You may notice this kind of authorization could be overridden by the user at the browser side. As base practices, this kind of authorization **must** be associated to a corresponding `api` authorization.
+The `ui` authorization is based on the fragment part of the URL, so it is only checked by the browser. This is not really secure, and is only relevant to disable, hide, or remove UI components the
+principal should not see. You may notice this kind of authorization could be overridden by the user at the browser side. As a best practice, this kind of authorization **must** be associated with a
+corresponding `api` authorization.
 
 The `ui` security can be avoided by the user when he/she requests separately each JavaScript/CSS/HTML,... static resources, but the data are guarded by the `api` authorizations.
 
-The `api` authorization is checked at server side for each REST access (see [At server side](#at-server-side), and is partially used at browser side.
+The `api` authorization is checked at the server side for each REST access (see [At the server side](#at-the-server-side)), and is partially used at the browser side.
 
-### At browser side
+### At the browser side
 
-When the user profile is loaded, the authorizations (`ui` and `api`) are checked in the current DOM for the first load and then continuously when it is updated.  
-The watched components are :
+When the user profile is loaded, the authorizations (`ui` and `api`) are checked in the current DOM for the first load and then continuously when updated.
+The watched components are:
+
 - The current browser's URL itself: the `location`, visible in the navigation URL. When it is unauthorized, a security message is displayed, and the content is not loaded.
 - The HTML components having `href` attribute
 - The HTML components having `data-secured-service`, `data-secured-role` or `data-secured-method` attribute. See [data-secured-*](#data-secured-)
 
 The matched URL starts after the `#/` fragment part. Samples:
-    * `^system/bench`: Browser URL `#/system/bench`
-    * `^system/.*`: Browser URL `#/system`
 
-When a HTML component is unauthorized, by default its removed from the DOM. It is possible to control this behavior with `data-security-on-forbidden="disable"` attribute value. 
+* `^system/bench`: Browser URL `#/system/bench`
+* `^system/.*`: Browser URL `#/system`
 
-When a HTML component contains only unauthorized components (buttons group, dropdown,...), it is also removed from the DOM. This process is recursively applied.
+When an HTML component is unauthorized, by default it is removed from the DOM. It is possible to control this behavior with the `data-security-on-forbidden="disable"` attribute value.
+
+When an HTML component contains only unauthorized components (buttons group, dropdown,...), it is also removed from the DOM. This process is recursively applied.
 
 #### `data-secured-*`
 
-The `data-secured-*` attributes value corresponds to the related `api` usage the component depends on. For sample, having a chart displaying data collected from a REST URL should be displayed only when the REST service is authorized. Without this `data-secured-service`, the chart is displayed but with an empty content: still secured, but not really friendly.
+The `data-secured-*` attributes value corresponds to the related `api` usage the component depends on. For example, a chart displaying data collected from a REST URL should be displayed only when the
+REST service is authorized. Without this `data-secured-service`, the chart is displayed but with an empty content: still secured, but not really friendly.
 
 #### Samples
+
 ```
 <svg class="my-chart-displaying-secured-data"></svg>
 ```
+
 SVG component is always displayed, even when the D3 ajax fails.
 
 ```
 <svg class="my-chart-displaying-secured-data" data-secured-service="rest/financial/y2y"></svg>
 ```
+
 SVG component is only displayed when `api` URL `rest/financial/y2y` is allowed.
 
 ```
 <svg class="my-chart-displaying-secured-data" data-secured-role="FINANCE"></svg>
 ```
-SVG component is only displayed when the principal as the role "FINANCE". This role can either be a static Spring-Security role, or an assigned role.
+
+SVG component is only displayed when the principal has the role "FINANCE". This role can either be a static Spring-Security role, or an assigned role.
 
 ```
 <svg class="my-chart-displaying-secured-data" data-secured-service="rest/financial/y2y" data-secured-method="GET"></svg>
 ```
+
 SVG component is only displayed when `api` URL `rest/financial/y2y` is allowed with the `GET` method.
 
-### At server side
+### At the server side
 
-Each HTTP request to `api` endpoint is checked by this guard. 
+Each HTTP request to `api` endpoint is checked by this guard.
 
 The sub-steps:
+
 - Authentication
-- Roles attachment to the principal
+- Role attachment to the principal
 - Authorization based on resolved roles
 
-
 The authentication is first implied. The built-in authentication feature is based on `x-api-key` and `x-api-user` headers or parameters.
+
 - When both are provided, they are checked.
 - Otherwise, when only `x-api-user` or `x-api-key` is provided, they are ignored, and then the plugins implementing `IdentityServicePlugin` are involved
 
-
 The roles living in `S_ROLE` tables are collected from:
-1. The `S_ROLE_ASSIGNMENT` table maintaining the relationship between users and roles.
-2. The plugins contributing to `ISessionSettingsProvider`. For sample roles mapped from Ldap or external APIs. This contribution can be disabled at request level with `x-api-local-roles` header set to `true`.
 
+1. The `S_ROLE_ASSIGNMENT` table, maintaining the relationship between users and roles.
+2. The plugins contributing to `ISessionSettingsProvider`. For example, roles mapped from LDAP or external APIs. This contribution can be disabled at request level with the `x-api-local-roles` header
+   set to `true`.
 
-From the resolved roles, the set of permissions are checked agains the current request.
+From the resolved roles, the set of permissions is checked against the current request.
 The access is granted when there is at least one permission having its `pattern` and `method` matching the current HTTP request URL.
 
 The matched URL starts after the context path, without the leading `/`, and includes the query part. Samples:
-  * `.*`: any URL, `/rest`, `/manage` (actuator), ... all endpoints
-  * `^rest/.*`: any REST URL. Not actuator endpoint.
-  * `^rest/my-resource/\d+`: access to `my-resource` by their identifier only.
+
+* `.*`: any URL, `/rest`, `/manage` (actuator), ... all endpoints
+* `^rest/.*`: any REST URL. Not actuator endpoint.
+* `^rest/my-resource/\d+`: access to `my-resource` by their identifier only.
 
 Unauthorized access gets a `401` response.
 
 ### Cache
 
-For this real time URL access, the system uses caches. Therefore, if you want to update theses authorizations directly in the database, without using REST services, you need to invalidate `authorizations` cache there [/#/system/cache](http://localhost:8080/ligoj/#/system/cache)
-
+For this real-time URL access, the system uses caches. Therefore, if you want to update theses authorizations directly in the database, without using REST services, you need to invalidate the
+`authorizations` cache at [/#/system/cache](http://localhost:8080/ligoj/#/system/cache).
 
 ### URL access granted by static configuration
 
-Static security is based on Spring-Security, and defines a simple Role Based Access Control. Pattern-based URLs are static and cannot be easily changed at runtime. This security is the first firewall. It can only be updated by creating your own spring-security XML or Spring-Boot Java configuration.
+Static security is based on Spring-Security, and defines a simple Role Based Access Control. Pattern-based URLs are static and cannot be easily changed at runtime. This security is the first firewall.
+It can only be updated by creating your own spring-security XML or Spring-Boot Java configuration.
 
-The security design is based on the `ligoj-ui` container that decides whether a request is forwarded to `ligoj-api` for the next security level. The final authentication and the authorization are always performed by the `ligoj-api` container.
+The security design is based on the `ligoj-ui` container that decides whether a request is forwarded to `ligoj-api` for the next security level. The final authentication and the authorization are
+always performed by the `ligoj-api` container.
 
 The decision follows this matrix:
 
@@ -336,11 +398,13 @@ The decision follows this matrix:
 
 ### Pre-authenticated access
 
-A pre-authentication is an authentication performed by a trusted security component between your users and the `ligoj-ui` container. This component forwards only trusted requests and adds specific headers in the forwarded request to the `ligoj-ui` container.
- 
-The `PreAuth` filter, can be enabled by the arguments `-Dsecurity.pre-auth-principal=${HEADER_PRINCIPAL}` and `-Dsecurity.pre-auth-credentials=${HEADER_CREDENTIAL}` of `ligoj-ui` at launch time only. When these arguments are empty, the `PreAuth` filter is not enabled. When enabled, the corresponding header must be included in the incoming request, otherwise the response will be a `401` error.
+Pre-authentication is an authentication performed by a trusted security component between your users and the `ligoj-ui` container. This component forwards only trusted requests and adds specific
+headers in the forwarded request to the `ligoj-ui` container.
 
-You should use the right [plugin-id](https://github.com/ligoj/plugin-id) implementation to get the user details. 
+The `PreAuth` filter, can be enabled by the arguments `-Dsecurity.pre-auth-principal=${HEADER_PRINCIPAL}` and `-Dsecurity.pre-auth-credentials=${HEADER_CREDENTIAL}` of `ligoj-ui` at launch time only.
+When these arguments are empty, the `PreAuth` filter is not enabled. When enabled, the corresponding header must be included in the incoming request, otherwise the response will be a `401` error.
+
+You should use the right [plugin-id](https://github.com/ligoj/plugin-id) implementation to get the user details.
 
 | Property                      | Role                                                                         | Sample                                                |
 | ----------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
@@ -358,18 +422,23 @@ For AWS Cognito placed on an ALB, use [plugin-id-cognito](https://github.com/lig
 
 ### URL access granted by RBAC
 
-Dynamic security layer is provided by `AuthorizingFilter`, also a pattern based access control where roles, users and authorizations can be changed at runtime and backed by the database. All roles and permissions can be updated at runtime with an immediate apply. You can manage this from [/#/system/role](http://localhost:8080/ligoj/#/system/role) and [/#/system/user](http://localhost:8080/ligoj/#/system/user)
+Dynamic security layer is provided by `AuthorizingFilter`, also a pattern based access control where roles, users and authorizations can be changed at runtime and backed by the database. All roles and
+permissions can be updated at runtime with immediate effect. You can manage this from [/#/system/role](http://localhost:8080/ligoj/#/system/role)
+and [/#/system/user](http://localhost:8080/ligoj/#/system/user)
 
-These security levels are only there to segregate kind of users, like administrators and simple users for example.
+These security levels are only there to segregate kinds of users, like administrators and simple users for example.
 
 This is a RBAC, top-level URL pattern filter. Users are associated to roles, and permissions are associated to roles.
 
 This access is dynamic, configuration is stored in a persistent database.
 
 ### Resource access
-This security level gives read or write access with propagation (GRANT) option to a resource for another resource. This level can be augmented by a [plugin-id](https://github.com/ligoj/plugin-id) or a IAM provider such as [plugin-iam-node](https://github.com/ligoj/plugin-iam-node).
+
+This security level gives read or write access with propagation (GRANT) option to a resource for another resource. This level can be augmented by a [plugin-id](https://github.com/ligoj/plugin-id) or a
+IAM provider such as [plugin-iam-node](https://github.com/ligoj/plugin-iam-node).
 
 ### Behaviors:
+
 * All delegates are applied at real time.
 * System Administrator can always see and manage any resource.
 * A receiver gets the permission for all containers inside the associated delegate's container: inheritance.
@@ -381,17 +450,19 @@ This security level gives read or write access with propagation (GRANT) option t
 * A user's group can be added or removed by the principal if it exists at least one delegate to this principal with a write flag for this group.
 * The member of a specific group (filter) is visible by the principal if it exists at least one delegate to this principal for this group and if the user is visible by this principal.
 * The member of a specific company (filter) is visible by the principal if it exists at least one delegate to this principal for this company and if the user is visible by this principal.
-* To determinate the set of related delegates of the principal, the match is:
-  * The receiver is the principal himself. Type is "USER"
-  * The receiver is a group the principal is member of, directly or not. Type is "GROUP".
-  * The receiver is a company the principal is member of, directly or not. Type is "COMPANY".
+* To determine the set of related delegates of the principal, the match is:
+    * The receiver is the principal himself. Type is "USER"
+    * The receiver is a group the principal is member of, directly or not. Type is "GROUP".
+    * The receiver is a company the principal is member of, directly or not. Type is "COMPANY".
 * A project is visible if there is at least one visible group subscribed by this project or, if the principal user is the team leader.
 
 #### Additional security obfuscation:
+
 * An existing resource but not visible for the principal is exactly reported as a non-existing resource
-* A visible read-only resource updated by the principal is refused and reported in logs as an attempt
+* An attempt to update a visible read-only resource by the principal is refused and reported in logs
 
 #### Relevant IAM resources:
+
 * GroupResource
 * UserOrgResource
 * CompanyResource
@@ -407,25 +478,26 @@ The enabled login mode is configured only at launch time of the `ligoj-ui` conta
 | `Rest`      | `org.ligoj.app.http.security.RestAuthenticationProvider`      | Ligoj login page | Login operation is delegated to a REST endpoint, by default one of `ligoj-api`.      |
 | `OAuth2Bff` | `org.ligoj.app.http.security.OAuth2BffAuthenticationProvider` | OIDC Provider    | Login and logout operations are delegated to external OAuth2 identity provider       |
 
-
 #### `/login-by-api-key` bypass
 
-In a browser, whatever the provider selected, the user can bypass the login process and directly grants a session to the user.
+In a browser, whatever the provider selected, the user can bypass the login process and directly grant a session to the user.
+
 - With a `GET` or `POST` to `http://localhost:8080/ligoj/login-by-api-key?api-key=API_KEY&api-user=API_USER`
 - With a `GET` from `http://localhost:8080/ligoj/login-by-api-key.html` and a form submit the above `POST`
 
 The constraints are:
+
 * The `API_USER` is an administrator, must have at least one API permission `.*`. This feature is only available for administrators.
 * The provided `API_KEY` is a valid API key for the `API_USER`.
 * The feature must be enabled. `ligoj.security.login-by-api-key` is `false` by default
 
 Timeline:
+
 - A special authentication provider is placed before the standard provider and listens to the `/login-by-api-key` path. This provider is only enabled when `ligoj.security.login-by-api-key` is `true`.
 - `API_KEY` and `API_USER` query parameters must be present and not empty. If not, a `400` is returned
 - The API `/session` endpoint is called with these credentials in order to check them and to retrieve the permissions of this user. If the call failed, a `401` is returned
 - One of the API user's permissions must match `pattern=.*` and `method=DELETE`. If not, a `401` is returned.
 - When succeeded, a stateful session is created in `ligoj-ui` container and a `302 /` is returned.
-
 
 #### `OAuth2Bff` Provider
 
@@ -434,19 +506,21 @@ Additional configuration is added to the `CUSTOM_OPTS` environment variable (for
 
 #### `Rest` Provider
 
-In this mode, authentication information is entered in the Ligoj login screen, and transmitted via `ligoj-ui` (not directly by the browser) to a REST resource whose result will determine the success of the authentication.
+In this mode, authentication information is entered in the Ligoj login screen, and transmitted via `ligoj-ui` (not directly by the browser) to a REST resource whose result will determine the success
+of the authentication.
 
 Timeline:
-- The user POST an HTTP request to `http://$ligoj-ui/login` with the credentials
+
+- The user POSTs an HTTP request to `http://$ligoj-ui/login` with the credentials
 - The security provider is selected according to the `security` configuration property, so `org.ligoj.app.http.security.RestAuthenticationProvider` for this case.
-- The security provider `POST` the login credentials to the endpoint defined by `ligoj.sso.url`.
-- By default, this endpoint is ``${ligoj.endpoint.api.url}/security/login` which will delegate the authentication to the defined `plugin:id` node designated by the `feature:iam:node:primary` configuration.
-- The plugin node proceed to the validation of the credentials.
+- The security provider POSTs the login credentials to the endpoint defined by `ligoj.sso.url`.
+- By default, this endpoint is ``${ligoj.endpoint.api.url}/security/login` which will delegate the authentication to the defined `plugin:id` node designated by the `feature:iam:node:primary`
+  configuration.
+- The plugin node proceeds to validate the credentials.
 - A `204` HTTP response is expected for a success. Any other response is considered as an authentication failure.
 - The Java `HttpSession` is created in `ligoj-ui` container, with optional custom principal name (set by `X-Real-User` response header)
 - If a concurrency limit (`security.max-sessions`) is reached for this principal, the oldest session is invalidated.
 - The `JSSESSIONID` cookie and other cookies optionally set by the plugin are forwarded back to the browser.
-
 
 ### Administrator user reinitialisation
 
@@ -485,17 +559,16 @@ Options to set:
 - `ligoj.initial.user.token.name`: `init_token`
 - `ligoj.initial.user.token.value`: `SECRET`
 
-
 ## Audit
 
 Most of the entities are audited. The audit data has only the following fields:
-* `createdBy`: not updatable field, principal name at creation time.
-* `createdDate`: not updatable field, creation time.
+
+* `createdBy`: non-updatable field, principal name at creation time.
+* `createdDate`: non-updatable field, creation time.
 * `lastModifiedBy`: principal name at last modification time.
 * `lastModifiedDate`: last modification time.
-* `creationContext`: not updatable field, optional, user context at creation time.
+* `creationContext`: non-updatable field, optional, user context at creation time.
 * `metadata`: updatable field, optional, free form JSON.
-
 
 These fields are automatically set by the transaction manager in successful API calls.
 
@@ -531,21 +604,20 @@ configuration.put("my-key", true);            // Save a new value in System too,
 configuration.put("my-key", true, true);      // Encrypt the value
 ```
 
-`put` operations update the value in database, however the value has the lowest priority than the other sources.
-The third parameter `system` set the value also in System properties. It overrides temporarily at the higheest priority.
+`put` operations update the value in the database, however, the value has a lower priority than other sources.
+The third parameter `system` also sets the value in System properties. It overrides temporarily at the highest priority.
 
 Using built-in Spring variable resolution: static, and resolved only when the context is started
+
 ```java
 @Value("$(my-key:default-value")
 private String value;
 ```
 
-
-
 ### Encryption
 
-Both solutions are backed by [Jasypt](http://www.jasypt.org/) to protect secret from configuration files and stored sensitive data in database. 
-It is possible to benefit the same security level for other stored data:
+Both solutions are backed by [Jasypt](http://www.jasypt.org/) to protect secrets from configuration files and store sensitive data in the database.
+It is possible to benefit from the same security level for other stored data:
 
 ```java
 @Autowired
@@ -567,25 +639,30 @@ private PaginationJson paging;
 
 @GET
 public TableItem<Project> findAll(@Context UriInfo uriInfo, @QueryParam(DataTableAttributes.SEARCH) String criteria) {
-  Page<Project> findAll = repository.find(criteria), paging.getPageRequest(uriInfo, COLUMNS));
+  Page<Project> findAll = repository.find(criteria, paging.getPageRequest(uriInfo, COLUMNS));
   return paging.applyPagination(uriInfo, findAll);
 }
 ```
+
 See `PaginationJson.java`
 
 ### Description
+
 Providing a lightweight filtering and pagination feature is the most complex part of UI/API interaction.
 There are two filter/pagination modes: managed and unmanaged
 
 ### Managed filtering
+
 Sequence
-  * The JPA query is executed for you with a generated `Criteria` from the given `UriInfo`
+
+* The JPA query is executed for you with a generated `Criteria` from the given `UriInfo`
 * Building the JPA pagination from the JSON request: `paging.getPageRequest(uriInfo, COLUMNS)`. Where `COLUMNS` corresponds to the allowed mapped properties.
 * Building the response: `paging.applyPagination(uriInfo, findAll)` with optional item transformation.
 
 ## MVVM
 
 MVVM is managed by [CascadeJS](https://github.com/fabdouglas/cascadejs) with enabled plugins:
+
 * `css`
 * `html` backed by [RequireJS Text](https://github.com/requirejs/text)
 * `js` backed by [RequireJS](http://requirejs.org/)
@@ -594,20 +671,20 @@ MVVM is managed by [CascadeJS](https://github.com/fabdouglas/cascadejs) with ena
 
 Note: VueJS rewrite is in progress.
 
-
 ## File
 
-Uploaded files are always stored by the `ligoj-api` container, and uses `ligoj.file.path` for authorization. Only administrators can use this feature.
+Uploaded files are always stored by the `ligoj-api` container, and use `ligoj.file.path` for authorization. Only administrators can use this feature.
 
-The endpoint `/system/file` allows download and upload. Files can be static for endusers or configuration files or hooks.
+The endpoint `/system/file` allows download and upload. Files can be static for end-users, configuration files, or hooks.
 
 When a user requests a file, the priority is the following:
-* Resources from the Ligoj home directory. Usually images and other public assets for customization : `/META-INF/resources/webjars/` , `/statics/themes/`.
+
+* Resources from the Ligoj home directory. Usually images and other public assets for customization: `/META-INF/resources/webjars/` , `/statics/themes/`.
 * Resources from the plugins
 * Resources from the application
 * Resources from the libraries
 
-Note : non assets files located in the Ligoj home directory such as `plugins`, `config`, are not reachable to endusers.
+Note: non-asset files located in the Ligoj home directory, such as `plugins` and `config`, are not reachable by end-users.
 
 ## Hook
 
@@ -615,9 +692,11 @@ Hooks are event based actions, one event by successful API call.
 
 ### Hook with scripts
 
-Uploaded scripts using [file](#file) must also be placed inside one of the location defined by `ligoj.hook.path` (multiple regex values separated by a comma), and only administrators use this feature.
+Uploaded scripts using [file](#file) must also be placed inside one of the locations defined by `ligoj.hook.path` (multiple regex values separated by a comma), and only administrators use this
+feature.
 
-The definition of a hook is :
+The definition of a hook is:
+
 - A name (unique)
 - A match of the HTTP method: exact method of any
 - A match of the API resource path: exact path or regex
@@ -627,39 +706,40 @@ The definition of a hook is :
 - The timeout of the script execution in seconds. Default value is managed by `ligoj.hook.timeout` configuration. Default is `30` seconds.
 
 Timeline:
-- When an API call succeed, all the hooks are checked to find the matching ones:
-  * Match of the HTTP method
-  * Match of the API resource path
+
+- When an API call succeeds, all the hooks are checked to find the matching ones:
+    * Match of the HTTP method
+    * Match of the API resource path
 - Matching hooks are split onto two groups: synchronous and asynchronous.
-  - Synchronous hooks (`delay=0`) are executed in the same thread as the API call.
-  - Asynchronous hooks (`delay>0`) are executed in a sub-shell after the event is processed.
+    - Synchronous hooks (`delay=0`) are executed in the same thread as the API call.
+    - Asynchronous hooks (`delay>0`) are executed in a sub-shell after the event is processed.
 - Just before the execution, the script is checked to be allowed by `ligoj.hook.path`
 - The script is executed with a JSON object, encoded as base64, as an environment variable `PAYLOAD`
 - The JSON structure is:
-  * `now`: the current date and time
-  * `name`: the hook name
-  * `path`: the API resource path
-  * `method`: the HTTP method
-  * `api`: the API name
-  * `inject`: map of configuration/secret decrypted values
-  * `timeout`: the execution timeout in seconds
-  * `params`: the API parameters
-  * `user`: the principal name
-  * `result`: the API result. Some response types like streams cannot be serialized in this hook. In this case the result is a string like `<ClassName>`.
- - For each synchronous hook, 2 additional headers are added to the response depending on the success or failure. `NAME` is the hook name where hyphens and non alphanumeric characters are replaced by underscores.
-   - `X-Ligoj-Hook-NAME` :
-      * `SUCCEED`: the hook was executed successfully
-      * `FAILED`: the hook failed due to an error
-      * `SKIP`: the hook was skipped because of security or configuration limits
-   - `X-Ligoj-Hook-NAME-Message` : hook output message gathered from standard output and error streams when non empty
- 
+    * `now`: the current date and time
+    * `name`: the hook name
+    * `path`: the API resource path
+    * `method`: the HTTP method
+    * `api`: the API name
+    * `inject`: a map of configuration/secret decrypted values
+    * `timeout`: the execution timeout in seconds
+    * `params`: the API parameters
+    * `user`: the principal name
+    * `result`: the API result. Some response types, like streams, cannot be serialized in this hook. In this case, the result is a string like `<ClassName>`.
+- For each synchronous hook, 2 additional headers are added to the response depending on the success or failure. `NAME` is the hook name where hyphens and non-alphanumeric characters are replaced by
+  underscores.
+    - `X-Ligoj-Hook-NAME`:
+        * `SUCCEED`: the hook was executed successfully
+        * `FAILED`: the hook failed due to an error
+        * `SKIP`: the hook was skipped because of security or configuration limits
+    - `X-Ligoj-Hook-NAME-Message`: hook output message gathered from standard output and error streams when non-empty
 
 In `ligoj-api` container, when a hook matches, the following logs appear:
+
 ```log
 2026-01-25 17:21:15.425 INFO  [Hook system/security/role/1 -> audit_role_change] Triggered
 2026-01-25 17:21:15.457 INFO  [Hook system/security/role/1 -> audit_role_change] Succeed, code: 0, duration: 00:00:00.031
 ```
-
 
 Synchronous hooks are triggered by `org.ligoj.bootstrap.core.resource.filter.HookResponseFilter` class.
 
@@ -669,11 +749,12 @@ Hooks are executed by `org.ligoj.bootstrap.resource.system.hook.HookProcessRunna
 
 ### Hook with plugins
 
-Plugins can register themself as hooks by extending a CXF interface `ContainerResponseFilter`.
+Plugins can register themselves as hooks by extending a CXF interface `ContainerResponseFilter`.
 
-Any uncaught exception in this filter rollbacks the current transaction.
+Any uncaught exception in this filter rolls back the current transaction.
 
 Sample hook:
+
 ```java
 import jakarta.ws.rs.ext.Provider;
 
@@ -693,18 +774,18 @@ public class HookResponseFilter implements ContainerResponseFilter {
 
 Sample implementation in `org.ligoj.bootstrap.core.resource.filter.HookResponseFilter`
 
-
-
 ## OpenAPI
 
 Available formats:
+
 - OpenAPI documentation is available at [http://localhost:8080/ligoj/rest/openapi.json](http://localhost:8080/ligoj/rest/openapi.json).
 - Wadl documentation is available at [http://localhost:8080/ligoj/rest?_wadl](http://localhost:8080/ligoj/rest?_wadl).
 
 The Swagger UI is available at [http://localhost:8080/ligoj/#/api](http://localhost:8080/ligoj/#/api).
 
 All enabled plugins contribute to the final generated OpenAPI document.
-The javadoc documentation is extracted from the `-javadoc.jar` artifacts of plugins and associated to relevant OpenAPI operations. Supported documentation includes:
+The javadoc documentation is extracted from the `-javadoc.jar` artifacts of plugins and associated with relevant OpenAPI operations. Supported documentation includes:
+
 - Operation description
 - Parameter description
 - Response description
@@ -714,23 +795,24 @@ The javadoc documentation is extracted from the `-javadoc.jar` artifacts of plug
 
 API tokens are used to authenticate API calls instead of a password or other credentials.
 Constraints are:
+
 - API tokens are scoped to a user. No user (even administrators) can list or see these tokens
 - Business key of a token is its `name`, unique for a user and case sensitive
-- API Key hash is stored in database, not the actual API key.
-- Optional expiration date can be set. The expired token cannot be used, and are daily purged by default with this CRON expression `0 0 4 * * ?`. This can be overridden with `api.token.purge` property.
-- Expired tokens are neither listed nor returned even if they are not yet physically deleted.
+- The API key hash is stored in the database, not the actual API key.
+- An optional expiration date can be set. Expired tokens cannot be used, and are daily purged by default with this CRON expression `0 0 4 * * ?`. This can be overridden with `api.token.purge`
+  property.
+- Expired tokens are neither listed nor returned even if they have not yet been physically deleted.
 - API `purge/all` forces the deletion of all expired tokens. This API is only available to administrators.
 - API `purge/me` forces the deletion of all expired tokens of current principal.
 
 API generation:
-- A Random `128` characters string is generated. Can be overridden with `api.token.length` property. This is actual value returned to the principal.
-- A hash is generated from the token's name and principal's name with `SHA-512` algorithm. Can be overridden with `api.token.digest` property.
-- A `SHA-1` hash is created from the principal's name, the previous hash, and a secret from `api.token.secret`. There is `31` iterations, can be overridden with `api.token.iterations` property.
-- The `SHA-1` hash is then crypted with `DESede` algorithm. Can be overridden with `api.token.digest` property. This the actual value stored in database.
 
+- A random `128` characters string is generated. Can be overridden with `api.token.length` property. This is the actual value returned to the principal.
+- A hash is generated from the token's name and principal's name with `SHA-512` algorithm. Can be overridden with `api.token.digest` property.
+- A `SHA-1` hash is created from the principal's name, the previous hash, and a secret from `api.token.secret`. There are `31` iterations, this can be overridden with `api.token.iterations` property.
+- The `SHA-1` hash is then crypted with `DESede` algorithm. Can be overridden with `api.token.digest` property. This is the actual value stored in the database.
 
 See `ApiTokenResource` for more details.
-
 
 ## UI
 
@@ -741,32 +823,32 @@ Callbacks are functions that are synchronously called when an event is triggered
 These are distinct from the native DOM events that can be used with jQuery `on` and `off` methods.
 
 Native events are:
-- `html:before` : `data` is an Object with this structure: 
-  - `target`: jQuery object that will receive the new content
-  - `content`: Array where the first element is the HTML content to be added. This array can be modified.
-- `html:after` : `data` is an Object with this structure: 
-  - `target`: jQuery object that received the new content
-  - `content`: Array where the first element is the HTML content that was added.
-- `unload:before` : No data. The context is the currently unloading fragment.
-- `unload:after` : No data. The context is the currently unloaded fragment.
-- `fragment:before` : No data. The context is the fragment to be loaded.
-- `fragment-${id}` : No data. The context is the fragment to be loaded. `id` is the fragment identifier.
-- `fragment:error` : No data. The context is the fragment that failed to load.
-- `hash` : `data` is the new navigation hash (URL fragment).
-- `html:after:datatables:row`: DataTables row has been added by DataTables. `data` is an Object with this structure: 
-  - `target`: Is the jQuery object of the row.
-  - `rowData`: The data associated with the row.
-  - `dataTable`: Is the DataTables object.
+
+- `html:before`: `data` is an Object with this structure:
+    - `target`: jQuery object that will receive the new content
+    - `content`: An array where the first element is the HTML content to be added. This array can be modified.
+- `html:after`: `data` is an Object with this structure:
+    - `target`: jQuery object that received the new content
+    - `content`: An array where the first element is the HTML content that was added.
+- `unload:before`: No data. The context is the currently unloading fragment.
+- `unload:after`: No data. The context is the currently unloaded fragment.
+- `fragment:before`: No data. The context is the fragment to be loaded.
+- `fragment-${id}`: No data. The context is the fragment to be loaded. `id` is the fragment identifier.
+- `fragment:error`: No data. The context is the fragment that failed to load.
+- `hash`: `data` is the new navigation hash (URL fragment).
+- `html:after:datatables:row`: DataTables row has been added by DataTables. `data` is an Object with this structure:
+    - `target`: Is the jQuery object of the row.
+    - `rowData`: The data associated with the row.
+    - `dataTable`: Is the DataTables object.
 - `html:before:login`: Before the internal login popup is added.
 - `html:after:login`: After the internal login popup is added.
 - `html:after:project`: After the project's details is added.
-- `view:before:compile`: Before a view is compiled by Handlebars. `data` is an Object with this structure: 
-  - `template`: Raw template content. Can be modified before compilation.
-- `view:after:compile`: After a view is compiled by Handlebars. `data` is an Object with this structure: 
-  - `template`: Compiled template function. Can be modified before the `html` phase.
+- `view:before:compile`: Before a view is compiled by Handlebars. `data` is an Object with this structure:
+    - `template`: Raw template content. Can be modified before compilation.
+- `view:after:compile`: After a view is compiled by Handlebars. `data` is an Object with this structure:
+    - `template`: Compiled template function. Can be modified before the `html` phase.
 - `view:before:unload`: Before a view is unloaded, removed from the DOM. `data` is the jQuery object of the view.
 - `view:after:unload`: After a view is unloaded, removed from the DOM. `data` is the jQuery object of the view.
-
 
 You can create your own events and use them with `trigger`, `on` and `off` methods.
 
@@ -807,28 +889,34 @@ $cascade.trigger("html", data, context);
 
 # Plugin management
 
-A single jar (archive) containing binaries (Java class files), configuration extensions and static resources.
+A single jar (archive) contains binaries (Java class files), configuration extensions, and static resources.
 A plugin can be:
-- A service provider, for sample: [plugin-id](https://github.com/ligoj/plugin-id), [plugin-vm](https://github.com/ligoj/plugin-vm).
-- A tool, implementing a service, for sample: [plugin-id-ldap](https://github.com/ligoj/plugin-id-ldap), [plugin-vm-aws](https://github.com/ligoj/plugin-aws)
-- An embedded node instance or a more specific tool, for sample: [plugin-id-ldap-embedded](https://github.com/ligoj/plugin-id-ldap-embedded), [plugin-vm-azure-csp](https://github.com/ligoj/plugin-vm-azure-csp)
-- A feature not based on a node, for sample: [plugin-iam-node](https://github.com/ligoj/plugin-iam-node)
+
+- A service provider, for example: [plugin-id](https://github.com/ligoj/plugin-id), [plugin-vm](https://github.com/ligoj/plugin-vm).
+- A tool implementing a service, for example: [plugin-id-ldap](https://github.com/ligoj/plugin-id-ldap), [plugin-vm-aws](https://github.com/ligoj/plugin-aws)
+- An embedded node instance or a more specific tool, for
+  example: [plugin-id-ldap-embedded](https://github.com/ligoj/plugin-id-ldap-embedded), [plugin-vm-azure-csp](https://github.com/ligoj/plugin-vm-azure-csp)
+- A feature not based on a node, for example: [plugin-iam-node](https://github.com/ligoj/plugin-iam-node)
 
 ## Dependency Management
+
 The process does not rely on OSGi like process, but is based on naming convention.
 
-The plug-ins are added to the application class loader during the startup in the natural string order. This ensure that "plugin-service" is loaded before "plugin-service-tool"
+Plug-ins are added to the application class loader during startup in natural string order. This ensures that "plugin-service" is loaded before "plugin-service-tool".
 All plug-ins are autowired and instantiated at the same time, but the initial data and exports follow the natural order.
 "plugin-service-tool" plugin is implicitly depending on "plugin-service"
 
-This implicit dependency can also be found in the `pom.xml` file. For now, the plugin manager does not use the Maven configuration to direct the loading order or the check during the deployment of a new plugin. So the administrative user must ensure, when the plug-in `plugin-service-tool` is installed, that the `plugin-service-tool` is installed to.
+This implicit dependency can also be found in the `pom.xml` file. For now, the plugin manager does not use the Maven configuration to direct the loading order or to check during the deployment of a
+new plugin. So the administrative user must ensure that when the plugin `plugin-service-tool` is installed, `plugin-service` is installed too.
 
-The same logic applies to the update process. Do not update `plugin-service-tool` without doing the same for `plugin-service-tool`. This limitation will be fixed with [#1](https://github.com/ligoj/ligoj/issues/1)
+The same logic applies to the update process. Do not update `plugin-service-tool` without doing the same for `plugin-service-tool`. This limitation will be fixed
+with [#1](https://github.com/ligoj/ligoj/issues/1)
 
 ## Creating your own plugin
 
-In the below table, the sample is based on a plug-in being a tool `Slack` implementing the service `Talk`.
-All Java classes are in the directory `org/ligoj/app/plugin/${service}/${tool}`, aliased as `$base_java`. So all java packages of this plug-in starts with `org.ligoj.app.plugin.${service}.${tool}`. For our sample, it is: `org.ligoj.app.plugin.talk.slack`. Sub-packages are also allowed.
+In the below table, the example is based on a plug-in being a tool `Slack` implementing the service `Talk`.
+All Java classes are in the directory `org/ligoj/app/plugin/${service}/${tool}`, aliased as `$base_java`. So all Java packages of this plugin start with `org.ligoj.app.plugin.${service}.${tool}`. For
+our sample, it is: `org.ligoj.app.plugin.talk.slack`. Sub-packages are also allowed.
 
 All Web resources are in the directory `META-INF/resources/webjars/service/${service}/${tool}`, aliased as `${base_web}`. For our sample, it is: `META-INF/resources/webjars/service/talk/slack`.
 
@@ -849,40 +937,40 @@ All entities to be installed on setup are in the directory `csv`.
 | csv/parameter.csv                   |                     | [Parameter](https://github.com/ligoj/ligoj-api/blob/master/plugin-core/src/main/java/org/ligoj/app/model/Parameter.java) entities to persist                      |
 | csv/parameter-value.csv             |                     | [ParameterValue](https://github.com/ligoj/ligoj-api/blob/master/plugin-core/src/main/java/org/ligoj/app/model/ParameterValue.java) entities to persist (optional) |
 
-
 ## Plugins Extension Points
+
 Extension points are configurations defined in the plugin to contribute to the behavior of the application.
 These extensions may:
+
 - Change the UI
-- Provide additional data collected by another plugins
+- Provide additional data collected by other plugins
 - Add security levels
 
 | Layer | Scope  | Enablement                                                                                                                                                                             |
 | ----- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | UI    | Global | Create a file `META-INF/resource/webjars/bootstrap.private.js`. This JS code will be added to the initial JS code. For example, it's possible to register events, add a menu entry,... |
 
-
 ## Subscription
 
 A subscription is the holder of the configuration of a service instance for a project:
-- The node instance
-- The parameters values
-- The project
+
+- The node instance.
+- The parameters values.
+- The project.
 
 ![subscription relationship](docs/assets/img/subscription.png)
-
 
 ## Multiple subscriptions sample
 
 A project can have multiple subscriptions.
 
 In the below diagram, the project `Project 123` has two subscriptions:
+
 - `Subscription[id=1]` linking the `Project[id=123]` to LDAP group `prj123admin` defined by `ParameterValue[id=2]` within the LDAP server `Node[id=service:id:ldap:server1]`
 - `Subscription`[id=2] linking the `Project`[id=123] to LDAP group `prj123dev` defined by `ParameterValue[id=3]` within the LDAP server `Node[id=service:id:ldap:server1]`
-- The `Node` instance `service:id:ldap:server1` owns the `ParameterValue[id=1]` definig the actual server URL.
+- The `Node` instance `service:id:ldap:server1` owns the `ParameterValue[id=1]` defining the actual server URL.
 
 ![multiple subscriptions](docs/assets/img/subscription-instance.png)
-
 
 ## Multiple subscriptions, multiple nodes sample
 
@@ -892,7 +980,6 @@ In the below diagram derived from the previous one, LDAP group `admin` has been 
 - The `Subscription[id=2]` is updated to point to this new `Node`
 
 ![multiple subscriptions, multiple nodes](docs/assets/img/subscription-instance-2.png)
-
 
 # Development
 
@@ -905,50 +992,52 @@ In the below diagram derived from the previous one, LDAP group `admin` has been 
 
 ### Naming convention
 
-Always use simple words. Because long words  :
+Always use simple words because long words:
+
 * are long to type
-* increase syntax/lexical typos
-* take some useless spaces in your editor and your mind
-* increase the conventional naming entropy in the team
+* increase syntactic/lexical typos
+* take up useless space in your editor and your mind
+* increase conventional naming entropy across the team
 
-Lines length is `120` chars for code and comments.
+Line length limits are `140` chars for code and comments.
 
-Every technical name (variable, URL, API component) exposed to end user must be written in lower case. In addition, for non-local names (Classes, HTML identifiers, CSS classes, function) avoid using 'trimmed' nouns such as: `passwd` (`password`), `param` (`parameter`), `gen` (`generate`), `init` (`initialize`),...
+Every technical name (variable, URL, API component) exposed to the end-user must be written in lower case. In addition, for non-local names (Classes, HTML identifiers, CSS classes, functions) avoid
+using 'trimmed' nouns such as: `passwd` (`password`), `param` (`parameter`), `gen` (`generate`), `init` (`initialize`),...
 
 Use patterns for packages or name for files of the same type as described in the below table.
 
-| Type                      | Package convention                                          | Name convention                                                             |
-| ------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
-| All                       | ASCII                                                       | ASCII                                                                       |
-| All                       | JavaScript syntax                                           | main/...                                                                    | --> See Standard JS, happiness style, only on Atom and SonarQube             |
-| All                       | Java syntax                                                 | lower case package, [a-z]+ in src/main/java or src/test/java,               | --> SonarQube profile enabled on your project, only on Eclipse and SonarQube |
-| All                       | HTML syntax                                                 | main/...                                                                    | --> Bootstrap Linter, only on Visual Source Code and SonarQube               |
-| JAX-RS                    | resources                                                   | ...resource....                                                             | ...Resource.java, use nouns, camel case                                      |
-| Spring Data Repository    |                                                             | ...repository...                                                            | ...Repository.java, use nouns, camel case                                    |
-| Exception                 | near the using components, but not in a "exception" package | ...Exception.java, camel case                                               |
-| JPA entity                | ...model...                                                 | Use nouns, camel case                                                       |
-| JPA property              |                                                             | Use nouns, camel case, plural for collections. No `List` or `Set` suffixes. |
-| View Object               | near the using components, but not in a "vo" package        | ...Vo.java, use nouns, camel case                                           |
-| Web files (js, html, css) | ...module/usecase/....                                      | simple nouns, singular, lower case. Use `-` as word separator               |
-| i18n keys                 | ../nls/messages.js or ../nls/xx/messages.js                 | simple nouns, lower case. Use `-` as word separator                         |
+| Type                   | Package convention                           | Name convention                                                             |
+| ---------------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
+| All                    | ASCII                                        | ASCII                                                                       |
+| All                    | JavaScript syntax                            | See JS linter                                                               |
+| All                    | Java syntax                                  | Lower case package, [a-z]+ in `src/main/java` or `src/test/java`            |
+| All                    | HTML syntax                                  | See VueJS Linter                                                            |
+| JAX-RS                 | resources                                    | `*Resource.java`, use nouns, camel case                                     |
+| Spring Data Repository |                                              | `*Repository.java`, use nouns, camel case                                   |
+| Exception              | near the using components, no nested package | `*Exception.java`, camel case                                               |
+| JPA entity             | ...model...                                  | Use nouns, camel case                                                       |
+| JPA property           |                                              | Use nouns, camel case, plural for collections. No `List` or `Set` suffixes. |
+| View Object            | near the using components, no nested package | `*Vo.java`, use nouns, camel case                                           |
+| Web files              | ...module/usecase/....                       | Simple nouns, singular, lower case. Use `-` as word separator               |
+| i18n keys              | `fr`, `en`                                   | Simple nouns, lower case. Use `-` as word separator                         |
 
+Avoid getters/setters, use Lombok.
 
-Avoid getter/setter, use Lombok
+Use full camel case for class names, no class like `PerformanceHTTP` but `PerformanceHttp`.
 
-Use full camel case for class names, no class like `PerformanceHTTP` but `PerformanceHttp`
+Keep the code as simple as possible. For example:
 
-Keep the code the most simple as possible. For sample :
 * In resources, the default repository should be named "repository".
 * In resources, keep standard the names for CRUD operations. For example `deleteUser` should be named `delete` in a resource named `UserResource`.
-* Prefer HTTP method type over HTTP path : `@DELETE /user` for deletion, and not `@POST /user/delete`
+* Prefer HTTP method types over HTTP paths: `@DELETE /user` for deletion, and not `@POST /user/delete`.
 * Prefer path parameters over the body when there are only one or two parameters
 * Use singular (not plural) for resources. This might hurt your feelings regarding the discussions over other practices about plural vs singular of REST resources.
 
 ### Test
 
-JUnit5 (no JUnit4) test class must refer to the test class in the JavaDoc with a link, and should contain a field named `resource` of the corresponding type.
+A JUnit5 (no JUnit4) test class must refer to the test class in the JavaDoc with a link, and should contain a field named `resource` of the corresponding type.
 
-The name of test class for `Xyz` should be named `XyzTest`, in the same package.
+The test class for `Xyz` should be named `XyzTest`, in the same package.
 
 The name of each test function should match to the corresponding tested function.
 
@@ -957,65 +1046,54 @@ Prefer test of resources over the repositories.
 ### Code coverage
 
 Every Java Code line must be covered. Even "getters", if not:
+
 - Either this code is necessary, and write the associated test
 - Or delete it
 
 ### REST
 
-Root path of a JAX-RS resource should match with the class name and the related entity JPA . Non unique related JPA entity is accepted and name should match to main feature. Only nouns are accepted.
+The root path of a JAX-RS resource should match the class name and the related JPA entity. Non-unique related JPA entities are accepted, and the name should match the main feature. Only nouns are
+accepted.
 
-All JAX-RS path, query, path parameters and form parameters must be in lower case and must be nouns. Avoid if possible the composed nouns; for sample "business-hours" should be replaced by "hours" when there is only one type of hours in the parameters. However, it's possible to use a different java parameter name in this case.
+All JAX-RS path, query, and form parameters must be lowercase and must be nouns. Avoid if possible composed nouns; for example "business-hours" should be replaced by "hours" when there is only one
+type of hours in the parameters. However, it's possible to use a different Java parameter name in this case.
 
-Add as much as possible JSR-303 annotation on your beans (`@NotNull`, `@Size`,..) By default all parameters without annotations are `@NotNull` and all properties are `@Nullable`. Cascaded bean validation still requires `@Valid` on cascaded property.
+Add as much JSR-303 annotations on your beans as possible (`@NotNull`, `@Size`,..) By default all parameters without annotations are `@NotNull` and all properties are `@Nullable`. Cascaded bean
+validation still requires `@Valid` on cascaded properties.
 
-Dont use try/catch block for technical exception handling. Use them only to handle business rule and `BusinessException` class.
+Don't use try/catch blocks for technical exception handling. Use them only to handle business rules and the `BusinessException` class.
 
 Add documentation to public endpoints, including the Javadoc parameters and return values. They are reused for OpenAPI documentation. See [OpenAPI](#openapi) for more details.
 
 ### Tools
 
 * [JSE 21+](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or [OpenJDK 21+](http://jdk.java.net/21/)
-* Java IDE 
-  * Either [IntelliJ IDEA 2024](https://www.jetbrains.com/idea/)
-  * Either [Eclipse 2024‑03+ (java package)](http://www.eclipse.org/downloads/eclipse-packages/) + [Lombok](https://projectlombok.org/) + Java14 JDT patch from the marketplace for version before 2020‑06.
+* Java IDE
+    * Either [IntelliJ IDEA 2026](https://www.jetbrains.com/idea/)
+    * Either [Eclipse 2026+ (java package)](http://www.eclipse.org/downloads/eclipse-packages/) + [Lombok](https://projectlombok.org/)
 * [Docker](https://www.docker.com/) or [Podman](https://podman.io/)
 * [Maven 3.9+](https://maven.apache.org/download.cgi)
-* A PgSQL/MySQL (or another compatible) database
-* SonarQube, ... (to complete), see the badges for the complete list.
+* A PgSQL 15+ / MySQL 5.7+ (or another compatible) database
+* SonarQube, ... see the badges for the complete list.
 * [Visual Studio Code](https://code.visualstudio.com/)
-* npm
+* npm with NodeJS 24+
 
 ## Database setup
 
-For the below samples, a MySQL server for `ligoj-api` container is needed.
+For the below samples, a PgSQL server 15+ for `ligoj-api` container is needed.
 
 Note: At the first start, schema is updated/created and the initial data is inserted into the database.
 
-### With your own database
+```shell
+# MysQL
+podman run --name ligoj-db -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=ligoj -e MYSQL_USER=ligoj -e MYSQL_PASSWORD=ligoj -d mysql:5.7
 
-```sql
-mysql --user=root
-CREATE DATABASE `ligoj` DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_bin;
-CREATE USER 'ligoj'@'localhost' IDENTIFIED BY 'ligoj';
-GRANT ALL ON `ligoj`.* TO 'ligoj'@'localhost';
-FLUSH PRIVILEGES;
-quit
-```
-
-### With a fresh new database 
-
-```
-docker run --name ligoj-db -d -p 3306:3306 -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=ligoj -e MYSQL_USER=ligoj -e MYSQL_PASSWORD=ligoj -d mysql:5.7
-```
-
-## Building
-
-Docker build (ARG) variables:
-
-```
-NEXUS_URL : Repository base host used to download the WAR files
-VERSION   : Ligoj version, used to build the WAR_URL
-WAR_URL   : Full WAR URL, built from NEXUS_URL and VERSION
+# PGSQL
+podman run --name ligoj-db -p 5432:5432 -e POSTGRES_PASSWORD=ligoj -e POSTGRES_USER=ligoj -d postgres
+CREATE USER ligoj WITH ENCRYPTED PASSWORD 'ligoj';
+CREATE DATABASE ligoj WITH OWNER=ligoj ENCODING='UTF-8';
+GRANT ALL ON DATABASE ligoj to ligoj;
+GRANT ALL ON SCHEMA public TO ligoj;
 ```
 
 ## Running
@@ -1030,14 +1108,14 @@ mvn spring-boot:run -f app-ui/pom.xml&
 
 ### With your IDE
 
-From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes :
+From your IDE, without Maven runner (but Maven classpath contribution), create and execute 2 run configurations with the following main classes:
 
 ```
 org.ligoj.boot.api.Application
 org.ligoj.boot.web.Application
 ```
 
-Notes these launchers (*.launch) are already configured for Eclipse.
+Note that these launchers (*.launch) are already configured for Eclipse.
 See [Wiki page](https://github.com/ligoj/ligoj/wiki/Dev-Setup) for more information.
 
 ## Packaging
@@ -1053,7 +1131,7 @@ mvn clean package -Pminify -DskipTests=true
 
 ### Nexus OSS
 
-```
+```shell
 mvn clean deploy -Dgpg.skip=false -Psources,javadoc,minify -DskipTests=true
 ```
 
@@ -1061,29 +1139,43 @@ mvn clean deploy -Dgpg.skip=false -Psources,javadoc,minify -DskipTests=true
 
 For Eclipse compiler, enable 'Store information about method parameters (usable with reflection)' in general preferences/Java/Compiler
 
-
 # Docker Installation
 
-These actions allow the first installation of Ligoj on an host having Docker installed.
+These actions allow the first installation of Ligoj on a host having Docker installed.
 
 ### Preparation of the Ligoj data directory
 
 A directory on the host must be created to store the application's persistent data. It is possible to create Docker data volumes, however this configuration is not documented here.
 This directory will contain:
+
 - plugins installed manually or downloaded automatically. These are `jar` files.
 - temporary and persistent data of plug-ins
 - hook scripts
 - (optional) the secret file to encrypt secrets in the database using AES-256
+- (optional) the `plugin-vendors.p12` truststore of the trusted plugin vendor certificates, see below
 
-```bash
+```shell
 mkdir -p /var/lib/ligoj
 ```
+
+#### Plugin vendors truststore
+
+To get the plugin code signatures reported as `VERIFIED` in the plugin administration view — and optionally to refuse unverified plug-ins — drop the truststore holding the trusted vendor certificates as `plugin-vendors.p12` inside the data directory. This file contains only certificates, no private key. Either copy the one distributed by your plugin vendor, or build it from a vendor certificate (`.cer`):
+
+```shell
+keytool -importcert -keystore /var/lib/ligoj/plugin-vendors.p12 -storetype PKCS12 \
+  -storepass changeit -alias ligoj -file ligoj-vendor.cer -noprompt
+```
+
+Without this file, the application still starts and verifies the signature integrity, but the signer identities stay reported as untrusted (`SIGNED` at best). See [Plugin code signing](#plugin-code-signing) for the complete feature: signing at release, verification statuses and the related `ligoj.plugin.signature.*` system properties (truststore location and password override, strict `required` mode).
+
+Note the `ligoj-api` image may bundle a default truststore (`plugin-vendors-default.p12`, built from the `plugin-vendors/*.cer` certificates present at image build — see `app-api/prepare-build-sample.sh` — or provided prebuilt as `plugin-vendors/plugin-vendors-default.p12` in the build context): at container startup it is automatically installed as `plugin-vendors.p12` in the data directory when this file does not exist yet — an existing file is never overridden. Disable this behavior with the `INSTALL_PLUGIN_VENDORS=false` container environment variable.
 
 ### Database creation
 
 Connect to the PostGreSQL 15+ server
 
-```bash
+```shell
 sudo su postgres
 psql
 ```
@@ -1126,18 +1218,23 @@ The `/etc/docker/daemon.json` file can be adjusted to enable mirror mode for Doc
 # Docker Execution
 
 Ligoj is composed of 2 Docker containers:
-- `ligoj-api`: Ligoj API, not intended to be accessible outside the Docker network. It is accessible only from the other container `ligoj-ui`. This container is the only one able to access the database and other sources (LDAP, Jenkins API, etc.). It is a RESTful, transactional API based on Spring-Boot.
-- `ligoj-ui`: Ligoj Frontend, is just a proxy for `ligoj-api` with routing rules too complex to be handled directly by Apache or NGinx. This container manages user sessions, is stateful and based on Spring-Boot.
+
+- `ligoj-api`: Ligoj API, not intended to be accessible outside the Docker network. It is accessible only from the other container `ligoj-ui`. This container is the only one able to access the
+  database and other sources (LDAP, Jenkins API, etc.). It is a RESTful, transactional API based on Spring-Boot.
+- `ligoj-ui`: Ligoj Frontend, is just a proxy for `ligoj-api` with routing rules too complex to be handled directly by Apache or NGinx. This container manages user sessions, is stateful and based on
+  Spring-Boot.
 
 ## Configuration
 
 ### `application.properties` file
 
-In the configuration file `/var/lib/ligoj/config/application.properties`, adapt the database username and password. All these configurations can be converted into `-D` arguments in the Docker execution line.
+In the configuration file `/var/lib/ligoj/config/application.properties`, adapt the database username and password. All these configurations can be converted into `-D` arguments in the Docker
+execution line.
 
-This configuration file can be shared between the 2 containers `ligoj-ui` and `ligoj-api` but it's not recommended. If a common Spring Boot configuration needs to have a different value from one container to another, use a `-D` argument dedicated to these containers.
+This configuration file can be shared between the 2 containers `ligoj-ui` and `ligoj-api` but it's not recommended. If a common Spring Boot configuration needs to have a different value from one
+container to another, use a `-D` argument dedicated to these containers.
 
-```bash
+```shell
 # Volume for configuration and installed Ligoj plugins
 mkdir -p /var/lib/ligoj/hooks
 mkdir -p /var/lib/ligoj/files
@@ -1164,7 +1261,8 @@ jpa.dialect=org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect
 
 For Java environments, the management of trusted certification authorities is handled in a JKS file: a TrustStore.
 
-To facilitate the creation of these files, a Python script [plugins/ssl.py](https://github.com/ligoj/cli/blob/master/plugins/ssl.py) allows easily adding certificates (the whole chain) from a given site into a JKS file.
+To facilitate the creation of these files, a Python script [plugins/ssl.py](https://github.com/ligoj/cli/blob/master/plugins/ssl.py) allows easily adding certificates (the whole chain) from a given
+site into a JKS file.
 
 Multiple consecutive executions are possible to progressively build the target JKS file.
 
@@ -1174,7 +1272,7 @@ In the example below, the JKS file is filled with 2 CAs.
 
 Note: This script requires `keytool` to be available on the host.
 
-```bash
+```shell
 python plugins/ssl.py keycloak.sample.com 443 ./ligoj.jks changeit
 ```
 
@@ -1199,7 +1297,7 @@ Modifying the content of a TrustStore is only taken into account after restartin
 
 ## `ligoj-api` Container
 
-```bash
+```shell
 # Volume for scripts associated with hooks. Only this location will be executable
 mkdir -p /var/lib/ligoj/hooks
 
@@ -1226,7 +1324,7 @@ ligoj/ligoj-api:4.0.2-SNAPSHOT-101
 
 Access logs
 
-```bash
+```shell
 sudo docker logs -f ligoj-api
 ```
 
@@ -1245,22 +1343,35 @@ sudo docker logs -f ligoj-api
 2023-07-18 20:08:21.583 INFO  Started Application in 11.234 seconds (process running for 11.854)
 ```
 
+### Docker environment variables
+
+| Docker env   | Default value                  | Note                                                                             |
+| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
+| CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration.                                                        |
+| CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
+| SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
+| SERVER_PORT  | `8081`                         | Passed to server listening port and exposed port.                                |
+| JAVA_MEMORY  | `-Xms128M -Xmx128M`            | JVM Memory                                                                       |
+| CUSTOM_OPTS  |                                | Additional JVM options, like `-D...`                                             |
+| JAVA_OPTIONS |                                | Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties |
+
 ### Notes
 
 The Ligoj mount point `/home/hooks` to the host directory `/var/lib/ligoj/hooks` allows the `ligoj hook` CLI command to execute scripts placed in this directory.
 
-The Ligoj mount point `/home/files` to the host directory `/var/lib/ligoj/files` allows the `ligoj files` CLI command to place files in this directory. In the [post-install](#customization-of-the-ui) configuration, this directory as well as `/home/hooks` will be authorized to allow depositing files subsequently executed by hooks.
-
+The Ligoj mount point `/home/files` to the host directory `/var/lib/ligoj/files` allows the `ligoj files` CLI command to place files in this directory. In the [post-install](#customization-of-the-ui)
+configuration, this directory as well as `/home/hooks` will be authorized to allow depositing files subsequently executed by hooks.
 
 ## `ligoj-ui` Container
 
 ### Starting the container without login verification
 
-This startup mode with the `-Dsecurity=Trusted` option allows running Ligoj without authentication verification. Thus passwords are not verified, however all RBAC logic remains active. Allows performing `run-as` by "authenticating" as any user.
+This startup mode with the `-Dsecurity=Trusted` option allows running Ligoj without authentication verification. Thus passwords are not verified, however all RBAC logic remains active. Allows
+performing `run-as` by "authenticating" as any user.
 
 *Warning* Do not enable this mode for production, or only after restricting its access to known or local IPs.
 
-```bash
+```shell
 sudo docker stop ligoj-ui
 sudo docker run \
 --name "ligoj-ui" \
@@ -1276,7 +1387,7 @@ ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
 
 Access logs
 
-```bash
+```shell
 sudo docker logs -f ligoj-ui
 ```
 
@@ -1291,14 +1402,14 @@ sudo docker logs -f ligoj-ui
 
 ### Test connectivity
 
-```bash
+```shell
 # From the system
 curl http://localhost/ligoj/login.html
 ```
 
 ### Check `ligoj-api` container health via `ligoj-ui`
 
-```bash
+```shell
 sudo docker run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
@@ -1311,12 +1422,12 @@ ligoj/ligoj-ui:4.0.2-SNAPSHOT-101 sh -c "apk add curl && curl http://127.0.0.1:8
 
 ### Call `ligoj-api` API directly from the host
 
-By network design, `ligoj-api` is not directly accessible from the host. The following call the container from this trusted network with an `run-as`.
+By network design, `ligoj-api` is not directly accessible from the host. The following calls the container from this trusted network with a `run-as`.
 The HTTP Header `SM_UniversalID` is used to *declare* the user.
 
-The following call, get the user session details using then endpoint `/rest/session` with the user `ligoj-user`.
+The following call gets the user session details using the endpoint `/rest/session` with the user `ligoj-user`.
 
-```bash
+```shell
 sudo docker run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
@@ -1327,18 +1438,17 @@ ligoj/ligoj-ui:4.0.2-SNAPSHOT-101 sh -c "apk add curl && curl http://127.0.0.1:8
 {"status":"UP"}
 ```
 
-
 ### Integration with reverse proxy
 
 Without integration with a reverse proxy or upstream load balancer, Ligoj is available:
+
 - Only on the `http` protocol. Although `https` is possible, it requires modifying the execution in `Dockerfile` to configure certificates, KeyStore, and TrustStore.
 - On the IP configured via the Docker environment variable `SERVER_HOST` (default `0.0.0.0`)
 - On the port configured via the Docker environment variable `SERVER_PORT` (configured below as `8089`)
 - On the URL (path) configured via the Docker environment variable `CONTEXT` (configured below as `/ligoj`)
 - Add the corresponding DNS `ligoj.sample.com` in the tenant's DNS zone, Record type A, similar to Jenkins for the IP.
 
-
-```bash
+```shell
 echo 'backend ligoj
   server server_ligoj 127.0.0.1:8089
   http-request set-header X-Forwarded-Proto "https"' > /etc/haproxy/conf.d/ligoj.cfg
@@ -1350,22 +1460,131 @@ service haproxy restart
 
 From the system hosting the reverse proxy (via localhost)
 
-```bash
+```shell
 curl --resolve ligoj.sample.com:80:127.0.0.1 http://ligoj.sample.com/ligoj
 ```
 
 From the external system reaching the reverse proxy (via its external IP)
 
-```bash
+```shell
 curl --resolve ligoj.sample.com:80:10.125.13.185 http://ligoj.sample.com/ligoj
 ```
 
-# Configuration
+### Configuration of authentication
+
+After configuring the primary `node` responsible for authentication, the `Trusted` mode can be disabled, the API keys generated previously remain valid.
+
+It is anyway possible to revert to this mode to regain access to Ligoj in case it becomes inaccessible due to a configuration defect of the LDAP `node`.
+
+System property `security` value determines the authentication mode:
+
+| `security` mode | Login screen  | Identity Provider                                                   |
+| --------------- | ------------- | ------------------------------------------------------------------- |
+| `Trusted`       | Ligoj         | Authentication required but always accepted                         |
+| `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
+| `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
+
+#### `Rest` mode
+
+For example, if LDAP authentication is expected to be processed by `plugin-id-ldap`
+
+In this authentication mode, the login page is served by Ligoj. Authentication is done by Ligoj API through LDAP plugin expected to be configured.
+
+```shell
+sudo docker rm -f ligoj-ui
+sudo docker run \
+--name "ligoj-ui" \
+--network="host" \
+--detach \
+--restart=always \
+--log-opt max-size=5m --log-opt max-file=5 \
+-v /var/lib/ligoj:/home/ligoj \
+-e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=Rest' \
+-e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
+-e SERVER_PORT=8089 \
+ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```
+
+#### `OAuth2Bff` mode
+
+In this mode, authentication information is entered in the OIDC identity provider.
+
+Parameters for the [`application.properties` configuration file](#configuration) are [here](https://github.com/ligoj/ligoj/wiki/Security#oauth2bff-provider).
+
+Note:
+
+- If the KeyCloak server uses an unknown SSL certificate authority (CA), follow the [trusted certificate configuration](#trusted-certificates) procedure for the `ligoj-ui` container.
+- At start time, the OAuth configuration is discovered from the OIDC provider. This means that the `ligoj-ui` container must be able to reach the OIDC provider. This is the actual limitation of Spring
+  Security. If it is unavailable at start time, the `ligoj-ui` container will fail to start. See https://github.com/spring-projects/spring-boot/issues/46862.
+- With this provider, the login page (login.html) is no longer available.
+
+##### With Keycloak
+
+In this authentication mode, the login page is served by Keycloak.
+Additional configuration is added to the `CUSTOM_OPTS` environment variable (for now), instead of the standard `application.properties` configuration file.
+
+Prerequisites:
+
+- KeyCloak instance configured on the same LDAP as the one configured as `plugin-id-ldap` in Ligoj
+- Redirect configuration filled in
+    - Base URL: https://ligoj.sample.com/ligoj
+    - Login URI:
+        - https://ligoj.sample.com/ligoj/login/oauth2/code/keycloak
+        - https://ligoj.sample.com/users/auth/openid_connect/callback
+        - https://ligoj.sample.com/ligoj/oauth2/authorization/keycloak?logout
+    - Logout URI: https://ligoj.sample.com/ligoj/login/oauth2/authorization/keycloak?logout
+- *Optional* Valid certificates in the container's JKS. See [trusted certificates](#trusted-certificates)
+
+Sample configuration file [application.properties](app-ui/src/main/resources/application.properties)
+
+``` ini
+# OAuth2 specific overrides
+security = OAuth2Bff
+
+# For login using the e-mail, recommended for EntraID, GMail,...
+#ligoj.security.oauth2.username-attribute = email
+
+# For login using the internal user identifier, recommended for LDAP
+ligoj.security.oauth2.username-attribute = preferred_username
+
+ligoj.security.login.url = /oauth2/authorization/keycloak
+spring.security.oauth2.client.provider.keycloak.issuer-uri = http://localhost:9083/realms/keycloak
+spring.security.oauth2.client.registration.keycloak.provider =  keycloak
+spring.security.oauth2.client.registration.keycloak.authorization-grant-type = authorization_code
+spring.security.oauth2.client.registration.keycloak.client-id = ligoj
+spring.security.oauth2.client.registration.keycloak.client-secret = secret
+spring.security.oauth2.client.registration.keycloak.scope = openid
+```
+
+Corresponding Keycloak configuration:
+
+- Root URL = http://localhost:8080/ligoj/
+- Home URL = http://localhost:8080/ligoj/
+- Redirect Login URI: http://localhost:8080/ligoj/login/oauth2/code/keycloak
+- Redirect Logout URI: http://localhost:8080/ligoj/oauth2/authorization/keycloak?logout
+
+```shell
+sudo docker rm -f ligoj-ui
+sudo docker run \
+--name "ligoj-ui" \
+--network="host" \
+--detach \
+--restart=always \
+--log-opt max-size=5m --log-opt max-file=5 \
+-v /var/lib/ligoj:/home/ligoj \
+-e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=OAuth2Bff -Djavax.net.ssl.trustStore=/home/ligoj/ligoj-ui.jks -Dspring.security.oauth2.client.registration.keycloak.provider=keycloak -Dspring.security.oauth2.client.registration.keycloak.client-id=ligoj -Dspring.security.oauth2.client.registration.keycloak.client-secret=tMpwYaU2pBc9wXuWfYPPJXtEgxIDNGW9 -Dspring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.sample.com/realms/ligoj -Dligoj.security.login.url=/oauth2/authorization/keycloak -Dligoj.security.oauth2.username-attribute=preferred_username -Dspring.security.oauth2.client.registration.keycloak.scope=openid -Dligoj.security.login-by-api-key=true -Dsecurity.max-sessions=-1' \
+-e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
+-e SERVER_PORT=8089 \
+ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```
+
+# Configuration with CLI
 
 The objective of this section is:
-- CLI configuration,
-- creation of an API key for the administrator,
-- configuration of Ligoj and its plugins.
+
+- CLI configuration.
+- Creation of an API key for the administrator.
+- Configuration of Ligoj and its plugins.
 
 ## CLI Configuration
 
@@ -1384,6 +1603,7 @@ output=json
 ```
 
 The Ligoj secret file `~/.ligoj/credentials` should look like this:
+
 ```ini
 [default]
 api_user=ligoj-admin
@@ -1391,7 +1611,7 @@ api_user=ligoj-admin
 
 Without using configuration files, the equivalent in environment variables is:
 
-```bash
+```shell
 export LIGOJ_ENDPOINT="https://ligoj.sample.com/ligoj"
 export LIGOJ_OUTPUT="json"
 export LIGOJ_API_USER="ligoj-admin"
@@ -1399,7 +1619,7 @@ export LIGOJ_API_USER="ligoj-admin"
 
 Create a new API Key
 
-```bash
+```shell
 # Login with a password ignored in "Trusted" mode
 ligoj session login --password __trusted_mode_so_whatever__
 
@@ -1416,7 +1636,7 @@ ligoj session whoami
 
 ## Plugin Configuration
 
-```bash
+```shell
 # Put here the path leading to a Nexus proxy from where Ligoj plugins will be downloaded once cached by Nexus
 MAVEN_PLUGINS_ENDPOINT="http://nexus.sample.com/repository/maven_group/"
 
@@ -1432,21 +1652,21 @@ ligoj configuration set --id "ligoj.plugin.update" --value "false"
 
 Hooks, and read-only files management
 
-```bash
+```shell
 ligoj configuration set --id "ligoj.hook.path" --value "^/home/hooks/.*,^/home/ligoj/.*"
 ligoj configuration set --id "ligoj.file.path" --value "^/home/files/.*,^/home/hooks/.*,^/home/ligoj/META-INF/resources/webjars/.*,^/home/ligoj/statics/themes/.*"
 ```
-
 
 ## Hook configuration
 
 Hooks are event based actions, one event by successful API call.
 
-To get API calls the hook can watch: 
-- From the UI Ligoj console, in APi (`/#/api`) page
+To get API calls the hook can watch:
+
+- From the UI Ligoj console, in the API (`/#/api`) page
 - From the CLI, execute these commands:
 
-```bash
+```shell
 ligoj info api --output wadl --print url
 ligoj info api --output openapi --print url
 ligoj info api --output swagger --print url
@@ -1455,15 +1675,15 @@ ligoj info api --output wadl --print content
 ligoj info api --output openapi --print content
 ```
 
-A triggered hook script get an environment variable `PAYLOAD` containing:
+A triggered hook script gets an environment variable `PAYLOAD` containing:
+
 - API input
 - API result
 - API context
 
 More [detailed structure](#hook).
 
-To test hook in the real condition, use the Docker command `docker exec ligoj-api python3 --version`
-
+To test a hook in real conditions, use the Docker command `docker exec ligoj-api python3 --version`
 
 ### Prepare hook script file
 
@@ -1471,7 +1691,7 @@ To test hook in the real condition, use the Docker command `docker exec ligoj-ap
 
 The operation involves writing the script file (Shell, Python, etc.) directly into the directory `/home/ligoj/hooks` and making it executable.
 
-```bash
+```shell
 vi /home/ligoj/hooks/ligoj_audit.sh
 #
 chmod +x /home/ligoj/hooks/ligoj_audit.sh
@@ -1481,7 +1701,7 @@ chmod +x /home/ligoj/hooks/ligoj_audit.sh
 
 Using the CLI, upload the hook file into the right location:
 
-```bash
+```shell
 vi docs/sample_hook_ligoj_audit.sh
 #
 
@@ -1492,7 +1712,7 @@ ligoj file put --from docs/sample_hook_ligoj_audit.sh --path "/home/hooks/ligoj_
 
 #### Watch system roles actions
 
-```bash
+```shell
 ligoj hook upsert --name "audit_role_change" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"system/security/role.*"}'
 #
 
@@ -1501,8 +1721,7 @@ tail -f /home/ligoj/hooks/ligoj_audit.log
 
 #### Watch group membership actions
 
-
-```bash
+```shell
 ligoj hook upsert --name "on_group_ops" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"service/id/user.*"}'
 ```
 
@@ -1510,7 +1729,7 @@ ligoj hook upsert --name "on_group_ops" --command "/home/hooks/ligoj_audit.sh" -
 
 [Configurations](http://localhost:8080/ligoj/#/system) are string values and can be encrypted in database. When the hook scripts are called, secrets are decrypted and injected in the `PAYLOAD`.
 
-```bash
+```shell
 ligoj hook upsert --name "on_group_ops" --command "/home/hooks/ligoj_audit.sh" --directory /home/hooks --match '{"path":"service/id/user.*"}' --inject "alfresco"
 ```
 
@@ -1555,7 +1774,7 @@ Sample `PAYLOAD`:
 
 ### Update hook
 
-```bash
+```shell
 ligoj hook upsert --id 4 --name "audit_role_change_new" --command "/home/hooks/ligoj_audit.sh" --directory  /var/log --match '{"path":"system/security/role.*"}'
 ```
 
@@ -1563,7 +1782,7 @@ ligoj hook upsert --id 4 --name "audit_role_change_new" --command "/home/hooks/l
 
 Deletion can be done by `id` or `name` attribute:
 
-```bash
+```shell
 ligoj hook delete --id 2
 ligoj hook delete --name "audit_role_change"
 ```
@@ -1572,8 +1791,7 @@ ligoj hook delete --name "audit_role_change"
 
 Optional `id` or `name` filters are accepted:
 
-
-```bash
+```shell
 ligoj hook get
 ligoj hook get --id 1
 ligoj hook get --name "audit_role_change"
@@ -1583,10 +1801,9 @@ ligoj hook get --name "audit_role_change"
 [{"id": 1, "name": "audit_role_change", "workingDirectory": "/var/log", "command": "/path/to/ligoj_audit.sh", "match": "{\"path\":\"system/role.*\"}"}]
 ```
 
-
 ## Plugin installation
 
-```bash
+```shell
 echo "Installing plugins (Ligoj DEV/SNAPSHOT mode only)..."
 ligoj plugin install --id "plugin-id" --repository "nexus" --version 2.2.11
 ligoj plugin install --id "plugin-id-ldap" --repository "nexus" --version 2.2.7
@@ -1612,9 +1829,9 @@ ligoj plugin restart --wait 60
 
 ## Plugin specification configuration
 
-For sample, `plugin-ai-ldap` configuration from the CLI:
+For example, `plugin-id-ldap` configuration from the CLI:
 
-```bash
+```shell
 ligoj configuration set --id "cache.id-ldap-data.ttl" --value "37200"
 ligoj configuration set --id "service:id:user-display" --value "mail-no-domain"
 ligoj cache invalidate
@@ -1631,129 +1848,157 @@ ligoj configuration set --id "feature:iam:node:primary" --value "service:id:ldap
 ligoj plugin restart --wait 60
 ```
 
-*Notes* To build your own plugins or rebuild them from their sources, documentation is available on the GitHub [plugin-api](https://github.com/ligoj/ligoj-api) repository
+*Note* To build your own plugins or rebuild them from their sources, documentation is available on the GitHub [plugin-api](https://github.com/ligoj/ligoj-api) repository.
+
+## Plugin code signing
+
+Plugin JARs can carry an embedded code signature (`jarsigner`), unrelated to the detached GPG signature (`.asc`) required by Maven Central: the GPG signature secures the *download*, the code signature
+travels *inside* the JAR and is verified again at every startup.
+
+### Signing at release
+
+One-time setup on the release machine — generate the vendor code-signing keypair (private key, stays on the release machine), then export its certificate and build the `plugin-vendors.p12` truststore distributed to the installations:
+
+```sh
+keytool -genkeypair -keystore ~/.ligoj/code-signing.p12 -storetype PKCS12 -alias ligoj \
+  -keyalg RSA -keysize 3072 -validity 3650 -dname "CN=Ligoj, O=Ligoj"
+keytool -exportcert -keystore ~/.ligoj/code-signing.p12 -alias ligoj -file ligoj-vendor.cer
+keytool -importcert -keystore ~/.ligoj/plugin-vendors.p12 -storetype PKCS12 -alias ligoj -file ligoj-vendor.cer -noprompt
+```
+
+The `code-sign` profile of `plugin-parent` is automatically activated when `~/.ligoj/code-signing.p12` exists: `maven-jarsigner-plugin` signs the main JAR at the `package` phase — before the GPG
+signature, so the deployed artifact is the signed one. The keystore password is read from the `LIGOJ_SIGN_STOREPASS` environment variable (or the `ligoj.sign.storepass` property); the signature is
+RFC3161-timestamped (`ligoj.sign.tsa`, defaults to DigiCert) so it outlives the certificate expiry.
+
+### Verification at startup
+
+The `PluginsClassLoader` verifies every installed plugin JAR before it joins the classpath, and reports one of:
+
+| Status     | Meaning                                                                                             |
+| ---------- | --------------------------------------------------------------------------------------------------- |
+| `UNSIGNED` | No code signature.                                                                                  |
+| `INVALID`  | Broken signature: tampered content (digest mismatch), partially signed entries, unreadable archive. |
+| `SIGNED`   | Valid and complete signature, but the certificate is not trusted (or no truststore is configured).  |
+| `VERIFIED` | Valid signature whose certificate is pinned in — or chains to — the configured truststore.          |
+
+| System property                              | Default                            | Note                                                                                                                 |
+| -------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `ligoj.plugin.signature.truststore`          | `${ligoj.home}/plugin-vendors.p12` | Path to the PKCS12/JKS truststore holding the trusted vendor certificates (no private key). Required for `VERIFIED`. |
+| `ligoj.plugin.signature.truststore.password` | `changeit`                         | Truststore password.                                                                                                 |
+| `ligoj.plugin.signature.required`            | `false`                            | When `true`, rejects from the classpath the plug-ins below `VERIFIED` (or `SIGNED` without truststore).              |
+
+The simplest deployment is therefore to drop the truststore as `plugin-vendors.p12` inside the `LIGOJ_HOME` directory of the `ligoj-api` container — no property needed, see the [data directory preparation](#preparation-of-the-ligoj-data-directory). The startup log states whether the truststore was read (`Plugin code-signing truststore read from ... with N trusted entries`) or not: a missing truststore at the default location is an `INFO` notice (signatures then cap at `SIGNED`), while a missing truststore at an explicitly configured location is reported as an `ERROR`.
+
+### Display
+
+The plugin administration view (`Administration → Plugins`) shows a *Vendor* column: a green shield with the certificate identity for `VERIFIED` plug-ins, an orange shield for `SIGNED` (valid but
+untrusted certificate), a red shield for `INVALID`, and the self-declared manifest vendor greyed out when there is no signature at all.
 
 ## Customization of the UI
 
-```bash
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/META-INF/resources/webjars/home/img/logo.png"
-ligoj file put --from ./customize/bg1.jpg  --path "/home/ligoj/statics/themes/bootstrap-material-design/img/bg1.jpg"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/favicon.ico"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/favicon.ico"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/favicon-16x16.png"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/favicon-32x32.png"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/android-chrome-192x192.png"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/android-chrome-512x512.png"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/apple-touch.png"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-70x70.png"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-144x144.png"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-150x150.png"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-310x150.png"
-ligoj file put --from ./customize/logo.png --path "/home/ligoj/statics/themes/bootstrap-material-design/ico/mstile-310x310.png"
+Two assets can be replaced to rebrand the application: `logo.svg` (the
+mark rendered in the sidebar, About page, login screens and license
+dialog) and `favicon.ico` (the browser-tab icon, also probed by the
+container's `HEALTHCHECK`). Pick the override mechanism that fits how
+you run Ligoj.
+
+### At runtime, via the CLI
+
+The Spring resource handler is configured with
+`spring.web.resources.static-locations = file:${ligoj.home}/statics`
+(see `app-ui/src/main/resources/application.properties`). Anything
+dropped into `/home/ligoj/statics/` is served at the matching URL,
+shadowing the file baked into the WAR — no container rebuild, no
+restart. Push your own assets with the CLI:
+
+```shell
+ligoj file put --from ./customize/logo.svg     --path "/home/ligoj/statics/logo.svg"
+ligoj file put --from ./customize/favicon.ico  --path "/home/ligoj/statics/favicon.ico"
 ```
 
-## Configuration of authentication
+This is the right path when you want different branding per
+environment (dev / staging / prod) on top of a single shared image.
 
-After configuring the primary `node` responsible for authentication, the `Trusted` mode can be disabled, the API keys generated previously remain valid.
+### At Docker build time, baking into the image
 
-It is anyway possible to revert to this mode to regain access to Ligoj in case it becomes inaccessible due to a configuration defect of the LDAP `node`.
+Bake the branding directly into the `ligoj-ui` image so every
+deployment starts already rebranded — no runtime CLI step, no shared
+volume. Two source locations are honoured:
 
-System property `security` value determines the authentication mode:
+| File in the image               | Source path in the repo                      | Notes                                                                                                                                                                                                                                                                        |
+| ------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `favicon.ico` (WAR root)        | `app-ui/src/main/webapp/favicon.ico`         | Served at `/ligoj/favicon.ico` by Spring's resource handler. The container's `HEALTHCHECK` probes this URL — keep the file valid.                                                                                                                                            |
+| `logo.svg` (Vite-bundled asset) | `app-ui/src/main/webapp/src/assets/logo.svg` | Imported through Vite. Replace BEFORE `docker build` so the new mark is bundled into the SPA chunks. When the SVG is under ~4 KB, Vite inlines it as a `data:image/svg+xml;base64,…` URI in the JS — no separate file in the dist; the browser never makes a second request. |
 
-| `security` mode | Login screen  | Identity Provider                                                   |
-| --------------- | ------------- | ------------------------------------------------------------------- |
-| `Trusted`       | Ligoj         | Authentication required but always accepted                         |
-| `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
-| `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
+#### Step 1 — drop your assets into the source tree
 
-### `Rest` mode
-
-For sample, if LDAP authentication is expected to be proceeded `plugin-id-ldap`
-
-In this authentication mode, the login page is served by Ligoj. Authentication is done by Ligoj API through LDAP plugin expected to be configured.
-
-```bash
-sudo docker rm -f ligoj-ui
-sudo docker run \
---name "ligoj-ui" \
---network="host" \
---detach \
---restart=always \
---log-opt max-size=5m --log-opt max-file=5 \
--v /var/lib/ligoj:/home/ligoj \
--e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=Rest' \
--e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
--e SERVER_PORT=8089 \
-ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```shell
+# From the repo root, after cloning ligoj/ligoj.
+cp ./my-branding/favicon.ico  app-ui/src/main/webapp/favicon.ico
+cp ./my-branding/logo.svg     app-ui/src/main/webapp/src/assets/logo.svg
 ```
 
-### `OAuth2Bff` mode
+The Dockerfile's frontend stage copies `src/main/webapp/` wholesale
+(`COPY src/main/webapp/ ./` — `app-ui/Dockerfile` line 18), so any
+file present at those paths is picked up by Vite and Maven without
+needing to touch the Dockerfile itself.
 
-In this mode, authentication information is entered in the OIDC identity provider.
+#### Step 2 — build the image
 
-Parameters for the [`application.properties` configuration file](#configuration) are [here](https://github.com/ligoj/ligoj/wiki/Security#oauth2bff-provider)
-
-Note: 
-- If the KeyCloak server uses an unknown SSL certificate authority (CA), follow the [trusted certificate configuration](#trusted-certificates) procedure for the `ligoj-ui` container.
-- At start time, the OAuth configuration is discovered from the OIDC provider. This means that the `ligoj-ui` container must be able to reach the OIDC provider. This is the actual limitation of Spring Security. If its unavailable at start time, the `ligoj-ui` container will fail to start. See https://github.com/spring-projects/spring-boot/issues/46862.
-- With this provider, the login page (login.html) is no more available.
-
-#### With Keycloak
-
-In this authentication mode, the login page is served by Keycloak.
-Additional configuration is added to the `CUSTOM_OPTS` environment variable (for now), instead of the standard `application.properties` configuration file.
-
-Prerequisites:
-- KeyCloak instance configured on the same LDAP as the one configured as `plugin-id-ldap` in Ligoj
-- Redirect configuration filled in
-  - Base URL: https://ligoj.sample.com/ligoj
-  - Login URI:
-    - https://ligoj.sample.com/ligoj/login/oauth2/code/keycloak
-    - https://ligoj.sample.com/users/auth/openid_connect/callback
-    - https://ligoj.sample.com/ligoj/oauth2/authorization/keycloak?logout
-  - Logout URI: https://ligoj.sample.com/ligoj/login/oauth2/authorization/keycloak?logout
-- *Optional* Valid certificates in the container's JKS. See [trusted certificates](#trusted-certificates)
-
-Sample configuration file [application.properties](app-ui/src/main/resources/application.properties)
-
-``` ini
-# OAuth2 specific overrides
-security = OAuth2Bff
-ligoj.security.oauth2.username-attribute = email
-ligoj.security.login.url = /oauth2/authorization/keycloak
-spring.security.oauth2.client.provider.keycloak.issuer-uri = http://localhost:9083/realms/keycloak
-spring.security.oauth2.client.registration.keycloak.provider =  keycloak
-spring.security.oauth2.client.registration.keycloak.authorization-grant-type = authorization_code
-spring.security.oauth2.client.registration.keycloak.client-id = ligoj
-spring.security.oauth2.client.registration.keycloak.client-secret = secret
-spring.security.oauth2.client.registration.keycloak.scope = openid
+```shell
+docker build \
+  --build-arg GIT_COMMIT="$(git rev-parse HEAD)" \
+  --build-arg GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)" \
+  --build-arg GIT_COMMIT_TIME="$(git show -s --format=%cI HEAD)" \
+  -t my-org/ligoj-ui:branded \
+  -f app-ui/Dockerfile \
+  app-ui/
 ```
 
-Corresponding Keycloak configuration::
-- Root URL = http://localhost:8080/ligoj/
-- Home URL = http://localhost:8080/ligoj/
-- Redirect Login URI: http://localhost:8080/ligoj/login/oauth2/code/keycloak
-- Redirect Logout URI: http://localhost:8080/ligoj/oauth2/authorization/keycloak?logout
+#### Step 3 — verify
 
-```bash
-sudo docker rm -f ligoj-ui
-sudo docker run \
---name "ligoj-ui" \
---network="host" \
---detach \
---restart=always \
---log-opt max-size=5m --log-opt max-file=5 \
--v /var/lib/ligoj:/home/ligoj \
--e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=OAuth2Bff -Djavax.net.ssl.trustStore=/home/ligoj/ligoj-ui.jks -Dspring.security.oauth2.client.registration.keycloak.provider=keycloak -Dspring.security.oauth2.client.registration.keycloak.client-id=ligoj -Dspring.security.oauth2.client.registration.keycloak.client-secret=tMpwYaU2pBc9wXuWfYPPJXtEgxIDNGW9 -Dspring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.sample.com/realms/ligoj -Dligoj.security.login.url=/oauth2/authorization/keycloak -Dligoj.security.oauth2.username-attribute=preferred_username -Dspring.security.oauth2.client.registration.keycloak.scope=openid -Dligoj.security.login-by-api-key=true -Dsecurity.max-sessions=-1' \
--e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
--e SERVER_PORT=8089 \
-ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```shell
+# Favicon — should return 200 and the bytes of your file.
+docker run --rm -p 8080:8080 my-org/ligoj-ui:branded &
+curl -I http://localhost:8080/ligoj/favicon.ico
+
+# Logo — when bundled as a hashed file, grep its asset name out of
+# the SPA's index.html. When inlined (typical for small SVGs) you'll
+# instead see a `data:image/svg+xml;base64,...` URI directly in the
+# rendered DOM.
+curl -s http://localhost:8080/ligoj/index.html | grep -oE 'logo[^"]*\.svg' || \
+  echo "logo.svg is inlined as a data: URI inside the JS chunk"
 ```
+
+#### Alternative — downstream image without rebuilding from source
+
+When you don't want to rebuild the full WAR, layer a tiny downstream
+image on top of the upstream one and copy your assets into the
+runtime `statics/` folder. Spring's static-locations override applies
+exactly as in the CLI flow above — so `favicon.ico` is replaced
+immediately, and `logo.svg` works AS LONG AS the SPA references a
+stable `/ligoj/logo.svg` URL (i.e. the upstream build has been wired
+to read it from the runtime path rather than import it through Vite).
+
+```dockerfile
+FROM ligoj/ligoj-ui:latest
+
+USER root
+RUN mkdir -p /home/ligoj/statics && chown ligoj:ligoj /home/ligoj/statics
+
+COPY --chown=ligoj:ligoj favicon.ico /home/ligoj/statics/favicon.ico
+COPY --chown=ligoj:ligoj logo.svg    /home/ligoj/statics/logo.svg
+
+USER ligoj:ligoj
+```
+
+This is the lightest-weight approach for `favicon.ico` (no Maven / Vite
+toolchain needed). For full `logo.svg` control today, prefer the
+source-tree-rebuild flow above.
 
 ## Configure with `bootstrap` commands
 
 These commands are aggregations of Ligoj API calls and/or ancillary tools.
-
 
 ### Create scopes and global groups.
 
@@ -1761,16 +2006,15 @@ Execution is necessary only once, but repeatable without error
 
 *Note* No existing jenkins job for the moment
 
-```bash
-ligoj bootstrap init --base-dn="ou=sample,,c=fr" --users-base-dn "" --internal-users-base-dn "ou=people" --technical-users-base-dn "ou=technical-users" --external-users-base-dn "ou=external" --groups-base-dn "" --technical-groups-base-dn "ou=tools" --projects-base-dn "ou=projects"
+```shell
+ligoj bootstrap init --base-dn="ou=sample,,c=fr" --users-base-dn "" --internal-users-base-dn "ou=people" --technical-users-base-dn "ou=technical-users" --external-users-base-dn "ou=external" --groups-base-dn "" --technical-groups-base-dn "ou=tools" --projects-base-dn "ou=project"
 ```
-
 
 ### Create a project
 
 Create a new project and associate `ligoj-user` user as its manager.
 
-```bash
+```shell
 ligoj bootstrap welcome-user --id "ligoj-user" --project "project1" --name "Sample Project1" --group-suffix="-team"
 ```
 
@@ -1779,12 +2023,11 @@ ligoj bootstrap welcome-user --id "ligoj-user" --project "project1" --name "Samp
 Creation of a project materializing a team by designating the administrator of the project and the administrator of the future project.
 Associated groups are also created.
 
-```bash
+```shell
 ligoj bootstrap create-project --project "project2" --name "Sample Project2" --group-suffix="-team" --groups="admin,dev" --parent-project "project1" --parent-admin "ligoj-user" --on-behalf-of other-user.name@sample.com
 ```
 
 *Note* The `admin` group is implicitly added and automatically receives a delegation of management for the project
-
 
 To retrieve project associations, use this SQL query:
 
@@ -1812,7 +2055,7 @@ Creation of roles in different tools based on groups and linked to tool permissi
 
 This action does not need to access Ligoj, but to the remote tools.
 
-```bash
+```shell
 ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from="conf/sample.conf.empty.json" \
 --sonar-endpoint="" \
 --sonar-api-token="" \
@@ -1825,89 +2068,76 @@ ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from=
 --nexus-password=""
 ```
 
-# `ligoj-api` container configuration properties
-
-## Docker environment variables
-
-| Docker env   | Default value                  | Note                                                                             |
-| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
-| CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration. See                                                    |
-| CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
-| SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
-| SERVER_PORT  | `8081`                         | Passed to server listening port and exposed port.                                |
-| JAVA_MEMORY  | `-Xms128M -Xmx128M`            | JVM Memory                                                                       |
-| CUSTOM_OPTS  |                                | Additional JVM options, like `-D...`                                             |
-| JAVA_OPTIONS |                                | Built from JAVA_OPTIONS, CUSTOM_OPTS and JAVA_MEMORY plus spring-boot properties |
-
 ## Application level properties
 
 Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot properties (can be injected in `CUSTOM_OPTS`) can be dynamically modified from the administration console:
 
-| Name                                                  | Default value                            | Note                                                                                              |
-| ----------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| api.token.purge                                       | `0 0 4 * * ?`                            | CRON expression for expired API tokens purge. See [API Token](#api-tokens) section.               |
-| api.token.iterations                                  | `31`                                     | API token hash iterations. See [API Token](#api-tokens) section.                                  |
-| api.token.digest                                      | `SHA-512`                                | API token hash algorithm. See [API Token](#api-tokens) section.                                   |
-| api.token.length                                      | `128`                                    | API token length. See [API Token](#api-tokens) section.                                           |
-| api.token.crypt                                       | `DESede`                                 | API token encryption algorithm. See [API Token](#api-tokens) section.                             |
-| api.token.secret                                      | `secret`                                 | Secret file location. Can also be defined in `APP_CRYPTO_FILE`environment variable.               |
-| app.crypto.file                                       |                                          | Secret file location. Can also be defined in `APP_CRYPTO_FILE`environment variable.               |
-| app.crypto.password                                   |                                          | Secret value. Can also be defined in `APP_CRYPTO_PASSWORD`environment variable.                   |
-| cache.location                                        | `classpath:META-INF/hazelcast-local.xml` | Custom Hazelcast configuration file location                                                      |
-| cache.${cache_name}.ttl                               |                                          | For each cache, default TTL can be adjusted.                                                      |
-| feature:iam:node:primary                              | `empty`                                  | Ligoj `plugin-id` node's identifier used as primary IAM provider. `empty` = always granted.       |
-|                                                       |                                          | See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node).                                  |
-| feature:iam:node:secondary                            | `secondary`                              | Ligoj `plugin-id` node's identifier used as secondary IAM provider. `empty` = always granted.     |
-|                                                       |                                          | See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node).                                  |
-| global.tools.external                                 | ``                                       | Ligoj `plugin-id` node's identifiers globally available for external users.                       |
-| global.tools.internal                                 | ``                                       | Ligoj `plugin-id` node's globally available for internal users.                                   |
-| health.node                                           | `0 0 0/1 1/1 * ?`                        | CRON expression to refresh the health of the nodes                                                |
-| health.subscription                                   | `0 0 2 1/1 * ?`                          | CRON expression to refresh the health of the subscriptions                                        |
-| jdbc.vendor                                           | `mysql`                                  | Database type: `mysql`, `postgresql`, `mariadb`                                                   |
-| jdbc.port                                             | `3306`                                   |                                                                                                   |
-| jdbc.database                                         | `ligoj`                                  |                                                                                                   |
-| jdbc.username                                         | `ligoj`                                  |                                                                                                   |
-| jdbc.password                                         | `ligoj`                                  |                                                                                                   |
-| jdbc.host                                             | `localhost`                              |                                                                                                   |
-| jdbc.driverClassName                                  | `com.mysql.cj.jdbc.Driver`               | Java class name of the driver: `org.postgresql.Driver`                                            |
-| jdbc.urlparam                                         | *complex*                                | See [application.properties](app-api/src/main/resources/application.properties)                   |
-| jdbc.url                                              | *complex*                                | See [application.properties](app-api/src/main/resources/application.properties)                   |
-| jdbc.validationQuery                                  | `select 1;`                              |                                                                                                   |
-| jdbc.maxIdleTime                                      | `180000`                                 |                                                                                                   |
-| jdbc.maxPoolSize                                      | `150`                                    |                                                                                                   |
-| jpa.dialect                                           | `...MySQL5InnoDBUtf8Dialect`             | For PgSQL: `org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect`                             |
-| jpa.hbm2ddl                                           | `update`                                 | update, none, validate. With "update", the server takes up to 30s to start                        |
-| jpa.log_queries_slower_than_ms                        | `0`                                      | Minimal cost of logged slow Hibernate queries. `0`to disable it.                                  |
-| jpa.generate_statistics                               | `false`                                  | When `true` Hibernate statistics are logged.                                                      |
-| management.context-path                               | `/manage`                                |                                                                                                   |
-| management.security.roles                             | `USER`                                   | Default RBAC role assigned to new user.                                                           |
-| ligoj.initial.user.action                             | ``                                       | When `init`, the initialization is executed once. When `reset`, its execution is forced.          |
-| ligoj.initial.user.name                               | `ligoj-admin`                            | The initial user name.                                                                            |
-| ligoj.initial.user.role                               | `ADMIN`                                  | The initial role name to associate to the initial user.                                           |
-| ligoj.initial.user.token.name                         | `auto-install`                           | The API token name to associate to the initial user.                                              |
-| ligoj.initial.user.token.value                        | ``                                       | When defined, the API token value is forced to the given value, and not printed.                  |
-|                                                       |                                          | Otherwise, a generated value is set and printed in log:                                           |
-|                                                       |                                          | `[INIT] Token '..' has been set for initial user '..' to value: ..`                               |
-| ligoj.hook.path                                       | `^$`                                     | Comma separated RegEx. See [Hook](#hook).                                                         |
-| ligoj.hook.timeout                                    | `30`                                     | Default hook timeout in seconds. See [Hook](#hook).                                               |
-| ligoj.file.path                                       | `^$`                                     | Comma separated RegEx. See [File](#file).                                                         |
-| ligoj.plugin.enabled                                  | `true`                                   | When false, plugins are not loaded and their state is not updated                                 |
-| ligoj.plugin.ignore                                   | `plugin-password-management`             | Filtered (deprecated, fixed version, ...) plugins for install or update from the repositories     |
-| ligoj.plugin.install                                  | ``                                       | List plugin identifiers to automatically install at start time: `p1,p2,...`.                      |
-|                                                       |                                          | Update are performed according to `ligoj.plugin.update` option                                    |
-| ligoj.plugin.update                                   | `false`                                  | `true` updates the plugins automatically at start time to the latest available version.           |
-| ligoj.plugin.repository                               | `central`                                | Repository identifier used to query plugin install or update.  May be `central`, `nexus`          |
-| ligoj.sslVerify                                       | `true`                                   | `false` disables the standard SSL verifications (domain name, certifications chain and validity). |
-| logging.level.root                                    | `info`                                   | Configure default log verbosity of all internal components: Spring, Jetty, Hibernate,...          |
-| logging.level.<category>                              | *vary*                                   | See [log4j2.json](app-api/src/main/resources/log4j2.json) for specific category                   |
-| plugins.repository-manager.${repository}.search.url   | *depends on repository*                  | URL template to discover plugins.                                                                 |
-| plugins.repository-manager.${repository}.artifact.url | *depends on repository*                  | URL template to download plugins.                                                                 |
-| plugins.repository-manager.${repository}.groupId      | `org.ligoj.plugin`                       | Maven `groupId` to filter the Ligoj plugins                                                       |
-| server.port                                           | `${SERVER_PORT}`                         |                                                                                                   |
-| server.address                                        | `${SERVER_HOST}`                         |                                                                                                   |
-| server.servlet.context-path                           | `/${CONTEXT}`                            |                                                                                                   |
+| Name                                                  | Default value                            | Note                                                                                                 |
+| ----------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| api.token.purge                                       | `0 0 4 * * ?`                            | CRON expression for expired API tokens purge. See [API Token](#api-tokens) section.                  |
+| api.token.iterations                                  | `31`                                     | API token hash iterations. See [API Token](#api-tokens) section.                                     |
+| api.token.digest                                      | `SHA-512`                                | API token hash algorithm. See [API Token](#api-tokens) section.                                      |
+| api.token.length                                      | `128`                                    | API token length. See [API Token](#api-tokens) section.                                              |
+| api.token.crypt                                       | `DESede`                                 | API token encryption algorithm. See [API Token](#api-tokens) section.                                |
+| api.token.secret                                      | `secret`                                 | Secret file location. Can also be defined in `APP_CRYPTO_FILE`environment variable.                  |
+| app.crypto.file                                       |                                          | Secret file location. Can also be defined in `APP_CRYPTO_FILE`environment variable.                  |
+| app.crypto.password                                   |                                          | Secret value. Can also be defined in `APP_CRYPTO_PASSWORD`environment variable.                      |
+| cache.location                                        | `classpath:META-INF/hazelcast-local.xml` | Custom Hazelcast configuration file location                                                         |
+| cache.${cache_name}.ttl                               |                                          | For each cache, default TTL can be adjusted.                                                         |
+| feature:iam:node:primary                              | `empty`                                  | Ligoj `plugin-id` node's identifier used as primary IAM provider. `empty` = always granted.          |
+|                                                       |                                          | See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node).                                     |
+| feature:iam:node:secondary                            | `secondary`                              | Ligoj `plugin-id` node's identifier used as secondary IAM provider. `empty` = always granted.        |
+|                                                       |                                          | See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node).                                     |
+| global.tools.external                                 | ``                                       | Ligoj `plugin-id` node's identifiers globally available for external users.                          |
+| global.tools.internal                                 | ``                                       | Ligoj `plugin-id` node's globally available for internal users.                                      |
+| health.node                                           | `0 0 0/1 1/1 * ?`                        | CRON expression to refresh the health of the nodes                                                   |
+| health.subscription                                   | `0 0 2 1/1 * ?`                          | CRON expression to refresh the health of the subscriptions                                           |
+| jdbc.vendor                                           | `mysql`                                  | Database type: `mysql`, `postgresql`, `mariadb`                                                      |
+| jdbc.port                                             | `3306`                                   |                                                                                                      |
+| jdbc.database                                         | `ligoj`                                  |                                                                                                      |
+| jdbc.username                                         | `ligoj`                                  |                                                                                                      |
+| jdbc.password                                         | `ligoj`                                  |                                                                                                      |
+| jdbc.host                                             | `localhost`                              |                                                                                                      |
+| jdbc.driverClassName                                  | `com.mysql.cj.jdbc.Driver`               | Java class name of the driver: `org.postgresql.Driver`                                               |
+| jdbc.urlparam                                         | *complex*                                | See [application.properties](app-api/src/main/resources/application.properties)                      |
+| jdbc.url                                              | *complex*                                | See [application.properties](app-api/src/main/resources/application.properties)                      |
+| jdbc.validationQuery                                  | `select 1;`                              |                                                                                                      |
+| jdbc.maxIdleTime                                      | `180000`                                 |                                                                                                      |
+| jdbc.maxPoolSize                                      | `150`                                    |                                                                                                      |
+| jpa.dialect                                           | `...MySQL5InnoDBUtf8Dialect`             | For PgSQL: `org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect`                                |
+| jpa.hbm2ddl                                           | `update`                                 | update, none, validate. With "update", the server takes up to 30s to start                           |
+| jpa.log_queries_slower_than_ms                        | `0`                                      | Minimal cost of logged slow Hibernate queries. `0`to disable it.                                     |
+| jpa.generate_statistics                               | `false`                                  | When `true` Hibernate statistics are logged.                                                         |
+| management.context-path                               | `/manage`                                |                                                                                                      |
+| management.security.roles                             | `USER`                                   | Default RBAC role assigned to new users.                                                             |
+| ligoj.name                                            | `Ligoj`                                  | Applicatio name displayed to authenticated users in about, titles, etc.                              |
+| ligoj.initial.user.action                             | ``                                       | When `init`, the initialization is executed once. When `reset`, its execution is forced.             |
+| ligoj.initial.user.name                               | `ligoj-admin`                            | The initial user name.                                                                               |
+| ligoj.initial.user.role                               | `ADMIN`                                  | The initial role name to associate to the initial user.                                              |
+| ligoj.initial.user.token.name                         | `auto-install`                           | The API token name to associate to the initial user.                                                 |
+| ligoj.initial.user.token.value                        | ``                                       | When defined, the API token value is forced to the given value, and not printed.                     |
+|                                                       |                                          | Otherwise, a generated value is set and printed in log:                                              |
+|                                                       |                                          | `[INIT] Token '..' has been set for initial user '..' to value: ..`                                  |
+| ligoj.hook.path                                       | `^$`                                     | Comma separated RegEx. See [Hook](#hook).                                                            |
+| ligoj.hook.timeout                                    | `30`                                     | Default hook timeout in seconds. See [Hook](#hook).                                                  |
+| ligoj.file.path                                       | `^$`                                     | Comma separated RegEx. See [File](#file).                                                            |
+| ligoj.plugin.enabled                                  | `true`                                   | When false, plugins are not loaded and their state is not updated                                    |
+| ligoj.plugin.ignore                                   | `plugin-password-management`             | Filtered (deprecated, fixed version, etc.) plugins for installation or updates from the repositories |
+| ligoj.plugin.install                                  | ``                                       | List plugin identifiers to automatically install at start time: `p1,p2,...`.                         |
+|                                                       |                                          | Updates are performed according to the `ligoj.plugin.update` option                                  |
+| ligoj.plugin.update                                   | `false`                                  | `true` updates the plugins automatically at start time to the latest available version.              |
+| ligoj.plugin.repository                               | `central`                                | Repository identifier used to query plugin installation or update. May be `central` or `nexus`       |
+| ligoj.sslVerify                                       | `true`                                   | `false` disables the standard SSL verifications (domain name, certifications chain and validity).    |
+| logging.level.root                                    | `info`                                   | Configure default log verbosity of all internal components: Spring, Jetty, Hibernate,...             |
+| logging.level.<category>                              | *vary*                                   | See [log4j2.json](app-api/src/main/resources/log4j2.json) for specific category                      |
+| plugins.repository-manager.${repository}.search.url   | *depends on repository*                  | URL template to discover plugins.                                                                    |
+| plugins.repository-manager.${repository}.artifact.url | *depends on repository*                  | URL template to download plugins.                                                                    |
+| plugins.repository-manager.${repository}.groupId      | `org.ligoj.plugin`                       | Maven `groupId` to filter the Ligoj plugins                                                          |
+| server.port                                           | `${SERVER_PORT}`                         |                                                                                                      |
+| server.address                                        | `${SERVER_HOST}`                         |                                                                                                      |
+| server.servlet.context-path                           | `/${CONTEXT}`                            |                                                                                                      |
 
-## System level-only variables
+## System-level variables
 
 These variables are only relevant when set as Java System property.
 For example `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
@@ -1918,26 +2148,57 @@ For example `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 | ligoj.log.file.size    | `10 MB`             | Max log file size                  |
 | ligoj.log.file.enabled | `true`              | Enablement of log file             |
 
+## Logs
+
+Both containers embed a [Log4j2](https://logging.apache.org/log4j/2.x/) configuration, reloaded every 60 seconds when changed:
+
+- `ligoj-api`: [app-api/src/main/resources/log4j2.json](app-api/src/main/resources/log4j2.json)
+- `ligoj-ui`: [app-ui/src/main/resources/log4j2.json](app-ui/src/main/resources/log4j2.json)
+
+The log destinations (console and an optional rolling file inside `LIGOJ_HOME`) are tuned with the `ligoj.log.*` system variables described above, and the verbosity with `-Dlog.level=...` plus the
+per-category `logging.level.<category>` application properties.
+A fully custom configuration can be supplied with the standard `-Dlog4j2.configurationFile=/path/to/log4j2.json` system property.
+
+### Principal identifier
+
+Every log line includes the identifier of the principal (the authenticated user) that triggered it, rendered by the Ligoj-specific `%principal` pattern token between brackets, right after the log
+level:
+
+```log
+2026-06-07 10:15:42.123 INFO  [jdoe] Catalog update for service:prov:aws, force=false
+2026-06-07 10:15:43.456 INFO  [-] Plugin repository cache refreshed
+```
+
+- The principal is read lazily, at log time, from the Spring Security context attached to the logging thread — no MDC propagation is involved.
+- Unauthenticated and anonymous accesses, the boot sequence and background threads without a propagated security context (schedulers, ...) are rendered as `-`. Background tasks restoring the requester
+  context — such as the asynchronous catalog import — keep the original principal.
+- The token is provided by the `org.ligoj.boot.log.PrincipalPatternConverter` Log4j2 plugin, deliberately duplicated in each container
+  module ([app-api](app-api/src/main/java/org/ligoj/boot/log/PrincipalPatternConverter.java) and [app-ui](app-ui/src/main/java/org/ligoj/boot/log/PrincipalPatternConverter.java)) to keep them
+  self-contained. It is auto-discovered through the `Log4j2Plugins.dat` descriptor generated at build time — no extra configuration. There is no standard library equivalent: `log4j-web` only provides
+  the servlet lifecycle binding and the `${web:…}` lookup (servlet-context scope), and nothing populates the `%X` MDC with the Spring Security principal. The token is available for any custom
+  `PatternLayout`. For example, to also display the thread: `%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level [%principal] %logger{36} - %msg%n`.
 
 # Troubleshooting
 
 ## Messages `WARN  constraint "uk_..." of relation "..." does not exist, skipping`
 
-Depending on the PgSQL version, messages like `WARN  constraint "uk_..." of relation "..." does not exist, skipping` might appear. They can be ignored, and are related to a verbosity defect in the [Hibernate](https://github.com/quarkusio/quarkus/issues/16204) and [here](https://hibernate.atlassian.net/browse/HHH-14889) module during schema updates.
+Depending on the PgSQL version, messages like `WARN  constraint "uk_..." of relation "..." does not exist, skipping` might appear. They can be ignored, and are related to a verbosity defect in
+the [Hibernate](https://github.com/quarkusio/quarkus/issues/16204) and [here](https://hibernate.atlassian.net/browse/HHH-14889) module during schema updates.
 
 ## Messages `ERROR Request execution ' [0] GET https://search.maven.org/`
 
-Depending on the proxy configuration provided by the Docker daemon, a non-blocking error `ERROR Request execution ' [0] GET https://search.maven.org/...` related to automatic plugin updates might appear in the logs. 
-It can be ignored and will disappear after applying a custom Nexus configurations.
-
+Depending on the proxy configuration provided by the Docker daemon, a non-blocking error `ERROR Request execution ' [0] GET https://search.maven.org/...` related to automatic plugin updates might
+appear in the logs.
+It can be ignored and will disappear after applying a custom Nexus configuration.
 
 ## Lost authentication configuration for administration
 
-If an LDAP configuration has been changed in such a way that it is no longer possible to connect to the application via LDAP, then 2 solutions are possible:
+If an LDAP configuration has been changed in such a way that it is no longer possible to connect to the application via LDAP, then two solutions are possible:
 
 ### Via the GUI
 
 The steps are as follows:
+
 - Interrupt the application network, i.e., make it available only for certain IPs
 - Change the security mode of the `ligoj-ui` container to `Trusted`
 - Restart the `ligoj-ui` container
@@ -1949,14 +2210,17 @@ The steps are as follows:
 ### Via the database
 
 To switch to the backup federator, the steps are as follows:
-- Change the system configuration value (table `s_configuration`) of the `feature:iam:node:primary` property to another identity provider node LDAP or other. For example a node of the `plugin:id:sql` plugin.
+
+- Change the system configuration value (table `s_configuration`) of the `feature:iam:node:primary` property to another identity provider node (LDAP or other). For example, a node of the
+  `plugin:id:sql` plugin.
 - Wait for the cache to expire or restart the `ligoj-api` container for the value to be taken into account
 
 To change an IP address, port, or LDAP parameter, the steps are as follows:
-- Change one or several node parameter values (table `ligoj_parameter_value`) associated with the involved identity federation `node`. Some of these values may already be encrypted. Putting a new clear value remains supported, encryption of this value will be done during the next update of the node via API or UI.
+
+- Change one or several node parameter values (table `ligoj_parameter_value`) associated with the involved identity federation `node`. Some of these values may already be encrypted. Entering a new
+  clear-text value remains supported; encryption of this value will be done during the next update of the node via API or UI.
 - Example: `UPDATE ligoj_parameter_value SET value = 'new_secret' WHERE node='service:id:ldap:annuaire' AND parameter='service:id:ldap:password'`
 - Wait for the cache to expire or restart the `ligoj-api` container for the value to be taken into account
-
 
 ### Message `Caused by: jakarta.persistence.EntityExistsException` in startup logs
 
@@ -1967,7 +2231,7 @@ This is a conflict related to plugin management when some plugins are updated.
 Caused by: jakarta.persistence.EntityExistsException: A different object with the same identifier value was already associated with the session : [o...]
 ```
 
-This error can occur if sequences have been reset, PK updates or insertions have been made in the database without going through the API.
+This error can occur if sequences have been reset, or if PK updates or insertions have been made in the database without going through the API.
 
 Example of sequence:
 
@@ -1986,35 +2250,34 @@ SELECT * FROM "s_plugin";
 SELECT setval('s_plugin_seq', (SELECT COALESCE(MAX(id),0) FROM s_plugin) + 1, false);
 ```
 
-
 ### Plugin compatibility errors
 
-These errors manifest as Java Exceptions of type `java.lang.NoSuchMethodError` or `java.lang.NoClassDefFoundError` and are linked to a mismatch between the Ligoj API compatibility version and the installed plugins.
+These errors manifest as Java Exceptions of type `java.lang.NoSuchMethodError` or `java.lang.NoClassDefFoundError` and are linked to a mismatch between the Ligoj API compatibility version and the
+installed plugins.
 None of the following solutions destroy configuration or plugin/application data.
 
-- Either the Ligoj version is too old compared to the installed plugins. Although it is possible to revert to an earlier version to find harmony, this operation is not recommended. It is therefore preferable to upgrade to a later version compatible with these plugins. The procedure is as follows:
-  - Update Ligoj by pointing the `ligoj-api` container to a more recent version
-  - Restart the `ligoj-api` container
-- Either the plugin version is too old.
-  - The simplest solution:
-    - Delete the identified plugin(s), or all: `rm -f /var/lib/ligoj/plugins/*.jar`
+- Either the Ligoj version is too old compared to the installed plugins. Although it is possible to revert to an earlier version to find harmony, this operation is not recommended. It is therefore
+  preferable to upgrade to a later version compatible with these plugins. The procedure is as follows:
+    - Update Ligoj by pointing the `ligoj-api` container to a more recent version
     - Restart the `ligoj-api` container
-    - Reinstall the plugin(s), via the CLI or the GUI
-    - Restart the container or just the context via the CLI
-  - The solution without plugin deletion:
-    - Restart `ligoj-api` without activated plugins by adding the option `-Dligoj.plugin.enabled=false`
-    - Reinstall the plugin(s), via the CLI or the GUI
-    - Restart `ligoj-api` with activated plugins by removing the option `-Dligoj.plugin.enabled=false`
-
+- Or the plugin version is too old.
+    - The simplest solution:
+        - Delete the identified plugin(s), or all: `rm -f /var/lib/ligoj/plugins/*.jar`
+        - Restart the `ligoj-api` container
+        - Reinstall the plugin(s), via the CLI or the GUI
+        - Restart the container or just the context via the CLI
+    - The solution without plugin deletion:
+        - Restart `ligoj-api` without activated plugins by adding the option `-Dligoj.plugin.enabled=false`
+        - Reinstall the plugin(s), via the CLI or the GUI
+        - Restart `ligoj-api` with activated plugins by removing the option `-Dligoj.plugin.enabled=false`
 
 ### Database connectivity
 
-You can experience network issue with a remote database. To validate the link from the `ligoj-api`.
-
+You might experience network issues with a remote database. To validate the connection from `ligoj-api`:
 
 #### MySQL
 
-```bash
+```shell
 docker run --rm -it \
  --name "ligoj-api" \
  ligoj/ligoj-api:4.0.1 sh -c "apk add mysql-client && mysql -h 192.168.1.16 --user=ligoj --password=ligoj ligoj"
@@ -2022,7 +2285,7 @@ docker run --rm -it \
 
 #### PostgreSQL
 
-```bash
+```shell
 docker run --rm -it \
  --name "ligoj-api" \
  ligoj/ligoj-api:4.0.1 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"

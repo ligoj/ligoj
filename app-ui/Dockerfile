@@ -1,58 +1,104 @@
+# syntax=docker/dockerfile:1.7
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
-ARG JAVA_VERSION="21-jdk"
+ARG JAVA_VERSION="21"
+ARG JAVA_IMAGE="eclipse-temurin"
 ARG NODE_VERSION="24-bookworm-slim"
 ARG MAVEN_VERSION="3.9.6-amazoncorretto-21-debian-bookworm"
 
-FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION} as builder_node
-WORKDIR /build/
-ADD src/main/build src/main/build
-ADD src/main/webapp src/main/webapp
-COPY Dockerfile ./*prepare-build.sh ./
-RUN touch ~/.bash_profile && \
-    { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
-    npm install -g clean-css-cli@5.6.3 && \
-    mkdir -p src/main/build && mkdir -p src/main/webapp && \
-    chmod +x src/main/build/minify.sh && src/main/build/minify.sh
+# ---------- Frontend build stage ----------
+FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION} AS builder_node
+WORKDIR /build/src/main/webapp
 
-FROM --platform=${BUILDPLATFORM} maven:${MAVEN_VERSION} as builder
-WORKDIR /build/
-ADD . .
+# Install deps first for layer-cache reuse on source-only changes.
+COPY src/main/webapp/package.json src/main/webapp/package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --no-audit --no-fund
+
+COPY src/main/webapp/ ./
+RUN npm run build -- --outDir ./vue-dist --emptyOutDir && \
+    cp vue-dist/index.html . && \
+    cp vue-dist/login.html . && \
+    cp -r vue-dist/assets/ . && \
+    rm -rf vue-dist node_modules
+
+# ---------- Maven build stage ----------
+FROM --platform=${BUILDPLATFORM} maven:${MAVEN_VERSION} AS builder
+WORKDIR /build
+
+# Opt-in: disable Maven's HTTPS certificate and hostname validation.
+# Intended for builds against trusted internal mirrors with self-signed certs.
+# Enable with: --build-arg MAVEN_INSECURE_TLS=true
+ARG MAVEN_INSECURE_TLS="false"
+
+# Optional custom Maven settings (Dockerfile is the always-present glob placeholder).
 COPY Dockerfile ./*.m2 /root/.m2/
-COPY --from=builder_node /build/src/main/webapp src/main/webapp
-RUN export MAVEN_OPTS="-Dmaven.test.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon" && \
-    { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || echo "No defined prepare build instruction, create a prepare-build.sh script to prepare http_proxy or other custom configurations."; } && \
-    mvn clean package -B
 
-FROM --platform=${TARGETPLATFORM} eclipse-temurin:${JAVA_VERSION}
+# Resolve dependencies before pulling in source, so source-only changes reuse cache.
+COPY pom.xml ./
+RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
+    if [ "$MAVEN_INSECURE_TLS" = "true" ]; then \
+      export MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon"; \
+    fi && \
+    mvn -B -ntp -DskipTests dependency:go-offline || true
+
+# Git provenance, injected from the host (see compose.yml). Defaults match the
+# buildnumber-maven-plugin's own fallbacks so an unset host env is harmless.
+ARG GIT_COMMIT=0
+ARG GIT_BRANCH=UNKNOWN_BRANCH
+ARG GIT_COMMIT_TIME=1970-01-01T00:00:00Z
+
+COPY . .
+COPY --from=builder_node /build/src/main/webapp src/main/webapp
+RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
+    if [ "$MAVEN_INSECURE_TLS" = "true" ]; then \
+      export MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon"; \
+    fi && \
+    { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || \
+      echo "No prepare-build.sh; skipping custom build setup."; } && \
+    mvn -B -ntp -DskipTests \
+        -DbuildNumber="$GIT_COMMIT" \
+        -DscmBranch="$GIT_BRANCH" \
+        -Dtimestamp="$GIT_COMMIT_TIME" \
+        clean package
+
+# ---------- Runtime stage ----------
+FROM --platform=${TARGETPLATFORM} ${JAVA_IMAGE}:${JAVA_VERSION}-jre AS runtime
 ARG VERSION="4.0.1-SNAPSHOT"
 ARG ARTIFACT_ID="app-ui"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG GIT_COMMIT=0
 
-LABEL maintainer="Kloudy <fdaugan@kloudy.io>" \
-      vendor="Kloudy" \
-      version="${VERSION}" \
-      release="${VERSION}" \
-      git.commit="${GIT_COMMIT}" \
-      url="https://ligoj.io" \
-      stop="docker stop NAME" \
-      com.sonatype.license="MIT" \
-      run="docker run -d --name NAME -p 8080:8080 IMAGE" \
-      name="Ligoj UI server" \
-      summary="The UI server of Ligoj." \
-      description="The UI server of Ligoj." \
+LABEL org.opencontainers.image.title="Ligoj UI server" \
+      org.opencontainers.image.description="The UI server of Ligoj." \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.revision="${GIT_COMMIT}" \
+      org.opencontainers.image.url="https://ligoj.io" \
+      org.opencontainers.image.vendor="Kloudy" \
+      org.opencontainers.image.licenses="MIT" \
+      maintainer="Kloudy <fdaugan@kloudy.io>" \
       io.k8s.description="The UI server of Ligoj." \
       io.k8s.display-name="Ligoj UI server" \
       io.openshift.expose-services="8080:8080" \
       io.openshift.tags="Ligoj,UI"
 
+# curl: HEALTHCHECK probe. tini: PID 1, reaps zombies and forwards SIGTERM.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl tini && \
+    rm -rf /var/lib/apt/lists/*
+
+# Non-root runtime user.
+RUN groupadd --system --gid 1001 ligoj && \
+    useradd  --system --uid 1001 --gid 1001 --home-dir /home/ligoj --shell /usr/sbin/nologin ligoj && \
+    mkdir -p /home/ligoj "${SERVER_HOME}" && \
+    chown -R ligoj:ligoj /home/ligoj "${SERVER_HOME}"
+
 WORKDIR "${SERVER_HOME}"
 
-COPY --from=builder /build/target/*.war ${ARTIFACT_ID}.war
-COPY Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
+COPY --chown=ligoj:ligoj --from=builder /build/target/*.war ${ARTIFACT_ID}.war
+# Dockerfile included as the guaranteed-existing placeholder for the optional globs.
+COPY --chown=ligoj:ligoj Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
 
-# ENV (run)
 ENV CONTEXT_URL="/ligoj" \
     SERVER_HOST="0.0.0.0" \
     SERVER_PORT="8080" \
@@ -67,19 +113,27 @@ ENV CONTEXT_URL="/ligoj" \
 
 EXPOSE ${SERVER_PORT}
 
-RUN { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || echo "No defined prepare run instruction, create a prepare-run.sh script to add custom packages before main RUN."; }
+# prepare-run runs at build time; needs root for package installs.
+RUN { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || \
+      echo "No prepare-run.sh; skipping custom runtime setup."; }
 
-CMD { [ -d "$LIGOJ_HOME" ] || mkdir -p "$LIGOJ_HOME"; } && \
-    { [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || echo "No defined prepare cmd instruction, create a prepare-cmd.sh script to prepare http_proxy or other custom configurations."; } && \
-    java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
-     -Dligoj.endpoint="${ENDPOINT}" \
-     -Dserver.address="${SERVER_HOST}" \
-     -Dserver.port="${SERVER_PORT}" \
-     -Dserver.servlet.context-path="${CONTEXT_URL}" \
-     -Djavax.net.ssl.trustStorePassword=changeit \
-     -Djava.net.preferIPv4Stack=true \
-     -Dligoj.home="${LIGOJ_HOME}" \
-     -jar "${ARTIFACT_ID}.war"
+USER ligoj:ligoj
+
+# tini = PID 1; exec java = clean signal delivery to the JVM.
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["sh", "-c", "\
+mkdir -p \"$LIGOJ_HOME\" && \
+{ [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || \
+  echo 'No prepare-cmd.sh; skipping custom startup.'; } && \
+exec java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
+  -Dligoj.endpoint=\"${ENDPOINT}\" \
+  -Dserver.address=\"${SERVER_HOST}\" \
+  -Dserver.port=\"${SERVER_PORT}\" \
+  -Dserver.servlet.context-path=\"${CONTEXT_URL}\" \
+  -Djavax.net.ssl.trustStorePassword=changeit \
+  -Djava.net.preferIPv4Stack=true \
+  -Dligoj.home=\"${LIGOJ_HOME}\" \
+  -jar \"${ARTIFACT_ID}.war\""]
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
-CMD curl --fail -s http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico || exit 1
+  CMD curl --fail -s "http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico" || exit 1

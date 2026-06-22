@@ -1,24 +1,51 @@
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createPinia, setActivePinia } from 'pinia'
 import App from './App.vue'
-import vuetify from './plugins/vuetify'
+import vuetify from './plugins/vuetify.js'
+import i18n from './plugins/i18n.js'
+import router from './router/index.js'
+import { loadAllPlugins } from './plugins/loader.js'
+import { registerBuiltinPlugins } from './plugins/index.js'
+import { bootCompact, bootReduceMotion } from './plugins/styles.js'
+import { bootPreset } from './plugins/presets.js'
+import { installErrorReporter } from './plugins/errorReporter.js'
 
-import PluginLoader from './plugins/PluginLoader'
-
-// Register plugins (could be loaded from a config file)
-// For local development, we point to the file path. In production, this might be a URL.
-// PluginLoader.register('id', '../../../../../ligoj-plugins/plugin-id/src/main/resources/META-INF/resources/id/IdPlugin.vue')
-
-// Sample: Register a plugin by URL (e.g. for production or remote loading)
-// The URL should point to a JS module that default exports a Vue component or a configuration object.
-PluginLoader.registerUrl('id', 'main/id/IdPlugin.vue')
+// Apply the persisted theme preset (color palette + shape style) and
+// the orthogonal compact toggle BEFORE the SPA mounts so the first
+// paint already reflects user preferences (no flash of vanilla
+// Vuetify between mount and the reactive update Profile would
+// otherwise drive). The color side rides on Vuetify's `defaultTheme`
+// — set by `plugins/vuetify.js` from the same persisted preset id.
+bootPreset()
+bootCompact()
+bootReduceMotion()
 
 const app = createApp(App)
+const pinia = createPinia()
 
-app.use(createPinia())
-app.use(vuetify)
+// Capture browser JS errors and forward them to the backend as early as
+// possible, so failures during boot are reported too.
+installErrorReporter(app)
 
-// Expose PluginLoader to global properties or provide it
-app.config.globalProperties.$pluginLoader = PluginLoader
+app.use(pinia)
+setActivePinia(pinia)
+app.use(i18n)
 
-app.mount('#app')
+// Domain i18n now ships WITH each plugin: plugin-id / plugin-ui (and the
+// other plugins) merge their own en/fr bundles in `install()`. The host
+// keeps only the generic keys in `i18n/{en,fr}.js`. The old
+// `i18n/plugin-id-*.js` monolith merged here is gone.
+
+// Built-in plugin stubs (bundled with the host).
+registerBuiltinPlugins()
+
+// External plugins whose routes must be registered before the router mounts.
+// Kept small on purpose — plugins whose absence is recoverable load lazily.
+const REQUIRED_PLUGINS = ['id', 'ui', 'prov']
+
+  ; (async () => {
+    await loadAllPlugins(REQUIRED_PLUGINS)
+    app.use(vuetify)
+    app.use(router)
+    app.mount('#app')
+  })()

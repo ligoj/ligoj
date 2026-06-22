@@ -30,6 +30,7 @@ class OAuthBffAuthenticationProviderTest extends AbstractServerTest {
 		Assertions.assertNull(authenticationProvider.authenticate(null));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	void configureLogout() throws Exception {
 		var http = Mockito.mock(HttpSecurity.class);
