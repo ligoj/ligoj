@@ -57,6 +57,9 @@ const FA_TO_MDI = {
   'fab fa-docker': 'mdi-microsoft-azure',
   'fab fa-windows': 'mdi-azure',
   'fas fa-cloud': 'mdi-cloud-outline',
+  'fas fa-tachometer-alt': 'mdi-gauge',
+  'fa fa-cogs': 'mdi-hammer',
+
 }
 
 function convertFromFontAwesome(uiClasses) {
