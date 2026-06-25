@@ -89,6 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
     return apiAuthorizations.value.some(auth => {
       const pattern = typeof auth === 'string' ? auth : auth.pattern
       const m = typeof auth === 'string' ? null : auth.method
+      // A permission with no method grants ALL methods; otherwise it must match.
       if (m && m !== method) return false
       try { return new RegExp(pattern).test(url) } catch { return false }
     })

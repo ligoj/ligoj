@@ -149,6 +149,41 @@ describe('useAuthStore', () => {
     expect(store.isAllowed('anything')).toBe(true)
   })
 
+  describe('API authorizations', () => {
+    async function login(apiAuthorizations, roles = ['USER']) {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          userName: 'u', roles, uiAuthorizations: [], apiAuthorizations, applicationSettings: {},
+        }),
+      })
+      const store = useAuthStore()
+      await store.fetchSession()
+      return store
+    }
+
+    it('isAllowedApi matches pattern + method; a null method grants any verb', async () => {
+      const store = await login([
+        { method: 'POST', pattern: '^rest/subscription' },
+        { method: null, pattern: '^rest/service/id/user' },
+      ])
+      expect(store.isAllowedApi('rest/subscription', 'POST')).toBe(true)
+      expect(store.isAllowedApi('rest/subscription', 'DELETE')).toBe(false) // method mismatch
+      expect(store.isAllowedApi('rest/service/id/user', 'DELETE')).toBe(true) // null method = any
+      expect(store.isAllowedApi('rest/service/id/group', 'GET')).toBe(false) // no matching pattern
+    })
+
+    it('isAllowedApi treats a bare string entry as an any-method grant', async () => {
+      const store = await login(['^rest/service/id/company'])
+      expect(store.isAllowedApi('rest/service/id/company', 'DELETE')).toBe(true)
+    })
+
+    it('admin bypasses all API gates', async () => {
+      const store = await login([], ['ADMIN'])
+      expect(store.isAllowedApi('rest/anything', 'DELETE')).toBe(true)
+    })
+  })
+
   it('navItems filters by uiAuthorizations', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
