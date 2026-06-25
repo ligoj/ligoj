@@ -22,6 +22,10 @@ export { useAuthStore } from './stores/auth.js'
 export { default as ImportExportBar } from './components/ImportExportBar.vue'
 export { default as LigojDataTable } from './components/LigojDataTable.vue'
 export { default as LigojDataTableServer } from './components/LigojDataTableServer.vue'
+// <v-autocomplete> drop-in that suppresses the browser's native autofill /
+// saved-value dropdown (which overlays Vuetify's own menu). Forwards every
+// prop/event/slot/v-model. Prefer it over a bare <v-autocomplete>.
+export { default as LigojAutocomplete } from './components/LigojAutocomplete.vue'
 export { default as LigojConfirmDialog } from './components/LigojConfirmDialog.vue'
 export { default as NodeIcon, nodeIcon } from './components/NodeIcon.vue'
 export { default as NodeModeChip } from './components/NodeModeChip.vue'
