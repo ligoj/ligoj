@@ -131,30 +131,36 @@ onMounted(async () => {
 
 // `labelKey` (not a literal `label`) so the sidebar localizes reactively — the
 // NAV computed resolves it through `i18n.t()` (which tracks the active locale).
+// `auth` is the backend resource path tested against the session's
+// `uiAuthorizations` regexes (see auth.isAllowed) to drop links the user
+// can't reach. It deliberately diverges from the SPA `route` where the REST
+// tree differs from the UI path — e.g. the /id/group view is gated by
+// `id/container/group`, /id/scope by `id/container-scope`. Mirrors the
+// store's NAV_CONFIG mapping.
 const BASE_NAV = [
-  { labelKey: 'nav.home', icon: 'mdi-home', route: '/' },
+  { labelKey: 'nav.home', icon: 'mdi-home', route: '/', auth: 'home' },
   // `match` makes the item active across a whole section; `children` render
   // a sub-menu while the section is active.
   {
     labelKey: 'nav.identity', icon: 'mdi-account-group', match: '/id', children: [
-      { labelKey: 'nav.users', icon: 'mdi-account', route: '/id/user', match: '/id/user' },
-      { labelKey: 'nav.groups', icon: 'mdi-account-group', route: '/id/group', match: '/id/group' },
-      { labelKey: 'nav.companies', icon: 'mdi-domain', route: '/id/company', match: '/id/company' },
-      { labelKey: 'nav.delegates', icon: 'mdi-account-arrow-right', route: '/id/delegate', match: '/id/delegate' },
-      { labelKey: 'nav.containerScopes', icon: 'mdi-file-tree', route: '/id/scope', match: '/id/scope' },
+      { labelKey: 'nav.users', icon: 'mdi-account', route: '/id/user', match: '/id/user', auth: 'id/user' },
+      { labelKey: 'nav.groups', icon: 'mdi-account-group', route: '/id/group', match: '/id/group', auth: 'id/container/group' },
+      { labelKey: 'nav.companies', icon: 'mdi-domain', route: '/id/company', match: '/id/company', auth: 'id/container/company' },
+      { labelKey: 'nav.delegates', icon: 'mdi-account-arrow-right', route: '/id/delegate', match: '/id/delegate', auth: 'id/delegate' },
+      { labelKey: 'nav.containerScopes', icon: 'mdi-file-tree', route: '/id/scope', match: '/id/scope', auth: 'id/container-scope' },
     ]
   },
-  { labelKey: 'nav.projects', icon: 'mdi-folder', route: '/project', match: '/project' },
+  { labelKey: 'nav.projects', icon: 'mdi-folder', route: '/project', match: '/project', auth: 'home' },
   {
     labelKey: 'nav.system', icon: 'mdi-cog', match: '/system', children: [
-      { labelKey: 'nav.plugins', icon: 'mdi-puzzle', route: '/system/plugin', match: '/system/plugin' },
-      { labelKey: 'nav.nodes', icon: 'mdi-server-network', route: '/system/node', match: '/system/node' },
-      { labelKey: 'nav.configuration', icon: 'mdi-cog-outline', route: '/system/configuration', match: '/system/configuration' },
-      { labelKey: 'nav.roles', icon: 'mdi-shield-account', route: '/system/role', match: '/system/role' },
-      { labelKey: 'nav.systemUsers', icon: 'mdi-account-supervisor', route: '/system/user', match: '/system/user' },
-      { labelKey: 'nav.cache', icon: 'mdi-database-clock', route: '/system/cache', match: '/system/cache' },
-      { labelKey: 'nav.bench', icon: 'mdi-speedometer', route: '/system/bench', match: '/system/bench' },
-      { labelKey: 'nav.information', icon: 'mdi-information', route: '/system/information', match: '/system/information' },
+      { labelKey: 'nav.plugins', icon: 'mdi-puzzle', route: '/system/plugin', match: '/system/plugin', auth: 'system/plugin' },
+      { labelKey: 'nav.nodes', icon: 'mdi-server-network', route: '/system/node', match: '/system/node', auth: 'system/node' },
+      { labelKey: 'nav.configuration', icon: 'mdi-cog-outline', route: '/system/configuration', match: '/system/configuration', auth: 'system/configuration' },
+      { labelKey: 'nav.roles', icon: 'mdi-shield-account', route: '/system/role', match: '/system/role', auth: 'system/role' },
+      { labelKey: 'nav.systemUsers', icon: 'mdi-account-supervisor', route: '/system/user', match: '/system/user', auth: 'system/user' },
+      { labelKey: 'nav.cache', icon: 'mdi-database-clock', route: '/system/cache', match: '/system/cache', auth: 'system/cache' },
+      { labelKey: 'nav.bench', icon: 'mdi-speedometer', route: '/system/bench', match: '/system/bench', auth: 'system/bench' },
+      { labelKey: 'nav.information', icon: 'mdi-information', route: '/system/information', match: '/system/information', auth: 'system' },
     ]
   },
   // API (Explorer + Tokens) is intentionally not in the sidebar — it's reached
@@ -212,17 +218,33 @@ const pluginAdminChildren = computed(() => {
   return items
 })
 
+/**
+ * Resource path tested against the session's `uiAuthorizations`. Static items
+ * carry an explicit `auth` (the REST tree path, which can diverge from the SPA
+ * route); plugin-contributed admin entries fall back to their route with the
+ * leading slash stripped.
+ */
+function authKey(it) {
+  return it.auth ?? String(it.route || it.match || '').replace(/^\//, '')
+}
+const allowed = (it) => auth.isAllowed(authKey(it))
+
 const NAV = computed(() => {
   void i18n.locale // re-localize the labels when the language changes
+  // Drop links pointing to routes the user can't reach (per uiAuthorizations);
+  // admins bypass the check (auth.isAllowed). A parent section is kept only
+  // while at least one of its children survives the filter.
   return BASE_NAV.map((it) => {
     const out = { ...it, label: i18n.t(it.labelKey) }
     if (it.children) {
-      const kids = it.children.map((c) => ({ ...c, label: i18n.t(c.labelKey) }))
-      const extra = it.match === '/system' ? pluginAdminChildren.value : []
+      const kids = it.children
+        .filter(allowed)
+        .map((c) => ({ ...c, label: i18n.t(c.labelKey) }))
+      const extra = it.match === '/system' ? pluginAdminChildren.value.filter(allowed) : []
       out.children = extra.length ? [...kids, ...extra] : kids
     }
     return out
-  })
+  }).filter((it) => (it.children ? it.children.length > 0 : allowed(it)))
 })
 
 const collapsed = ref(false)
