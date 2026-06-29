@@ -11,6 +11,7 @@ export default {
   'nav.system': 'Administration',
   'nav.information': 'Informations',
   'nav.configuration': 'Configuration',
+  'nav.hooks': 'Hooks',
   'nav.roles': 'Rôles',
   'nav.plugins': 'Plugins',
   'nav.nodes': 'Nœuds',
