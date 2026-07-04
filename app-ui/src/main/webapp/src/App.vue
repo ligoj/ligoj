@@ -156,6 +156,7 @@ const BASE_NAV = [
       { labelKey: 'nav.plugins', icon: 'mdi-puzzle', route: '/system/plugin', match: '/system/plugin', auth: 'system/plugin' },
       { labelKey: 'nav.nodes', icon: 'mdi-server-network', route: '/system/node', match: '/system/node', auth: 'system/node' },
       { labelKey: 'nav.configuration', icon: 'mdi-cog-outline', route: '/system/configuration', match: '/system/configuration', auth: 'system/configuration' },
+      { labelKey: 'nav.hooks', icon: 'mdi-webhook', route: '/system/hook', match: '/system/hook', auth: 'system/hook' },
       { labelKey: 'nav.roles', icon: 'mdi-shield-account', route: '/system/role', match: '/system/role', auth: 'system/role' },
       { labelKey: 'nav.systemUsers', icon: 'mdi-account-supervisor', route: '/system/user', match: '/system/user', auth: 'system/user' },
       { labelKey: 'nav.cache', icon: 'mdi-database-clock', route: '/system/cache', match: '/system/cache', auth: 'system/cache' },
@@ -260,6 +261,7 @@ const title = computed(() => {
   if (route.path.startsWith('/system/plugin')) return 'Plugins'
   if (route.path.startsWith('/system/node')) return 'Nœuds'
   if (route.path.startsWith('/system/configuration')) return 'Configuration'
+  if (route.path.startsWith('/system/hook')) return 'Hooks'
   if (route.path.startsWith('/system/role')) return 'Rôles'
   if (route.path.startsWith('/system/user')) return 'Utilisateurs système'
   if (route.path.startsWith('/system/cache')) return 'Cache'
