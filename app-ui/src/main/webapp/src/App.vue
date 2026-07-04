@@ -160,6 +160,7 @@ const BASE_NAV = [
       { labelKey: 'nav.systemUsers', icon: 'mdi-account-supervisor', route: '/system/user', match: '/system/user', auth: 'system/user' },
       { labelKey: 'nav.cache', icon: 'mdi-database-clock', route: '/system/cache', match: '/system/cache', auth: 'system/cache' },
       { labelKey: 'nav.bench', icon: 'mdi-speedometer', route: '/system/bench', match: '/system/bench', auth: 'system/bench' },
+      { labelKey: 'nav.tasks', icon: 'mdi-timer-sand', route: '/system/task', match: '/system/task', auth: 'system/task' },
       { labelKey: 'nav.information', icon: 'mdi-information', route: '/system/information', match: '/system/information', auth: 'system' },
     ]
   },
@@ -263,6 +264,7 @@ const title = computed(() => {
   if (route.path.startsWith('/system/user')) return 'Utilisateurs système'
   if (route.path.startsWith('/system/cache')) return 'Cache'
   if (route.path.startsWith('/system/bench')) return 'Bench'
+  if (route.path.startsWith('/system/task')) return 'Tâches'
   if (route.path.startsWith('/system/information')) return 'Information'
   if (route.path.startsWith('/system')) return 'Administration'
   if (route.path.startsWith('/api/token')) return 'Jetons d\'API'

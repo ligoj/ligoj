@@ -16,6 +16,7 @@ export default {
   'nav.nodes': 'Nœuds',
   'nav.cache': 'Cache',
   'nav.bench': 'Bench',
+  'nav.tasks': 'Tâches',
   'nav.systemUsers': 'Utilisateurs système',
   'nav.profile': 'Profil',
   'nav.about': 'À propos',
