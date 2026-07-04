@@ -12,9 +12,11 @@
   follows the active Vuetify preset (light/dark), per the 2026 rule.
 
   Cells render through #cell.<key> slots (fallback: raw value); the trailing
-  gear column renders through the #actions slot. Header cells can opt into
-  an mdi icon via header.icon and a hover tooltip via header.tooltip (use the
-  tooltip with no label for an icon-only header).
+  gear column renders through the #actions slot. The header tools cog exposes a
+  #tools-extra slot to append caller actions (buttons) after a divider, below
+  the built-in Export CSV / Copy to clipboard. Header cells can opt into an mdi
+  icon via header.icon and a hover tooltip via header.tooltip (use the tooltip
+  with no label for an icon-only header).
 -->
 <template>
   <div class="panel">
@@ -53,6 +55,12 @@
                 <div class="lj-popmenu">
                   <button :disabled="exporting || copying" @click="exportCsv"><v-icon size="18">mdi-file-download-outline</v-icon>{{ t('common.exportCsv') || t('common.export') || 'Export CSV' }}</button>
                   <button :disabled="exporting || copying" @click="copyToClipboard"><v-icon size="18">mdi-content-copy</v-icon>{{ t('common.copyClipboard') || 'Copy to clipboard' }}</button>
+                  <!-- Caller-supplied tools (e.g. a status refresh), separated
+                       from the built-in Export/Copy actions by a divider. -->
+                  <template v-if="slots['tools-extra']">
+                    <div class="sep" />
+                    <slot name="tools-extra" />
+                  </template>
                 </div>
               </v-menu>
             </th>
