@@ -59,7 +59,8 @@ const FA_TO_MDI = {
   'fas fa-cloud': 'mdi-cloud-outline',
   'fas fa-tachometer-alt': 'mdi-gauge',
   'fa fa-cogs': 'mdi-hammer',
-
+  'fas fa-box-open': 'mdi-package-variant-closed',
+  'fas fa-code-branch': 'mdi-source-branch'
 }
 
 function convertFromFontAwesome(uiClasses) {
