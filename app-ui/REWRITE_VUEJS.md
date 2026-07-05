@@ -269,9 +269,9 @@ rejects otherwise — a delegation test's fake tool must be a full manifest
 - **Declared dependencies** via `requires: ['id']` on the plugin manifest. The loader awaits these BEFORE calling `install()`, so parent i18n is merged and registry slot exists by the time the sub-plugin runs. `plugin-id-ldap` uses this — `plugin-id` could be dropped from `REQUIRED_PLUGINS` without breaking LDAP.
 - **Concurrency**: `loadPlugin` dedupes in-flight loads via a `Map<id, Promise>`, so the wizard's lazy load and a sub-plugin's `requires` can race the same id without double-importing.
 
-## Subscription wizard (`SubscribeWizardView`)
+## Subscription wizard (`SubscribeWizardView`) & node editor (`NodeEditDialog`)
 
-One file, three modes — used by everything that creates or edits subscriptions and nodes:
+Two sibling dialogs sharing one parameter-form core (`utils/pluginParams.js` + `utils/parameterGroups.js` — type discrimination, wire building, owning-plugin hook resolution, bundle loading, ordering/grouping). `SubscribeWizardView` owns `subscribe`; `NodeEditDialog` owns `create-node` / `edit-node`. Together they cover everything that creates or edits subscriptions and nodes:
 
 | Mode          | Trigger                                  | Steps shown                                        | Result                                                                                                              |
 | ------------- | ---------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -556,10 +556,11 @@ The backend serialises an enum-style `type`. **Values are UPPERCASE** — `TEXT`
   "secured": false,                     // ← drives password masking
   "defaultValue": null,
   "min": null, "max": null,             // INTEGER only
-  "values": [],                         // SELECT/MULTIPLE/TAGS only
-  "depends": []
+  "values": []                          // SELECT/MULTIPLE/TAGS only
 }
 ```
+
+> **`depends` was removed (2026).** Parameters no longer carry a dependency graph, and the backend no longer topologically sorts them. `/rest/node/<id>/parameter/<MODE>` now returns parameters **id-ascending**; the dialogs re-sort by **display name, ascending** and apply any plugin-declared layout. See "Ordering & natural grouping".
 
 Notable backend gaps (not yet exposed in `ParameterVo`):
 
@@ -593,19 +594,67 @@ A subscription on `service:id:ldap:local` carries both LDAP-specific parameters 
 
 When porting a tool-level plugin, ship only the keys YOUR plugin's CSV declares. Let the parent ship the inherited ones.
 
-### Lazy-loading the right bundle
+### Custom fields (`parameterField`)
 
-The wizard's `ensureToolPluginLoaded(nodeId)` runs at parameter-fetch time (and from `bootstrapEdit` for the edit-node mode). It converts the node id to a plugin id via `pluginIdFromKey` and fires `loadPlugin(...)` best-effort:
+A plugin can replace the default type-based input for specific parameters. Both dialogs call `resolveParameterField(nodeId, ctx)` (in `utils/pluginParams.js`), which asks the **tool** plugin first, then the **parent** service plugin, for a `parameterField` feature:
 
 ```js
-function ensureToolPluginLoaded(nodeId) {
-  const pluginId = pluginIdFromKey(nodeId)        // 'service:id:ldap' → 'id-ldap'
-  if (!pluginId) return
-  loadPlugin(pluginId).catch(() => {})            // 404 ok — keeps rendering with raw ids
+// ui/src/service.js
+parameterField({ parameter, mode, isNode, formValues, nodeId, instanceNodeId } = {}) {
+  if (isNode) return null                      // e.g. only in subscribe mode
+  return PARAM_FIELDS[parameter?.id] || null   // a Vue component, or null to fall back
 }
 ```
 
-vue-i18n's reactive store re-renders labels in place when `mergeLocaleMessage` fires, so a late-arriving bundle just refreshes the form — no race between parameter fetch and bundle download.
+- Return a Vue component (mounted with `v-model`, `:parameter`, `:form-values`, `:mode`, `:is-node`, `:node-id`, `:instance-node-id`) or `null` to keep the default field.
+- `ctx.isNode` distinguishes node-config (`NodeEditDialog`) from subscription (`SubscribeWizardView`); `ctx.mode` is `link`/`create`; `ctx.nodeId` is the tool node id.
+- Sub-plugin-first: `service:registry:nexus:type` tries `registry-nexus` (no field), then the parent `registry` (which owns `RegistryTypeField` for every tool).
+
+### Ordering & natural grouping (`parameterLayout`)
+
+**Default:** parameters render **ordered by display name, ascending** (see the `depends` note above) — no plugin code needed.
+
+**Override:** a plugin may declare order and/or groups via a `parameterLayout` feature — resolved exactly like `parameterField` (tool plugin first, then parent), in both node and subscription context:
+
+```js
+// ui/src/service.js — returns [{ label?, parameters: [id | glob, ...] }, ...]
+parameterLayout({ mode, isNode, nodeId } = {}) {
+  return [
+    // explicit ids → fixed order; label is an i18n key (omit label for an order-only group)
+    { label: 'id.wizard.group.connection',
+      parameters: ['service:id:ldap:url', 'service:id:ldap:user-dn', 'service:id:ldap:password'] },
+    { label: 'id.wizard.group.groups', parameters: ['service:id:ldap:groups-*'] },              // natural group (glob)
+    { label: 'id.wizard.group.people', parameters: ['service:id:ldap:people-*', 'service:id:ldap:quarantine-dn'] },
+  ]
+}
+```
+
+`groupParameters(params, layout, { name, label })` (in `utils/parameterGroups.js`) turns that into render-ready `[{ label, params }]`:
+
+- **Groups first, in declared order.** Each group's `parameters` entries are matched against the live parameters, in the declared order:
+  - an **exact id** contributes that one parameter, keeping its declared position;
+  - a **glob** — any entry containing `*` (e.g. `service:id:ldap:groups-*`) — is the _natural grouping_: it pulls in every not-yet-used parameter whose id matches, in **display-name order**. Only `*` is special (any run of chars); everything else is literal.
+- A parameter is **never placed in two groups** (first match wins); an id/glob matching **nothing in the current context is silently skipped** — so a node-only param like `service:id:ldap:clear-password` groups during `create-node` yet is simply absent from a subscription form.
+- **Everything unmatched trails** in one unlabeled group, name-ascending.
+- `label` is an i18n key resolved through the plugin's bundle, falling back to the literal.
+
+**Parent vs tool.** Since ids are strings, a parent can order a whole family generically from `ctx.nodeId`:
+
+```js
+// plugin-registry (parent) — orders every registry tool's connection params: url, user, then the secret
+parameterLayout({ nodeId } = {}) {
+  if (!nodeId) return []
+  return [{ parameters: [`${nodeId}:url`, `${nodeId}:user`, `${nodeId}:password`, `${nodeId}:secret`, `${nodeId}:token`] }]
+}
+```
+
+A tool plugin that needs something different returns its own (it is consulted first). `registry-nexus`, for example, orders `type` before `registry` **only on a link subscription** (`!isNode && mode === 'link'`) and returns `[]` in node context, so the parent's connection ordering applies there.
+
+### Lazy-loading the right bundle
+
+The shared `ensureToolPluginLoaded(nodeId)` (`utils/pluginParams.js`) runs at parameter-fetch time (and from `bootstrapEdit` for edit-node). It maps the node id to a plugin id via `pluginIdFromKey` (`service:id:ldap` → `id-ldap`) and calls `loadPlugin(...)` best-effort — with a cache-busting retry for the browser's poisoned-URL cache when an early import 404'd.
+
+**It is `await`ed before `parameters.value` is assigned.** That ordering matters: `resolveParameterField` / `resolveParameterLayout` read the registry synchronously during render, so the owning plugin must already be registered on the **first** paint — otherwise a custom field (or a group layout) silently falls back to the default on load. (vue-i18n still re-renders *labels* in place when a late bundle merges, but component/layout resolution does not get that reactive second chance.)
 
 ## 7. Routing
 
