@@ -16,6 +16,15 @@ import { readFileSync } from 'node:fs'
  * rewrites it to the pre-bundled URL. The middleware exposes that
  * transformed code at the exact URL the import map asks for.
  */
+// Re-export a library's whole surface: every named export, plus a default that
+// falls back to the namespace for libraries without one. The SAME shape backs
+// both the dev middleware shims and the production facade entries, so plugins
+// see an identical `import ... from "vue"` surface in dev and in a built WAR.
+const sharedShimSource = (from) =>
+  `export * from ${JSON.stringify(from)};\n` +
+  `import * as __ns from ${JSON.stringify(from)};\n` +
+  `export default __ns.default ?? __ns;\n`
+
 const SHIMS = {
   '/ligoj/assets/vue.js': { from: 'vue' },
   '/ligoj/assets/router.js': { from: 'vue-router' },
@@ -23,6 +32,20 @@ const SHIMS = {
   '/ligoj/assets/vuetify.js': { from: 'vuetify' },
   '/ligoj/assets/host.js': { from: '/src/host.js' },
 }
+
+// Production build: each shared singleton is a facade ENTRY (below) re-exporting
+// its library. `chunk.name` -> library; the virtual id is the rollup input.
+// `@ligoj/host` is a real entry already (src/host.js), so it is not listed here.
+const SHARED_LIBS = {
+  vue: 'vue',
+  router: 'vue-router',
+  pinia: 'pinia',
+  vuetify: 'vuetify',
+}
+const FACADE_PREFIX = 'virtual:ligoj-shared/'
+const SHARED_FACADE_IDS = Object.fromEntries(
+  Object.keys(SHARED_LIBS).map((name) => [name, FACADE_PREFIX + name]),
+)
 
 /**
  * Dev-only: serve `favicon.ico` from the webapp root at `/ligoj/favicon.ico`.
@@ -109,10 +132,7 @@ function ligojDevSharedImports() {
     },
     load(id) {
       const shim = SHIMS[id]
-      if (!shim) return null
-      return `export * from ${JSON.stringify(shim.from)};\n` +
-        `import * as __ns from ${JSON.stringify(shim.from)};\n` +
-        `export default __ns.default ?? __ns;\n`
+      return shim ? sharedShimSource(shim.from) : null
     },
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
@@ -135,8 +155,33 @@ function ligojDevSharedImports() {
   }
 }
 
+/**
+ * Production build: expose each shared singleton (vue, vue-router, pinia,
+ * vuetify) as a stable-URL facade ENTRY re-exporting the library's full public
+ * API under its REAL names. Runtime-loaded plugins are built separately and
+ * import those names (`import { createElementBlock } from 'vue'`) via the import
+ * map. A plain advancedChunks group instead emits a non-entry chunk whose
+ * exports rolldown minifies to the mangled subset the host happens to use, so
+ * the plugin import fails with "'vue' does not provide createElementBlock".
+ * Facade entries + `preserveEntrySignatures` keep every real name.
+ */
+function ligojSharedFacades() {
+  return {
+    name: 'ligoj-shared-facades',
+    apply: 'build',
+    resolveId(id) {
+      return id.startsWith(FACADE_PREFIX) ? id : null
+    },
+    load(id) {
+      if (!id.startsWith(FACADE_PREFIX)) return null
+      const from = SHARED_LIBS[id.slice(FACADE_PREFIX.length)]
+      return from ? sharedShimSource(from) : null
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [vue(), ligojDevSharedImports(), ligojDevFavicon()],
+  plugins: [vue(), ligojDevSharedImports(), ligojSharedFacades(), ligojDevFavicon()],
   base: '/ligoj/',
   resolve: {
     alias: {
@@ -170,41 +215,40 @@ export default defineConfig({
         login: resolve(__dirname, 'login.html'),
         loginByApiKey: resolve(__dirname, 'login-by-api-key.html'),
         host: resolve(__dirname, 'src/host.js'),
+        // Shared singletons as facade entries (see ligojSharedFacades): each
+        // re-exports its library's full public API under real names, at the
+        // stable URL the import map targets. Being entries, they are each their
+        // own chunk (no minSize merging) and their exports are preserved.
+        vue: SHARED_FACADE_IDS.vue,
+        router: SHARED_FACADE_IDS.router,
+        pinia: SHARED_FACADE_IDS.pinia,
+        vuetify: SHARED_FACADE_IDS.vuetify,
       },
+      // Keep every entry's full export surface under its real names, even though
+      // the host imports these libraries internally too. Without this, rolldown
+      // renames the shared chunks' exports to internal aliases and runtime
+      // plugins can't resolve `import { createElementBlock } from 'vue'`.
+      preserveEntrySignatures: 'allow-extension',
       external: [/^\/main\//, /^\/ligoj\/main\//],
+      onwarn(warning, defaultHandler) {
+        // The shared facades deliberately fall back to the module namespace as
+        // the `default` export for libraries that have none (vue, vue-router,
+        // pinia, vuetify), so this static "import `default` is undefined" note
+        // is expected. Everything else passes through.
+        if (warning.code === 'IMPORT_IS_UNDEFINED' && /`default`/.test(warning.message ?? '')) {
+          return
+        }
+        defaultHandler(warning)
+      },
       output: {
-        // Rolldown's default `minSize: 20480` silently merges chunks
-        // smaller than 20 KB into their importer, which would fold Vue
-        // (~80 KB) into the pinia chunk (~4 KB) and break the import
-        // map in index.html. `advancedChunks` with per-group `minSize:
-        // 0` keeps each shared dep on its stable filename.
-        codeSplitting: {
-          groups: [
-            // Highest-priority groups claim modules first; vue must
-            // outrank vuetify or rolldown folds @vue/* into vuetify
-            // (it pulls them in transitively).
-            { name: 'vue', test: /[\\/]node_modules[\\/](?:vue|@vue)[\\/]/, priority: 100, minSize: 0 },
-            { name: 'router', test: /[\\/]node_modules[\\/]vue-router[\\/]/, priority: 90, minSize: 0 },
-            { name: 'pinia', test: /[\\/]node_modules[\\/]pinia[\\/]/, priority: 80, minSize: 0 },
-            { name: 'vuetify', test: /[\\/]node_modules[\\/]vuetify[\\/]/, priority: 70, minSize: 0 },
-          ],
-        },
-        // Stable filenames for shared deps so runtime-loaded plugins can
-        // resolve `import 'vue'` (etc.) via the import map in index.html.
-        // Other chunks stay hashed for cache-busting.
-        chunkFileNames: (chunk) => {
-          const stable = ['vue', 'router', 'pinia', 'vuetify']
-          return stable.includes(chunk.name)
-            ? 'assets/[name].js'
-            : 'assets/[name]-[hash].js'
-        },
+        // The shared singletons (+ host) keep stable, unhashed filenames so the
+        // import map in index.html never drifts; every other chunk is hashed for
+        // cache-busting.
         entryFileNames: (chunk) => {
-          // `host` is the shared-surface entry consumed by runtime plugins —
-          // must resolve to a stable URL so the import map doesn't drift.
-          return chunk.name === 'host'
-            ? 'assets/host.js'
-            : 'assets/[name]-[hash].js'
+          const stable = ['host', 'vue', 'router', 'pinia', 'vuetify']
+          return stable.includes(chunk.name) ? 'assets/[name].js' : 'assets/[name]-[hash].js'
         },
+        chunkFileNames: 'assets/[name]-[hash].js',
       },
     },
     outDir: resolve(__dirname, '../../../target/classes/META-INF/resources/webjars/vue-dist'),
