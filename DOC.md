@@ -1881,11 +1881,7 @@ The `PluginsClassLoader` verifies every installed plugin JAR before it joins the
 | `SIGNED`   | Valid and complete signature, but the certificate is not trusted (or no truststore is configured).  |
 | `VERIFIED` | Valid signature whose certificate is pinned in — or chains to — the configured truststore.          |
 
-| System property                              | Default                            | Note                                                                                                                 |
-| -------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `ligoj.plugin.signature.truststore`          | `${ligoj.home}/plugin-vendors.p12` | Path to the PKCS12/JKS truststore holding the trusted vendor certificates (no private key). Required for `VERIFIED`. |
-| `ligoj.plugin.signature.truststore.password` | `changeit`                         | Truststore password.                                                                                                 |
-| `ligoj.plugin.signature.required`            | `false`                            | When `true`, rejects from the classpath the plug-ins below `VERIFIED` (or `SIGNED` without truststore).              |
+See [API container properties](#API-Container-properties) `ligoj.plugin.signature.*` to configure the behaviors.
 
 The simplest deployment is therefore to drop the truststore as `plugin-vendors.p12` inside the `LIGOJ_HOME` directory of the `ligoj-api` container — no property needed, see the [data directory preparation](#preparation-of-the-ligoj-data-directory). The startup log states whether the truststore was read (`Plugin code-signing truststore read from ... with N trusted entries`) or not: a missing truststore at the default location is an `INFO` notice (signatures then cap at `SIGNED`), while a missing truststore at an explicitly configured location is reported as an `ERROR`.
 
@@ -2072,6 +2068,10 @@ ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from=
 
 Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot properties (can be injected in `CUSTOM_OPTS`) can be dynamically modified from the administration console:
 
+
+### API Container properties
+
+
 | Name                                                  | Default value                            | Note                                                                                                 |
 | ----------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | api.token.purge                                       | `0 0 4 * * ?`                            | CRON expression for expired API tokens purge. See [API Token](#api-tokens) section.                  |
@@ -2092,6 +2092,7 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | global.tools.internal                                 | ``                                       | Ligoj `plugin-id` node's globally available for internal users.                                      |
 | health.node                                           | `0 0 0/1 1/1 * ?`                        | CRON expression to refresh the health of the nodes                                                   |
 | health.subscription                                   | `0 0 2 1/1 * ?`                          | CRON expression to refresh the health of the subscriptions                                           |
+| javax.net.ssl.trustStore                              |                                          | SSL truststore file path for SSL connection. Sample `/home/ligoj/ligoj-api.jks`                      |
 | jdbc.vendor                                           | `mysql`                                  | Database type: `mysql`, `postgresql`, `mariadb`                                                      |
 | jdbc.port                                             | `3306`                                   |                                                                                                      |
 | jdbc.database                                         | `ligoj`                                  |                                                                                                      |
@@ -2110,7 +2111,9 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | jpa.generate_statistics                               | `false`                                  | When `true` Hibernate statistics are logged.                                                         |
 | management.context-path                               | `/manage`                                |                                                                                                      |
 | management.security.roles                             | `USER`                                   | Default RBAC role assigned to new users.                                                             |
-| ligoj.name                                            | `Ligoj`                                  | Applicatio name displayed to authenticated users in about, titles, etc.                              |
+| ligoj.hook.path                                       | `^$`                                     | Comma separated RegEx. See [Hook](#hook).                                                            |
+| ligoj.hook.timeout                                    | `30`                                     | Default hook timeout in seconds. See [Hook](#hook).                                                  |
+| ligoj.file.path                                       | `^$`                                     | Comma separated RegEx. See [File](#file).                                                            |
 | ligoj.initial.user.action                             | ``                                       | When `init`, the initialization is executed once. When `reset`, its execution is forced.             |
 | ligoj.initial.user.name                               | `ligoj-admin`                            | The initial user name.                                                                               |
 | ligoj.initial.user.role                               | `ADMIN`                                  | The initial role name to associate to the initial user.                                              |
@@ -2118,15 +2121,19 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | ligoj.initial.user.token.value                        | ``                                       | When defined, the API token value is forced to the given value, and not printed.                     |
 |                                                       |                                          | Otherwise, a generated value is set and printed in log:                                              |
 |                                                       |                                          | `[INIT] Token '..' has been set for initial user '..' to value: ..`                                  |
-| ligoj.hook.path                                       | `^$`                                     | Comma separated RegEx. See [Hook](#hook).                                                            |
-| ligoj.hook.timeout                                    | `30`                                     | Default hook timeout in seconds. See [Hook](#hook).                                                  |
-| ligoj.file.path                                       | `^$`                                     | Comma separated RegEx. See [File](#file).                                                            |
+| ligoj.log.file.name                                   | `./api-rolling.log`                      | File inside `LIGOJ_HOME` directory                                                                   |
+| ligoj.log.file.size                                   | `10 MB`                                  | Max log file size                                                                                    |
+| ligoj.log.file.enabled                                | `true`                                   | Enablement of log file                                                                               |
+| ligoj.name                                            | `Ligoj`                                  | Applicatio name displayed to authenticated users in about, titles, etc.                              |
 | ligoj.plugin.enabled                                  | `true`                                   | When false, plugins are not loaded and their state is not updated                                    |
 | ligoj.plugin.ignore                                   | `plugin-password-management`             | Filtered (deprecated, fixed version, etc.) plugins for installation or updates from the repositories |
 | ligoj.plugin.install                                  | ``                                       | List plugin identifiers to automatically install at start time: `p1,p2,...`.                         |
 |                                                       |                                          | Updates are performed according to the `ligoj.plugin.update` option                                  |
-| ligoj.plugin.update                                   | `false`                                  | `true` updates the plugins automatically at start time to the latest available version.              |
 | ligoj.plugin.repository                               | `central`                                | Repository identifier used to query plugin installation or update. May be `central` or `nexus`       |
+| ligoj.plugin.signature.truststore                     | `${ligoj.home}/plugin-vendors.p12`       | PKCS12/JKS file of the trusted vendor certificates (no private key). Required for `VERIFIED`.        |
+| ligoj.plugin.signature.truststore.password            | `changeit`                               | PKCS12/JKS truststore file password.                                                                 |
+| ligoj.plugin.signature.required                       | `false`                                  | When `true`, the plug-ins not `VERIFIED` (`SIGNED` or without signature) are ignored                 |
+| ligoj.plugin.update                                   | `false`                                  | `true` updates the plugins automatically at start time to the latest available version.              |
 | ligoj.sslVerify                                       | `true`                                   | `false` disables the standard SSL verifications (domain name, certifications chain and validity).    |
 | logging.level.root                                    | `info`                                   | Configure default log verbosity of all internal components: Spring, Jetty, Hibernate,...             |
 | logging.level.<category>                              | *vary*                                   | See [log4j2.json](app-api/src/main/resources/log4j2.json) for specific category                      |
@@ -2136,6 +2143,30 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | server.port                                           | `${SERVER_PORT}`                         |                                                                                                      |
 | server.address                                        | `${SERVER_HOST}`                         |                                                                                                      |
 | server.servlet.context-path                           | `/${CONTEXT}`                            |                                                                                                      |
+
+
+### UI container properties
+
+| Name                                                              | Default value      | Note                                                                                                             |
+| ----------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| security                                                          | `Rest`             | Security provider to handle stateful session. Values are `Trusted`, `Rest` and `OAuth2Bff`.                      |
+| security.max-sessions                                             | `-1`               | Maximum number of concurrent sessions allowed. `-1` means unlimited sessions                                     |
+| security.pre-auth-principal                                       |                    | Request header name containing the identity of the authenticated user. Sample `X-Amzn-Oidc-Identity`             |
+| security.pre-auth-credentials                                     |                    | Request header name containing the token to verify Sample `X-Amzn-Oidc-Accesstoken`                              |
+| security.pre-auth-logout                                          |                    | Optional logout relative or absolute URL when user requests to be logged out. Sample `https://signin.sample.com` |
+| javax.net.ssl.trustStore                                          |                    | SSL truststore file path for SSL connection like Keycloak. Sample `/home/ligoj/ligoj-ui.jks`                     |
+| ligoj.log.file.name                                               | `./ui-rolling.log` | File inside `LIGOJ_HOME` directory.                                                                              |
+| ligoj.log.file.size                                               | `10 MB`            | Max log file size                                                                                                |
+| ligoj.log.file.enabled                                            | `true`             | Enablement of log file                                                                                           |
+| ligoj.security.login.url                                          |                    | Login relative or absolute URL when user requests to be logged in. Sample `/oauth2/authorization/keycloak`       |
+| ligoj.security.oauth2.username-attribute                          |                    | Attribute of the OAuth2 token to use as username. Sample `preferred_username`                                    |
+| ligoj.security.login-by-api-key                                   | `false`            | Enable API key authentication bypass                                                                             |
+| spring.security.oauth2.client.registration.keycloak.provider      | `keycloak`         | Provider name used in other properties.                                                                          |
+| spring.security.oauth2.client.registration.keycloak.client-id     |                    | Client identifier of this application in Keycloak. Sample `ligoj`                                                |
+| spring.security.oauth2.client.registration.keycloak.client-secret |                    | Client secret of this application in Keycloak.                                                                   |
+| spring.security.oauth2.client.provider.keycloak.issuer-uri        |                    | Issuer URI of the Keycloak realm. Sample `https://keycloak.sample.com/realms/ligoj`                              |
+| spring.security.oauth2.client.registration.keycloak.scope         |                    | Scope of the authentication request. Sample `openid`                                                             |
+
 
 ## System-level variables
 
