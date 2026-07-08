@@ -13,6 +13,16 @@ WORKDIR /build
 # Enable with: --build-arg MAVEN_INSECURE_TLS=true
 ARG MAVEN_INSECURE_TLS="false"
 
+# Maven profiles to activate for the build. Defaults to the three JDBC-driver
+# profiles so the image can talk to any of them. These are <activeByDefault> in
+# app-api/pom.xml, BUT Maven disables every activeByDefault profile as soon as a
+# settings.xml <activeProfiles> (or any -P) is in play — which silently dropped
+# ALL DB drivers from the war (org.postgresql.Driver / mysql / mariadb absent →
+# the app fails at boot with ClassNotFoundException). Listing them explicitly
+# makes the image DB-capable regardless of the build's settings.xml. Override
+# with --build-arg MAVEN_PROFILES="db-postgresql" to slim the war to one driver.
+ARG MAVEN_PROFILES="db-postgresql,db-mysql,db-mariadb"
+
 # Optional custom Maven settings. The Dockerfile is included as a guaranteed-existing
 # placeholder so the COPY never fails when no *.m2 file is present in the context.
 COPY Dockerfile ./*.m2 /root/.m2/
@@ -23,7 +33,7 @@ RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
     if [ "$MAVEN_INSECURE_TLS" = "true" ]; then \
       export MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.resolver.transport=wagon"; \
     fi && \
-    mvn -B -ntp -DskipTests dependency:go-offline || true
+    mvn -B -ntp -DskipTests ${MAVEN_PROFILES:+-P${MAVEN_PROFILES}} dependency:go-offline || true
 
 # Git provenance, injected from the host (see compose.yml). Defaults match the
 # buildnumber-maven-plugin's own fallbacks so an unset host env is harmless.
@@ -45,7 +55,7 @@ RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
     fi && \
     { [ -f prepare-build.sh ] && chmod +x prepare-build.sh && . ./prepare-build.sh || \
       echo "No prepare-build.sh; skipping custom build setup."; } && \
-    mvn -B -ntp -DskipTests \
+    mvn -B -ntp -DskipTests ${MAVEN_PROFILES:+-P${MAVEN_PROFILES}} \
         -DbuildNumber="$GIT_COMMIT" \
         -DscmBranch="$GIT_BRANCH" \
         -Dtimestamp="$GIT_COMMIT_TIME" \
