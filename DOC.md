@@ -2,6 +2,25 @@
 
 ![architecture](docs/assets/img/architecture.png)
 
+Ligoj runs as two Spring Boot containers in front of a database:
+
+```
+                     :8080                    :8081
+ Browser  ─────────>  ligoj-ui  ───────────>  ligoj-api  ──────>  ligoj-db
+ (Vue 3 SPA)         Spring Boot             Spring Boot          MySQL / PgSQL
+                     + Vue assets            REST API
+                     + REST proxy            + Java plugins
+```
+
+| Service       | Image                     |  Port  | Description                                                                       |
+|---------------|---------------------------|:------:|-----------------------------------------------------------------------------------|
+| **ligoj-db**  | `mysql:8` / `postgres:17` |   —    | Database. Not exposed outside the Docker network.                                 |
+| **ligoj-api** | `ligoj/ligoj-api`         | `8081` | Stateless REST backend + Java plugins. Only container with DB/LDAP access.        |
+| **ligoj-ui**  | `ligoj/ligoj-ui`          | `8080` | Vue 3 SPA + stateful Spring Boot session holder / REST proxy in front of the API. |
+
+`ligoj-api` is never meant to be reachable directly by end users — only `ligoj-ui` (session holder + REST proxy) is exposed. See [Docker Execution](#docker-execution)
+and [Deployment with Docker Compose](#deployment-with-docker-compose).
+
 # Key features
 
 The backend container assumes the business role of the application, is stateless, scalable and based on extensive use of convention over configuration design.
@@ -379,7 +398,7 @@ always performed by the `ligoj-api` container.
 The decision follows this matrix:
 
 | URL               | Session | API Key | [PreAuth](#pre-authenticated-access) | Login | Auth.     | Response | Notes                                             |
-| ----------------- | ------- | ------- | ------------------------------------ | ----- | --------- | -------- | ------------------------------------------------- |
+|-------------------|---------|---------|--------------------------------------|-------|-----------|----------|---------------------------------------------------|
 | public            | *       | *       | *                                    | *     | *         | `200`    | Whitelisted page                                  |
 | /rest/*           | Yes     | *       | *                                    | *     | Granted   | `200`    | Authorization is checked by `ligoj-api`           |
 | /rest/*           | No      | No      | Not configured                       | *     | Refused   | `401`    | Unauthorized by `ligoj-api`                       |
@@ -407,7 +426,7 @@ When these arguments are empty, the `PreAuth` filter is not enabled. When enable
 You should use the right [plugin-id](https://github.com/ligoj/plugin-id) implementation to get the user details.
 
 | Property                      | Role                                                                         | Sample                                                |
-| ----------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
+|-------------------------------|------------------------------------------------------------------------------|-------------------------------------------------------|
 | security.pre-auth-principal   | Request header name containing the identity of the authenticated user        | -Dsecurity.pre-auth-principal=SM_USER                 |
 | security.pre-auth-credentials | Request header name containing the token to verify                           | -Dsecurity.pre-auth-credentials=SM_TOKEN              |
 | security.pre-auth-logout      | Optional logout relative or absolute URL when user requests to be logged out | -Dsecurity.pre-auth-logout="https://signin.sample.com |
@@ -415,7 +434,7 @@ You should use the right [plugin-id](https://github.com/ligoj/plugin-id) impleme
 For AWS Cognito placed on an ALB, use [plugin-id-cognito](https://github.com/ligoj/plugin-id-cognito), and these properties:
 
 | Property                      | Value                     |
-| ----------------------------- | ------------------------- |
+|-------------------------------|---------------------------|
 | security.pre-auth-principal   | `X-Amzn-Oidc-Identity`    |
 | security.pre-auth-credentials | `X-Amzn-Oidc-Accesstoken` |
 | security.pre-auth-logout      | (Cognito subdomain)       |
@@ -473,7 +492,7 @@ IAM provider such as [plugin-iam-node](https://github.com/ligoj/plugin-iam-node)
 The enabled login mode is configured only at launch time of the `ligoj-ui` container with `-Dsecurity=${MODE}` argument. The behavior is described in the below table:
 
 | Mode        | Implementation                                                | Login screen     | Behavior                                                                             |
-| ----------- | ------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------ |
+|-------------|---------------------------------------------------------------|------------------|--------------------------------------------------------------------------------------|
 | `Trusted`   | `org.ligoj.app.http.security.TrustedAuthenticationProvider`   | Ligoj login page | Login is always accepted, `ligoj-api` container is not involved. Useful for testing. |
 | `Rest`      | `org.ligoj.app.http.security.RestAuthenticationProvider`      | Ligoj login page | Login operation is delegated to a REST endpoint, by default one of `ligoj-api`.      |
 | `OAuth2Bff` | `org.ligoj.app.http.security.OAuth2BffAuthenticationProvider` | OIDC Provider    | Login and logout operations are delegated to external OAuth2 identity provider       |
@@ -577,7 +596,7 @@ These fields are automatically set by the transaction manager in successful API 
 Values resolution priorities
 
 | Priority | Source                               | Note                                                                                                |
-| -------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+|----------|--------------------------------------|-----------------------------------------------------------------------------------------------------|
 | 1        | Spring Command-line arguments        | `--ligoj.property=value` when running the application                                               |
 | 2        | Java System properties               | `-Dligoj.property=value`                                                                            |
 | 3        | OS environment variables             | `LIGOJ_PROPERTY=value`                                                                              |
@@ -791,6 +810,86 @@ The javadoc documentation is extracted from the `-javadoc.jar` artifacts of plug
 - Response description
 - Type description
 
+### API schema examples
+
+Fetch the OpenAPI document through the UI proxy (a valid session is required):
+
+```bash
+curl 'http://localhost:8080/ligoj/rest/openapi.json'
+```
+
+When the API container is exposed directly (development only), it can be queried with a run-as header:
+
+```bash
+curl 'http://localhost:8081/ligoj-api/rest/openapi.json' -H 'SM_UniversalID: ligoj-admin'
+```
+
+```json
+{
+  "openapi": "3.0.1",
+  "servers": [ { "url": "http://localhost:8081/ligoj-api/rest" } ],
+  "paths": {
+    "/service/id/company": {
+      "get": {
+        "operationId": "findAll_20",
+        "responses": { "default": { "description": "default response",
+          "content": { "application/json": { "schema": {
+            "$ref": "#/components/schemas/TableItemContainerCountVo" } } } } }
+      }
+    }
+  }
+}
+```
+
+The WADL format currently outputs only XML:
+
+```bash
+curl 'http://localhost:8081/ligoj-api/rest?_wadl' -H 'SM_UniversalID: ligoj-admin'
+```
+
+```xml
+<application xmlns="http://wadl.dev.java.net/2009/02">
+    <resources base="http://localhost:8081/ligoj-api/rest/">
+        <resource path="/security">
+            <resource path="/login">
+                <method name="POST">
+                    <request><representation mediaType="application/json"/></request>
+                    <response><representation mediaType="application/json"/></response>
+                </method>
+            </resource>
+        </resource>
+    </resources>
+</application>
+```
+
+## Management endpoints
+
+Both containers expose Spring Boot Actuator endpoints. On `ligoj-api` they are proxied by `ligoj-ui` under `/manage`; `ligoj-ui` serves its own actuator under `/actuator`. A richer admin browser for
+every actuator endpoint is available in the UI under **System → Information → Actuator**.
+
+| Endpoint        | Purpose                                                       |
+|-----------------|---------------------------------------------------------------|
+| `manage/health` | Liveness/readiness. `{"status":"UP"}` when the API is ready.  |
+| `manage/info`   | Application, Java and OS build information.                   |
+| `manage/sbom`   | Software Bill of Materials (SBOM) exposed by Spring Actuator. |
+
+These endpoints are only reachable directly when the API container is exposed (development):
+
+```bash
+curl -H "SM_UniversalID:ligoj-admin" http://localhost:8081/ligoj-api/manage/info
+```
+
+```json
+{
+  "app": { "name": "Ligoj - API", "description": "Ligoj API container",
+           "version": "4.0.1", "groupId": "org.ligoj.app", "artifactId": "app-api" },
+  "java": { "version": "17.0.3", "vendor": { "name": "Eclipse Adoptium" } },
+  "os": { "name": "Mac OS X", "version": "13.5.2", "arch": "aarch64" }
+}
+```
+
+In a normal deployment they are reached through the UI proxy, e.g. the SBOM at `http://localhost:8080/ligoj/manage/sbom` and the health probe at `http://localhost:8080/ligoj/manage/health`.
+
 ## API Tokens
 
 API tokens are used to authenticate API calls instead of a password or other credentials.
@@ -923,7 +1022,7 @@ All Web resources are in the directory `META-INF/resources/webjars/service/${ser
 All entities to be installed on setup are in the directory `csv`.
 
 | Pattern file                        | Sample              | Role                                                                                                                                                              |
-| ----------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-------------------------------------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | ${base_java}/${Tool}Resource.class  | SlackResource.class | Plugin definition                                                                                                                                                 |
 | ${base_web}/img/${tool}.png         | img/slack.png       | 16x icon                                                                                                                                                          |
 | ${base_web}/img/${tool}x64.png      | img/slack.png       | 64x icon                                                                                                                                                          |
@@ -947,7 +1046,7 @@ These extensions may:
 - Add security levels
 
 | Layer | Scope  | Enablement                                                                                                                                                                             |
-| ----- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | UI    | Global | Create a file `META-INF/resource/webjars/bootstrap.private.js`. This JS code will be added to the initial JS code. For example, it's possible to register events, add a menu entry,... |
 
 ## Subscription
@@ -1007,7 +1106,7 @@ using 'trimmed' nouns such as: `passwd` (`password`), `param` (`parameter`), `ge
 Use patterns for packages or name for files of the same type as described in the below table.
 
 | Type                   | Package convention                           | Name convention                                                             |
-| ---------------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
+|------------------------|----------------------------------------------|-----------------------------------------------------------------------------|
 | All                    | ASCII                                        | ASCII                                                                       |
 | All                    | JavaScript syntax                            | See JS linter                                                               |
 | All                    | Java syntax                                  | Lower case package, [a-z]+ in `src/main/java` or `src/test/java`            |
@@ -1096,6 +1195,34 @@ GRANT ALL ON DATABASE ligoj to ligoj;
 GRANT ALL ON SCHEMA public TO ligoj;
 ```
 
+### Existing database server
+
+On an existing MySQL server:
+
+```sql
+CREATE DATABASE `ligoj` DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_bin;
+CREATE USER 'ligoj'@'localhost' IDENTIFIED BY 'ligoj';
+GRANT ALL ON `ligoj`.* TO 'ligoj'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+On an existing PostgreSQL server up to 14:
+
+```sql
+CREATE USER ligoj WITH ENCRYPTED PASSWORD 'ligoj';
+CREATE DATABASE ligoj WITH OWNER=ligoj ENCODING='UTF-8';
+GRANT ALL PRIVILEGES ON DATABASE ligoj TO ligoj;
+```
+
+On PostgreSQL 15+, the `public` schema must be granted explicitly:
+
+```sql
+CREATE USER ligoj WITH ENCRYPTED PASSWORD 'ligoj';
+CREATE DATABASE ligoj WITH OWNER=ligoj ENCODING='UTF-8';
+GRANT ALL ON DATABASE ligoj TO ligoj;
+GRANT ALL ON SCHEMA public TO ligoj;
+```
+
 ## Running
 
 ### With Maven CLI
@@ -1118,7 +1245,33 @@ org.ligoj.boot.web.Application
 Note that these launchers (*.launch) are already configured for Eclipse.
 See [Wiki page](https://github.com/ligoj/ligoj/wiki/Dev-Setup) for more information.
 
+### Running a single container (development)
+
+The API container can be started alone against an existing database, disabling schema generation and plugins for a fast boot:
+
+```bash
+mvn spring-boot:run -f app-api/pom.xml -Dspring-boot.run.arguments=--user.timezone=UTC,--jpa.hbm2ddl=none,--ligoj.plugin.enabled=false,--jdbc.host=ligoj-db
+```
+
+The packaged WARs can also be run directly:
+
+```bash
+# API
+java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar app-api/target/app-api-4.0.1.war
+
+# UI, pointed at a running API endpoint
+java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar app-ui/target/app-ui-4.0.1.war
+```
+
 ## Packaging
+
+Compile the Java sources and produce the WAR files:
+
+```bash
+mvn clean package -DskipTests=true
+```
+
+You can run this either from the root module or from `app-api` / `app-ui`. When executed from the root module, both WARs (`app-api` and `app-ui`) are created.
 
 When the WAR is built you can enable minified CSS/JS with the maven profile 'minify'. This requires 'clean-css-cli' NPM module.
 
@@ -1126,6 +1279,51 @@ When the WAR is built you can enable minified CSS/JS with the maven profile 'min
 npm install clean-css-cli -g
 mvn clean package -Pminify -DskipTests=true
 ```
+
+## Building the Docker images
+
+Both images build with the Docker/Podman builder alone — no local Java, Maven or Node toolchain required (the WAR is compiled inside a multi-stage build):
+
+```bash
+docker build -t ligoj/ligoj-api:4.0.1 -f app-api/Dockerfile app-api/
+docker build -t ligoj/ligoj-ui:4.0.1  -f app-ui/Dockerfile  app-ui/
+```
+
+Multi-architecture manifests are supported:
+
+```bash
+podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-api -t ligoj/ligoj-api:4.0.1 -f app-api/Dockerfile app-api/
+```
+
+During the `ligoj-ui` build, the WAR may be pulled from a released remote location (such as Nexus) rather than the local file system; a custom build can override this remote or local location.
+
+### Custom Maven proxy
+
+To use a custom Maven configuration (proxy, mirror, ...), copy your `settings.xml` into the module's `.m2/` directory. It is copied into the builder image at build time with a `COPY` instruction and
+never ends up in the final image.
+
+### Build behind a private Maven mirror with self-signed TLS
+
+When the build must fetch artifacts from an internal mirror whose TLS certificate is self-signed (or not in the JDK trust store), enable the `MAVEN_INSECURE_TLS` build argument to disable Maven's
+HTTPS certificate and hostname validation:
+
+```bash
+docker build --build-arg MAVEN_INSECURE_TLS=true -t ligoj/ligoj-api:4.0.1 -f app-api/Dockerfile app-api/
+```
+
+When enabled, the builder stage exports these `MAVEN_OPTS` for every `mvn` invocation:
+
+- `-Dmaven.wagon.http.ssl.insecure=true` — accept any server certificate.
+- `-Dmaven.wagon.http.ssl.allowall=true` — skip hostname verification.
+- `-Dmaven.resolver.transport=wagon` — switch the resolver to the wagon transport so the two flags above take effect (Maven 3.9 defaults to the native HTTP transport, which ignores them).
+
+The flag affects only the Maven stage; the Node/Vite stage of `app-ui` is unchanged (configure NPM TLS separately if needed, e.g. `npm config set strict-ssl false` in `prepare-build.sh`). It is opt-in
+and defaults to `false`; released images are built with full TLS verification.
+
+> **Warning** — Only enable `MAVEN_INSECURE_TLS=true` against trusted mirrors on a trusted network. It removes all transport-level integrity guarantees and exposes the build to MitM-injected
+> dependencies. Where possible, prefer importing the mirror's CA into the builder image via `prepare-build.sh`; a ready-to-use sample ships as [
+`app-api/prepare-build-sample.sh`](app-api/prepare-build-sample.sh) / [`app-ui/prepare-build-sample.sh`](app-ui/prepare-build-sample.sh) — drop your PEM certificates in a `.ca/` directory and rename
+> the script to `prepare-build.sh`.
 
 ## Deploying
 
@@ -1138,6 +1336,72 @@ mvn clean deploy -Dgpg.skip=false -Psources,javadoc,minify -DskipTests=true
 ## Setup notices
 
 For Eclipse compiler, enable 'Store information about method parameters (usable with reflection)' in general preferences/Java/Compiler
+
+## Frontend development (Vite)
+
+The UI is a Vue 3 SPA built with Vite. The plugins ship their own Vue bundles under a `ui/` folder. See [Frontend / Vue architecture](#frontend--vue-architecture) for the design and plugin contract.
+
+Start the host dev server (hot-reload):
+
+```shell
+cd app-ui/src/main/webapp
+npm run dev
+open http://localhost:5173/ligoj/
+```
+
+Install, build and test the plugin bundles (example set — adapt the list to the plugins you develop), e.g. under `~/git/ligoj-plugins/`:
+
+```shell
+# Install
+for plugin in plugin-ui plugin-id plugin-prov plugin-id-ldap plugin-prov-aws plugin-password plugin-inbox-sql; do
+   npm install --prefix ~/git/ligoj-plugins/$plugin/ui
+done
+
+# Build (emits to each plugin's ../src/main/resources/.../webjars/<id>/vue/)
+for plugin in plugin-ui plugin-id; do
+   npm run build --prefix ~/git/ligoj-plugins/$plugin/ui
+done
+
+# Test
+for plugin in plugin-ui plugin-id; do
+   npm run test --prefix ~/git/ligoj-plugins/$plugin/ui
+done
+```
+
+The host dev server proxies `/ligoj/main/<id>/vue/*` to the backend, which serves each plugin's freshly built bundle — so the edit → `npm run build` → browser-reload loop needs no host rebuild.
+
+## Frontend / Vue architecture
+
+The Vue 3 rewrite (host-as-shell + per-plugin `ui/` bundles, the `@ligoj/host` surface, the plugin loading model, the subscription/parameter wizards, and the accumulated migration gotchas) is
+documented in depth in **[app-ui/REWRITE_VUEJS.md](app-ui/REWRITE_VUEJS.md)**. That guide is the reference for authoring or porting a plugin's UI.
+
+# Compatibilities
+
+## Database
+
+Tested compatibility and performance for 10,000+ users and 1,000+ projects.
+
+| Vendor                                    | Version | Driver                   | Dialect                                                  | Status                  |
+|-------------------------------------------|---------|--------------------------|----------------------------------------------------------|-------------------------|
+| [MySQL](https://www.mysql.com)            | 5.5     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
+| [MySQL](https://www.mysql.com)            | 5.6     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
+| [MySQL](https://www.mysql.com)            | 5.7     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
+| [MySQL](https://www.mysql.com)            | 8.0     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL8InnoDBUtf8Dialect     | OK                      |
+| [MariaDB](https://mariadb.org/)           | 10.1    | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
+| [MariaDB](https://mariadb.org/)           | 10.1    | org.mariadb.jdbc.Driver  | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK, unknown performance |
+| [PostgreSQL](https://www.postgresql.org/) | 9.6     | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+| [PostgreSQL](https://www.postgresql.org/) | 10.21   | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+| [PostgreSQL](https://www.postgresql.org/) | 15.1    | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+| [PostgreSQL](https://www.postgresql.org/) | 17.0    | org.postgresql.Driver    | org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect | OK                      |
+
+## JSE
+
+The source compatibility is 21 without preview features.
+
+| Vendor  | Release | OS              |
+|---------|---------|-----------------|
+| Oracle  | 21      | Linux and MacOS |
+| OpenJDK | 21      | Linux and MacOS |
 
 # Docker Installation
 
@@ -1160,16 +1424,23 @@ mkdir -p /var/lib/ligoj
 
 #### Plugin vendors truststore
 
-To get the plugin code signatures reported as `VERIFIED` in the plugin administration view — and optionally to refuse unverified plug-ins — drop the truststore holding the trusted vendor certificates as `plugin-vendors.p12` inside the data directory. This file contains only certificates, no private key. Either copy the one distributed by your plugin vendor, or build it from a vendor certificate (`.cer`):
+To get the plugin code signatures reported as `VERIFIED` in the plugin administration view — and optionally to refuse unverified plug-ins — drop the truststore holding the trusted vendor certificates
+as `plugin-vendors.p12` inside the data directory. This file contains only certificates, no private key. Either copy the one distributed by your plugin vendor, or build it from a vendor certificate (
+`.cer`):
 
 ```shell
 keytool -importcert -keystore /var/lib/ligoj/plugin-vendors.p12 -storetype PKCS12 \
   -storepass changeit -alias ligoj -file ligoj-vendor.cer -noprompt
 ```
 
-Without this file, the application still starts and verifies the signature integrity, but the signer identities stay reported as untrusted (`SIGNED` at best). See [Plugin code signing](#plugin-code-signing) for the complete feature: signing at release, verification statuses and the related `ligoj.plugin.signature.*` system properties (truststore location and password override, strict `required` mode).
+Without this file, the application still starts and verifies the signature integrity, but the signer identities stay reported as untrusted (`SIGNED` at best).
+See [Plugin code signing](#plugin-code-signing) for the complete feature: signing at release, verification statuses and the related `ligoj.plugin.signature.*` system properties (truststore location
+and password override, strict `required` mode).
 
-Note the `ligoj-api` image may bundle a default truststore (`plugin-vendors-default.p12`, built from the `plugin-vendors/*.cer` certificates present at image build — see `app-api/prepare-build-sample.sh` — or provided prebuilt as `plugin-vendors/plugin-vendors-default.p12` in the build context): at container startup it is automatically installed as `plugin-vendors.p12` in the data directory when this file does not exist yet — an existing file is never overridden. Disable this behavior with the `INSTALL_PLUGIN_VENDORS=false` container environment variable.
+Note the `ligoj-api` image may bundle a default truststore (`plugin-vendors-default.p12`, built from the `plugin-vendors/*.cer` certificates present at image build — see
+`app-api/prepare-build-sample.sh` — or provided prebuilt as `plugin-vendors/plugin-vendors-default.p12` in the build context): at container startup it is automatically installed as
+`plugin-vendors.p12` in the data directory when this file does not exist yet — an existing file is never overridden. Disable this behavior with the `INSTALL_PLUGIN_VENDORS=false` container environment
+variable.
 
 ### Database creation
 
@@ -1346,7 +1617,7 @@ sudo docker logs -f ligoj-api
 ### Docker environment variables
 
 | Docker env   | Default value                  | Note                                                                             |
-| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
+|--------------|--------------------------------|----------------------------------------------------------------------------------|
 | CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration.                                                        |
 | CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
 | SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
@@ -1362,7 +1633,21 @@ The Ligoj mount point `/home/hooks` to the host directory `/var/lib/ligoj/hooks`
 The Ligoj mount point `/home/files` to the host directory `/var/lib/ligoj/files` allows the `ligoj files` CLI command to place files in this directory. In the [post-install](#customization-of-the-ui)
 configuration, this directory as well as `/home/hooks` will be authorized to allow depositing files subsequently executed by hooks.
 
+> **Schema generation note** — with `-Djpa.hbm2ddl=update`, the configured database user must see ONLY the target database. If several databases are visible to this user, the update mechanism tries to
+> populate the tables of all of them, which may produce an empty schema update when some tables already exist in another visible database.
+
 ## `ligoj-ui` Container
+
+### Endpoints
+
+The UI container proxies these API endpoints (override via `-D` properties):
+
+| Property                   | Endpoint                     | Default                           |
+|----------------------------|------------------------------|-----------------------------------|
+| ligoj.endpoint             | Default base endpoint URL    | `http://localhost:8081/ligoj-api` |
+| ligoj.endpoint.api.url     | Core API URL                 | `${ligoj.endpoint}/rest`          |
+| ligoj.endpoint.manage.url  | Health status and management | `${ligoj.endpoint}/manage`        |
+| ligoj.endpoint.plugins.url | Plug-ins API URL             | `${ligoj.endpoint}/webjars`       |
 
 ### Starting the container without login verification
 
@@ -1479,7 +1764,7 @@ It is anyway possible to revert to this mode to regain access to Ligoj in case i
 System property `security` value determines the authentication mode:
 
 | `security` mode | Login screen  | Identity Provider                                                   |
-| --------------- | ------------- | ------------------------------------------------------------------- |
+|-----------------|---------------|---------------------------------------------------------------------|
 | `Trusted`       | Ligoj         | Authentication required but always accepted                         |
 | `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
 | `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
@@ -1576,6 +1861,215 @@ sudo docker run \
 -e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
 -e SERVER_PORT=8089 \
 ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+```
+
+# Deployment with Docker Compose
+
+The repository ships `compose.yml` plus database-specific override files, so the whole stack (api + ui + database) can be built and run with a single command. This is the quickest way to get a working
+instance and the recommended path for local evaluation and simple deployments.
+
+## Prerequisites
+
+The build is driven by `podman compose`, a thin wrapper that delegates to an external provider. **By default it prefers `docker-compose` over `podman-compose` when both are installed** — so installing
+`podman-compose` alone is not enough on a machine that already has Docker Compose.
+
+Install `podman-compose`:
+
+```bash
+# Linux (Fedora/RHEL/Amazon Linux 2023)
+sudo dnf install -y podman podman-compose git
+
+# Linux (Debian/Ubuntu)
+sudo apt install -y podman python3-pip git && pip install --user podman-compose
+
+# macOS
+brew install podman podman-compose git && podman machine init && podman machine start
+```
+
+Then tell Podman to prefer it with a drop-in file (Podman merges every `*.conf` under `containers.conf.d/`, so a drop-in avoids colliding with an existing `[engine]` section):
+
+```bash
+mkdir -p ~/.config/containers/containers.conf.d
+cat > ~/.config/containers/containers.conf.d/ligoj-compose.conf <<'EOF'
+[engine]
+compose_providers = ["podman-compose"]
+compose_warning_logs = false
+EOF
+```
+
+Sanity check — the second command must print `podman-compose version 1.x.x`, not `Docker Compose version …`:
+
+```bash
+which podman-compose
+podman compose version | head -n1
+```
+
+Delegating to `docker-compose` instead triggers the *"Docker Compose is configured to build using Bake…"* warning, makes `BUILDAH_FORMAT` a no-op, and falls back to the legacy Docker builder.
+
+## Run
+
+```bash
+git clone https://github.com/ligoj/ligoj.git && cd ligoj
+podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
+```
+
+Then open [http://localhost:8080/ligoj](http://localhost:8080/ligoj).
+
+| Role          | Login         | Password      |
+|---------------|---------------|---------------|
+| Administrator | `ligoj-admin` | `ligoj-admin` |
+| Regular user  | `ligoj-user`  | `ligoj-user`  |
+
+For RBAC security, install: `plugin-id`, `plugin-id-ldap`, `plugin-id-ldap-embedded`.
+
+### One-script rebuild and run
+
+Clones the repo, sets up a persistent home, then builds and starts the stack:
+
+```bash
+sudo systemctl enable --now podman.socket   # Linux only, idempotent
+
+git clone https://github.com/ligoj/ligoj.git
+cd ligoj
+
+mkdir -p "$(pwd)/.ligoj"
+cat > .env <<EOF
+LIGOJ_HOME=$(pwd)/.ligoj
+PODMAN_USERNS=keep-id
+EOF
+
+podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
+xdg-open http://localhost:8080/ligoj 2>/dev/null || true
+```
+
+## Custom Docker Compose variables
+
+| Variable               | Service | Phase | Default                               | Note                                                                                                                         |
+|------------------------|---------|-------|---------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| LIGOJ_HOME             | api     | RUN   | `/home/ligoj`                         | To map a persistent home                                                                                                     |
+| LIGOJ_REGISTRY         | *       | BUILD |                                       | To push to your registry. When provided, must end with `/`.                                                                  |
+| LIGOJ_VERSION          | app-*   | BUILD | (version of application)              |                                                                                                                              |
+| LIGOJ_WEB_PORT         | web     | RUN   | `8080`                                | Internal WEB port                                                                                                            |
+| LIGOJ_PORT             | web     | RUN   | `8080`                                | Exposed port                                                                                                                 |
+| LIGOJ_API_JAVA_OPTIONS | api     | RUN   | `-Duser.timezone=UTC`                 |                                                                                                                              |
+| LIGOJ_WEB_JAVA_OPTIONS | web     | RUN   | `-Duser.timezone=UTC -Dsecurity=Rest` |                                                                                                                              |
+| LIGOJ_API_CRYPTO       | api     | RUN   | `-Dapp.crypto.password=public`        | Double encryption feature                                                                                                    |
+| LIGOJ_WEB_CRYPTO       | web     | RUN   | `-Dapp.crypto.password=public`        | Double encryption feature                                                                                                    |
+| LIGOJ_API_CUSTOM_OPTS  | api     | RUN   | ``                                    | Additional Java properties, merged with `LIGOJ_API_JAVA_OPTIONS`                                                             |
+| LIGOJ_WEB_CUSTOM_OPTS  | web     | RUN   | ``                                    | Additional Java properties, merged with `LIGOJ_WEB_JAVA_OPTIONS`                                                             |
+| LIGOJ_BUILD_PLATFORM   | app-*   | BUILD | `linux/amd64`                         | Docker build platform.                                                                                                       |
+| LIGOJ_TARGET_PLATFORM  | app-*   | BUILD | `linux/amd64`                         | Docker run platform.                                                                                                         |
+| MAVEN_INSECURE_TLS     | app-*   | BUILD | `false`                               | When `true`, disables Maven HTTPS cert + hostname validation. See [Building the Docker images](#building-the-docker-images). |
+| GIT_COMMIT             | app-*   | BUILD | `0`                                   | Captured from host git, embedded as `${buildNumber}` and the `git.commit` OCI label.                                         |
+| GIT_BRANCH             | app-*   | BUILD | `UNKNOWN_BRANCH`                      | Captured from host git, embedded as `${scmBranch}`.                                                                          |
+| GIT_COMMIT_TIME        | app-*   | BUILD | `1970-01-01T00:00:00Z`                | Captured from host git (ISO-8601), embedded as `${timestamp}`.                                                               |
+
+Sample `.env` file:
+
+```ini
+LIGOJ_HOME=/var/data/ligoj
+PODMAN_USERNS=keep-id
+LIGOJ_BUILD_PLATFORM=linux/arm64
+LIGOJ_TARGET_PLATFORM=linux/arm64
+LIGOJ_REGISTRY=nexus.sample.local/
+LIGOJ_API_PREPARE_BUILD='export HTTP_PROXY=192.168.0.254:8000 && export HTTPS_PROXY=192.168.0.254:8000'
+```
+
+## Custom Docker Compose discovered scripts
+
+| Source             | Service | Destination  | Phase | Note                                                                                              |
+|--------------------|---------|--------------|-------|---------------------------------------------------------------------------------------------------|
+| `prepare-build.sh` | app-*   | `WORKDIR`    | BUILD | Additional Bash commands executed inside the builder, before `mvn` but after `MAVEN_OPTS` is set. |
+| `prepare-run.sh`   | app-*   | `WORKDIR`    | RUN   | Additional Bash commands executed inside the final image, before `java`.                          |
+| `.m2/`             | app-*   | `/root/.m2/` | BUILD | Custom Maven configuration: proxy, mirror, dependencies, ...                                      |
+
+Minimal `prepare-build.sh` (HTTP proxy):
+
+```bash
+export http_proxy=192.168.0.254:8000
+export https_proxy=192.168.0.254:8000
+```
+
+A more complete sample — importing private/self-signed CA certificates so Maven trusts an internal mirror — ships as [`app-api/prepare-build-sample.sh`](app-api/prepare-build-sample.sh) and [
+`app-ui/prepare-build-sample.sh`](app-ui/prepare-build-sample.sh). Copy the file to `prepare-build.sh` to activate it.
+
+## Embedding git provenance
+
+The build context sent to the Docker builder is `app-api/` / `app-ui/` — the repo's `.git/` lives at the *parent* and is invisible to the builder, so `buildnumber-maven-plugin` falls back to
+`buildNumber=0` / `scmBranch=UNKNOWN_BRANCH`. Capture the values on the host and pass them as build args:
+
+```bash
+export GIT_COMMIT=$(git rev-parse HEAD)
+export GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+export GIT_COMMIT_TIME=$(git log -1 --format=%cI)
+
+podman compose -p ligoj -f compose.yml -f compose-override.yml build
+```
+
+`compose.yml` interpolates these into `build.args`, both Dockerfiles forward them to Maven, and a profile in each `pom.xml` activates on the presence of `-DbuildNumber=`, suppressing the SCM lookup.
+Local Maven builds (`mvn package` without `-DbuildNumber=…`) still read the real `.git` on disk.
+
+## Persistent Ligoj home
+
+With Docker Compose the Ligoj home directory is persistent and contains plugin installations, container logs and database data:
+
+```bash
+mkdir -p "$(pwd)/.ligoj"
+cat > .env <<EOF
+LIGOJ_HOME=$(pwd)/.ligoj
+PODMAN_USERNS=keep-id
+EOF
+```
+
+## Use MySQL or PostgreSQL databases
+
+`compose.yml` defines only the `api` and `ui` services. The database is picked by layering exactly one override file on top:
+
+| Database               | Override file          | Image (default) | Data directory         |
+|------------------------|------------------------|-----------------|------------------------|
+| PostgreSQL *(default)* | `compose-override.yml` | `postgres:17`   | `$LIGOJ_HOME/postgres` |
+| MySQL                  | `compose-mysql.yml`    | `mysql:8.0.36`  | `$LIGOJ_HOME/mysql`    |
+
+> Running `podman compose -p ligoj up -d` *without* an override file fails on purpose — the DB choice is always explicit. To auto-load the PG override, rename `compose-override.yml` to
+`compose.override.yml` (the dot form is picked up automatically by Compose).
+
+To avoid repeating the long flag list, define a small alias for your session:
+
+```bash
+# Tell buildah to emit Docker-format images (OCI is the buildah default and not
+# accepted by every downstream registry). No-op if podman delegates to docker.
+export BUILDAH_FORMAT=docker
+
+# Pick ONE of these:
+alias lc='podman compose -p ligoj -f compose.yml -f compose-override.yml'  # PostgreSQL
+alias lc='podman compose -p ligoj -f compose.yml -f compose-mysql.yml'     # MySQL
+
+lc build     # build the images
+lc up -d     # start the stack
+lc logs -f   # tail the logs
+lc down      # stop the stack
+```
+
+### Switching between databases
+
+Each override file uses its own bind-mount directory, so the two databases coexist on disk and swapping is non-destructive. The schema is created automatically by Hibernate (`-Djpa.hbm2ddl=update`) on
+first start, so expect a longer first boot. To start from a clean slate, wipe the matching directory:
+
+```bash
+rm -rf "${LIGOJ_HOME:-./.ligoj}/postgres"   # or .../mysql
+```
+
+## Publish to AWS ECR
+
+```bash
+AWS_ACCOUNT="$(aws sts get-caller-identity --query "Account" --output text)"
+AWS_REGION="$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')"
+ECR_REGISTRY=$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com
+docker image tag ligoj/ligoj-api:4.0.0 $ECR_REGISTRY/ligoj/ligoj-api:4.0.0
+docker image tag ligoj/ligoj-ui:4.0.0 $ECR_REGISTRY/ligoj/ligoj-ui:4.0.0
+aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+docker push $ECR_REGISTRY/ligoj/ligoj-api:4.0.0
+docker push $ECR_REGISTRY/ligoj/ligoj-ui:4.0.0
 ```
 
 # Configuration with CLI
@@ -1857,7 +2351,8 @@ travels *inside* the JAR and is verified again at every startup.
 
 ### Signing at release
 
-One-time setup on the release machine — generate the vendor code-signing keypair (private key, stays on the release machine), then export its certificate and build the `plugin-vendors.p12` truststore distributed to the installations:
+One-time setup on the release machine — generate the vendor code-signing keypair (private key, stays on the release machine), then export its certificate and build the `plugin-vendors.p12` truststore
+distributed to the installations:
 
 ```sh
 keytool -genkeypair -keystore ~/.ligoj/code-signing.p12 -storetype PKCS12 -alias ligoj \
@@ -1875,7 +2370,7 @@ RFC3161-timestamped (`ligoj.sign.tsa`, defaults to DigiCert) so it outlives the 
 The `PluginsClassLoader` verifies every installed plugin JAR before it joins the classpath, and reports one of:
 
 | Status     | Meaning                                                                                             |
-| ---------- | --------------------------------------------------------------------------------------------------- |
+|------------|-----------------------------------------------------------------------------------------------------|
 | `UNSIGNED` | No code signature.                                                                                  |
 | `INVALID`  | Broken signature: tampered content (digest mismatch), partially signed entries, unreadable archive. |
 | `SIGNED`   | Valid and complete signature, but the certificate is not trusted (or no truststore is configured).  |
@@ -1883,7 +2378,10 @@ The `PluginsClassLoader` verifies every installed plugin JAR before it joins the
 
 See [API container properties](#API-Container-properties) `ligoj.plugin.signature.*` to configure the behaviors.
 
-The simplest deployment is therefore to drop the truststore as `plugin-vendors.p12` inside the `LIGOJ_HOME` directory of the `ligoj-api` container — no property needed, see the [data directory preparation](#preparation-of-the-ligoj-data-directory). The startup log states whether the truststore was read (`Plugin code-signing truststore read from ... with N trusted entries`) or not: a missing truststore at the default location is an `INFO` notice (signatures then cap at `SIGNED`), while a missing truststore at an explicitly configured location is reported as an `ERROR`.
+The simplest deployment is therefore to drop the truststore as `plugin-vendors.p12` inside the `LIGOJ_HOME` directory of the `ligoj-api` container — no property needed, see
+the [data directory preparation](#preparation-of-the-ligoj-data-directory). The startup log states whether the truststore was read (
+`Plugin code-signing truststore read from ... with N trusted entries`) or not: a missing truststore at the default location is an `INFO` notice (signatures then cap at `SIGNED`), while a missing
+truststore at an explicitly configured location is reported as an `ERROR`.
 
 ### Display
 
@@ -1922,7 +2420,7 @@ deployment starts already rebranded — no runtime CLI step, no shared
 volume. Two source locations are honoured:
 
 | File in the image               | Source path in the repo                      | Notes                                                                                                                                                                                                                                                                        |
-| ------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `favicon.ico` (WAR root)        | `app-ui/src/main/webapp/favicon.ico`         | Served at `/ligoj/favicon.ico` by Spring's resource handler. The container's `HEALTHCHECK` probes this URL — keep the file valid.                                                                                                                                            |
 | `logo.svg` (Vite-bundled asset) | `app-ui/src/main/webapp/src/assets/logo.svg` | Imported through Vite. Replace BEFORE `docker build` so the new mark is bundled into the SPA chunks. When the SVG is under ~4 KB, Vite inlines it as a `data:image/svg+xml;base64,…` URI in the JS — no separate file in the dist; the browser never makes a second request. |
 
@@ -2068,12 +2566,10 @@ ligoj bootstrap create-roles --project "project2" --group-suffix="-team" --from=
 
 Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot properties (can be injected in `CUSTOM_OPTS`) can be dynamically modified from the administration console:
 
-
 ### API Container properties
 
-
 | Name                                                  | Default value                            | Note                                                                                                 |
-| ----------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+|-------------------------------------------------------|------------------------------------------|------------------------------------------------------------------------------------------------------|
 | api.token.purge                                       | `0 0 4 * * ?`                            | CRON expression for expired API tokens purge. See [API Token](#api-tokens) section.                  |
 | api.token.iterations                                  | `31`                                     | API token hash iterations. See [API Token](#api-tokens) section.                                     |
 | api.token.digest                                      | `SHA-512`                                | API token hash algorithm. See [API Token](#api-tokens) section.                                      |
@@ -2144,29 +2640,32 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | server.address                                        | `${SERVER_HOST}`                         |                                                                                                      |
 | server.servlet.context-path                           | `/${CONTEXT}`                            |                                                                                                      |
 
-
 ### UI container properties
 
-| Name                                                              | Default value      | Note                                                                                                             |
-| ----------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| security                                                          | `Rest`             | Security provider to handle stateful session. Values are `Trusted`, `Rest` and `OAuth2Bff`.                      |
-| security.max-sessions                                             | `-1`               | Maximum number of concurrent sessions allowed. `-1` means unlimited sessions                                     |
-| security.pre-auth-principal                                       |                    | Request header name containing the identity of the authenticated user. Sample `X-Amzn-Oidc-Identity`             |
-| security.pre-auth-credentials                                     |                    | Request header name containing the token to verify Sample `X-Amzn-Oidc-Accesstoken`                              |
-| security.pre-auth-logout                                          |                    | Optional logout relative or absolute URL when user requests to be logged out. Sample `https://signin.sample.com` |
-| javax.net.ssl.trustStore                                          |                    | SSL truststore file path for SSL connection like Keycloak. Sample `/home/ligoj/ligoj-ui.jks`                     |
-| ligoj.log.file.name                                               | `./ui-rolling.log` | File inside `LIGOJ_HOME` directory.                                                                              |
-| ligoj.log.file.size                                               | `10 MB`            | Max log file size                                                                                                |
-| ligoj.log.file.enabled                                            | `true`             | Enablement of log file                                                                                           |
-| ligoj.security.login.url                                          |                    | Login relative or absolute URL when user requests to be logged in. Sample `/oauth2/authorization/keycloak`       |
-| ligoj.security.oauth2.username-attribute                          |                    | Attribute of the OAuth2 token to use as username. Sample `preferred_username`                                    |
-| ligoj.security.login-by-api-key                                   | `false`            | Enable API key authentication bypass                                                                             |
-| spring.security.oauth2.client.registration.keycloak.provider      | `keycloak`         | Provider name used in other properties.                                                                          |
-| spring.security.oauth2.client.registration.keycloak.client-id     |                    | Client identifier of this application in Keycloak. Sample `ligoj`                                                |
-| spring.security.oauth2.client.registration.keycloak.client-secret |                    | Client secret of this application in Keycloak.                                                                   |
-| spring.security.oauth2.client.provider.keycloak.issuer-uri        |                    | Issuer URI of the Keycloak realm. Sample `https://keycloak.sample.com/realms/ligoj`                              |
-| spring.security.oauth2.client.registration.keycloak.scope         |                    | Scope of the authentication request. Sample `openid`                                                             |
-
+| Name                                                              | Default value                              | Note                                                                                                             |
+|-------------------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| security                                                          | `Rest`                                     | Security provider to handle stateful session. Values are `Trusted`, `Rest` and `OAuth2Bff`.                      |
+| security.max-sessions                                             | `-1`                                       | Maximum number of concurrent sessions allowed. `-1` means unlimited sessions                                     |
+| ligoj.sso.url                                                     | `${ligoj.endpoint.api.url}/security/login` | Authentication endpoint URL used by the `Rest` provider.                                                         |
+| ligoj.sso.content                                                 | `{"name":"%s","password":"%s"}`            | SSO login payload template.                                                                                      |
+| app-env                                                           | `auto`                                     | Suffix for index/login HTML files (`-prod`, `auto`, or empty). `auto` guesses it from how the app is started.    |
+| log.http                                                          | `info`                                     | When `debug`, all HTTP queries are logged (larger log file).                                                     |
+| log.level                                                         | `info`                                     | Log verbosity of internal components (Spring, Jetty).                                                            |
+| security.pre-auth-principal                                       |                                            | Request header name containing the identity of the authenticated user. Sample `X-Amzn-Oidc-Identity`             |
+| security.pre-auth-credentials                                     |                                            | Request header name containing the token to verify Sample `X-Amzn-Oidc-Accesstoken`                              |
+| security.pre-auth-logout                                          |                                            | Optional logout relative or absolute URL when user requests to be logged out. Sample `https://signin.sample.com` |
+| javax.net.ssl.trustStore                                          |                                            | SSL truststore file path for SSL connection like Keycloak. Sample `/home/ligoj/ligoj-ui.jks`                     |
+| ligoj.log.file.name                                               | `./ui-rolling.log`                         | File inside `LIGOJ_HOME` directory.                                                                              |
+| ligoj.log.file.size                                               | `10 MB`                                    | Max log file size                                                                                                |
+| ligoj.log.file.enabled                                            | `true`                                     | Enablement of log file                                                                                           |
+| ligoj.security.login.url                                          |                                            | Login relative or absolute URL when user requests to be logged in. Sample `/oauth2/authorization/keycloak`       |
+| ligoj.security.oauth2.username-attribute                          |                                            | Attribute of the OAuth2 token to use as username. Sample `preferred_username`                                    |
+| ligoj.security.login-by-api-key                                   | `false`                                    | Enable API key authentication bypass                                                                             |
+| spring.security.oauth2.client.registration.keycloak.provider      | `keycloak`                                 | Provider name used in other properties.                                                                          |
+| spring.security.oauth2.client.registration.keycloak.client-id     |                                            | Client identifier of this application in Keycloak. Sample `ligoj`                                                |
+| spring.security.oauth2.client.registration.keycloak.client-secret |                                            | Client secret of this application in Keycloak.                                                                   |
+| spring.security.oauth2.client.provider.keycloak.issuer-uri        |                                            | Issuer URI of the Keycloak realm. Sample `https://keycloak.sample.com/realms/ligoj`                              |
+| spring.security.oauth2.client.registration.keycloak.scope         |                                            | Scope of the authentication request. Sample `openid`                                                             |
 
 ## System-level variables
 
@@ -2174,7 +2673,7 @@ These variables are only relevant when set as Java System property.
 For example `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 
 | Name                   | Default value       | Note                               |
-| ---------------------- | ------------------- | ---------------------------------- |
+|------------------------|---------------------|------------------------------------|
 | ligoj.log.file.name    | `./api-rolling.log` | File inside `LIGOJ_HOME` directory |
 | ligoj.log.file.size    | `10 MB`             | Max log file size                  |
 | ligoj.log.file.enabled | `true`              | Enablement of log file             |
