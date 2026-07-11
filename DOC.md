@@ -2310,8 +2310,6 @@ ligoj plugin install --id "plugin-iam-node" --repository "nexus" --version 1.2.2
 ligoj plugin install --id "plugin-ui" --repository "nexus" --version 1.1.11
 # plugin-password, a priori, useless for a setup without plugin-id-sql or plugin-id-ldap
 ligoj plugin install --id "plugin-password" --repository "nexus" --version 1.1.3 # allows password resets
-# plugin-menu-node allows UI activation of plugin-id-x (Identity part) and other plugins
-ligoj plugin install --id "plugin-menu-node" --repository "nexus"         # specifies which plugins contribute to the GUI interface
 
 # Eventually, install a plugin from the snapshot repository
 # ligoj plugin upload --id "plugin-id" --version "2.1.8-SNAPSHOT" --from "https://ligoj.io/plugins/plugin-id-2.1.8-SNAPSHOT.jar"

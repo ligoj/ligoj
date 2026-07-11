@@ -109,7 +109,7 @@ router.beforeEach(() => { app.setBreadcrumbs([]) })
 
 // Backend-only plugins (no Vue bundle) — skip to avoid guaranteed 404s on
 // every session refresh. Mirrors app-ui's App.vue NO_UI_PLUGINS deny list.
-const NO_UI_PLUGINS = new Set(['iam-empty', 'iam-node', 'menu-node', 'welcome-data-rbac'])
+const NO_UI_PLUGINS = new Set(['iam-empty', 'iam-node', 'welcome-data-rbac'])
 
 // Lazily load the remaining installed plugins (the core 'id'/'ui'/'prov' are
 // already loaded eagerly in main.js). `appSettings.plugins` lists FeaturePlugin
