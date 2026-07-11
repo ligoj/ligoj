@@ -310,7 +310,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-prov-aws</artifactId>
-                    <version>[3.0.1,2.1.0)</version>
+                    <version>[3.0.0-SNAPSHOT,3.1.0)</version>
                 </dependency>
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
