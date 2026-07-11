@@ -29,7 +29,7 @@
                state is manual (toggled by clicking the parent). -->
           <div v-if="it.children && isOpen(it)" class="subnav">
             <template v-for="c in it.children" :key="c.label">
-              <div v-if="c.divider" class="sub-sep"><span>{{ c.divider }}</span></div>
+              <div v-if="c.divider" class="sub-sep"><span v-if="c.divider !== true">{{ c.divider }}</span></div>
               <a class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }" @click="c.route ? go(c.route) : toast()">
                 <LigojIcon v-if="c.icon" :icon="c.icon" size="16" />
                 <span v-else class="dot" />
@@ -90,6 +90,7 @@ import { useAppStore } from '@/stores/app.js'
 import { useI18nStore } from '@/stores/i18n.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import registry from '@/plugins/registry.js'
+import { mergeNav } from '@/plugins/nav.js'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
 import LigojIcon from '@/components/LigojIcon.vue'
 
@@ -139,17 +140,12 @@ onMounted(async () => {
 // store's NAV_CONFIG mapping.
 const BASE_NAV = [
   { labelKey: 'nav.home', icon: 'mdi-home', route: '/', auth: 'home' },
-  // `match` makes the item active across a whole section; `children` render
-  // a sub-menu while the section is active.
-  {
-    labelKey: 'nav.identity', icon: 'mdi-account-group', match: '/id', children: [
-      { labelKey: 'nav.users', icon: 'mdi-account', route: '/id/user', match: '/id/user', auth: 'id/user' },
-      { labelKey: 'nav.groups', icon: 'mdi-account-group', route: '/id/group', match: '/id/group', auth: 'id/container/group' },
-      { labelKey: 'nav.companies', icon: 'mdi-domain', route: '/id/company', match: '/id/company', auth: 'id/container/company' },
-      { labelKey: 'nav.delegates', icon: 'mdi-account-arrow-right', route: '/id/delegate', match: '/id/delegate', auth: 'id/delegate' },
-      { labelKey: 'nav.containerScopes', icon: 'mdi-file-tree', route: '/id/scope', match: '/id/scope', auth: 'id/container-scope' },
-    ]
-  },
+  // The "Identity" section (Users / Groups / … ) is no longer hardcoded here —
+  // plugin-id contributes it as a top-level menu via its `renderNav` feature,
+  // positioned `before: 'nav.projects'`. The `nav.*` label keys it references
+  // remain host-owned nav vocabulary (still defined in the host locale files).
+  // `match` makes an item active across a whole section; `children` render a
+  // sub-menu while the section is active.
   { labelKey: 'nav.projects', icon: 'mdi-folder', route: '/project', match: '/project', auth: 'home' },
   {
     labelKey: 'nav.system', icon: 'mdi-cog', match: '/system', children: [
@@ -171,53 +167,67 @@ const BASE_NAV = [
 ]
 
 /**
- * Plugin contributions to the Administration menu, via the `renderAdmin`
- * render-delegation feature. The 2026 redesign rebuilt the sidebar from a
- * static NAV array and dropped the old `AdminNavExtras` mount, so these
- * vanished — this restores them the 2026 way.
- *
- * Each contributing plugin returns `<v-list-item>` VNodes built with
- * `h(VListItem, { prependIcon, title, to })`; we read those props off the
- * VNodes and turn them into native sidebar sub-items (so they get the 2026
- * `.sub-item` styling + active-state logic, instead of an off-theme Vuetify
- * list). `registry.version` + `i18n.locale` are read for reactivity, so a
- * plugin loaded lazily after first paint (or a locale switch) re-runs this.
+ * Swallow the "no feature" error a plugin throws for an optional render hook
+ * it doesn't implement; surface anything else.
  */
-const pluginAdminChildren = computed(() => {
+function safeFeature(plugin, name) {
+  if (typeof plugin?.feature !== 'function') return null
+  try {
+    return plugin.feature(name)
+  } catch (err) {
+    if (!new RegExp(`no feature ["']${name}["']`).test(err?.message || '')) {
+      console.warn(`[App] ${plugin.id}.${name} threw`, err)
+    }
+    return null
+  }
+}
+
+/**
+ * All plugin sidebar contributions, normalized to the `mergeNav` shape
+ * (see plugins/nav.js). Plugins contribute declaratively via the `renderNav`
+ * feature — a whole top-level menu with children (e.g. plugin-id's Identity),
+ * or `{ menu, children }` to insert entries into an existing menu (e.g.
+ * plugin-prov → Administration) — each entry supporting before/after
+ * positioning and an optional divider.
+ *
+ * The older VNode-based `renderAdmin` (any not-yet-migrated plugin) is adapted
+ * here into a `{ menu: 'nav.system', children }` insert, preserving its auto
+ * "owner name" divider on the first entry. `registry.version` + `i18n.locale`
+ * are read for reactivity, so a plugin loaded lazily after first paint (or a
+ * locale switch) re-runs the collection.
+ */
+const pluginNav = computed(() => {
   void registry.version.value
   void i18n.locale
-  const items = []
+  const out = []
   for (const plugin of registry.list()) {
-    if (typeof plugin?.feature !== 'function') continue
-    let out
-    try {
-      out = plugin.feature('renderAdmin')
-    } catch (err) {
-      if (!/no feature ["']renderAdmin["']/.test(err?.message || '')) {
-        console.warn(`[App] ${plugin.id}.renderAdmin threw`, err)
-      }
-      continue
+    // New declarative API — pass contributions straight through.
+    const nav = safeFeature(plugin, 'renderNav')
+    if (nav != null) {
+      for (const c of Array.isArray(nav) ? nav : [nav]) if (c) out.push(c)
     }
-    if (out == null) continue
-    // Each contributing plugin's entries are preceded by a labeled divider
-    // carrying the plugin's display name (its "ownership notice"), so admins
-    // see which plugin owns the entries below it.
-    const owner = plugin.label || plugin.id
-    let first = true
-    for (const node of Array.isArray(out) ? out.filter(Boolean) : [out]) {
-      const p = node?.props
-      if (!p?.to) continue
-      items.push({
-        label: p.title || p.to,
-        icon: p.prependIcon || 'mdi-circle-small',
-        route: p.to,
-        match: p.to,
-        ...(first ? { divider: owner } : {}),
-      })
-      first = false
+    // Legacy VNode-based Administration contribution.
+    const admin = safeFeature(plugin, 'renderAdmin')
+    if (admin != null) {
+      const owner = plugin.label || plugin.id
+      const children = []
+      let first = true
+      for (const node of Array.isArray(admin) ? admin.filter(Boolean) : [admin]) {
+        const p = node?.props
+        if (!p?.to) continue
+        children.push({
+          label: p.title || p.to,
+          icon: p.prependIcon || 'mdi-circle-small',
+          route: p.to,
+          match: p.to,
+          ...(first ? { divider: owner } : {}),
+        })
+        first = false
+      }
+      if (children.length) out.push({ menu: 'nav.system', children })
     }
   }
-  return items
+  return out
 })
 
 /**
@@ -231,19 +241,26 @@ function authKey(it) {
 }
 const allowed = (it) => auth.isAllowed(authKey(it))
 
+// A menu/entry's display label: a plugin contribution may carry a ready
+// `label` (already localized by the plugin), otherwise resolve its host
+// `labelKey` through i18n so it re-localizes with the active language.
+function navLabel(it) {
+  return it.label != null ? it.label : i18n.t(it.labelKey)
+}
+
 const NAV = computed(() => {
   void i18n.locale // re-localize the labels when the language changes
-  // Drop links pointing to routes the user can't reach (per uiAuthorizations);
-  // admins bypass the check (auth.isAllowed). A parent section is kept only
-  // while at least one of its children survives the filter.
-  return BASE_NAV.map((it) => {
-    const out = { ...it, label: i18n.t(it.labelKey) }
+  void registry.version.value // re-run when a plugin (de)registers
+  // Assemble BASE_NAV + plugin contributions (new sections, inserts,
+  // before/after ordering, dividers), then localize and drop links pointing to
+  // routes the user can't reach (per uiAuthorizations; admins bypass via
+  // auth.isAllowed). A parent section is kept only while ≥1 child survives.
+  return mergeNav(BASE_NAV, pluginNav.value).map((it) => {
+    const out = { ...it, label: navLabel(it) }
     if (it.children) {
-      const kids = it.children
+      out.children = it.children
         .filter(allowed)
-        .map((c) => ({ ...c, label: i18n.t(c.labelKey) }))
-      const extra = it.match === '/system' ? pluginAdminChildren.value.filter(allowed) : []
-      out.children = extra.length ? [...kids, ...extra] : kids
+        .map((c) => ({ ...c, label: navLabel(c) }))
     }
     return out
   }).filter((it) => (it.children ? it.children.length > 0 : allowed(it)))

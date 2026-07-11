@@ -162,16 +162,20 @@ originally landed in the host (`app-ui/.../src/{views,components}`) but the
 domain screens have since been **relocated into the plugins** — the host is now
 a pure shell + shared component surface.
 
-- **Host keeps**: the chrome (`App.vue` sidebar/topbar, `LoginView`/login apps,
-  `ProfileView`, `AboutView`, `PluginView`, `ErrorSnackbar`, `AdminNavExtras`,
-  `GlobalToolsList`) and the **shared component surface** re-exported from
+- **Host keeps**: the chrome (`App.vue` sidebar/topbar — the sidebar menu is
+  assembled by its `mergeNav` engine from `BASE_NAV` + plugin `renderNav`
+  contributions, see "Sidebar menu contribution" — `LoginView`/login apps,
+  `ProfileView`, `AboutView`, `PluginView`, `ErrorSnackbar`, `GlobalToolsList`)
+  and the **shared component surface** re-exported from
   `host.js` (`LigojDataTable*`, `LigojConfirmDialog`, `NodeIcon`, `NodeModeChip`,
   `PluginFeatures`, `ImportExportBar`, and the 2026 `VibrantDataTable` /
   `VibrantConfirmDialog` / `LigojIcon`). Host `router/index.js` = `/profile`,
   `/about`, catch-all only.
 - **plugin-id owns** identity screens: `UserListView`, `GroupListView`,
   `CompanyListView`, `DelegateListView`, `ContainerScopeView` + the edit
-  dialogs/panels + `GroupMembers{Dialog,Panel}`.
+  dialogs/panels + `GroupMembers{Dialog,Panel}`. It also contributes the
+  top-level **Identity** sidebar menu via `renderNav` (no longer hardcoded in
+  the host — see "Sidebar menu contribution").
 - **plugin-ui owns** the rest: `HomeView` (dashboard), `ProjectListView`,
   `ProjectDetailView`, `System*View`, `Api*View`, `SubscribeWizardView`,
   `ProjectEditDialog`, `NodeEditDialog`, `AuditDialog`, the **Actuator admin
@@ -227,7 +231,7 @@ Ported to the `ui/` Vue stack on this branch (each emits to
 | plugin-id                                         | service        | "fat" reference — CRUD views, dialogs, delegation hook                        |
 | plugin-ui                                         | service        | shared wizards (`SubscribeWizardView`, `SystemNodeView`, `ProjectDetailView`) |
 | plugin-id-ldap                                    | tool           | "thin" reference — i18n + `renderFeatures`                                    |
-| plugin-prov                                       | service        | catalog / currency / **Administration** pages via `renderAdmin` (see below)   |
+| plugin-prov                                       | service        | catalog / currency / **Administration** pages via `renderNav` (see below)     |
 | plugin-prov-aws / -azure / -fe / -outscale / -ovh | tool           | **i18n-only** (prov parent has no delegation hook)                            |
 | plugin-vm                                         | service        | parent with schedule / snapshot / reports views + delegation hook             |
 | plugin-vm-aws / -azure / -vcloud                  | tool           | delegation: console/portal link + instance chip                               |
@@ -504,7 +508,7 @@ Imported from the host bundle via the import map; treat as the public API and do
 | `ImportExportBar`                                                  | CSV import/export header strip for list views.                                                                                                                                                                                                            |
 | `PluginFeatures`                                                   | Render-function delegate that mounts a plugin's VNodes for a subscription row (`renderFeatures`, `renderDetailsKey`, …). See "Subscription row delegation" below.                                                                                         |
 | `nodePluginId`                                                     | Returns the plugin id (the second `:`-segment) of a node — `service:prov:aws` → `'prov'`. Used by `PluginFeatures` to resolve the right plugin.                                                                                                           |
-| `VBtn` / `VChip` / `VIcon` / `VTooltip` / `VListItem` / `VDivider` | Re-exports of Vuetify primitives (the list-item / divider pair is for `renderGlobal` / `renderAdmin` menu VNodes). Plugins build their VNodes with `h(VBtn, …)` without bundling their own Vuetify (which would break shared theming and instance state). |
+| `VBtn` / `VChip` / `VIcon` / `VTooltip` / `VListItem` / `VDivider` | Re-exports of Vuetify primitives (the list-item / divider pair is for `renderGlobal`, and the legacy VNode-based `renderAdmin`, menu VNodes — note `renderNav` is declarative and needs neither). Plugins build their VNodes with `h(VBtn, …)` without bundling their own Vuetify (which would break shared theming and instance state). |
 | `APP_BASE`                                                         | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths.                                                                                                                             |
 | `pluginRegistry` / `callFeature`                                   | Direct registry access for parent-to-child delegation (`subPluginIdFor`, `delegateToToolPlugin`). `callFeature` throws on missing plugin; prefer `pluginRegistry.get(id)?.feature?.(...)` when graceful degradation matters.                              |
 | `renderServiceLink` / `renderDetailsChip`                          | Shared subscription-row VNode builders — the icon link button and the icon+text chip every tool plugin returned by hand. Set a plain `title:` (promoted to a v-tooltip implicitly). See "Subscription row delegation".                                    |
@@ -973,48 +977,110 @@ container.
 
 ---
 
-# Administration menu (`renderAdmin`)
+# Sidebar menu contribution (`renderNav`)
 
-The third host→plugin render-delegation point (alongside subscription-row
-`PluginFeatures` and sidebar `renderGlobal`). It lets any plugin contribute
-entries to the shared **Administration** menu — used by `plugin-prov` for
-its global admin pages (catalog, currency, terraform binary version), which
-have no subscription and so don't belong on a project row.
+The declarative host→plugin sidebar hook (alongside subscription-row
+`PluginFeatures` and sidebar-footer `renderGlobal`). A plugin contributes to
+the left navigation as **data** — not VNodes — so the host can position, merge,
+localize and auth-filter the contributions. Two things use it today:
+`plugin-id` contributes the whole **Identity** top-level menu (Users / Groups /
+Companies / Delegates / Container scopes — this section used to be hardcoded in
+the host's `BASE_NAV`), and `plugin-prov` inserts its global admin pages
+(catalog / currency / terraform) into the shared **Administration** menu.
 
-## Plugin contract
+This supersedes the former VNode-based `renderAdmin`, which could only append
+flat items to the Administration menu. `renderAdmin` still works (the host
+adapts it — see below), but new contributions should use `renderNav`.
 
-A plugin opts in by implementing a `renderAdmin` feature returning one or
-more `VListItem` VNodes (routes, not hrefs — these are in-app admin pages):
+## Contribution shapes
+
+`renderNav()` returns one contribution object, or an array of them. Each is
+either a whole top-level menu, or an insert into an existing menu:
 
 ```js
-import { h } from 'vue'
-import { VListItem, useI18nStore } from '@ligoj/host'
+// A new top-level menu with children (plugin-id's Identity):
+{
+  id: 'identity',            // stable key (before/after anchor + sub-menu open-state)
+  labelKey: 'nav.identity',  // host i18n key — OR `label: '<already localized>'`
+  icon: 'mdi-account-group',
+  match: '/id',              // keeps the section active across its subtree
+  before: 'nav.projects',    // position among top-level menus (see Positioning)
+  children: [
+    { id: 'id-users', labelKey: 'nav.users', icon: 'mdi-account',
+      route: '/id/user', match: '/id/user', auth: 'id/user' },
+    // …
+  ],
+}
 
-const features = {
-  renderAdmin() {
-    const { t } = useI18nStore()
-    return [
-      h(VListItem, { prependIcon: 'mdi-database-cog-outline', title: t('catalog.title'),   to: '/prov/catalog' }),
-      h(VListItem, { prependIcon: 'mdi-cash-multiple',        title: t('currency.title'),  to: '/prov/currency' }),
-      h(VListItem, { prependIcon: 'mdi-terraform',            title: t('terraform.title'), to: '/prov/terraform' }),
-    ]
-  },
+// Insert entries into an existing menu (plugin-prov → Administration):
+{
+  menu: 'nav.system',        // target menu, by its id / labelKey / match
+  children: [
+    // `divider` = a separator rendered BEFORE this entry (labels the block)
+    { id: 'prov-catalog', label: t('catalog.title'), icon: 'mdi-database-search',
+      route: '/prov/catalog', divider: 'Provisioning' },
+    { id: 'prov-currency', label: t('currency.title'), icon: 'mdi-cash-multiple',
+      route: '/prov/currency' },
+  ],
 }
 ```
 
+Each entry field:
+
+| Field                 | Purpose                                                                                                                                                                 |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | stable key; the preferred `before`/`after` anchor and sub-menu open-state key                                                                                          |
+| `labelKey` \| `label` | `labelKey` is resolved by the host against the shared i18n store (re-localizes reactively); `label` is a ready string the plugin already localized. One or the other.  |
+| `icon`                | mdi glyph (rendered through `LigojIcon`)                                                                                                                                |
+| `route` / `match`     | SPA path; `match` (defaults to `route`) keeps the item active across a subtree                                                                                          |
+| `auth`                | REST authorization path tested against the session `uiAuthorizations`; the entry is dropped if the user can't reach it (admins bypass). Defaults to route sans leading `/` |
+| `divider`             | `string` → a labeled separator BEFORE the entry; `true` → an unlabeled separator                                                                                        |
+| `before` / `after`    | position relative to a sibling — see below                                                                                                                              |
+
+## Positioning (`before` / `after`)
+
+`before` / `after` name a sibling by any of its `id`, `labelKey`, `route` or
+`match`. `before` wins if both are set; an unresolved (or absent) anchor
+appends in contribution order, and several entries anchored to the same sibling
+keep their contribution order. This works for both **top-level menus** (position
+among Home / Projects / Administration) and **child entries** (position within a
+menu). Example: plugin-id's Identity sets `before: 'nav.projects'` to keep its
+historic slot between Home and Projects.
+
+## Merging into an existing menu
+
+A `{ menu }` contribution splices its children into the target menu's existing
+children (base children first, then the insert, honoring each child's
+before/after). A **top-level** contribution whose `id` / `labelKey` / `match`
+matches an existing menu *augments* it (children merged) instead of creating a
+duplicate — so a plugin can add entries to the host's (or another plugin's) menu
+without owning it.
+
 ## Host plumbing
 
-- `AdminNavExtras.vue` (mounted by `AppLayout` inside the system/Administration
-  nav group) polls every registered plugin for `feature('renderAdmin')`,
-  groups the results per plugin under a visible divider + a thin ownership
-  notice (the plugin's `label`), and renders the entries. Plugins that don't
-  implement `renderAdmin` are skipped (the "no feature" error is swallowed;
-  real errors `console.warn`).
-- **Lazy-load reactivity** — the registry exposes a reactive `version` ref
-  bumped on every `register`/`remove`. `AdminNavExtras` (and the analogous
-  `GlobalToolsList`) read it so a plugin whose bundle arrives *after* first
-  paint re-renders the host menu once it registers. Read `registry.version.value`
-  (and `i18n.locale`) inside the render fn to subscribe to both.
+- `src/plugins/nav.js` — `mergeNav(baseNav, contributions)` is the pure merge
+  engine (two passes: build/augment top-level menus, then apply `{ menu }`
+  inserts). It operates on raw items (labelKey, not the localized label) and
+  never mutates its inputs. Unit-tested in `__tests__/plugins/nav.test.js`.
+- `App.vue` — `BASE_NAV` now holds only the host-owned sections (Home /
+  Projects / Administration). The `pluginNav` computed collects every plugin's
+  `renderNav` (and adapts any legacy `renderAdmin` VNodes into a
+  `{ menu: 'nav.system' }` insert, preserving the old auto "owner name"
+  divider). `NAV` runs `mergeNav(BASE_NAV, pluginNav.value)`, then localizes
+  each `labelKey` and drops auth-denied entries.
+- **Label vocabulary** — the `nav.*` i18n keys (`nav.identity`, `nav.users`, …)
+  stay host-owned sidebar vocabulary in the host locale files, so a plugin
+  contribution can reference them via `labelKey` without shipping its own copy.
+  A plugin that prefers to own its wording passes a ready `label` instead.
+- **Lazy-load reactivity** — `pluginNav` / `NAV` read `registry.version.value`
+  and `i18n.locale`, so a plugin whose bundle arrives *after* first paint (or a
+  locale switch) re-runs the merge. The required plugins (`id`, `ui`, `prov`)
+  are awaited before `mount`, so their menus are present on the first paint.
+
+> **Legacy `renderAdmin`** (VNode-based, Administration-only) is still accepted
+> via the adapter in `pluginNav`, and the old `AdminNavExtras.vue` component is
+> now **dead code** — unmounted since the 2026 redesign; the sidebar is
+> assembled entirely by `App.vue` + `mergeNav`. Don't build on either.
 
 ---
 
@@ -1289,6 +1355,7 @@ Copy/paste into the plugin's first PR description.
 - [ ] `install()` registers routes AND merges `i18n/en.js` + `i18n/fr.js` into `useI18nStore`
 - [ ] Sibling CSS auto-injection snippet present (Vite library mode doesn't auto-inject)
 - [ ] Plugin entry added to `REQUIRED_PLUGINS` in host `main.js` if the host's sidebar nav references its routes; otherwise let `App.vue`'s lazy load via `pluginIdFromKey` pick it up
+- [ ] If the plugin owns a sidebar section (or adds admin entries), it exposes a `renderNav` feature — a declarative menu/insert with optional `before`/`after` + `divider` (see "Sidebar menu contribution"). A `renderNav`-contributed menu must be in `REQUIRED_PLUGINS` (or otherwise loaded early) so it's present on first paint
 - [ ] At least one happy-path view ported (use `LigojDataTableServer` + `LigojConfirmDialog` rather than rolling your own)
 - [ ] Parameter labels: every CSV-declared parameter id has a matching key in `i18n/{en,fr}.js` (and an optional `-description` for the hint)
 - [ ] Translations use **flat keys** in plugin's `i18n/{en,fr}.js`; host's `i18n/{en,fr}.js` untouched
