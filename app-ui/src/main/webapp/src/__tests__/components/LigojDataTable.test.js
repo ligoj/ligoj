@@ -62,4 +62,27 @@ describe('LigojDataTable', () => {
     expect(writeText).toHaveBeenCalledTimes(1)
     expect(writeText.mock.calls[0][0]).toMatch(/^Id\tName\n1\talpha/)
   })
+
+  it('hides a column marked hidden in its persisted storage key', () => {
+    localStorage.setItem('ldt-cols', JSON.stringify(['name']))
+    const wrapper = mountTable({ columnsStorageKey: 'ldt-cols' })
+    // `name` is neither pinned nor the last column, so it (and its cells) go.
+    expect(wrapper.text()).not.toContain('alpha')
+    expect(wrapper.text()).toContain('1')
+    localStorage.removeItem('ldt-cols')
+  })
+
+  it('keeps every column when the selector is disabled', () => {
+    localStorage.setItem('ldt-cols2', JSON.stringify(['name']))
+    const wrapper = mountTable({ columnsStorageKey: 'ldt-cols2', columnSelector: false })
+    expect(wrapper.text()).toContain('alpha')
+    localStorage.removeItem('ldt-cols2')
+  })
+
+  it('never hides a pinned column even when persisted hidden', () => {
+    localStorage.setItem('ldt-cols3', JSON.stringify(['name']))
+    const wrapper = mountTable({ columnsStorageKey: 'ldt-cols3', pinnedColumns: ['name'] })
+    expect(wrapper.text()).toContain('alpha')
+    localStorage.removeItem('ldt-cols3')
+  })
 })

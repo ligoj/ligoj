@@ -20,8 +20,11 @@
       <TableToolsMenu
         :column="column"
         :loading="exporting || copying"
+        :columns="columnSelector ? columnOptions : []"
+        :columns-label="columnsLabel"
         @export-csv="exportCsv"
         @copy="copyToClipboard"
+        @toggle-column="toggleColumn"
       />
     </template>
 
@@ -59,6 +62,7 @@
 import { computed, useSlots } from 'vue'
 import TableToolsMenu from './TableToolsMenu.vue'
 import { useTableTools } from '@/composables/useTableTools.js'
+import { useColumnSelector } from '@/composables/useColumnSelector.js'
 
 defineOptions({ inheritAttrs: false })
 
@@ -67,12 +71,33 @@ const props = defineProps({
   items:    { type: Array,   default: () => [] },
   tools:    { type: Boolean, default: true },
   filename: { type: String,  default: 'table.csv' },
+  /** Show the standard show/hide column selector in the tools cog. */
+  columnSelector:    { type: Boolean, default: true },
+  columnsLabel:      { type: String,  default: 'Columns' },
+  /** localStorage key — when set, hidden columns persist across reloads. */
+  columnsStorageKey: { type: String,  default: null },
+  /** Column keys the user can never hide (the last column is always pinned). */
+  pinnedColumns:     { type: Array,   default: () => [] },
 })
 
 const slots = useSlots()
 
+/**
+ * Column visibility. `visibleHeaders` is what the table actually renders;
+ * `columnOptions` feeds the tools-cog selector. When `columnSelector` is
+ * false nothing is hidden — visibleHeaders === headers.
+ */
+const { visibleHeaders, columnOptions, toggleColumn } = useColumnSelector({
+  headers: () => props.headers,
+  storageKey: () => props.columnsStorageKey,
+  pinned: () => props.pinnedColumns,
+})
+
+// The set of headers actually shown — full list when the selector is off.
+const baseHeaders = computed(() => (props.columnSelector ? visibleHeaders.value : props.headers))
+
 const lastKey = computed(() => {
-  const last = props.headers[props.headers.length - 1]
+  const last = baseHeaders.value[baseHeaders.value.length - 1]
   return last?.key ?? last?.value ?? null
 })
 
@@ -83,8 +108,9 @@ const lastKey = computed(() => {
  * — the goal is layout consistency across every DataTable in the app.
  */
 const normalizedHeaders = computed(() => {
-  if (!props.headers.length) return props.headers
-  const list = [...props.headers]
+  const src = baseHeaders.value
+  if (!src.length) return src
+  const list = [...src]
   const lastIdx = list.length - 1
   list[lastIdx] = { ...list[lastIdx], align: 'end' }
   return list
@@ -110,7 +136,7 @@ const forwardedSlotNames = computed(() => {
  */
 const tooltipHeaders = computed(() => {
   const reservedKey = !customLastHeaderSlot.value && props.tools ? lastKey.value : null
-  return props.headers
+  return baseHeaders.value
     .filter((h) => {
       if (!h.tooltip) return false
       const k = h.key ?? h.value
@@ -122,7 +148,7 @@ const tooltipHeaders = computed(() => {
 })
 
 const { exporting, copying, exportCsv, copyToClipboard } = useTableTools({
-  headers: () => props.headers,
+  headers: () => baseHeaders.value,
   getRows: () => props.items,
   filename: () => props.filename,
 })
