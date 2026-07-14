@@ -85,4 +85,18 @@ describe('LigojDataTable', () => {
     expect(wrapper.text()).toContain('alpha')
     localStorage.removeItem('ldt-cols3')
   })
+
+  it('emits "tool-action" when a custom tools-cog action is chosen', async () => {
+    const wrapper = mountTable({
+      toolActions: [{ key: 'delete-all', title: 'Delete all', icon: 'mdi-delete-sweep', color: 'error' }],
+    })
+    // Open the tools cog so the menu content mounts.
+    await wrapper.find('button[aria-label="Table tools"]').trigger('click')
+    const item = [...document.querySelectorAll('.v-list-item')]
+      .find((el) => el.textContent.includes('Delete all'))
+    expect(item).toBeTruthy()
+    item.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('tool-action')?.[0]).toEqual(['delete-all'])
+  })
 })

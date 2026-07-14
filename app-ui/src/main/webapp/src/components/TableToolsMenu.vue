@@ -46,6 +46,23 @@
           :disabled="loading"
           @click="onCopy"
         />
+        <!-- Consumer-supplied table-level actions (e.g. "Delete all"),
+             grouped at the bottom since they are often destructive. -->
+        <template v-if="actions.length">
+          <v-divider class="my-1" />
+          <v-list-item
+            v-for="a in actions"
+            :key="a.key"
+            :disabled="a.disabled"
+            :base-color="a.color"
+            @click="onAction(a.key)"
+          >
+            <template #prepend>
+              <v-icon size="small" :color="a.color">{{ a.icon }}</v-icon>
+            </template>
+            <v-list-item-title>{{ a.title }}</v-list-item-title>
+          </v-list-item>
+        </template>
       </v-list>
     </v-menu>
     <v-progress-circular
@@ -77,11 +94,13 @@ defineProps({
   /** [{ key, title, visible }] toggleable columns; empty hides the section. */
   columns: { type: Array, default: () => [] },
   columnsLabel: { type: String, default: 'Columns' },
+  /** [{ key, title, icon, color?, disabled? }] extra table-level actions. */
+  actions: { type: Array, default: () => [] },
 })
-const emit = defineEmits(['export-csv', 'copy', 'toggle-column'])
+const emit = defineEmits(['export-csv', 'copy', 'toggle-column', 'action'])
 
-// Controlled so a column toggle keeps the menu open while export/copy
-// close it (close-on-content-click is disabled for the whole menu).
+// Controlled so a column toggle keeps the menu open while export/copy/
+// action items close it (close-on-content-click is disabled for the menu).
 const open = ref(false)
 
 function onExport() {
@@ -91,5 +110,9 @@ function onExport() {
 function onCopy() {
   open.value = false
   emit('copy')
+}
+function onAction(key) {
+  open.value = false
+  emit('action', key)
 }
 </script>

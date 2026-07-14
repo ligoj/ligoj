@@ -22,9 +22,11 @@
         :loading="exporting || copying"
         :columns="columnSelector ? columnOptions : []"
         :columns-label="columnsLabel"
+        :actions="toolActions"
         @export-csv="exportCsv"
         @copy="copyToClipboard"
         @toggle-column="toggleColumn"
+        @action="(key) => emit('tool-action', key)"
       />
     </template>
 
@@ -78,7 +80,11 @@ const props = defineProps({
   columnsStorageKey: { type: String,  default: null },
   /** Column keys the user can never hide (the last column is always pinned). */
   pinnedColumns:     { type: Array,   default: () => [] },
+  /** [{ key, title, icon, color?, disabled? }] extra items in the tools cog. */
+  toolActions:       { type: Array,   default: () => [] },
 })
+
+const emit = defineEmits(['tool-action'])
 
 const slots = useSlots()
 
