@@ -139,6 +139,9 @@ onMounted(async () => {
 // store's NAV_CONFIG mapping.
 const BASE_NAV = [
   { labelKey: 'nav.home', icon: 'mdi-home', route: '/', auth: 'home' },
+  // AI assistant — visible to any authenticated user; the plugin scopes all
+  // data server-side to the caller's rights.
+  { labelKey: 'nav.ai', icon: 'mdi-robot', route: '/ai', match: '/ai', auth: 'home' },
   // `match` makes the item active across a whole section; `children` render
   // a sub-menu while the section is active.
   {
