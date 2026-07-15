@@ -180,8 +180,41 @@ function ligojSharedFacades() {
   }
 }
 
+// Dev-only: serve the locally-built `ai` plugin bundle straight from the
+// sibling plugin-ai repo (webjars/ai/vue), BYPASSING the `/ligoj/main` proxy to
+// app-api. This lets `npm run build` in plugin-ai/ui + a browser reload reflect
+// UI changes instantly — no jar rebuild/redeploy, no app-api restart. The file
+// is read per request so rebuilds are picked up live; if the local build is
+// absent (e.g. plugin-ai not checked out beside ligoj), it falls through to the
+// proxy so nothing breaks. Remove this plugin to go back to the jar-served bundle.
+function ligojDevLocalAiBundle() {
+  const AI_DIR = resolve(
+    __dirname,
+    '../../../../../ligoj-plugins/plugin-ai/src/main/resources/META-INF/resources/webjars/ai/vue',
+  )
+  return {
+    name: 'ligoj-dev-local-ai-bundle',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const urlPath = req.url?.split('?')[0]
+        const match = urlPath && urlPath.match(/^\/ligoj\/main\/ai\/vue\/index\.(js|css)$/)
+        if (!match) return next()
+        try {
+          const buf = readFileSync(resolve(AI_DIR, `index.${match[1]}`))
+          res.setHeader('Content-Type', match[1] === 'css' ? 'text/css' : 'text/javascript')
+          res.setHeader('Cache-Control', 'no-cache')
+          res.end(buf)
+        } catch {
+          next() // local build missing → fall through to the app-api proxy
+        }
+      })
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [vue(), ligojDevSharedImports(), ligojSharedFacades(), ligojDevFavicon()],
+  plugins: [vue(), ligojDevSharedImports(), ligojSharedFacades(), ligojDevFavicon(), ligojDevLocalAiBundle()],
   base: '/ligoj/',
   resolve: {
     alias: {
