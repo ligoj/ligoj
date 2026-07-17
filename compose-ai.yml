@@ -1,0 +1,68 @@
+# =============================================================================
+# Ligoj — optional AI layer (local inference for plugin-ai)
+# =============================================================================
+# Adds a self-hosted Ollama service to the stack: the Ligoj-AI copilot talks to
+# it over the internal network, no data ever leaves the platform. Layer it on
+# top of the base stack, like the database override:
+#
+#   podman compose -p ligoj -f compose.yml -f compose-override.yml -f compose-ai.yml up -d
+#
+# Then point the plugin to it (Système → Configuration):
+#   service:ai:base-url = http://ollama:11434
+#
+# Variables of interest:
+#   LIGOJ_AI_MODEL — model pulled at startup (default: qwen3:30b-instruct, ~18 GB,
+#                    non-thinking MoE — required: thinking models leak their
+#                    reasoning into the answers)
+#
+# GPU (Linux + NVIDIA container toolkit): uncomment the `deploy` block below.
+# Without GPU, Ollama runs on CPU — fine for a demo, slow for production.
+# =============================================================================
+services:
+  ollama:
+    container_name: ligoj-ollama
+    image: ollama/ollama:latest
+    restart: always
+    environment:
+      # Keep the model loaded forever: no multi-second reload on the first chat after idle.
+      OLLAMA_KEEP_ALIVE: -1
+      # The agent loop needs a few thousand tokens, not the model's 256k maximum:
+      # a 16k context divides the memory footprint and the load time.
+      OLLAMA_CONTEXT_LENGTH: 16384
+    expose:
+      - 11434
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "ls"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    networks:
+      ligoj-network:
+        aliases:
+          - ollama
+
+  # One-shot: pre-pull the model so the first chat does not time out.
+  ollama-init:
+    container_name: ligoj-ollama-init
+    image: ollama/ollama:latest
+    restart: "no"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c", "ollama pull ${LIGOJ_AI_MODEL:-qwen3:30b-instruct}"]
+    networks:
+      ligoj-network: {}
+
+volumes:
+  ollama-models:
