@@ -6,6 +6,7 @@ package org.ligoj.app.http.security;
 import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -36,8 +37,8 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(final Authentication authentication) {
-		return authenticate(StringUtils.lowerCase(authentication.getPrincipal().toString()),
-				Objects.toString(authentication.getCredentials().toString(), ""), authentication.getAuthorities());
+		return authenticate(StringUtils.lowerCase(authentication.getPrincipal().toString()), Objects.toString(authentication.getCredentials().toString(), ""),
+				authentication.getAuthorities());
 	}
 
 	/**
@@ -69,10 +70,9 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 	/**
 	 * Return a new authentication with the real use name.
 	 */
-	private Authentication newAuthentication(final String username, final String credentials,
-			final Collection<? extends GrantedAuthority> authorities, final HttpResponse httpResponse) {
-		final var cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> "set-cookie".equals(header.getName())).map(Header::getValue)
-				.toList();
+	private Authentication newAuthentication(final String username, final String credentials, final Collection<? extends GrantedAuthority> authorities,
+			final HttpResponse httpResponse) {
+		final var cookies = Arrays.stream(httpResponse.getAllHeaders()).filter(header -> "set-cookie".equals(header.getName())).map(Header::getValue).toList();
 
 		// Get the optional real username if provided
 		final var realUserName = Optional.ofNullable(httpResponse.getFirstHeader("X-Real-User")).map(Header::getValue).orElse(username);
@@ -99,7 +99,7 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 	protected Authentication doLogin(final CloseableHttpClient httpClient, final String username, final String credential,
 			final Collection<? extends GrantedAuthority> authorities) throws IOException {
 		final var httpPost = new HttpPost(getSsoPostUrl());
-		final var content = String.format(getSsoPostContent(), username, credential.replace("\\", "\\\\").replace("\"", "\\\""));
+		final var content = String.format(getSsoPostContent(), escapeJson(username), escapeJson(credential));
 		httpPost.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
 		httpPost.setHeader("Content-Type", "application/json");
 		final var apiResponse = httpClient.execute(httpPost);
@@ -112,5 +112,18 @@ public class RestAuthenticationProvider extends AbstractAuthenticationProvider {
 		log.info("Failed authentication of {}[{}] : {}", username, credential.length(), statusCode);
 		apiResponse.getEntity().getContent().close();
 		return null;
+	}
+
+	/**
+	 * Escape the two structural characters of a JSON string literal so a login or credential can't break out of — or inject into — the SSO
+	 * request body ({@link #getSsoPostContent()} is a JSON template). Previously only the credential was escaped while the username flowed in
+	 * raw.
+	 *
+	 * @param value The raw value to embed inside a JSON string.
+	 * @return The value with {@code \} and {@code "} escaped, or {@code null} when {@code value} is {@code null} (null-safe via
+	 *         {@link StringUtils#replace}).
+	 */
+	private static String escapeJson(final String value) {
+		return Strings.CS.replace(Strings.CS.replace(value, "\\", "\\\\"), "\"", "\\\"");
 	}
 }
