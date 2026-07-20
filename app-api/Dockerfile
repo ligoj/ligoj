@@ -116,7 +116,7 @@ COPY --chown=ligoj:ligoj src/test/resources/ligoj.policy "${SERVER_HOME}/ligoj.p
 # JDK_JAVA_OPTIONS is read automatically by the java launcher, so we keep the
 # long --add-opens / --add-exports list out of the CMD line.
 ENV CONTEXT_URL="/ligoj-api" \
-    SERVER_HOST="0.0.0.0" \
+    SERVER_HOST="127.0.0.1" \
     SERVER_PORT="8081" \
     LIGOJ_HOME=/home/ligoj \
     INSTALL_PLUGIN_VENDORS="true" \
