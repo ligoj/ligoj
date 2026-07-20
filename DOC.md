@@ -13,7 +13,7 @@ Ligoj runs as two Spring Boot containers in front of a database:
 ```
 
 | Service       | Image                     |  Port  | Description                                                                       |
-|---------------|---------------------------|:------:|-----------------------------------------------------------------------------------|
+| ------------- | ------------------------- | :----: | --------------------------------------------------------------------------------- |
 | **ligoj-db**  | `mysql:8` / `postgres:17` |   —    | Database. Not exposed outside the Docker network.                                 |
 | **ligoj-api** | `ligoj/ligoj-api`         | `8081` | Stateless REST backend + Java plugins. Only container with DB/LDAP access.        |
 | **ligoj-ui**  | `ligoj/ligoj-ui`          | `8080` | Vue 3 SPA + stateful Spring Boot session holder / REST proxy in front of the API. |
@@ -398,7 +398,7 @@ always performed by the `ligoj-api` container.
 The decision follows this matrix:
 
 | URL               | Session | API Key | [PreAuth](#pre-authenticated-access) | Login | Auth.     | Response | Notes                                             |
-|-------------------|---------|---------|--------------------------------------|-------|-----------|----------|---------------------------------------------------|
+| ----------------- | ------- | ------- | ------------------------------------ | ----- | --------- | -------- | ------------------------------------------------- |
 | public            | *       | *       | *                                    | *     | *         | `200`    | Whitelisted page                                  |
 | /rest/*           | Yes     | *       | *                                    | *     | Granted   | `200`    | Authorization is checked by `ligoj-api`           |
 | /rest/*           | No      | No      | Not configured                       | *     | Refused   | `401`    | Unauthorized by `ligoj-api`                       |
@@ -426,7 +426,7 @@ When these arguments are empty, the `PreAuth` filter is not enabled. When enable
 You should use the right [plugin-id](https://github.com/ligoj/plugin-id) implementation to get the user details.
 
 | Property                      | Role                                                                         | Sample                                                |
-|-------------------------------|------------------------------------------------------------------------------|-------------------------------------------------------|
+| ----------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
 | security.pre-auth-principal   | Request header name containing the identity of the authenticated user        | -Dsecurity.pre-auth-principal=SM_USER                 |
 | security.pre-auth-credentials | Request header name containing the token to verify                           | -Dsecurity.pre-auth-credentials=SM_TOKEN              |
 | security.pre-auth-logout      | Optional logout relative or absolute URL when user requests to be logged out | -Dsecurity.pre-auth-logout="https://signin.sample.com |
@@ -434,7 +434,7 @@ You should use the right [plugin-id](https://github.com/ligoj/plugin-id) impleme
 For AWS Cognito placed on an ALB, use [plugin-id-cognito](https://github.com/ligoj/plugin-id-cognito), and these properties:
 
 | Property                      | Value                     |
-|-------------------------------|---------------------------|
+| ----------------------------- | ------------------------- |
 | security.pre-auth-principal   | `X-Amzn-Oidc-Identity`    |
 | security.pre-auth-credentials | `X-Amzn-Oidc-Accesstoken` |
 | security.pre-auth-logout      | (Cognito subdomain)       |
@@ -492,7 +492,7 @@ IAM provider such as [plugin-iam-node](https://github.com/ligoj/plugin-iam-node)
 The enabled login mode is configured only at launch time of the `ligoj-ui` container with `-Dsecurity=${MODE}` argument. The behavior is described in the below table:
 
 | Mode        | Implementation                                                | Login screen     | Behavior                                                                             |
-|-------------|---------------------------------------------------------------|------------------|--------------------------------------------------------------------------------------|
+| ----------- | ------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------ |
 | `Trusted`   | `org.ligoj.app.http.security.TrustedAuthenticationProvider`   | Ligoj login page | Login is always accepted, `ligoj-api` container is not involved. Useful for testing. |
 | `Rest`      | `org.ligoj.app.http.security.RestAuthenticationProvider`      | Ligoj login page | Login operation is delegated to a REST endpoint, by default one of `ligoj-api`.      |
 | `OAuth2Bff` | `org.ligoj.app.http.security.OAuth2BffAuthenticationProvider` | OIDC Provider    | Login and logout operations are delegated to external OAuth2 identity provider       |
@@ -596,7 +596,7 @@ These fields are automatically set by the transaction manager in successful API 
 Values resolution priorities
 
 | Priority | Source                               | Note                                                                                                |
-|----------|--------------------------------------|-----------------------------------------------------------------------------------------------------|
+| -------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | 1        | Spring Command-line arguments        | `--ligoj.property=value` when running the application                                               |
 | 2        | Java System properties               | `-Dligoj.property=value`                                                                            |
 | 3        | OS environment variables             | `LIGOJ_PROPERTY=value`                                                                              |
@@ -868,7 +868,7 @@ Both containers expose Spring Boot Actuator endpoints. On `ligoj-api` they are p
 every actuator endpoint is available in the UI under **System → Information → Actuator**.
 
 | Endpoint        | Purpose                                                       |
-|-----------------|---------------------------------------------------------------|
+| --------------- | ------------------------------------------------------------- |
 | `manage/health` | Liveness/readiness. `{"status":"UP"}` when the API is ready.  |
 | `manage/info`   | Application, Java and OS build information.                   |
 | `manage/sbom`   | Software Bill of Materials (SBOM) exposed by Spring Actuator. |
@@ -1022,7 +1022,7 @@ All Web resources are in the directory `META-INF/resources/webjars/service/${ser
 All entities to be installed on setup are in the directory `csv`.
 
 | Pattern file                        | Sample              | Role                                                                                                                                                              |
-|-------------------------------------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ${base_java}/${Tool}Resource.class  | SlackResource.class | Plugin definition                                                                                                                                                 |
 | ${base_web}/img/${tool}.png         | img/slack.png       | 16x icon                                                                                                                                                          |
 | ${base_web}/img/${tool}x64.png      | img/slack.png       | 64x icon                                                                                                                                                          |
@@ -1046,7 +1046,7 @@ These extensions may:
 - Add security levels
 
 | Layer | Scope  | Enablement                                                                                                                                                                             |
-|-------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | UI    | Global | Create a file `META-INF/resource/webjars/bootstrap.private.js`. This JS code will be added to the initial JS code. For example, it's possible to register events, add a menu entry,... |
 
 ## Subscription
@@ -1106,7 +1106,7 @@ using 'trimmed' nouns such as: `passwd` (`password`), `param` (`parameter`), `ge
 Use patterns for packages or name for files of the same type as described in the below table.
 
 | Type                   | Package convention                           | Name convention                                                             |
-|------------------------|----------------------------------------------|-----------------------------------------------------------------------------|
+| ---------------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
 | All                    | ASCII                                        | ASCII                                                                       |
 | All                    | JavaScript syntax                            | See JS linter                                                               |
 | All                    | Java syntax                                  | Lower case package, [a-z]+ in `src/main/java` or `src/test/java`            |
@@ -1382,7 +1382,7 @@ documented in depth in **[app-ui/REWRITE_VUEJS.md](app-ui/REWRITE_VUEJS.md)**. T
 Tested compatibility and performance for 10,000+ users and 1,000+ projects.
 
 | Vendor                                    | Version | Driver                   | Dialect                                                  | Status                  |
-|-------------------------------------------|---------|--------------------------|----------------------------------------------------------|-------------------------|
+| ----------------------------------------- | ------- | ------------------------ | -------------------------------------------------------- | ----------------------- |
 | [MySQL](https://www.mysql.com)            | 5.5     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
 | [MySQL](https://www.mysql.com)            | 5.6     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
 | [MySQL](https://www.mysql.com)            | 5.7     | com.mysql.cj.jdbc.Driver | org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect     | OK                      |
@@ -1399,7 +1399,7 @@ Tested compatibility and performance for 10,000+ users and 1,000+ projects.
 The source compatibility is 21 without preview features.
 
 | Vendor  | Release | OS              |
-|---------|---------|-----------------|
+| ------- | ------- | --------------- |
 | Oracle  | 21      | Linux and MacOS |
 | OpenJDK | 21      | Linux and MacOS |
 
@@ -1617,10 +1617,10 @@ sudo docker logs -f ligoj-api
 ### Docker environment variables
 
 | Docker env   | Default value                  | Note                                                                             |
-|--------------|--------------------------------|----------------------------------------------------------------------------------|
+| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
 | CRYPTO       | `-Dapp.crypto.password=public` | Secret AES configuration.                                                        |
 | CONTEXT      | `ligoj`                        | Context, without starting '/'                                                    |
-| SERVER_HOST  | `0.0.0.0`                      | IP of the listening socket.                                                      |
+| SERVER_HOST  | `127.0.0.1`                    | IP of the listening socket. Should be loopback only to accept UI network         |
 | SERVER_PORT  | `8081`                         | Passed to server listening port and exposed port.                                |
 | JAVA_MEMORY  | `-Xms128M -Xmx128M`            | JVM Memory                                                                       |
 | CUSTOM_OPTS  |                                | Additional JVM options, like `-D...`                                             |
@@ -1643,7 +1643,7 @@ configuration, this directory as well as `/home/hooks` will be authorized to all
 The UI container proxies these API endpoints (override via `-D` properties):
 
 | Property                   | Endpoint                     | Default                           |
-|----------------------------|------------------------------|-----------------------------------|
+| -------------------------- | ---------------------------- | --------------------------------- |
 | ligoj.endpoint             | Default base endpoint URL    | `http://localhost:8081/ligoj-api` |
 | ligoj.endpoint.api.url     | Core API URL                 | `${ligoj.endpoint}/rest`          |
 | ligoj.endpoint.manage.url  | Health status and management | `${ligoj.endpoint}/manage`        |
@@ -1764,7 +1764,7 @@ It is anyway possible to revert to this mode to regain access to Ligoj in case i
 System property `security` value determines the authentication mode:
 
 | `security` mode | Login screen  | Identity Provider                                                   |
-|-----------------|---------------|---------------------------------------------------------------------|
+| --------------- | ------------- | ------------------------------------------------------------------- |
 | `Trusted`       | Ligoj         | Authentication required but always accepted                         |
 | `Rest`          | Ligoj         | A REST endpoint, and by default `ligoj-api`                         |
 | `OAuth2Bff`     | OIDC Provider | Any type of OIDC identity provider: AWS Cognito, Keycloak, EntraID. |
@@ -1916,7 +1916,7 @@ podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
 Then open [http://localhost:8080/ligoj](http://localhost:8080/ligoj).
 
 | Role          | Login         | Password      |
-|---------------|---------------|---------------|
+| ------------- | ------------- | ------------- |
 | Administrator | `ligoj-admin` | `ligoj-admin` |
 | Regular user  | `ligoj-user`  | `ligoj-user`  |
 
@@ -1945,7 +1945,7 @@ xdg-open http://localhost:8080/ligoj 2>/dev/null || true
 ## Custom Docker Compose variables
 
 | Variable               | Service | Phase | Default                               | Note                                                                                                                         |
-|------------------------|---------|-------|---------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------- | ------- | ----- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | LIGOJ_HOME             | api     | RUN   | `/home/ligoj`                         | To map a persistent home                                                                                                     |
 | LIGOJ_REGISTRY         | *       | BUILD |                                       | To push to your registry. When provided, must end with `/`.                                                                  |
 | LIGOJ_VERSION          | app-*   | BUILD | (version of application)              |                                                                                                                              |
@@ -1978,7 +1978,7 @@ LIGOJ_API_PREPARE_BUILD='export HTTP_PROXY=192.168.0.254:8000 && export HTTPS_PR
 ## Custom Docker Compose discovered scripts
 
 | Source             | Service | Destination  | Phase | Note                                                                                              |
-|--------------------|---------|--------------|-------|---------------------------------------------------------------------------------------------------|
+| ------------------ | ------- | ------------ | ----- | ------------------------------------------------------------------------------------------------- |
 | `prepare-build.sh` | app-*   | `WORKDIR`    | BUILD | Additional Bash commands executed inside the builder, before `mvn` but after `MAVEN_OPTS` is set. |
 | `prepare-run.sh`   | app-*   | `WORKDIR`    | RUN   | Additional Bash commands executed inside the final image, before `java`.                          |
 | `.m2/`             | app-*   | `/root/.m2/` | BUILD | Custom Maven configuration: proxy, mirror, dependencies, ...                                      |
@@ -2026,7 +2026,7 @@ EOF
 `compose.yml` defines only the `api` and `ui` services. The database is picked by layering exactly one override file on top:
 
 | Database               | Override file          | Image (default) | Data directory         |
-|------------------------|------------------------|-----------------|------------------------|
+| ---------------------- | ---------------------- | --------------- | ---------------------- |
 | PostgreSQL *(default)* | `compose-override.yml` | `postgres:17`   | `$LIGOJ_HOME/postgres` |
 | MySQL                  | `compose-mysql.yml`    | `mysql:8.0.36`  | `$LIGOJ_HOME/mysql`    |
 
@@ -2368,7 +2368,7 @@ RFC3161-timestamped (`ligoj.sign.tsa`, defaults to DigiCert) so it outlives the 
 The `PluginsClassLoader` verifies every installed plugin JAR before it joins the classpath, and reports one of:
 
 | Status     | Meaning                                                                                             |
-|------------|-----------------------------------------------------------------------------------------------------|
+| ---------- | --------------------------------------------------------------------------------------------------- |
 | `UNSIGNED` | No code signature.                                                                                  |
 | `INVALID`  | Broken signature: tampered content (digest mismatch), partially signed entries, unreadable archive. |
 | `SIGNED`   | Valid and complete signature, but the certificate is not trusted (or no truststore is configured).  |
@@ -2418,7 +2418,7 @@ deployment starts already rebranded — no runtime CLI step, no shared
 volume. Two source locations are honoured:
 
 | File in the image               | Source path in the repo                      | Notes                                                                                                                                                                                                                                                                        |
-|---------------------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `favicon.ico` (WAR root)        | `app-ui/src/main/webapp/favicon.ico`         | Served at `/ligoj/favicon.ico` by Spring's resource handler. The container's `HEALTHCHECK` probes this URL — keep the file valid.                                                                                                                                            |
 | `logo.svg` (Vite-bundled asset) | `app-ui/src/main/webapp/src/assets/logo.svg` | Imported through Vite. Replace BEFORE `docker build` so the new mark is bundled into the SPA chunks. When the SVG is under ~4 KB, Vite inlines it as a `data:image/svg+xml;base64,…` URI in the JS — no separate file in the dist; the browser never makes a second request. |
 
@@ -2567,7 +2567,7 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 ### API Container properties
 
 | Name                                                  | Default value                            | Note                                                                                                 |
-|-------------------------------------------------------|------------------------------------------|------------------------------------------------------------------------------------------------------|
+| ----------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | api.token.purge                                       | `0 0 4 * * ?`                            | CRON expression for expired API tokens purge. See [API Token](#api-tokens) section.                  |
 | api.token.iterations                                  | `31`                                     | API token hash iterations. See [API Token](#api-tokens) section.                                     |
 | api.token.digest                                      | `SHA-512`                                | API token hash algorithm. See [API Token](#api-tokens) section.                                      |
@@ -2635,44 +2635,44 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | plugins.repository-manager.${repository}.artifact.url | *depends on repository*                  | URL template to download plugins.                                                                    |
 | plugins.repository-manager.${repository}.groupId      | `org.ligoj.plugin`                       | Maven `groupId` to filter the Ligoj plugins                                                          |
 | server.port                                           | `${SERVER_PORT}`                         |                                                                                                      |
-| server.address                                        | `${SERVER_HOST}`                         |                                                                                                      |
+| server.address                                        | `${SERVER_HOST}`                         | Bind address. `127.0.0.1` for loopback only                                                          |
 | server.servlet.context-path                           | `/${CONTEXT}`                            |                                                                                                      |
 
 ### UI container properties
 
-| Name                                                              | Default value                              | Note                                                                                                             |
-|-------------------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------|
-| security                                                          | `Rest`                                     | Security provider to handle stateful session. Values are `Trusted`, `Rest` and `OAuth2Bff`.                      |
-| security.max-sessions                                             | `-1`                                       | Maximum number of concurrent sessions allowed. `-1` means unlimited sessions                                     |
+| Name                                                              | Default value                              | Note                                                                                                                                                                                                                                                                    |
+| ----------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| security                                                          | `Rest`                                     | Security provider to handle stateful session. Values are `Trusted`, `Rest` and `OAuth2Bff`.                                                                                                                                                                             |
+| security.max-sessions                                             | `-1`                                       | Maximum number of concurrent sessions allowed. `-1` means unlimited sessions                                                                                                                                                                                            |
 | ligoj.cors.origin                                                 | `*`                                        | `Access-Control-Allow-Origin` echoed by the backend proxy responses (`/rest`, `/manage`, `/main`). `*` is safe as no `Access-Control-Allow-Credentials` is sent. For a Vite dev server calling the backend directly, set the Vite origin, e.g. `http://localhost:5173`. |
-| server.servlet.session.cookie.same-site                           | `lax`                                      | `SameSite` of the session cookie. `lax` keeps it off cross-site state-changing requests (CSRF protection) while OAuth2 redirect logins keep working.             |
-| server.servlet.session.cookie.http-only                           | `true`                                     | Keeps the session cookie out of JavaScript reach (XSS hardening).                                               |
-| server.servlet.session.cookie.secure                              | `${ligoj.cookie.secure}`                   | Adds the `Secure` flag to the session cookie; value driven by `ligoj.cookie.secure`.                            |
-| ligoj.cookie.secure                                               | `true`                                     | When `true` the session cookie is flagged `Secure` (sent over HTTPS only). Set `false` for plain-HTTP local development. |
-| ligoj.sso.url                                                     | `${ligoj.endpoint.api.url}/security/login` | Authentication endpoint URL used by the `Rest` provider.                                                         |
-| ligoj.sso.content                                                 | `{"name":"%s","password":"%s"}`            | SSO login payload template.                                                                                      |
-| app-env                                                           | `auto`                                     | Suffix for index/login HTML files (`-prod`, `auto`, or empty). `auto` guesses it from how the app is started.    |
-| log.http                                                          | `info`                                     | When `debug`, all HTTP queries are logged (larger log file).                                                     |
-| log.level                                                         | `info`                                     | Log verbosity of internal components (Spring, Jetty).                                                            |
-| security.pre-auth-principal                                       |                                            | Request header name containing the identity of the authenticated user. Sample `X-Amzn-Oidc-Identity`             |
-| security.pre-auth-credentials                                     |                                            | Request header name containing the token to verify Sample `X-Amzn-Oidc-Accesstoken`                              |
-| security.pre-auth-logout                                          |                                            | Optional logout relative or absolute URL when user requests to be logged out. Sample `https://signin.sample.com` |
-| javax.net.ssl.trustStore                                          |                                            | SSL truststore file path for SSL connection like Keycloak. Sample `/home/ligoj/ligoj-ui.jks`                     |
-| ligoj.log.file.name                                               | `./ui-rolling.log`                         | File inside `LIGOJ_HOME` directory.                                                                              |
-| ligoj.log.file.size                                               | `10 MB`                                    | Max log file size                                                                                                |
-| ligoj.log.file.enabled                                            | `true`                                     | Enablement of log file                                                                                           |
-| ligoj.security.login.url                                          |                                            | Login relative or absolute URL when user requests to be logged in. Sample `/oauth2/authorization/keycloak`       |
-| ligoj.security.oauth2.username-attribute                          |                                            | Attribute of the OAuth2 token to use as username. Sample `preferred_username`                                    |
-| ligoj.security.login-by-api-key                                   | `false`                                    | Enable API key authentication bypass                                                                             |
-| spring.security.oauth2.client.registration.keycloak.provider      | `keycloak`                                 | Provider name used in other properties.                                                                          |
-| spring.security.oauth2.client.registration.keycloak.client-id     |                                            | Client identifier of this application in Keycloak. Sample `ligoj`                                                |
-| spring.security.oauth2.client.registration.keycloak.client-secret |                                            | Client secret of this application in Keycloak.                                                                   |
-| spring.security.oauth2.client.provider.keycloak.issuer-uri        |                                            | Issuer URI of the Keycloak realm. Sample `https://keycloak.sample.com/realms/ligoj`                              |
-| spring.security.oauth2.client.registration.keycloak.scope         |                                            | Scope of the authentication request. Sample `openid`                                                             |
-| server.port                                                       | `${SERVER_PORT}`                           | HTTP listen port. `8080` by default.                                                                            |
-| server.address                                                    | `${SERVER_HOST}`                           | Bind address. `0.0.0.0` by default (the UI is the public-facing container).                                      |
-| server.servlet.context-path                                       | `/${CONTEXT}`                              | Servlet context path. `/ligoj` by default.                                                                      |
-| server.forward-headers-strategy                                   | `FRAMEWORK`                                | Honor `X-Forwarded-*` from a reverse proxy — required so `Secure` cookies work when TLS is terminated upstream.  |
+| server.servlet.session.cookie.same-site                           | `lax`                                      | `SameSite` of the session cookie. `lax` keeps it off cross-site state-changing requests (CSRF protection) while OAuth2 redirect logins keep working.                                                                                                                    |
+| server.servlet.session.cookie.http-only                           | `true`                                     | Keeps the session cookie out of JavaScript reach (XSS hardening).                                                                                                                                                                                                       |
+| server.servlet.session.cookie.secure                              | `${ligoj.cookie.secure}`                   | Adds the `Secure` flag to the session cookie; value driven by `ligoj.cookie.secure`.                                                                                                                                                                                    |
+| ligoj.cookie.secure                                               | `true`                                     | When `true` the session cookie is flagged `Secure` (sent over HTTPS only). Set `false` for plain-HTTP local development.                                                                                                                                                |
+| ligoj.sso.url                                                     | `${ligoj.endpoint.api.url}/security/login` | Authentication endpoint URL used by the `Rest` provider.                                                                                                                                                                                                                |
+| ligoj.sso.content                                                 | `{"name":"%s","password":"%s"}`            | SSO login payload template.                                                                                                                                                                                                                                             |
+| app-env                                                           | `auto`                                     | Suffix for index/login HTML files (`-prod`, `auto`, or empty). `auto` guesses it from how the app is started.                                                                                                                                                           |
+| log.http                                                          | `info`                                     | When `debug`, all HTTP queries are logged (larger log file).                                                                                                                                                                                                            |
+| log.level                                                         | `info`                                     | Log verbosity of internal components (Spring, Jetty).                                                                                                                                                                                                                   |
+| security.pre-auth-principal                                       |                                            | Request header name containing the identity of the authenticated user. Sample `X-Amzn-Oidc-Identity`                                                                                                                                                                    |
+| security.pre-auth-credentials                                     |                                            | Request header name containing the token to verify Sample `X-Amzn-Oidc-Accesstoken`                                                                                                                                                                                     |
+| security.pre-auth-logout                                          |                                            | Optional logout relative or absolute URL when user requests to be logged out. Sample `https://signin.sample.com`                                                                                                                                                        |
+| javax.net.ssl.trustStore                                          |                                            | SSL truststore file path for SSL connection like Keycloak. Sample `/home/ligoj/ligoj-ui.jks`                                                                                                                                                                            |
+| ligoj.log.file.name                                               | `./ui-rolling.log`                         | File inside `LIGOJ_HOME` directory.                                                                                                                                                                                                                                     |
+| ligoj.log.file.size                                               | `10 MB`                                    | Max log file size                                                                                                                                                                                                                                                       |
+| ligoj.log.file.enabled                                            | `true`                                     | Enablement of log file                                                                                                                                                                                                                                                  |
+| ligoj.security.login.url                                          |                                            | Login relative or absolute URL when user requests to be logged in. Sample `/oauth2/authorization/keycloak`                                                                                                                                                              |
+| ligoj.security.oauth2.username-attribute                          |                                            | Attribute of the OAuth2 token to use as username. Sample `preferred_username`                                                                                                                                                                                           |
+| ligoj.security.login-by-api-key                                   | `false`                                    | Enable API key authentication bypass                                                                                                                                                                                                                                    |
+| spring.security.oauth2.client.registration.keycloak.provider      | `keycloak`                                 | Provider name used in other properties.                                                                                                                                                                                                                                 |
+| spring.security.oauth2.client.registration.keycloak.client-id     |                                            | Client identifier of this application in Keycloak. Sample `ligoj`                                                                                                                                                                                                       |
+| spring.security.oauth2.client.registration.keycloak.client-secret |                                            | Client secret of this application in Keycloak.                                                                                                                                                                                                                          |
+| spring.security.oauth2.client.provider.keycloak.issuer-uri        |                                            | Issuer URI of the Keycloak realm. Sample `https://keycloak.sample.com/realms/ligoj`                                                                                                                                                                                     |
+| spring.security.oauth2.client.registration.keycloak.scope         |                                            | Scope of the authentication request. Sample `openid`                                                                                                                                                                                                                    |
+| server.port                                                       | `${SERVER_PORT}`                           | HTTP listen port. `8080` by default.                                                                                                                                                                                                                                    |
+| server.address                                                    | `${SERVER_HOST}`                           | Bind address. `0.0.0.0` by default (the UI is the public-facing container).                                                                                                                                                                                             |
+| server.servlet.context-path                                       | `/${CONTEXT}`                              | Servlet context path. `/ligoj` by default.                                                                                                                                                                                                                              |
+| server.forward-headers-strategy                                   | `FRAMEWORK`                                | Honor `X-Forwarded-*` from a reverse proxy — required so `Secure` cookies work when TLS is terminated upstream.                                                                                                                                                         |
 
 ## System-level variables
 
@@ -2680,7 +2680,7 @@ These variables are only relevant when set as Java System property.
 For example `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 
 | Name                   | Default value       | Note                               |
-|------------------------|---------------------|------------------------------------|
+| ---------------------- | ------------------- | ---------------------------------- |
 | ligoj.log.file.name    | `./api-rolling.log` | File inside `LIGOJ_HOME` directory |
 | ligoj.log.file.size    | `10 MB`             | Max log file size                  |
 | ligoj.log.file.enabled | `true`              | Enablement of log file             |
