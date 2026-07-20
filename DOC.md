@@ -2644,6 +2644,11 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 |-------------------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------|
 | security                                                          | `Rest`                                     | Security provider to handle stateful session. Values are `Trusted`, `Rest` and `OAuth2Bff`.                      |
 | security.max-sessions                                             | `-1`                                       | Maximum number of concurrent sessions allowed. `-1` means unlimited sessions                                     |
+| ligoj.cors.origin                                                 | `*`                                        | `Access-Control-Allow-Origin` echoed by the backend proxy responses (`/rest`, `/manage`, `/main`). `*` is safe as no `Access-Control-Allow-Credentials` is sent. For a Vite dev server calling the backend directly, set the Vite origin, e.g. `http://localhost:5173`. |
+| server.servlet.session.cookie.same-site                           | `lax`                                      | `SameSite` of the session cookie. `lax` keeps it off cross-site state-changing requests (CSRF protection) while OAuth2 redirect logins keep working.             |
+| server.servlet.session.cookie.http-only                           | `true`                                     | Keeps the session cookie out of JavaScript reach (XSS hardening).                                               |
+| server.servlet.session.cookie.secure                              | `${ligoj.cookie.secure}`                   | Adds the `Secure` flag to the session cookie; value driven by `ligoj.cookie.secure`.                            |
+| ligoj.cookie.secure                                               | `true`                                     | When `true` the session cookie is flagged `Secure` (sent over HTTPS only). Set `false` for plain-HTTP local development. |
 | ligoj.sso.url                                                     | `${ligoj.endpoint.api.url}/security/login` | Authentication endpoint URL used by the `Rest` provider.                                                         |
 | ligoj.sso.content                                                 | `{"name":"%s","password":"%s"}`            | SSO login payload template.                                                                                      |
 | app-env                                                           | `auto`                                     | Suffix for index/login HTML files (`-prod`, `auto`, or empty). `auto` guesses it from how the app is started.    |
@@ -2664,6 +2669,10 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | spring.security.oauth2.client.registration.keycloak.client-secret |                                            | Client secret of this application in Keycloak.                                                                   |
 | spring.security.oauth2.client.provider.keycloak.issuer-uri        |                                            | Issuer URI of the Keycloak realm. Sample `https://keycloak.sample.com/realms/ligoj`                              |
 | spring.security.oauth2.client.registration.keycloak.scope         |                                            | Scope of the authentication request. Sample `openid`                                                             |
+| server.port                                                       | `${SERVER_PORT}`                           | HTTP listen port. `8080` by default.                                                                            |
+| server.address                                                    | `${SERVER_HOST}`                           | Bind address. `0.0.0.0` by default (the UI is the public-facing container).                                      |
+| server.servlet.context-path                                       | `/${CONTEXT}`                              | Servlet context path. `/ligoj` by default.                                                                      |
+| server.forward-headers-strategy                                   | `FRAMEWORK`                                | Honor `X-Forwarded-*` from a reverse proxy — required so `Secure` cookies work when TLS is terminated upstream.  |
 
 ## System-level variables
 

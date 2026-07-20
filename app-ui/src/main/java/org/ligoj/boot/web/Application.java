@@ -61,6 +61,15 @@ public class Application extends SpringBootServletInitializer {
 	private String loginUrl;
 
 	/**
+	 * {@code Access-Control-Allow-Origin} value echoed by the backend proxy responses. Defaults to {@code *} (open) —
+	 * safe here because the proxy never emits {@code Access-Control-Allow-Credentials}, so browsers won't attach the
+	 * session cookie to a cross-origin call. Set it to a specific origin (e.g. the Vite dev server
+	 * {@code http://localhost:5173}) to accept credentialed/preflighted requests from that origin during debug.
+	 */
+	@Value("${ligoj.cors.origin:*}")
+	private String corsOrigin;
+
+	/**
 	 * The last loaded context.
 	 */
 	protected static ConfigurableApplicationContext lastContext;
@@ -140,7 +149,7 @@ public class Application extends SpringBootServletInitializer {
 		configureServletParameter(initParameters, configurationKey, "responseBufferSize", String.valueOf(16 * 1024));
 		configureServletParameter(initParameters, configurationKey, "requestBufferSize", String.valueOf(4 * 1024));
 		configureServletParameter(initParameters, configurationKey, "maxConnections", "512");
-		configureServletParameter(initParameters, configurationKey, "cors-origin", "*");
+		configureServletParameter(initParameters, configurationKey, "cors-origin", corsOrigin);
 		configureServletParameter(initParameters, configurationKey, "cors-vary", "Origin");
 		configureServletParameter(initParameters, configurationKey, "usernameOAuth2Attribute", usernameOAuth2Attribute);
 
