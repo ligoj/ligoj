@@ -1590,7 +1590,7 @@ sudo docker run \
 --log-opt max-size=5m --log-opt max-file=5 \
 -e SERVER_PORT=8088 \
 -e CUSTOM_OPTS='--enable-preview -Dlog.level=INFO -Dcom.sun.jndi.ldap.connect.pool.initsize=1 -Dcom.sun.jndi.ldap.connect.pool.maxsize=1 -Dcom.sun.jndi.ldap.connect.pool.prefsize=1 -Dcom.sun.jndi.ldap.connect.pool.debug=all -Dligoj.sslVerify=false' \
-ligoj/ligoj-api:4.0.2-SNAPSHOT-101
+ligoj/ligoj-api:4.1.0-SNAPSHOT-101
 ```
 
 Access logs
@@ -1608,7 +1608,7 @@ sudo docker logs -f ligoj-api
 2023-07-18 20:00:02.648 INFO  Application listener and plugin classloader are now configured
 
 🅛🅘🅖🅞🅙 🅐🅟🅘
-:: Ligoj API :: (v4.0.2-SNAPSHOT)
+:: Ligoj API :: (v4.1.0-SNAPSHOT)
 
 ...
 2023-07-18 20:08:21.583 INFO  Started Application in 11.234 seconds (process running for 11.854)
@@ -1667,7 +1667,7 @@ sudo docker run \
 -e CUSTOM_OPTS='-Dsecurity=Trusted -Dlog.level=info' \
 -e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
 -e SERVER_PORT=8089 \
-ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+ligoj/ligoj-ui:4.1.0-SNAPSHOT-101
 ```
 
 Access logs
@@ -1678,9 +1678,9 @@ sudo docker logs -f ligoj-ui
 
 ```log
 🅛🅘🅖🅞🅙 🅤🅘
-:: Ligoj UI :: (v4.0.2-SNAPSHOT)
+:: Ligoj UI :: (v4.1.0-SNAPSHOT)
 
-2023-07-18 20:17:06.107 INFO  Starting Application v4.0.2-SNAPSHOT using Java 17.0.2 with PID 1 (/usr/local/ligoj/app-ui.war started by root in /usr/local/ligoj)
+2023-07-18 20:17:06.107 INFO  Starting Application v4.1.0-SNAPSHOT using Java 17.0.2 with PID 1 (/usr/local/ligoj/app-ui.war started by root in /usr/local/ligoj)
 ...
 2023-07-18 20:17:07.199 INFO  Started Application in 1.342 seconds (process running for 1.821)
 ```
@@ -1698,7 +1698,7 @@ curl http://localhost/ligoj/login.html
 sudo docker run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
-ligoj/ligoj-ui:4.0.2-SNAPSHOT-101 sh -c "apk add curl && curl http://127.0.0.1:8088/ligoj-api/manage/health"
+ligoj/ligoj-ui:4.1.0-SNAPSHOT-101 sh -c "apk add curl && curl http://127.0.0.1:8088/ligoj-api/manage/health"
 ```
 
 ```json
@@ -1716,7 +1716,7 @@ The following call gets the user session details using the endpoint `/rest/sessi
 sudo docker run --rm -it \
 --name "ligoj-ui" \
 --network="host" \
-ligoj/ligoj-ui:4.0.2-SNAPSHOT-101 sh -c "apk add curl && curl http://127.0.0.1:8088/ligoj-api/rest/session -H 'SM_UniversalID:ligoj-user'"
+ligoj/ligoj-ui:4.1.0-SNAPSHOT-101 sh -c "apk add curl && curl http://127.0.0.1:8088/ligoj-api/rest/session -H 'SM_UniversalID:ligoj-user'"
 ```
 
 ```json
@@ -1787,7 +1787,7 @@ sudo docker run \
 -e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=Rest' \
 -e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
 -e SERVER_PORT=8089 \
-ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+ligoj/ligoj-ui:4.1.0-SNAPSHOT-101
 ```
 
 #### `OAuth2Bff` mode
@@ -1860,7 +1860,7 @@ sudo docker run \
 -e CUSTOM_OPTS='-Dlog.level=info -Dsecurity=OAuth2Bff -Djavax.net.ssl.trustStore=/home/ligoj/ligoj-ui.jks -Dspring.security.oauth2.client.registration.keycloak.provider=keycloak -Dspring.security.oauth2.client.registration.keycloak.client-id=ligoj -Dspring.security.oauth2.client.registration.keycloak.client-secret=tMpwYaU2pBc9wXuWfYPPJXtEgxIDNGW9 -Dspring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.sample.com/realms/ligoj -Dligoj.security.login.url=/oauth2/authorization/keycloak -Dligoj.security.oauth2.username-attribute=preferred_username -Dspring.security.oauth2.client.registration.keycloak.scope=openid -Dligoj.security.login-by-api-key=true -Dsecurity.max-sessions=-1' \
 -e ENDPOINT='http://127.0.0.1:8088/ligoj-api' \
 -e SERVER_PORT=8089 \
-ligoj/ligoj-ui:4.0.2-SNAPSHOT-101
+ligoj/ligoj-ui:4.1.0-SNAPSHOT-101
 ```
 
 # Deployment with Docker Compose
