@@ -7431,3 +7431,4 @@ app-ui/src/main/webapp/src/main/resources/static/
 /app-ui/src/main/webapp/node_modules/yocto-queue/readme.md
 /app-ui/src/main/webapp/node_modules/.package-lock.json
 /.claude/settings.json
+app-api/plugin-vendors/plugin-vendors-default.p12
