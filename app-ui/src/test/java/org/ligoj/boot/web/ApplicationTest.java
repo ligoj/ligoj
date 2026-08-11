@@ -6,11 +6,13 @@ package org.ligoj.boot.web;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.error.ErrorPageRegistry;
 import org.springframework.util.StringUtils;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test class of {@link Application}
@@ -40,10 +42,10 @@ class ApplicationTest {
 
 	@Test
 	void configure() {
-		final var builder = Mockito.mock(SpringApplicationBuilder.class);
+		final var builder = mock(SpringApplicationBuilder.class);
 		new Application().configure(builder);
-		Mockito.verify(builder).sources(Application.class);
-		new Application().containerCustomizer().registerErrorPages(Mockito.mock(ErrorPageRegistry.class));
+		verify(builder).sources(Application.class);
+		new Application().containerCustomizer().registerErrorPages(mock(ErrorPageRegistry.class));
 	}
 
 	@Test

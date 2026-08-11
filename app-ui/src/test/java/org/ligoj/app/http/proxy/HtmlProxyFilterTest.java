@@ -3,16 +3,16 @@
  */
 package org.ligoj.app.http.proxy;
 
-import java.io.IOException;
-
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import java.io.IOException;
+
+import static org.mockito.Mockito.*;
 
 /**
  * HTML proxying test of {@link HtmlProxyFilter} class.
@@ -66,15 +66,15 @@ class HtmlProxyFilterTest {
 		final HtmlProxyFilter htmlProxyFilter = new HtmlProxyFilter();
 		htmlProxyFilter.setSuffix(suffix);
 
-		final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-		Mockito.when(request.getServletPath()).thenReturn(from);
-		final RequestDispatcher requestDispatcher = Mockito.mock(RequestDispatcher.class);
-		Mockito.when(request.getRequestDispatcher(to)).thenReturn(requestDispatcher);
-		Mockito.when(request.getDispatcherType()).thenReturn(DispatcherType.REQUEST);
+		final HttpServletRequest request = mock(HttpServletRequest.class);
+		final HttpServletResponse response = mock(HttpServletResponse.class);
+		when(request.getServletPath()).thenReturn(from);
+		final RequestDispatcher requestDispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher(to)).thenReturn(requestDispatcher);
+		when(request.getDispatcherType()).thenReturn(DispatcherType.REQUEST);
 		htmlProxyFilter.doFilter(request, response, null);
-		Mockito.verify(requestDispatcher, Mockito.atLeastOnce()).forward(request, response);
-		Mockito.validateMockitoUsage();
+		verify(requestDispatcher, atLeastOnce()).forward(request, response);
+		validateMockitoUsage();
 	}
 
 }

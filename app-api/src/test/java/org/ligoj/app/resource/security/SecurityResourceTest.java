@@ -22,6 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * Test of {@link SecurityResource}
  */
@@ -36,8 +39,8 @@ class SecurityResourceTest extends AbstractServerTest {
 		final User user = new User();
 		user.setName("any");
 		user.setPassword("any");
-		final IamProvider iamProvider = Mockito.mock(IamProvider.class);
-		Mockito.when(iamProvider.authenticate(ArgumentMatchers.any(Authentication.class))).thenThrow(new BadCredentialsException("any"));
+		final IamProvider iamProvider = mock(IamProvider.class);
+		when(iamProvider.authenticate(ArgumentMatchers.any(Authentication.class))).thenThrow(new BadCredentialsException("any"));
 		final SecurityResource resource = new SecurityResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
 		resource.iamProvider = new IamProvider[] { iamProvider };
@@ -48,16 +51,16 @@ class SecurityResourceTest extends AbstractServerTest {
 	void login() {
 
 		// Mock the authentication
-		final IamProvider iamProvider = Mockito.mock(IamProvider.class);
-		Mockito.when(iamProvider.authenticate(ArgumentMatchers.any(Authentication.class))).thenAnswer(i -> i.getArguments()[0]);
+		final IamProvider iamProvider = mock(IamProvider.class);
+		when(iamProvider.authenticate(ArgumentMatchers.any(Authentication.class))).thenAnswer(i -> i.getArguments()[0]);
 		final SecurityResource resource = new SecurityResource();
 		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
 		resource.iamProvider = new IamProvider[] { iamProvider };
 
 		// Mock the contributor
-		final IAuthenticationContributor contributor = Mockito.mock(IAuthenticationContributor.class);
-		final ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
-		Mockito.when(applicationContext.getBeansOfType(IAuthenticationContributor.class))
+		final IAuthenticationContributor contributor = mock(IAuthenticationContributor.class);
+		final ApplicationContext applicationContext = mock(ApplicationContext.class);
+		when(applicationContext.getBeansOfType(IAuthenticationContributor.class))
 				.thenAnswer(i -> Collections.singletonMap("some", contributor));
 		resource.applicationContext = applicationContext;
 

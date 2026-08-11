@@ -3,10 +3,11 @@
  */
 package org.ligoj.app.resource.plugin;
 
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.context.annotation.Bean;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Test configuration for some boot components.
@@ -16,6 +17,6 @@ class AppTestConfiguration {
 
 	@Bean
 	RestartEndpoint mockRestartEndpoint() {
-		return Mockito.mock(RestartEndpoint.class);
+		return mock(RestartEndpoint.class);
 	}
 }

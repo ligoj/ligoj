@@ -8,7 +8,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,6 +17,8 @@ import java.util.Collection;
 import java.util.IllegalFormatConversionException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Check the SSO authentication {@link RestAuthenticationProvider} provider.
@@ -52,13 +53,13 @@ class RestAuthenticationProviderTest extends AbstractServerTest {
 		authenticationProvider.setSsoPostUrl("");
 		authenticationProvider.setSsoWelcome("");
 		authenticationProvider.setSsoPostContent("%d%d");
-		final Authentication authentication = Mockito.mock(Authentication.class);
-		final Object credential = Mockito.mock(Object.class);
-		Mockito.when(credential.toString()).thenReturn("");
-		final Object principal = Mockito.mock(Object.class);
-		Mockito.when(principal.toString()).thenReturn(null);
-		Mockito.when(authentication.getCredentials()).thenReturn(credential);
-		Mockito.when(authentication.getPrincipal()).thenReturn(principal);
+		final Authentication authentication = mock(Authentication.class);
+		final Object credential = mock(Object.class);
+		when(credential.toString()).thenReturn("");
+		final Object principal = mock(Object.class);
+		when(principal.toString()).thenReturn(null);
+		when(authentication.getCredentials()).thenReturn(credential);
+		when(authentication.getPrincipal()).thenReturn(principal);
 		Assertions.assertThrows(IllegalFormatConversionException.class, () -> authenticationProvider.authenticate(authentication));
 	}
 
@@ -86,7 +87,7 @@ class RestAuthenticationProviderTest extends AbstractServerTest {
 		};
 
 		filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
-		@SuppressWarnings("unchecked") final Collection<? extends GrantedAuthority> authorities = Mockito.mock(Collection.class);
+		@SuppressWarnings("unchecked") final Collection<? extends GrantedAuthority> authorities = mock(Collection.class);
 		Assertions.assertThrows(RuntimeException.class, () -> filter.authenticate("", "", authorities));
 	}
 
@@ -140,13 +141,13 @@ class RestAuthenticationProviderTest extends AbstractServerTest {
 	 * Generate a mock authentication/
 	 */
 	private Authentication prepareAuthentication(final String user) {
-		final Authentication authentication = Mockito.mock(Authentication.class);
-		final Object credential = Mockito.mock(Object.class);
-		Mockito.when(credential.toString()).thenReturn("");
-		final Object principal = Mockito.mock(Object.class);
-		Mockito.when(principal.toString()).thenReturn(user);
-		Mockito.when(authentication.getCredentials()).thenReturn(credential);
-		Mockito.when(authentication.getPrincipal()).thenReturn(principal);
+		final Authentication authentication = mock(Authentication.class);
+		final Object credential = mock(Object.class);
+		when(credential.toString()).thenReturn("");
+		final Object principal = mock(Object.class);
+		when(principal.toString()).thenReturn(user);
+		when(authentication.getCredentials()).thenReturn(credential);
+		when(authentication.getPrincipal()).thenReturn(principal);
 		return authentication;
 	}
 

@@ -7,12 +7,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.client.RestTemplate;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Test class of {@link ApiKeyLoginFilter}
@@ -115,12 +116,12 @@ class ApiKeyLoginFilterTest {
      * Generate a mock request with api-key and api-user
      */
     private HttpServletRequest newRequest(String apiKeyParam, String apiUserParam, String apiKeyHeader, String apiUserHeader) {
-        final var request = Mockito.mock(HttpServletRequest.class);
-        Mockito.when(request.getParameter("api-key")).thenReturn(apiKeyParam);
-        Mockito.when(request.getParameter("api-user")).thenReturn(apiUserParam);
-        Mockito.when(request.getHeader("x-api-key")).thenReturn(apiKeyHeader);
-        Mockito.when(request.getHeader("x-api-user")).thenReturn(apiUserHeader);
-        Mockito.when(request.getRequestURI()).thenReturn("/login-by-api-key");
+        final var request = mock(HttpServletRequest.class);
+        when(request.getParameter("api-key")).thenReturn(apiKeyParam);
+        when(request.getParameter("api-user")).thenReturn(apiUserParam);
+        when(request.getHeader("x-api-key")).thenReturn(apiKeyHeader);
+        when(request.getHeader("x-api-user")).thenReturn(apiUserHeader);
+        when(request.getRequestURI()).thenReturn("/login-by-api-key");
         return request;
     }
 
@@ -129,22 +130,22 @@ class ApiKeyLoginFilterTest {
         if (realUser != null) {
             body = "{\"userName\": \"" + realUser + "\", \"apiAuthorizations\": [{\"method\": \"DELETE\", \"pattern\": \".*\"}]}";
         }
-        final var responseEntity = new ResponseEntity<String>(body, status);
-        Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.eq(HttpMethod.GET), Mockito.any(), Mockito.eq(String.class)))
+        final var responseEntity = new ResponseEntity<>(body, status);
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(String.class)))
                 .thenReturn(responseEntity);
     }
 
     private void mockSessionResponseNotAdmin(HttpStatus status) {
         final var body = "{\"apiAuthorizations\": [{\"method\": \"DELETE\", \"pattern\": \"somePattern\"}]}";
-        final var responseEntity = new ResponseEntity<String>(body, status);
-        Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.eq(HttpMethod.GET), Mockito.any(), Mockito.eq(String.class)))
+        final var responseEntity = new ResponseEntity<>(body, status);
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(String.class)))
                 .thenReturn(responseEntity);
     }
 
     private void mockSessionResponseNotAdmin2(HttpStatus status) {
         final var body = "{\"apiAuthorizations\": [{\"method\": \"GET\", \"pattern\": \".*\"}]}";
-        final var responseEntity = new ResponseEntity<String>(body, status);
-        Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.eq(HttpMethod.GET), Mockito.any(), Mockito.eq(String.class)))
+        final var responseEntity = new ResponseEntity<>(body, status);
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(String.class)))
                 .thenReturn(responseEntity);
     }
 
@@ -154,8 +155,8 @@ class ApiKeyLoginFilterTest {
     @BeforeEach
     void init() {
         filter = new ApiKeyLoginFilter("/login-by-api-key", true);
-        authenticationManager = Mockito.mock(AuthenticationManager.class);
-        restTemplate = Mockito.mock(RestTemplate.class);
+        authenticationManager = mock(AuthenticationManager.class);
+        restTemplate = mock(RestTemplate.class);
         filter.setAuthenticationManager(authenticationManager);
         filter.setRestTemplate(restTemplate);
     }

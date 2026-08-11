@@ -25,7 +25,6 @@ import org.ligoj.bootstrap.model.system.SystemConfiguration;
 import org.ligoj.bootstrap.model.system.SystemPlugin;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,6 +39,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class of {@link LigojPluginListener}
@@ -147,7 +149,7 @@ class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	void configureFeature() {
-		final var service1 = Mockito.mock(FeaturePlugin.class);
+		final var service1 = mock(FeaturePlugin.class);
 		final var entity = new SystemPlugin();
 		resource.configure(service1, entity);
 		Assertions.assertEquals("FEATURE", entity.getType());
@@ -192,14 +194,14 @@ class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	void determinePluginTypeError() {
-		final var service1 = Mockito.mock(ServicePlugin.class);
-		Mockito.when(service1.getKey()).thenReturn("service:sample:tool");
+		final var service1 = mock(ServicePlugin.class);
+		when(service1.getKey()).thenReturn("service:sample:tool");
 		Assertions.assertThrows(TechnicalException.class, () -> resource.determinePluginType(service1));
 	}
 
 	@Test
 	void getPluginClassLoader() {
-		final var pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
+		final var pluginsClassLoader = mock(LigojPluginsClassLoader.class);
 		try (var ignored = new ThreadClassLoaderScope(
 				new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(resource.getPluginClassLoader());
@@ -207,15 +209,15 @@ class LigojPluginListenerTest extends AbstractServerTest {
 	}
 
 	private LigojPluginListener newPluginResourceInstall() {
-		final var pluginsClassLoader = Mockito.mock(LigojPluginsClassLoader.class);
-		final var directory = Mockito.mock(Path.class);
-		Mockito.when(pluginsClassLoader.getHomeDirectory()).thenReturn(Paths.get(USER_HOME_DIRECTORY));
-		Mockito.when(directory.resolve(ArgumentMatchers.anyString()))
+		final var pluginsClassLoader = mock(LigojPluginsClassLoader.class);
+		final var directory = mock(Path.class);
+		when(pluginsClassLoader.getHomeDirectory()).thenReturn(Paths.get(USER_HOME_DIRECTORY));
+		when(directory.resolve(ArgumentMatchers.anyString()))
 				.thenReturn(Paths
 						.get(USER_HOME_DIRECTORY, org.ligoj.bootstrap.core.plugin.PluginsClassLoader.HOME_DIR_FOLDER,
 								org.ligoj.bootstrap.core.plugin.PluginsClassLoader.PLUGINS_DIR)
 						.resolve("plugin-iam-node-test.jar"));
-		Mockito.when(pluginsClassLoader.getPluginDirectory()).thenReturn(directory);
+		when(pluginsClassLoader.getPluginDirectory()).thenReturn(directory);
 		final var pluginResource = new LigojPluginListener() {
 			@Override
 			protected LigojPluginsClassLoader getPluginClassLoader() {

@@ -10,8 +10,10 @@ import org.ligoj.app.iam.IamConfiguration;
 import org.ligoj.app.iam.IamProvider;
 import org.ligoj.app.iam.UserOrg;
 import org.ligoj.bootstrap.core.security.RbacUserDetailsService;
-import org.mockito.Mockito;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test of {@link FederatedUserDetailsService}
@@ -21,35 +23,35 @@ class FederatedUserDetailsServiceTest {
 	@Test
 	void loadUserByUsername() {
 		final var service = new FederatedUserDetailsService();
-		final var federated = Mockito.mock(RbacUserDetailsService.class);
+		final var federated = mock(RbacUserDetailsService.class);
 		service.federated = federated;
-		final var provider = Mockito.mock(IamProvider.class);
+		final var provider = mock(IamProvider.class);
 		service.iamProvider = new IamProvider[] { provider };
-		var configuration = Mockito.mock(IamConfiguration.class);
-		Mockito.when(provider.getConfiguration()).thenReturn(configuration);
-		var repository = Mockito.mock(IUserRepository.class);
-		Mockito.when(configuration.getUserRepository()).thenReturn(repository);
+		var configuration = mock(IamConfiguration.class);
+		when(provider.getConfiguration()).thenReturn(configuration);
+		var repository = mock(IUserRepository.class);
+		when(configuration.getUserRepository()).thenReturn(repository);
 		var userOrg = new UserOrg();
 		userOrg.setName("federated");
-		Mockito.when(repository.findByIdNoCache("jdoe")).thenReturn(userOrg);
-		var details = Mockito.mock(UserDetails.class);
-		Mockito.when(federated.loadUserByUsername("federated")).thenReturn(details);
+		when(repository.findByIdNoCache("jdoe")).thenReturn(userOrg);
+		var details = mock(UserDetails.class);
+		when(federated.loadUserByUsername("federated")).thenReturn(details);
 		Assertions.assertSame(details, service.loadUserByUsername("jdoe"));
 	}
 
 	@Test
 	void loadUserByUsernameNotFederated() {
 		final var service = new FederatedUserDetailsService();
-		final var federated = Mockito.mock(RbacUserDetailsService.class);
+		final var federated = mock(RbacUserDetailsService.class);
 		service.federated = federated;
-		final var provider = Mockito.mock(IamProvider.class);
+		final var provider = mock(IamProvider.class);
 		service.iamProvider = new IamProvider[] { provider };
-		var configuration = Mockito.mock(IamConfiguration.class);
-		Mockito.when(provider.getConfiguration()).thenReturn(configuration);
-		var repository = Mockito.mock(IUserRepository.class);
-		Mockito.when(configuration.getUserRepository()).thenReturn(repository);
-		var details = Mockito.mock(UserDetails.class);
-		Mockito.when(federated.loadUserByUsername("jdoe")).thenReturn(details);
+		var configuration = mock(IamConfiguration.class);
+		when(provider.getConfiguration()).thenReturn(configuration);
+		var repository = mock(IUserRepository.class);
+		when(configuration.getUserRepository()).thenReturn(repository);
+		var details = mock(UserDetails.class);
+		when(federated.loadUserByUsername("jdoe")).thenReturn(details);
 		Assertions.assertSame(details, service.loadUserByUsername("jdoe"));
 	}
 

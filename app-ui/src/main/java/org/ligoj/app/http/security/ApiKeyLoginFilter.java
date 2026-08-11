@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Collection;
 import java.util.List;

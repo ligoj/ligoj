@@ -9,7 +9,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -17,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import java.io.IOException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class of {@link DigestAuthenticationFilter}
@@ -47,7 +48,7 @@ class DigestAuthenticationFilterTest extends AbstractServerTest {
 		};
 		filter.setSsoPostUrl("der://localhost:" + MOCK_PORT);
 		filter.afterPropertiesSet();
-		final var authenticationManager = Mockito.mock(AuthenticationManager.class);
+		final var authenticationManager = mock(AuthenticationManager.class);
 		filter.setAuthenticationManager(authenticationManager);
 		final var req = newRequest("token");
 		Assertions.assertThrows(RuntimeException.class, () -> filter.attemptAuthentication(req, null));
@@ -94,8 +95,8 @@ class DigestAuthenticationFilterTest extends AbstractServerTest {
 	 * Generate a mock authentication/
 	 */
 	private HttpServletRequest newRequest(final String token) {
-		final var request = Mockito.mock(HttpServletRequest.class);
-		Mockito.when(request.getParameter("token")).thenReturn(token);
+		final var request = mock(HttpServletRequest.class);
+		when(request.getParameter("token")).thenReturn(token);
 		return request;
 	}
 
