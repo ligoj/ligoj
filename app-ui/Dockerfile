@@ -16,9 +16,14 @@ RUN --mount=type=cache,target=/root/.npm \
     npm ci --no-audit --no-fund
 
 COPY src/main/webapp/ ./
-RUN npm run build -- --outDir ./vue-dist --emptyOutDir && \
+# Build with a placeholder base (VITE_BASE) so the SPA is NOT bound to a
+# context path at image-build time: the container CMD substitutes
+# `/__ligoj_ctx__` with the runtime ${CONTEXT_URL} — context stays a
+# run-level choice (no rebuild needed to deploy at root or elsewhere).
+RUN VITE_BASE=/__ligoj_ctx__/ npm run build -- --outDir ./vue-dist --emptyOutDir && \
     cp vue-dist/index.html . && \
     cp vue-dist/login.html . && \
+    cp vue-dist/login-by-api-key.html . && \
     cp -r vue-dist/assets/ . && \
     rm -rf vue-dist node_modules
 
@@ -83,8 +88,10 @@ LABEL org.opencontainers.image.title="Ligoj UI server" \
       io.openshift.tags="Ligoj,UI"
 
 # curl: HEALTHCHECK probe. tini: PID 1, reaps zombies and forwards SIGTERM.
+# unzip: explode the war at image build so the SPA's placeholder base can be
+# substituted with the runtime CONTEXT_URL at container start.
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl tini && \
+    apt-get install -y --no-install-recommends curl tini unzip && \
     rm -rf /var/lib/apt/lists/*
 
 # Non-root runtime user.
@@ -96,6 +103,12 @@ RUN groupadd --system --gid 1001 ligoj && \
 WORKDIR "${SERVER_HOME}"
 
 COPY --chown=ligoj:ligoj --from=builder /build/target/*.war ${ARTIFACT_ID}.war
+# Explode the war: Spring Boot's WarLauncher runs it in place, and the startup
+# CMD can then rewrite the SPA's `/__ligoj_ctx__` base placeholder with the
+# runtime ${CONTEXT_URL} (impossible inside a zipped war).
+RUN unzip -q ${ARTIFACT_ID}.war -d app && \
+    rm ${ARTIFACT_ID}.war && \
+    chown -R ligoj:ligoj app
 # Dockerfile included as the guaranteed-existing placeholder for the optional globs.
 COPY --chown=ligoj:ligoj Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
 
@@ -120,20 +133,29 @@ RUN { [ -f prepare-run.sh ] && chmod +x prepare-run.sh && . ./prepare-run.sh || 
 USER ligoj:ligoj
 
 # tini = PID 1; exec java = clean signal delivery to the JVM.
+# Startup: normalize CONTEXT_URL (no trailing slash), substitute the SPA's
+# `/__ligoj_ctx__` build-time base placeholder with it (HTML/JS/CSS at the
+# webapp root — idempotent, a handful of small files), then launch the
+# exploded war via Spring Boot's WarLauncher. Context stays run-level: the
+# same image serves /ligoj, root ('') or any other context without rebuild.
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["sh", "-c", "\
 mkdir -p \"$LIGOJ_HOME\" && \
 { [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || \
   echo 'No prepare-cmd.sh; skipping custom startup.'; } && \
+CTX=\"${CONTEXT_URL%/}\" && \
+find app -maxdepth 2 -type f \\( -name '*.html' -o -name '*.js' -o -name '*.css' \\) \
+  -exec sed -i \"s|/__ligoj_ctx__|${CTX}|g\" {} + && \
+cd app && \
 exec java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
   -Dligoj.endpoint=\"${ENDPOINT}\" \
   -Dserver.address=\"${SERVER_HOST}\" \
   -Dserver.port=\"${SERVER_PORT}\" \
-  -Dserver.servlet.context-path=\"${CONTEXT_URL}\" \
+  -Dserver.servlet.context-path=\"${CTX}\" \
   -Djavax.net.ssl.trustStorePassword=changeit \
   -Djava.net.preferIPv4Stack=true \
   -Dligoj.home=\"${LIGOJ_HOME}\" \
-  -jar \"${ARTIFACT_ID}.war\""]
+  -cp . org.springframework.boot.loader.launch.WarLauncher"]
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
   CMD curl --fail -s "http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico" || exit 1

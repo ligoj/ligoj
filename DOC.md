@@ -1349,6 +1349,33 @@ npm run dev
 open http://localhost:5173/ligoj/
 ```
 
+### Base path / servlet context
+
+The SPA's public base path is baked at build time and MUST match the backend's
+`server.servlet.context-path`. Default is `/ligoj/`; it is configurable with
+the `VITE_BASE` environment variable (dev server and build):
+
+```shell
+# Backend deployed at root context (server.servlet.context-path=):
+VITE_BASE=/ npm run dev      # dev — pages at http://localhost:5173/login-by-api-key.html
+VITE_BASE=/ npm run build    # build — assets/import-map emitted with '/' base
+```
+
+Everything derives from this single value: the Vite dev proxy keys, the
+import maps in the HTML entry pages (`%BASE_URL%`), and the runtime
+`APP_BASE`/`BASE_URL` used for REST calls, the login pages
+(`login.html`, `login-by-api-key.html`) and the OAuth2/Keycloak entry points
+(`<base>oauth2/authorization/<client>`). A mismatch is why a root-context
+deployment serving a `/ligoj/`-built bundle 404s on assets and breaks the
+Keycloak redirect. When switching context, also update the redirect URI
+registered in the IdP (e.g. Keycloak client `redirect_uri`
+`https://host/login/oauth2/code/keycloak` without the `/ligoj` prefix).
+
+> The **Docker image needs none of this**: it builds the SPA with a base
+> placeholder and substitutes the runtime `CONTEXT_URL` at container start, so
+> its context stays a run-level choice — see
+> [Context path (`CONTEXT_URL`, run-level)](#context-path-context_url-run-level).
+
 Install, build and test the plugin bundles (example set — adapt the list to the plugins you develop), e.g. under `~/git/ligoj-plugins/`:
 
 ```shell
@@ -1637,6 +1664,17 @@ configuration, this directory as well as `/home/hooks` will be authorized to all
 > populate the tables of all of them, which may produce an empty schema update when some tables already exist in another visible database.
 
 ## `ligoj-ui` Container
+
+### Context path (`CONTEXT_URL`, run-level)
+
+The UI image is **context-agnostic**: the SPA inside it is built with a base
+placeholder, and the container startup substitutes it with the `CONTEXT_URL`
+environment variable (default `/ligoj`) before launching the exploded war —
+the same `-Dserver.servlet.context-path` value. So switching context — e.g.
+`-e CONTEXT_URL=` (root) or `-e CONTEXT_URL=/portal` — is a `docker run`-level
+choice, with **no image rebuild**. Only bare-war/manual deployments need the
+SPA rebuilt with a matching `VITE_BASE` (see
+[Base path / servlet context](#base-path--servlet-context)).
 
 ### Endpoints
 
@@ -2630,7 +2668,7 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | ligoj.plugin.update                                   | `false`                                  | `true` updates the plugins automatically at start time to the latest available version.              |
 | ligoj.sslVerify                                       | `true`                                   | `false` disables the standard SSL verifications (domain name, certifications chain and validity).    |
 | logging.level.root                                    | `info`                                   | Configure default log verbosity of all internal components: Spring, Jetty, Hibernate,...             |
-| logging.level.<category>                              | *vary*                                   | See [log4j2.json](app-api/src/main/resources/log4j2.json) for specific category                      |
+| logging.level.<category>                              | *vary*                                   | See [log4j2.properties](app-api/src/main/resources/log4j2.properties) for specific category                      |
 | plugins.repository-manager.${repository}.search.url   | *depends on repository*                  | URL template to discover plugins.                                                                    |
 | plugins.repository-manager.${repository}.artifact.url | *depends on repository*                  | URL template to download plugins.                                                                    |
 | plugins.repository-manager.${repository}.groupId      | `org.ligoj.plugin`                       | Maven `groupId` to filter the Ligoj plugins                                                          |
@@ -2671,7 +2709,7 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | spring.security.oauth2.client.registration.keycloak.scope         |                                            | Scope of the authentication request. Sample `openid`                                                                                                                                                                                                                    |
 | server.port                                                       | `${SERVER_PORT}`                           | HTTP listen port. `8080` by default.                                                                                                                                                                                                                                    |
 | server.address                                                    | `${SERVER_HOST}`                           | Bind address. `0.0.0.0` by default (the UI is the public-facing container).                                                                                                                                                                                             |
-| server.servlet.context-path                                       | `/${CONTEXT}`                              | Servlet context path. `/ligoj` by default.                                                                                                                                                                                                                              |
+| server.servlet.context-path                                       | `/${CONTEXT}`                              | Servlet context path. `/ligoj` by default. MUST match the SPA build base — rebuild the UI with `VITE_BASE=/` for a root context (see [Base path / servlet context](#base-path--servlet-context)).                                                                        |
 | server.forward-headers-strategy                                   | `FRAMEWORK`                                | Honor `X-Forwarded-*` from a reverse proxy — required so `Secure` cookies work when TLS is terminated upstream.                                                                                                                                                         |
 
 ## System-level variables
@@ -2689,12 +2727,12 @@ For example `-Dvar=value` in `CUSTOM_OPTS` Docker environment variable
 
 Both containers embed a [Log4j2](https://logging.apache.org/log4j/2.x/) configuration, reloaded every 60 seconds when changed:
 
-- `ligoj-api`: [app-api/src/main/resources/log4j2.json](app-api/src/main/resources/log4j2.json)
-- `ligoj-ui`: [app-ui/src/main/resources/log4j2.json](app-ui/src/main/resources/log4j2.json)
+- `ligoj-api`: [app-api/src/main/resources/log4j2.properties](app-api/src/main/resources/log4j2.properties)
+- `ligoj-ui`: [app-ui/src/main/resources/log4j2.properties](app-ui/src/main/resources/log4j2.properties)
 
 The log destinations (console and an optional rolling file inside `LIGOJ_HOME`) are tuned with the `ligoj.log.*` system variables described above, and the verbosity with `-Dlog.level=...` plus the
 per-category `logging.level.<category>` application properties.
-A fully custom configuration can be supplied with the standard `-Dlog4j2.configurationFile=/path/to/log4j2.json` system property.
+A fully custom configuration can be supplied with the standard `-Dlog4j2.configurationFile=/path/to/log4j2.properties` system property.
 
 ### Principal identifier
 

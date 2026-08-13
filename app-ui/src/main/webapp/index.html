@@ -12,14 +12,16 @@
     `vue-router`, `pinia`, `vuetify` marked external so they resolve
     through these stable URLs and share the host's instances.
   -->
+	<!-- %BASE_URL% is substituted by Vite (dev and build) with the configured
+	     `base` — '/ligoj/' by default, '/' for a root-context build (VITE_BASE=/). -->
 	<script type="importmap">
     {
       "imports": {
-        "vue": "/ligoj/assets/vue.js",
-        "vue-router": "/ligoj/assets/router.js",
-        "pinia": "/ligoj/assets/pinia.js",
-        "vuetify": "/ligoj/assets/vuetify.js",
-        "@ligoj/host": "/ligoj/assets/host.js"
+        "vue": "%BASE_URL%assets/vue.js",
+        "vue-router": "%BASE_URL%assets/router.js",
+        "pinia": "%BASE_URL%assets/pinia.js",
+        "vuetify": "%BASE_URL%assets/vuetify.js",
+        "@ligoj/host": "%BASE_URL%assets/host.js"
       }
     }
   </script>

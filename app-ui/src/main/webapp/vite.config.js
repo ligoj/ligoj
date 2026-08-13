@@ -180,9 +180,19 @@ function ligojSharedFacades() {
   }
 }
 
+// Public base path of the app — MUST match the backend's
+// `server.servlet.context-path` ('/ligoj' by default, '' for a root-context
+// deployment). Configurable so a root-context install can rebuild with
+// `VITE_BASE=/` (dev server: `VITE_BASE=/ npm run dev`). The value is
+// normalized to lead and trail with '/'; everything else (dev proxy keys,
+// the HTML import maps via %BASE_URL%, runtime APP_BASE) derives from it.
+const BASE = `/${(process.env.VITE_BASE || '/ligoj/').replace(/^\/+|\/+$/g, '')}/`.replace('//', '/')
+// Context prefix without the trailing slash: '/ligoj' by default, '' for root.
+const CTX = BASE.slice(0, -1)
+
 export default defineConfig({
   plugins: [vue(), ligojDevSharedImports(), ligojSharedFacades(), ligojDevFavicon()],
-  base: '/ligoj/',
+  base: BASE,
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -256,40 +266,42 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // Every key is prefixed with the configurable context (CTX = '/ligoj' by
+    // default, '' for a root-context backend) so dev works for both layouts.
     proxy: {
-      '/ligoj/rest': {
+      [`${CTX}/rest`]: {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
       // Spring Boot Actuator endpoints (management.endpoints.web.base-path),
       // surfaced by the Actuator admin view. Same backend as `rest`.
-      '/ligoj/manage': {
+      [`${CTX}/manage`]: {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
       // app-ui's OWN actuator (UI container) — served locally by app-ui, NOT
       // proxied to ligoj-api. Surfaces the UI container log to the Logs view.
-      '/ligoj/actuator': {
+      [`${CTX}/actuator`]: {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
-      '/ligoj/login': {
+      [`${CTX}/login`]: {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        // `/ligoj/login.html` and `/ligoj/login-by-api-key.html` are
+        // `<base>login.html` and `<base>login-by-api-key.html` are
         // the SPA's own static login pages — let vite serve them from
         // `app-ui/src/main/webapp/` instead of forwarding to the
         // backend (which has no resource at those paths in OAuth2Bff
         // mode, and would 302 us into the auth flow, looping forever
         // after a `?denied` failure URL). The other paths under
-        // `/ligoj/login*` — the form-login POST, the API-key POST
+        // `<base>login*` — the form-login POST, the API-key POST
         // (`/login-by-api-key`), and the `/login/oauth2/code/<client>`
         // OAuth callback — must still proxy through, so we only
         // bypass the `.html` files explicitly. The narrower
-        // `/ligoj/login/oauth2` proxy below keeps its own settings.
+        // `<base>login/oauth2` proxy below keeps its own settings.
         bypass(req) {
-          if (req.url?.startsWith('/ligoj/login.html')) return req.url
-          if (req.url?.startsWith('/ligoj/login-by-api-key.html')) return req.url
+          if (req.url?.startsWith(`${BASE}login.html`)) return req.url
+          if (req.url?.startsWith(`${BASE}login-by-api-key.html`)) return req.url
         },
       },
       // Spring Security OIDC endpoints: /oauth2/authorization/{client}
@@ -306,32 +318,32 @@ export default defineConfig({
       // (Alternative: add `xfwd: true` and set
       // `server.forward-headers-strategy=framework` in
       // application.properties — closer to a prod reverse-proxy.)
-      '/ligoj/oauth2': {
+      [`${CTX}/oauth2`]: {
         target: 'http://localhost:8080',
         changeOrigin: false,
       },
-      '/ligoj/login/oauth2': {
+      [`${CTX}/login/oauth2`]: {
         target: 'http://localhost:8080',
         changeOrigin: false,
       },
-      '/ligoj/logout': {
+      [`${CTX}/logout`]: {
         target: 'http://localhost:8080',
-        // Same reason as /ligoj/oauth2: Spring builds the OIDC
+        // Same reason as <base>oauth2: Spring builds the OIDC
         // `post_logout_redirect_uri` from the inbound Host header,
         // and we need it to point at vite (`localhost:5173`).
         changeOrigin: false,
       },
-      '/ligoj/captcha.png': {
+      [`${CTX}/captcha.png`]: {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
       // Plugin assets: app-ui's /main/* servlet proxies to ligoj-api on :8081.
-      '/ligoj/main': {
+      [`${CTX}/main`]: {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
       // Legacy: kept for any code still fetching /webjars/* directly.
-      '/ligoj/webjars': {
+      [`${CTX}/webjars`]: {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
