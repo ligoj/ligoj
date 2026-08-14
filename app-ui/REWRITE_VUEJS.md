@@ -502,6 +502,7 @@ Imported from the host bundle via the import map; treat as the public API and do
 | `useClipboard`                                                     | `copy(text, { message })` with browser API + textarea fallback.                                                                                                                                                                                           |
 | `useDataTable`                                                     | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`).                                                                                                                                                    |
 | `useFormGuard`                                                     | Unsaved-changes dialog + `onBeforeRouteLeave` integration.                                                                                                                                                                                                |
+| `useEditExtensions`                                                | Resolves the `editExtension` plugin contributions (body component + replacement save `apiPath`) of an entity edit dialog. See "Edit dialogs plugin extension".                                                                                             |
 | `LigojDataTable` / `LigojDataTableServer`                          | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported.                                                                                                                                                    |
 | `LigojConfirmDialog`                                               | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s.                                                                                                                                                                            |
 | `NodeIcon` / `nodeIcon` / `NodeModeChip`                           | Render a node's icon and subscription mode consistently.                                                                                                                                                                                                  |
@@ -1082,6 +1083,63 @@ without owning it.
 > via the adapter in `pluginNav`, and the old `AdminNavExtras.vue` component is
 > now **dead code** — unmounted since the 2026 redesign; the sidebar is
 > assembled entirely by `App.vue` + `mergeNav`. Don't build on either.
+
+---
+
+# Edit dialogs plugin extension (`editExtension`)
+
+The entity create/edit dialogs are extensible by any registered plugin through
+a single **`editExtension`** feature, resolved by the host composable
+`useEditExtensions(target, defaultApiPath, contextSupplier)` (exported from
+`@ligoj/host`, registry-driven, reactive to lazy plugin loads via
+`registry.version`). Two capabilities per contribution:
+
+- **`component`** — a Vue component rendered BELOW the dialog's built-in form
+  and BEFORE the actions, mounted with props `{ mode, form, context }`:
+  `mode` is `'create' | 'edit'`, `form` is the dialog's **live model** (extra
+  keys the component writes into it are spread into the save payload), and
+  `context` is the full feature context (target + entity refs below).
+- **`apiPath`** — a replacement REST resource for the save `POST`/`PUT` (same
+  API base, different resource). First contributing plugin wins.
+
+## Sample contribution
+
+```js
+// In the contributing plugin's features map:
+import MyUserExtension from './components/MyUserExtension.vue'
+
+editExtension(ctx) {                  // ctx = { target, mode, ...entity refs }
+  if (ctx.target !== 'user') {
+    return null                       // opt out of the other dialogs
+  }
+  return {
+    component: MyUserExtension,       // writes e.g. `form.badge = ...` on mount
+    apiPath: 'rest/my-extended-user', // ...saved through the extended endpoint
+  }
+}
+```
+
+Return `null`/`undefined` (or don't expose the feature at all — the standard
+`no feature "editExtension"` rejection is swallowed) to opt out. Dialogs reset
+their `form` to the base fields on every open, so an extension component must
+(re)write its own keys on mount.
+
+## Extension-aware components
+
+| `target` | Component | Default `apiPath` | Context fields |
+| --- | --- | --- | --- |
+| `project` | plugin-ui `views/ProjectEditDialog.vue` | `rest/project` | `project` (object or null) |
+| `user` | plugin-id `views/UserEditDialog.vue` | `rest/service/id/user` | `userId` |
+| `delegate` | plugin-id `views/DelegateEditDialog.vue` | `rest/security/delegate` | `delegateId` |
+| `container-scope` | plugin-id `views/ContainerScopeView.vue` (edit dialog) | `rest/service/id/container-scope` | `scope` (row or null), `type` (`group`/`company` tab) |
+| `company` | plugin-id `components/CompanyEditPanel.vue` | `rest/service/id/company` | `companyId` |
+| `group` | plugin-id `components/GroupEditPanel.vue` | `rest/service/id/group` | `groupId` |
+
+Payload note: every dialog now spreads its `form` into the save payload
+(dialog-specific transforms — e.g. group/company `scope` name→id — are applied
+AFTER the spread and win). Company additionally strips its display-only
+`locked`/`count` fields. Unit coverage of the resolution mechanics lives in the
+host: `src/__tests__/composables/useEditExtensions.test.js`.
 
 ---
 

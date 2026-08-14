@@ -15,6 +15,9 @@ export { useApi } from './composables/useApi.js'
 export { useClipboard } from './composables/useClipboard.js'
 export { useDataTable } from './composables/useDataTable.js'
 export { useFormGuard } from './composables/useFormGuard.js'
+// Generic `editExtension` plugin hook of the entity create/edit dialogs
+// (project, user, delegate, container-scope, company, group).
+export { useEditExtensions } from './composables/useEditExtensions.js'
 export { useAppStore } from './stores/app.js'
 export { useI18nStore } from './stores/i18n.js'
 export { useErrorStore } from './stores/error.js'
