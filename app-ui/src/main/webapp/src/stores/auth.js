@@ -53,6 +53,36 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!session.value)
   const userName = computed(() => session.value?.userName ?? '')
+
+  /**
+   * IAM user details pushed by plugin-id's session decoration (firstName,
+   * lastName, mails, company, department, localId, customAttributes, ...).
+   * Null when no identity provider decorates the session.
+   */
+  const userDetails = computed(() => session.value?.userSettings?.userDetails ?? null)
+
+  /**
+   * Displayed username, driven by the `service:id:user-display` configuration
+   * forwarded in the application settings:
+   * - 'id' (default): the login
+   * - 'mail': first attached mail, fallback to id
+   * - 'mail-short': same as 'mail' with the domain part dropped
+   * - any user attribute name ('firstName', 'lastName', 'company', ...),
+   *   also resolved in the `customAttributes` map, fallback to id
+   */
+  const displayName = computed(() => {
+    const id = userName.value
+    const mode = session.value?.applicationSettings?.data?.['service:id:user-display'] || 'id'
+    const details = userDetails.value
+    if (!details || mode === 'id') return id
+    if (mode === 'mail' || mode === 'mail-short') {
+      const mail = (Array.isArray(details.mails) ? details.mails : []).find(Boolean)
+      if (!mail) return id
+      return mode === 'mail-short' ? mail.split('@')[0] : mail
+    }
+    const value = details[mode] ?? details.customAttributes?.[mode]
+    return typeof value === 'string' && value.trim() ? value : id
+  })
   const roles = computed(() => session.value?.roles ?? [])
   // The session exposes an explicit `admin` flag; keep the legacy ADMIN-role
   // check as a fallback for older backends that don't emit it.
@@ -295,7 +325,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     session, loading,
-    isAuthenticated, userName, roles, isAdmin,
+    isAuthenticated, userName, userDetails, displayName, roles, isAdmin,
     uiAuthorizations, apiAuthorizations, appSettings, userSettings, globalTools,
     navItems,
     isAllowed, isAllowedApi,

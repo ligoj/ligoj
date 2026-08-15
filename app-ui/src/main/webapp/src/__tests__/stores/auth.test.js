@@ -71,6 +71,42 @@ describe('useAuthStore', () => {
     expect(store.isAdmin).toBe(true)
   })
 
+  it('displayName follows the service:id:user-display mode', async () => {
+    const details = {
+      firstName: 'Fabrice', lastName: 'Daugan',
+      mails: ['fabrice.daugan@sample.com', 'alt@sample.com'],
+      customAttributes: { employeeId: 'E-42' },
+    }
+    const newSession = (mode) => ({
+      userName: 'fdaugan',
+      userSettings: { userDetails: details },
+      applicationSettings: { data: mode ? { 'service:id:user-display': mode } : {} },
+    })
+    const store = useAuthStore()
+    const load = async (mode) => {
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(newSession(mode)) })
+      await store.fetchSession()
+    }
+
+    await load(null) // default → id
+    expect(store.displayName).toBe('fdaugan')
+    await load('mail')
+    expect(store.displayName).toBe('fabrice.daugan@sample.com')
+    await load('mail-short')
+    expect(store.displayName).toBe('fabrice.daugan')
+    await load('firstName')
+    expect(store.displayName).toBe('Fabrice')
+    await load('employeeId') // custom attribute
+    expect(store.displayName).toBe('E-42')
+    await load('unknown-attribute') // fallback to id
+    expect(store.displayName).toBe('fdaugan')
+
+    // 'mail' without any mail → fallback to id
+    details.mails = []
+    await load('mail')
+    expect(store.displayName).toBe('fdaugan')
+  })
+
   it('fetchSession deduplicates concurrent calls, then refetches once settled', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,

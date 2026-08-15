@@ -66,7 +66,18 @@
       <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
       <span class="sp" />
       <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' :
-          'mdi-account' }}</v-icon>{{ auth.userName || 'invité' }}<v-tooltip v-if="auth.isAdmin" activator="parent" location="bottom" :text="i18n.t('profile.adminTooltip')" /></button>
+          'mdi-account' }}</v-icon>{{ auth.displayName || 'invité' }}
+        <!-- Identity card tooltip: full name, login, mails, custom attributes,
+             roles and the administrator mention (see auth.displayName for the
+             `service:id:user-display` driven button label). -->
+        <v-tooltip activator="parent" location="bottom" max-width="360">
+          <div class="user-tip">
+            <div v-for="(line, li) in userTooltipLines" :key="li" class="user-tip-line" :class="{ 'user-tip-admin': line.admin }">
+              <span v-if="line.label" class="user-tip-label">{{ line.label }}</span>{{ line.text }}
+            </div>
+          </div>
+        </v-tooltip>
+      </button>
       <button class="icon-btn" title="Se déconnecter" @click="logout"><v-icon>mdi-logout</v-icon></button>
     </header>
 
@@ -101,6 +112,25 @@ const app = useAppStore()
 const i18n = useI18nStore()
 const appName = computed(() => auth.appSettings?.name || 'Ligoj')
 const appVersion = computed(() => auth.appSettings?.buildVersion || '')
+
+// Identity-card lines of the user button tooltip: full name, login, mails,
+// custom attributes, roles, and the administrator mention.
+const userTooltipLines = computed(() => {
+  const details = auth.userDetails || {}
+  const lines = []
+  const fullName = [details.firstName, details.lastName].filter(Boolean).join(' ')
+  if (fullName) lines.push({ text: fullName })
+  lines.push({ label: i18n.t('profile.tipLogin'), text: auth.userName })
+  for (const mail of (Array.isArray(details.mails) ? details.mails : [])) {
+    lines.push({ label: i18n.t('profile.tipMail'), text: mail })
+  }
+  for (const [key, value] of Object.entries(details.customAttributes || {})) {
+    lines.push({ label: key, text: value })
+  }
+  if (auth.roles.length) lines.push({ label: i18n.t('profile.tipRoles'), text: auth.roles.join(', ') })
+  if (auth.isAdmin) lines.push({ text: i18n.t('profile.adminTooltip'), admin: true })
+  return lines
+})
 
 // Each page re-opts into the bar breadcrumbs/refresh via setBreadcrumbs() in
 // its onMounted; clear on every navigation so a page that doesn't set them
@@ -468,6 +498,30 @@ body {
 .v-autocomplete__content .v-list-item--active .v-list-item__overlay {
   opacity: 0;
 }
+
+/* User button identity-card tooltip (teleported: global selectors). */
+.user-tip {
+  display: grid;
+  gap: 2px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.user-tip-label {
+  opacity: .7;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.user-tip-label::after {
+  content: ":";
+}
+
+.user-tip-admin {
+  font-weight: 700;
+  margin-top: 4px;
+}
+
 </style>
 
 <style scoped>
