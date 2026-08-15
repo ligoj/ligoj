@@ -18,6 +18,8 @@ export { useFormGuard } from './composables/useFormGuard.js'
 // Generic `editExtension` plugin hook of the entity create/edit dialogs
 // (project, user, delegate, container-scope, company, group).
 export { useEditExtensions } from './composables/useEditExtensions.js'
+// Admin-level demo mode flag (localStorage-backed), toggled from ProfileView.
+export { useDemoMode } from './composables/useDemoMode.js'
 export { useAppStore } from './stores/app.js'
 export { useI18nStore } from './stores/i18n.js'
 export { useErrorStore } from './stores/error.js'

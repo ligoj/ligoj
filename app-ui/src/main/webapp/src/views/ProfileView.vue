@@ -64,6 +64,16 @@
           <span class="sw" :class="{ on: reduceMotion }" role="switch" :aria-checked="reduceMotion" @click="onReduceMotionChange(!reduceMotion)"></span>
         </div>
 
+        <div v-if="auth.isAdmin" class="pref-row">
+          <v-icon class="pref-ic">mdi-flask-outline</v-icon>
+          <div class="pt">
+            <div class="ptt">{{ t('profile.demoMode') }}</div>
+            <div class="pth">{{ t('profile.demoModeHint') }}</div>
+          </div>
+          <span class="sw" :class="{ on: demoEnabled }" role="switch" :aria-checked="demoEnabled" @click="setDemoEnabled(!demoEnabled)"></span>
+          <v-tooltip activator="parent" location="top" max-width="340" :text="t('profile.demoModeTooltip')" />
+        </div>
+
         <div class="pref-theme-label"><v-icon class="pref-ic">mdi-palette</v-icon>{{ t('profile.theme') }}</div>
         <div class="tiles">
           <button v-for="(opt, i) in PRESET_OPTIONS" :key="opt.id" type="button" class="swatch" :class="{ on: preset === opt.id }" :style="{ '--i': i }" :title="opt.description"
@@ -116,6 +126,7 @@ import { useI18nStore } from '@/stores/i18n.js'
 import { useAppStore } from '@/stores/app.js'
 import { PRESET_OPTIONS, detectPreset, applyPreset, persistPreset } from '@/plugins/presets.js'
 import { detectCompact, applyCompact, persistCompact, detectReduceMotion, applyReduceMotion, persistReduceMotion } from '@/plugins/styles.js'
+import { useDemoMode } from '@/composables/useDemoMode.js'
 
 const auth = useAuthStore()
 const i18n = useI18nStore()
@@ -182,6 +193,9 @@ function onCompactChange(value) { compact.value = !!value; applyCompact(compact.
 
 const reduceMotion = ref(detectReduceMotion())
 function onReduceMotionChange(value) { reduceMotion.value = !!value; applyReduceMotion(reduceMotion.value); persistReduceMotion(reduceMotion.value) }
+
+// Admin-only demonstration mode (fake projects/tools blended into the views).
+const { enabled: demoEnabled, setEnabled: setDemoEnabled } = useDemoMode()
 
 const LOCALE_LABELS = { en: 'English', fr: 'Français' }
 const FLAGS = { en: '🇬🇧', fr: '🇫🇷' }

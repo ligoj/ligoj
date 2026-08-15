@@ -40,12 +40,13 @@ describe('useEditExtensions', () => {
     register('test-edit-ext', {
       editExtension(ctx) {
         seen.push(ctx)
-        return { component: FakeExtension, apiPath: 'rest/my-user' }
+        return { component: FakeExtension, footer: FakeExtension, apiPath: 'rest/my-user' }
       },
     })
-    const { components, apiPath, context } = useEditExtensions('user', 'rest/service/id/user',
+    const { components, footers, apiPath, context } = useEditExtensions('user', 'rest/service/id/user',
       () => ({ mode: 'edit', userId: 'alice' }))
     expect(components.value).toEqual([FakeExtension])
+    expect(footers.value).toEqual([FakeExtension])
     expect(apiPath.value).toBe('rest/my-user')
     expect(seen.at(-1)).toEqual({ target: 'user', mode: 'edit', userId: 'alice' })
     expect(context.value.target).toBe('user')
@@ -55,8 +56,9 @@ describe('useEditExtensions', () => {
     register('test-no-feature', {})
     register('test-other-target', { editExtension: (ctx) => ctx.target === 'group' ? { apiPath: 'rest/x' } : null })
     register('test-api-only', { editExtension: () => ({ apiPath: 'rest/other-project' }) })
-    const { components, apiPath } = useEditExtensions('project', 'rest/project', () => ({ mode: 'create' }))
+    const { components, footers, apiPath } = useEditExtensions('project', 'rest/project', () => ({ mode: 'create' }))
     expect(components.value).toEqual([])
+    expect(footers.value).toEqual([])
     expect(apiPath.value).toBe('rest/other-project')
   })
 

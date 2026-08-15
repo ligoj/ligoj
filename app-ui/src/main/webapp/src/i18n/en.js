@@ -200,6 +200,9 @@ export default {
   'profile.compactHint': 'Tighter spacing, smaller fonts, denser tables',
   'profile.reduceMotion': 'Reduce motion',
   'profile.reduceMotionHint': 'Disable ripples, dialog and menu animations, and progress bar motion',
+  'profile.demoMode': 'Demo mode',
+  'profile.demoModeHint': 'Blend demonstration content into the views: sample tools on the dashboard, sample projects and a demo section in the project dialog',
+  'profile.demoModeTooltip': 'Administrator-only. The demo content is stored nowhere: it only augments what this browser displays, and is remembered locally.',
   'profile.skipUnsavedConfirmation': 'Skip leave confirmation',
   'profile.skipUnsavedConfirmationHint': 'Leave dirty forms without confirmation prompt',
   'profile.language': 'Language',
@@ -492,7 +495,7 @@ export default {
   'common.lastModifiedBy': "Modified by",
   'common.lastModifiedDate': "Modified on",
   'common.noData': "No data",
-  'common.preview': "preview",
+  'common.demo': "demo",
   'common.reduce': "Collapse",
   'subscription.deleteConfirm': "Delete this subscription?",
 

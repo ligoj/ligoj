@@ -38,6 +38,7 @@ const props = defineProps({
 const attrs = useAttrs()
 const root = ref(null)
 // Respect an explicit name; otherwise a unique, non-guessable one.
+// eslint-disable-next-line no-useless-assignment -- module-level counter, incremented across component instances
 const fieldName = String(attrs.name ?? `lj-ac-${++seq}`)
 
 function hardenInputs() {

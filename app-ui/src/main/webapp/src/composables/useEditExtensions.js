@@ -19,6 +19,10 @@ import registry from '@/plugins/registry.js'
  *       // `form` is the dialog's live model: extra keys the component writes
  *       // into it are sent in the save payload.
  *       component: MyExtension,
+ *       // Optional Vue component mounted in the dialog's action bar (footer),
+ *       // next to the built-in buttons — typically an LjButton. Same
+ *       // { mode, form, context } props.
+ *       footer: MyExtensionAction,
  *       // Optional replacement REST resource for the save POST/PUT (same API
  *       // base, different resource). First contributing plugin wins.
  *       apiPath: 'rest/my-project',
@@ -59,6 +63,7 @@ export function useEditExtensions(target, defaultApiPath, contextSupplier) {
   })
 
   const components = computed(() => extensions.value.filter((e) => e.component).map((e) => e.component))
+  const footers = computed(() => extensions.value.filter((e) => e.footer).map((e) => e.footer))
   const apiPath = computed(() => extensions.value.map((e) => e.apiPath).find(Boolean) || defaultApiPath)
-  return { components, apiPath, context }
+  return { components, footers, apiPath, context }
 }

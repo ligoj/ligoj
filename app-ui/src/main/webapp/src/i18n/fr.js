@@ -200,6 +200,9 @@ export default {
   'profile.compactHint': 'Espacements resserrés, polices plus petites, tableaux plus denses',
   'profile.reduceMotion': 'Réduire les animations',
   'profile.reduceMotionHint': 'Désactive les effets ripple, les animations de dialogs et menus, et la barre de progression',
+  'profile.demoMode': 'Mode démo',
+  'profile.demoModeHint': 'Ajoute du contenu de démonstration aux vues : outils fictifs sur le tableau de bord, projets fictifs et une section démo dans le dialogue projet',
+  'profile.demoModeTooltip': 'Réservé aux administrateurs. Le contenu de démonstration n\'est stocké nulle part : il complète uniquement l\'affichage de ce navigateur, et la préférence est mémorisée localement.',
   'profile.skipUnsavedConfirmation': 'Quitter sans confirmation',
   'profile.skipUnsavedConfirmationHint': 'Quitte les formulaires modifiés sans demander confirmation',
   'profile.language': 'Langue',
@@ -483,7 +486,7 @@ export default {
   'common.lastModifiedBy': "Modifié par",
   'common.lastModifiedDate': "Modifié le",
   'common.noData': "Aucune donnée",
-  'common.preview': "aperçu",
+  'common.demo': "démo",
   'common.reduce': "Réduire",
   'subscription.deleteConfirm': "Supprimer cette souscription ?",
 

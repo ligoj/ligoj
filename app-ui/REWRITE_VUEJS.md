@@ -264,7 +264,7 @@ rejects otherwise — a delegation test's fake tool must be a full manifest
 - **Lint baseline**: `js.configs.recommended` + `pluginVue.configs['flat/essential']` (NOT `flat/recommended`). `vue/valid-v-slot` runs with `{ allowModifiers: true }` because Vuetify data-table cell templates use dotted slot names (`#item.foo`).
 - **Host-exposed Vuetify primitives**: `host.js` re-exports `VBtn`, `VChip`, `VIcon`, `VTooltip`, `VListItem`, `VDivider`. Plugin `feature()` actions build VNodes with `h(VBtn, …)` without bundling their own Vuetify copy.
 - **2026 "Vibrant" shared components** live in the host and are re-exported from `host.js`: `VibrantDataTable` (presentation-only table; caller keeps its own `useDataTable`), `VibrantConfirmDialog` (drop-in for `LigojConfirmDialog` — same props/slots/events), `LigojIcon` (compact-mode-aware `<v-icon>` wrapper). They live in the host (not a plugin) because BOTH plugin-ui and plugin-id consume them and a plugin cannot import from a sibling plugin. See "2026 redesign & host-as-shell".
-- **Admin-level demo mode** (`useDemoMode` from `@ligoj/host`): a shared reactive flag persisted under localStorage `ligoj-demo-mode`, toggled from the host ProfileView (visible to administrators only, tooltip + hint). When on, plugin-ui blends demonstration content into the views: demo tool groups on the dashboard, demo projects in ProjectListView (shared dataset `plugin-ui/ui/src/demo/demoData.js`) and a `DemoProjectExtension` in the project edit dialog via `editExtension`. The former per-view "Preview" toolbar toggle of HomeView is gone; `common.preview` was renamed `common.demo`.
+- **Admin-level demo mode** (`useDemoMode` from `@ligoj/host`): a shared reactive flag persisted under localStorage `ligoj-demo-mode`, toggled from the host ProfileView (visible to administrators only, tooltip + hint). When on, plugin-ui blends demonstration content into the views: demo tool groups on the dashboard, demo projects in ProjectListView (shared dataset `plugin-ui/ui/src/demo/demoData.js`) a `DemoProjectExtension` body + `DemoProjectAction` action-bar button in the project edit dialog via `editExtension`, and a "Demo showcase" entry in the Administration menu (`renderNav`, demo-gated) routing to `plugin-ui/ui/src/views/DemoShowcaseView.vue` — a one-page gallery of the Ligoj shared components and Vuetify primitives, meant to grow into the reference showcase. The former per-view "Preview" toolbar toggle of HomeView is gone; `common.preview` was renamed `common.demo`.
 - **Host is a shell**: the host owns only the chrome (App.vue sidebar/topbar, login, profile, about, error snackbar, plugin loader, shared component surface). EVERY domain screen lives in a plugin. The host `router/index.js` registers only `/profile`, `/about`, and the catch-all → `PluginView`; all other routes come from plugins' `install({ router })`.
 
 ## Plugin loading model (current)
@@ -1100,6 +1100,9 @@ a single **`editExtension`** feature, resolved by the host composable
   `mode` is `'create' | 'edit'`, `form` is the dialog's **live model** (extra
   keys the component writes into it are spread into the save payload), and
   `context` is the full feature context (target + entity refs below).
+- **`footer`** — a Vue component mounted in the dialog's ACTION BAR next to
+  the built-in buttons (typically an `LjButton`), same `{ mode, form,
+  context }` props.
 - **`apiPath`** — a replacement REST resource for the save `POST`/`PUT` (same
   API base, different resource). First contributing plugin wins.
 
@@ -1115,6 +1118,7 @@ editExtension(ctx) {                  // ctx = { target, mode, ...entity refs }
   }
   return {
     component: MyUserExtension,       // writes e.g. `form.badge = ...` on mount
+    footer: MyUserActionButton,       // extra button in the dialog action bar
     apiPath: 'rest/my-extended-user', // ...saved through the extended endpoint
   }
 }
@@ -1136,10 +1140,11 @@ their `form` to the base fields on every open, so an extension component must
 | `company` | plugin-id `components/CompanyEditPanel.vue` | `rest/service/id/company` | `companyId` |
 | `group` | plugin-id `components/GroupEditPanel.vue` | `rest/service/id/group` | `groupId` |
 
-A live sample ships with plugin-ui: `components/DemoProjectExtension.vue`,
-contributed for target `project` when the admin-level demo mode
-(`useDemoMode`) is on. Its feature reads the reactive flag, so the consuming
-dialog updates the moment the mode is toggled — no reload.
+A live sample ships with plugin-ui: `components/DemoProjectExtension.vue`
+(body) + `components/DemoProjectAction.vue` (action-bar button), contributed
+for target `project` when the admin-level demo mode (`useDemoMode`) is on.
+The feature reads the reactive flag, so the consuming dialog updates the
+moment the mode is toggled — no reload.
 
 Payload note: every dialog now spreads its `form` into the save payload
 (dialog-specific transforms — e.g. group/company `scope` name→id — are applied
