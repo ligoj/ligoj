@@ -147,7 +147,21 @@ export const useAuthStore = defineStore('auth', () => {
     authPromptOpen.value = false
   }
 
-  async function fetchSession() {
+  // In-flight session request, shared between concurrent callers.
+  let sessionPromise = null
+
+  function fetchSession() {
+    // Boot-time dedup: App.vue's onMounted and the router's initial beforeEach
+    // guard both request the session around mount, before either resolved —
+    // share the single in-flight request instead of firing twice. Once
+    // settled, the next call performs a fresh fetch (login/expiry flows).
+    if (!sessionPromise) {
+      sessionPromise = doFetchSession().finally(() => { sessionPromise = null })
+    }
+    return sessionPromise
+  }
+
+  async function doFetchSession() {
     loading.value = true
     try {
       // Build the URL against the app's base so relative-path drift

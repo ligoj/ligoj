@@ -71,6 +71,24 @@ describe('useAuthStore', () => {
     expect(store.isAdmin).toBe(true)
   })
 
+  it('fetchSession deduplicates concurrent calls, then refetches once settled', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ userName: 'admin' }),
+    })
+    const store = useAuthStore()
+
+    // Boot race: App.vue onMounted + router guard fire before either resolves
+    const [ok1, ok2] = await Promise.all([store.fetchSession(), store.fetchSession()])
+    expect(ok1).toBe(true)
+    expect(ok2).toBe(true)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+
+    // A later call (login/expiry flows) performs a fresh fetch
+    await store.fetchSession()
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+  })
+
   it('fetchSession returns false on failure', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({ ok: false })
 
