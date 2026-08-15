@@ -31,6 +31,7 @@ The backend container assumes the business role of the application, is stateless
 * Spring baseline: core, security and data
 * Apache CXF, not Spring-WS
 * JPA
+* Frontend: Vue 3 SPA (Vite, Pinia, Vuetify) — see [UI](#ui) and [app-ui/REWRITE_VUEJS.md](app-ui/REWRITE_VUEJS.md)
 
 # Philosophy
 
@@ -303,52 +304,20 @@ The `api` authorization is checked at the server side for each REST access (see 
 
 ### At the browser side
 
-When the user profile is loaded, the authorizations (`ui` and `api`) are checked in the current DOM for the first load and then continuously when updated.
-The watched components are:
+The session settings (`GET rest/session`) deliver the principal's `uiAuthorizations` and
+`apiAuthorizations` regex sets to the Vue SPA, which applies them declaratively (administrators
+bypass every check):
 
-- The current browser's URL itself: the `location`, visible in the navigation URL. When it is unauthorized, a security message is displayed, and the content is not loaded.
-- The HTML components having `href` attribute
-- The HTML components having `data-secured-service`, `data-secured-role` or `data-secured-method` attribute. See [data-secured-*](#data-secured-)
+- **Navigation**: the sidebar entries carry an `auth` resource path checked against
+  `uiAuthorizations` via `auth.isAllowed(path)` — unauthorized entries (and any section left
+  without children) are not rendered. Same check guards direct URL navigation.
+- **Actions**: buttons, menu items and other per-action components are gated with
+  `v-if="auth.isAllowedApi(path, method)"` against `apiAuthorizations` — e.g. a "Delete" button
+  requires `rest/service/id/user` with `DELETE`. The component simply isn't rendered when the
+  REST call it triggers would be refused.
 
-The matched URL starts after the `#/` fragment part. Samples:
-
-* `^system/bench`: Browser URL `#/system/bench`
-* `^system/.*`: Browser URL `#/system`
-
-When an HTML component is unauthorized, by default it is removed from the DOM. It is possible to control this behavior with the `data-security-on-forbidden="disable"` attribute value.
-
-When an HTML component contains only unauthorized components (buttons group, dropdown,...), it is also removed from the DOM. This process is recursively applied.
-
-#### `data-secured-*`
-
-The `data-secured-*` attributes value corresponds to the related `api` usage the component depends on. For example, a chart displaying data collected from a REST URL should be displayed only when the
-REST service is authorized. Without this `data-secured-service`, the chart is displayed but with an empty content: still secured, but not really friendly.
-
-#### Samples
-
-```
-<svg class="my-chart-displaying-secured-data"></svg>
-```
-
-SVG component is always displayed, even when the D3 ajax fails.
-
-```
-<svg class="my-chart-displaying-secured-data" data-secured-service="rest/financial/y2y"></svg>
-```
-
-SVG component is only displayed when `api` URL `rest/financial/y2y` is allowed.
-
-```
-<svg class="my-chart-displaying-secured-data" data-secured-role="FINANCE"></svg>
-```
-
-SVG component is only displayed when the principal has the role "FINANCE". This role can either be a static Spring-Security role, or an assigned role.
-
-```
-<svg class="my-chart-displaying-secured-data" data-secured-service="rest/financial/y2y" data-secured-method="GET"></svg>
-```
-
-SVG component is only displayed when `api` URL `rest/financial/y2y` is allowed with the `GET` method.
+Both helpers live in the host auth store (`@ligoj/host` → `useAuthStore`); the patterns and the
+per-view conventions are detailed in [app-ui/REWRITE_VUEJS.md](app-ui/REWRITE_VUEJS.md).
 
 ### At the server side
 
@@ -678,18 +647,6 @@ Sequence
 * Building the JPA pagination from the JSON request: `paging.getPageRequest(uriInfo, COLUMNS)`. Where `COLUMNS` corresponds to the allowed mapped properties.
 * Building the response: `paging.applyPagination(uriInfo, findAll)` with optional item transformation.
 
-## MVVM
-
-MVVM is managed by [CascadeJS](https://github.com/fabdouglas/cascadejs) with enabled plugins:
-
-* `css`
-* `html` backed by [RequireJS Text](https://github.com/requirejs/text)
-* `js` backed by [RequireJS](http://requirejs.org/)
-* `i18n` backed by [RequireJS i18n](https://github.com/requirejs/i18n) and [HandlebarsJS](https://handlebarsjs.com/)
-* `partial` backed by [HandlebarsJS](https://handlebarsjs.com/)
-
-Note: VueJS rewrite is in progress.
-
 ## File
 
 Uploaded files are always stored by the `ligoj-api` container, and use `ligoj.file.path` for authorization. Only administrators can use this feature.
@@ -915,77 +872,49 @@ See `ApiTokenResource` for more details.
 
 ## UI
 
-### Callbacks
+The UI is a **Vue 3 single-page application**: Vite 8 build, Pinia stores, Vuetify 4 components,
+vue-i18n with flat keys, native `fetch` (no Axios). The full architecture and the plugin-authoring
+guide live in **[app-ui/REWRITE_VUEJS.md](app-ui/REWRITE_VUEJS.md)** — the summary below is the
+entry point.
 
-Callbacks are functions that are synchronously called when an event is triggered.
+### Host as a shell
 
-These are distinct from the native DOM events that can be used with jQuery `on` and `off` methods.
+`app-ui/src/main/webapp` owns only the chrome: the `App.vue` sidebar/topbar, login pages, profile,
+error toasts, the plugin loader and the shared component surface. **Every domain screen ships with
+its owning plugin** as an independently built Vue bundle
+(`plugin-<id>/ui/` → `META-INF/resources/webjars/<id>/vue/index.js`), loaded at runtime — no host
+rebuild to add or update a plugin. Plugins import the host surface from `@ligoj/host` (stores,
+composables, shared components, Vuetify primitives), kept external at build so host and plugins
+share the same instances.
 
-Native events are:
+### Plugin contract
 
-- `html:before`: `data` is an Object with this structure:
-    - `target`: jQuery object that will receive the new content
-    - `content`: An array where the first element is the HTML content to be added. This array can be modified.
-- `html:after`: `data` is an Object with this structure:
-    - `target`: jQuery object that received the new content
-    - `content`: An array where the first element is the HTML content that was added.
-- `unload:before`: No data. The context is the currently unloading fragment.
-- `unload:after`: No data. The context is the currently unloaded fragment.
-- `fragment:before`: No data. The context is the fragment to be loaded.
-- `fragment-${id}`: No data. The context is the fragment to be loaded. `id` is the fragment identifier.
-- `fragment:error`: No data. The context is the fragment that failed to load.
-- `hash`: `data` is the new navigation hash (URL fragment).
-- `html:after:datatables:row`: DataTables row has been added by DataTables. `data` is an Object with this structure:
-    - `target`: Is the jQuery object of the row.
-    - `rowData`: The data associated with the row.
-    - `dataTable`: Is the DataTables object.
-- `html:before:login`: Before the internal login popup is added.
-- `html:after:login`: After the internal login popup is added.
-- `html:after:project`: After the project's details is added.
-- `view:before:compile`: Before a view is compiled by Handlebars. `data` is an Object with this structure:
-    - `template`: Raw template content. Can be modified before compilation.
-- `view:after:compile`: After a view is compiled by Handlebars. `data` is an Object with this structure:
-    - `template`: Compiled template function. Can be modified before the `html` phase.
-- `view:before:unload`: Before a view is unloaded, removed from the DOM. `data` is the jQuery object of the view.
-- `view:after:unload`: After a view is unloaded, removed from the DOM. `data` is the jQuery object of the view.
+Each plugin's `ui/src/index.js` default-exports a manifest:
+`{ id, label, component?, routes?, requires?, install({ router }), feature(action, ...args), service, meta }`.
+`install()` registers the routes and merges the plugin's own i18n bundles; `feature()` is the
+single dispatch point the host and sibling plugins call into. Required plugins (`id`, `ui`,
+`prov`) are pre-loaded before mount; the rest load lazily from the discovered plugin list or
+just-in-time.
 
-You can create your own events and use them with `trigger`, `on` and `off` methods.
+### Extension points
 
-#### Register a callback
+Contributions are resolved through the plugin registry, reactively (a lazily loaded plugin still
+contributes after first paint):
 
-Register a callback with `on` method.
+| Feature | Contributes |
+| --- | --- |
+| `renderNav` | Sidebar menus/entries, declaratively, with `before`/`after` positioning and dividers |
+| `editExtension` | Entity edit dialogs: body component, action-bar button, replacement save resource |
+| `renderFeatures` / `renderDetailsKey` / `renderDetailsFeatures` | Subscription-row buttons and details cells |
+| `renderGlobal` | Per-user global tool links in the sidebar footer |
+| `parameterField` / `parameterLayout` | Custom inputs and grouping/ordering in the subscription/node parameter forms |
 
-The callback is a function that will be called synchronously when the event is triggered.
+### Development loop
 
-```javascript
-$cascade.on("html:before", function({target, content}, context) {
-  content[0] += "<div>My callback</div>";
-});
-$cascade.on("html:after", function({target, content}, context) {
-  target.append("<div>My callback</div>");
-});
-$cascade.on("html", function({target, content}, context) {
-    // is invoked for `html:before` and `html:after` trigerred events
-});
-```
-
-#### Unregister from an event
-
-```javascript
-// This is unregistering all callbacks for the events `html*`, so `html` and `html:before` for example
-$cascade.off("html");
-
-// This is unregistering a callback for an event
-$cascade.off("html:private_name");
-```
-
-#### Trigger an event
-
-```javascript
-// This is triggering an event `html` that will trigger callbacks listening to `html*`
-$cascade.trigger("html", data, context);
-```
-
+`npm run dev` in `app-ui/src/main/webapp` serves the host with hot reload and proxies the REST/plugin
+endpoints to the backend; plugin bundles are rebuilt with `npm run build` in their `ui/` folder and
+picked up live. See [Frontend development (Vite)](#frontend-development-vite) for the commands,
+the `VITE_BASE` context-path coupling and the plugin build chain.
 # Plugin management
 
 A single jar (archive) contains binaries (Java class files), configuration extensions, and static resources.
@@ -1021,17 +950,12 @@ All Web resources are in the directory `META-INF/resources/webjars/service/${ser
 
 All entities to be installed on setup are in the directory `csv`.
 
-| Pattern file                        | Sample              | Role                                                                                                                                                              |
-| ----------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ${base_java}/${Tool}Resource.class  | SlackResource.class | Plugin definition                                                                                                                                                 |
-| ${base_web}/img/${tool}.png         | img/slack.png       | 16x icon                                                                                                                                                          |
-| ${base_web}/img/${tool}x64.png      | img/slack.png       | 64x icon                                                                                                                                                          |
-| ${base_web}/img/${tool}x64w.png     | img/slack.png       | 64x white icon                                                                                                                                                    |
-| ${base_web}/nls/messages.js         | nls/messages.js     | English i18n messages                                                                                                                                             |
-| ${base_web}/nls/${lang}/messages.js | nls/fr/messages.js  | Specific i18n messages                                                                                                                                            |
-| ${base_web}/${tool}.css             | slack.css           | CSS                                                                                                                                                               |
-| ${base_web}/${tool}.js              | slack.js            | JS code                                                                                                                                                           |
-| ${base_web}/${tool}.html            | slack.html          | HTML template                                                                                                                                                     |
+| Pattern file                         | Sample              | Role                                                                                                                        |
+| ------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ${base_java}/${Tool}Resource.class   | SlackResource.class | Plugin definition                                                                                                           |
+| ${base_web}/img/${tool}.svg          | img/slack.svg       | Tool icon (SVG; a `.png` fallback is probed by the UI when absent)                                                          |
+| ui/src/index.js                      |                     | Vue plugin manifest (routes, `install()`, `feature()`); i18n ships inside the bundle (`ui/src/i18n/{en,fr}.js`)             |
+| webjars/${qualified-id}/vue/index.js |                     | Vite-built Vue bundle emitted from `ui/` (see [app-ui/REWRITE_VUEJS.md](app-ui/REWRITE_VUEJS.md))                           |
 | csv/node.csv                        |                     | [Node](https://github.com/ligoj/ligoj-api/blob/master/plugin-core/src/main/java/org/ligoj/app/model/Node.java) entities to persist                                |
 | csv/parameter.csv                   |                     | [Parameter](https://github.com/ligoj/ligoj-api/blob/master/plugin-core/src/main/java/org/ligoj/app/model/Parameter.java) entities to persist                      |
 | csv/parameter-value.csv             |                     | [ParameterValue](https://github.com/ligoj/ligoj-api/blob/master/plugin-core/src/main/java/org/ligoj/app/model/ParameterValue.java) entities to persist (optional) |
@@ -1045,9 +969,15 @@ These extensions may:
 - Provide additional data collected by other plugins
 - Add security levels
 
-| Layer | Scope  | Enablement                                                                                                                                                                             |
-| ----- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| UI    | Global | Create a file `META-INF/resource/webjars/bootstrap.private.js`. This JS code will be added to the initial JS code. For example, it's possible to register events, add a menu entry,... |
+| Layer | Scope         | Enablement                                                                                                                             |
+| ----- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| UI    | Navigation    | `renderNav` feature: contribute sidebar menus/entries declaratively (positioning, dividers)                                            |
+| UI    | Edit dialogs  | `editExtension` feature: body component, action-bar button and/or replacement save resource on the entity edit dialogs                 |
+| UI    | Subscriptions | `renderFeatures` / `renderDetailsKey` / `renderDetailsFeatures` features: row buttons and details cells                                |
+| UI    | Parameters    | `parameterField` / `parameterLayout` features: custom inputs and grouping in the subscription/node forms                               |
+| UI    | Global tools  | `renderGlobal` feature: per-user tool links in the sidebar footer                                                                      |
+
+The contracts of these UI extension points are specified in [app-ui/REWRITE_VUEJS.md](app-ui/REWRITE_VUEJS.md).
 
 ## Subscription
 
@@ -1864,10 +1794,9 @@ Sample configuration file [application.properties](app-ui/src/main/resources/app
 # OAuth2 specific overrides
 security = OAuth2Bff
 
-# For login using the e-mail, recommended for EntraID, GMail,...
-#ligoj.security.oauth2.username-attribute = email
-
-# For login using the internal user identifier, recommended for LDAP
+# Login attribute
+# `email`: recommended for EntraID, GMail,...
+# `preferred_username`: recommended for LDAP, Keycloak, OAuth, ...
 ligoj.security.oauth2.username-attribute = preferred_username
 
 ligoj.security.login.url = /oauth2/authorization/keycloak
