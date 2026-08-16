@@ -1303,6 +1303,15 @@ Battle scars worth respecting on the next migration.
 
 ## Vue components & breadcrumbs
 
+- **Sidebar entries are REAL links.** `App.vue` nav/sub-nav anchors (and the
+  About footer) carry hash `href`s (`#/route`; a section link targets its
+  first child page) so the browser's native new-tab gestures work —
+  middle-click, right-click → "Open in new tab", ctrl/cmd+click. Only a
+  **plain left-click** is intercepted (`isPlainLeftClick` guard →
+  `preventDefault()` + `router.push` / section toggle); a modified click must
+  fall through untouched. Apply the same pattern to any new chrome
+  navigation: never a bare `@click="router.push(...)"` on a hrefless element.
+
 - **Scoped CSS bleeds onto a child component's ROOT element.** A Vue SFC's
   `<style scoped>` rule applies to the *root* node of any child component it
   renders (the child root carries both scope ids). So if a parent view has

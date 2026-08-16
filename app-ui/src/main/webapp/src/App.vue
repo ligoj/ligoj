@@ -18,8 +18,11 @@
         <span class="brand-word">{{ appName }}</span>
       </div>
       <nav class="nav">
+        <!-- Real hash hrefs so middle-click / right-click "Open in new tab" /
+             ctrl+click work natively; plain left-clicks are intercepted for
+             SPA navigation (a section link targets its first child page). -->
         <template v-for="it in NAV" :key="it.label">
-          <a class="nav-item" :class="{ active: isNavActive(it), 'has-children': it.children }" @click="onNavClick(it)">
+          <a class="nav-item" :class="{ active: isNavActive(it), 'has-children': it.children }" :href="navHref(it)" @click="onNavClick(it, $event)">
             <v-icon>{{ it.icon }}</v-icon>
             <span>{{ it.label }}</span>
             <span v-if="it.soon" class="soon">bientôt</span>
@@ -30,7 +33,7 @@
           <div v-if="it.children && isOpen(it)" class="subnav">
             <template v-for="c in it.children" :key="c.label">
               <div v-if="c.divider" class="sub-sep"><span v-if="c.divider !== true">{{ c.divider }}</span></div>
-              <a class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }" @click="c.route ? go(c.route) : toast()">
+              <a class="sub-item" :class="{ active: c.route === route.path || (c.match && route.path.startsWith(c.match)) }" :href="c.route ? `#${c.route}` : undefined" @click="onSubClick(c, $event)">
                 <LigojIcon v-if="c.icon" :icon="c.icon" size="16" />
                 <span v-else class="dot" />
                 <span>{{ c.label }}</span>
@@ -41,8 +44,8 @@
         </template>
       </nav>
       <div class="sb-foot">
-        <button class="ver" :class="{ active: route.path === '/about' }" @click="go('/about')"><v-icon size="14">mdi-information-outline</v-icon><span>{{ i18n.t('nav.about') }}</span><span
-            v-if="appVersion" class="ver-num">{{ appVersion }}</span></button>
+        <a class="ver" :class="{ active: route.path === '/about' }" href="#/about" @click="onSubClick({ route: '/about' }, $event)"><v-icon size="14">mdi-information-outline</v-icon><span>{{ i18n.t('nav.about') }}</span><span
+            v-if="appVersion" class="ver-num">{{ appVersion }}</span></a>
         <button class="foot-bug" :aria-label="i18n.t('about.reportBug')" @click="app.openBugDialog()"><v-icon size="18">mdi-bug-outline</v-icon><v-tooltip activator="parent" location="top" :text="i18n.t('about.reportBug')" /></button>
       </div>
     </aside>
@@ -330,7 +333,23 @@ function isNavActive(it) {
 // auto-opens on navigation so the active page is always revealed.
 const openSections = reactive({})
 function isOpen(it) { return !!(it.children && openSections[it.label]) }
-function onNavClick(it) {
+
+/* The nav renders REAL links (hash hrefs) so the browser's native new-tab
+ * gestures work: middle-click and the right-click context menu use the href
+ * directly, and a modified left-click (ctrl/cmd/shift/alt) falls through
+ * here untouched. Only a plain left-click is intercepted for in-app
+ * routing (and section toggling). */
+function isPlainLeftClick(e) {
+  return !e || (e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey)
+}
+/** Native target of a nav entry: its route, or its first child page. */
+function navHref(it) {
+  const route2 = it.route || it.children?.[0]?.route
+  return route2 ? `#${route2}` : undefined
+}
+function onNavClick(it, e) {
+  if (!isPlainLeftClick(e)) return
+  e?.preventDefault()
   if (it.children) {
     if (openSections[it.label]) {
       openSections[it.label] = false
@@ -343,6 +362,11 @@ function onNavClick(it) {
   } else {
     toast()
   }
+}
+function onSubClick(c, e) {
+  if (!isPlainLeftClick(e)) return
+  e?.preventDefault()
+  c.route ? go(c.route) : toast()
 }
 watch(() => route.path, () => {
   for (const it of NAV.value) if (it.children && isNavActive(it)) openSections[it.label] = true
@@ -607,6 +631,8 @@ body {
   padding: 10px 12px;
   border-radius: var(--lj-radius-sm, 10px);
   cursor: pointer;
+  /* Real links (native new-tab support) — keep the app look. */
+  text-decoration: none;
   font-family: var(--v26-font);
   font-weight: 600;
   font-size: 14px;
@@ -686,6 +712,7 @@ body {
   padding: 8px 12px;
   border-radius: var(--lj-radius-sm, 9px);
   cursor: pointer;
+  text-decoration: none;
   font-family: var(--v26-font);
   font-weight: 600;
   font-size: 13px;
@@ -772,6 +799,7 @@ body {
   color: inherit;
   cursor: pointer;
   border-radius: 8px;
+  text-decoration: none;
   transition: opacity .15s, background .15s;
 }
 
