@@ -88,7 +88,7 @@
         </div>
       </section>
 
-      <section class="pcard">
+      <section class="pcard pcard--perm">
         <h3><span class="ic"><v-icon>mdi-key</v-icon></span>{{ t('profile.permissions') }}</h3>
         <div class="subhead d-flex align-center">{{ t('profile.uiAuth') }}<v-chip size="x-small" variant="tonal" color="primary" class="ms-2">{{ auth.uiAuthorizations.length }}</v-chip></div>
         <div class="perm-list">
@@ -418,11 +418,27 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
   margin-top: 16px;
 }
 
+/* The Permissions card stretches to the grid row set by the (taller)
+ * Preferences card. Distribute that height: headers stay fixed, the two
+ * auth lists split the remaining space evenly — no blank band under the
+ * lists while they scroll. The 200px basis keeps the intrinsic height
+ * bounded in the stacked single-column layout. */
+.pcard--perm {
+  display: flex;
+  flex-direction: column;
+}
+
+.pcard--perm h3,
+.pcard--perm .subhead {
+  flex: none;
+}
+
 .perm-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 220px;
+  flex: 1 1 200px;
+  min-height: 0;
   overflow: auto;
 }
 
