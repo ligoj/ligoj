@@ -507,6 +507,7 @@ Imported from the host bundle via the import map; treat as the public API and do
 | `useEditExtensions`                                                | Resolves the `editExtension` plugin contributions (body component + replacement save `apiPath`) of an entity edit dialog. See "Edit dialogs plugin extension".                                                                                             |
 | `LigojDataTable` / `LigojDataTableServer`                          | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported.                                                                                                                                                    |
 | `LigojConfirmDialog`                                               | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s.                                                                                                                                                                            |
+| `ApiVerifyDialog`                                                  | API access verification dialog: crosses `rest/openapi.json` operations with a set of `{method?, pattern}` API authorizations. Props: `authorizations`, `admin` (bypass — session only, never for role/user audits), `subject` (appended to the title). Used by the profile (own session) and the system Roles/Users row action "Verify". |
 | `LigojAutocomplete` / `LigojSelect`                                | Drop-in `v-autocomplete` / `v-select` twins — **always use these, never the bare Vuetify components**. They defeat the browser's native autofill overlay (unique per-instance `name` + unmatchable `autocomplete` token — Chrome ignores a literal `off` — plus 1Password/LastPass opt-outs) and disable the dropdown transition when the profile's reduce-motion flag (`<html data-reduce-motion>`) is set. All props/events/slots forwarded.                |
 | `NodeIcon` / `nodeIcon` / `NodeModeChip`                           | Render a node's icon and subscription mode consistently.                                                                                                                                                                                                  |
 | `nodeType` / `isInstance`                                          | Classify a node id (`service` / `feature` / `tool` / `instance`).                                                                                                                                                                                         |
@@ -1383,12 +1384,15 @@ Battle scars worth respecting on the next migration.
 - **API explorer deep link.** `#/api?op=<method>|<path>` (the operation `key`
   of ApiHomeView, lowercase method + raw OpenAPI path, URL-encoded) opens the
   owning tag group and the operation body, scrolls it to center and rings it
-  (`.op.focused`). Used by the profile's **API access verification** dialog
-  (ProfileView "Verify" next to "Manage API keys"): it crosses every
-  `rest/openapi.json` operation with `auth.apiAuthorizations` (path templates
-  `{x}` substituted with `1`/`a` before `isAllowedApi`), shows the allowed
-  rate, and tests a typed URL (scheme/host/`/ligoj/` stripped) against the
-  authorizations with live table filtering; row click opens the deep link.
+  (`.op.focused`). Used by the shared **`ApiVerifyDialog`** host component
+  (profile "Verify" next to "Manage API keys" — own session + admin bypass;
+  system Roles row action — one role's authorizations; system Users row
+  action — union of the user's roles' authorizations): it crosses every
+  `rest/openapi.json` operation with the given authorizations (path templates
+  `{x}` substituted with `1`/`a` before matching), shows the allowed rate,
+  and tests a typed URL (scheme/host/any context prefix up to `rest/`
+  stripped) against the authorizations with live table filtering; row click
+  opens the deep link.
 
 ## Plugin loader
 

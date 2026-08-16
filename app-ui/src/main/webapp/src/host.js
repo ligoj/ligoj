@@ -35,6 +35,9 @@ export { default as RowActionsMenu } from './components/RowActionsMenu.vue'
 export { default as LigojAutocomplete } from './components/LigojAutocomplete.vue'
 export { default as LigojSelect } from './components/LigojSelect.vue'
 export { default as LigojConfirmDialog } from './components/LigojConfirmDialog.vue'
+// API access verification dialog: crosses rest/openapi.json operations with a
+// set of {method?, pattern} API authorizations (session, role or user union).
+export { default as ApiVerifyDialog } from './components/ApiVerifyDialog.vue'
 export { default as NodeIcon, nodeIcon } from './components/NodeIcon.vue'
 export { default as NodeModeChip } from './components/NodeModeChip.vue'
 export { default as PluginFeatures } from './components/PluginFeatures.vue'
