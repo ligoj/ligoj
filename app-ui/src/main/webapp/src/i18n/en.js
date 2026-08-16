@@ -210,6 +210,7 @@ export default {
   'profile.apiVerifyStatusAllowed': 'Allowed by your authorizations',
   'profile.apiVerifyStatusDenied': 'Not allowed by your authorizations',
   'profile.apiVerifyError': 'Unable to load the API description',
+  'profile.apiVerifyRowTooltip': 'Open this operation in the API explorer (new tab)',
   'profile.theme': 'Theme',
   'profile.compact': 'Compact mode',
   'profile.compactHint': 'Tighter spacing, smaller fonts, denser tables',

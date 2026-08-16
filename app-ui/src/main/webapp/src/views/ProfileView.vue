@@ -144,10 +144,12 @@
         <VibrantDataTable :key="normalizedQuery" :headers="verifyHeaders" :items="pagedVerifyOps" :items-length="filteredVerifyOps.length"
           :loading="false" item-value="key" :tools="false" :empty-text="t('common.noData')" @update:options="onVerifyOptions" @row-click="openApiExplorer">
           <template #cell.method="{ item }">
-            <v-chip size="x-small" variant="flat" :color="METHOD_COLORS[item.method] || '#607d8b'" class="vmethod" label>{{ item.method }}</v-chip>
+            <v-chip size="x-small" variant="flat" :color="METHOD_COLORS[item.method] || '#607d8b'" class="vmethod" label>{{ item.method }}
+              <v-tooltip activator="parent" location="top" :text="t('profile.apiVerifyRowTooltip')" />
+            </v-chip>
           </template>
           <template #cell.path="{ item }">
-            <code class="vpath">{{ item.path }}</code>
+            <code class="vpath">{{ item.path }}<v-tooltip activator="parent" location="top" :text="t('profile.apiVerifyRowTooltip')" /></code>
           </template>
           <template #cell.summary="{ item }">
             <span class="vsum">{{ item.summary }}<v-tooltip v-if="item.description" activator="parent" location="top" max-width="460" :text="item.description" /></span>
