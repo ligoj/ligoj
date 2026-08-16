@@ -127,6 +127,7 @@ ENV CONTEXT_URL="/ligoj-api" \
     JAVA_MEMORY="" \
     JAVA_OPTIONS="-Duser.timezone=UTC" \
     JDK_JAVA_OPTIONS="--enable-preview \
+--sun-misc-unsafe-memory-access=allow \
 --add-modules java.se \
 --add-opens java.base/jdk.internal.loader=ALL-UNNAMED \
 --add-opens java.base/jdk.internal.module=ALL-UNNAMED \

@@ -54,7 +54,7 @@ class PrincipalPatternConverterTest {
 	/**
 	 * End-to-end Log4j2 plugin discovery: a real {@link PatternLayout} must resolve the <code>%principal</code>
 	 * token to this converter — guards the plugin descriptor generation and the <code>packages</code> declaration of
-	 * <code>log4j2.json</code>.
+	 * <code>log4j2.properties</code>.
 	 */
 	@Test
 	void patternLayoutResolvesPrincipal() {

@@ -10,9 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * Basic user details service.
- * 
- * @author Fabrice Daugan
- * 
  */
 public class SimpleUserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
 
