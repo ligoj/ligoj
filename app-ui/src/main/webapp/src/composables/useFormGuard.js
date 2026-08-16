@@ -10,6 +10,15 @@ export function useFormGuard(formData) {
   const skipUnsavedConfirmation = ref(
     typeof window !== 'undefined' && window.localStorage?.getItem(STORAGE_KEY) === 'true'
   )
+
+  /**
+   * Live read of the profile's "skip leave confirmation" preference. Read from
+   * localStorage on every check (not the captured ref): the user may toggle it
+   * in ProfileView while this composable instance is alive.
+   */
+  function isConfirmationSkipped() {
+    return typeof window !== 'undefined' && window.localStorage?.getItem(STORAGE_KEY) === 'true'
+  }
   let savedSnapshot = ''
   // Capture the target route, not the `next` callback. Vue Router 4
   // considers `next` consumed once a guard returns `false`; calling
@@ -34,7 +43,7 @@ export function useFormGuard(formData) {
   }, { deep: true })
 
   onBeforeRouteLeave((to) => {
-    if (isDirty.value && !skipUnsavedConfirmation.value) {
+    if (isDirty.value && !isConfirmationSkipped()) {
       pendingTo = to
       showGuardDialog.value = true
       return false
@@ -84,5 +93,5 @@ export function useFormGuard(formData) {
   }
 
   return { isDirty, showGuardDialog, markClean, confirmLeave, cancelLeave, init,
-           skipUnsavedConfirmation, setSkipUnsavedConfirmation }
+           skipUnsavedConfirmation, setSkipUnsavedConfirmation, isConfirmationSkipped }
 }
