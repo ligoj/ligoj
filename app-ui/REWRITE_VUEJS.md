@@ -1380,6 +1380,16 @@ Battle scars worth respecting on the next migration.
 - **`logfile` endpoint + custom Log4j2 = path mismatch.** Both apps log via a custom `log4j2.json` (rolling file `${sys:ligoj.home:-target}/<api|ui>-rolling.log`), so Spring Boot's `logging.file.name` is IGNORED and the endpoint 404s. Point it at the real file with `management.endpoint.logfile.external-file=${ligoj.home:target}/${ligoj.log.file.name:…-rolling.log}`. SECOND trap: Spring `${ligoj.home}` reads env **and** system properties, but Log4j2 `${sys:ligoj.home}` reads system properties ONLY — an env-var `LIGOJ_HOME` makes Log4j2 write to `target/` while the endpoint looks in `${ligoj.home}`. Make Log4j2 env-aware: `${env:LIGOJ_HOME:-${sys:ligoj.home:-target}}/…` (no-op when home is a `-D`).
 - **Node operational status ≠ `NodeVo.enabled`.** `enabled` is plug-in/resource availability (a DOWN node can still be `enabled:true`). The operational UP/DOWN is the last `EventType.STATUS` event. `NodeVo` has an optional `status` field; `NodeResource#findAll?status=true` populates it from the page's nodes via the BULK `EventRepository.findLastEvents(user, Collection<nodeId>)` — one query for the whole page, not per-row (avoid the N+1; the single `findLastEvent(user, node)` is for one-off lookups). Live re-check endpoints: `POST node/status/refresh/{id}` (`checkNodeStatus`, a real probe) and `GET subscription/status/{id}/refresh` (`refreshStatus`); the cheaper stored value is `GET node/status/{id}`. All take the `%3A`-encoded id (decoded by `UriColonDecodingFilter`).
 
+- **API explorer deep link.** `#/api?op=<method>|<path>` (the operation `key`
+  of ApiHomeView, lowercase method + raw OpenAPI path, URL-encoded) opens the
+  owning tag group and the operation body, scrolls it to center and rings it
+  (`.op.focused`). Used by the profile's **API access verification** dialog
+  (ProfileView "Verify" next to "Manage API keys"): it crosses every
+  `rest/openapi.json` operation with `auth.apiAuthorizations` (path templates
+  `{x}` substituted with `1`/`a` before `isAllowedApi`), shows the allowed
+  rate, and tests a typed URL (scheme/host/`/ligoj/` stripped) against the
+  authorizations with live table filtering; row click opens the deep link.
+
 ## Plugin loader
 
 - **`requires: ['<parent-id>']`** declares a hard dependency. The loader awaits all `requires` before calling the dependent's `install()`, so parent i18n is merged and registry slot is populated. Use this for any tool-level plugin instead of relying on `REQUIRED_PLUGINS`.
