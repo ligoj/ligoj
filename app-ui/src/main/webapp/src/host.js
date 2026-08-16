@@ -31,7 +31,9 @@ export { default as RowActionsMenu } from './components/RowActionsMenu.vue'
 // <v-autocomplete> drop-in that suppresses the browser's native autofill /
 // saved-value dropdown (which overlays Vuetify's own menu). Forwards every
 // prop/event/slot/v-model. Prefer it over a bare <v-autocomplete>.
+// Same for v-select.
 export { default as LigojAutocomplete } from './components/LigojAutocomplete.vue'
+export { default as LigojSelect } from './components/LigojSelect.vue'
 export { default as LigojConfirmDialog } from './components/LigojConfirmDialog.vue'
 export { default as NodeIcon, nodeIcon } from './components/NodeIcon.vue'
 export { default as NodeModeChip } from './components/NodeModeChip.vue'

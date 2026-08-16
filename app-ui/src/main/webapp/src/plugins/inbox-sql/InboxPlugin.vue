@@ -61,7 +61,7 @@
         <v-alert type="info" variant="tonal" density="compact" class="mb-4">
           Messages cannot be edited or deleted after sending.
         </v-alert>
-        <v-select v-model="newMsg.targetType" :items="targetTypes" label="Recipient Type" />
+        <LigojSelect v-model="newMsg.targetType" :items="targetTypes" label="Recipient Type" />
         <v-text-field v-model="newMsg.target" :label="targetLabel" />
         <div v-if="audience > 0" class="text-caption text-medium-emphasis mb-2">
           Audience: {{ audience }} user(s)
@@ -78,6 +78,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import LigojSelect from '@/components/LigojSelect.vue'
 import { useInboxApi } from './useInboxApi.js'
 
 const api = useInboxApi()

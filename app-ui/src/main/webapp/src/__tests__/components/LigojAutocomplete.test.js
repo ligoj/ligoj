@@ -21,9 +21,12 @@ describe('<LigojAutocomplete />', () => {
     const w = mountAc()
     const input = w.find('input')
     expect(input.exists()).toBe(true)
-    expect(input.attributes('autocomplete')).toBe('off')
     // A unique, non-empty name so the browser has no saved value to match.
     expect(input.attributes('name')).toBeTruthy()
+    // 'off' resolves to the unmatchable per-instance token (Chrome ignores a
+    // literal "off" for heuristic field types), mirroring the name.
+    expect(input.attributes('autocomplete')).toBe(input.attributes('name'))
+    expect(input.attributes('autocomplete')).not.toBe('off')
     // Password-manager opt-outs.
     expect(input.attributes('data-1p-ignore')).toBe('true')
     expect(input.attributes('data-lpignore')).toBe('true')

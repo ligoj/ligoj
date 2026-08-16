@@ -26,7 +26,7 @@ let seq = 0
  * Vuetify) and imperatively on mount, so they land on the <input> regardless of
  * Vuetify's attribute-splitting internals.
  */
-import { ref, onMounted, useAttrs } from 'vue'
+import { computed, ref, onMounted, useAttrs } from 'vue'
 
 defineOptions({ inheritAttrs: false })
 
@@ -40,12 +40,22 @@ const root = ref(null)
 // Respect an explicit name; otherwise a unique, non-guessable one.
 // eslint-disable-next-line no-useless-assignment -- module-level counter, incremented across component instances
 const fieldName = String(attrs.name ?? `lj-ac-${++seq}`)
+// Chrome ignores `autocomplete="off"` for heuristic field types (organization,
+// address, mail...): an unknown per-instance token disables matching for real.
+const autocompleteToken = computed(() => (props.autocomplete === 'off' ? fieldName : props.autocomplete))
+// Honor the profile's reduce-motion flag: no dropdown transition. Read from
+// the same <html data-reduce-motion> attribute the CSS layer keys on.
+const menuProps = computed(() => {
+  const caller = attrs['menu-props'] ?? attrs.menuProps ?? {}
+  const reduce = typeof document !== 'undefined' && document.documentElement.dataset.reduceMotion === 'true'
+  return reduce ? { ...caller, transition: false } : caller
+})
 
 function hardenInputs() {
   const el = root.value?.$el
   if (!el || typeof el.querySelectorAll !== 'function') return
   el.querySelectorAll('input').forEach((input) => {
-    input.setAttribute('autocomplete', props.autocomplete)
+    input.setAttribute('autocomplete', autocompleteToken.value)
     if (!input.getAttribute('name')) input.setAttribute('name', fieldName)
     input.setAttribute('data-1p-ignore', 'true')
     input.setAttribute('data-lpignore', 'true')
@@ -59,7 +69,7 @@ defineExpose({ root })
 </script>
 
 <template>
-  <v-autocomplete ref="root" v-bind="$attrs" :autocomplete="autocomplete" :name="fieldName">
+  <v-autocomplete ref="root" v-bind="$attrs" :autocomplete="autocompleteToken" :name="fieldName" :menu-props="menuProps">
     <!-- Forward every slot the caller declares to the inner component. -->
     <template v-for="(_, slot) in $slots" #[slot]="slotProps">
       <slot :name="slot" v-bind="slotProps ?? {}" />
