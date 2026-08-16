@@ -403,6 +403,12 @@
 [data-reduce-motion="true"] .v-ripple__container {
   display: none !important;
 }
+/* Dropdown/overlay entrances (select & autocomplete menus, tooltips): the
+ * Ligoj wrappers also pass `transition: false`, this covers bare usages. */
+[data-reduce-motion="true"] .v-overlay__content {
+  transition: none !important;
+  animation: none !important;
+}
 [data-reduce-motion="true"] .v-progress-linear__indeterminate,
 [data-reduce-motion="true"] .v-progress-circular__overlay {
   animation: none !important;
@@ -1145,6 +1151,84 @@
   [data-style="md3"] .sub-item:active::after {
     opacity: 0;
   }
+}
+
+/* ===========================================================================
+ * Ligoj / Ligoj Dark presets — Material ripple (mirrors "Reforged")
+ *
+ * Scoped on `[data-preset]` (stamped by presets.js) because these two presets
+ * share the `default` style with VS Code Dark, which stays ripple-less. Same
+ * timing as the ligoj-classic block below: Vuetify's v-ripple tuning plus the
+ * pure-CSS centered ripple on the 2026 custom controls (plain elements
+ * carrying no v-ripple directive). Reduce-motion still wins (its rules hide
+ * the ripple container and zero the durations).
+ * ========================================================================= */
+[data-preset="ligoj-classic"] .v-ripple__animation--in,
+[data-preset="ligoj-dark"] .v-ripple__animation--in {
+  transition:
+    transform .5s cubic-bezier(.4, 0, .2, 1) .1s,
+    opacity .15s ease-in !important;
+  opacity: .18;
+}
+[data-preset="ligoj-classic"] .v-ripple__animation--out,
+[data-preset="ligoj-dark"] .v-ripple__animation--out {
+  transition: opacity .1s linear !important;
+}
+[data-preset="ligoj-classic"] .lj-btn,
+[data-preset="ligoj-classic"] .lj-iconbtn,
+[data-preset="ligoj-classic"] .nav-item,
+[data-preset="ligoj-classic"] .sub-item,
+[data-preset="ligoj-dark"] .lj-btn,
+[data-preset="ligoj-dark"] .lj-iconbtn,
+[data-preset="ligoj-dark"] .nav-item,
+[data-preset="ligoj-dark"] .sub-item {
+  position: relative;
+  overflow: hidden;
+}
+[data-preset="ligoj-classic"] .lj-btn::after,
+[data-preset="ligoj-classic"] .lj-iconbtn::after,
+[data-preset="ligoj-classic"] .nav-item::after,
+[data-preset="ligoj-classic"] .sub-item::after,
+[data-preset="ligoj-dark"] .lj-btn::after,
+[data-preset="ligoj-dark"] .lj-iconbtn::after,
+[data-preset="ligoj-dark"] .nav-item::after,
+[data-preset="ligoj-dark"] .sub-item::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(3);
+  transform-origin: center;
+  pointer-events: none;
+  transition: transform .5s cubic-bezier(.4, 0, .2, 1), opacity .6s linear;
+}
+[data-preset="ligoj-classic"] .lj-btn:active::after,
+[data-preset="ligoj-classic"] .lj-iconbtn:active::after,
+[data-preset="ligoj-classic"] .nav-item:active::after,
+[data-preset="ligoj-classic"] .sub-item:active::after,
+[data-preset="ligoj-dark"] .lj-btn:active::after,
+[data-preset="ligoj-dark"] .lj-iconbtn:active::after,
+[data-preset="ligoj-dark"] .nav-item:active::after,
+[data-preset="ligoj-dark"] .sub-item:active::after {
+  opacity: .2;
+  transform: translate(-50%, -50%) scale(.2);
+  transition: none;
+}
+[data-preset="ligoj-classic"] .lj-btn > *,
+[data-preset="ligoj-classic"] .lj-iconbtn > *,
+[data-preset="ligoj-classic"] .nav-item > *,
+[data-preset="ligoj-classic"] .sub-item > *,
+[data-preset="ligoj-dark"] .lj-btn > *,
+[data-preset="ligoj-dark"] .lj-iconbtn > *,
+[data-preset="ligoj-dark"] .nav-item > *,
+[data-preset="ligoj-dark"] .sub-item > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ===========================================================================

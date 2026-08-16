@@ -156,6 +156,9 @@ export function applyPreset(id, themeApi = null) {
   const preset = lookup(id) || lookup(DEFAULT_PRESET_ID)
   if (themeApi) themeApi.global.name.value = preset.theme
   applyStyle(preset.style)
+  // Stamp the preset id so CSS can target a preset (not only a shared style) —
+  // e.g. the ripple rules of the two Ligoj presets, which share style 'default'.
+  if (typeof document !== 'undefined') document.documentElement.dataset.preset = preset.id
   return preset
 }
 
@@ -177,5 +180,6 @@ export function getInitialThemeId() {
 export function bootPreset() {
   const preset = detectPreset()
   applyStyle(preset.style)
+  if (typeof document !== 'undefined') document.documentElement.dataset.preset = preset.id
   return preset
 }
