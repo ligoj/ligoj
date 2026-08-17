@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.7
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
-ARG JAVA_VERSION="21"
-ARG MAVEN_VERSION="3.9.6-amazoncorretto-21-debian-bookworm"
+ARG JAVA_VERSION="25"
+ARG MAVEN_VERSION="3.9.16-amazoncorretto-25-debian-trixie"
 
 # ---------- Build stage ----------
 FROM --platform=${BUILDPLATFORM} maven:${MAVEN_VERSION} AS builder

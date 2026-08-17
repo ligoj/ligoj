@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1.7
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
-ARG JAVA_VERSION="21"
+ARG JAVA_VERSION="25"
 ARG JAVA_IMAGE="eclipse-temurin"
 ARG NODE_VERSION="24-bookworm-slim"
-ARG MAVEN_VERSION="3.9.6-amazoncorretto-21-debian-bookworm"
+ARG MAVEN_VERSION="3.9.16-amazoncorretto-25-debian-trixie"
 
 # ---------- Frontend build stage ----------
 FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION} AS builder_node
