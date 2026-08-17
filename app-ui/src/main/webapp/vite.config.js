@@ -90,7 +90,7 @@ function ligojDevFavicon() {
   let buf = null
   let mime = 'image/x-icon'
   try {
-    buf = readFileSync(resolve(__dirname, 'favicon.ico'))
+    buf = readFileSync(resolve(import.meta.dirname, 'favicon.ico'))
     mime = sniffImageType(buf)
   } catch {
     // `favicon.ico` missing — leave `buf` null so the middleware falls
@@ -195,10 +195,10 @@ export default defineConfig({
   base: BASE,
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      '@': resolve(import.meta.dirname, 'src'),
       // Resolve the shared-surface module locally during dev/test. At runtime
       // the browser resolves `@ligoj/host` via the import map in index.html.
-      '@ligoj/host': resolve(__dirname, 'src/host.js'),
+      '@ligoj/host': resolve(import.meta.dirname, 'src/host.js'),
     },
   },
   test: {
@@ -221,10 +221,10 @@ export default defineConfig({
     chunkSizeWarningLimit: 700,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        login: resolve(__dirname, 'login.html'),
-        loginByApiKey: resolve(__dirname, 'login-by-api-key.html'),
-        host: resolve(__dirname, 'src/host.js'),
+        main: resolve(import.meta.dirname, 'index.html'),
+        login: resolve(import.meta.dirname, 'login.html'),
+        loginByApiKey: resolve(import.meta.dirname, 'login-by-api-key.html'),
+        host: resolve(import.meta.dirname, 'src/host.js'),
         // Shared singletons as facade entries (see ligojSharedFacades): each
         // re-exports its library's full public API under real names, at the
         // stable URL the import map targets. Being entries, they are each their
@@ -261,7 +261,7 @@ export default defineConfig({
         chunkFileNames: 'assets/[name]-[hash].js',
       },
     },
-    outDir: resolve(__dirname, '../../../target/classes/META-INF/resources/webjars/vue-dist'),
+    outDir: resolve(import.meta.dirname, '../../../target/classes/META-INF/resources/webjars/vue-dist'),
     emptyOutDir: true,
   },
   server: {
