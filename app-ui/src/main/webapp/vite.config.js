@@ -270,23 +270,23 @@ export default defineConfig({
     // default, '' for a root-context backend) so dev works for both layouts.
     proxy: {
       [`${CTX}/rest`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       // Spring Boot Actuator endpoints (management.endpoints.web.base-path),
       // surfaced by the Actuator admin view. Same backend as `rest`.
       [`${CTX}/manage`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       // app-ui's OWN actuator (UI container) — served locally by app-ui, NOT
       // proxied to ligoj-api. Surfaces the UI container log to the Logs view.
       [`${CTX}/actuator`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       [`${CTX}/login`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
         // `<base>login.html` and `<base>login-by-api-key.html` are
         // the SPA's own static login pages — let vite serve them from
@@ -319,32 +319,32 @@ export default defineConfig({
       // `server.forward-headers-strategy=framework` in
       // application.properties — closer to a prod reverse-proxy.)
       [`${CTX}/oauth2`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: false,
       },
       [`${CTX}/login/oauth2`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: false,
       },
       [`${CTX}/logout`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         // Same reason as <base>oauth2: Spring builds the OIDC
         // `post_logout_redirect_uri` from the inbound Host header,
         // and we need it to point at vite (`localhost:5173`).
         changeOrigin: false,
       },
       [`${CTX}/captcha.png`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       // Plugin assets: app-ui's /main/* servlet proxies to ligoj-api on :8081.
       [`${CTX}/main`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       // Legacy: kept for any code still fetching /webjars/* directly.
       [`${CTX}/webjars`]: {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
     },

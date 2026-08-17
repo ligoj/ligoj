@@ -1288,6 +1288,7 @@ Battle scars worth respecting on the next migration.
 ## Dev-server proxies
 
 - All `/ligoj/*` paths the backend should see go through `vite.config.js` proxies. **`changeOrigin: false`** on `/ligoj/oauth2`, `/ligoj/login/oauth2`, and `/ligoj/logout` — Spring builds OAuth redirect URIs from the inbound `Host` header, and we need it to point at vite (`:5173`), not the backend (`:8080`).
+- **Proxy targets are pinned to `http://127.0.0.1:…`, never `localhost`.** Node resolves `localhost` to `::1` first, so any other process bound to the IPv6 loopback on the same port (e.g. another project's dev server on `[::1]:8080`) silently shadows the Spring backend's wildcard bind — every proxied call then 404s from the wrong server.
 - Other paths (`/ligoj/rest`, `/ligoj/main`, `/ligoj/webjars`, …) keep `changeOrigin: true`.
 
 ## Authentication
