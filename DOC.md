@@ -1096,7 +1096,7 @@ Add documentation to public endpoints, including the Javadoc parameters and retu
 
 ### Tools
 
-* [JSE 21+](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or [OpenJDK 21+](http://jdk.java.net/21/)
+* [JSE 25+](https://www.oracle.com/java/technologies/downloads/) or [OpenJDK 25+](https://jdk.java.net/25/)
 * Java IDE
     * Either [IntelliJ IDEA 2026](https://www.jetbrains.com/idea/)
     * Either [Eclipse 2026+ (java package)](http://www.eclipse.org/downloads/eclipse-packages/) + [Lombok](https://projectlombok.org/)
@@ -1648,7 +1648,7 @@ sudo docker logs -f ligoj-ui
 🅛🅘🅖🅞🅙 🅤🅘
 :: Ligoj UI :: (v4.1.0-SNAPSHOT)
 
-2023-07-18 20:17:06.107 INFO  Starting Application v4.1.0-SNAPSHOT using Java 17.0.2 with PID 1 (/usr/local/ligoj/app-ui.war started by root in /usr/local/ligoj)
+2023-07-18 20:17:06.107 INFO  Starting Application v5.0.0-SNAPSHOT using Java 25 with PID 1 (/usr/local/ligoj/app-ui.war started by root in /usr/local/ligoj)
 ...
 2023-07-18 20:17:07.199 INFO  Started Application in 1.342 seconds (process running for 1.821)
 ```
