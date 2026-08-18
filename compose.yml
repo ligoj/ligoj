@@ -11,21 +11,21 @@
 #     podman compose -p ligoj -f compose.yml -f compose-mysql.yml    up -d
 #
 # Build args of interest:
-#   JAVA_VERSION         — Temurin JRE tag prefix (default: 21)
+#   JAVA_VERSION         — Temurin JRE tag prefix (default: 25)
 #   MAVEN_VERSION        — Maven builder image tag
 #   MAVEN_INSECURE_TLS   — set to "true" to disable Maven HTTPS verification
 # =============================================================================
 services:
   api:
     container_name: ligoj-api
-    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-api:${LIGOJ_VERSION:-4.0.0}
+    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-api:${LIGOJ_VERSION:-5.0.0}
     build:
       context: app-api
       args:
         BUILDPLATFORM: ${LIGOJ_BUILD_PLATFORM:-linux/amd64}
         TARGETPLATFORM: ${LIGOJ_TARGET_PLATFORM:-linux/amd64}
-        JAVA_VERSION: ${JAVA_VERSION:-21}
-        MAVEN_VERSION: ${MAVEN_VERSION:-3.9.6-amazoncorretto-21-debian-bookworm}
+        JAVA_VERSION: ${JAVA_VERSION:-25}
+        MAVEN_VERSION: ${MAVEN_VERSION:-3.9.16-amazoncorretto-25-debian-trixie}
         MAVEN_INSECURE_TLS: ${MAVEN_INSECURE_TLS:-false}
         GIT_COMMIT: ${GIT_COMMIT:-0}
         GIT_BRANCH: ${GIT_BRANCH:-UNKNOWN_BRANCH}
@@ -49,15 +49,15 @@ services:
 
   ui:
     container_name: ligoj-ui
-    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-ui:${LIGOJ_VERSION:-4.0.0}
+    image: ${LIGOJ_REGISTRY:-}ligoj/ligoj-ui:${LIGOJ_VERSION:-5.0.0}
     build:
       context: app-ui
       args:
         BUILDPLATFORM: ${LIGOJ_BUILD_PLATFORM:-linux/amd64}
         TARGETPLATFORM: ${LIGOJ_TARGET_PLATFORM:-linux/amd64}
-        JAVA_VERSION: ${JAVA_VERSION:-21}
+        JAVA_VERSION: ${JAVA_VERSION:-25}
         NODE_VERSION: ${NODE_VERSION:-24-bookworm-slim}
-        MAVEN_VERSION: ${MAVEN_VERSION:-3.9.6-amazoncorretto-21-debian-bookworm}
+        MAVEN_VERSION: ${MAVEN_VERSION:-3.9.16-amazoncorretto-25-debian-trixie}
         MAVEN_INSECURE_TLS: ${MAVEN_INSECURE_TLS:-false}
         GIT_COMMIT: ${GIT_COMMIT:-0}
         GIT_BRANCH: ${GIT_BRANCH:-UNKNOWN_BRANCH}
