@@ -217,6 +217,8 @@ export default {
   'profile.reduceMotion': 'Réduire les animations',
   'profile.reduceMotionHint': 'Désactive les effets ripple, les animations de dialogs et menus, et la barre de progression',
   'profile.demoMode': 'Mode démo',
+  'demo.indicator': 'Démo',
+  'demo.indicatorTip': 'Le mode démo est actif : du contenu de démonstration (outils, projets et pages vitrines fictifs) est ajouté aux vues de ce navigateur uniquement. Cliquez pour ouvrir votre profil et le désactiver.',
   'profile.tipLogin': 'Identifiant',
   'profile.tipMail': 'Mail',
   'profile.tipRoles': 'Rôles',

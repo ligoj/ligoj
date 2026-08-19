@@ -217,6 +217,8 @@ export default {
   'profile.reduceMotion': 'Reduce motion',
   'profile.reduceMotionHint': 'Disable ripples, dialog and menu animations, and progress bar motion',
   'profile.demoMode': 'Demo mode',
+  'demo.indicator': 'Demo',
+  'demo.indicatorTip': 'Demo mode is enabled: demonstration content (sample tools, projects, showcase pages) is blended into the views of this browser only. Click to open your profile and turn it off.',
   'profile.tipLogin': 'Login',
   'profile.tipMail': 'Mail',
   'profile.tipRoles': 'Roles',

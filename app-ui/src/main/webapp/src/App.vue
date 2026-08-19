@@ -68,6 +68,12 @@
       </nav>
       <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
       <span class="sp" />
+      <!-- Demo-mode indicator: reminds the admin the views are augmented with
+           demonstration content. Click-through to the profile toggle. -->
+      <v-chip v-if="demoMode" class="demo-chip" size="small" color="info" variant="tonal" prepend-icon="mdi-flask-outline" @click="go('/profile')">
+        {{ i18n.t('demo.indicator') }}
+        <v-tooltip activator="parent" location="bottom" max-width="320">{{ i18n.t('demo.indicatorTip') }}</v-tooltip>
+      </v-chip>
       <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' :
           'mdi-account' }}</v-icon>{{ auth.displayName || 'invité' }}
         <!-- Identity card tooltip: full name, login, mails, custom attributes,
@@ -106,6 +112,7 @@ import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import registry from '@/plugins/registry.js'
 import { mergeNav } from '@/plugins/nav.js'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
+import { useDemoMode } from '@/composables/useDemoMode.js'
 import LigojIcon from '@/components/LigojIcon.vue'
 
 const route = useRoute()
@@ -113,6 +120,8 @@ const router = useRouter()
 const auth = useAuthStore()
 const app = useAppStore()
 const i18n = useI18nStore()
+// Admin-level demo mode (localStorage-backed): drives the app-bar indicator chip.
+const { enabled: demoMode } = useDemoMode()
 const appName = computed(() => auth.appSettings?.name || 'Ligoj')
 const appVersion = computed(() => auth.appSettings?.buildVersion || '')
 
@@ -961,6 +970,12 @@ a.bc-chip.link:hover {
 
 .user:hover {
   background: var(--hover);
+}
+
+.demo-chip {
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-right: 2px;
 }
 
 .main {
