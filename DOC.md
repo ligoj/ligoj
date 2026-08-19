@@ -2292,7 +2292,7 @@ For example, `plugin-id-ldap` configuration from the CLI:
 
 ```shell
 ligoj configuration set --id "cache.id-ldap-data.ttl" --value "37200"
-ligoj configuration set --id "service:id:user-display" --value "mail-no-domain"
+ligoj configuration set --id "service:id:user-display" --value "mail-short"
 ligoj cache invalidate
 
 ligoj plugin restart --wait 60
