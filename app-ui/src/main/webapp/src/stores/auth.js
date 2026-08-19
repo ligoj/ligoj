@@ -69,19 +69,36 @@ export const useAuthStore = defineStore('auth', () => {
    * - 'mail-short': same as 'mail' with the domain part dropped
    * - any user attribute name ('firstName', 'lastName', 'company', ...),
    *   also resolved in the `customAttributes` map, fallback to id
+   * - an expression combining `${token}` placeholders and literal text,
+   *   e.g. '${firstName} ${lastName}' — each token is one of the modes
+   *   above; unresolved tokens render empty, and a blank result falls
+   *   back to id
    */
+  // Resolve one display token ('id', 'mail', 'mail-short' or an attribute
+  // name, also looked up in `customAttributes`) to a string, '' when absent.
+  function resolveDisplayToken(token, details, id) {
+    if (token === 'id') return id
+    if (token === 'mail' || token === 'mail-short') {
+      const mail = (Array.isArray(details.mails) ? details.mails : []).find(Boolean)
+      if (!mail) return ''
+      return token === 'mail-short' ? mail.split('@')[0] : mail
+    }
+    const value = details[token] ?? details.customAttributes?.[token]
+    return typeof value === 'string' ? value.trim() : ''
+  }
   const displayName = computed(() => {
     const id = userName.value
     const mode = session.value?.applicationSettings?.data?.['service:id:user-display'] || 'id'
     const details = userDetails.value
     if (!details || mode === 'id') return id
-    if (mode === 'mail' || mode === 'mail-short') {
-      const mail = (Array.isArray(details.mails) ? details.mails : []).find(Boolean)
-      if (!mail) return id
-      return mode === 'mail-short' ? mail.split('@')[0] : mail
+    if (mode.includes('${')) {
+      const resolved = mode
+        .replace(/\$\{([^}]*)\}/g, (_, token) => resolveDisplayToken(token.trim(), details, id))
+        .replace(/\s+/g, ' ')
+        .trim()
+      return resolved || id
     }
-    const value = details[mode] ?? details.customAttributes?.[mode]
-    return typeof value === 'string' && value.trim() ? value : id
+    return resolveDisplayToken(mode, details, id) || id
   })
   const roles = computed(() => session.value?.roles ?? [])
   // The session exposes an explicit `admin` flag; keep the legacy ADMIN-role

@@ -101,9 +101,25 @@ describe('useAuthStore', () => {
     await load('unknown-attribute') // fallback to id
     expect(store.displayName).toBe('fdaugan')
 
+    // Expressions: '${token}' placeholders mixed with literal text
+    await load('${firstName} ${lastName}')
+    expect(store.displayName).toBe('Fabrice Daugan')
+    await load('${lastName}, ${firstName}')
+    expect(store.displayName).toBe('Daugan, Fabrice')
+    await load('${firstName} (${employeeId})') // custom attribute token
+    expect(store.displayName).toBe('Fabrice (E-42)')
+    await load('${firstName} ${unknown}') // unresolved token renders empty
+    expect(store.displayName).toBe('Fabrice')
+    await load('${mail-short} [${id}]') // built-in tokens work too
+    expect(store.displayName).toBe('fabrice.daugan [fdaugan]')
+    await load('${unknown} ${also-unknown}') // fully blank result → id
+    expect(store.displayName).toBe('fdaugan')
+
     // 'mail' without any mail → fallback to id
     details.mails = []
     await load('mail')
+    expect(store.displayName).toBe('fdaugan')
+    await load('${mail}') // same fallback through an expression
     expect(store.displayName).toBe('fdaugan')
   })
 
