@@ -6,7 +6,6 @@ package org.ligoj.app.http.security;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -57,9 +56,8 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 	 * @param logoutUrl              The URL to redirect to after logout has occurred.
 	 * @param securityPreAuthCookies The wiping cookies.
 	 * @return The HttpSecurity parameter for the chaining.
-	 * @throws Exception From {@link HttpSecurity#logout(Customizer)}
 	 */
-	public HttpSecurity configureLogout(HttpSecurity http, final String logoutUrl, final String[] securityPreAuthCookies) throws Exception {
+	public HttpSecurity configureLogout(HttpSecurity http, final String logoutUrl, final String[] securityPreAuthCookies) {
 		return http
 				.logout(a -> a.addLogoutHandler(new CookieWipingLogoutHandler(securityPreAuthCookies)).invalidateHttpSession(true).logoutSuccessUrl(logoutUrl));
 	}
@@ -73,10 +71,9 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 	 * @param successHandler Specifies the {@link AuthenticationSuccessHandler} to be used.
 	 * @param failureHandler Specifies the {@link AuthenticationFailureHandler} to use when authentication fails.
 	 * @return The HttpSecurity parameter for the chaining.
-	 * @throws Exception From {@link HttpSecurity#formLogin(Customizer)}
 	 */
 	public HttpSecurity configureLogin(HttpSecurity http, final String loginUrlDenied, final String loginApiUrl,
-			final AuthenticationSuccessHandler successHandler, final AuthenticationFailureHandler failureHandler) throws Exception {
+			final AuthenticationSuccessHandler successHandler, final AuthenticationFailureHandler failureHandler) {
 		// Standard self-hosted 'form' login
 		return http.formLogin(a -> a.loginPage(loginUrlDenied).loginProcessingUrl(loginApiUrl).successHandler(successHandler).failureHandler(failureHandler));
 	}

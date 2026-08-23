@@ -5,19 +5,16 @@ package org.ligoj.boot.web;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.http.security.AbstractAuthenticationProvider;
 import org.ligoj.app.http.security.SilentRequestHeaderAuthenticationFilter;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.mockito.Mockito.*;
 
 /**
  * Test class of {@link SecurityConfiguration}
  */
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
 class SecurityConfigurationTest {
 

@@ -34,6 +34,8 @@ import java.util.Collections;
 @ImportResource("classpath:/META-INF/spring/application-context.xml")
 public class Application extends SpringBootServletInitializer {
 
+	public static final String API_PATH_PATTERN = "/rest/*";
+
 	@Override
 	protected SpringApplicationBuilder configure(final SpringApplicationBuilder application) {
 		return application.sources(Application.class);
@@ -67,7 +69,7 @@ public class Application extends SpringBootServletInitializer {
 	 */
 	@Bean
 	public ServletRegistrationBean<CXFServlet> cxfServlet() {
-		final var registrationBean = new ServletRegistrationBean<>(new CXFServlet(), "/rest/*");
+		final var registrationBean = new ServletRegistrationBean<>(new CXFServlet(), API_PATH_PATTERN);
 		registrationBean.setName("CXFServlet");
 		registrationBean.setInitParameters(Collections.singletonMap("service-list-path", "web-services"));
 		registrationBean.setOrder(10);
@@ -86,7 +88,7 @@ public class Application extends SpringBootServletInitializer {
 	public FilterRegistrationBean<UriColonDecodingFilter> uriColonDecodingFilter() {
 		final var registrationBean = new FilterRegistrationBean<>(new UriColonDecodingFilter());
 		registrationBean.setName("UriColonDecoding");
-		registrationBean.addUrlPatterns("/rest/*");
+		registrationBean.addUrlPatterns(API_PATH_PATTERN);
 		registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		return registrationBean;
 	}
@@ -102,7 +104,7 @@ public class Application extends SpringBootServletInitializer {
 		delegatingFilterProxy.setTargetBeanName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
 		final var registrationBean = new FilterRegistrationBean<>(delegatingFilterProxy);
 		registrationBean.setName(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME);
-		registrationBean.addUrlPatterns("/rest/*", "/manage/*");
+		registrationBean.addUrlPatterns(API_PATH_PATTERN, "/manage/*");
 		return registrationBean;
 	}
 

@@ -36,12 +36,16 @@ public class ApiKeyLoginFilter extends AbstractAuthenticationProcessingFilter {
 	@Setter
 	private RestTemplate restTemplate = new RestTemplate();
 
+	/**
+	 * When true, login by API key is allowed.
+	 */
 	private final boolean enableLoginByApiKey;
 
 	/**
 	 * Constructor defining the filtering path.
 	 *
-	 * @param filterProcessesUrl The login URL.
+	 * @param filterProcessesUrl  The login URL.
+	 * @param enableLoginByApiKey When true, login by API key is allowed.
 	 */
 	public ApiKeyLoginFilter(final String filterProcessesUrl, final boolean enableLoginByApiKey) {
 		super(filterProcessesUrl);
@@ -129,7 +133,7 @@ public class ApiKeyLoginFilter extends AbstractAuthenticationProcessingFilter {
 				return new CookieUsernamePasswordAuthenticationToken(realUserName, apiKey, List.of(new SimpleGrantedAuthority("ROLE_USER")), List.of());
 			}
 			return null;
-		} catch (HttpClientErrorException.Forbidden e) {
+		} catch (HttpClientErrorException.Forbidden _) {
 			log.info("Authentication failed for user: '{}'", apiUser);
 			return null;
 		} catch (Exception e) {

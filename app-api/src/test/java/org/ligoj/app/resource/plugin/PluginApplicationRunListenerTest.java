@@ -20,7 +20,7 @@ class PluginApplicationRunListenerTest {
 
 	@Test
 	void noPluginClassLoader() {
-		try (var scope = new ThreadClassLoaderScope(new URLClassLoader(new URL[0]))){
+		try (var _ = new ThreadClassLoaderScope(new URLClassLoader(new URL[0]))){
 			Assertions.assertEquals(-10, new PluginApplicationRunListener(mock(SpringApplication.class)).getOrder());
 		}
 	}

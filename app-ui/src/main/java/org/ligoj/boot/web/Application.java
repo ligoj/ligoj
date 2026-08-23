@@ -10,7 +10,6 @@ import org.ligoj.app.http.security.CaptchaServlet;
 import org.ligoj.bootstrap.http.proxy.BackendProxyServlet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.error.ErrorPage;
@@ -36,7 +35,6 @@ import java.util.Map;
  */
 @SpringBootApplication
 @ImportResource("classpath:/META-INF/spring/application.xml")
-@EnableAutoConfiguration()
 public class Application extends SpringBootServletInitializer {
 
 	private static final String SERVICE_RECOVERY = "/rest/service/password/recovery/*";

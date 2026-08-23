@@ -202,7 +202,7 @@ class LigojPluginListenerTest extends AbstractServerTest {
 	@Test
 	void getPluginClassLoader() {
 		final var pluginsClassLoader = mock(LigojPluginsClassLoader.class);
-		try (var ignored = new ThreadClassLoaderScope(
+		try (var _ = new ThreadClassLoaderScope(
 				new URLClassLoader(new URL[0], pluginsClassLoader))) {
 			Assertions.assertNotNull(resource.getPluginClassLoader());
 		}

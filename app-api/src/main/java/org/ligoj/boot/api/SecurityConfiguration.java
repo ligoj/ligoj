@@ -52,10 +52,9 @@ public class SecurityConfiguration {
 	 *
 	 * @param http HTTP security bean.
 	 * @return The built bean.
-	 * @throws Exception from the build.
 	 */
 	@Bean
-	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(final HttpSecurity http) {
 		final var authenticationManager = http.getSharedObject(AuthenticationManager.class);
 		final var matcher = PathPatternRequestMatcher.withDefaults();
 		return http
@@ -111,10 +110,9 @@ public class SecurityConfiguration {
 	 *
 	 * @param authenticationConfiguration The configuration wrapper.
 	 * @return Simple bean unwrapping authentication manager from its configuration.
-	 * @throws Exception From the authentication builder.
 	 */
 	@Bean
-	public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration) throws Exception {
+	public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration) {
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 

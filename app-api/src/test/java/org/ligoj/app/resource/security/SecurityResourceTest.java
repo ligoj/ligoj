@@ -11,7 +11,6 @@ import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.iam.IAuthenticationContributor;
 import org.ligoj.app.iam.IamProvider;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -22,8 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Test of {@link SecurityResource}
@@ -61,7 +59,7 @@ class SecurityResourceTest extends AbstractServerTest {
 		final IAuthenticationContributor contributor = mock(IAuthenticationContributor.class);
 		final ApplicationContext applicationContext = mock(ApplicationContext.class);
 		when(applicationContext.getBeansOfType(IAuthenticationContributor.class))
-				.thenAnswer(i -> Collections.singletonMap("some", contributor));
+				.thenAnswer(_ -> Collections.singletonMap("some", contributor));
 		resource.applicationContext = applicationContext;
 
 		// Perform the login
@@ -73,7 +71,7 @@ class SecurityResourceTest extends AbstractServerTest {
 		Assertions.assertEquals("fdauganA", login.getHeaderString("X-Real-User"));
 
 		// Check the contributor has been involved
-		Mockito.verify(contributor).accept(ArgumentMatchers.any(), ArgumentMatchers.any());
+		verify(contributor).accept(ArgumentMatchers.any(), ArgumentMatchers.any());
 	}
 
 }

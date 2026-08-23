@@ -5,9 +5,7 @@ package org.ligoj.boot.web;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +13,6 @@ import java.util.Arrays;
 /**
  * Test class of {@link Application}
  */
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
 class ApplicationLightTest {
 

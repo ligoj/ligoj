@@ -34,7 +34,7 @@ public class OAuth2BffAuthenticationProvider extends AbstractAuthenticationProvi
 	}
 
 	@Override
-	public HttpSecurity configureLogout(HttpSecurity http, final String logoutUrl, final String[] securityPreAuthCookies) throws Exception {
+	public HttpSecurity configureLogout(HttpSecurity http, final String logoutUrl, final String[] securityPreAuthCookies) {
 		return http.logout(a -> {
 			final var logoutSuccessHandler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
 			logoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}" + logoutUrl);
