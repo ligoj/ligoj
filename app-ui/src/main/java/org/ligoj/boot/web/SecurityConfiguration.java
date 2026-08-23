@@ -156,7 +156,7 @@ public class SecurityConfiguration {
 
 	@Bean
 	@Order(1)
-	public SecurityFilterChain apiKeyFilterChain(HttpSecurity http, ApiKeyLoginFilter apiKeyFilter) throws Exception {
+	public SecurityFilterChain apiKeyFilterChain(HttpSecurity http, ApiKeyLoginFilter apiKeyFilter) {
 		http.securityMatcher(LOGIN_BY_API_KEY_API).authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
 				.addFilterAt(apiKeyFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
 				.sessionManagement(a -> a.sessionAuthenticationStrategy(sessionAuth())).csrf(AbstractHttpConfigurer::disable);
@@ -178,9 +178,9 @@ public class SecurityConfiguration {
 			AbstractAuthenticationProvider provider) throws Exception {
 		final var logoutUrl = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, LOGOUT_HTML) : loginUrl + "?logout";
 		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
-		final var authorization = new WebExpressionAuthorizationManager(
-				"((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()");
-		authorization.setExpressionHandler(expressionWebHandler);
+		final var authorization = WebExpressionAuthorizationManager
+				.withExpressionHandler(expressionWebHandler)
+				.expression("((hasParameter('api-key') or hasHeader('x-api-key')) and (hasParameter('api-user') or hasHeader('x-api-user'))) or isFullyAuthenticated()");
 
 		final var matcher = PathPatternRequestMatcher.withDefaults();
 		http.authorizeHttpRequests(authorize -> authorize.requestMatchers(
@@ -277,7 +277,7 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	public AuthenticationManager authenticationManager(HttpSecurity http, AbstractAuthenticationProvider provider) throws Exception {
+	public AuthenticationManager authenticationManager(HttpSecurity http, AbstractAuthenticationProvider provider) {
 		return http.getSharedObject(AuthenticationManagerBuilder.class).authenticationProvider(provider).build();
 	}
 
