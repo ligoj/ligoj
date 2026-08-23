@@ -3,23 +3,23 @@
  */
 package org.ligoj.app.resource.plugin;
 
-import jakarta.ws.rs.GET;
+import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
 import org.springframework.stereotype.Component;
 
 /**
- * Sample tool for test.
+ * Sample feature
  */
 @Component
-public class SampleTool2 extends SampleTool1 {
+public class FooFeature implements FeaturePlugin {
 
 	@Override
 	public String getKey() {
-		return "service:sample:tool2";
+		return "feature:foo";
 	}
 
-	@GET
-	public String test() {
-		return "Hello";
+	@Override
+	public String getName() {
+		return "Foo";
 	}
 
 }

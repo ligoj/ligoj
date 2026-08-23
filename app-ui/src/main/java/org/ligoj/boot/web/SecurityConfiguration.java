@@ -8,9 +8,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.http.security.*;
-import org.ligoj.bootstrap.http.security.ExtendedWebSecurityExpressionHandler;
-import org.ligoj.bootstrap.http.security.RedirectAuthenticationEntryPoint;
-import org.ligoj.bootstrap.http.security.RestRedirectStrategy;
+import org.ligoj.app.http.security.ExtendedWebSecurityExpressionHandler;
+import org.ligoj.app.http.security.RedirectAuthenticationEntryPoint;
+import org.ligoj.app.http.security.RestRedirectStrategy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -170,12 +170,11 @@ public class SecurityConfiguration {
 	 * @param expressionWebHandler Custom expression handler.
 	 * @param provider             Authentication provider bean.
 	 * @return The built bean.
-	 * @throws Exception from the build.
 	 */
 	@Bean
 	@Order(2)
 	public SecurityFilterChain filterChain(final HttpSecurity http, final ExtendedWebSecurityExpressionHandler expressionWebHandler,
-			AbstractAuthenticationProvider provider) throws Exception {
+			AbstractAuthenticationProvider provider) {
 		final var logoutUrl = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, LOGOUT_HTML) : loginUrl + "?logout";
 		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
 		final var authorization = WebExpressionAuthorizationManager
@@ -227,7 +226,7 @@ public class SecurityConfiguration {
 		return chain;
 	}
 
-	void configureLoginHandler(HttpSecurity http, AbstractAuthenticationProvider provider, String loginDeniedUrl) throws Exception {
+	void configureLoginHandler(HttpSecurity http, AbstractAuthenticationProvider provider, String loginDeniedUrl) {
 		if (isOauth2Bff()) {
 			// Always land on the SPA root after a successful OIDC login.
 			// `true` forces this URL regardless of any saved request — the

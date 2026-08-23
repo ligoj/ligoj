@@ -140,7 +140,7 @@ Migrate the current implementation :
   
 The challenge is that each module like `plugin-id` is a standalone Maven project:
 - it has its own life cycle
-- it can be added, removed by a Java plugin manager discovered and served by a Webjars Servlet (`~/git/bootstrap/bootstrap-plugin/src/main/java/org/ligoj/bootstrap/resource/system/plugin/WebjarsServlet.java`).
+- it can be added, removed by a Java plugin manager discovered and served by a Webjars Servlet (`~/git/ligoj/app-api/src/main/java/org/ligoj/app/resource/plugin/WebjarsServlet.java`).
 - no restart or build is needed to add/remove a plugin from the context
 - make it easy to test in local mode in browser. Maybe one Vite configuration per module?
 

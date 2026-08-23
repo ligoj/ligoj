@@ -3,16 +3,16 @@
  */
 package org.ligoj.app.resource.plugin;
 
-import org.ligoj.app.api.ServicePlugin;
+import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
 
 /**
- * Sample service for test.
+ * Sample tool for test.
  */
-public class SampleService implements ServicePlugin {
+public class SampleTool3 implements FeaturePlugin {
 
 	@Override
 	public String getKey() {
-		return "service:sample";
+		return "service:sample:tool3";
 	}
 
 }

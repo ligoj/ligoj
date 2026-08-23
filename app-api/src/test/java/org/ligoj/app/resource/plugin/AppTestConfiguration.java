@@ -13,10 +13,15 @@ import static org.mockito.Mockito.mock;
  * Test configuration for some boot components.
  */
 @TestConfiguration
-class AppTestConfiguration {
+public class AppTestConfiguration {
 
+	/**
+	 * Tested spring boot bean with a restart endpoint access.
+	 * 
+	 * @return A spring boot bean with a restart endpoint access.
+	 */
 	@Bean
-	RestartEndpoint mockRestartEndpoint() {
+	public RestartEndpoint mockRestartEndpoint() {
 		return mock(RestartEndpoint.class);
 	}
 }

@@ -3,11 +3,11 @@
  */
 package org.ligoj.boot.web;
 
+import org.ligoj.app.http.proxy.BackendProxyServlet;
 import org.ligoj.app.http.proxy.HtmlProxyFilter;
 import org.ligoj.app.http.security.CacheBustingFilter;
 import org.ligoj.app.http.security.CaptchaFilter;
 import org.ligoj.app.http.security.CaptchaServlet;
-import org.ligoj.bootstrap.http.proxy.BackendProxyServlet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

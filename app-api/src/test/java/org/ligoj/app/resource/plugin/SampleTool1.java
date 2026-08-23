@@ -3,29 +3,47 @@
  */
 package org.ligoj.app.resource.plugin;
 
-import org.ligoj.app.api.SubscriptionStatusWithData;
-import org.ligoj.app.api.ToolPlugin;
-
-import java.util.Map;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
+import org.ligoj.app.api.ServicePlugin;
+import org.ligoj.bootstrap.core.NamedBean;
+import org.ligoj.bootstrap.model.system.SystemUser;
+import org.springframework.stereotype.Component;
 
 /**
- * Mock tool.
+ * Sample tool for test.
  */
-public class SampleTool1 implements ToolPlugin {
+@Path("mock/sample1")
+@Component
+public class SampleTool1 implements ServicePlugin {
 
 	@Override
 	public String getKey() {
 		return "service:sample:tool1";
 	}
 
-	@Override
-	public boolean checkStatus(String node, Map<String, String> parameters) {
-		return false;
+	/**
+	 * Method doc. Details.
+	 *
+	 * @param param1 Param1 doc.
+	 * @param user   User doc. Details.
+	 * @return Return doc
+	 */
+	@POST
+	public NamedBean<String> test1(@QueryParam("param1") String param1, SystemUser user) {
+		return new NamedBean<>();
 	}
 
-	@Override
-	public SubscriptionStatusWithData checkSubscriptionStatus(String node, Map<String, String> parameters) {
-		return null;
+	/**
+	 * Method2 doc. Details.
+	 *
+	 * @param param2 Param2 doc.
+	 * @return Return2 doc
+	 */
+	@POST
+	public String test2(@QueryParam("param1") String param2) {
+		return "Hello";
 	}
 
 }
