@@ -233,7 +233,7 @@ public class SecurityConfiguration {
 			// `true` forces this URL regardless of any saved request — the
 			// SPA owns the post-login routing itself, so a stale or
 			// dev-mode-mistargeted savedRequest (e.g. with the backend's
-			// host:port baked in from before the vite proxy was tuned)
+			// host:port baked in from before the Vite proxy was tuned)
 			// can never be replayed.
 			//
 			// On the failure side, Spring's default URL is `/login?error`
