@@ -18,12 +18,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.ligoj.app.dao.system.SystemPluginRepository;
-import org.ligoj.app.resource.plugin.SampleTool1;
 import org.ligoj.app.resource.plugin.SampleTool2;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.ligoj.bootstrap.model.system.SystemPlugin;
 import org.ligoj.bootstrap.model.system.SystemRole;
 import org.ligoj.bootstrap.model.system.SystemUser;
+import org.ligoj.bootstrap.resource.system.plugin.SampleTool1;
 import org.mockito.Mockito;
 
 import java.io.IOException;

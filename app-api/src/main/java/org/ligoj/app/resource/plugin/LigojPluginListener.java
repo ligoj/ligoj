@@ -52,7 +52,10 @@ public class LigojPluginListener implements PluginListener {
 			final var key = entity.getKey();
 			lvo.setNodes(nodeRepository.countByRefined(key));
 			lvo.setSubscriptions(subscriptionRepository.countByNode(key));
-			lvo.setNode(NodeHelper.toVo(nodeRepository.findOne(key)));
+			var node = nodeRepository.findOne(key);
+			if (node != null) {
+				lvo.setNode(NodeHelper.toVo(nodeRepository.findOne(key)));
+			}
 		}
 	}
 
@@ -75,13 +78,10 @@ public class LigojPluginListener implements PluginListener {
 	 * subscription as a context to isolate it, and using the related node and
 	 * the subscription's identifier. The parent directory is created as needed.
 	 *
-	 * @param subscription
-	 *            The subscription used a context of the file to create.
-	 * @param fragments
-	 *            The file fragments.
+	 * @param subscription The subscription used a context of the file to create.
+	 * @param fragments    The file fragments.
 	 * @return The file reference.
-	 * @throws IOException
-	 *             When the file creation failed.
+	 * @throws IOException When the file creation failed.
 	 */
 	public File toFile(final Subscription subscription, final String... fragments) throws IOException {
 		var parent = toPath(getPluginClassLoader().getHomeDirectory(), subscription.getNode());
@@ -99,10 +99,8 @@ public class LigojPluginListener implements PluginListener {
 	 * Convert a {@link Node} to a {@link java.nio.file.Path} inside the given parent
 	 * directory.
 	 *
-	 * @param parent
-	 *            The parent path.
-	 * @param node
-	 *            The related node.
+	 * @param parent The parent path.
+	 * @param node   The related node.
 	 * @return The computed sibling path.
 	 */
 	private java.nio.file.Path toPath(final Path parent, final Node node) {
@@ -118,8 +116,7 @@ public class LigojPluginListener implements PluginListener {
 	 * <li>node = 'service:id', fragment = 'service:id'</li>
 	 * </ul>
 	 *
-	 * @param node
-	 *            The node to convert to a simple fragment String.
+	 * @param node The node to convert to a simple fragment String.
 	 * @return The simple fragment.
 	 */
 	private String toFragmentId(final Node node) {
@@ -129,8 +126,7 @@ public class LigojPluginListener implements PluginListener {
 	/**
 	 * Determine the plug-in type and check it regarding the contact and the convention.
 	 *
-	 * @param plugin
-	 *            The plug-in resource.
+	 * @param plugin The plug-in resource.
 	 * @return The checked {@link PluginType}
 	 */
 	protected PluginType determinePluginType(final ServicePlugin plugin) {
@@ -154,8 +150,7 @@ public class LigojPluginListener implements PluginListener {
 	/**
 	 * Build a new {@link Node} from the given plug-in instance using the naming convention to link the parent.
 	 *
-	 * @param service
-	 *            The service plug-in to add as a node.
+	 * @param service The service plug-in to add as a node.
 	 * @return The new {@link Node}
 	 */
 	protected Node newNode(final ServicePlugin service) {
@@ -178,10 +173,9 @@ public class LigojPluginListener implements PluginListener {
 	/**
 	 * Return the parent node from a key. The node entity is retrieved from the database without cache.
 	 *
-	 * @param key
-	 *            The plug-in key.
+	 * @param key The plug-in key.
 	 * @return the parent node entity or <code>null</code> when this the top most definition. Note if there is an
-	 *         expected parent by convention, and the parent is not found, an error will be raised.
+	 * expected parent by convention, and the parent is not found, an error will be raised.
 	 */
 	protected Node getParentNode(final String key) {
 		final var parentKey = StringUtils.substringBeforeLast(key, ":");

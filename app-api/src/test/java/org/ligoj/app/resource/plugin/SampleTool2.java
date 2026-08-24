@@ -4,6 +4,7 @@
 package org.ligoj.app.resource.plugin;
 
 import jakarta.ws.rs.GET;
+import org.ligoj.bootstrap.resource.system.plugin.SampleTool1;
 import org.springframework.stereotype.Component;
 
 /**

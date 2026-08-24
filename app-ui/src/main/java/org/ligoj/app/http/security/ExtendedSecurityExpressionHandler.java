@@ -7,12 +7,10 @@ import org.springframework.security.access.expression.SecurityExpressionOperatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
-import org.springframework.stereotype.Component;
 
 /**
  * Custom expression handler using a different expression manager.
  */
-@Component
 public class ExtendedSecurityExpressionHandler extends AbstractCommonSecurityExpressionHandler<FilterInvocation> {
 
 	@Override

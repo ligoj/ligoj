@@ -11,10 +11,10 @@ import org.apache.cxf.jaxrs.model.OperationResourceInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.ligoj.app.resource.plugin.SampleTool1;
 import org.ligoj.app.resource.plugin.SampleTool2;
 import org.ligoj.app.resource.plugin.SampleTool4;
 import org.ligoj.bootstrap.model.system.SystemUser;
+import org.ligoj.bootstrap.resource.system.plugin.SampleTool1;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

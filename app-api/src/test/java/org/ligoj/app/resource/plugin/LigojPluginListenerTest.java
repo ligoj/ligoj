@@ -116,17 +116,17 @@ class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	void installExists() {
-		Assertions.assertFalse(resource.install(new SampleService()));
+		Assertions.assertFalse(resource.install(new SampleSingleton()));
 	}
 
 	@Test
 	void installNotExists() {
-		Assertions.assertTrue(resource.install(new SampleTool1()));
+		Assertions.assertTrue(resource.install(new SampleTool0()));
 	}
 
 	@Test
 	void configure() {
-		final var service1 = new SampleService();
+		final var service1 = new SampleSingleton();
 		final var entity = new SystemPlugin();
 
 		// Configure, but is already installed
@@ -135,7 +135,7 @@ class LigojPluginListenerTest extends AbstractServerTest {
 		Assertions.assertEquals("SERVICE", entity.getType());
 
 		// Configure, but is already installed
-		final var service2 = new SampleTool1();
+		final var service2 = new SampleTool0();
 		resource.configure(service2, entity);
 		Assertions.assertEquals("TOOL", entity.getType());
 
@@ -157,7 +157,7 @@ class LigojPluginListenerTest extends AbstractServerTest {
 
 	@Test
 	void configureWithImplicitNode() {
-		final var service1 = new SampleService() {
+		final var service1 = new SampleSingleton() {
 			@Override
 			public List<Class<?>> getInstalledEntities() {
 				return List.of(SystemBench.class); // "Node" class is not included
@@ -168,13 +168,13 @@ class LigojPluginListenerTest extends AbstractServerTest {
 		final var entity = new SystemPlugin();
 
 		resource.configure(service1, entity);
-		Assertions.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
+		Assertions.assertEquals("Singleton", nodeRepository.findOneExpected("service:singleton").getName());
 		Assertions.assertEquals("SERVICE", entity.getType());
 	}
 
 	@Test
 	void configureWithExplicitNode() {
-		final var service1 = new SampleService() {
+		final var service1 = new SampleSingleton() {
 			@Override
 			public List<Class<?>> getInstalledEntities() {
 				return List.of(Node.class); // "Node" class is included
@@ -182,14 +182,14 @@ class LigojPluginListenerTest extends AbstractServerTest {
 		};
 		final var entity = new SystemPlugin();
 		resource.configure(service1, entity); // No implicit Node install for this plug-in
-		Assertions.assertEquals("Sample", nodeRepository.findOneExpected("service:sample").getName());
+		Assertions.assertEquals("Singleton", nodeRepository.findOneExpected("service:singleton").getName());
 		Assertions.assertEquals("SERVICE", entity.getType());
 	}
 
 	@Test
 	void determinePluginType() {
-		Assertions.assertEquals(PluginType.SERVICE, resource.determinePluginType(new SampleService()));
-		Assertions.assertEquals(PluginType.TOOL, resource.determinePluginType(new SampleTool1()));
+		Assertions.assertEquals(PluginType.SERVICE, resource.determinePluginType(new SampleSingleton()));
+		Assertions.assertEquals(PluginType.TOOL, resource.determinePluginType(new SampleTool0()));
 	}
 
 	@Test

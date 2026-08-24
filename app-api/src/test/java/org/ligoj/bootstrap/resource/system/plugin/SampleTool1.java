@@ -1,13 +1,13 @@
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
-package org.ligoj.app.resource.plugin;
+package org.ligoj.bootstrap.resource.system.plugin;
 
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
-import org.ligoj.app.api.ToolPlugin;
 import org.ligoj.bootstrap.core.NamedBean;
+import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
 import org.ligoj.bootstrap.model.system.SystemUser;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  */
 @Path("mock/sample1")
 @Component
-public class SampleTool1 implements ToolPlugin {
+public class SampleTool1 implements FeaturePlugin {
 
 	@Override
 	public String getKey() {

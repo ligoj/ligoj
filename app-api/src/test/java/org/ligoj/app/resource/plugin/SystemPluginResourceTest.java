@@ -28,6 +28,8 @@ import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.model.system.*;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
+import org.ligoj.bootstrap.resource.system.plugin.SampleService;
+import org.ligoj.bootstrap.resource.system.plugin.SampleTool1;
 import org.ligoj.bootstrap.resource.system.session.ApplicationSettings;
 import org.ligoj.bootstrap.resource.system.session.SessionSettings;
 import org.mockito.ArgumentMatchers;
@@ -388,10 +390,10 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		repository.saveAndFlush(pluginId);
 
 		final var plugins = filter(resource.findAll("central"));
-		Assertions.assertEquals(5, plugins.size()); // "foo", "bar", "Sample", "Tool1", "Tool2"
+		Assertions.assertEquals(8, plugins.size()); // "foo", "bar", "Sample", "Tool1", "Tool2"
 
 		// External plug-in service
-		final var plugin2 = plugins.get(2);
+		final var plugin2 = plugins.get(3);
 		Assertions.assertEquals("service:sample", plugin2.getId());
 		Assertions.assertEquals("Sample", plugin2.getName());
 		Assertions.assertNull(plugin2.getVendor());
@@ -454,7 +456,7 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 			repository.saveAndFlush(plugin);
 
 			final var plugins = filter(resource.findAll("central"));
-			Assertions.assertEquals(4, plugins.size());
+			Assertions.assertEquals(7, plugins.size());
 
 			// Plug-in from the API
 			final var plugin0 = plugins.getFirst();
@@ -490,7 +492,7 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		repository.saveAndFlush(orphanPlugin);
 
 		final var plugins = filter(resource.findAll("central"));
-		Assertions.assertEquals(4, plugins.size());
+		Assertions.assertEquals(7, plugins.size());
 
 		// Plug-in in the classpath
 		final var plugin0 = plugins.getFirst();
@@ -503,7 +505,7 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		Assertions.assertEquals("FEATURE", plugin0.getPlugin().getType());
 
 		// Plug-in present in the plug-ins directory but not in the class-path
-		final var plugin1 = plugins.get(1);
+		final var plugin1 = plugins.get(3);
 		Assertions.assertEquals("plugin-bar", plugin1.getId());
 		Assertions.assertEquals("plugin-bar", plugin1.getName());
 		Assertions.assertNull(plugin1.getVendor());
@@ -863,7 +865,7 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		final var localJavadocJar = toFile("plugin-sample-0.0.1-javadoc.jar");
 		localJar.delete();
 		localJavadocJar.delete();
-		newPluginResourceInstall().install(null, "groupId", "plugin-sample", "1.0.03","central",false, true);
+		newPluginResourceInstall().install(null, "groupId", "plugin-sample", "1.0.03", "central", false, true);
 		Assertions.assertFalse(localJar.exists());
 		Assertions.assertFalse(localJavadocJar.exists());
 	}

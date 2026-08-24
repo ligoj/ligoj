@@ -163,6 +163,15 @@ public class SecurityConfiguration {
 		return http.build();
 	}
 
+	@Bean
+	public ExtendedWebSecurityExpressionHandler extendedWebSecurityExpressionHandler() {
+		return new ExtendedWebSecurityExpressionHandler();
+	}
+	@Bean
+	public ExtendedSecurityExpressionHandler extendedSecurityExpressionHandler() {
+		return new ExtendedSecurityExpressionHandler();
+	}
+
 	/**
 	 * Filter security chain
 	 *
