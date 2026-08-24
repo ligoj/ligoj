@@ -393,7 +393,7 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		Assertions.assertEquals(8, plugins.size()); // "foo", "bar", "Sample", "Tool1", "Tool2"
 
 		// External plug-in service
-		final var plugin2 = plugins.get(3);
+		final var plugin2 = plugins.get(4);
 		Assertions.assertEquals("service:sample", plugin2.getId());
 		Assertions.assertEquals("Sample", plugin2.getName());
 		Assertions.assertNull(plugin2.getVendor());
