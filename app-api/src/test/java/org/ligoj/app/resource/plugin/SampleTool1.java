@@ -6,7 +6,7 @@ package org.ligoj.app.resource.plugin;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
-import org.ligoj.app.api.ServicePlugin;
+import org.ligoj.app.api.ToolPlugin;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.model.system.SystemUser;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  */
 @Path("mock/sample1")
 @Component
-public class SampleTool1 implements ServicePlugin {
+public class SampleTool1 implements ToolPlugin {
 
 	@Override
 	public String getKey() {

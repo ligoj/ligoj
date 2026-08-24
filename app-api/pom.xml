@@ -157,6 +157,49 @@
             <scope>compile</scope>
         </dependency>
 
+
+        <!-- JSR-907 -->
+        <dependency>
+            <groupId>jakarta.transaction</groupId>
+            <artifactId>jakarta.transaction-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JSR-154 -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ligoj.bootstrap</groupId>
+            <artifactId>bootstrap-business</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ligoj.bootstrap</groupId>
+            <artifactId>bootstrap-business-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-context</artifactId>
+        </dependency>
+
         <!-- Embedded plugin-ui -->
         <dependency>
             <groupId>org.ligoj.plugin</groupId>
@@ -392,54 +435,6 @@
                     <version>[2.0.0-SNAPSHOT,2.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
-
-
-                <!-- JSR-907 -->
-                <dependency>
-                    <groupId>jakarta.transaction</groupId>
-                    <artifactId>jakarta.transaction-api</artifactId>
-                    <scope>provided</scope>
-                </dependency>
-
-                <!-- JSR-154 -->
-                <dependency>
-                    <groupId>jakarta.servlet</groupId>
-                    <artifactId>jakarta.servlet-api</artifactId>
-                    <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.ligoj.bootstrap</groupId>
-                    <artifactId>bootstrap-business</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.ligoj.bootstrap</groupId>
-                    <artifactId>bootstrap-business-test</artifactId>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.projectlombok</groupId>
-                    <artifactId>lombok</artifactId>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-test</artifactId>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-context</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-actuator</artifactId>
-                </dependency>
-
             </dependencies>
         </profile>
         <profile>
