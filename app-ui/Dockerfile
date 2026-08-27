@@ -3,7 +3,7 @@ ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 ARG JAVA_VERSION="25"
 ARG JAVA_IMAGE="eclipse-temurin"
-ARG NODE_VERSION="24-bookworm-slim"
+ARG NODE_VERSION="26-bookworm-slim"
 ARG MAVEN_VERSION="3.9.16-amazoncorretto-25-debian-trixie"
 
 # ---------- Frontend build stage ----------
