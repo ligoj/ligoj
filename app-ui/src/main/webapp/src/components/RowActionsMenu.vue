@@ -26,6 +26,15 @@
           <v-icon size="small" :color="a.color">{{ a.icon }}</v-icon>
         </template>
         <v-list-item-title>{{ a.title }}</v-list-item-title>
+        <!-- Optional info chip (e.g. the network in/out link counts of the row) -->
+        <template v-if="a.chip?.length" #append>
+          <v-chip size="x-small" variant="tonal" class="ram-chip">
+            <span v-for="(part, pi) in a.chip" :key="pi" class="ram-chip-part">
+              <v-icon size="10">{{ part.icon }}</v-icon>{{ part.text }}
+            </span>
+            <v-tooltip v-if="a.chipTooltip" activator="parent" location="top" max-width="300" :text="a.chipTooltip" />
+          </v-chip>
+        </template>
       </v-list-item>
     </v-list>
   </v-menu>
@@ -51,10 +60,16 @@
  * with `@click:row` (row-click-to-edit) does not fire when the cog is used.
  */
 defineProps({
-  /** [{ key, title, icon, color?, disabled? }] */
+  /** [{ key, title, icon, color?, disabled?, chip?: [{ icon, text }], chipTooltip? }] */
   actions: { type: Array, default: () => [] },
   icon:    { type: String, default: 'mdi-cog' },
   label:   { type: String, default: 'Actions' },
 })
 defineEmits(['select'])
 </script>
+
+<style scoped>
+.ram-chip { margin-left: 12px; }
+.ram-chip-part { display: inline-flex; align-items: center; gap: 2px; }
+.ram-chip-part + .ram-chip-part { margin-left: 5px; }
+</style>
