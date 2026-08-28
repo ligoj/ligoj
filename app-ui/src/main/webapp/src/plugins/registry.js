@@ -72,4 +72,35 @@ export function callFeature(pluginId, action, ...args) {
   return plugin.feature(action, ...args)
 }
 
+/**
+ * Polls EVERY loaded plugin for an optional feature and returns the non-empty
+ * results, in registration order. This is the collector behind the generic
+ * extension points (`editExtension`, `actionExtension`, ...):
+ *  - plugins without a `feature()` function are skipped,
+ *  - the standard `no feature "<name>"` rejection (thrown by the canonical
+ *    manifest dispatcher for an unimplemented optional feature) is swallowed,
+ *  - any other error is reported with `console.warn` and the plugin skipped,
+ *  - `null` / `undefined` results (explicit opt-out) are dropped.
+ * Read `registry.version.value` before calling it inside a computed so the
+ * result refreshes when a plugin is lazily loaded after first paint.
+ */
+export function collectFeature(name, ...args) {
+  const noFeature = new RegExp(`no feature ["']${name}["']`)
+  const out = []
+  for (const plugin of plugins.values()) {
+    if (typeof plugin?.feature !== 'function') continue
+    let result
+    try {
+      result = plugin.feature(name, ...args)
+    } catch (err) {
+      if (!noFeature.test(err?.message || '')) {
+        console.warn(`[${name}] ${plugin.id}.${name} threw`, err)
+      }
+      continue
+    }
+    if (result) out.push(result)
+  }
+  return out
+}
+
 export default registry

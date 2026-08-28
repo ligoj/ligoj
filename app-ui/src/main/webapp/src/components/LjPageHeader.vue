@@ -15,6 +15,11 @@
   Title/subtitle/crumb labels are PROPS (the plugin owns its i18n keys); the
   component owns only the chrome. Reads its colours/type from the enclosing
   `.lj-surface` root.
+
+  Plugin toolbar actions (`actionExtension` feature, see useActionExtensions):
+  give the view a target and the contributed action components are mounted
+  after the own actions, with the supplied context:
+    <LjPageHeader :title="…" actions-target="user" :actions-context="() => ({ selected, reload })">
 -->
 <template>
   <header class="ph">
@@ -26,17 +31,30 @@
       <h1>{{ title }}</h1>
       <p v-if="subtitle || $slots.subtitle" class="sub"><slot name="subtitle">{{ subtitle }}</slot></p>
     </div>
-    <div v-if="$slots.actions" class="ph-actions"><slot name="actions" /></div>
+    <div v-if="$slots.actions || pluginActions.length" class="ph-actions">
+      <slot name="actions" />
+      <!-- Plugin toolbar contributions (`actionExtension.action`). -->
+      <component :is="a" v-for="(a, i) in pluginActions" :key="'xa' + i" :context="pluginContext" />
+    </div>
   </header>
 </template>
 
 <script setup>
-defineProps({
+import { useActionExtensions } from '@/composables/useActionExtensions.js'
+
+const props = defineProps({
   title: { type: String, default: '' },
   subtitle: { type: String, default: '' },
   // [{ icon?, label, current? }]
   crumbs: { type: Array, default: null },
+  // `actionExtension` target of this view (e.g. 'user'); unset = no plugin polling
+  actionsTarget: { type: String, default: '' },
+  // Supplier of the view context handed to the contributed actions
+  actionsContext: { type: Function, default: () => ({}) },
 })
+
+const { actions: pluginActions, context: pluginContext } = useActionExtensions(
+  () => props.actionsTarget, () => props.actionsContext())
 </script>
 
 <style scoped>

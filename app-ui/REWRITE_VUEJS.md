@@ -505,6 +505,7 @@ Imported from the host bundle via the import map; treat as the public API and do
 | `useDataTable`                                                     | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`).                                                                                                                                                    |
 | `useFormGuard`                                                     | Unsaved-changes dialog + `onBeforeRouteLeave` integration. Honors the profile's "skip leave confirmation" via the live `isConfirmationSkipped()` read — the route guard checks it automatically, but a dialog's own close path (`requestClose`-style) must call it explicitly: `if (isDirty.value && !isConfirmationSkipped())`. |
 | `useEditExtensions`                                                | Resolves the `editExtension` plugin contributions (body component + replacement save `apiPath`) of an entity edit dialog. See "Edit dialogs plugin extension".                                                                                             |
+| `useActionExtensions`                                              | Resolves the `actionExtension` plugin contributions (toolbar action components) of a view. `LjPageHeader` wraps it (`actions-target` / `actions-context`). See "Toolbar plugin extension".                                                                      |
 | `LigojDataTable` / `LigojDataTableServer`                          | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported.                                                                                                                                                    |
 | `LigojConfirmDialog`                                               | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s.                                                                                                                                                                            |
 | `ApiVerifyDialog`                                                  | API access verification dialog: crosses `rest/openapi.json` operations with a set of `{method?, pattern}` API authorizations. Props: `authorizations`, `admin` (bypass — session only, never for role/user audits), `subject` (appended to the title). Used by the profile (own session) and the system Roles/Users row action "Verify". |
@@ -1156,6 +1157,69 @@ Payload note: every dialog now spreads its `form` into the save payload
 AFTER the spread and win). Company additionally strips its display-only
 `locked`/`count` fields. Unit coverage of the resolution mechanics lives in the
 host: `src/__tests__/composables/useEditExtensions.test.js`.
+
+---
+
+# Toolbar plugin extension (`actionExtension`)
+
+The action bar of the main views is extensible by any registered plugin
+through a single **`actionExtension`** feature, resolved by the host
+composable `useActionExtensions(target, contextSupplier)` (exported from
+`@ligoj/host`, registry-driven, reactive to lazy plugin loads — same
+collector as `editExtension`: `registry.collectFeature`). One capability per
+contribution:
+
+- **`action`** — a Vue component mounted in the view's TOOLBAR after the
+  built-in actions, with a single `context` prop
+  (`{ target, ...viewContext }`). The component owns its button(s) and
+  whatever they open (dialog, fullscreen view, navigation). Match the chrome
+  of the target: `LjButton variant="ghost"` in the `LjPageHeader` views, an
+  icon `v-btn size="small" variant="text"` + `v-tooltip` in the quote tools
+  strip.
+
+Return `null`/`undefined` (or don't expose the feature at all) to opt out.
+
+## Sample contribution
+
+```js
+import MyQuoteAction from './views/MyQuoteAction.vue'
+
+const features = {
+  actionExtension(ctx) {
+    if (ctx.target !== 'prov-quote') return null
+    return { action: MyQuoteAction }
+  },
+}
+```
+
+## Extension-aware views
+
+`LjPageHeader` mounts the contributions itself — a view opts in with
+`actions-target` (+ `actions-context`); views with a bespoke toolbar call the
+composable and render `actions` with `<component :is>`.
+
+| `target` | View | Context fields |
+| --- | --- | --- |
+| `user` | plugin-id `views/UserListView.vue` | `selected` (ids), `reload()` |
+| `group` | plugin-id `views/GroupListView.vue` | `selected`, `reload()` |
+| `company` | plugin-id `views/CompanyListView.vue` | `selected`, `reload()` |
+| `delegate` | plugin-id `views/DelegateListView.vue` | `selected`, `reload()` |
+| `project` | plugin-ui `views/ProjectListView.vue` | `reload()` |
+| `prov-quote` | plugin-prov `views/QuoteView.vue` (quote tools strip) | `subscriptionId`, `config` (live `QuoteVo`), `meta`, `providerNode`, `reload()` |
+
+A real-world consumer is **plugin-cartography** (feature-level, backend key
+`feature:cartography`): its legacy jQuery tab inside plugin-prov's config
+screen became an `actionExtension` on target `prov-quote` — a toolbar button
+opening, in a FULLSCREEN dialog, a d3 force-directed network map
+(`ui/src/views/CartographyView.vue`) of the quote resources (nodes =
+instances/databases/containers/functions/supports + unattached storages,
+attached storages rolled up on their parent; links = the quote `networks`;
+`app:` tags group, `env:` tags color). The graph derivation is a pure module
+(`ui/src/graph.js`) fed by the `config` handed through the action context —
+no REST call. d3 sub-modules are bundled in the plugin (not host-shared).
+Dev port 5317. Unit coverage of the resolution mechanics lives in the host:
+`src/__tests__/composables/useActionExtensions.test.js` and
+`src/__tests__/components/LjPageHeader.test.js`.
 
 ---
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import registry from '@/plugins/registry.js'
+import registry, { collectFeature } from '@/plugins/registry.js'
 
 describe('Plugin Registry', () => {
   const registeredIds = []
@@ -137,5 +137,38 @@ describe('Plugin Registry', () => {
     expect(plugin.component).toBeNull()
     expect(plugin.meta).toEqual({})
     expect(plugin.routes).toEqual([])
+  })
+})
+
+describe('collectFeature()', () => {
+  const ids = []
+  function register(id, definition) {
+    registry.register(id, { id, install() {}, ...definition })
+    ids.push(id)
+  }
+  afterEach(() => {
+    ids.splice(0).forEach((id) => registry.remove(id))
+    vi.restoreAllMocks()
+  })
+
+  it('gathers the non-empty results of every plugin exposing the feature, passing the context', () => {
+    const seen = []
+    register('c-a', { feature: (action, ctx) => { seen.push([action, ctx]); return { a: 1 } } })
+    register('c-b', { feature: () => null })
+    register('c-c', { feature: () => ({ c: 3 }) })
+    register('c-none', {}) // no feature() at all
+    const ctx = { target: 'x' }
+    expect(collectFeature('myFeature', ctx)).toEqual([{ a: 1 }, { c: 3 }])
+    expect(seen).toEqual([['myFeature', ctx]])
+  })
+
+  it('silently skips the standard "no feature" rejection and warns on any other error', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    register('c-strict', { feature: (action) => { throw new Error(`Plugin "c-strict" has no feature "${action}"`) } })
+    register('c-broken', { feature: () => { throw new Error('boom') } })
+    register('c-ok', { feature: () => 'ok' })
+    expect(collectFeature('myFeature', {})).toEqual(['ok'])
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain('c-broken')
   })
 })

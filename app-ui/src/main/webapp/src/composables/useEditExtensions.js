@@ -1,11 +1,13 @@
 import { computed } from 'vue'
-import registry from '@/plugins/registry.js'
+import registry, { collectFeature } from '@/plugins/registry.js'
 
 /**
  * Generic plugin extension point for the entity create/edit dialogs (project,
  * user, delegate, container-scope, company, group, ...).
  *
- * Any registered plugin may expose an `editExtension` feature. It is invoked
+ * Any registered plugin may expose an `editExtension` feature (targets so
+ * far: project, user, delegate, container-scope, company, group, prov-quote).
+ * It is invoked
  * with the edition context `{ target, mode, ...dialogContext }` — `target`
  * identifies the extended dialog (e.g. 'project', 'user'), `mode` is
  * 'create' or 'edit' — and returns a contribution object (or null/undefined
@@ -42,24 +44,9 @@ export function useEditExtensions(target, defaultApiPath, contextSupplier) {
   const context = computed(() => ({ target, ...contextSupplier() }))
 
   const extensions = computed(() => {
+    // Subscribe to lazy plugin loads; the collector skips non-contributors
     void registry.version.value
-    const ctx = context.value
-    const out = []
-    for (const plugin of registry.list()) {
-      if (typeof plugin?.feature !== 'function') continue
-      let ext
-      try {
-        ext = plugin.feature('editExtension', ctx)
-      } catch (err) {
-        // Optional feature: swallow the standard "no feature" rejection only
-        if (!/no feature ["']editExtension["']/.test(err?.message || '')) {
-          console.warn(`[edit-extension] ${plugin.id}.editExtension threw`, err)
-        }
-        continue
-      }
-      if (ext) out.push(ext)
-    }
-    return out
+    return collectFeature('editExtension', context.value)
   })
 
   const components = computed(() => extensions.value.filter((e) => e.component).map((e) => e.component))
