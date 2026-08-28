@@ -1209,7 +1209,7 @@ When the WAR is built you can enable minified CSS/JS with the maven profile 'min
 
 ```
 npm install clean-css-cli -g
-mvn clean package -Pminify -DskipTests=true
+mvn clean package -Pminify -DskipTests=true -Djarsigner.skip=true
 ```
 
 ## Building the Docker images
