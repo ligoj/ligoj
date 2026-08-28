@@ -7,6 +7,10 @@
   Plain text input wrapped in a focus-ring chrome; emits both `update:modelValue`
   (v-model) and `input` for callers that reset paging on keystroke. Reads its
   colours/shape from the enclosing `.lj-surface` root.
+
+  Native browser autofill / field-history is defeated the LigojAutocomplete
+  way: a unique, unmatchable per-instance `name`/`autocomplete` token plus the
+  password-manager opt-out attributes.
 -->
 <template>
   <label class="search">
@@ -15,6 +19,11 @@
       :value="modelValue"
       type="text"
       :placeholder="placeholder"
+      :name="fieldName"
+      :autocomplete="fieldName"
+      data-1p-ignore="true"
+      data-lpignore="true"
+      data-form-type="other"
       @input="onInput"
     />
     <button v-if="clearable && modelValue" class="search-x" :aria-label="clearLabel" @click.prevent="clear">
@@ -22,6 +31,12 @@
     </button>
   </label>
 </template>
+
+<script>
+// Module-scoped counter → a unique field name per instance for the whole app
+// lifetime (same rationale as LigojAutocomplete).
+let seq = 0
+</script>
 
 <script setup>
 import { useI18nStore } from '@ligoj/host'
@@ -34,6 +49,8 @@ defineProps({
 const emit = defineEmits(['update:modelValue', 'input'])
 const { t } = useI18nStore()
 const clearLabel = t('common.cancel')
+// eslint-disable-next-line no-useless-assignment -- module-level counter, incremented across component instances
+const fieldName = `lj-search-${++seq}`
 
 function onInput(e) {
   emit('update:modelValue', e.target.value)
