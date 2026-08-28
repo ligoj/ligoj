@@ -56,7 +56,7 @@ services:
         BUILDPLATFORM: ${LIGOJ_BUILD_PLATFORM:-linux/amd64}
         TARGETPLATFORM: ${LIGOJ_TARGET_PLATFORM:-linux/amd64}
         JAVA_VERSION: ${JAVA_VERSION:-25}
-        NODE_VERSION: ${NODE_VERSION:-24-bookworm-slim}
+        NODE_VERSION: ${NODE_VERSION:-26-bookworm-slim}
         MAVEN_VERSION: ${MAVEN_VERSION:-3.9.16-amazoncorretto-25-debian-trixie}
         MAVEN_INSECURE_TLS: ${MAVEN_INSECURE_TLS:-false}
         GIT_COMMIT: ${GIT_COMMIT:-0}
