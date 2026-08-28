@@ -178,7 +178,7 @@ public class JavadocDocumentationProvider implements DocumentationProvider {
 			var codeIndex = 0;
 			var parameterInfo = getJavaDocText(paramString, MARKUP_OPERATION_PARAM, MARKUP_HEADER_START, codeIndex, MARKUP_OPERATION_PARAM_END);
 			while (parameterInfo != null) {
-				paramDocs.add(StringUtils.split(parameterInfo, "- ")[1].trim());
+				paramDocs.add(parameterInfo.split("- ")[1].trim());
 				codeIndex += parameterInfo.length();
 				parameterInfo = getJavaDocText(paramString, MARKUP_OPERATION_PARAM, MARKUP_HEADER_START, codeIndex, MARKUP_OPERATION_PARAM_END);
 			}
