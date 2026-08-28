@@ -905,6 +905,7 @@ contributes after first paint):
 | --- | --- |
 | `renderNav` | Sidebar menus/entries, declaratively, with `before`/`after` positioning and dividers |
 | `editExtension` | Entity edit dialogs: body component, action-bar button, replacement save resource |
+| `actionExtension` | View toolbars (users, groups, companies, projects, delegates, provisioning quote): action components |
 | `renderFeatures` / `renderDetailsKey` / `renderDetailsFeatures` | Subscription-row buttons and details cells |
 | `renderGlobal` | Per-user global tool links in the sidebar footer |
 | `parameterField` / `parameterLayout` | Custom inputs and grouping/ordering in the subscription/node parameter forms |
@@ -973,6 +974,7 @@ These extensions may:
 | ----- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | UI    | Navigation    | `renderNav` feature: contribute sidebar menus/entries declaratively (positioning, dividers)                                            |
 | UI    | Edit dialogs  | `editExtension` feature: body component, action-bar button and/or replacement save resource on the entity edit dialogs                 |
+| UI    | Toolbars      | `actionExtension` feature: action components in the toolbar of the main views (users, groups, companies, projects, delegates, quote) |
 | UI    | Subscriptions | `renderFeatures` / `renderDetailsKey` / `renderDetailsFeatures` features: row buttons and details cells                                |
 | UI    | Parameters    | `parameterField` / `parameterLayout` features: custom inputs and grouping in the subscription/node forms                               |
 | UI    | Global tools  | `renderGlobal` feature: per-user tool links in the sidebar footer                                                                      |
@@ -1105,7 +1107,7 @@ Add documentation to public endpoints, including the Javadoc parameters and retu
 * A PgSQL 15+ / MySQL 5.7+ (or another compatible) database
 * SonarQube, ... see the badges for the complete list.
 * [Visual Studio Code](https://code.visualstudio.com/)
-* npm with NodeJS 24+
+* npm with NodeJS 26+
 
 ## Database setup
 
