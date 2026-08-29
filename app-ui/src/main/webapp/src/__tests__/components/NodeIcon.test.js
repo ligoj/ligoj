@@ -31,13 +31,17 @@ describe('nodeIcon()', () => {
     expect(img.attributes('src')).toMatch(/main\/service\/scm\/git\/img\/git\.svg$/)
   })
 
-  it('falls back to the legacy .png on svg load error, then marks broken', async () => {
+  it('falls back to .png on svg load error, then to the explicit placeholder', async () => {
     const w = renderHost({ id: 'service:scm:git:server-1' })
     const img = w.find('img')
     await img.trigger('error') // svg missing → swap to .png
     expect(img.attributes('src')).toMatch(/main\/service\/scm\/git\/img\/git\.png$/)
-    await img.trigger('error') // png missing too → broken
-    expect(img.classes()).toContain('broken')
+    await img.trigger('error') // png missing too → explicit inline placeholder, never a broken image
+    expect(img.attributes('src')).toMatch(/^data:image\/svg\+xml,/)
+    expect(img.classes()).toContain('missing')
+    expect(img.attributes('title')).toBe('Plugin unavailable')
+    await img.trigger('error') // placeholder is terminal: no further mutation
+    expect(img.attributes('src')).toMatch(/^data:image\/svg\+xml,/)
   })
 
   it('renders an explicit mdi-* uiClasses for a service-level node', () => {

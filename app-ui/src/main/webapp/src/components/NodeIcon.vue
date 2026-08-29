@@ -30,8 +30,20 @@
  */
 import { defineComponent, h } from 'vue'
 import { VChip } from 'vuetify/components'
+import { useI18nStore } from '@/stores/i18n.js'
 
 const APP_BASE = import.meta.env.BASE_URL
+
+/**
+ * Explicit placeholder shown when the tool icon cannot be fetched (plugin
+ * uninstalled or unavailable): a muted rounded tile with a question mark,
+ * inlined as a data URI so it can never 404 itself.
+ */
+export const MISSING_NODE_ICON = 'data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+  + '<rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="#94a3b8" stroke-width="1.6"/>'
+  + '<text x="12" y="16.4" text-anchor="middle" font-family="sans-serif" font-size="11.5" font-weight="700" fill="#94a3b8">?</text>'
+  + '</svg>')
 
 /**
  * Plugins still ship Font-Awesome class strings on their `uiClasses`
@@ -84,7 +96,19 @@ export function nodeIcon(node) {
       onError: (e) => {
         const el = e.target
         if (!el.dataset.pngFallback) { el.dataset.pngFallback = '1'; el.src = `${base}.png` }
-        else { el.classList.add('broken') }
+        else if (!el.dataset.missing) {
+          // Both SVG and PNG failed (plugin unavailable): replace the broken
+          // image with the explicit placeholder instead of the browser glyph.
+          el.dataset.missing = '1'
+          el.src = MISSING_NODE_ICON
+          el.classList.add('missing')
+          let title = 'Plugin unavailable'
+          try {
+            const localized = useI18nStore().t('node.iconMissing')
+            if (localized && localized !== 'node.iconMissing') title = localized
+          } catch { /* i18n store unavailable (bare render) — keep the default */ }
+          el.title = title
+        }
       },
     })
   }
@@ -163,6 +187,10 @@ export default defineComponent({
 .tool-icon.broken {
   opacity: 0.35;
   filter: grayscale(1);
+}
+
+.tool-icon.missing {
+  opacity: 0.8;
 }
 
 .icon-text {

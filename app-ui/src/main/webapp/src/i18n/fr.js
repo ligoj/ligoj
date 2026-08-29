@@ -20,6 +20,7 @@ export default {
   'nav.tasks': 'Tâches',
   'nav.systemUsers': 'Utilisateurs système',
   'nav.profile': 'Profil',
+  'node.iconMissing': 'Plugin indisponible',
   'nav.about': 'À propos',
   'nav.logout': 'Déconnexion',
   'nav.refresh': 'Actualiser',
