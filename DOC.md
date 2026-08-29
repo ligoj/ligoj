@@ -839,7 +839,7 @@ curl -H "SM_UniversalID:ligoj-admin" http://localhost:8081/ligoj-api/manage/info
 ```json
 {
   "app": { "name": "Ligoj - API", "description": "Ligoj API container",
-           "version": "4.0.1", "groupId": "org.ligoj.app", "artifactId": "app-api" },
+           "version": "5.0.0", "groupId": "org.ligoj.app", "artifactId": "app-api" },
   "java": { "version": "17.0.3", "vendor": { "name": "Eclipse Adoptium" } },
   "os": { "name": "Mac OS X", "version": "13.5.2", "arch": "aarch64" }
 }
@@ -1189,10 +1189,10 @@ The packaged WARs can also be run directly:
 
 ```bash
 # API
-java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar app-api/target/app-api-4.0.1.war
+java -Xmx1024M -Duser.timezone=UTC -Djpa.hbm2ddl=none -Dligoj.plugin.enabled=false -Djdbc.host=ligoj-db -jar app-api/target/app-api-5.0.0.war
 
 # UI, pointed at a running API endpoint
-java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar app-ui/target/app-ui-4.0.1.war
+java -Dligoj.endpoint="http://192.168.4.138:8081/ligoj-api" -jar app-ui/target/app-ui-5.0.0.war
 ```
 
 ## Packaging
@@ -1217,14 +1217,14 @@ mvn clean package -Pminify -DskipTests=true -Djarsigner.skip=true
 Both images build with the Docker/Podman builder alone — no local Java, Maven or Node toolchain required (the WAR is compiled inside a multi-stage build):
 
 ```bash
-docker build -t ligoj/ligoj-api:4.0.1 -f app-api/Dockerfile app-api/
-docker build -t ligoj/ligoj-ui:4.0.1  -f app-ui/Dockerfile  app-ui/
+docker build -t ligoj/ligoj-api:5.0.0 -f app-api/Dockerfile app-api/
+docker build -t ligoj/ligoj-ui:5.0.0  -f app-ui/Dockerfile  app-ui/
 ```
 
 Multi-architecture manifests are supported:
 
 ```bash
-podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-api -t ligoj/ligoj-api:4.0.1 -f app-api/Dockerfile app-api/
+podman build --platform linux/arm64 --platform linux/amd64 --manifest ligoj/ligoj-api -t ligoj/ligoj-api:5.0.0 -f app-api/Dockerfile app-api/
 ```
 
 During the `ligoj-ui` build, the WAR may be pulled from a released remote location (such as Nexus) rather than the local file system; a custom build can override this remote or local location.
@@ -1240,7 +1240,7 @@ When the build must fetch artifacts from an internal mirror whose TLS certificat
 HTTPS certificate and hostname validation:
 
 ```bash
-docker build --build-arg MAVEN_INSECURE_TLS=true -t ligoj/ligoj-api:4.0.1 -f app-api/Dockerfile app-api/
+docker build --build-arg MAVEN_INSECURE_TLS=true -t ligoj/ligoj-api:5.0.0 -f app-api/Dockerfile app-api/
 ```
 
 When enabled, the builder stage exports these `MAVEN_OPTS` for every `mvn` invocation:
@@ -2747,7 +2747,7 @@ SELECT * FROM "s_plugin";
 
   id  |         artifact         |            key            |  type   |    version   
 ------+--------------------------+---------------------------+---------+----------------
-    3 | plugin-welcome-data-rbac | feature:welcome:data-rbac | FEATURE | 4.0.1-SNAPSHOT
+    3 | plugin-welcome-data-rbac | feature:welcome:data-rbac | FEATURE | 5.0.0-SNAPSHOT
  5002 | plugin-iam-node          | feature:iam:node          | FEATURE | 1.2.1-SNAPSHOT
     1 | plugin-iam-empty         | feature:iam:empty         | FEATURE | 4.0.4
     2 | plugin-ui                | feature:ui                | FEATURE | 1.1.1
@@ -2786,7 +2786,7 @@ You might experience network issues with a remote database. To validate the conn
 ```shell
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:4.0.1 sh -c "apk add mysql-client && mysql -h 192.168.1.16 --user=ligoj --password=ligoj ligoj"
+ ligoj/ligoj-api:5.0.0 sh -c "apk add mysql-client && mysql -h 192.168.1.16 --user=ligoj --password=ligoj ligoj"
 ```
 
 #### PostgreSQL
@@ -2794,5 +2794,5 @@ docker run --rm -it \
 ```shell
 docker run --rm -it \
  --name "ligoj-api" \
- ligoj/ligoj-api:4.0.1 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"
+ ligoj/ligoj-api:5.0.0 sh -c "apk add postgresql-client && psql --host 192.168.1.13 --username=ligoj --password ligoj"
 ```
