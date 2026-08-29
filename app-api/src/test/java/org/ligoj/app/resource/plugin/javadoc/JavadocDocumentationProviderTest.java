@@ -249,7 +249,7 @@ class JavadocDocumentationProviderTest extends AbstractJavaDocTest {
 		// '<section class="detail" id="...">' — the fallback markup must match.
 		// The matched tag ends at the opening quote, so the extraction keeps the
 		// remainder of the h3 attribute markup ('">') as-is.
-		Assertions.assertEquals("\">Alt doc",
+		Assertions.assertEquals("\">Alt doc.",
 				provider.getJavaDocText("<h3 id=\"test1()\">Alt doc.</section>", "test1()"));
 	}
 
@@ -260,8 +260,44 @@ class JavadocDocumentationProviderTest extends AbstractJavaDocTest {
 		Assertions.assertEquals("", JavadocDocumentationProvider.normalize(" ", false));
 		Assertions.assertNull(JavadocDocumentationProvider.normalize(null, false));
 		Assertions.assertEquals("", JavadocDocumentationProvider.normalize(".", false));
-		Assertions.assertEquals("Pre <code>Hello</code> World post", JavadocDocumentationProvider.normalize("pre <a href=\"..\"><code>Hello</code> World</a> post", false));
+		Assertions.assertEquals("Pre `Hello` World post", JavadocDocumentationProvider.normalize("pre <a href=\"..\"><code>Hello</code> World</a> post", false));
 		Assertions.assertEquals("Pre Hello World post", JavadocDocumentationProvider.normalize("pre <a href=\"..\"><code>Hello</code> World</a> post", true));
+		Assertions.assertEquals("Pre & post", JavadocDocumentationProvider.normalize("pre &amp; post", true));
+	}
+
+	@Test
+	void htmlToMarkdown() {
+		// Paragraphs and hard breaks (backslash form)
+		Assertions.assertEquals("First\n\nSecond\\\nnext", JavadocDocumentationProvider.htmlToMarkdown("First<p>Second<br/>next</p>"));
+		// Lists
+		Assertions.assertEquals("Items:\n\n- One\n- Two", JavadocDocumentationProvider.htmlToMarkdown("Items:<ul><li>One</li><li>Two</li></ul>"));
+		// Source-code line wraps are joined back into spaces
+		Assertions.assertEquals("Only non-locked objects can be", JavadocDocumentationProvider.htmlToMarkdown("Only non-locked\nobjects can be"));
+		// Realistic javadoc block: wrapped item text, tight list, following paragraph
+		Assertions.assertEquals("Rules :\n\n- A did not exist\n- B\n\nNote",
+				JavadocDocumentationProvider.htmlToMarkdown("<p>Rules :</p><ul>\n<li>A did not\nexist</li>\n<li>B</li>\n</ul>\nNote"));
+		// Inline styles
+		Assertions.assertEquals("**bold** *italic* `mono`", JavadocDocumentationProvider.htmlToMarkdown("<b>bold</b> <i>italic</i> <code>mono</code>"));
+		// Links: absolute kept as Markdown links, relative (javadoc site) unwrapped
+		Assertions.assertEquals("[Doc](https://ligoj.io/doc)", JavadocDocumentationProvider.htmlToMarkdown("<a href=\"https://ligoj.io/doc\">Doc</a>"));
+		Assertions.assertEquals("Doc", JavadocDocumentationProvider.htmlToMarkdown("<a href=\"../NodeVo.html\">Doc</a>"));
+		// Entities decoded AFTER tag conversion: escaped markup samples stay literal
+		Assertions.assertEquals("`<br>` & A", JavadocDocumentationProvider.htmlToMarkdown("<code>&lt;br&gt;</code> &amp; &#65;"));
+		// <pre><code> becomes a fenced block, inner whitespace preserved
+		Assertions.assertEquals("Sample:\n```\na < b\n  c\n```", JavadocDocumentationProvider.htmlToMarkdown("Sample:<pre><code>a &lt; b\n  c</code></pre>"));
+		// Unknown tags are dropped
+		Assertions.assertEquals("Text", JavadocDocumentationProvider.htmlToMarkdown("<span class=\"x\">Text</span>"));
+		// Idempotent on already-converted text (some customizer paths normalize twice)
+		final var once = JavadocDocumentationProvider.htmlToMarkdown("First<p>Second<br/>next</p><ul><li>One</li></ul>");
+		Assertions.assertEquals(once, JavadocDocumentationProvider.htmlToMarkdown(once));
+		// A hard break butting a paragraph boundary would render as a literal backslash — dropped
+		Assertions.assertEquals("Untouched.\n\nRules:", JavadocDocumentationProvider.htmlToMarkdown("Untouched.<br>\nRules:"));
+		Assertions.assertEquals("End", JavadocDocumentationProvider.htmlToMarkdown("End<br>"));
+		// No leading/trailing newlines or blanks, whatever markup sits at the boundaries
+		Assertions.assertEquals("Text", JavadocDocumentationProvider.htmlToMarkdown("  <p>Text</p>  "));
+		Assertions.assertEquals("- One", JavadocDocumentationProvider.htmlToMarkdown("<ul><li>One</li></ul>"));
+		Assertions.assertEquals("```\ncode\n```", JavadocDocumentationProvider.htmlToMarkdown("<pre>code</pre>"));
+		Assertions.assertEquals("Trimmed", JavadocDocumentationProvider.normalize("\n\n  trimmed  \n\n", false));
 	}
 
 	@Test

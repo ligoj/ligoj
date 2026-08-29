@@ -49,6 +49,7 @@ class LigojOpenApiCustomizerTest extends AbstractJavaDocTest {
 		final var plugin1 = new SystemPlugin();
 		plugin1.setBasePackage(SampleTool2.class.getPackageName());
 		plugin1.setArtifact("tool1");
+		plugin1.setType("SERVICE");
 		final var plugin2 = new SystemPlugin();
 		plugin2.setBasePackage("org.ligoj.bootstrap.resource");
 		plugin2.setArtifact("tool2");
@@ -57,7 +58,17 @@ class LigojOpenApiCustomizerTest extends AbstractJavaDocTest {
 		plugin3.setArtifact("tool3");
 		final var pluginNoPackage = new SystemPlugin();
 		pluginNoPackage.setArtifact("toolNoPackage");
-		Mockito.doReturn(List.of(plugin1, plugin2, plugin3, pluginNoPackage)).when(repository).findAll();
+		// FEATURE registered from the SAME package as the service (e.g. a session-settings provider living in
+		// the service resource package): the service artifact must still win the tag resolution.
+		final var pluginFeature = new SystemPlugin();
+		pluginFeature.setBasePackage(SampleTool2.class.getPackageName());
+		pluginFeature.setArtifact("a-feature");
+		pluginFeature.setType("FEATURE");
+		// Shorter matching prefix: must lose against the longer 'org.ligoj.bootstrap.resource'.
+		final var pluginGeneric = new SystemPlugin();
+		pluginGeneric.setBasePackage("org.ligoj");
+		pluginGeneric.setArtifact("a-generic");
+		Mockito.doReturn(List.of(pluginFeature, pluginGeneric, plugin1, plugin2, plugin3, pluginNoPackage)).when(repository).findAll();
 		customizer = new LigojOpenApiCustomizer(javadocUrls, repository);
 	}
 
@@ -150,6 +161,10 @@ class LigojOpenApiCustomizerTest extends AbstractJavaDocTest {
 
 		// Repeat with cache
 		customizer.customize(oas);
+
+		// Tag resolution: longest base package wins, and on same-package ties the service beats the feature
+		Assertions.assertEquals(List.of("tool2"), oasOperation.getTags());
+		Assertions.assertEquals(List.of("tool1"), oasOperation2.getTags());
 
 		Assertions.assertEquals("Method doc", oasOperation.getSummary());
 		Assertions.assertEquals("Details", oasOperation.getDescription());

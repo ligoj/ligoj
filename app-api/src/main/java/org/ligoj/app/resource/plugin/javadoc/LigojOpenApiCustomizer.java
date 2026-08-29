@@ -92,12 +92,17 @@ public class LigojOpenApiCustomizer extends OpenApiCustomizer {
 	}
 
 	/**
-	 * Return the closest artifact from the given path.
+	 * Return the closest artifact from the given path: the plugin whose base package is the LONGEST prefix of the
+	 * resource's package. On ties (several plugins registered from the same package, e.g. a service resource and a
+	 * feature living side by side), the service/tool plugin wins over a plain feature — a REST route belongs to the
+	 * service artifact — then the alphabetical artifact keeps the choice deterministic.
 	 */
 	private String getArtifact(List<SystemPlugin> plugins, HashMap<String, SystemPlugin> packageToPlugin, ClassResourceInfo cri, String pathKey) {
 		var artifact = packageToPlugin.computeIfAbsent(cri.getResourceClass().getPackageName(), p -> plugins.stream()
 				.filter(plugin1 -> p.startsWith(plugin1.getBasePackage()))
-				.min(Comparator.comparing(SystemPlugin::getBasePackage))
+				.max(Comparator.comparingInt((SystemPlugin p2) -> p2.getBasePackage().length())
+						.thenComparingInt(p2 -> "FEATURE".equals(p2.getType()) ? 0 : 1)
+						.thenComparing(p2 -> StringUtils.defaultString(p2.getArtifact()), Comparator.reverseOrder()))
 				.orElse(DEFAULT_PLUGIN)).getArtifact();
 		if (artifact == null) {
 			artifact = StringUtils.split(pathKey, '/')[0];
