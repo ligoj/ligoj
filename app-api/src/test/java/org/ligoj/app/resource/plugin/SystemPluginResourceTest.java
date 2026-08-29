@@ -1232,8 +1232,14 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		final var settings = mock(SessionSettings.class);
 		when(settings.getApplicationSettings()).thenReturn(applicationSettings);
 		Assertions.assertNull(applicationSettings.getPlugins());
+		Assertions.assertNull(applicationSettings.getUiPlugins());
 		resource.decorate(settings);
 		Assertions.assertNotNull(settings.getApplicationSettings().getPlugins());
+		Assertions.assertNotNull(settings.getApplicationSettings().getUiPlugins());
+		// Only the bundle-shipping plug-ins are advertised to the SPA: 'feature:ui' (the embedded plugin-ui
+		// jar carries webjars/ui/vue/index.js) is kept, the backend-only samples and features are excluded.
+		Assertions.assertEquals(List.of("feature:ui"), settings.getApplicationSettings().getUiPlugins());
+		Assertions.assertTrue(settings.getApplicationSettings().getPlugins().contains("feature:iam:empty"));
 		resource.decorate(settings);
 		Assertions.assertNotNull(settings.getApplicationSettings().getPlugins());
 	}

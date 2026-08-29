@@ -152,7 +152,10 @@ router.beforeEach(() => { app.setBreadcrumbs([]) })
 
 // Backend-only plugins (no Vue bundle) — skip to avoid guaranteed 404s on
 // every session refresh. Mirrors app-ui's App.vue NO_UI_PLUGINS deny list.
-const NO_UI_PLUGINS = new Set(['iam-empty', 'iam-node', 'welcome-data-rbac'])
+// Fallback denylist for backends predating `appSettings.uiPlugins` (the
+// backend-filtered list of bundle-shipping plugins) — only consulted when
+// that list is absent from the session.
+const NO_UI_PLUGINS = new Set(['iam-empty', 'iam-node', 'menu-node', 'welcome-data-rbac'])
 
 // Lazily load the remaining installed plugins (the core 'id'/'ui'/'prov' are
 // already loaded eagerly in main.js). `appSettings.plugins` lists FeaturePlugin
@@ -166,9 +169,12 @@ onMounted(async () => {
   const ok = await auth.fetchSession()
   if (!ok) { auth.redirectToLogin(); return }
   app.setAppName(auth.appSettings?.name)
-  const optional = (auth.appSettings?.plugins || [])
+  // Prefer the backend-filtered list of bundle-shipping plugins: backend-only
+  // features are excluded there, so no 404 fetch ever hits the console.
+  const uiPlugins = auth.appSettings?.uiPlugins
+  const optional = (uiPlugins || auth.appSettings?.plugins || [])
     .map(pluginIdFromKey)
-    .filter((id) => id && id !== 'id' && !NO_UI_PLUGINS.has(id))
+    .filter((id) => id && id !== 'id' && (uiPlugins || !NO_UI_PLUGINS.has(id)))
   if (optional.length) loadAllPlugins(optional)
 })
 

@@ -893,11 +893,28 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	@Override
 	public void decorate(final SessionSettings settings) {
 		// Add the enabled plug-ins
+		final var featurePlugins = context.getBeansOfType(FeaturePlugin.class).values();
 		if (settings.getApplicationSettings().getPlugins() == null) {
-			settings.getApplicationSettings().setPlugins(context.getBeansOfType(FeaturePlugin.class).values().stream()
+			settings.getApplicationSettings().setPlugins(featurePlugins.stream().map(FeaturePlugin::getKey).toList());
+		}
+		if (settings.getApplicationSettings().getUiPlugins() == null) {
+			// Only the plug-ins shipping a frontend bundle: the SPA requests /main/<ui-id>/vue/index.js for
+			// each of these, so backend-only features (iam-node, menu contributions, ...) are excluded and
+			// never produce 404 fetches on the browser side.
+			settings.getApplicationSettings().setUiPlugins(featurePlugins.stream()
+					.filter(p -> p.getClass().getClassLoader()
+							.getResource("META-INF/resources/webjars/" + toUiId(p.getKey()) + "/vue/index.js") != null)
 					.map(FeaturePlugin::getKey).toList());
 		}
+	}
 
+	/**
+	 * Convert a plug-in key to the SPA loader id: the leading {@code service:}/{@code feature:} segment is
+	 * dropped and the remaining segments are joined with dashes — {@code service:id:ldap} → {@code id-ldap},
+	 * mirroring the frontend {@code pluginIdFromKey}.
+	 */
+	private static String toUiId(final String key) {
+		return key.substring(key.indexOf(':') + 1).replace(':', '-');
 	}
 
 }
