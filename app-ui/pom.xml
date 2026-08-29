@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.ligoj.bootstrap</groupId>
 		<artifactId>parent</artifactId>
-		<version>4.0.0</version>
+		<version>5.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -17,13 +17,7 @@
 	<properties>
 		<jetty.properties>${project.build.outputDirectory}/META-INF/jetty/jetty-dev.properties</jetty.properties>
 		<sonar.sources>src/main/java,src/main/webapp/main</sonar.sources>
-<!--		<sonar.sources>src/main/java</sonar.sources>-->
 		<antrun.spawn>true</antrun.spawn>
-		<jetty.version>12.1.12</jetty.version>
-		<spring.version>7.0.9</spring.version>
-		<spring-boot.version>4.1.1</spring-boot.version>
-		<spring-cloud-context.version>5.0.3</spring-cloud-context.version>
-		<spring-security.version>7.1.1</spring-security.version>
 	</properties>
 	<scm>
 		<connection>scm:git:https://github.com/ligoj/ligoj.git</connection>
@@ -33,16 +27,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-proxy</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-config</artifactId>
-				<version>${spring-security.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-oauth2-client</artifactId>
@@ -141,6 +125,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-webmvc</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -222,16 +212,6 @@
 		</dependency>
 
 		<!-- Aspects & Proxy -->
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjrt</artifactId>
-			<version>${aspectj.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjweaver</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
