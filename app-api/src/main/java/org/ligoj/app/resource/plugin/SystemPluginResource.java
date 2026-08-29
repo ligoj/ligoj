@@ -897,15 +897,14 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		if (settings.getApplicationSettings().getPlugins() == null) {
 			settings.getApplicationSettings().setPlugins(featurePlugins.stream().map(FeaturePlugin::getKey).toList());
 		}
-		if (settings.getApplicationSettings().getUiPlugins() == null) {
-			// Only the plug-ins shipping a frontend bundle: the SPA requests /main/<ui-id>/vue/index.js for
-			// each of these, so backend-only features (iam-node, menu contributions, ...) are excluded and
-			// never produce 404 fetches on the browser side.
-			settings.getApplicationSettings().setUiPlugins(featurePlugins.stream()
-					.filter(p -> p.getClass().getClassLoader()
-							.getResource("META-INF/resources/webjars/" + toUiId(p.getKey()) + "/vue/index.js") != null)
-					.map(FeaturePlugin::getKey).toList());
-		}
+		// Only the plug-ins shipping a frontend bundle: the SPA requests /main/<ui-id>/vue/index.js for
+		// each of these, so backend-only features (iam-node, menu contributions, ...) are excluded and
+		// never produce 404 fetches on the browser side. Exposed through the shared application data map —
+		// bootstrap's ApplicationSettings has no dedicated field for it.
+		settings.getApplicationSettings().getData().computeIfAbsent("ui-plugins", _ -> featurePlugins.stream()
+				.filter(p -> p.getClass().getClassLoader()
+						.getResource("META-INF/resources/webjars/" + toUiId(p.getKey()) + "/vue/index.js") != null)
+				.map(FeaturePlugin::getKey).collect(java.util.stream.Collectors.joining(",")));
 	}
 
 	/**

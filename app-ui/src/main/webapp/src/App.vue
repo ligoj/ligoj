@@ -169,12 +169,14 @@ onMounted(async () => {
   const ok = await auth.fetchSession()
   if (!ok) { auth.redirectToLogin(); return }
   app.setAppName(auth.appSettings?.name)
-  // Prefer the backend-filtered list of bundle-shipping plugins: backend-only
-  // features are excluded there, so no 404 fetch ever hits the console.
-  const uiPlugins = auth.appSettings?.uiPlugins
+  // Prefer the backend-filtered list of bundle-shipping plugins (comma-joined
+  // keys in the shared application data map): backend-only features are
+  // excluded there, so no 404 fetch ever hits the console.
+  const uiPluginsData = auth.appSettings?.data?.['ui-plugins']
+  const uiPlugins = uiPluginsData == null ? null : uiPluginsData.split(',').filter(Boolean)
   const optional = (uiPlugins || auth.appSettings?.plugins || [])
     .map(pluginIdFromKey)
-    .filter((id) => id && id !== 'id' && (uiPlugins || !NO_UI_PLUGINS.has(id)))
+    .filter((id) => id && id !== 'id' && (uiPlugins ? true : !NO_UI_PLUGINS.has(id)))
   if (optional.length) loadAllPlugins(optional)
 })
 
