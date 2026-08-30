@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ligoj.fullname" . }}-ui
+  labels:
+    {{- include "ligoj.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ui
+spec:
+  replicas: {{ .Values.ui.replicas }}
+  selector:
+    matchLabels:
+      {{- include "ligoj.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: ui
+  template:
+    metadata:
+      labels:
+        {{- include "ligoj.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: ui
+      {{- with .Values.ui.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: ui
+          image: {{ include "ligoj.uiImage" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CONTEXT_URL
+              value: {{ .Values.ui.contextUrl | quote }}
+            - name: ENDPOINT
+              value: "http://{{ include "ligoj.fullname" . }}-api:8081/ligoj-api"
+            - name: JAVA_MEMORY
+              value: {{ .Values.ui.javaMemory | quote }}
+            - name: JAVA_OPTIONS
+              value: {{ .Values.ui.javaOptions | quote }}
+            {{- with .Values.ui.customOpts }}
+            - name: CUSTOM_OPTS
+              value: {{ . | quote }}
+            {{- end }}
+            - name: CRYPTO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ligoj.crypto.secretName" . }}
+                  key: {{ include "ligoj.crypto.secretKey" . }}
+            - name: CRYPTO
+              value: "-Dapp.crypto.password=$(CRYPTO_PASSWORD)"
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: {{ printf "%s/favicon.ico" (.Values.ui.contextUrl | trimSuffix "/") }}
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: {{ printf "%s/favicon.ico" (.Values.ui.contextUrl | trimSuffix "/") }}
+              port: http
+            initialDelaySeconds: 45
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 5
+          {{- with .Values.ui.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: home
+              mountPath: /home/ligoj
+      volumes:
+        # The UI server keeps only transient state under its home.
+        - name: home
+          emptyDir: {}
+      {{- with .Values.ui.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ui.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ui.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

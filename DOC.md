@@ -1359,8 +1359,29 @@ The source compatibility is 21 without preview features.
 
 | Vendor  | Release | OS              |
 | ------- | ------- | --------------- |
-| Oracle  | 21      | Linux and MacOS |
-| OpenJDK | 21      | Linux and MacOS |
+| Oracle  | 25      | Linux and MacOS |
+| OpenJDK | 25      | Linux and MacOS |
+
+# Kubernetes Installation (Helm)
+
+A Helm chart lives in **[charts/ligoj](charts/ligoj)** and deploys the same topology as the compose stack: the `api` Deployment (`:8081`, context `/ligoj-api`), the `ui` Deployment (`:8080`, context `/ligoj`, only piece to expose) and a database — the bundled single-replica development one (PostgreSQL by default, `database.builtin.vendor=mysql` for MySQL) or an external managed instance (`database.builtin.enabled=false` + `database.external.*`).
+
+```bash
+# Evaluation: bundled PostgreSQL, then port-forward
+helm install ligoj ./charts/ligoj
+kubectl port-forward svc/ligoj-ui 8080:8080
+open http://localhost:8080/ligoj
+
+# Production shape: external DB, ingress, real secrets
+helm install ligoj ./charts/ligoj \
+  --set database.builtin.enabled=false \
+  --set database.external.host=pg.company.com \
+  --set database.external.existingSecret=ligoj-db \
+  --set crypto.existingSecret=ligoj-crypto \
+  --set ingress.enabled=true --set "ingress.hosts[0]=ligoj.company.com"
+```
+
+Sensitive values (`app.crypto.password`, JDBC password) are Secret-backed and injected through env substitution — never inlined in the pod spec. The API home (`/home/ligoj`, downloaded plugin jars) is PVC-backed. The full values reference is in the chart's [README](charts/ligoj/README.md).
 
 # Docker Installation
 

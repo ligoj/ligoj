@@ -1,0 +1,23 @@
+apiVersion: v2
+name: ligoj
+description: >-
+  Ligoj — plugin-based project portal linking your tools (SCM, CI, IAM,
+  provisioning, ...). Deploys the API server, the UI server and optionally a
+  bundled development database; production setups point to an external
+  MySQL/PostgreSQL instead.
+type: application
+# Chart version (bump on chart changes) — independent from the app version.
+version: 1.0.0
+# Ligoj application version, used as the default image tag.
+appVersion: "5.0.0"
+home: https://ligoj.io
+sources:
+  - https://github.com/ligoj/ligoj
+icon: https://avatars.githubusercontent.com/u/22186627
+keywords:
+  - ligoj
+  - portal
+  - devops
+maintainers:
+  - name: Kloudy
+    url: https://github.com/ligoj

@@ -1,0 +1,113 @@
+# =============================================================================
+# Ligoj Helm chart — default values
+# =============================================================================
+# Mirrors the compose stack (compose.yml + compose-override.yml/-mysql.yml):
+# an `api` Deployment (:8081, context /ligoj-api), a `ui` Deployment (:8080,
+# context /ligoj) and a database — either the bundled single-replica dev
+# database or an external one you manage.
+# =============================================================================
+
+image:
+  # Prefix prepended to both repositories, e.g. "registry.company.com/".
+  registry: ""
+  apiRepository: ligoj/ligoj-api
+  uiRepository: ligoj/ligoj-ui
+  # Defaults to the chart appVersion when empty.
+  tag: ""
+  pullPolicy: IfNotPresent
+  # Names of existing imagePullSecrets.
+  pullSecrets: []
+
+api:
+  replicas: 1
+  # JVM tuning of the container (JAVA_MEMORY / JAVA_OPTIONS envs).
+  javaMemory: "-Xms512M -Xmx1024M"
+  javaOptions: "-Duser.timezone=UTC"
+  # Extra `-D` system properties appended AFTER the chart-computed JDBC ones —
+  # the last occurrence wins, so anything can be overridden here.
+  customOpts: ""
+  resources: {}
+  #  requests: { cpu: 250m, memory: 768Mi }
+  #  limits: { memory: 1536Mi }
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  # Persistent /home/ligoj (downloaded plugin jars, exports...).
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClass: ""
+    accessModes: [ReadWriteOnce]
+    # Reuse a PVC created outside the chart instead.
+    existingClaim: ""
+
+ui:
+  replicas: 1
+  # Public context path of the SPA. Must start with '/'; also drives the
+  # default ingress path and the readiness probe.
+  contextUrl: /ligoj
+  javaMemory: "-Xms128M -Xmx128M"
+  javaOptions: "-Duser.timezone=UTC -Dsecurity=Rest"
+  customOpts: ""
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    port: 8080
+    # nodePort: 30080   # honored when type is NodePort
+
+# Symmetric encryption password of the stored secrets (`app.crypto.password`).
+# CHANGE IT for any real deployment, or point to an existing Secret.
+crypto:
+  password: "public"
+  # Existing Secret name; when set, `password` above is ignored.
+  existingSecret: ""
+  existingSecretKey: crypto-password
+
+database:
+  # Bundled single-replica database (development / evaluation). Disable it and
+  # fill `external` for production.
+  builtin:
+    enabled: true
+    # postgresql | mysql
+    vendor: postgresql
+    # Image override; defaults per vendor: postgres:16 / mysql:8.0.36.
+    image: ""
+    database: ligoj
+    username: ligoj
+    password: ligoj
+    persistence:
+      size: 8Gi
+      storageClass: ""
+    resources: {}
+  # External database, used when `builtin.enabled` is false.
+  external:
+    # postgresql | mysql
+    vendor: postgresql
+    host: ""
+    # Defaults per vendor when 0: 5432 / 3306.
+    port: 0
+    database: ligoj
+    username: ligoj
+    password: ""
+    # Existing Secret holding the password; when set, `password` is ignored.
+    existingSecret: ""
+    existingSecretKey: db-password
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  # Host list; the UI is exposed under `ui.contextUrl` on each host.
+  hosts:
+    - ligoj.example.org
+  tls: []
+  #  - secretName: ligoj-tls
+  #    hosts: [ligoj.example.org]
+
+# Extra labels added to every object.
+commonLabels: {}

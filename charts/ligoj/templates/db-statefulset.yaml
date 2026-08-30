@@ -1,0 +1,109 @@
+{{- /*
+Bundled single-replica database — development / evaluation grade, mirroring
+the compose overrides. Use `database.builtin.enabled: false` + an external
+managed database for production.
+*/ -}}
+{{- if .Values.database.builtin.enabled }}
+{{- $b := .Values.database.builtin }}
+{{- $mysql := eq $b.vendor "mysql" }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ligoj.fullname" . }}-db
+  labels:
+    {{- include "ligoj.labels" . | nindent 4 }}
+    app.kubernetes.io/component: db
+spec:
+  serviceName: {{ include "ligoj.fullname" . }}-db
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "ligoj.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: db
+  template:
+    metadata:
+      labels:
+        {{- include "ligoj.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: db
+    spec:
+      containers:
+        - name: db
+          image: {{ include "ligoj.db.image" . }}
+          env:
+            {{- if $mysql }}
+            - name: MYSQL_RANDOM_ROOT_PASSWORD
+              value: "yes"
+            - name: MYSQL_DATABASE
+              value: {{ $b.database | quote }}
+            - name: MYSQL_USER
+              value: {{ $b.username | quote }}
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ligoj.secretName" . }}
+                  key: db-password
+            {{- else }}
+            - name: POSTGRES_DB
+              value: {{ $b.database | quote }}
+            - name: POSTGRES_USER
+              value: {{ $b.username | quote }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ligoj.secretName" . }}
+                  key: db-password
+            {{- end }}
+          ports:
+            - name: db
+              containerPort: {{ if $mysql }}3306{{ else }}5432{{ end }}
+          readinessProbe:
+            exec:
+              command:
+                {{- if $mysql }}
+                - sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -u"$MYSQL_USER" -p"$MYSQL_PASSWORD"
+                {{- else }}
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" -h 127.0.0.1
+                {{- end }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          {{- with $b.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ if $mysql }}/var/lib/mysql{{ else }}/var/lib/postgresql/data{{ end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        {{- with $b.persistence.storageClass }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $b.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ligoj.fullname" . }}-db
+  labels:
+    {{- include "ligoj.labels" . | nindent 4 }}
+    app.kubernetes.io/component: db
+spec:
+  type: ClusterIP
+  ports:
+    - name: db
+      port: {{ if $mysql }}3306{{ else }}5432{{ end }}
+      targetPort: db
+  selector:
+    {{- include "ligoj.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: db
+{{- end }}

@@ -1,0 +1,18 @@
+{{- if and .Values.api.persistence.enabled (not .Values.api.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "ligoj.fullname" . }}-home
+  labels:
+    {{- include "ligoj.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  accessModes:
+    {{- toYaml .Values.api.persistence.accessModes | nindent 4 }}
+  {{- with .Values.api.persistence.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.api.persistence.size }}
+{{- end }}

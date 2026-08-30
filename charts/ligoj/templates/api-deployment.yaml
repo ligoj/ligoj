@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ligoj.fullname" . }}-api
+  labels:
+    {{- include "ligoj.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      {{- include "ligoj.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        {{- include "ligoj.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: api
+      {{- with .Values.api.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: api
+          image: {{ include "ligoj.apiImage" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            # The image defaults to 127.0.0.1 — pods must listen cluster-wide.
+            - name: SERVER_HOST
+              value: "0.0.0.0"
+            - name: JAVA_MEMORY
+              value: {{ .Values.api.javaMemory | quote }}
+            - name: JAVA_OPTIONS
+              value: {{ .Values.api.javaOptions | quote }}
+            - name: JDBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ligoj.db.secretName" . }}
+                  key: {{ include "ligoj.db.secretKey" . }}
+            - name: CRYPTO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ligoj.crypto.secretName" . }}
+                  key: {{ include "ligoj.crypto.secretKey" . }}
+            - name: CRYPTO
+              value: "-Dapp.crypto.password=$(CRYPTO_PASSWORD)"
+            # Chart-computed JDBC wiring first, then user extras (last -D wins).
+            - name: CUSTOM_OPTS
+              value: "-Dmanagement.endpoint.sbom.application.location=classpath:bom.json {{ include "ligoj.jdbcOpts" . }}{{ with .Values.api.customOpts }} {{ . }}{{ end }}"
+          ports:
+            - name: http
+              containerPort: 8081
+          readinessProbe:
+            httpGet:
+              path: /ligoj-api/manage/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /ligoj-api/manage/health
+              port: http
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 5
+          {{- with .Values.api.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: home
+              mountPath: /home/ligoj
+      volumes:
+        - name: home
+          {{- if .Values.api.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.api.persistence.existingClaim | default (printf "%s-home" (include "ligoj.fullname" .)) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      {{- with .Values.api.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.api.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.api.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

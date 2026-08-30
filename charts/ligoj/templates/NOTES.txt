@@ -1,0 +1,27 @@
+Ligoj {{ include "ligoj.tag" . }} deployed as release "{{ .Release.Name }}".
+
+  UI      : service {{ include "ligoj.fullname" . }}-ui (port {{ .Values.ui.service.port }}), context {{ .Values.ui.contextUrl }}
+  API     : service {{ include "ligoj.fullname" . }}-api (port 8081), context /ligoj-api
+  Database: {{ if .Values.database.builtin.enabled }}bundled {{ .Values.database.builtin.vendor }} ({{ include "ligoj.fullname" . }}-db) — development grade{{ else }}external {{ .Values.database.external.vendor }} at {{ .Values.database.external.host }}{{ end }}
+
+{{- if .Values.ingress.enabled }}
+
+Open:
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ui.contextUrl }}
+{{- end }}
+{{- else }}
+
+No ingress enabled — reach the UI with a port-forward:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "ligoj.fullname" . }}-ui {{ .Values.ui.service.port }}:{{ .Values.ui.service.port }}
+  open http://localhost:{{ .Values.ui.service.port }}{{ .Values.ui.contextUrl }}
+{{- end }}
+
+Default credentials on a fresh database: admin / admin (change them immediately).
+{{- if eq .Values.crypto.password "public" }}
+
+WARNING: `crypto.password` is still the default "public" — stored secrets are
+encrypted with a well-known key. Set your own value (or `crypto.existingSecret`)
+for any real deployment.
+{{- end }}
