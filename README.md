@@ -2,30 +2,15 @@
 
 **The open-source project portal**: one place that centralizes every tool of your projects — issue trackers, CI, SCM, quality, cloud provisioning… — with plugin-based connections, fine-grained security and data collection.
 
-[![Docker API](https://img.shields.io/docker/v/ligoj/ligoj-api?label=ligoj-api)](https://hub.docker.com/r/ligoj/ligoj-api)
-[![Docker UI](https://img.shields.io/docker/v/ligoj/ligoj-ui?label=ligoj-ui)](https://hub.docker.com/r/ligoj/ligoj-ui)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ligoj_ligoj&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ligoj_ligoj)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/abf810c094e44c0691f71174c707d6ed)](https://www.codacy.com/gh/ligoj/ligoj)
-[![CodeFactor](https://www.codefactor.io/repository/github/ligoj/ligoj/badge)](https://www.codefactor.io/repository/github/ligoj/ligoj)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fligoj%2Fligoj.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fligoj%2Fligoj?ref=badge_shield)
-[![License](http://img.shields.io/:license-mit-blue.svg)](http://fabdouglas.mit-license.org/)
+![Vue 3](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vuedotjs&logoColor=white) ![Vuetify](https://img.shields.io/badge/Vuetify-4-1867C0?logo=vuetify&logoColor=white) ![Java 25](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4-6DB33F?logo=springboot&logoColor=white) [![Docker](https://img.shields.io/docker/v/ligoj/ligoj-api?logo=docker&label=Docker&logoColor=white)](https://hub.docker.com/r/ligoj/ligoj-api) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ligoj_ligoj&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ligoj_ligoj) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fligoj%2Fligoj.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fligoj%2Fligoj?ref=badge_shield) [![License](http://img.shields.io/:license-mit-blue.svg)](http://fabdouglas.mit-license.org/)
 
 ![Ligoj home page](https://github.com/ligoj/ligoj/raw/master/docs/assets/img/home-multi-project.png "Home page")
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vuedotjs&logoColor=white" alt="Vue 3">
-  <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/Vuetify-4-1867C0?logo=vuetify&logoColor=white" alt="Vuetify">
-  <img src="https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white" alt="Java 25">
-  <img src="https://img.shields.io/badge/Spring_Boot-4-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot">
-  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white" alt="Docker">
-</p>
 
 ## Why Ligoj?
 
 - 🧩 **Everything is a plugin** — tools, identity providers, features. Pick from the [published plugins](https://mvnrepository.com/artifact/org.ligoj.plugin) (Jira, Jenkins, SonarQube, GitHub/GitLab, LDAP, AWS/Azure/OVH provisioning…) or [write your own](https://github.com/ligoj/plugin-api). Install, update and remove them from the UI or the CLI, without rebuilding Ligoj.
 - 🗂️ **Projects & subscriptions** — each project subscribes to tool instances; health, metrics and key data are collected and displayed on one dashboard.
-- 🔐 **Security first** — (O)RBAC model with regex-based UI/API authorizations, delegated administration, API tokens, session/OAuth2 (OIDC) login, audit trail and signed plugins. See [Security](DOC.md#security).
+- 🔐 **Security first** — (O)RBAC model withh regex-based UI/API authorizations, delegated administration, API tokens, session/OAuth2 (OIDC) login, audit trail and signed plugins. See [Security](DOC.md#security).
 - 💸 **Cloud cost management** — the provisioning plugins (AWS, Azure, OVH, Outscale…) bring catalog-aware cost estimation and optimization to your projects.
 - ⚡ **Modern stack** — Vue 3 + Vuetify 4 SPA (dark mode, i18n EN/FR, mobile-friendly) on a Java 25 / Spring Boot REST API, shipped as Docker images.
 - 🤖 **API-first** — every feature is a REST endpoint, browsable from the built-in [OpenAPI explorer](DOC.md#openapi) and scriptable through the [CLI](DOC.md#cli-configuration).
@@ -39,7 +24,7 @@ git clone https://github.com/ligoj/ligoj.git && cd ligoj
 podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
 ```
 
-Then open http://localhost:8080/ligoj and log in:
+Then open <http://localhost:8080/ligoj> and log in:
 
 | Role          | Login         | Password      |
 | ------------- | ------------- | ------------- |

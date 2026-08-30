@@ -1,6 +1,7 @@
-[![Docker](https://img.shields.io/docker/build/ligoj/ligoj-api.svg)](https://hub.docker.com/r/ligoj/ligoj-api)
 
-# API (REST) container running a stateless Spring Boot application.
+# API (REST) container running a stateless Spring Boot application
+
+[![Docker](https://img.shields.io/docker/build/ligoj/ligoj-api.svg)](https://hub.docker.com/r/ligoj/ligoj-api)
 
 ## Roles
 

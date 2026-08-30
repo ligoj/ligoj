@@ -25,8 +25,8 @@ The goal is to rewrite the UI in VueJS.
 This is a modular project with many Maven plugins that can be added dynamically.
 All plugins are available in this workspace under `ligoj/plugin-<qualified-id>` repositories (github).
 
-At mmost, there is one parent plugin.
-Whe a plugin has a parent, the perent is of type `tool`
+At most, there is one parent plugin.
+Whe a plugin has a parent, the parent is of type `tool`
 When a plugin has no parent, it is of type `service` or `feature`.
 A plugin of type `feature` cannot have children.
 
@@ -73,7 +73,7 @@ Each plugin provides at least on `node`:
   - `service:<parent-plugin-short-id>:<plugin-short-id>` for a tool `plugin-short-id` having `parent-plugin-short-id` as parent plugin.
 - the user can create instances of the tool nodes. So the instances have an `id` having the following form: 
   - `service:<parent-plugin-short-id>:<plugin-short-id>:<instance-id>`.
-  - No instance can be created dirrectly under a service or feature node.
+  - No instance can be created directly under a service or feature node.
   - If the node `id` contains 4 segments, it is an instance node, and the parent `id` contains 3 segments.
   - If the node `id` contains 3 segments, it is a tool node, and the parent `id` contains 2 segments.
   - If the node `id` contains 2 segments, it is a service node or a service. The first segment is always `service` or `feature`.
@@ -102,14 +102,14 @@ adds its `src/main/resources/META-INF/resources/<plugin-path>/` to the classpath
 - `<plugin_short_id>.html` — Handlebars view
 - `<plugin_short_id>.js` — the AMD controller (`define(function(){…})`); this is
   the file you read to recover `renderFeatures` / `renderKey` / `renderDetailsKey`
-  behaviour. Many are `define({})` (parent with no own UI).
+  behavior. Many are `define({})` (parent with no own UI).
 - `<plugin_short_id>.css`, `nls/messages.js` (+ `nls/fr/messages.js`) — styles + i18n.
 
 `cascade.js` (the legacy custom MVVM/AMD loader) wires routing-by-convention,
 Handlebars i18n, inherited parent contexts, and per-module `initialize`/`unload`.
 `error.mod.js` = global error→toast; `security.mod.js` = a DOM access guard.
 The Vue port replaces all of this — you only need the legacy `.js`/`nls` files
-as the behavioural spec for the plugin you're migrating.
+as the behavioral spec for the plugin you're migrating.
 
 # Target design
 
@@ -557,7 +557,7 @@ The subscribe wizard auto-renders the parameter form for any node. To make it lo
 
 ### Wire shape (`ParameterVo`)
 
-The backend serialises an enum-style `type`. **Values are UPPERCASE** — `TEXT`, `BOOL`, `SELECT`, `MULTIPLE`, `INTEGER`, `DATE`, `TAGS`. The wizard normalises via `typeKind(p) = String(p.type).toLowerCase()`.
+The backend serializes an enum-style `type`. **Values are UPPERCASE** — `TEXT`, `BOOL`, `SELECT`, `MULTIPLE`, `INTEGER`, `DATE`, `TAGS`. The wizard normalises via `typeKind(p) = String(p.type).toLowerCase()`.
 
 ```jsonc
 {
@@ -1341,7 +1341,7 @@ their decorative pills.
   **lazily**: each row emits `row-appear` (the `directives/appear.js` `v-appear`
   IntersectionObserver, fires once) → HomeView batches ids (debounced, chunked)
   → `rest/subscription/status/refresh?id=…` → merges `{parameters,data,status}`
-  into a reactive `detailsById` map → groups recompute. A "Démo" checkbox
+  into a reactive `detailsById` map → groups recompute. A "Demo" checkbox
   additively appends the mockup dataset on top of the real one.
 
 # Decisions and gotchas

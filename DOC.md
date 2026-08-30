@@ -866,7 +866,7 @@ API generation:
 - A random `128` characters string is generated. Can be overridden with `api.token.length` property. This is the actual value returned to the principal.
 - A hash is generated from the token's name and principal's name with `SHA-512` algorithm. Can be overridden with `api.token.digest` property.
 - A `SHA-1` hash is created from the principal's name, the previous hash, and a secret from `api.token.secret`. There are `31` iterations, this can be overridden with `api.token.iterations` property.
-- The `SHA-1` hash is then crypted with `DESede` algorithm. Can be overridden with `api.token.digest` property. This is the actual value stored in the database.
+- The `SHA-1` hash is then encrypted with `DESede` algorithm. Can be overridden with `api.token.digest` property. This is the actual value stored in the database.
 
 See `ApiTokenResource` for more details.
 
@@ -1833,10 +1833,10 @@ spring.security.oauth2.client.registration.keycloak.scope = openid
 
 Corresponding Keycloak configuration:
 
-- Root URL = http://localhost:8080/ligoj/
-- Home URL = http://localhost:8080/ligoj/
-- Redirect Login URI: http://localhost:8080/ligoj/login/oauth2/code/keycloak
-- Redirect Logout URI: http://localhost:8080/ligoj/oauth2/authorization/keycloak?logout
+* Root URL = http://localhost:8080/ligoj/
+* Home URL = http://localhost:8080/ligoj/
+* Redirect Login URI: http://localhost:8080/ligoj/login/oauth2/code/keycloak
+* Redirect Logout URI: http://localhost:8080/ligoj/oauth2/authorization/keycloak?logout
 
 ```shell
 sudo docker rm -f ligoj-ui
