@@ -56,14 +56,14 @@ spec:
               containerPort: 8080
           readinessProbe:
             httpGet:
-              path: {{ printf "%s/favicon.ico" (.Values.ui.contextUrl | trimSuffix "/") }}
+              path: {{ printf "%s/" (.Values.ui.contextUrl | trimSuffix "/") }}
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 3
           livenessProbe:
             httpGet:
-              path: {{ printf "%s/favicon.ico" (.Values.ui.contextUrl | trimSuffix "/") }}
+              path: {{ printf "%s/" (.Values.ui.contextUrl | trimSuffix "/") }}
               port: http
             initialDelaySeconds: 45
             periodSeconds: 15

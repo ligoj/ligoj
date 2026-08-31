@@ -158,4 +158,4 @@ exec java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
   -cp . org.springframework.boot.loader.launch.WarLauncher"]
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
-  CMD curl --fail -s "http://localhost:${SERVER_PORT}${CONTEXT_URL}/favicon.ico" || exit 1
+  CMD curl --fail -s -o /dev/null "http://localhost:${SERVER_PORT}${CONTEXT_URL%/}/" || exit 1

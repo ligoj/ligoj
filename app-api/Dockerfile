@@ -172,11 +172,11 @@ exec java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
   -Djava.security.policy=\"${SERVER_HOME}/ligoj.policy\" \
   -Dserver.address=\"${SERVER_HOST}\" \
   -Dserver.port=\"${SERVER_PORT}\" \
-  -Dserver.servlet.context-path=\"${CONTEXT_URL}\" \
+  -Dserver.servlet.context-path=\"${CONTEXT_URL%/}\" \
   -Djavax.net.ssl.trustStorePassword=changeit \
   -Djava.net.preferIPv4Stack=true \
   -Dligoj.home=\"${LIGOJ_HOME}\" \
   -jar \"${ARTIFACT_ID}.war\""]
 
 HEALTHCHECK --interval=10s --timeout=2s --retries=5 --start-period=30s \
-  CMD curl --fail -s "http://localhost:${SERVER_PORT}${CONTEXT_URL}/manage/health" || exit 1
+  CMD curl --fail-with-body -s "http://localhost:${SERVER_PORT}${CONTEXT_URL%/}/manage/health" || exit 1
