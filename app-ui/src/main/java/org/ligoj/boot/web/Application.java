@@ -14,6 +14,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.error.ErrorPage;
 import org.springframework.boot.web.error.ErrorPageRegistrar;
+import org.springframework.boot.jetty.servlet.JettyServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -166,6 +168,27 @@ public class Application extends SpringBootServletInitializer {
 	 *
 	 * @return captcha configuration.
 	 */
+	/**
+	 * Source-run (IDE / {@code spring-boot:run}) document root. Spring Boot 4 dropped the deprecated
+	 * {@code src/main/webapp} fallback, and this application serves its static pages (login.html, index.html,
+	 * assets) through the SERVLET CONTAINER only — there is no Spring MVC on the classpath — so without a
+	 * document root every static resource is a 404 when running from sources, whatever the context path. WAR and
+	 * exploded-WAR deployments resolve their own document root and the relative directory does not exist there:
+	 * this customizer is then a no-op.
+	 *
+	 * @return The Jetty factory customizer setting the development document root when available.
+	 */
+	@Bean
+	public WebServerFactoryCustomizer<JettyServletWebServerFactory> devDocumentRoot() {
+		return factory -> java.util.stream.Stream.of("src/main/webapp", "app-ui/src/main/webapp")
+				.map(java.io.File::new).filter(java.io.File::isDirectory).findFirst().ifPresent(root -> {
+					factory.setDocumentRoot(root);
+					// Embedded (non-WAR) runs get no container DefaultServlet by default: without it the
+					// document root would stay unserved. WAR deployments never reach this branch.
+					factory.setRegisterDefaultServlet(true);
+				});
+	}
+
 	@Bean
 	public ServletRegistrationBean<CaptchaServlet> captchaServlet() {
 		return new ServletRegistrationBean<>(new CaptchaServlet(), "/captcha.png");
