@@ -181,12 +181,8 @@ public class Application extends SpringBootServletInitializer {
 	@Bean
 	public WebServerFactoryCustomizer<JettyServletWebServerFactory> devDocumentRoot() {
 		return factory -> java.util.stream.Stream.of("src/main/webapp", "app-ui/src/main/webapp")
-				.map(java.io.File::new).filter(java.io.File::isDirectory).findFirst().ifPresent(root -> {
-					factory.setDocumentRoot(root);
-					// Embedded (non-WAR) runs get no container DefaultServlet by default: without it the
-					// document root would stay unserved. WAR deployments never reach this branch.
-					factory.setRegisterDefaultServlet(true);
-				});
+				.map(java.io.File::new).filter(java.io.File::isDirectory).findFirst()
+				.ifPresent(factory::setDocumentRoot);
 	}
 
 	@Bean
