@@ -1,31 +1,37 @@
 <script>
-// Module-scoped counter → a unique field name per instance (see LigojAutocomplete).
+// Module-scoped counter → a unique field name per instance for the whole app
+// lifetime (see LigojAutocomplete for the rationale).
 let seq = 0
 </script>
 
 <script setup>
 /**
- * LigojSelect — a drop-in <v-select> aligned with LigojAutocomplete: the inner
- * input carries an unmatchable per-instance `autocomplete` token and `name`
- * (plus the password-manager opt-outs) so no native browser suggestion can
- * overlay Vuetify's menu, and the dropdown transition honors the profile's
- * reduce-motion flag. Every prop, event, slot and `v-model` is forwarded.
+ * LigojCombobox — a drop-in <v-combobox> that suppresses the browser's native
+ * autofill / saved-value dropdown, which otherwise renders ON TOP of Vuetify's
+ * own suggestion menu. Combobox inputs are free-text, making them the most
+ * autofill-prone widgets of all.
+ *
+ * Same contract and hardening as LigojAutocomplete: every prop, event, slot
+ * and `v-model` is forwarded; the inner <input> gets a KNOWN suppressing
+ * `autocomplete` token (`new-password` — newer Chrome ignores both `off` and
+ * unknown tokens), a per-instance non-guessable `name`, and the
+ * password-manager opt-out attributes; the dropdown transition honors the
+ * profile's reduce-motion flag.
  */
 import { computed, ref, onMounted, useAttrs } from 'vue'
 
 defineOptions({ inheritAttrs: false })
 
 const props = defineProps({
-  // Token placed on the inner <input>. 'off' resolves to an unmatchable token.
+  // Token placed on the inner <input>. 'off' disables browser autofill.
   autocomplete: { type: String, default: 'off' },
 })
 
 const attrs = useAttrs()
 const root = ref(null)
+// Respect an explicit name; otherwise a unique, non-guessable one.
 // eslint-disable-next-line no-useless-assignment -- module-level counter, incremented across component instances
-const fieldName = String(attrs.name ?? `lj-sel-${++seq}`)
-// `new-password` — see LigojAutocomplete: the known token browsers honor to
-// fully suppress native autofill (unknown tokens are ignored by newer Chrome).
+const fieldName = String(attrs.name ?? `lj-cb-${++seq}`)
 const autocompleteToken = computed(() => (props.autocomplete === 'off' ? 'new-password' : props.autocomplete))
 // Honor the profile's reduce-motion flag: no dropdown transition.
 const menuProps = computed(() => {
@@ -53,9 +59,10 @@ defineExpose({ root })
 </script>
 
 <template>
-  <v-select ref="root" v-bind="$attrs" :name="fieldName" :menu-props="menuProps">
+  <v-combobox ref="root" v-bind="$attrs" :autocomplete="autocompleteToken" :name="fieldName" :menu-props="menuProps">
+    <!-- Forward every slot the caller declares to the inner component. -->
     <template v-for="(_, slot) in $slots" #[slot]="slotProps">
       <slot :name="slot" v-bind="slotProps ?? {}" />
     </template>
-  </v-select>
+  </v-combobox>
 </template>

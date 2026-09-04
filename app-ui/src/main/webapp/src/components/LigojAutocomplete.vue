@@ -41,8 +41,11 @@ const root = ref(null)
 // eslint-disable-next-line no-useless-assignment -- module-level counter, incremented across component instances
 const fieldName = String(attrs.name ?? `lj-ac-${++seq}`)
 // Chrome ignores `autocomplete="off"` for heuristic field types (organization,
-// address, mail...): an unknown per-instance token disables matching for real.
-const autocompleteToken = computed(() => (props.autocomplete === 'off' ? fieldName : props.autocomplete))
+// address, mail...) and, since ~2025, IGNORES unknown tokens too (falling back
+// to label/name heuristics). `new-password` is a KNOWN token it honors and
+// that never has stored values for a text input — the reliable industry
+// escape hatch to fully suppress the native autofill dropdown.
+const autocompleteToken = computed(() => (props.autocomplete === 'off' ? 'new-password' : props.autocomplete))
 // Honor the profile's reduce-motion flag: no dropdown transition. Read from
 // the same <html data-reduce-motion> attribute the CSS layer keys on.
 const menuProps = computed(() => {
@@ -60,6 +63,7 @@ function hardenInputs() {
     input.setAttribute('data-1p-ignore', 'true')
     input.setAttribute('data-lpignore', 'true')
     input.setAttribute('data-form-type', 'other')
+    input.setAttribute('data-bwignore', 'true')
   })
 }
 

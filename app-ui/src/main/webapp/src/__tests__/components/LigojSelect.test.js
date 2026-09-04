@@ -20,10 +20,11 @@ describe('<LigojSelect />', () => {
     const w = mountSel()
     const input = w.find('input')
     expect(input.exists()).toBe(true)
-    // A unique, non-empty name so the browser has no saved value to match;
-    // 'off' resolves to the same unmatchable token (Chrome ignores "off").
+    // A unique, non-empty name so the browser has no saved value to match.
     expect(input.attributes('name')).toBeTruthy()
-    expect(input.attributes('autocomplete')).toBe(input.attributes('name'))
+    // 'off' resolves to 'new-password': the KNOWN token browsers honor to
+    // fully suppress autofill (newer Chrome ignores 'off' AND unknown tokens)
+    expect(input.attributes('autocomplete')).toBe('new-password')
     expect(input.attributes('autocomplete')).not.toBe('off')
     // Password-manager opt-outs.
     expect(input.attributes('data-1p-ignore')).toBe('true')

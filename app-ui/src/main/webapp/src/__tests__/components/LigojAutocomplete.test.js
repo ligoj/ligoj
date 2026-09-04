@@ -23,9 +23,9 @@ describe('<LigojAutocomplete />', () => {
     expect(input.exists()).toBe(true)
     // A unique, non-empty name so the browser has no saved value to match.
     expect(input.attributes('name')).toBeTruthy()
-    // 'off' resolves to the unmatchable per-instance token (Chrome ignores a
-    // literal "off" for heuristic field types), mirroring the name.
-    expect(input.attributes('autocomplete')).toBe(input.attributes('name'))
+    // 'off' resolves to 'new-password': the KNOWN token browsers honor to
+    // fully suppress autofill (newer Chrome ignores 'off' AND unknown tokens)
+    expect(input.attributes('autocomplete')).toBe('new-password')
     expect(input.attributes('autocomplete')).not.toBe('off')
     // Password-manager opt-outs.
     expect(input.attributes('data-1p-ignore')).toBe('true')
