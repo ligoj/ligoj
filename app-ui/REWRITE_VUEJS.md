@@ -1461,6 +1461,19 @@ Battle scars worth respecting on the next migration.
 - **`logfile` endpoint + custom Log4j2 = path mismatch.** Both apps log via a custom `log4j2.json` (rolling file `${sys:ligoj.home:-target}/<api|ui>-rolling.log`), so Spring Boot's `logging.file.name` is IGNORED and the endpoint 404s. Point it at the real file with `management.endpoint.logfile.external-file=${ligoj.home:target}/${ligoj.log.file.name:…-rolling.log}`. SECOND trap: Spring `${ligoj.home}` reads env **and** system properties, but Log4j2 `${sys:ligoj.home}` reads system properties ONLY — an env-var `LIGOJ_HOME` makes Log4j2 write to `target/` while the endpoint looks in `${ligoj.home}`. Make Log4j2 env-aware: `${env:LIGOJ_HOME:-${sys:ligoj.home:-target}}/…` (no-op when home is a `-D`).
 - **Node operational status ≠ `NodeVo.enabled`.** `enabled` is plug-in/resource availability (a DOWN node can still be `enabled:true`). The operational UP/DOWN is the last `EventType.STATUS` event. `NodeVo` has an optional `status` field; `NodeResource#findAll?status=true` populates it from the page's nodes via the BULK `EventRepository.findLastEvents(user, Collection<nodeId>)` — one query for the whole page, not per-row (avoid the N+1; the single `findLastEvent(user, node)` is for one-off lookups). Live re-check endpoints: `POST node/status/refresh/{id}` (`checkNodeStatus`, a real probe) and `GET subscription/status/{id}/refresh` (`refreshStatus`); the cheaper stored value is `GET node/status/{id}`. All take the `%3A`-encoded id (decoded by `UriColonDecodingFilter`).
 
+- **User visual identifier (`service:id:visual-id-name` / `-label`).** Optional
+  configuration selecting the attribute shown as the user's identifier in the
+  tables (`id` default, `firstName`, `lastName`, `mail` — first one — or
+  `customAttributes.<property>`), plus an optional STATIC header label
+  (default: the localized attribute name). Forwarded by
+  `UserOrgResource#decorate` in `applicationSettings.data`; resolved UI-side by
+  plugin-id `ui/src/visualId.js` (`visualIdName/Value/Label/ColumnKey`, always
+  falling back to the login). UserListView + GroupMembersPanel use it for their
+  first column (dynamic `cell.<key>` slot) and sort EXPLICITLY on the
+  `visual-id` key, which `UserOrgResource#findAll` maps dynamically to the
+  configured property (`getOrderedColumns()`); the LDAP repository sorts
+  `customAttributes.<x>` through `CustomAttributeComparator` (id fallback).
+
 - **Shared id parameter fields (`service.parameterFields`).** The rich
   subscription inputs for `service:id:parent-group` (autocomplete) and
   `service:id:group` (composite simple-name + computed full-name editor with
