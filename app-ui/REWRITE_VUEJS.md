@@ -1510,6 +1510,14 @@ Battle scars worth respecting on the next migration.
 
 - Setting `form.value.<type>` (the discriminator) and `form.value.<value>` (the identifier) in the same synchronous block races: the watcher on `<type>` fires post-flush and wipes the identifier you just set. Set the type field first, `await nextTick()`, then set the value. See `DelegateEditView.vue`'s edit-mode load for the canonical fix.
 - For server-side autocompletes, lazy-load the first page on `@update:menu` (dropdown open), not on mount. Users who never open the dropdown should make zero API calls.
+- **`LigojTextField`** completes the anti-autofill family for free-text inputs
+  (user/password/url tool parameters...): same hardening as the dropdown
+  wrappers (`new-password` token, unique `name`, password-manager opt-outs).
+  The auto-rendered parameter forms (NodeEditDialog, SubscribeWizardView) use
+  it for every typed parameter, and show the parameter's description as a
+  field hint when available (`<id>-description` i18n key, else the parameter's
+  own `description`, via `paramDescription(p)`).
+
 - **Never use bare `<v-autocomplete>` / `<v-select>` / `<v-combobox>`** — use the host's `LigojAutocomplete` / `LigojSelect` / `LigojCombobox` (see §4). They suppress the browser's native autofill overlay (`autocomplete="new-password"`, the only token modern Chrome reliably honors) and honor reduce-motion for the dropdown; a bare Vuetify widget regresses both.
 - An **empty string is a selected value** for `v-autocomplete`/`v-select`: the placeholder is hidden and the clear button shows. Initialize optional select model fields to `null`, never `''` (and normalize `api || null` when loading).
 - A `v-dialog`'s effective initial focus can land on the wrong field (`autofocus` competes with menu/teleport mounting). To force it, after the open+load completes, `setTimeout`-focus the first enabled `<input>` under the form ref — see `UserEditDialog.focusFirstField`.
