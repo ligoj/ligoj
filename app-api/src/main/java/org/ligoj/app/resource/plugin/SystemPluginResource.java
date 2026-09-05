@@ -1058,6 +1058,10 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		// each of these, so backend-only features (iam-node, menu contributions, ...) are excluded and
 		// never produce 404 fetches on the browser side. Exposed through the shared application data map —
 		// bootstrap's ApplicationSettings has no dedicated field for it.
+		// Primary identity provider node (e.g. "service:id:ldap:dig", empty for the internal users): the profile
+		// shows which authentication plug-in is in charge
+		settings.getApplicationSettings().getData().computeIfAbsent("iam-primary",
+				_ -> configuration.get("feature:iam:node:primary", ""));
 		settings.getApplicationSettings().getData().computeIfAbsent("ui-plugins", _ -> featurePlugins.stream()
 				.filter(p -> p.getClass().getClassLoader()
 						.getResource("META-INF/resources/webjars/" + toUiId(p.getKey()) + "/vue/index.js") != null)
