@@ -1135,6 +1135,33 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 	}
 
 	@Test
+	void findAllEnabledBackWaitingRestart() throws IOException {
+		// Persisted plug-in, jar installed (enabled back after a restart without it), not loaded yet
+		final var kept = new SystemPlugin();
+		kept.setKey("feature:keep");
+		kept.setArtifact("plugin-keep");
+		kept.setVersion("1.0.0");
+		kept.setType("FEATURE");
+		kept.setBasePackage("org.ligoj.app.plugin.keep");
+		repository.saveAndFlush(kept);
+		resource.getPluginClassLoader().getInstalledPlugins().put("plugin-keep", "plugin-keep-Z0000001Z0000000Z0000000Z0000000");
+		try {
+			final var plugin = (LigojPluginVo) resource.findAll("central").stream()
+					.filter(p -> "plugin-keep".equals(p.getPlugin().getArtifact())).findFirst().orElseThrow();
+			// Identity kept: not a staged unknown plug-in
+			Assertions.assertEquals("feature:keep", plugin.getId());
+			Assertions.assertEquals("1.0.0", plugin.getPlugin().getVersion());
+			Assertions.assertFalse(plugin.isLoaded());
+			Assertions.assertFalse(plugin.isDisabled());
+			Assertions.assertFalse(plugin.isDeleted());
+			Assertions.assertNull(plugin.getLocation());
+		} finally {
+			resource.getPluginClassLoader().getInstalledPlugins().remove("plugin-keep");
+			repository.deleteAllBy("key", "feature:keep");
+		}
+	}
+
+	@Test
 	void refreshPluginsKeepsDisabled() throws Exception {
 		final var disabledJar = toFile("plugin-keep-1.0.0.jar" + SystemPluginResource.DISABLED_SUFFIX);
 		final var kept = new SystemPlugin();

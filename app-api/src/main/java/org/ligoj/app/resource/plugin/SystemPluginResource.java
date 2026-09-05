@@ -164,12 +164,14 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 
 		// Disabled plug-ins: renamed jar, not loaded at the next restart, configuration kept
 		final var disabled = getDisabledPlugins();
+		// Installed plug-ins: jar in the plug-ins directory, loaded or not (enabled back, just installed...)
+		final var installed = getPluginClassLoader().getInstalledPlugins();
 
 		// Get the enabled plug-in features
 		final var enabled = this.repository.findAll().stream()
 				.map(p -> toVo(lastVersionF, p,
 						enabledFeatures.values().stream().filter(f -> p.getKey().equals(f.getKey())).findFirst()
-								.orElse(null), disabled))
+								.orElse(null), disabled, installed))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toMap(p -> p.getPlugin().getArtifact(), Function.identity()));
 
@@ -188,14 +190,15 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		}));
 
 		// Add pending installation: available but not yet enabled plug-ins
-		getPluginClassLoader().getInstalledPlugins().forEach((id, v) -> {
+		installed.forEach((id, v) -> {
 			enabled.computeIfPresent(id, (_, p) -> {
 				// Check if it's an update
-				if (!p.getPlugin().getVersion().equals(toTrimmedVersion(v))) {
+				if (!toTrimmedVersion(v).equals(p.getPlugin().getVersion())) {
 					// Corresponds to a different version
 					p.setLatestLocalVersion(toTrimmedVersion(v));
 				}
-				p.setDeleted(isDeleted(p));
+				// A not loaded plug-in has no location: nothing to delete
+				p.setDeleted(p.getLocation() != null && isDeleted(p));
 				return p;
 			});
 
@@ -377,10 +380,15 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	/**
 	 * Build the plug-in information from the plug-in itself and the last version being available.
 	 */
+	/**
+	 * Build the VO of a persisted plug-in. A plug-in without feature bean (not loaded) is still listed when its jar is
+	 * disabled, or installed in the plug-ins directory (enabled back, or updated, waiting for a restart): its identity
+	 * and node data are kept, and {@code loaded} is <code>false</code>. Otherwise it is an orphan, not listed.
+	 */
 	private PluginVo toVo(final Map<String, Artifact> lastVersion, final SystemPlugin p, final FeaturePlugin feature,
-			final Map<String, String> disabled) {
+			final Map<String, String> disabled, final Map<String, String> installed) {
 		final var isDisabled = disabled.containsKey(p.getArtifact());
-		if (feature == null && !isDisabled) {
+		if (feature == null && !isDisabled && !installed.containsKey(p.getArtifact())) {
 			// Plug-in is no more available or in fail-safe mode
 			return null;
 		}
@@ -391,7 +399,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		vo.setPlugin(p);
 		markState(vo, feature != null, isDisabled);
 		if (feature == null) {
-			// Disabled and not loaded: only the persisted data are known
+			// Not loaded (disabled, or enabled back and waiting for a restart): only the persisted data are known
 			vo.setName(p.getArtifact());
 		} else {
 			// Plug-in implementation is available

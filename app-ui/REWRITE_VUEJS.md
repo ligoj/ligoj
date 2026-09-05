@@ -1373,7 +1373,12 @@ lives once in the panel):
   carries `disabled` (the switch) and `loaded` (the class-path state,
   `LigojPluginVo`); `pluginState()` derives the status: active, disabled,
   disabling / enabling (restart required), pending (staged install), deleted.
-  Each state has its own `v-tooltip` (`system.plugin.toggle.<state>`).
+  Each state has its own `v-tooltip` (`system.plugin.toggle.<state>`). The
+  view's three KPI cards (`pluginStats.js`) each carry a stacked multi-color
+  bar with a tooltip per segment (label, count, rate — no legend): plug-ins by type
+  (service/tool/feature), active plug-ins (loaded rate, enabled rate, segments
+  by state), verified plug-ins (segments verified / signed / unsigned /
+  invalid).
 
 Group model (per tool): `{ key, name, kind, color, icon: ()=>h(NodeIcon,{node}),
 health, rows: [{ name, status:'ok|warn|err|idle', pills, cost?, sub }] }`. `pills`
