@@ -62,6 +62,32 @@ describe('useEditExtensions', () => {
     expect(apiPath.value).toBe('rest/other-project')
   })
 
+  it('prepare() passes the payload through untouched without beforeSave contributor', async () => {
+    register('plain', { editExtension: () => ({ component: FakeExtension }) })
+    const { prepare } = useEditExtensions('project', 'rest/project', () => ({ mode: 'create' }))
+    const payload = { name: 'p' }
+    expect(await prepare(payload)).toBe(payload)
+  })
+
+  it('prepare() chains the beforeSave hooks in order, sync or async, mutation or replacement', async () => {
+    register('first', { editExtension: () => ({ beforeSave: (p) => ({ ...p, a: 1 }) }) })
+    // Async hook, sees the previous result
+    register('second', { editExtension: () => ({ beforeSave: async (p, ctx) => ({ ...p, b: p.a + 1, target: ctx.target }) }) })
+    // In-place mutation returning nothing keeps the current payload
+    register('third', { editExtension: () => ({ beforeSave: (p) => { p.c = 3 } }) })
+    const { prepare } = useEditExtensions('project', 'rest/project', () => ({ mode: 'edit' }))
+    expect(await prepare({ name: 'p' })).toEqual({ name: 'p', a: 1, b: 2, target: 'project', c: 3 })
+  })
+
+  it('prepare() returns false as soon as a hook aborts, skipping the following hooks', async () => {
+    register('abort', { editExtension: () => ({ beforeSave: () => false }) })
+    let called = false
+    register('after', { editExtension: () => ({ beforeSave: () => { called = true } }) })
+    const { prepare } = useEditExtensions('project', 'rest/project', () => ({ mode: 'edit' }))
+    expect(await prepare({ name: 'p' })).toBe(false)
+    expect(called).toBe(false)
+  })
+
   it('reacts to a plugin registered after the first read', () => {
     const { components } = useEditExtensions('company', 'rest/service/id/company', () => ({ mode: 'create' }))
     expect(components.value).toEqual([])

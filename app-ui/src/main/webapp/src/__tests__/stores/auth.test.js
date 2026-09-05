@@ -77,14 +77,14 @@ describe('useAuthStore', () => {
       mails: ['fabrice.daugan@sample.com', 'alt@sample.com'],
       customAttributes: { employeeId: 'E-42' },
     }
-    const newSession = (mode) => ({
+    const newSession = (mode, extra = {}) => ({
       userName: 'fdaugan',
       userSettings: { userDetails: details },
-      applicationSettings: { data: mode ? { 'service:id:user-display': mode } : {} },
+      applicationSettings: { data: { ...(mode ? { 'service:id:user-display': mode } : {}), ...extra } },
     })
     const store = useAuthStore()
-    const load = async (mode) => {
-      globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(newSession(mode)) })
+    const load = async (mode, extra) => {
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(newSession(mode, extra)) })
       await store.fetchSession()
     }
 
@@ -108,18 +108,37 @@ describe('useAuthStore', () => {
     expect(store.displayName).toBe('Daugan, Fabrice')
     await load('${firstName} (${employeeId})') // custom attribute token
     expect(store.displayName).toBe('Fabrice (E-42)')
-    await load('${firstName} ${unknown}') // unresolved token renders empty
-    expect(store.displayName).toBe('Fabrice')
+    await load('${firstName} ${unknown}') // a missing attribute → the visual id (login by default), never a partial name
+    expect(store.displayName).toBe('fdaugan')
     await load('${mail-short} [${id}]') // built-in tokens work too
     expect(store.displayName).toBe('fabrice.daugan [fdaugan]')
-    await load('${unknown} ${also-unknown}') // fully blank result → id
+    await load('${unknown} ${also-unknown}')
     expect(store.displayName).toBe('fdaugan')
+
+    // The visual identifier drives the fallback when configured
+    const visual = { 'service:id:visual-id-name': 'customAttributes.employeeId' }
+    await load('${firstName} ${unknown}', visual)
+    expect(store.displayName).toBe('E-42')
+    await load('unknown-attribute', visual)
+    expect(store.displayName).toBe('E-42')
+    await load('${firstName} ${lastName}', visual) // fully resolved → the expression wins
+    expect(store.displayName).toBe('Fabrice Daugan')
+    await load('${firstName} ${unknown}', { 'service:id:visual-id-name': 'mail' })
+    expect(store.displayName).toBe('fabrice.daugan@sample.com')
 
     // 'mail' without any mail → fallback to id
     details.mails = []
     await load('mail')
     expect(store.displayName).toBe('fdaugan')
     await load('${mail}') // same fallback through an expression
+    expect(store.displayName).toBe('fdaugan')
+
+    // Never blocking: odd shapes fall back to the login
+    details.customAttributes = null
+    await load('${employeeId}', visual)
+    expect(store.displayName).toBe('fdaugan')
+    details.mails = 'not-an-array'
+    await load('${mail}', { 'service:id:visual-id-name': 42 })
     expect(store.displayName).toBe('fdaugan')
   })
 

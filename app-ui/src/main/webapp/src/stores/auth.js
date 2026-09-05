@@ -65,14 +65,16 @@ export const useAuthStore = defineStore('auth', () => {
    * Displayed username, driven by the `service:id:user-display` configuration
    * forwarded in the application settings:
    * - 'id' (default): the login
-   * - 'mail': first attached mail, fallback to id
+   * - 'mail': first attached mail
    * - 'mail-short': same as 'mail' with the domain part dropped
    * - any user attribute name ('firstName', 'lastName', 'company', ...),
-   *   also resolved in the `customAttributes` map, fallback to id
+   *   also resolved in the `customAttributes` map
    * - an expression combining `${token}` placeholders and literal text,
-   *   e.g. '${firstName} ${lastName}' — each token is one of the modes
-   *   above; unresolved tokens render empty, and a blank result falls
-   *   back to id
+   *   e.g. '${firstName} ${lastName}' — each token is one of the modes above
+   * Whenever the mode or one of the tokens cannot be resolved for this user
+   * (missing attribute, no mail, ...), the display is the user's visual
+   * identifier (`service:id:visual-id-name`, the login by default). The
+   * computation never throws: any unexpected shape falls back to the login.
    */
   // Resolve one display token ('id', 'mail', 'mail-short' or an attribute
   // name, also looked up in `customAttributes`) to a string, '' when absent.
@@ -86,19 +88,34 @@ export const useAuthStore = defineStore('auth', () => {
     const value = details[token] ?? details.customAttributes?.[token]
     return typeof value === 'string' ? value.trim() : ''
   }
+  // The user's visual identifier (`service:id:visual-id-name`: 'id', 'mail',
+  // an attribute name or 'customAttributes.<x>'), the login when unresolved.
+  function resolveVisualId(details, id) {
+    const name = String(session.value?.applicationSettings?.data?.['service:id:visual-id-name'] || 'id')
+    return resolveDisplayToken(name.replace(/^customAttributes\./, ''), details, id) || id
+  }
   const displayName = computed(() => {
     const id = userName.value
-    const mode = session.value?.applicationSettings?.data?.['service:id:user-display'] || 'id'
-    const details = userDetails.value
-    if (!details || mode === 'id') return id
-    if (mode.includes('${')) {
-      const resolved = mode
-        .replace(/\$\{([^}]*)\}/g, (_, token) => resolveDisplayToken(token.trim(), details, id))
-        .replace(/\s+/g, ' ')
-        .trim()
-      return resolved || id
+    try {
+      const mode = String(session.value?.applicationSettings?.data?.['service:id:user-display'] || 'id')
+      const details = userDetails.value
+      if (!details || mode === 'id') return id
+      if (mode.includes('${')) {
+        let missing = false
+        const resolved = mode
+          .replace(/\$\{([^}]*)\}/g, (_, token) => {
+            const value = resolveDisplayToken(token.trim(), details, id)
+            if (!value) missing = true
+            return value
+          })
+          .replace(/\s+/g, ' ')
+          .trim()
+        return missing || !resolved ? resolveVisualId(details, id) : resolved
+      }
+      return resolveDisplayToken(mode, details, id) || resolveVisualId(details, id)
+    } catch {
+      return id
     }
-    return resolveDisplayToken(mode, details, id) || id
   })
   const roles = computed(() => session.value?.roles ?? [])
   // The session exposes an explicit `admin` flag; keep the legacy ADMIN-role
