@@ -89,8 +89,8 @@ export function setLocale(loc) {
 }
 
 /**
- * Merges a flat message map into the current locale. Used by the plugin
- * loader after fetching a plugin's NLS bundle via nls-adapter.
+ * Merges a flat message map into the current locale (used by `useI18nStore.merge`
+ * when a plugin installs its i18n bundle).
  */
 export function mergeMessages(messages, locale = i18n.global.locale.value) {
   i18n.global.mergeLocaleMessage(locale, normalizeMessages(messages))

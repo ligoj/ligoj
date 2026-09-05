@@ -5,7 +5,6 @@ import vuetify from './plugins/vuetify.js'
 import i18n from './plugins/i18n.js'
 import router from './router/index.js'
 import { loadAllPlugins } from './plugins/loader.js'
-import { registerBuiltinPlugins } from './plugins/index.js'
 import { bootCompact, bootReduceMotion } from './plugins/styles.js'
 import { bootPreset } from './plugins/presets.js'
 import { installErrorReporter } from './plugins/errorReporter.js'
@@ -35,9 +34,6 @@ app.use(i18n)
 // other plugins) merge their own en/fr bundles in `install()`. The host
 // keeps only the generic keys in `i18n/{en,fr}.js`. The old
 // `i18n/plugin-id-*.js` monolith merged here is gone.
-
-// Built-in plugin stubs (bundled with the host).
-registerBuiltinPlugins()
 
 // External plugins whose routes must be registered before the router mounts.
 // Kept small on purpose — plugins whose absence is recoverable load lazily.

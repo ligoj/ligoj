@@ -1,356 +1,107 @@
-# Where to start (fresh session orientation)
+# Ligoj UI — Vue host and plugin architecture
 
-If you're picking this up cold, the fastest path to context is:
+Reference for the Vue UI: how the host shell and the plugin bundles fit together, the contracts between them, and the decisions that must not be re-litigated. Keep it in sync whenever a UI concept is introduced or changed.
 
-1. **Read this doc end-to-end** — sections later in the file are denser than the intro.
-2. **Read the reference plugins**:
-   - `ligoj-plugins/plugin-id/ui/src/index.js` — service-level plugin contract.
-   - `ligoj-plugins/plugin-id-ldap/ui/src/index.js` — tool-level (sub-plugin) variant.
-   - `ligoj-plugins/plugin-ui/ui/src/views/SubscribeWizardView.vue` — the central subscription/node wizard. Subscribe + edit-node + create-node modes.
-3. **Read the host surface**:
-   - `app-ui/src/main/webapp/src/host.js` — public API plugins consume.
-   - `app-ui/src/main/webapp/src/plugins/loader.js` — `loadPlugin`, `pluginIdFromKey`, `requires` handling, in-flight dedup.
-   - `app-ui/src/main/webapp/src/plugins/registry.js` — `register`, `get`, `callFeature`.
-4. **Run the tests** to confirm the workspace is sound before changing anything:
-   - Host suite: `cd app-ui/src/main/webapp && npm run test --silent`.
-   - Per plugin: `cd ligoj-plugins/plugin-<id>/ui && npm test`. Plugin contract tests live in each plugin's own repo (see §9). The host suite only exercises host-internal modules now.
+# Where to start
 
-When in doubt: "Status snapshot" lists exactly what's shipped, "Decisions and gotchas" lists what bit somebody on the way here.
+1. Read this document; the later sections are denser than the first ones.
+2. Read the reference plugins: `ligoj-plugins/plugin-id/ui/src/index.js` (service-level contract), `ligoj-plugins/plugin-id-ldap/ui/src/index.js` (tool-level variant), `ligoj-plugins/plugin-ui/ui/src/views/SubscribeWizardView.vue` (subscription wizard).
+3. Read the host surface: `app-ui/src/main/webapp/src/host.js` (public API), `plugins/loader.js` (`loadPlugin`, `pluginIdFromKey`, `requires`, in-flight dedup), `plugins/registry.js` (`register`, `get`, `callFeature`).
+4. Run the tests before changing anything: host `cd app-ui/src/main/webapp && npm run test --silent`; plugin `cd ligoj-plugins/plugin-<id>/ui && npm test`.
 
-# Introduction
+# Stack and principles
 
-The Spring Boot Application is in @ligoj/app-api.
-The goal is to rewrite the UI in VueJS.
+- Vue 3 (`<script setup>`), Vite 8 (rolldown), Pinia, Vuetify 4, vue-i18n with flat keys, Material Design Icons + simpleicons. No Axios: native `fetch` only (`useApi`). No VeeValidate: Vuetify `:rules` are enough.
+- Backend is `app-api` (Spring Boot, CXF). `app-ui` is a thin Spring Boot shell serving the SPA and proxying `/rest/*`, `/main/*`, `/manage/*` to the API (`BackendProxyServlet`).
+- Entry points: `index.html` (app), `login.html` (light login app, does not load the whole application), `mfa.html` (second factor).
+- Every plugin is a standalone Maven project (`ligoj/plugin-<qualified-id>` on GitHub) whose Vue bundle is packaged as a webjar and served dynamically by the API (`WebjarsServlet`), so a plugin is added or removed without rebuilding the host. A plugin is a singleton: loaded at most once.
+- `v-dialog` is never `persistent`: ESC closes every dialog, and the close is a Cancel.
 
-This is a modular project with many Maven plugins that can be added dynamically.
-All plugins are available in this workspace under `ligoj/plugin-<qualified-id>` repositories (github).
+# Plugin model
 
-At most, there is one parent plugin.
-Whe a plugin has a parent, the parent is of type `tool`
-When a plugin has no parent, it is of type `service` or `feature`.
-A plugin of type `feature` cannot have children.
+Naming for the repository `plugin-prov-aws`: `qualified-id` = `prov-aws`, `plugin-short-id` = `aws`, parent = `prov` (Maven dependency on `plugin-prov`). A plugin has at most one parent; a plugin with a parent is a `tool`, without parent it is a `service` or a `feature` (a feature has no children).
 
+Node ids: `service:<short-id>` (service), `feature:<short-id>` (feature), `service:<parent>:<tool>` (tool). Users create instances only under tools: `service:<parent>:<tool>:<instance>`. Segment count tells the kind: 2 = service/feature, 3 = tool, 4 = instance (`nodeType` / `isInstance` in the host).
 
-# Github layout
-```
-ligoj/plugin-<qualified-id> (github)
-├── README.md
-├── pom.xml
-└── src/
-    └── main/
-        ├── java/
-        │   └── org/
-        │       └── ligoj/
-        │           └── plugin/
-        │               └── <PluginClassName>.java
-        └── resources/
-            └── META-INF/
-                └── resources/
-                    └── <plugin-path>/
-                        ├── <plugin-short-id>.html
-                        ├── <plugin-short-id>.js
-                        ├── <plugin-short-id>.css
-                        ├── messages.js
-                        └── nls/
-                            ├── en/
-                            │   └── messages.js
-                            └── fr/
-                                └── messages.js
-```
+# Host as shell
 
-Plugins can be children of a group, so nested plugins are possible.
-Naming convention for ample of GitHub repository `plugin-prov-aws`
-  - `qualified-id` is `prov-aws`.
-  - `plugin-short-id` is `aws`.
-  - `plugin-path` is `prov/aws`.
-  - `plugin-class` is `org.ligoj.app.plugin.prov.aws.resource.ProvAwsPluginResource`, but the simple Java Class name could be without parent plugin prefix, so `AwsPluginResource`.
-  - Parent `qualified-id` of `prov-aws` is `prov`. So the Maven repository `plugin-prov-aws` depends on `plugin-prov`.
+The host owns only the chrome and the shared component surface. Every domain screen lives in a plugin.
 
-Each plugin provides at least on `node`:
-- the plugin provided nodes have an `id` having the following form: 
-  - `service:<plugin-short-id>` for a service
-  - `feature:<plugin-short-id>` for a feature
-  - `service:<parent-plugin-short-id>:<plugin-short-id>` for a tool `plugin-short-id` having `parent-plugin-short-id` as parent plugin.
-- the user can create instances of the tool nodes. So the instances have an `id` having the following form: 
-  - `service:<parent-plugin-short-id>:<plugin-short-id>:<instance-id>`.
-  - No instance can be created directly under a service or feature node.
-  - If the node `id` contains 4 segments, it is an instance node, and the parent `id` contains 3 segments.
-  - If the node `id` contains 3 segments, it is a tool node, and the parent `id` contains 2 segments.
-  - If the node `id` contains 2 segments, it is a service node or a service. The first segment is always `service` or `feature`.
+- **Host keeps**: `App.vue` (sidebar assembled by `mergeNav` from `BASE_NAV` + plugin `renderNav` contributions, top bar, breadcrumbs, app-bar items), the login / MFA apps, `ProfileView`, `PluginView`, `ErrorSnackbar`, `GlobalToolsList`, the plugin loader and the components re-exported by `host.js`. The host router registers `/profile` and the catch-all `PluginView` only; all other routes come from `install({ router })` of the plugins (`/about` is registered by plugin-ui).
+- **plugin-id owns** the identity screens (`UserListView`, `GroupListView`, `CompanyListView`, `DelegateListView`, `ContainerScopeView`, edit dialogs and panels, `GroupMembers{Dialog,Panel}`) and contributes the **Identity** sidebar menu through `renderNav`.
+- **plugin-ui owns** the rest: `HomeView`, `ProjectListView`, `ProjectDetailView`, `System*View`, `Api*View`, `AboutView`, `SubscribeWizardView`, `ProjectEditDialog`, `NodeEditDialog`, `AuditDialog`, the Actuator admin surface, the shared subscriptions display and the demo content.
+- **Route scheme**: `/` (dashboard), `/project`, `/project/:id`, `/id/{user,group,company,delegate,scope}`, `/system/{node,plugin,role,user,configuration,cache,bench,information,task}`, `/api`, `/api/token`, `/about`. `/home/*` and `/id/container-scope` remain as Vue Router `alias` entries for old bookmarks (an alias does not add a route).
+- **2026 chrome components** (host, re-exported from `host.js`), used everywhere with the `.lj-surface` design-token class: `LjPageHeader` (title, subtitle, breadcrumb chips, `#actions`), `LjButton` (primary / ghost / danger), `LjSearch`, `LjDialog`, `LjSegmented` (tab toggle), `LjStatus` (semantic status chip), `LjAvailabilityField` (text field with a live "already exists" check). `.lj-surface` provides the `--ink / --pill / --radius / --mono / --surface / --card / --border*` variables. Theming axes on `<html>`: `data-style` (shadow / radius / border tokens shared by several presets), `data-preset` (exact preset id, scope CSS on it when two presets sharing a style must diverge), `data-reduce-motion`.
+- **Themes**: presets in `plugins/vuetify.js` and `plugins/presets.js`, chosen from `ProfileView`, persisted under localStorage `ligoj-theme`. Global Vuetify tweaks go to `assets/vuetify-overrides.css`, imported once.
+- **Configurable base path** (`VITE_BASE`, default `/ligoj/`) must match the backend `server.servlet.context-path`. Everything derives from it: Vite `base`, the dev proxy keys, the import maps of the entry HTML (`%BASE_URL%` placeholders, never a literal `/ligoj/assets/...`), runtime `APP_BASE`. Application code builds URLs from `import.meta.env.BASE_URL` / `APP_BASE`, never from a literal `/ligoj/`. The Docker image is built with the placeholder base `/__ligoj_ctx__/` and substitutes the runtime `CONTEXT_URL` at container start.
+- **Build chain**: Vite 8 with rolldown (`output.codeSplitting.groups`, not `manualChunks`), ESLint 9 flat config (`js.configs.recommended` + `flat/essential`, `vue/valid-v-slot` with `allowModifiers` for dotted data-table slots).
 
-# Current design
+## Reference and shipped plugins
 
-- Bootstrap CSS + JS
-- jQuery
-- DataTables.net CSS + JS
-- Font Awesome icons
-- Select2
-- jQuery.sparkline.js
-- Handlebars.js
-- require.js
-- `cascade.js`, a custom MVVM library
-- `error.mod.js`, a custom error manager
-- `application.mod.js`, a custom application manager
-- `security.mod.js`, a custom security manager
+| Plugin | Role |
+| --- | --- |
+| `plugin-id` | "fat" service-level reference: routes, views, dialogs, `renderFeatures` / `renderDetailsKey` / `renderDetailsFeatures`, parent-to-tool delegation, shared id parameter fields |
+| `plugin-ui` | shared views and wizards (`SubscribeWizardView`, `NodeEditDialog`, `ProjectDetailView`, system views, actuator) |
+| `plugin-id-ldap` | "thin" tool-level reference: i18n + `renderFeatures`, `requires: ['id']`; also the vitest scaffolding template |
+| `plugin-prov` | large service-level plugin: catalog / currency / administration pages through `renderNav`; its tools (`-aws`, `-azure`, `-fe`, `-outscale`, `-ovh`) are i18n-only since the parent does not delegate |
 
-The application is plugin aware, so with dynamical resources.
+Other shipped plugin UIs (each emits to `webjars/<id>/vue/`): `plugin-id-cognito` (i18n + shared group fields + AWS wizard layout), `plugin-vm` (+ `-aws`, `-azure`, `-vcloud`: console link + instance chip; `-google`: chip only), `plugin-bt` (+ `-jira`), `plugin-build` (+ `-jenkins`, `-travis`), `plugin-km` (+ `-confluence`), `plugin-qa` (+ `-sonarqube`, bespoke metric badges), `plugin-mail` (+ `-smtp`, i18n-only), `plugin-storage` (+ `-owncloud`), `plugin-security` (+ `-fortify`), `plugin-scm` (+ `-git`, `-github`), `plugin-registry` (+ `-nexus`), `plugin-cartography` (feature-level `actionExtension` on the quote view). Delegating service parents (vm, bt, build, km, qa, mail, storage, security, scm) share one shape: no routes or component, i18n + `subPluginIdFor` / `delegateToToolPlugin` aliases of the host helpers; each tool's vitest imports the sibling parent's `index.js` to exercise delegation.
 
-**What a legacy plugin looks like** (this is what you port FROM). Each plugin
-is a separate GitHub repo `ligoj/plugin-<id>`, served by a Spring Boot app that
-adds its `src/main/resources/META-INF/resources/<plugin-path>/` to the classpath
-— so assets are path-scoped, loaded dynamically, no host rebuild. Per plugin:
-- `<plugin_short_id>.html` — Handlebars view
-- `<plugin_short_id>.js` — the AMD controller (`define(function(){…})`); this is
-  the file you read to recover `renderFeatures` / `renderKey` / `renderDetailsKey`
-  behavior. Many are `define({})` (parent with no own UI).
-- `<plugin_short_id>.css`, `nls/messages.js` (+ `nls/fr/messages.js`) — styles + i18n.
+**Migration status** (2026-09-05): the legacy jQuery / AMD bundles of every migrated plugin are deleted; under `webjars/` only `<id>/vue/` and the `img/` folders remain (node icons are served from `main/service/<svc>/<tool>/img/<tool>.svg|png`, keep them). Not yet migrated, still shipping only their legacy `webjars/service/<path>/` bundle that the host no longer loads (their parameter labels show as raw ids until a `ui/` exists): `plugin-id-sql`, `plugin-prov-digitalocean`, `plugin-prov-gcp`, `plugin-req`, `plugin-req-squash`, `plugin-scm-svn`. Backend-only, no UI needed: `plugin-iam-node`, `plugin-id-ldap-embedded` (a pre-configured LDAP instance), `plugin-redirect`, `plugin-sso-salt`.
 
-`cascade.js` (the legacy custom MVVM/AMD loader) wires routing-by-convention,
-Handlebars i18n, inherited parent contexts, and per-module `initialize`/`unload`.
-`error.mod.js` = global error→toast; `security.mod.js` = a DOM access guard.
-The Vue port replaces all of this — you only need the legacy `.js`/`nls` files
-as the behavioral spec for the plugin you're migrating.
+## Plugin loading model
 
-# Target design
+- **Pre-loaded** in `main.js`: `REQUIRED_PLUGINS = ['id', 'ui', 'prov']`, awaited before `app.use(router)` and `mount`, so the routes and the sidebar menus they register exist on first paint.
+- **Lazy-loaded** in `App.vue` on session ready: `auth.appSettings.plugins` (backend keys such as `service:id:ldap`) go through `pluginIdFromKey` (strip `service:` / `feature:`, `:` becomes `-`) before `loadAllPlugins`. The loader id regex `^[a-zA-Z0-9][\w-]*$` rejects raw colon keys.
+- **Just-in-time** through `loadPlugin(id)`: the parameter dialogs' `ensureToolPluginLoaded(nodeId)` and `PluginFeatures` for an unloaded subscription plugin.
+- **`requires: ['<parent-id>']`** on a manifest: the loader awaits the dependencies (in parallel, so keep it a strict tree, mutual requires stall forever) before calling `install()`, so the parent's i18n and registry slot exist first.
+- **Concurrency**: in-flight loads are deduplicated in a `Map<id, Promise>`, re-entrant safe.
+- The bundle URL `/main/<id>/vue/index.js` carries a `?v=<digest>` token: versioned URLs are long-cached (`Application#pluginCacheFilter`), unversioned ones revalidated. After `mvn install` of a plugin the new bundle is served without restarting the API (in dev, copy `index.js` AND `index.css` into `target/classes`).
 
-- VueJS
-- Vite
-- Pinia
-- VeeValidate
-- Vuetify 4
-- VeeValidateI18n
-- Material Design icons and simpleicons.org
-- ...
-
-
-Migrate the current implementation :
-- Common module with utilities, routing, main VueJS app etc. in `app-ui/src/main/webapp`
-- Migrate modular plugin `plugin-id` in `plugin-id/src/main/resources/META-INF/resources/id`.
-- A plugin is singleton, it can be loaded multiple times but only one instance is kept.
-- Use `index.html` as main entry point for the new VueJS app
-- Use `login.html` as main entry point for the new VueJS login
-- Find a way to minimize the code size of the login part. There is no need to load the full application for the login.
-- Do not use Axios library, only native fetch API
-- Complete Dockerfile to include the npm command for the VueJS application.
-- `v-dialog` should not be persistent by default.
-- Document the new implementation for plugins :
-  - how to migrate them and how to load/add them from the application dynamically by their name or id or path. 
-  - Use `plugin-id` (there `~/git/ligoj-plugins/plugin-id`) as sample to add it in the app.
-  - By contract make all plugins exposing 1 function `feature` that can be called from the application and other plugins.
-  
-The challenge is that each module like `plugin-id` is a standalone Maven project:
-- it has its own life cycle
-- it can be added, removed by a Java plugin manager discovered and served by a Webjars Servlet (`~/git/ligoj/app-api/src/main/java/org/ligoj/app/resource/plugin/WebjarsServlet.java`).
-- no restart or build is needed to add/remove a plugin from the context
-- make it easy to test in local mode in browser. Maybe one Vite configuration per module?
-
-# Core components
-
-Core components are in `~/git/ligoj/app-ui/src/main/webapp/src/components`. They are share with the other plugins modules.
-- `LigojDataTable` and `LigojDataTableServer` ar the base components for the data table.
-
----
-
-# Status snapshot
-
-What's actually shipped in this branch — record here so the next plugin migration starts from reality, not the wish list.
-
-## 2026 redesign & host-as-shell
-
-The "2026 Vibrant" redesign is the canonical UI. Its components were
-originally landed in the host (`app-ui/.../src/{views,components}`) but the
-domain screens have since been **relocated into the plugins** — the host is now
-a pure shell + shared component surface.
-
-- **Host keeps**: the chrome (`App.vue` sidebar/topbar — the sidebar menu is
-  assembled by its `mergeNav` engine from `BASE_NAV` + plugin `renderNav`
-  contributions, see "Sidebar menu contribution" — `LoginView`/login apps,
-  `ProfileView`, `AboutView`, `PluginView`, `ErrorSnackbar`, `GlobalToolsList`)
-  and the **shared component surface** re-exported from
-  `host.js` (`LigojDataTable*`, `LigojConfirmDialog`, `NodeIcon`, `NodeModeChip`,
-  `PluginFeatures`, `ImportExportBar`, and the 2026 `VibrantDataTable` /
-  `VibrantConfirmDialog` / `LigojIcon`). Host `router/index.js` = `/profile`,
-  `/about`, catch-all only.
-- **plugin-id owns** identity screens: `UserListView`, `GroupListView`,
-  `CompanyListView`, `DelegateListView`, `ContainerScopeView` + the edit
-  dialogs/panels + `GroupMembers{Dialog,Panel}`. It also contributes the
-  top-level **Identity** sidebar menu via `renderNav` (no longer hardcoded in
-  the host — see "Sidebar menu contribution").
-- **plugin-ui owns** the rest: `HomeView` (dashboard), `ProjectListView`,
-  `ProjectDetailView`, `System*View`, `Api*View`, `SubscribeWizardView`,
-  `ProjectEditDialog`, `NodeEditDialog`, `AuditDialog`, the **Actuator admin
-  surface** (`ActuatorView` + `components/actuator/Act*.vue` renderers +
-  `LogPanel`), and the **shared subscriptions display** (`SubscriptionsPanel` /
-  `SubscriptionGroupCard` + `directives/appear.js`) reused by Home + ProjectDetail.
-
-A later session also added a family of **2026 chrome components** to the host
-(re-exported from `host.js`), consumed across plugins via the global
-`.lj-surface` design-token class: `LjPageHeader` (title/subtitle + breadcrumb
-chips + `#actions`), `LjButton` (primary/ghost/danger), `LjSearch`, `LjDialog`,
-`LjSegmented` (tab toggle), `LjStatus` (semantic status chip). Prefer these over
-hand-rolled chrome; `.lj-surface` supplies the `--ink/--pill/--radius/--mono/
---surface/--card/--border*` vars every 2026 view reads.
-
-**Canonical route scheme** (what `App.vue` nav links to): dashboard `/`,
-`/project` + `/project/:id`, `/id/{user,group,company,delegate,scope}`,
-`/system/{node,plugin,role,user,configuration,cache,bench,information}`,
-`/api` + `/api/token`. Legacy `/home/*` and `/id/container-scope` are kept as
-Vue Router `alias` entries so old bookmarks resolve (an `alias` does NOT add a
-separate `addRoute` path — route-count assertions are unaffected).
-
-**Relocating a host 2026 view into a plugin** — the recipe used for the move:
-1. Copy the `.vue` into the plugin (keep the plugin's existing filename if one
-   exists, so its `index.js` routes + contract test stay stable).
-2. Rewrite imports: `@/components/Vibrant*` → `@ligoj/host` (alias as needed,
-   e.g. `import { VibrantConfirmDialog as LigojConfirmDialog } from '@ligoj/host'`);
-   `@/views|components/X` → relative, applying any rename.
-3. Split i18n: domain keys → the plugin's `i18n/{en,fr}`; generic chrome keys
-   (`common.*`, `subscription.*`) → host `i18n/{en,fr}`. **Watch for
-   dynamically-built keys** (`t('subscription.status.' + s)`,
-   `t('system.plugin.type.' + x)`) — a static `t('…')` scan misses them; grep
-   the bundle for the prefixes before deleting it.
-4. Delete the host copy + any now-orphaned host composable (verify nothing else
-   imports it — the relocated cluster tends to be self-contained).
-
-## Reference implementations (read these first)
-
-| Plugin           | Role                                                    | What it demonstrates                                                                                                                                                |
-| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plugin-id`      | Service-level plugin with full CRUD views               | The "fat" pattern: routes, root component, list/edit views, `renderFeatures` / `renderDetailsKey` / `renderDetailsFeatures` hooks, parent-to-child delegation hook. |
-| `plugin-ui`      | Service-level plugin with shared UI views (the wizards) | Cross-plugin shared views: `SubscribeWizardView` (subscribe / edit-node / create-node modes), `SystemNodeView`, `ProjectDetailView`, …                              |
-| `plugin-id-ldap` | Tool-level sub-plugin                                   | The "thin" pattern: no routes, no component. Just i18n labels + a `renderFeatures` hook the parent merges in. Declares `requires: ['id']`.                          |
-| `plugin-prov`    | Large service-level plugin (legacy)                     | The first port — `renderFeatures` and `renderDetailsKey` patterns originated here.                                                                                  |
-
-## Migrated plugins
-
-Ported to the `ui/` Vue stack on this branch (each emits to
-`webjars/<id>/vue/`). Use the nearest sibling as a copy template.
-
-| Plugin                                            | Kind           | Notes                                                                         |
-| ------------------------------------------------- | -------------- | ----------------------------------------------------------------------------- |
-| plugin-id                                         | service        | "fat" reference — CRUD views, dialogs, delegation hook                        |
-| plugin-id-cognito                                 | tool           | i18n labels + shared group fields (from parent registry) + AWS wizard layout |
-| plugin-ui                                         | service        | shared wizards (`SubscribeWizardView`, `SystemNodeView`, `ProjectDetailView`) |
-| plugin-id-ldap                                    | tool           | "thin" reference — i18n + `renderFeatures`                                    |
-| plugin-prov                                       | service        | catalog / currency / **Administration** pages via `renderNav` (see below)     |
-| plugin-prov-aws / -azure / -fe / -outscale / -ovh | tool           | **i18n-only** (prov parent has no delegation hook)                            |
-| plugin-vm                                         | service        | parent with schedule / snapshot / reports views + delegation hook             |
-| plugin-vm-aws / -azure / -vcloud                  | tool           | delegation: console/portal link + instance chip                               |
-| plugin-vm-google                                  | tool           | i18n + instance chip only — **no** row link (see asset-bug gotcha)            |
-| plugin-bt (+ -jira)                               | service + tool | JIRA browse link + PKEY chip                                                  |
-| plugin-build (+ -jenkins / -travis)               | service + tool | job link + job chip                                                           |
-| plugin-km (+ -confluence)                         | service + tool | space link + space chip                                                       |
-| plugin-qa (+ -sonarqube)                          | service + tool | dashboard link + project chip                                                 |
-| plugin-mail (+ -smtp)                             | service + tool | i18n-only (SMTP node is global, mode NONE)                                    |
-| plugin-storage (+ -owncloud)                      | service + tool | ownCloud files-app link + directory chip                                      |
-| plugin-security (+ -fortify)                      | service + tool | Fortify SSC flex link + project-version chip                                  |
-| plugin-scm (+ -git / -github)                     | service + tool | repo home link + repo chip (github: `github.com/<user>/<repo>`)               |
-
-All delegating service parents (vm/bt/build/km/qa/mail/storage/security/scm)
-share one shape: no routes/component (legacy HTML empty / `define({})`), i18n +
-`subPluginIdFor` delegation; each tool's vitest imports its sibling parent's
-`index.js` to exercise parent→tool delegation. **Parent-test gotcha:**
-`registry.register(id, def)` requires `id` + `install` on the def and silently
-rejects otherwise — a delegation test's fake tool must be a full manifest
-`{ id, install(){}, feature }`, not just `{ feature }`.
-
-## Infrastructure decisions
-
-- **VeeValidate / VeeValidateI18n** never landed. Vuetify's built-in `:rules` are enough; avoids a second validation library plugins would have to learn.
-- **`v-dialog` persistent** is removed globally so ESC closes any dialog. See "Decisions" — don't re-add without a strong reason.
-- **i18n is modularised**: host keeps only generic keys (`common.*`, `nav.*`, `dashboard.*`, `agreement.*`, `error.*`, `profile.*`). Plugins ship their own keys via `useI18nStore().merge(...)` in `install()`. See "Translations" and "Parameter form conventions".
-- **Theme system**: 12 themes in `plugins/vuetify.js`; user picks via `ProfileView`. Persisted in `localStorage` under `ligoj-theme`.
-- **Build chain**: Vite 8 with rolldown. `manualChunks` rejected — use `output.codeSplitting.groups`. ESLint 9+ flat config (`eslint.config.js`); no `.eslintrc.cjs`.
-- **Configurable base path (`VITE_BASE`)**: the host's public base defaults to `/ligoj/` and MUST match the backend's `server.servlet.context-path`. `VITE_BASE=/` (dev or build) targets a root-context backend. Everything derives from it: `base`, the dev proxy keys (built from a `CTX` prefix in `vite.config.js`), the HTML import maps (`%BASE_URL%` placeholders — never hardcode `/ligoj/assets/...` in entry HTML), and runtime `APP_BASE`. App code must always build URLs from `import.meta.env.BASE_URL` / `APP_BASE`, never a literal `/ligoj/`. The Docker image builds with the placeholder base `/__ligoj_ctx__/` and substitutes the runtime `CONTEXT_URL` at container start (exploded-war launch + `sed` in the CMD), keeping context a run-level choice there.
-- **Lint baseline**: `js.configs.recommended` + `pluginVue.configs['flat/essential']` (NOT `flat/recommended`). `vue/valid-v-slot` runs with `{ allowModifiers: true }` because Vuetify data-table cell templates use dotted slot names (`#item.foo`).
-- **Host-exposed Vuetify primitives**: `host.js` re-exports `VBtn`, `VChip`, `VIcon`, `VTooltip`, `VListItem`, `VDivider`. Plugin `feature()` actions build VNodes with `h(VBtn, …)` without bundling their own Vuetify copy.
-- **2026 "Vibrant" shared components** live in the host and are re-exported from `host.js`: `VibrantDataTable` (presentation-only table; caller keeps its own `useDataTable`), `VibrantConfirmDialog` (drop-in for `LigojConfirmDialog` — same props/slots/events), `LigojIcon` (compact-mode-aware `<v-icon>` wrapper). They live in the host (not a plugin) because BOTH plugin-ui and plugin-id consume them and a plugin cannot import from a sibling plugin. See "2026 redesign & host-as-shell".
-- **Displayed username (`service:id:user-display`)**: plugin-id's session decoration ships the IAM `userDetails` (first/last name, mails, `customAttributes`) plus the `service:id:user-display` configuration; the host auth store resolves the app-bar username from it (`auth.displayName`): `id` (default), `mail`, `mail-short`, any attribute name incl. custom attributes, or an expression mixing `${token}` placeholders with literal text (e.g. `${firstName} ${lastName}`, tokens = the previous modes). Whenever the mode or a token cannot be resolved for the user (missing attribute, no mail), the display is the user's visual identifier (`service:id:visual-id-name`, the login by default); the computation never throws. Backend side, plugin-id forwards this value raw (`UserOrgResource#getDisplayConfiguration`): the `${...}` placeholders are for the UI, and Spring's `Environment` resolution would otherwise fail on them and break every session. The user button's tooltip is the identity card: full name, login, mails, custom attributes, roles and the administrator mention.
-- **Admin-level demo mode** (`useDemoMode` from `@ligoj/host`): a shared reactive flag persisted under localStorage `ligoj-demo-mode`, toggled from the host ProfileView (visible to administrators only, tooltip + hint). The mode is visible to administrators only: `enabled` (what every consumer renders on) is the stored flag AND `auth.isAdmin`, while `stored` is the raw toggle state — a visual decision, not a security measure (the flag is browser-local, the demo content is fake or dropped by the backend); a non-admin session with the flag left in its browser sees nothing. While enabled, the host app-bar shows an info `v-chip` indicator (flask icon + “Demo”, `demo.indicator*` keys) next to the user button — its tooltip explains the mode and clicking it opens the profile toggle. When on, plugin-ui blends demonstration content into the views: demo tool groups on the dashboard, demo projects in ProjectListView (shared dataset `plugin-ui/ui/src/demo/demoData.js`) a `DemoProjectExtension` body + `DemoProjectAction` action-bar button in the project edit dialog via `editExtension`, a demo `actionExtension` button in the project list toolbar (target `project`, `DemoProjectListAction` — lists the toolbar context it received and calls its `reload`), and a "Demo showcase" entry in the Administration menu (`renderNav`, demo-gated) routing to `plugin-ui/ui/src/views/DemoShowcaseView.vue` — a one-page gallery of the Ligoj shared components and Vuetify primitives, meant to grow into the reference showcase. The former per-view "Preview" toolbar toggle of HomeView is gone; `common.preview` was renamed `common.demo`.
-- **Host is a shell**: the host owns only the chrome (App.vue sidebar/topbar, login, profile, about, error snackbar, plugin loader, shared component surface). EVERY domain screen lives in a plugin. The host `router/index.js` registers only `/profile`, `/about`, and the catch-all → `PluginView`; all other routes come from plugins' `install({ router })`.
-
-## Plugin loading model (current)
-
-- **Pre-loaded** in `main.js`: `REQUIRED_PLUGINS = ['id', 'ui', 'prov']`. `main.js` `await loadAllPlugins(REQUIRED_PLUGINS)` BEFORE `app.use(router)` + `mount`, so the routes these plugins register in `install({ router })` exist by the first navigation. The host shell's sidebar (`App.vue`) links to those plugin-owned paths (`/`, `/project`, `/id/*`, `/system/*`, `/api*`); they resolve because the plugins are pre-loaded.
-- **Lazy-loaded** in `App.vue` on session ready: `auth.appSettings.plugins` is run through `pluginIdFromKey(...)` (strips `service:` / `feature:` prefix, swaps `:` for `-`) before being passed to `loadAllPlugins`. The backend's `FeaturePlugin.getKey()` returns `service:id:ldap`; the loader needs `id-ldap`.
-- **Just-in-time** via `loadPlugin(id)`: triggered by the wizard's `ensureToolPluginLoaded(nodeId)` whenever it fetches parameters, and by `PluginFeatures` when it encounters an unloaded subscription plugin.
-- **Declared dependencies** via `requires: ['id']` on the plugin manifest. The loader awaits these BEFORE calling `install()`, so parent i18n is merged and registry slot exists by the time the sub-plugin runs. `plugin-id-ldap` uses this — `plugin-id` could be dropped from `REQUIRED_PLUGINS` without breaking LDAP.
-- **Concurrency**: `loadPlugin` dedupes in-flight loads via a `Map<id, Promise>`, so the wizard's lazy load and a sub-plugin's `requires` can race the same id without double-importing.
-
-## Subscription wizard (`SubscribeWizardView`) & node editor (`NodeEditDialog`)
-
-Two sibling dialogs sharing one parameter-form core (`utils/pluginParams.js` + `utils/parameterGroups.js` — type discrimination, wire building, owning-plugin hook resolution, bundle loading, ordering/grouping). `SubscribeWizardView` owns `subscribe`; `NodeEditDialog` owns `create-node` / `edit-node`. Together they cover everything that creates or edits subscriptions and nodes:
-
-| Mode          | Trigger                                     | Steps shown                                        | Result                                                                                                              |
-| ------------- | ------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `subscribe`   | Dialog in `ProjectDetailView` (not a route) | Service → Tool → Instance → Mode → Params          | POST `rest/subscription`                                                                                            |
-| `edit-node`   | "Edit" in `SystemNodeView` (dialog)         | Read-only chain + editable Name + Params           | PUT `rest/node` (uses `node` field, not `refined` — `NodeEditionVo` has no `setRefined`, Jackson drops `refined:`). |
-| `create-node` | "New node" in `SystemNodeView` (dialog)     | Service → Tool → new-instance form + Mode + Params | POST `rest/node` with full payload (id, name, **`node`** (parent), mode, parameters).                               |
-
-Parameters are auto-rendered from `/rest/node/<tool-id>/parameter/<MODE>` — the wizard reads parameter labels and descriptions via `t(p.id)` and `t(p.id + '-description')` against the unified i18n store. See "Parameter form conventions".
-
----
-
-# Plugin migration recipe
-
-Use this as a checklist when porting `plugin-<id>` (e.g. `plugin-prov`, `plugin-prov-aws`, …) from the legacy AMD bundle to Vue. `plugin-id` and `plugin-ui` are the two reference implementations — start by reading their `ui/` folder before writing your own.
+# Plugin UI recipe
 
 ## 1. Directory layout
-
-Add a `ui/` sibling to the plugin's Maven `src/`:
 
 ```
 plugin-<id>/
 ├── pom.xml
-├── src/                        # Maven module — unchanged
-└── ui/                         # Vue source — new
+├── src/                        # Maven module
+└── ui/
     ├── package.json
     ├── vite.config.js
     ├── eslint.config.js
     └── src/
-        ├── index.js            # Plugin entry — see §2
-        ├── service.js          # Optional: action dispatcher
-        ├── i18n/
-        │   ├── en.js           # Plain object with flat keys
-        │   └── fr.js
-        └── views/
-            └── *.vue
+        ├── index.js            # plugin entry (contract below)
+        ├── service.js          # optional: feature dispatcher / helpers
+        ├── i18n/{en,fr}.js     # flat keys
+        ├── views/*.vue
+        └── __tests__/          # vitest (setup.js + contract tests)
 ```
 
-`vite build` emits the bundle into `../src/main/resources/META-INF/resources/webjars/<id>/vue/` so Maven still packages it into the plugin JAR. No build-time symlink, no extra Maven plugin — just the right Vite `outDir`.
+`vite build` emits into `../src/main/resources/META-INF/resources/webjars/<id>/vue/` so Maven packages the bundle in the plugin jar.
 
 ## 2. The plugin contract
 
-`ui/src/index.js` must default-export an object with these fields. Host code reads them via `plugins/loader.js` and `plugins/registry.js`.
+`ui/src/index.js` default-exports the manifest read by `plugins/loader.js` and `plugins/registry.js` (`register` silently rejects a manifest without `id` + `install`):
 
 ```js
 import { useI18nStore } from '@ligoj/host'
-import Plugin from './Plugin.vue'              // root component
 import enMessages from './i18n/en.js'
 import frMessages from './i18n/fr.js'
 import service from './service.js'
 import FooView from './views/FooView.vue'
 
-const routes = [
-  { path: '/<id>/foo', name: '<id>-foo', component: FooView },
-]
-
-const features = {
-  // Action functions callable from other plugins via callFeature(<id>, action, …).
-  doSomething: service.doSomething,
-}
+const routes = [{ path: '/<id>/foo', name: '<id>-foo', component: FooView }]
+const features = { renderFeatures: service.renderFeatures, /* callable through callFeature(<id>, action, …) */ }
 
 export default {
-  id: '<id>',                                  // stable plugin id (URL-safe)
-  label: 'My Plugin',                          // display label
-  component: Plugin,                           // optional root component
+  id: '<id>',                      // stable, URL-safe
+  label: 'My Plugin',
+  component: Plugin,               // optional root component
   routes,
-  requires: ['<parent-id>'],                   // optional — see "Tool-level variant" below
+  requires: ['<parent-id>'],       // optional, tool-level plugins
   install({ router }) {
-    // Merge translations BEFORE any view renders. The host pre-loads
-    // required plugins synchronously in main.js, so views never see
-    // missing keys.
-    const i18n = useI18nStore()
+    const i18n = useI18nStore()    // merge translations BEFORE any view renders
     i18n.merge(enMessages, 'en')
     i18n.merge(frMessages, 'fr')
     for (const route of routes) router.addRoute(route)
@@ -363,85 +114,10 @@ export default {
   service,
   meta: { icon: 'mdi-...', color: 'blue-darken-3' },
 }
-
 export { service }
 ```
 
-### Tool-level (sub-plugin) variant
-
-Tool-level plugins like `plugin-id-ldap` (lives at `service:id:ldap`) augment a service-level parent. They typically:
-
-- **Don't** export routes or a root component. The parent provides them.
-- **Declare** `requires: ['<parent-id>']` so the loader pulls the parent (and its i18n) before this plugin's `install()` runs.
-- **Ship** an i18n bundle with parameter labels keyed on the parameter ids the tool owns (e.g. `service:id:ldap:base-dn`). The subscribe wizard's flat `t(p.id)` lookup resolves them automatically — see "Parameter form conventions".
-- **Implement** `renderFeatures` (and friends). The parent's `service.js` looks for a sub-plugin via `subPluginIdFor(node)` — for a node `service:id:ldap:local`, this resolves to `id-ldap` and the parent merges the child's VNodes into its own row buttons.
-
-**Not every service parent delegates.** The `vm`, `bt`, `build`, `km`, `qa`, and `mail` parents implement `subPluginIdFor` + feature-merging, so their tools contribute `renderFeatures` / `renderDetailsKey`. The `prov` parent does NOT — its tools (`prov-aws`, `prov-azure`, `prov-fe`, `prov-outscale`, `prov-ovh`) are **i18n-only**: parameter labels and nothing else. Check the parent's `service.js` before writing a tool's hooks.
-
-Minimal sub-plugin manifest:
-
-```js
-import { useI18nStore } from '@ligoj/host'
-import enMessages from './i18n/en.js'
-import frMessages from './i18n/fr.js'
-import service from './service.js'
-
-const features = { renderFeatures: service.renderFeatures }
-
-export default {
-  id: 'id-ldap',
-  label: 'Identity LDAP',
-  requires: ['id'],                            // parent must be loaded first
-  install() {
-    const i18n = useI18nStore()
-    i18n.merge(enMessages, 'en')
-    i18n.merge(frMessages, 'fr')
-  },
-  feature(action, ...args) {
-    const fn = features[action]
-    if (!fn) throw new Error(`Plugin "id-ldap" has no feature "${action}"`)
-    return fn(...args)
-  },
-  service,
-  meta: { icon: 'mdi-folder-network-outline', color: 'blue-grey-darken-2' },
-}
-```
-
-The parent's delegation hook (lives in the parent's `service.js`):
-
-```js
-import { pluginRegistry } from '@ligoj/host'
-
-function subPluginIdFor(subscription) {
-  const id = subscription?.node?.id || ''
-  const parts = id.split(':').filter(Boolean)
-  if (parts.length < 3) return null              // not a tool/instance
-  return `${parts[1]}-${parts[2]}`               // e.g. service:id:ldap → 'id-ldap'
-}
-
-function delegateToToolPlugin(subscription, action) {
-  const subId = subPluginIdFor(subscription)
-  if (!subId) return []
-  const plugin = pluginRegistry.get(subId)
-  if (typeof plugin?.feature !== 'function') return []
-  try {
-    const result = plugin.feature(action, subscription)
-    return result == null ? [] : (Array.isArray(result) ? result : [result])
-  } catch (err) {
-    if (!new RegExp(`no feature ["']${action}["']`).test(err?.message || '')) {
-      console.warn(`[plugin:<parent>] delegate to ${subId}.${action} threw`, err)
-    }
-    return []
-  }
-}
-
-// Inside renderFeatures(subscription):
-const buttons = [/* parent's own VNodes */]
-buttons.push(...delegateToToolPlugin(subscription, 'renderFeatures'))
-return buttons
-```
-
-Also at the top of `index.js`, inject the sibling stylesheet manually — Vite's library mode emits a separate `index.css` but does NOT auto-inject it on dynamic-import. Propagate the loader's `?v=<digest>` cache token onto the CSS URL (`new URL()` resolution drops the query): versioned `/main/*` URLs are long-cached by the host (`Application#pluginCacheFilter`), unversioned ones are revalidated on every load.
+Also at the top of `index.js`, inject the sibling stylesheet: Vite library mode emits a separate `index.css` and does not inject it on dynamic import. Carry the loader's `?v=` token onto the CSS URL (`new URL()` drops the query):
 
 ```js
 if (typeof document !== 'undefined') {
@@ -451,14 +127,25 @@ if (typeof document !== 'undefined') {
     link.id = id
     link.rel = 'stylesheet'
     const cssUrl = new URL(/* @vite-ignore */ './index.css', import.meta.url)
-    // Carry over the loader's `?v=<digest>` token so the stylesheet is
-    // long-cached and busted together with the bundle.
     cssUrl.search = new URL(import.meta.url).search
     link.href = cssUrl.href
     document.head.appendChild(link)
   }
 }
 ```
+
+### Tool-level (sub-plugin) variant
+
+A tool plugin (`service:<parent>:<tool>`, e.g. `plugin-id-ldap`) augments its parent: no routes, no component, `requires: ['<parent-id>']`, an i18n bundle with the labels of the parameters it owns (`service:id:ldap:base-dn`), and optional `renderFeatures` / `renderDetailsKey` / `parameterField` / `parameterLayout` hooks. Check the parent's `service.js` first: only delegating parents (vm, bt, build, km, qa, mail, storage, security, scm, id, registry) merge a tool's row VNodes; `prov` does not, its tools are i18n-only. The parent side is two lines:
+
+```js
+import { toolPluginId, delegateFeature } from '@ligoj/host'
+export const subPluginIdFor = toolPluginId                                   // service:build:jenkins:* → 'build-jenkins'
+export const delegateToToolPlugin = (s, action) => delegateFeature(s, action, 'build')
+// in renderFeatures(subscription): buttons.push(...delegateToToolPlugin(subscription, 'renderFeatures'))
+```
+
+`delegateFeature` returns `[]` on any failure (no sub-plugin, no action, throw); "no feature" errors are swallowed, real ones logged under `[plugin:<label>]`.
 
 ## 3. Vite config template
 
@@ -469,19 +156,11 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
-  resolve: {
-    alias: { '@': resolve(__dirname, 'src') },
-  },
+  resolve: { alias: { '@': resolve(__dirname, 'src') } },
   build: {
-    lib: {
-      entry: resolve(__dirname, 'src/index.js'),
-      formats: ['es'],
-      fileName: () => 'index.js',
-    },
+    lib: { entry: resolve(__dirname, 'src/index.js'), formats: ['es'], fileName: () => 'index.js' },
     rollupOptions: {
-      // Shared deps come from the host via the import map in index.html.
-      // Marking them external keeps each plugin small and ensures one
-      // pinia / vue runtime instance, not N copies.
+      // Shared runtimes come from the host through the import map: one vue / pinia / vuetify instance.
       external: ['vue', 'vue-router', 'pinia', 'vuetify', '@ligoj/host'],
       output: { entryFileNames: 'index.js' },
     },
@@ -493,1234 +172,260 @@ export default defineConfig({
 
 ## 4. Shared host surface (`@ligoj/host`)
 
-Imported from the host bundle via the import map; treat as the public API and don't bypass it. Current exports (see `app-ui/src/main/webapp/src/host.js`):
+Resolved by the import map at runtime, aliased to `host.js` in tests. Treat it as the public API.
 
-| Export                                                             | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `useApi`                                                           | `get / post / put / del` against `rest/*`. Adds redirect handling, error toasts, and 401 → bounce-to-SPA-root behaviour.                                                                                                                                                                                                                                                                                                                       |
-| `useAuthStore`                                                     | Session, roles, `redirectToLogin()`, OIDC-aware logout.                                                                                                                                                                                                                                                                                                                                                                                        |
-| `useAppStore`                                                      | Breadcrumbs (`setBreadcrumbs(items, { refresh })`), title, refresh button in app bar.                                                                                                                                                                                                                                                                                                                                                          |
-| `useI18nStore`                                                     | `t(key, params)`, `setLocale(loc)`, `merge(messages, locale?)`.                                                                                                                                                                                                                                                                                                                                                                                |
-| `useErrorStore`                                                    | Toast queue (`push / success / info`), centralized API response handling.                                                                                                                                                                                                                                                                                                                                                                      |
-| `useClipboard`                                                     | `copy(text, { message })` with browser API + textarea fallback.                                                                                                                                                                                                                                                                                                                                                                                |
-| `useDataTable`                                                     | Server-side paged table state (`load(options)`, `loadAll()`, `items`, `loading`, `error`, `demoMode`).                                                                                                                                                                                                                                                                                                                                         |
-| `useFormGuard`                                                     | Unsaved-changes dialog + `onBeforeRouteLeave` integration. Honors the profile's "skip leave confirmation" via the live `isConfirmationSkipped()` read — the route guard checks it automatically, but a dialog's own close path (`requestClose`-style) must call it explicitly: `if (isDirty.value && !isConfirmationSkipped())`.                                                                                                               |
-| `useEditExtensions`                                                | Resolves the `editExtension` plugin contributions (body component + replacement save `apiPath`) of an entity edit dialog. See "Edit dialogs plugin extension".                                                                                                                                                                                                                                                                                 |
-| `useActionExtensions`                                              | Resolves the `actionExtension` plugin contributions (toolbar action components) of a view. `LjPageHeader` wraps it (`actions-target` / `actions-context`). See "Toolbar plugin extension".                                                                                                                                                                                                                                                     |
-| `LigojDataTable` / `LigojDataTableServer`                          | Wrappers around v-data-table with the tools menu (CSV export, copy). Header `tooltip` field supported.                                                                                                                                                                                                                                                                                                                                         |
-| `LigojConfirmDialog`                                               | Cancel/Confirm modal — use this everywhere instead of hand-rolled `v-dialog`s.                                                                                                                                                                                                                                                                                                                                                                 |
-| `ApiVerifyDialog`                                                  | API access verification dialog: crosses `rest/openapi.json` operations with a set of `{method?, pattern}` API authorizations. Props: `authorizations`, `admin` (bypass — session only, never for role/user audits), `subject` (appended to the title). Used by the profile (own session) and the system Roles/Users row action "Verify".                                                                                                       |
-| `LigojAutocomplete` / `LigojSelect` / `LigojCombobox`              | Drop-in `v-autocomplete` / `v-select` / `v-combobox` twins — **always use these, never the bare Vuetify components**. They defeat the browser's native autofill overlay: unique per-instance `name` + `autocomplete="new-password"` (the KNOWN token browsers honor — newer Chrome ignores both a literal `off` AND unknown tokens, falling back to label heuristics) + 1Password/LastPass/Dashlane/Bitwarden opt-outs; and they disable the dropdown transition when the profile's reduce-motion flag (`<html data-reduce-motion>`) is set. All props/events/slots forwarded. |
-| `LigojTextField` / `LigojTextarea`                                 | Drop-in `v-text-field` / `v-textarea` twins — **always use these, never bare Vuetify text inputs**: same hardening (`new-password` token, unique per-instance `name`, password-manager opt-outs). The only intentional exception is the login pages' credential inputs (`autocomplete="username"` / `"current-password"`). |
-| `NodeIcon` / `nodeIcon` / `NodeModeChip`                           | Render a node's icon and subscription mode consistently.                                                                                                                                                                                                                                                                                                                                                                                       |
-| `nodeType` / `isInstance`                                          | Classify a node id (`service` / `feature` / `tool` / `instance`).                                                                                                                                                                                                                                                                                                                                                                              |
-| `ImportExportBar`                                                  | CSV import/export header strip for list views.                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `PluginFeatures`                                                   | Render-function delegate that mounts a plugin's VNodes for a subscription row (`renderFeatures`, `renderDetailsKey`, …). See "Subscription row delegation" below.                                                                                                                                                                                                                                                                              |
-| `nodePluginId`                                                     | Returns the plugin id (the second `:`-segment) of a node — `service:prov:aws` → `'prov'`. Used by `PluginFeatures` to resolve the right plugin.                                                                                                                                                                                                                                                                                                |
-| `VBtn` / `VChip` / `VIcon` / `VTooltip` / `VListItem` / `VDivider` | Re-exports of Vuetify primitives (the list-item / divider pair is for `renderGlobal`, and the legacy VNode-based `renderAdmin`, menu VNodes — note `renderNav` is declarative and needs neither). Plugins build their VNodes with `h(VBtn, …)` without bundling their own Vuetify (which would break shared theming and instance state).                                                                                                       |
-| `APP_BASE`                                                         | The host's `import.meta.env.BASE_URL` (`/ligoj/`). Plugin's own BASE is `/`, so always use this when building absolute paths.                                                                                                                                                                                                                                                                                                                  |
-| `pluginRegistry` / `callFeature`                                   | Direct registry access for parent-to-child delegation (`subPluginIdFor`, `delegateToToolPlugin`). `callFeature` throws on missing plugin; prefer `pluginRegistry.get(id)?.feature?.(...)` when graceful degradation matters.                                                                                                                                                                                                                   |
-| `renderServiceLink` / `renderDetailsChip`                          | Shared subscription-row VNode builders — the icon link button and the icon+text chip every tool plugin returned by hand. Set a plain `title:` (promoted to a v-tooltip implicitly). See "Subscription row delegation".                                                                                                                                                                                                                         |
-| `toolPluginId` / `delegateFeature`                                 | Shared parent→tool delegation plumbing (`service:bt:jira:* → 'bt-jira'`, then call its `feature` returning `[]` on any failure). Parents alias their `subPluginIdFor` / `delegateToToolPlugin` to these.                                                                                                                                                                                                                                       |
-| `loadPlugin` / `pluginIdFromKey`                                   | Lazy-load a sibling plugin at runtime. The wizard uses these to `ensureToolPluginLoaded(nodeId)` before rendering parameter labels, so i18n inheritance works even if discovery hasn't run. `pluginIdFromKey('service:id:ldap')` → `'id-ldap'`.                                                                                                                                                                                                |
-| `VibrantDataTable` / `VibrantConfirmDialog` / `LigojIcon`          | 2026 "Vibrant" shared components. `VibrantDataTable` = presentation-only table (caller keeps its own `useDataTable`, listens to `@update:options`); `VibrantConfirmDialog` = drop-in for `LigojConfirmDialog`; `LigojIcon` = compact-mode `<v-icon>` wrapper. Host-owned so both plugin-ui and plugin-id can use them.                                                                                                                         |
+- **Composables / stores**: `useApi` (`get / post / put / del` on `rest/*`; returns `null` on any non-2xx and pushes the error toast, never throws; `{ raw: true }` for the `Response`, `{ silent: true }` to skip the toast), `useAuthStore` (session, roles, `isAllowed(uiPath)`, `isAllowedApi(path, method)`, `displayName`, `userSettings`, `globalTools`, `redirectToLogin`, OIDC-aware `logout`), `useAppStore` (`setBreadcrumbs(factory, { refresh })`, title, refresh button, `registerHeaderItem`, `registerNavbarItem`), `useI18nStore` (`t`, `setLocale`, `merge`, `locale`), `useErrorStore` (toast queue), `useClipboard`, `useDataTable` (server-paged table state), `useFormGuard` (unsaved-changes dialog + route guard; a dialog's own close path must check `isConfirmationSkipped()` itself), `useEditExtensions`, `useActionExtensions`, `useDemoMode`.
+- **Tables**: `LigojDataTable` / `LigojDataTableServer` (v-data-table + tools menu: CSV export, copy; forward `#header.<key>` / `#item.<key>` slots; header `tooltip` field), `VibrantDataTable` (presentation-only, caller keeps its `useDataTable` and listens to `@update:options`), `RowActionsMenu`, `ImportExportBar`.
+- **Dialogs**: `LigojConfirmDialog` / `VibrantConfirmDialog` (same props / slots / events), `LjDialog`, `ApiVerifyDialog` (see "API explorer").
+- **Inputs (mandatory)**: `LigojAutocomplete` / `LigojSelect` / `LigojCombobox` / `LigojTextField` / `LigojTextarea`. Never use the bare Vuetify widgets: the twins suppress the browser autofill overlay (`autocomplete="new-password"`, the only token current Chrome honors; a `name` unique per instance AND randomized per page load through `composables/antiAutofill.js`, since browsers key their typed-value history on the field name), add the password-manager opt-outs and honor reduce-motion. The only exception is the login pages' credential inputs (`username` / `current-password`) and the MFA `one-time-code` input.
+- **Nodes**: `NodeIcon` / `nodeIcon` (priority `uiClasses` → wrench for short ids → PNG; when both SVG and PNG 404 an inline "?" placeholder, `MISSING_NODE_ICON`), `NodeModeChip`, `nodeType`, `isInstance`, `nodePluginId` (`service:prov:aws` → `'prov'`).
+- **Plugin plumbing**: `pluginRegistry` / `callFeature` (throws on a missing plugin; prefer `pluginRegistry.get(id)?.feature?.(...)` for graceful degradation), `loadPlugin` / `pluginIdFromKey`, `toolPluginId` / `delegateFeature`, `PluginFeatures`, `renderServiceLink` / `renderDetailsChip`.
+- **Chrome**: `LjPageHeader`, `LjButton`, `LjSearch`, `LjSegmented`, `LjStatus`, `LjAvailabilityField`, `LigojIcon` (compact-mode aware `v-icon`).
+- **Vuetify primitives** re-exported for render functions: `VBtn`, `VChip`, `VIcon`, `VTooltip`, `VListItem`, `VDivider` (build VNodes with `h(VBtn, …)` instead of bundling a second Vuetify).
+- `APP_BASE`: the host's `BASE_URL`. A plugin's own `import.meta.env.BASE_URL` is `/`, so always use `APP_BASE` for absolute URLs (`fetch`, `<img src>`).
 
 ## 5. Translations
 
-Two reasons keys live with the plugin:
-
-- the host bundle stays free of plugin churn,
-- the translations are version-locked to the views that use them.
-
-Inside the plugin: keep keys **flat** (the host's vue-i18n is configured with `messageResolver: (obj, path) => obj?.[path]`, no dot traversal).
+Keys live with the plugin (no host churn, version-locked with the views) and are **flat**: the host vue-i18n uses `messageResolver: (obj, path) => obj?.[path]`, no dot or colon traversal, which is what makes `t('service:id:ldap:base-dn')` work.
 
 ```js
 // ui/src/i18n/en.js
-export default {
-  '<id>.title': 'My Feature',
-  '<id>.foo.deleteConfirm': 'Delete {name}?',
-  // ...
-}
+export default { '<id>.title': 'My Feature', '<id>.foo.deleteConfirm': 'Delete {name}?' }
 ```
 
-Use them via `useI18nStore`:
-
-```js
-import { useI18nStore } from '@ligoj/host'
-const { t } = useI18nStore()
-t('<id>.foo.deleteConfirm', { name })
-```
-
-Keep table `headers` arrays as `computed(() => […])` so they re-evaluate on locale change — Vuetify will re-render the columns.
+Use `const { t } = useI18nStore()`. Keep table `headers` as `computed(() => [...])` so they follow the locale. The host keeps only generic keys (`common.*`, `nav.*`, `dashboard.*`, `error.*`, `profile.*`, `subscription.*`, ...); `common.edit / view / delete` are host keys.
 
 ## 6. Parameter form conventions
 
-The subscribe wizard auto-renders the parameter form for any node. To make it look good for **your** plugin's parameters, ship the right i18n keys.
+The parameter dialogs auto-render the form of any node from `/rest/node/<tool-id>/parameter/<MODE>`.
 
-### Wire shape (`ParameterVo`)
+**Wire shape (`ParameterVo`)**: `{ id, type, mandatory, secured, defaultValue, min, max, values }`. `type` is UPPERCASE (`TEXT`, `BOOL`, `SELECT`, `MULTIPLE`, `INTEGER`, `DATE`, `TAGS`), always compare through `typeKind(p)`. No `name`, `description` or `pattern` on the wire: labels and hints come from i18n, the password input is driven by `secured`. `depends` no longer exists: the endpoint returns parameters id-ascending, the dialogs sort by display name and apply the plugin layout.
 
-The backend serializes an enum-style `type`. **Values are UPPERCASE** — `TEXT`, `BOOL`, `SELECT`, `MULTIPLE`, `INTEGER`, `DATE`, `TAGS`. The wizard normalises via `typeKind(p) = String(p.type).toLowerCase()`.
+**i18n contract**: two keys per parameter, `'<parameter-id>'` (label) and `'<parameter-id>-description'` (optional hint shown under the field). Helpers: `paramLabel(p) = t(p.id) ?? p.id` (a missing key shows the raw id), `paramHint(p)`, `tOrNull(key)` (vue-i18n echoes a missing key back, `tOrNull` turns that into `null`). Inherited parameters (`service:id:group` on an LDAP subscription) resolve through the unified store: each owning plugin ships its own keys, a tool ships only the keys of the parameters its CSV declares.
 
-```jsonc
-{
-  "id": "service:id:ldap:base-dn",     // ← matches the i18n key
-  "type": "TEXT",                       // ← uppercase
-  "mandatory": false,
-  "secured": false,                     // ← drives password masking
-  "defaultValue": null,
-  "min": null, "max": null,             // INTEGER only
-  "values": []                          // SELECT/MULTIPLE/TAGS only
-}
-```
+**Custom fields (`parameterField`)**: both dialogs call `resolveParameterField(nodeId, ctx)` (`plugin-ui/ui/src/utils/pluginParams.js`), tool plugin first then parent, with `ctx = { parameter, mode ('link'|'create'), isNode, formValues, nodeId, instanceNodeId }`. Return a component (mounted with `v-model`, `:parameter`, `:form-values`, `:mode`, `:is-node`, `:node-id`, `:instance-node-id`) or `null` for the default input. The shared identity fields (`service:id:parent-group` autocomplete, `service:id:group` composite editor with live `exists` check) live in plugin-id `ui/src/fields/` and are exported on `service.parameterFields`; tools (ldap, cognito) resolve that map at call time with `pluginRegistry.get('id')?.service?.parameterFields` because a tool cannot import a sibling bundle (`requires: ['id']` guarantees the parent is registered; tests must register it first).
 
-> **`depends` was removed (2026).** Parameters no longer carry a dependency graph, and the backend no longer topologically sorts them. `/rest/node/<id>/parameter/<MODE>` now returns parameters **id-ascending**; the dialogs re-sort by **display name, ascending** and apply any plugin-declared layout. See "Ordering & natural grouping".
+**Ordering and groups (`parameterLayout`)**: resolved like `parameterField`, returns `[{ label?, parameters: [id | glob] }]`. Groups render first in declared order; an exact id keeps its position, a glob (`service:id:ldap:groups-*`, only `*` is special) pulls every unused matching parameter in display-name order; a parameter belongs to one group (first match), unmatched ids are skipped silently (a node-only parameter simply vanishes from a subscription form), everything else trails in an unlabeled group. `label` is an i18n key with literal fallback. A parent can order a whole family from `ctx.nodeId` (`plugin-registry` orders `url, user, password, secret, token` for every tool); a tool answering `[]` in node context lets the parent layout apply.
 
-Notable backend gaps (not yet exposed in `ParameterVo`):
-
-- **No `name` / `description`** — labels and hints come from the plugin's i18n bundle. Anything reading `p.name` or `p.description` is dead code.
-- **No `pattern`** — `Parameter.data` stores `{"pattern": "..."}` server-side for TEXT but `NodeHelper.toVo()` doesn't expose it. Live regex validation on text inputs needs a backend change to surface this.
-- **`secured`** drives the password input — not the parameter name. The legacy `p.name.toLowerCase().includes('password')` heuristic doesn't work because `p.name` doesn't exist.
-
-### i18n contract for parameters
-
-Two keys per parameter:
-
-```js
-// In your plugin's ui/src/i18n/en.js
-export default {
-  'service:id:ldap:base-dn': 'Base DN',                                    // label
-  'service:id:ldap:url': 'Connection URLs',
-  'service:id:ldap:url-description': 'Comma-separated URLs, failover only', // optional hint
-  // ...
-}
-```
-
-Wizard helpers:
-
-- `paramLabel(p) = t(p.id) ?? p.id` — falls back to the raw id so missing keys are visible.
-- `paramHint(p) = t(p.id + '-description')` or `null` — suppresses the `:persistent-hint` slot when undefined.
-- `tOrNull(key)` detects vue-i18n's "key not found → echo back" behaviour and returns `null`. Use it in any helper that wants to distinguish "missing" from "blank".
-
-### Inherited parameter labels
-
-A subscription on `service:id:ldap:local` carries both LDAP-specific parameters (`service:id:ldap:*`, owned by `plugin-id-ldap`) and identity-shared ones (`service:id:group`, `service:id:ou`, owned by `plugin-id`). The wizard's flat `t(p.id)` lookup is plugin-agnostic — it just reads from the unified store. **Each owning plugin ships its keys; inheritance falls out for free.**
-
-When porting a tool-level plugin, ship only the keys YOUR plugin's CSV declares. Let the parent ship the inherited ones.
-
-### Custom fields (`parameterField`)
-
-A plugin can replace the default type-based input for specific parameters. Both dialogs call `resolveParameterField(nodeId, ctx)` (in `utils/pluginParams.js`), which asks the **tool** plugin first, then the **parent** service plugin, for a `parameterField` feature:
-
-```js
-// ui/src/service.js
-parameterField({ parameter, mode, isNode, formValues, nodeId, instanceNodeId } = {}) {
-  if (isNode) return null                      // e.g. only in subscribe mode
-  return PARAM_FIELDS[parameter?.id] || null   // a Vue component, or null to fall back
-}
-```
-
-- Return a Vue component (mounted with `v-model`, `:parameter`, `:form-values`, `:mode`, `:is-node`, `:node-id`, `:instance-node-id`) or `null` to keep the default field.
-- `ctx.isNode` distinguishes node-config (`NodeEditDialog`) from subscription (`SubscribeWizardView`); `ctx.mode` is `link`/`create`; `ctx.nodeId` is the tool node id.
-- Sub-plugin-first: `service:registry:nexus:type` tries `registry-nexus` (no field), then the parent `registry` (which owns `RegistryTypeField` for every tool).
-
-### Ordering & natural grouping (`parameterLayout`)
-
-**Default:** parameters render **ordered by display name, ascending** (see the `depends` note above) — no plugin code needed.
-
-**Override:** a plugin may declare order and/or groups via a `parameterLayout` feature — resolved exactly like `parameterField` (tool plugin first, then parent), in both node and subscription context:
-
-```js
-// ui/src/service.js — returns [{ label?, parameters: [id | glob, ...] }, ...]
-parameterLayout({ mode, isNode, nodeId } = {}) {
-  return [
-    // explicit ids → fixed order; label is an i18n key (omit label for an order-only group)
-    { label: 'id.wizard.group.connection',
-      parameters: ['service:id:ldap:url', 'service:id:ldap:user-dn', 'service:id:ldap:password'] },
-    { label: 'id.wizard.group.groups', parameters: ['service:id:ldap:groups-*'] },              // natural group (glob)
-    { label: 'id.wizard.group.people', parameters: ['service:id:ldap:people-*', 'service:id:ldap:quarantine-dn'] },
-  ]
-}
-```
-
-`groupParameters(params, layout, { name, label })` (in `utils/parameterGroups.js`) turns that into render-ready `[{ label, params }]`:
-
-- **Groups first, in declared order.** Each group's `parameters` entries are matched against the live parameters, in the declared order:
-  - an **exact id** contributes that one parameter, keeping its declared position;
-  - a **glob** — any entry containing `*` (e.g. `service:id:ldap:groups-*`) — is the _natural grouping_: it pulls in every not-yet-used parameter whose id matches, in **display-name order**. Only `*` is special (any run of chars); everything else is literal.
-- A parameter is **never placed in two groups** (first match wins); an id/glob matching **nothing in the current context is silently skipped** — so a node-only param like `service:id:ldap:clear-password` groups during `create-node` yet is simply absent from a subscription form.
-- **Everything unmatched trails** in one unlabeled group, name-ascending.
-- `label` is an i18n key resolved through the plugin's bundle, falling back to the literal.
-
-**Parent vs tool.** Since ids are strings, a parent can order a whole family generically from `ctx.nodeId`:
-
-```js
-// plugin-registry (parent) — orders every registry tool's connection params: url, user, then the secret
-parameterLayout({ nodeId } = {}) {
-  if (!nodeId) return []
-  return [{ parameters: [`${nodeId}:url`, `${nodeId}:user`, `${nodeId}:password`, `${nodeId}:secret`, `${nodeId}:token`] }]
-}
-```
-
-A tool plugin that needs something different returns its own (it is consulted first). `registry-nexus`, for example, orders `type` before `registry` **only on a link subscription** (`!isNode && mode === 'link'`) and returns `[]` in node context, so the parent's connection ordering applies there.
-
-### Lazy-loading the right bundle
-
-The shared `ensureToolPluginLoaded(nodeId)` (`utils/pluginParams.js`) runs at parameter-fetch time (and from `bootstrapEdit` for edit-node). It maps the node id to a plugin id via `pluginIdFromKey` (`service:id:ldap` → `id-ldap`) and calls `loadPlugin(...)` best-effort — with a cache-busting retry for the browser's poisoned-URL cache when an early import 404'd.
-
-**It is `await`ed before `parameters.value` is assigned.** That ordering matters: `resolveParameterField` / `resolveParameterLayout` read the registry synchronously during render, so the owning plugin must already be registered on the **first** paint — otherwise a custom field (or a group layout) silently falls back to the default on load. (vue-i18n still re-renders *labels* in place when a late bundle merges, but component/layout resolution does not get that reactive second chance.)
+**Lazy bundle**: `ensureToolPluginLoaded(nodeId)` runs at parameter-fetch time and is awaited before `parameters.value` is assigned, because `resolveParameterField` / `resolveParameterLayout` read the registry synchronously on first paint (labels re-render when a late bundle merges, component and layout resolution do not).
 
 ## 7. Routing
 
-Routes are registered dynamically via `install({ router })`. Use kebab-case names (`<id>-foo`) to avoid clashes with other plugins. The host's router has a catch-all `/:pathMatch(.*)*` route that falls back to `PluginView`, so missing routes 404 cleanly.
-
-Detail views generally **don't** want to be routes — open them as dialogs from the list view (see `UserEditDialog` in plugin-id). That avoids a second round-trip and keeps the user's table state.
+Routes are added by `install({ router })` with kebab-case names (`<id>-foo`). The catch-all `/:pathMatch(.*)*` falls back to `PluginView`. Detail views are dialogs opened from the list (`UserEditDialog`), not routes, to keep the table state.
 
 ## 8. Styles
 
-Two patterns are in use:
+`<style scoped>` for view-local rules; unscoped `<style>` only for Vuetify teleported DOM (dialog overlays, table cells), namespaced by a unique root class. Scoped CSS applies to the ROOT element of a child component too, so a shared child needs a unique root class (`SubscriptionGroupCard` uses `.subcard`, not `.card`).
 
-- **SFC `<style scoped>`** — preferred for view-local styling. Vite library mode bundles them into `index.css` and the snippet in §2 auto-injects.
-- **`<style>` (unscoped)** — for selectors that have to reach into Vuetify's teleported DOM (data-table cells, dialog overlays). Always namespace by a unique class on the SFC's root.
+## 8b. Data tables and list-view conventions
 
-Global Vuetify tweaks live in `app-ui/src/main/webapp/src/assets/vuetify-overrides.css` and are imported once from `plugins/vuetify.js`. Add to that file instead of duplicating CSS in every plugin.
-
-Theming axes on `<html>`: `data-style` carries the **style** axis (shadow/radius/border tokens — several presets share one style), and `applyPreset`/`bootPreset` also stamp `data-preset` with the exact preset id. Scope CSS by `data-preset` when two presets share a style but must diverge (e.g. the ripple effect is enabled for `ligoj-classic`/`ligoj-dark` but not `vscode-dark`, all style `default`). `data-reduce-motion="true"` is the profile's reduce-motion flag — overlay/dropdown transitions are disabled under it in `vuetify-overrides.css`.
-
-## 8b. Data tables & list-view conventions
-
-`LigojDataTable` (client data) and `LigojDataTableServer` (server-paged)
-wrap `v-data-table` with the tools (cog) menu — CSV export + copy. They
-**forward any `#header.<key>` / `#item.<key>` slot** to the inner table, so
-you customise a column by declaring the matching slot in the parent. They
-also honour a per-header `tooltip` field (auto-renders a tooltip on the
-header label); a custom `#header.<key>` slot **overrides** the `tooltip`
-field for that column — use one or the other.
-
-**Icon-only headers.** When a column's label is long but an icon conveys
-it, show only the icon and move the label into a tooltip:
-
-```vue
-<template #header.nbQuotes="{ column, getSortIcon, toggleSort }">
-  <span class="icon-header" @click="column.sortable && toggleSort?.(column)">
-    <v-icon size="small">mdi-file-document-multiple-outline</v-icon>
-    <v-icon v-if="column.sortable && getSortIcon" :icon="getSortIcon(column)" size="x-small" class="ml-1" />
-    <v-tooltip activator="parent" location="top" :text="column.title" />
-  </span>
-</template>
-```
-
-Keep `title` populated (even though hidden) so CSV export carries a real
-column name. For a NON-sortable icon-only header drop the
-`getSortIcon`/`toggleSort` bits. plugin-prov's catalog
-(Quotes/Locations/Types/Prices) and currency (`nbQuotes`) use this.
-
-**List-view polish convention** (plugin-id is the reference — apply
-consistently across every list view):
-
-- **Row-action buttons** are icon-only `<v-btn>` with a nested tooltip:
-  ```vue
-  <v-btn icon size="small" variant="text" @click.stop="openEdit(item)">
-    <v-icon size="small">mdi-pencil</v-icon>
-    <v-tooltip activator="parent" location="top" :text="t('common.edit')" />
-  </v-btn>
-  ```
-  `common.edit` / `common.view` / `common.delete` live in the HOST i18n.
-- **Data columns** get a leading header icon via a `#header.<key>` slot:
-  `<v-icon size="small" class="mr-1">ICON</v-icon>{{ column.title }}`.
-- **Identifier cells** read as icon + monospace: a leading
-  `mdi-account-circle` (`color="medium-emphasis"`) beside
-  `<code>{{ item.id }}</code>`.
-- **Boolean cells** use `mdi-check-circle` (`color="success"`) for true and
-  `mdi-minus-circle-outline` (`color="grey-lighten-1"`) for false. NEVER
-  `color="disabled"` — it is not a valid Vuetify color and renders
-  uncolored.
-- **Status cells** (locked/active) use a colored icon wrapped in a tooltip.
+- **Icon-only headers**: a `#header.<key>` slot rendering an icon + a `v-tooltip` with `column.title`; keep `title` populated so CSV export carries a real column name. Sortable variant uses `getSortIcon` / `toggleSort` from the slot.
+- **Row actions**: icon-only `<v-btn icon size="small" variant="text">` with a nested `v-tooltip` (`common.edit`, `common.view`, `common.delete`).
+- **Data columns** get a leading header icon; **identifier cells** are icon + `<code>`; **boolean cells** use `mdi-check-circle` (`success`) / `mdi-minus-circle-outline` (`grey-lighten-1`), never `color="disabled"` (not a Vuetify color); **status cells** are a colored icon inside a tooltip.
+- The shared `statusHeader({ tooltip, key?, sortable?, exportValue? })` helper (`plugin-ui/ui/src/useUiHelpers.js`) defines the first, icon-only, fixed-width status column used by SystemNodeView, the subscriptions list and SystemPluginView.
 
 ## 9. Building and testing
 
 ```bash
 cd plugin-<id>/ui
-npm install
-npm run build          # emits to ../src/main/resources/.../webjars/<id>/vue/
-npm run dev            # serves a standalone preview (rarely useful — see below)
-npm run lint
-npm test               # vitest run — plugin-local contract / view tests
+npm install && npm run build   # → ../src/main/resources/.../webjars/<id>/vue/
+npm run lint && npm test       # eslint + vitest run
 ```
 
-For real integration testing, run the host's vite dev server (`app-ui/src/main/webapp`) — `npm run dev` there proxies `/ligoj/main/<id>/vue/*` to the backend, which serves the plugin's freshly-built bundle from `target/classes/`. So the cycle is:
+Integration: run the host dev server (`app-ui/src/main/webapp`, `npm run dev`), which proxies `/ligoj/main/<id>/vue/*` to the backend serving the bundle from the plugin's `target/classes` (copy `index.js` and `index.css` there after a build).
 
-1. Edit plugin source in `plugin-<id>/ui/src/`.
-2. `npm run build` in the plugin's `ui/` folder.
-3. Browser auto-reloads (vite watches the proxied URL).
+**Plugin-local vitest** (template: `plugin-id-ldap/ui/`): devDependencies `@vue/test-utils`, `jsdom`, `pinia`, `vitest`; in `vite.config.js` add `resolve.alias` `'@ligoj/host' → <host>/src/host.js` and `'@' → <host>/src` (host-side imports only), `resolve.dedupe: ['vue', 'pinia', 'vue-router', 'vuetify']` (CRITICAL: otherwise the test's `setActivePinia` never reaches the stores resolved through `@ligoj/host`), and a `test` block (`environment: 'jsdom'`, `globals`, `setupFiles: ['src/__tests__/setup.js']`, `css: false`, `server.deps.inline: ['vuetify']`). `setup.js` stubs `fetch` and `localStorage` and polyfills `ResizeObserver`, `IntersectionObserver`, `visualViewport` so Vuetify overlays mount under jsdom. Sibling plugins are imported by relative path (`../../../../plugin-id/ui/src/index.js`). Any test calling `install()` needs `setActivePinia(createPinia())` first.
 
-### Plugin-local tests (vitest in `plugin-<id>/ui/`)
+**View-level tests**: activate Pinia, seed the plugin i18n with `useI18nStore().merge(en, 'en')`, mount with `global.plugins = [createVuetify({ components, directives }), router]`, assign `globalThis.fetch = vi.fn(...)` before mounting (`vi.spyOn` does not replace the setup stub reliably). A `v-expand-transition` stub must render its slot or the content disappears.
 
-Plugin contract tests live in the plugin repo, not the host. The host's `__tests__/plugins/` folder only keeps host-internal tests (`registry.test.js`, `plugin-contracts.test.js`, `nls-adapter.test.js`, `provFormatters.test.js`, `useProvApi.test.js` — the in-tree legacy plugins still under `@/plugins/`). Plugin tests run with `npm test` inside the plugin's `ui/` folder.
+# Extension points
 
-The setup is mechanical. The reference is `plugin-id-ldap/ui/` — copy it for any new migration.
+## Subscription row delegation (`PluginFeatures`)
 
-**1. Devs deps in `package.json`:**
+`<PluginFeatures :subscription="row" action="renderFeatures|renderDetailsKey|renderDetailsFeatures" />` resolves the **service-level** plugin from the node id (`nodePluginId`), lazy-loads it, calls `plugin.feature(action, subscription)` and mounts the returned VNodes (single, array or `null`). Actions: `renderFeatures` (action icons next to the unsubscribe button), `renderDetailsKey` (stable resource chips), `renderDetailsFeatures` (live chips: counts, quotas). A plugin without the action throws from its dispatcher and the host swallows that error; real errors surface in `console.warn`. `subscription.data / status / parameters` only exist after the `rest/subscription/status/refresh?id=…` round-trip (ProjectDetail runs it once upfront, Home lazily per visible row).
 
-```jsonc
-{
-  "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest"
-  },
-  "devDependencies": {
-    "@vue/test-utils": "^2.4.10",
-    "jsdom": "^28.1.0",
-    "pinia": "^3.0.4",
-    "vitest": "^4.1.7"
-    // …plus the build deps you already have
-  }
-}
-```
-
-**2. `vite.config.js` — add `resolve.alias`, `resolve.dedupe` and a `test` block:**
-
-```js
-const HOST_SRC = resolve(__dirname, '../../../ligoj/app-ui/src/main/webapp/src')
-
-export default defineConfig({
-  // …existing build config…
-  resolve: {
-    alias: {
-      // Pull the real host surface in for tests / dev. At runtime the
-      // browser resolves @ligoj/host via the import map in index.html;
-      // the build keeps it external.
-      '@ligoj/host': resolve(HOST_SRC, 'host.js'),
-      // host.js transitively imports `@/stores/*`, `@/composables/*`, …
-      // The plugin's own code never uses `@/`, so this only affects
-      // host-side imports pulled in through @ligoj/host.
-      '@': HOST_SRC,
-    },
-    // CRITICAL. Without dedupe each side of the test picks its own
-    // node_modules copy of pinia (etc.) and `setActivePinia` from
-    // the test never reaches `useI18nStore` resolved via @ligoj/host.
-    dedupe: ['vue', 'pinia', 'vue-router', 'vuetify'],
-  },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['src/__tests__/setup.js'],
-    exclude: ['node_modules/**', 'dist/**'],
-    css: false,
-    server: { deps: { inline: ['vuetify'] } },
-  },
-})
-```
-
-**3. `src/__tests__/setup.js`** — fetch stub, localStorage, ResizeObserver / IntersectionObserver / visualViewport polyfills. Copy from `plugin-id-ldap/ui/src/__tests__/setup.js`.
-
-**4. Test imports** — use `@ligoj/host` for the registry / stores; relative paths for plugin and sibling-plugin sources:
-
-```js
-import { pluginRegistry, callFeature } from '@ligoj/host'
-import pluginIdLdapDef from '../index.js'                                  // local
-import pluginIdDef from '../../../../plugin-id/ui/src/index.js'            // sibling repo
-```
-
-`install()` reaches into the i18n store, so any test that calls it must `setActivePinia(createPinia())` first.
-
-### View-level component tests (mounting a plugin's SFC)
-
-For SFC mount tests inside the plugin repo:
-
-1. `setActivePinia(createPinia())`.
-2. Seed plugin-local i18n keys via `useI18nStore().merge(enBundle, 'en')` — `install()` does this in production; tests bypass that path.
-3. Mount with `global: { plugins: [vuetify, router] }` where `vuetify = createVuetify({ components, directives })`. The host's `i18n` plugin is already initialised by `useI18nStore`.
-4. Stub `globalThis.fetch = vi.fn(() => Promise.resolve({ ok: true, … }))` BEFORE mounting — `setup.js` pre-stubs it as a bare `vi.fn()`, and `vi.spyOn` doesn't replace an already-mocked fn reliably.
-
-`setup.js` polyfills `ResizeObserver`, `IntersectionObserver`, and `visualViewport` so Vuetify's overlay components (`v-dialog`, `v-menu`, `v-tooltip`) mount under jsdom.
-
----
-
-# Subscription row delegation
-
-Plugins contribute to the host's subscription rows (in `ProjectDetailView`'s table) without owning the surrounding chrome. The host exposes a render-function component, `PluginFeatures`, that mounts a plugin's VNodes for a given subscription row:
-
-```vue
-<!-- In ProjectDetailView -->
-<PluginFeatures :subscription="item" action="renderFeatures" />
-<PluginFeatures :subscription="item" action="renderDetailsKey" />
-```
-
-`PluginFeatures` resolves the plugin from the subscription's node id (via `nodePluginId(subscription.node)`), lazy-loads it if the host hasn't pre-registered it, calls `plugin.feature(action, subscription)`, and mounts whatever VNodes come back.
-
-Plugins implement these actions inside their `feature()` dispatcher. Three are wired today (across plugin-id, plugin-prov, plugin-id-ldap):
-
-- **`renderFeatures(subscription)`** — small action icons next to the unsubscribe button.
-- **`renderDetailsKey(subscription)`** — stable resource chips for the details column (resource id, provider name, …).
-- **`renderDetailsFeatures(subscription)`** — live resource chips (counts, quotas) — refreshed by the `rest/subscription/status/refresh` round-trip described below.
-
-The function returns VNodes (single, array, or `null`). The host never interprets HTML — the plugin paints its own pixels. **Don't hand-roll the VBtn/VChip** — almost every tool plugin returned the *same* two shapes (an icon link button, an icon+text chip), so the host exports two builders (`@ligoj/host`):
+Use the host builders instead of hand-rolled VNodes:
 
 ```js
 import { renderServiceLink, renderDetailsChip, useI18nStore } from '@ligoj/host'
-
-const features = {
-  renderFeatures(subscription) {
-    const { t } = useI18nStore()
-    // icon-only button. href → opens in a new tab (safe rel) automatically;
-    // also accepts { to } (router nav), { onClick }, { disabled }, { download }, { color }.
-    return [renderServiceLink({ icon: 'mdi-home', href: subscription.parameters['…:url'], title: t('…') })]
-  },
-  renderDetailsKey(subscription) {
-    const count = subscription?.data?.members
-    if (count == null) return null
-    // icon + text chip. Also accepts { color }, { size }, { variant }.
-    return renderDetailsChip({ icon: 'mdi-account-multiple', text: count, title: t('…'), color: 'primary' })
-  },
+renderFeatures(subscription) {
+  const { t } = useI18nStore()
+  return [renderServiceLink({ icon: 'mdi-home', href: subscription.parameters['…:url'], title: t('…') })] // also { to }, { onClick }, { disabled }, { download }, { color }
+},
+renderDetailsKey(subscription) {
+  const count = subscription?.data?.members
+  return count == null ? null : renderDetailsChip({ icon: 'mdi-account-multiple', text: count, title: t('…'), color: 'primary' }) // also { size }, { variant }
 }
 ```
 
-`renderServiceLink` / `renderDetailsChip` are the single source of truth for the button/chip shape — one definition instead of ~18 copies. (`plugin-qa-sonarqube` still hand-builds its bespoke metric badges with `h('span', { …, title })`, but those are unique to it.)
+**Tooltips are implicit**: set a plain `title:` on any returned VNode; `PluginFeatures.promoteTitleToTooltip` (`src/utils/promoteTitleToTooltip.js`) upgrades every `title:` into a themed `v-tooltip`, recursing into plain-element array children (component children are slot functions and are left alone) and rendering a `"\n"`-joined title as one row per line. Never import `VTooltip` for delegated output; explicit `<v-tooltip>` is only for a plugin's own SFC templates.
 
-### Tooltips are IMPLICIT — never import VTooltip in a plugin
+Parent-to-tool delegation: see the tool-level variant above (`toolPluginId` / `delegateFeature`).
 
-A plugin sets the plain **`title:`** prop on any VNode it returns; the host's `PluginFeatures.promoteTitleToTooltip` (`src/utils/promoteTitleToTooltip.js`) walks the returned tree and upgrades every `title:` into a themed `<v-tooltip>` (matching font/surface/shadow, no double native tooltip). Two properties make it cover everything:
+## Sidebar global tools (`renderGlobal`)
 
-- **Recursion** — it descends into plain-element *array* children, so a `title:` nested inside a wrapper (e.g. a sonarqube metric badge inside `<span class="sq-metrics">`) is promoted too, not just the top-level delegation node. Component children are slot *functions* (not arrays), so a chip's own inner icon is never touched.
-- **Multi-line** — a `title:` carrying `"\n"` renders as one row per line, so a `name\nValue: X\nmeaning` hint reads cleanly. (This replaced the old per-plugin explicit `<v-tooltip>` wrappers — plugins now just join their lines with `"\n"`.)
+`session.userSettings.globalTools` is a list of `{ node: <full NodeVo>, parameters }` produced by `ISessionSettingsProvider#decorate`. `GlobalToolsList` (host) derives the tool plugin from the first three segments (`pluginIdFromKey('service:km:confluence')` → `km-confluence`), lazy-loads it and calls `renderGlobal({ node, parameters })`, which returns a `VListItem` VNode (or an array, or `null`), e.g. `h(VListItem, { prependIcon, href: \`${APP_BASE}rest/${parameters.query}\`, target: '_blank', rel: 'noopener noreferrer', title: node?.name || node?.id })`. The host mounts them in a compact nav list above the About row; a missing plugin or feature renders nothing.
 
-So the rule "ALWAYS render tooltips via v-tooltip" is satisfied *for free* on delegated output: write `title:`, get a v-tooltip. Only reach for an explicit `<v-tooltip>` in a plugin's own SFC templates (outside the delegation render path).
+## Sidebar menu contribution (`renderNav`)
 
-A plugin that doesn't implement an action throws from its dispatcher; `PluginFeatures` swallows that specific error so the column degrades cleanly to "nothing rendered". Real exceptions surface via `console.warn`.
-
-`ProjectDetailView` also calls `rest/subscription/status/refresh?id=…&id=…` after the initial project load to populate `subscription.data` / `status` / fresh `parameters` — without that round-trip `renderDetailsKey` would always see `data === undefined` (the project endpoint omits live state by design).
-
-## Parent-to-child delegation
-
-`PluginFeatures` resolves to the **service-level** plugin (segment 2 of the node id — `service:id:ldap:local` → `'id'`). To get tool-specific contributions (`plugin-id-ldap`'s activity exports, etc.) on top of the parent's buttons, the parent's `renderFeatures` looks up its tool sub-plugin and merges. Every service parent (`bt`, `build`, `km`, `qa`, `scm`, `security`, `storage`, `vm`, `id`, `mail`) used the *same* ~40-line `subPluginIdFor` + `delegateToToolPlugin` block, so that plumbing is now the host's shared `toolPluginId` / `delegateFeature` (`src/plugins/delegate.js`):
+Declarative data, not VNodes, so the host can position, merge, localize and auth-filter. plugin-id contributes the whole **Identity** menu; plugin-prov inserts its admin pages into **Administration**. `renderNav()` returns one contribution or an array:
 
 ```js
-// Inside a parent's service.js (e.g. plugin-build)
-import { toolPluginId, delegateFeature } from '@ligoj/host'
-export const subPluginIdFor = toolPluginId                        // service:build:jenkins:* → 'build-jenkins'
-export const delegateToToolPlugin = (s, action) => delegateFeature(s, action, 'build')
-
-// Inside renderFeatures(subscription):
-const buttons = [/* parent's own */]
-buttons.push(...delegateToToolPlugin(subscription, 'renderFeatures'))
+// a top-level menu
+{ id: 'identity', labelKey: 'nav.identity', icon: 'mdi-account-group', match: '/id', before: 'nav.projects',
+  children: [{ id: 'id-users', labelKey: 'nav.users', icon: 'mdi-account', route: '/id/user', match: '/id/user', auth: 'id/user' }] }
+// an insert into an existing menu
+{ menu: 'nav.system', children: [
+  { id: 'prov-catalog', label: t('catalog.title'), icon: 'mdi-database-search', route: '/prov/catalog', divider: 'Provisioning' },
+  { id: 'prov-currency', label: t('currency.title'), icon: 'mdi-cash-multiple', route: '/prov/currency' } ] }
 ```
 
-The named exports `subPluginIdFor` / `delegateToToolPlugin` are kept (parent vitest suites import them) but now just alias the host helpers. `delegateFeature` returns `[]` on every failure (no sub-plugin, no action, throw); unknown-action errors are swallowed, real ones surface under `[plugin:<label>]`. The sub-plugin doesn't need to know about delegation — it just implements `renderFeatures` like any other plugin. The parent decides where in its output the child's VNodes go (typically appended).
+Fields: `id` (stable key, anchor and open-state key), `labelKey` (host i18n key, re-localizes reactively) or `label` (already localized), `icon`, `route` / `match` (`match` keeps the entry active on a subtree), `auth` (UI authorization path, default = route without leading `/`; the entry is dropped when denied, admins bypass), `divider` (`string` = labeled separator before the entry, `true` = plain), `before` / `after` (anchor on a sibling's `id`, `labelKey`, `route` or `match`; `before` wins; unresolved anchors append in contribution order). A `{ menu }` insert splices into the target's children; a top-level contribution matching an existing menu augments it instead of duplicating it.
 
----
+Host plumbing: `src/plugins/nav.js` `mergeNav(baseNav, contributions)` (pure, two passes, unit-tested), `App.vue` `BASE_NAV` = Home / Projects / Administration, `pluginNav` computed reads `registry.version` and `i18n.locale` so late bundles and locale switches re-run the merge. The `nav.*` keys are host vocabulary a plugin may reference through `labelKey`. The older VNode-based `renderAdmin` (Administration-only) is still adapted into a `{ menu: 'nav.system' }` insert but is deprecated; `AdminNavExtras.vue` is unmounted dead code.
 
-# Sidebar global tools (`renderGlobal`)
+## Edit dialogs (`editExtension`)
 
-Per-user, backend-driven sidebar links — the "global tools" list. Each
-entry in `session.userSettings.globalTools` pairs a node with arbitrary
-parameters; the owning tool plugin renders it.
+Resolved by `useEditExtensions(target, defaultApiPath, contextSupplier)` (registry-driven, reactive to lazy loads). A contribution `{ component?, footer?, apiPath?, beforeSave? }`:
 
-## Wire shape
+- `component` renders below the built-in form with props `{ mode: 'create'|'edit', form, context }`; `form` is the live model, extra keys written into it ride along in the save payload (dialogs reset `form` on every open, so write on mount).
+- `footer` renders in the action bar (typically an `LjButton`), same props.
+- `apiPath` replaces the REST resource of the save (first contributor wins).
+- `beforeSave(payload, ctx)` receives the payload about to be sent (the whole `form` spread, including the extension's keys) and returns the body (sync or async; nothing keeps the input, `false` aborts silently). Hooks chain in registration order. The payload CAN be reshaped, but the target must accept it: the standard APIs reject unknown properties with a 400 `Mapping` error, so extra data goes either into known fields or to the plugin's own endpoint through `apiPath`.
 
-```jsonc
-[
-  // Sample produced by `ISessionSettingsProvider#decorate` for the
-  // Confluence "DIG" instance — pre-configured space-directory query.
-  {
-    "node": {
-      "id": "service:km:confluence:dig",
-      "uiClasses": "fab fa-confluence",
-      "refined": { /* parent NodeVo chain — tool then service */ },
-      "mode": "ALL"
-      // …other NodeVo fields (enabled, parameters, name, …)
-    },
-    "parameters": { "query": "rest/spacedirectory/1/search?…" }
-  }
-]
-```
+Opt out with `null` (or no feature). Targets: `project` (plugin-ui `ProjectEditDialog`, `rest/project`, ctx `project`), `user` (`rest/service/id/user`, `userId`), `delegate` (`rest/security/delegate`, `delegateId`), `container-scope` (`rest/service/id/container-scope`, `scope`, `type`), `company` (`rest/service/id/company`, `companyId`), `group` (`rest/service/id/group`, `groupId`). Every dialog spreads `form` into its payload, dialog-specific transforms applied after; unit coverage in host `src/__tests__/composables/useEditExtensions.test.js`. Reminder: `useApi` returns `null` on a rejected save, the dialog still closes.
 
-`node` is the full `NodeVo` (see
-`ligoj-api/plugin-core/src/main/java/org/ligoj/app/api/NodeVo.java`).
-The host's `GlobalToolsList` component derives the owning plugin from
-the first three segments of `node.id` via `pluginIdFromKey('service:km:confluence')`
-→ `'km-confluence'`, lazy-loads it if needed, and asks for the entry's
-rendering. Passing the whole `NodeVo` (not just the id) means the
-plugin can brand the link from `node.uiClasses`, walk `node.refined` to
-discover the parent service, or read the instance name without a
-re-fetch.
+## Toolbar (`actionExtension`)
 
-## Plugin contract
+Resolved by `useActionExtensions(target, contextSupplier)`; a contribution `{ action: Component }` mounted after the built-in toolbar actions with a single `context` prop (`{ target, ...viewContext }`). `LjPageHeader` mounts them itself (`actions-target` + `actions-context`); bespoke toolbars call the composable and render `actions` with `<component :is>`. Match the chrome of the target (`LjButton variant="ghost"` in page headers, icon `v-btn` + tooltip in the quote tools strip). Targets: `user`, `group`, `company`, `delegate` (`selected`, `reload()`), `project` (`reload()`), `prov-quote` (`subscriptionId`, `config`, `meta`, `providerNode`, `reload()`). plugin-cartography is the real-world consumer: a `prov-quote` button opening a fullscreen force-directed map of the quote resources (Chart.js bundled in the plugin, pure graph derivation in `ui/src/graph.js`, advanced filtering, table report, JSON export). Tests: host `useActionExtensions.test.js`, `LjPageHeader.test.js`.
 
-Tool plugins (the ones at segment 3) implement:
+## App-bar items
 
-```js
-const features = {
-  renderGlobal({ node, parameters }) {
-    const { t } = useI18nStore()
-    return h(VListItem, {
-      prependIcon: 'mdi-book-open-page-variant',
-      href: `${APP_BASE}rest/${parameters.query}`,
-      target: '_blank',
-      rel: 'noopener noreferrer',
-      // `node.name` gives the instance label set by the admin (e.g.
-      // "Confluence DIG"); fall back to the bare node id when it's
-      // missing so the link is still labelled.
-      title: node?.name || node?.id,
-    })
-  },
-}
-```
+`app.registerNavbarItem(Component)` renders visible compact chrome in the app bar (right-side stack, before the demo chip); `app.registerHeaderItem(Component)` only keeps a root-mounted component alive (dialogs). plugin-ui contributes `PluginUpdatesIndicator` (administrators, when the last check found newer plug-in versions: `mdi-update` picto, count badge, tooltip listing them, opens the plug-in manager).
 
-Return one VNode, an array of VNodes, or `null` to opt out for a
-specific entry. The host wraps everything inside a `<v-list density="compact" nav>`
-mounted in `AppLayout`'s `#append` slot, **above** the About row, so
-the items inherit sidebar nav styling without each plugin re-doing the
-container.
+# Host and plugin-ui features
 
-## Host plumbing
+## Subscription wizard and node editor
 
-- `useAuthStore` exposes `userSettings` and `globalTools` computed
-  selectors over `session.userSettings`. Plugins read those through
-  `@ligoj/host`'s existing `useAuthStore` re-export.
-- `GlobalToolsList.vue` (in `components/`) watches `auth.globalTools`,
-  lazy-loads each entry's plugin on first observation, bumps a tick
-  ref when a load completes so the render function re-runs, and
-  swallows the "no feature renderGlobal" exception for plugins that
-  opt out. Real errors surface via `console.warn`.
-- An entry whose plugin isn't installed (or doesn't implement
-  `renderGlobal`) renders nothing — same graceful-degrade as the
-  subscription-row delegation.
+`SubscribeWizardView` (mode `subscribe`, dialog in `ProjectDetailView`: Service → Tool → Instance → Mode → Params, `POST rest/subscription`) and `NodeEditDialog` (`create-node`: Service → Tool → new instance form + Mode + Params, `POST rest/node`; `edit-node`: read-only chain + name + params, `PUT rest/node`) share one parameter-form core (`utils/pluginParams.js`, `utils/parameterGroups.js`). The parent field of `NodeEditionVo` is `node`, not `refined` (no `setRefined`, Jackson drops it).
 
----
+## Shared subscriptions display (`SubscriptionsPanel`)
 
-# Sidebar menu contribution (`renderNav`)
+Used by `ProjectDetailView` and `HomeView` (plugin-ui `components/`):
 
-The declarative host→plugin sidebar hook (alongside subscription-row
-`PluginFeatures` and sidebar-footer `renderGlobal`). A plugin contributes to
-the left navigation as **data** — not VNodes — so the host can position, merge,
-localize and auth-filter the contributions. Two things use it today:
-`plugin-id` contributes the whole **Identity** top-level menu (Users / Groups /
-Companies / Delegates / Container scopes — this section used to be hardcoded in
-the host's `BASE_NAV`), and `plugin-prov` inserts its global admin pages
-(catalog / currency / terraform) into the shared **Administration** menu.
+- `SubscriptionsPanel.vue`: toolbar (cards / list toggle, optional search, collapse-all) over a grid of `SubscriptionGroupCard` or a flat `VibrantDataTable`. Props `groups`, `defaultView`, `searchable`, `collapsible`, `loading`, `cog`; emits `rowmenu`, `row-appear`; slots `#toolbar`, `#empty`.
+- `SubscriptionGroupCard.vue`: one tool group (root class `.subcard`), controlled collapse, per-tool search: a magnify button expands an `LjSearch` (Escape closes and clears) filtering rows case-insensitively on name, pills, the node chain (instance / tool / service names and ids) and every non-secured parameter value (`utils/subscriptionSearch.js`, secured = id looks like a secret); the badge shows `matching/total`.
+- `SubscriptionStatus.vue`: the status dot used everywhere a node or subscription status is shown, accepting a full `subscription` or a bare `node` (+ `status`). Its tooltip gathers service / tool / instance from the node chain, status, mode, `enabled`, audit and parameters (secrets masked), plus the floating `#<id>` badge. `enabled === false` renders black regardless of status; service / tool / feature nodes show no dot unless disabled. Click re-checks live (`POST rest/node/status/refresh/{id}` for a node, `GET rest/subscription/status/{id}/refresh` for a subscription), the dot blinks while in flight, the result is shallow-merged.
+- Group model: `{ key, name, kind, color, icon: () => h(NodeIcon, { node }), health, rows: [{ name, status: 'ok|warn|err|idle', pills, cost?, sub }] }`; `pills` is empty for real subscriptions.
+- **ProjectDetailView** builds groups from `rest/project/:id` plus one upfront status refresh, default view `list`. **HomeView** builds them from `rest/subscription` (LIGHT model `{ nodes[], projects[], subscriptions[{ id, project, node: <id> }] }`): rebuild the instance → tool → service chain from `nodes[]` (`refined` = parent id); details are fetched lazily, each row emits `row-appear` (`directives/appear.js`, an IntersectionObserver firing once, immediately under jsdom; a `v-show` hidden row never fires) → batched, chunked `rest/subscription/status/refresh?id=…` → reactive `detailsById`.
 
-This supersedes the former VNode-based `renderAdmin`, which could only append
-flat items to the Administration menu. `renderAdmin` still works (the host
-adapts it — see below), but new contributions should use `renderNav`.
+## System views (plugin-ui)
 
-## Contribution shapes
+- **Plugin manager** (`SystemPluginView`): the "Enabled" switch (`pluginToggle.js`) calls `PUT rest/system/plugin/{artifact}/disable|enable`, which renames the jar (`*.jar.disabled`) so the plug-in class loader skips or loads it at the next restart, like install / uninstall (configuration kept; there is no persisted `enabled` on nodes, `PUT rest/node` rejects it). `LigojPluginVo` carries `disabled` and `loaded`; `pluginState()` derives active / disabled / disabling / enabling (restart required) / pending / deleted, each with its tooltip. Three KPI cards (`pluginStats.js`) with stacked multi-color bars and per-segment tooltips, no legend: plug-ins by type, active plug-ins, verified plug-ins. The **Automation** dialog (`PluginAutomationDialog`, `rest/system/plugin/schedule`, app-api `PluginScheduleResource` with its own scheduler) drives `ligoj.plugin.check` + `.check.cron` (scheduled version check, Spring cron edited with `@vue-js-cron/vuetify`, format `spring`, numeric weekdays), `ligoj.plugin.update` (automatic download, only while the check is enabled, guarded by the risks warning dialog) and `ligoj.plugin.maintenance` + `.maintenance.cron` (restart only when an update is staged). The check result (`ligoj.plugin.check.last/.updates`) is decorated into the session as `plugin-updates`; "Check versions" runs `POST …/schedule/check` and refreshes the session.
+- **Tasks** (`SystemTaskView`, `LjSegmented` tabs, deep link `?tab=scheduled`): long-task runners and the scheduled tasks from `GET rest/system/schedule` (app-api `ScheduledTaskResource`: Spring `@Scheduled` methods from the `ScheduledTaskHolder` beans with trigger, next and last execution and outcome, plus `ScheduledTaskProvider` contributions such as the plugin check and maintenance jobs).
+- **Actuator admin surface**: routes `/system/information/actuator/:endpoint` (`ActuatorView`, default `info`; `/system/actuator` and `/system/logs` redirect). Two actuators: the API one is reached through `${APP_BASE}manage/*` (proxied to app-api, HAL `_links` come back under the backend context so `toPath()` keeps the segment after `/manage/`), app-ui's own MUST use base path `/actuator` (`/ligoj/actuator/*`, dev proxy needed) because `/manage` is the proxy servlet. The view lists the HAL index with a renderer per endpoint (`components/actuator/registry.js` → `Act*.vue`, props `data`, `copy`, `fetch`, `post`), raw-JSON toggle, download, copy; templated endpoints are filtered out, `heapdump` is a download panel, write endpoints (`restart`, `refresh`, `pause`, `resume`, `shutdown`) get a submit panel with confirmation, `logfile` opens `LogPanel` (API and UI tabs, `Range: bytes=-262144` tail, full-log toggle, filter, wrap, auto-refresh, download; the UI tab is probed on mount). `ActLoggers` edits levels at runtime (`POST loggers/<name>`) and shows the `logging.level.<name>=<LEVEL>` line to persist.
 
-`renderNav()` returns one contribution object, or an array of them. Each is
-either a whole top-level menu, or an insert into an existing menu:
+## Displayed username and visual identifier
 
-```js
-// A new top-level menu with children (plugin-id's Identity):
-{
-  id: 'identity',            // stable key (before/after anchor + sub-menu open-state)
-  labelKey: 'nav.identity',  // host i18n key — OR `label: '<already localized>'`
-  icon: 'mdi-account-group',
-  match: '/id',              // keeps the section active across its subtree
-  before: 'nav.projects',    // position among top-level menus (see Positioning)
-  children: [
-    { id: 'id-users', labelKey: 'nav.users', icon: 'mdi-account',
-      route: '/id/user', match: '/id/user', auth: 'id/user' },
-    // …
-  ],
-}
+- `service:id:user-display` (plugin-id session decoration ships `userDetails` and this value raw through `UserOrgResource#getDisplayConfiguration`, because Spring's `Environment` would fail on the `${}` placeholders): the host resolves `auth.displayName` as `id` (default), `mail`, `mail-short`, any attribute including custom ones, or an expression mixing `${token}` placeholders with text. Whenever a mode or token cannot be resolved, the display falls back to the visual identifier; it never throws. The user button tooltip is the identity card (name, login, mails, custom attributes, roles).
+- `service:id:visual-id-name` / `-label`: the attribute shown as the user identifier in tables (`id`, `firstName`, `lastName`, `mail`, `customAttributes.<x>`) with an optional static header label; resolved by plugin-id `ui/src/visualId.js` (always falling back to the login), used by `UserListView` and `GroupMembersPanel` first column, sorted on the `visual-id` key mapped server-side (`getOrderedColumns()`, `CustomAttributeComparator` in LDAP).
 
-// Insert entries into an existing menu (plugin-prov → Administration):
-{
-  menu: 'nav.system',        // target menu, by its id / labelKey / match
-  children: [
-    // `divider` = a separator rendered BEFORE this entry (labels the block)
-    { id: 'prov-catalog', label: t('catalog.title'), icon: 'mdi-database-search',
-      route: '/prov/catalog', divider: 'Provisioning' },
-    { id: 'prov-currency', label: t('currency.title'), icon: 'mdi-cash-multiple',
-      route: '/prov/currency' },
-  ],
-}
-```
+## Demo mode
 
-Each entry field:
+`useDemoMode()` → `{ enabled, stored, setEnabled }`: `stored` is the localStorage `ligoj-demo-mode` flag toggled from `ProfileView` (administrators only), `enabled` = stored AND `auth.isAdmin` (a visual decision, not a security measure). While enabled the app bar shows a "Demo" chip and plugin-ui blends demonstration content: demo tool groups on the dashboard, demo projects (`plugin-ui/ui/src/demo/demoData.js`), a `DemoProjectExtension` body + `DemoProjectAction` footer button in the project dialog (`editExtension` on `project`, overriding `apiPath` to the sink endpoint `rest/system/demo/project`, `DemoProjectResource`, which logs and drops the payload; the `beforeSave` hook turns typed `demoTags` into the `tags` list and opens `DemoSavePreviewDialog` with three panes: built by the dialog, added by the demo section, sent to the demo API), a `DemoProjectListAction` toolbar button (`actionExtension` on `project`) and a "Demo showcase" Administration entry (`DemoShowcaseView`, a gallery of the shared components).
 
-| Field                 | Purpose                                                                                                                                                                    |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                  | stable key; the preferred `before`/`after` anchor and sub-menu open-state key                                                                                              |
-| `labelKey` \| `label` | `labelKey` is resolved by the host against the shared i18n store (re-localizes reactively); `label` is a ready string the plugin already localized. One or the other.      |
-| `icon`                | mdi glyph (rendered through `LigojIcon`)                                                                                                                                   |
-| `route` / `match`     | SPA path; `match` (defaults to `route`) keeps the item active across a subtree                                                                                             |
-| `auth`                | REST authorization path tested against the session `uiAuthorizations`; the entry is dropped if the user can't reach it (admins bypass). Defaults to route sans leading `/` |
-| `divider`             | `string` → a labeled separator BEFORE the entry; `true` → an unlabeled separator                                                                                           |
-| `before` / `after`    | position relative to a sibling — see below                                                                                                                                 |
+## Multi-factor authentication
 
-## Positioning (`before` / `after`)
+- **Bootstrap**: `SystemMfaDevice` (`S_MFA_DEVICE`, per-user unique name, encrypted `secret` of 4000 chars, `lastUsed`, `defaultDevice`), dependency-free `TotpHelper` (RFC 6238), `Cbor` and `WebAuthnHelper` (COSE ES256 / RS256, assertion signature check, attestation statement not verified). `MfaResource` at `rest/system/mfa`: `GET` (devices, `required`, `lastConnection`), `POST login` (records the authentication), `POST totp/setup` / `POST totp` (confirm with a first code), `POST passkey/setup` / `POST passkey` (single-use challenge kept 5 min, origin and rpId checks), `POST passkey/challenge` / `POST passkey/verify` (challenge, origin, rpId, user presence, signature, counter regression), `POST verify` (`{ code, device? }`, TOTP), `PUT {id}/default`, `DELETE {id}` (the oldest remaining device becomes default). Configuration `ligoj.mfa.rp-id` (site host, `localhost` by default, set in production and never changed), `ligoj.mfa.origins`, `ligoj.mfa.issuer`. Granted to `USER` by the app-api authorization seed (`^rest/system/mfa.*`, existing databases need the row added by hand).
+- **app-ui** enforces the second factor after form and OIDC logins only (`security.mfa.enabled`, default true): `MfaAuthenticationSuccessHandler` flags the session `ligoj.mfa.pending` and sends the user to `mfa.html` (JSON `redirect` for the AJAX form, real redirect for OIDC), `MfaAuthorizationManager` denies everything but the MFA page, `/login/mfa(/passkey)?`, logout and assets while pending, `MfaVerifyFilter` verifies (5 attempts then the session is invalidated), `MfaAccessDeniedHandler` redirects pending sessions. `MfaClient` calls the API with the trusted user header (`SM_UNIVERSALID`) like the proxy; an API without the resource disables the step. API-token mode (`x-api-key` / `x-api-user` headers, `/login-by-api-key`) and pre-auth header mode never carry the session flag and are not subject to MFA.
+- **Host**: `mfa.html` + `MfaApp.vue` (`GET /login/mfa` returns the devices, default preselected, 6-digit `one-time-code` input gating the verify button, "Use my passkey" through `GET /login/mfa/passkey` + `navigator.credentials.get`; `utils/webauthn.js` converts Base64url), `LoginApp` honors the `redirect` of the login payload, `composables/useMfa.js` drives the profile **Authentication** card (provider from the `iam-primary` session data, last authentication, add device as authenticator with QR code (`qrcode` package) or passkey through `navigator.credentials.create`, default badge and "use as default", remove). The Permissions card's UI / API lists are `LjSegmented` tabs.
 
-`before` / `after` name a sibling by any of its `id`, `labelKey`, `route` or
-`match`. `before` wins if both are set; an unresolved (or absent) anchor
-appends in contribution order, and several entries anchored to the same sibling
-keep their contribution order. This works for both **top-level menus** (position
-among Home / Projects / Administration) and **child entries** (position within a
-menu). Example: plugin-id's Identity sets `before: 'nav.projects'` to keep its
-historic slot between Home and Projects.
+## API explorer and verification
 
-## Merging into an existing menu
+`#/api?op=<method>|<path>` (lowercase method + raw OpenAPI path, URL-encoded) opens the owning tag group and operation of `ApiHomeView`, scrolled and highlighted. `ApiVerifyDialog` (host; props `authorizations`, `admin`, `subject`) crosses every `rest/openapi.json` operation with a set of `{ method?, pattern }` authorizations, shows the allowed rate and tests a typed URL; used by the profile ("Verify" next to "Manage API keys", own session with admin bypass), the system Roles row action and the system Users row action (union of the roles).
 
-A `{ menu }` contribution splices its children into the target menu's existing
-children (base children first, then the insert, honoring each child's
-before/after). A **top-level** contribution whose `id` / `labelKey` / `match`
-matches an existing menu *augments* it (children merged) instead of creating a
-duplicate — so a plugin can add entries to the host's (or another plugin's) menu
-without owning it.
-
-## Host plumbing
-
-- `src/plugins/nav.js` — `mergeNav(baseNav, contributions)` is the pure merge
-  engine (two passes: build/augment top-level menus, then apply `{ menu }`
-  inserts). It operates on raw items (labelKey, not the localized label) and
-  never mutates its inputs. Unit-tested in `__tests__/plugins/nav.test.js`.
-- `App.vue` — `BASE_NAV` now holds only the host-owned sections (Home /
-  Projects / Administration). The `pluginNav` computed collects every plugin's
-  `renderNav` (and adapts any legacy `renderAdmin` VNodes into a
-  `{ menu: 'nav.system' }` insert, preserving the old auto "owner name"
-  divider). `NAV` runs `mergeNav(BASE_NAV, pluginNav.value)`, then localizes
-  each `labelKey` and drops auth-denied entries.
-- **Label vocabulary** — the `nav.*` i18n keys (`nav.identity`, `nav.users`, …)
-  stay host-owned sidebar vocabulary in the host locale files, so a plugin
-  contribution can reference them via `labelKey` without shipping its own copy.
-  A plugin that prefers to own its wording passes a ready `label` instead.
-- **Lazy-load reactivity** — `pluginNav` / `NAV` read `registry.version.value`
-  and `i18n.locale`, so a plugin whose bundle arrives *after* first paint (or a
-  locale switch) re-runs the merge. The required plugins (`id`, `ui`, `prov`)
-  are awaited before `mount`, so their menus are present on the first paint.
-
-> **Legacy `renderAdmin`** (VNode-based, Administration-only) is still accepted
-> via the adapter in `pluginNav`, and the old `AdminNavExtras.vue` component is
-> now **dead code** — unmounted since the 2026 redesign; the sidebar is
-> assembled entirely by `App.vue` + `mergeNav`. Don't build on either.
-
----
-
-# Edit dialogs plugin extension (`editExtension`)
-
-The entity create/edit dialogs are extensible by any registered plugin through
-a single **`editExtension`** feature, resolved by the host composable
-`useEditExtensions(target, defaultApiPath, contextSupplier)` (exported from
-`@ligoj/host`, registry-driven, reactive to lazy plugin loads via
-`registry.version`). Two capabilities per contribution:
-
-- **`component`** — a Vue component rendered BELOW the dialog's built-in form
-  and BEFORE the actions, mounted with props `{ mode, form, context }`:
-  `mode` is `'create' | 'edit'`, `form` is the dialog's **live model** (extra
-  keys the component writes into it are spread into the save payload), and
-  `context` is the full feature context (target + entity refs below).
-- **`footer`** — a Vue component mounted in the dialog's ACTION BAR next to
-  the built-in buttons (typically an `LjButton`), same `{ mode, form,
-  context }` props.
-- **`apiPath`** — a replacement REST resource for the save `POST`/`PUT` (same
-  API base, different resource). First contributing plugin wins.
-
-## Sample contribution
-
-```js
-// In the contributing plugin's features map:
-import MyUserExtension from './components/MyUserExtension.vue'
-
-editExtension(ctx) {                  // ctx = { target, mode, ...entity refs }
-  if (ctx.target !== 'user') {
-    return null                       // opt out of the other dialogs
-  }
-  return {
-    component: MyUserExtension,       // writes e.g. `form.badge = ...` on mount
-    footer: MyUserActionButton,       // extra button in the dialog action bar
-    apiPath: 'rest/my-extended-user', // ...saved through the extended endpoint
-  }
-}
-```
-
-Return `null`/`undefined` (or don't expose the feature at all — the standard
-`no feature "editExtension"` rejection is swallowed) to opt out. Dialogs reset
-their `form` to the base fields on every open, so an extension component must
-(re)write its own keys on mount.
-
-## Extension-aware components
-
-| `target`          | Component                                              | Default `apiPath`                 | Context fields                                        |
-| ----------------- | ------------------------------------------------------ | --------------------------------- | ----------------------------------------------------- |
-| `project`         | plugin-ui `views/ProjectEditDialog.vue`                | `rest/project`                    | `project` (object or null)                            |
-| `user`            | plugin-id `views/UserEditDialog.vue`                   | `rest/service/id/user`            | `userId`                                              |
-| `delegate`        | plugin-id `views/DelegateEditDialog.vue`               | `rest/security/delegate`          | `delegateId`                                          |
-| `container-scope` | plugin-id `views/ContainerScopeView.vue` (edit dialog) | `rest/service/id/container-scope` | `scope` (row or null), `type` (`group`/`company` tab) |
-| `company`         | plugin-id `components/CompanyEditPanel.vue`            | `rest/service/id/company`         | `companyId`                                           |
-| `group`           | plugin-id `components/GroupEditPanel.vue`              | `rest/service/id/group`           | `groupId`                                             |
-
-A live sample ships with plugin-ui: `components/DemoProjectExtension.vue`
-(body) + `components/DemoProjectAction.vue` (action-bar button), contributed
-for target `project` when the admin-level demo mode (`useDemoMode`) is on.
-The feature reads the reactive flag, so the consuming dialog updates the
-moment the mode is toggled — no reload.
-
-`beforeSave(payload, ctx)` (optional, since 2026-09): intercepts the save right
-before the POST/PUT. The contributor receives the payload the dialog is about
-to send — the whole `form` spread, INCLUDING the keys its own extension
-component wrote into it (the ride-along contract of the payload note below),
-so there is no separate "original" payload — plus the extension context, and
-returns the request body (sync or async; returning nothing keeps the input, so
-in-place mutation works; returning `false` ABORTS the save silently).
-
-**The payload sent to the original API CAN be altered** — keys added, removed
-or reshaped — with one constraint: the target must accept it. The standard
-REST APIs reject unknown properties with a 400 "Mapping" error, so extra data
-either lands in fields the API knows, or goes to the plugin's own API by
-overriding `apiPath` in the same `editExtension` result. Hooks of several
-plugins chain in registration order. Every `editExtension` consumer (project,
-user, delegate, container-scope, company, group dialogs) routes its payload
-through `prepare()` returned by `useEditExtensions`.
-
-The plugin-ui demo contribution showcases both levers: its "Tags" field writes
-`demoTags` into the form; its `editExtension` result overrides `apiPath` to
-the plugin's own backend endpoint `rest/system/demo/project`
-(`DemoProjectResource`, plugin-ui Java side), whose payload
-(`DemoProjectEditionVo`) is the standard project VO plus `tags`; on save the
-hook parses the typed tags into that `tags` list, removes `demoTags`, and opens
-`DemoSavePreviewDialog` (persistent `registerHeaderItem` mount, driven by
-`demo/savePreview.js`) with three captioned panes — built by the dialog, added
-by the demo section (as typed, untouched), sent to the demo API (more complete
-than what the dialog built) — so the origin of every key is explicit. The
-endpoint is a sink: it logs and drops the payload, nothing is persisted (no
-project is created; the list view just reloads since no id comes back); like
-any endpoint without an explicit authorization it is admin-only. "Cancel"
-aborts. Note
-`useApi` returns `null` on any failed call (the error store shows it), it never
-throws: a payload the API rejects still closes the dialog.
-
-Payload note: every dialog now spreads its `form` into the save payload
-(dialog-specific transforms — e.g. group/company `scope` name→id — are applied
-AFTER the spread and win). Company additionally strips its display-only
-`locked`/`count` fields. Unit coverage of the resolution mechanics lives in the
-host: `src/__tests__/composables/useEditExtensions.test.js`.
-
----
-
-# Toolbar plugin extension (`actionExtension`)
-
-The action bar of the main views is extensible by any registered plugin
-through a single **`actionExtension`** feature, resolved by the host
-composable `useActionExtensions(target, contextSupplier)` (exported from
-`@ligoj/host`, registry-driven, reactive to lazy plugin loads — same
-collector as `editExtension`: `registry.collectFeature`). One capability per
-contribution:
-
-- **`action`** — a Vue component mounted in the view's TOOLBAR after the
-  built-in actions, with a single `context` prop
-  (`{ target, ...viewContext }`). The component owns its button(s) and
-  whatever they open (dialog, fullscreen view, navigation). Match the chrome
-  of the target: `LjButton variant="ghost"` in the `LjPageHeader` views, an
-  icon `v-btn size="small" variant="text"` + `v-tooltip` in the quote tools
-  strip.
-
-Return `null`/`undefined` (or don't expose the feature at all) to opt out.
-
-## Sample contribution
-
-```js
-import MyQuoteAction from './views/MyQuoteAction.vue'
-
-const features = {
-  actionExtension(ctx) {
-    if (ctx.target !== 'prov-quote') return null
-    return { action: MyQuoteAction }
-  },
-}
-```
-
-## Extension-aware views
-
-`LjPageHeader` mounts the contributions itself — a view opts in with
-`actions-target` (+ `actions-context`); views with a bespoke toolbar call the
-composable and render `actions` with `<component :is>`.
-
-| `target`     | View                                                  | Context fields                                                                  |
-| ------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `user`       | plugin-id `views/UserListView.vue`                    | `selected` (ids), `reload()`                                                    |
-| `group`      | plugin-id `views/GroupListView.vue`                   | `selected`, `reload()`                                                          |
-| `company`    | plugin-id `views/CompanyListView.vue`                 | `selected`, `reload()`                                                          |
-| `delegate`   | plugin-id `views/DelegateListView.vue`                | `selected`, `reload()`                                                          |
-| `project`    | plugin-ui `views/ProjectListView.vue`                 | `reload()`                                                                      |
-| `prov-quote` | plugin-prov `views/QuoteView.vue` (quote tools strip) | `subscriptionId`, `config` (live `QuoteVo`), `meta`, `providerNode`, `reload()` |
-
-A real-world consumer is **plugin-cartography** (feature-level, backend key
-`feature:cartography`): its legacy jQuery tab inside plugin-prov's config
-screen became an `actionExtension` on target `prov-quote` — a toolbar button
-opening, in a FULLSCREEN dialog, a force-directed network map
-(`ui/src/views/CartographyView.vue`, Chart.js + chartjs-chart-graph on a
-canvas, static layout so thousands of nodes stay responsive) of the quote
-resources (nodes = instances/databases/containers/functions/supports +
-unattached storages, attached storages rolled up on their parent; links = the
-quote `networks`; `app:` tags group, `env:` tags color). The graph derivation
-is a pure module (`ui/src/graph.js`) fed by the `config` handed through the
-action context — no REST call. The view also ports the legacy advanced
-filtering (filter sets = OR conditions of ANDed, negatable tokens, faceted
-candidates, hard-filtering the graph), a table report mode grouped by the
-active grouping, and JSON exports (full / genuinely filtered). Chart.js and
-its graph/zoom plugins are bundled in the plugin (not host-shared).
-Dev port 5317. Unit coverage of the resolution mechanics lives in the host:
-`src/__tests__/composables/useActionExtensions.test.js` and
-`src/__tests__/components/LjPageHeader.test.js`.
-
----
-
-# Spring Boot Actuator admin surface (plugin-ui)
-
-A full admin browser for the Spring Boot Actuator, nested under the System →
-Information view. Routes (plugin-ui `index.js`):
-`/system/information/actuator/:endpoint` (ActuatorView; the selected endpoint is
-the route param, default `info`). `/system/information/actuator` redirects to
-`…/info`; `/system/actuator` and `/system/logs` are back-compat redirects.
-
-**Two containers, two actuators — the path split is the #1 gotcha.** app-ui
-registers a `BackendProxyServlet` on `/manage/*`, `/rest/*`, `/main/*` that
-forwards to **app-api** (`/ligoj-api/...`). So:
-- API actuator → reached via `${APP_BASE}manage/*` (= `/ligoj/manage/*`, proxied
-  to app-api). The HAL index's `_links` hrefs come back under the *backend*
-  context (`/ligoj-api/manage/...`); `ActuatorView.toPath()` keeps the segment
-  after `/manage/` and rebuilds against `${APP_BASE}manage/`.
-- app-ui's OWN actuator (added `spring-boot-starter-actuator` to its pom) MUST
-  use base-path `/actuator` (NOT `/manage`, which is the proxy servlet), so it's
-  served locally at `/ligoj/actuator/*`. Dev needs a vite proxy `/ligoj/actuator`
-  → :8080 next to `/ligoj/manage`.
-
-**ActuatorView shell**: fetches the `${APP_BASE}manage` HAL index, lists each
-endpoint with a friendly label/icon, and renders the selection via a dedicated
-renderer (`components/actuator/registry.js` → `Act*.vue`) with a raw-JSON
-toggle + JSON download + copy. Special cases:
-- **Templated** endpoints (`configprops-prefix`, `metrics-requiredMetricName`,
-  `loggers-name`, `health-path`, `env-toMatch`, `sbom-id` — href has a
-  `{variable}`) are **filtered out** of the menu (not openable; their data is
-  reached through the base endpoint's renderer). The counter then reflects only
-  usable endpoints.
-- **Binary** (`heapdump`) → a direct download panel.
-- **Write/operation** endpoints (`restart`/`refresh`/`pause`/`resume`/`shutdown`,
-  POST-only) → a submit panel with a confirm step for the destructive ones
-  (treats a dropped connection as "triggered").
-- **`logfile`** → the embedded `LogPanel` (see below), not a blind download.
-- The catalog (`.act-list`) is sticky + `max-height:72vh; overflow:auto` so a
-  long list scrolls inside the menu instead of stretching the page.
-
-**Renderer contract** (`Act*.vue`): presentational; receive injected props
-`data` (parsed payload), `copy`, `fetch` (GET `manage/<sub>`), `post` (POST
-`manage/<sub>`, body). Shared `:deep` rules from ActuatorView give every renderer
-table no-horizontal-scroll + single-line ellipsis + hover-copy cells. `ActMetrics`
-fetches values async (eager highlights + per-meter values shown in the panel
-titles: progress bar / number+unit / multi-stat chips + tag chips). `ActLoggers`
-makes the configured level **editable at runtime** (POST `loggers/<name>`
-`{configuredLevel}`) with a confirmation snackbar that states it's runtime-only
-and shows the `logging.level.<name>=<LEVEL>` line to persist it.
-
-**Logs** (`components/LogPanel.vue`, shared by the `logfile` route): tabs API
-(`manage/logfile`) and UI (`actuator/logfile`), tail-fetched via HTTP
-`Range: bytes=-262144` with a Full-log toggle, filter, wrap, auto-refresh,
-download. The UI tab is **probed on mount** (`Range: bytes=0-1023`) and only
-shown when app-ui's actuator actually serves a log (no dead tab on older
-deployments).
-
-# Shared subscriptions display (`SubscriptionsPanel`)
-
-The subscriptions UI is one reusable component used by both `ProjectDetailView`
-and `HomeView` (the `viewOptions` Cartes/Liste toggle was duplicated; now it
-lives once in the panel):
-- `components/SubscriptionsPanel.vue` — toolbar (toggle + optional search +
-  optional collapse-all) over a grid of cards or a flat `VibrantDataTable`
-  (one row per subscription). Props: `groups`, `defaultView` ('list'|'cards'),
-  `searchable`, `collapsible`, `loading`, `cog`. Emits `rowmenu` ({event,sub})
-  and `row-appear` (sub). Slots `#toolbar` / `#empty`.
-- `components/SubscriptionGroupCard.vue` — one tool group as a 2026 card; root
-  class is **`.subcard` (NOT `.card`)** to dodge the parent view's scoped `.card`
-  rule (see gotchas). Collapse is a controlled prop so collapse-all works.
-- Both keep the per-subscription plugin DELEGATION (`PluginFeatures` with
-  `renderDetailsKey`/`renderDetailsFeatures`/`renderFeatures` + host cog).
-- `components/SubscriptionStatus.vue` — the status indicator used **everywhere a
-  node / subscription status is shown** (panel list + cards). A coloured dot
-  whose `v-tooltip` gathers, only when present: the service / tool (icon + id +
-  name) and instance (id + name) from the `node` chain, the status icon +
-  translated value, the subscription `mode` (link/create), `enabled`, audit
-  (created/modified by + date), and the `parameters` (name + value, secrets
-  masked). Accepts a full `subscription` OR a bare `node` (+ `status`). This
-  REPLACED the synthetic status / node-name chips that used to sit in the
-  details column, and the list dropped its `name` column — the row identity now
-  lives in this tooltip + the delegation chips. **`enabled === false`** (NodeVo:
-  plug-in/resource unavailable) renders a **black** dot regardless of any stale
-  status. **Click-to-refresh**: clicking the dot actively re-checks the status —
-  node → `POST rest/node/status/refresh/{id}` (`checkNodeStatus`, live probe,
-  instances only), subscription → `GET rest/subscription/status/{id}/refresh`
-  (`refreshStatus`); the result is shallow-merged over the base (a `data`
-  computed), the dot **blinks** while in flight, and the tooltip footer reads
-  "Click to refresh" / "Refreshing…". The component picks the endpoint itself
-  from `isSub` (uses `useApi`). **service / tool / feature nodes render no status**
-  (nothing to check) UNLESS `enabled === false`; only instances and subscriptions
-  show a dot. SystemNodeView shows the status column FIRST as an **icon-only header**
-  (label in a `v-tooltip` — VibrantDataTable headers support `tooltip`) and loads
-  `rest/node?status=true` so each `NodeVo.status` is the last known status; the
-  tooltip otherwise shows the node chain + mode + enabled (`mode` read from the
-  subscription OR the node). The status COLUMN itself (first, icon-only heart
-  header + tooltip + fixed 64px width) comes from the shared `statusHeader({ tooltip,
-  key?, sortable?, exportValue? })` helper in `plugin-ui/ui/src/useUiHelpers.js`,
-  reused by SystemNodeView, SubscriptionsPanel's list, and SystemPluginView (key
-  `'statut'`) — one definition instead of three.
-- **SystemPluginView "Enabled" switch** = the plug-in is loadable
-  (`plugin-ui/ui/src/pluginToggle.js`). There is no persisted "enabled" flag
-  on nodes (`NodeVo.enabled` is a derived availability and `PUT rest/node`
-  rejects an `enabled` property): the switch calls
-  `PUT rest/system/plugin/{artifact}/disable|enable`, which renames the jar
-  (`*.jar.disabled`, app-api `SystemPluginResource`) so the plug-ins
-  class-loader skips it — or loads it again — at the next restart, like an
-  installation or a removal; the plug-in configuration is kept (the startup
-  refresh keeps the `SystemPlugin` row of a disabled plug-in). Each entry
-  carries `disabled` (the switch) and `loaded` (the class-path state,
-  `LigojPluginVo`); `pluginState()` derives the status: active, disabled,
-  disabling / enabling (restart required), pending (staged install), deleted.
-  Each state has its own `v-tooltip` (`system.plugin.toggle.<state>`). The
-  view's three KPI cards (`pluginStats.js`) each carry a stacked multi-color
-  bar with a tooltip per segment (label, count, rate — no legend): plug-ins by type
-  (service/tool/feature), active plug-ins (loaded rate, enabled rate, segments
-  by state), verified plug-ins (segments verified / signed / unsigned /
-  invalid). The header also carries the **Automation** button
-  (`PluginAutomationDialog`, backed by `rest/system/plugin/schedule`, app-api
-  `PluginScheduleResource` with its own `ThreadPoolTaskScheduler`): three
-  features driven by `ligoj.plugin.*` configuration values — the scheduled
-  check of new versions (`ligoj.plugin.check` + `.check.cron`, Spring cron
-  edited with `@vue-js-cron/vuetify`, format `spring`), the automatic
-  download of the versions found (`ligoj.plugin.update`, only available while
-  the check is enabled, guarded by the risks warning dialog), and the
-  maintenance window (`ligoj.plugin.maintenance` + `.maintenance.cron`)
-  restarting the context only when at least one update is staged. The check
-  records its result (`ligoj.plugin.check.last/.updates`), which the backend
-  decorates into the session as the `plugin-updates` application data; the
-  "Check versions" action now runs `POST …/schedule/check` and refreshes the
-  session. The button tooltip summarizes the state (next runs).
-- **Per-tool search on the subscription cards** (`SubscriptionGroupCard`): a
-  magnify button in the card header expands into an `LjSearch` box (Escape or
-  the button closes and clears it); the rows are filtered case-insensitively by
-  name, synthetic pills, the node chain (instance/tool/service names and ids)
-  and the value of every non-secured subscription parameter (`plugin-ui/ui/src/utils/subscriptionSearch.js`, secured = the id
-  looks like a secret, same rule as the status tooltip masking); the count
-  badge shows `matching/total` while typing.
-- **Multi-factor authentication (TOTP)**. Backend in bootstrap: `SystemMfaDevice`
-  entity (encrypted Base32 secret, per-user unique name), `TotpHelper` (RFC 6238,
-  dependency-free), `MfaResource` at `rest/system/mfa` — `GET` status (devices,
-  `required`, `lastConnection`), `POST login` (records the authentication, called
-  by app-ui right after any primary login), `POST totp/setup` (secret + otpauth
-  URI, nothing persisted), `POST totp` (confirm with a first code), `POST verify`,
-  `DELETE {id}`, plus the passkeys (WebAuthn, dependency-free: `Cbor` and
-  `WebAuthnHelper` in bootstrap-core — COSE ES256/RS256 keys, assertion
-  signature verification, attestation statement not verified): `POST
-  passkey/setup` (creation options, single-use challenge kept in memory 5 min),
-  `POST passkey` (registers the browser credential after challenge, origin and
-  rpId checks), `POST passkey/challenge` (request options), `POST
-  passkey/verify` (assertion: challenge, origin, rpId, user presence, signature,
-  signature-counter clone detection); configuration `ligoj.mfa.rp-id` (site host,
-  `localhost` by default, must be set in production and never changed) and
-  `ligoj.mfa.origins` (optional explicit origins, otherwise HTTPS origins within
-  the rpId scope, HTTP for localhost); and `PUT {id}/default`; `verify` takes an
-  optional `device` to check a single selected TOTP device. The first registered device is the default
-  one, removing it hands the role to the oldest remaining device; granted to
-  the USER role by app-api's authorization seed. app-ui
-  enforces the second factor for form AND OIDC logins (`security.mfa.enabled`,
-  default true): `MfaAuthenticationSuccessHandler` flags the session as pending
-  and sends the user to `mfa.html` (JSON `redirect` for the AJAX form login,
-  real redirect for OIDC), `MfaAuthorizationManager` denies everything but the
-  MFA page, `POST /login/mfa` (`MfaVerifyFilter`, 5 attempts then the session is
-  ended), logout and assets, `MfaAccessDeniedHandler` redirects pending sessions
-  to the page. The UI calls the API with the trusted user header, like the proxy;
-  an API without the resource (older bootstrap) disables the step. Host:
-  `mfa.html` + `MfaApp.vue` (self-contained like the login page; `GET /login/mfa`
-  returns the devices recorded at login so the page offers the choice, default
-  preselected, with a 6-digit input for authenticators and a "Use my passkey"
-  button for passkeys — `GET /login/mfa/passkey` relays the request options,
-  `navigator.credentials.get` answers, the assertion is posted with the code
-  payload; `utils/webauthn.js` converts Base64url/ArrayBuffer both ways; the
-  `one-time-code` input is the accepted native-completion exception),
-  `LoginApp` honors the
-  `redirect` of the login payload, `composables/useMfa.js` drives the profile's
-  **Authentication card** (provider from the session `iam-primary` data
-  decorated by app-api, last authentication, devices with method choice at add —
-  authenticator with QR code via the `qrcode` package, or passkey created through
-  `navigator.credentials.create` — default badge and "use as default" action,
-  remove); the Permissions card's UI/API lists became
-  `LjSegmented` tabs to make room.
-- **App-bar plugin items** (`app.registerNavbarItem(Component)`, rendered by
-  `App.vue` in the right-side stack before the demo chip): visible compact
-  chrome, unlike `registerHeaderItem` which only keeps dialogs alive at the
-  root. plugin-ui contributes `PluginUpdatesIndicator`: for administrators,
-  when the last check found newer plug-in versions (session `plugin-updates`),
-  an `mdi-update` picto with a count badge and a tooltip listing them, opening
-  the plug-in manager.
-- **SystemTaskView "Scheduled" tab** (`LjSegmented` in the page header switches between the long-task runners and the scheduled tasks; deep link `#/system/task?tab=scheduled`): `GET rest/system/schedule`
-  (app-api `ScheduledTaskResource`) lists the Spring `@Scheduled` methods
-  (from the `ScheduledTaskHolder` beans: bean, method, trigger kind and
-  expression, next execution from `ScheduledTask.nextExecution()`, last
-  execution and result from Spring's `Task.getLastExecutionOutcome()`) plus
-  the schedules contributed by `ScheduledTaskProvider`
-  beans — `PluginScheduleResource` exposes its check and maintenance jobs with
-  their enabled state and tracked last execution/result. Columns: task
-  (bean.method, FQN tooltip), trigger (expression, kind tooltip), next run,
-  last run (+ succeeded/failed chip, error tooltip), status
-  (scheduled/disabled/running).
-
-Group model (per tool): `{ key, name, kind, color, icon: ()=>h(NodeIcon,{node}),
-health, rows: [{ name, status:'ok|warn|err|idle', pills, cost?, sub }] }`. `pills`
-is now empty for real subscriptions (no status/node-name chips); demo rows keep
-their decorative pills.
-
-- **ProjectDetailView** builds groups from `rest/project/:id` (nested node) +
-  one upfront `rest/subscription/status/refresh`; default view `list`.
-- **HomeView** builds groups from `rest/subscription` (`SubscriptionResource#findAll`)
-  — a LIGHT model `{ nodes[], projects[], subscriptions[{id,project,node:<id string>}] }`.
-  The node is a string id, so rebuild the nested instance→tool→category chain
-  from the flat `nodes` list (`refined` = parent id) before passing to the
-  delegation. findAll returns NO parameters/data/status, so details are fetched
-  **lazily**: each row emits `row-appear` (the `directives/appear.js` `v-appear`
-  IntersectionObserver, fires once) → HomeView batches ids (debounced, chunked)
-  → `rest/subscription/status/refresh?id=…` → merges `{parameters,data,status}`
-  into a reactive `detailsById` map → groups recompute. A "Demo" checkbox
-  additively appends the mockup dataset on top of the real one.
+**API permission gating**: hide buttons and menu entries behind `v-if="auth.isAllowedApi(path, method)"`; sidebar entries carry `auth`.
 
 # Decisions and gotchas
 
-Battle scars worth respecting on the next migration.
-
 ## Vite / rolldown
 
-- `manualChunks` (object or function) is rejected in Vite 8. Use `build.rollupOptions.output.codeSplitting.groups` with `priority` + `minSize: 0`. Vue must outrank Vuetify on priority — otherwise Vuetify pulls `@vue/*` into its chunk and `vue.js` is never emitted (breaking the import map).
-- Default `chunkSizeWarningLimit: 500` fires on `vuetify.js` (~530 KB). Bumped to `700` host-side; the proper fix is `vite-plugin-vuetify` for per-component tree-shaking — currently not enabled.
-- The host's `chunkFileNames` keeps stable filenames for `vue`, `router`, `pinia`, `vuetify`, `host`. The import map in `index.html` depends on those.
+- `manualChunks` is rejected in Vite 8: use `build.rollupOptions.output.codeSplitting.groups` with `priority` + `minSize: 0`; Vue must outrank Vuetify or `vue.js` is never emitted and the import map breaks. `chunkFileNames` keeps stable names for `vue`, `router`, `pinia`, `vuetify`, `host`, which the `index.html` import map depends on. `chunkSizeWarningLimit` is 700 because of `vuetify.js`.
 
 ## Dev-server proxies
 
-- All `/ligoj/*` paths the backend should see go through `vite.config.js` proxies. **`changeOrigin: false`** on `/ligoj/oauth2`, `/ligoj/login/oauth2`, and `/ligoj/logout` — Spring builds OAuth redirect URIs from the inbound `Host` header, and we need it to point at vite (`:5173`), not the backend (`:8080`).
-- **Proxy targets are pinned to `http://127.0.0.1:…`, never `localhost`.** Node resolves `localhost` to `::1` first, so any other process bound to the IPv6 loopback on the same port (e.g. another project's dev server on `[::1]:8080`) silently shadows the Spring backend's wildcard bind — every proxied call then 404s from the wrong server.
-- Other paths (`/ligoj/rest`, `/ligoj/main`, `/ligoj/webjars`, …) keep `changeOrigin: true`.
+- Every `/ligoj/*` path the backend must see is proxied in `vite.config.js`. `changeOrigin: false` on `/ligoj/oauth2`, `/ligoj/login/oauth2`, `/ligoj/logout`: Spring builds the OAuth redirect URIs from the inbound `Host` and it must stay `:5173`. Targets are pinned to `http://127.0.0.1:…`, never `localhost` (Node resolves `localhost` to `::1` first, and another process bound on the IPv6 loopback would silently shadow Spring).
 
 ## Authentication
 
-- `auth.fetchSession()` uses `redirect: 'manual'` so Spring's `302 → /oauth2/authorization/<client>` surfaces as `opaqueredirect` (status 0). The store sets `needsOAuthRedirect = true`; `redirectToLogin()` then top-level-navigates the browser to the OAuth entry (XHR can't follow cross-origin redirects).
-- `error.js` on a 401 navigates to `${BASE_URL}` (the SPA root), not to `login.html` directly. The root re-runs the session probe and handles OIDC vs. local-login correctly.
-- `auth.logout()` is a top-level navigation to `${BASE_URL}logout` — never an XHR. Required for Spring's `OidcClientInitiatedLogoutSuccessHandler` to drive the full Spring → Keycloak `end_session_endpoint` → back chain.
-- In OIDC mode `login.html` is short-circuited on mount: it probes `/rest/session` and bounces to `/ligoj/` if Spring returns either `200` (already authenticated) or `opaqueredirect` (must go through OAuth). The local form only renders when Spring genuinely returned `401`.
+- `auth.fetchSession()` uses `redirect: 'manual'`, so Spring's `302 → /oauth2/authorization/<client>` surfaces as `opaqueredirect`; the store sets `needsOAuthRedirect` and `redirectToLogin()` top-level-navigates to the OAuth entry.
+- A 401 in `error.js` navigates to `${BASE_URL}` (SPA root), which re-runs the session probe and picks OIDC or local login; the deep route is remembered in `sessionStorage` (`ligoj-return-url`) and consumed once.
+- `auth.logout()` is a top-level navigation to `${BASE_URL}logout`, never an XHR, so Spring's OIDC logout chain (Keycloak `end_session_endpoint`) runs.
+- `login.html` probes `/rest/session` on mount and bounces to the app on `200` or `opaqueredirect`; the local form renders only on a genuine `401`.
 
 ## Vue Router 4
 
-- Returning `false` from `onBeforeRouteLeave` consumes the `next` callback. Don't capture it and call later — that triggers an "Unhandled error during execution of native event handler" warning. Instead capture the target route and use `router.push(to)` after confirm. `useFormGuard` is the reference implementation.
+- Returning `false` from `onBeforeRouteLeave` consumes `next`; do not keep it for later. Capture the target route and `router.push(to)` after confirmation (`useFormGuard` is the reference).
 
-## Vue components & breadcrumbs
+## Vue components and breadcrumbs
 
-- **Sidebar entries are REAL links.** `App.vue` nav/sub-nav anchors (and the
-  About footer) carry hash `href`s (`#/route`; a section link targets its
-  first child page) so the browser's native new-tab gestures work —
-  middle-click, right-click → "Open in new tab", ctrl/cmd+click. Only a
-  **plain left-click** is intercepted (`isPlainLeftClick` guard →
-  `preventDefault()` + `router.push` / section toggle); a modified click must
-  fall through untouched. Apply the same pattern to any new chrome
-  navigation: never a bare `@click="router.push(...)"` on a hrefless element.
-
-- **Scoped CSS bleeds onto a child component's ROOT element.** A Vue SFC's
-  `<style scoped>` rule applies to the *root* node of any child component it
-  renders (the child root carries both scope ids). So if a parent view has
-  `.card { … }` scoped and renders a child whose root is also `.card`, the
-  parent's rule hits the child. Fix: give a shared child component a unique root
-  class (`SubscriptionGroupCard` uses `.subcard`, not `.card`) and keep its
-  animation/chrome self-contained. Inner (non-root) child elements are NOT
-  affected — only the root.
-- **Two breadcrumb systems, set in two places.** The in-page `LjPageHeader
-  :crumbs` prop draws the header's breadcrumb chips; the **shell top-bar**
-  breadcrumb is driven separately by `useAppStore().setBreadcrumbs(factory,
-  { refresh })`. A view that sets only `:crumbs` leaves the shell bar showing the
-  *previous* route's trail. The store only re-runs the factory on **locale
-  change**, so when a page's own sub-selection changes (e.g. ActuatorView's
-  selected endpoint), re-call `setBreadcrumbs(factory)` from a `watch` — the
-  factory closes over the reactive selection.
-- **`v-appear` (IntersectionObserver) for lazy work.** `directives/appear.js`
-  fires its callback once when an element scrolls into view (guards
-  `typeof IntersectionObserver === 'undefined'` → fires immediately under jsdom).
-  Used for HomeView's lazy per-row detail fetch. A `v-show`-hidden element
-  (`display:none`) never intersects, so collapsed-card rows don't fire until
-  expanded — exactly the intent.
+- Sidebar entries are real links (`href="#/route"`, a section links to its first child) so middle-click and modified clicks open new tabs; only a plain left-click is intercepted (`isPlainLeftClick` guard). Never a bare `@click="router.push(...)"` on a hrefless element.
+- Two breadcrumb systems: `LjPageHeader :crumbs` draws the in-page chips, the shell top bar is driven by `useAppStore().setBreadcrumbs(factory, { refresh })`. The store re-runs the factory on locale change only, so re-call it from a `watch` when the page's own selection changes (ActuatorView).
+- `registerHeaderItem` mounts stay alive at the root (dialogs); `registerNavbarItem` is visible chrome.
 
 ## Vuetify
 
-- **ALWAYS render tooltips with `v-tooltip` — never the native `title` box.** The
-  themed Vuetify tooltip matches the active preset (font / surface / shadow); the
-  browser's grey `title` popover is off-theme and is considered a bug.
-  - **SFC templates**: `<v-tooltip activator="parent" location="top" text="…">`
-    (or the default slot for rich / multi-line content), nested inside the element
-    it describes.
-  - **Render functions / plugin delegation**: wrap the activator —
-    `h(VTooltip, { location: 'top' }, { activator: ({ props }) => h(child, { ...props, … }), default: () => … })`.
-    Multi-line content goes in the `default` slot (one `<div>` per line), not a
-    `\n`-joined string (HTML collapses whitespace).
-  - **The one sanctioned `title:` use** is the host's
-    `PluginFeatures.promoteTitleToTooltip`, which upgrades a `title:` on a
-    **top-level** returned delegation VNode (e.g. a `renderFeatures` `VBtn`) into a
-    `v-tooltip` centrally. It does **NOT recurse**, so any **nested** tooltip
-    (a metric badge inside a wrapper span, a branch link, …) MUST be an explicit
-    `v-tooltip` — see `plugin-qa-sonarqube/ui/src/service.js` (`tip()` helper).
-- `v-dialog persistent` was removed from every dialog so ESC closes uniformly. ESC fires `update:model-value=false`, which our handlers treat as Cancel — never as Save.
-- `v-row dense` is deprecated in current Vuetify — use `density="comfortable"`.
-- `v-data-table` cell templates use dotted slot names (`#item.foo`). ESLint's `vue/valid-v-slot` treats the dot as a directive modifier and trips; the rule is configured with `{ allowModifiers: true }` in the project's `eslint.config.js`.
-- Vuetify's own widget i18n (data-table footer, etc.) is wired to the app locale via the `locale: { messages: { en, fr } }` block in `plugins/vuetify.js`, kept in sync by `setLocale()` in `plugins/i18n.js`.
-- **v-select slot signature changed in v4**. The `#item` and `#selection` slots are now called with `{ item, internalItem, index, props }` where `item` is the **raw object directly** — `item.raw` was the Vuetify 3 wrapper. Reading `item.raw.foo` crashes with `Cannot read properties of undefined (reading 'foo')`. Fix: use `item.foo` (and pass `item`, not `item.raw`, to child components).
-- **`:rules="[required]"` array literals trigger "Maximum recursive updates"**. Vuetify 4's `v-form` watches the `rules` prop by reference; an inline `[fn]` is a fresh array per render. When the input mounts inside an `v-expansion-panel-text` expand transition, v-form revalidates every frame and runs away. Always hoist:
-  ```js
-  const REQUIRED_RULES = [required]
-  const REQUIRED_POSITIVE_RULES = [required, positive]
-  ```
-  Then use `:rules="REQUIRED_RULES"` in the template. Same fix for custom validators.
-- **`v-combobox` + computed `:items` + `clearable` + expansion panel = infinite re-render**. Vuetify 4's combobox re-emits on mount when wrapped this way, looping forever. Either move items to a `shallowRef` (not a `computed`), add `eager` on the panel so content mounts on dialog open instead of during the expand transition, or fall back to `v-text-field` (used in plugin-prov for processor / architecture).
-- **`v-expansion-panel` model**. Initialise the `v-expansion-panels` model with `null` (not `undefined`) — `undefined` triggers weird "open by default" behavior in Vuetify 4. Use `eager` to pre-render the body so inputs mount once, outside any transition.
+- Tooltips are always Vuetify `v-tooltip` (`activator="parent"`, nested in the element; rich content in the default slot), never the native `title` box, except the `title:` prop of delegated VNodes which the host promotes.
+- `v-row dense` is deprecated: `density="comfortable"`. Vuetify widget i18n (table footers) follows the app locale through `locale.messages` in `plugins/vuetify.js`, synced by `setLocale()`.
+- `v-select` / `v-autocomplete` `#item` and `#selection` slots receive `{ item, internalItem, index, props }` where `item` is the raw object (no `item.raw`).
+- `:rules="[required]"` inline arrays cause "Maximum recursive updates" inside expand transitions (`v-form` watches `rules` by reference): hoist `const REQUIRED_RULES = [required]`.
+- `v-combobox` + computed `:items` + `clearable` inside an expansion panel loops forever: use a `shallowRef`, add `eager` on the panel, or fall back to a text field.
+- `v-expansion-panels` model must be initialised with `null`, not `undefined`; use `eager` so inputs mount once outside transitions.
+- `color="disabled"` is not a Vuetify color.
 
 ## vue-i18n
 
-- **Escape literal `@` with `{'@'}`**. vue-i18n treats `@` as the start of a linked-message reference (`@:foo`, `@.upper:foo`, `@{foo}`). Any literal `@` in a translation string throws `Invalid linked format` at message-compilation time and the whole bundle fails to load. Wrap with `{'@'}` (a v-i18n literal-placeholder) and switch the JS string delimiter to `"..."` so the single quotes inside don't need escaping:
-  ```js
-  'foo.workloadHint': "duration{'@'}cpu pairs, e.g. 100,40{'@'}20",
-  ```
-- **Locale changes don't fire** unless the component reads `t()` reactively. The host's `useI18nStore.t` is the proxy that tracks locale; plain string captures don't. Re-evaluate via `computed(() => t('foo'))` for derived strings.
-- **Missing keys are echoed back, not `null`**. vue-i18n's default behaviour with `messageResolver: (obj, path) => obj?.[path] ?? null` is to return the key string when no message matches. For helpers that want to detect missing keys (label fallback, suppressing an empty hint), wrap with `tOrNull(key) = (value === key ? null : value)`. The subscribe wizard does this for `paramHint`.
-- **Colons in keys are fine** — the host's vue-i18n is configured with a flat `messageResolver` (no dot/colon traversal), so `service:id:ldap:base-dn` is a literal lookup. This is what makes parameter id → label resolution work.
+- Escape a literal `@` as `{'@'}` (linked-message syntax otherwise throws `Invalid linked format` and the whole bundle fails).
+- Only `t()` read reactively follows locale changes; derive strings in `computed`.
+- A missing key is echoed back, not `null`: use `tOrNull`.
+- Dynamically built keys (`t('subscription.status.' + s)`) escape a static scan; grep prefixes before deleting keys.
 
 ## Backend interop
 
-- **`ParameterType` is serialised UPPERCASE** (`TEXT`, `BOOL`, …). Always normalise via `typeKind(p)` before comparing — lowercase literals like `p.type === 'text'` silently never match.
-- **`NodeEditionVo` parent field is `node`, NOT `refined`**. The class implements `Refining<String>` with an override `getRefined() { return getNode(); }` but **no `setRefined`**, so Jackson silently drops `refined:` on POST/PUT and the `@NotBlank` validation on `node` rejects the payload. The wizard's create-node / edit-node paths both use `node: parentId`.
-- **`UriColonDecodingFilter`** (in app-api's `Application.java`) is a servlet filter at `HIGHEST_PRECEDENCE` that substitutes `%3A` → `:` in the request URI before CXF matches routes. JAX-RS `@Path("{node:service:.+}/parameter/{mode}")` regexes are matched against the RAW URI, so a `encodeURIComponent`'d node id (`service%3Aid%3Aldap`) 404s without this filter. Don't decode other percent-encodings (especially `%2F`) — only `:` is safe per RFC 3986 sub-delim rules.
-- **Plugin discovery uses colon-keys** (`auth.appSettings.plugins` returns `['service:id', 'service:id:ldap', …]`). The frontend converts via `pluginIdFromKey('service:id:ldap')` → `'id-ldap'` before passing to `loadPlugin`. The loader's id validation regex `^[a-zA-Z0-9][\w-]*$` rejects raw colon-keys, so the transformation is non-negotiable.
-- **`rest/subscription` (findAll) is a LIGHT model and drops fields the UI needs.** `SubscriptionLightVo.node` is a string id (not the nested object); join against the response's `nodes[]`/`projects[]`. And `SubscribedNodeVo extends AbstractNodeVo`, which has **no `uiClasses`** — so `NodeIcon` fell back to the deleted `/main/service/<svc>/<tool>/img/<tool>.png` path. Fix applied: added `private String uiClasses` to `SubscribedNodeVo` + `subscribedNode.setUiClasses(node.getUiClasses())` in `SubscriptionResource.addNodeAsNeeded`, and the UI passes the full resolved node (not `{id}`) to `NodeIcon`. `NodeIcon`'s priority is `uiClasses` (mdi/fa) → id<3 frags (wrench) → PNG. When both the SVG and PNG icon files 404 (plugin unavailable), the `<img>` swaps to an explicit inline-SVG placeholder (muted '?' tile, `MISSING_NODE_ICON` export, `.tool-icon.missing`, localized `node.iconMissing` title) instead of the browser broken-image glyph — central in `nodeIcon()`, so Home/ProjectDetail subscription cards and every other consumer inherit it.
-- **Actuator responses aren't `application/json`.** They use `application/vnd.spring-boot.actuator.v3+json`, which `useApi` doesn't auto-parse — fetch `{ raw: true }` and `JSON.parse(await resp.text())` (fall back to text). The `logfile` endpoint is `text/plain`.
-- **A `Range` request against a missing endpoint returns the HTML error page as `206`, not `404`.** Spring forwards to the error page and the static handler serves it with `206 Partial Content` because of the `Range` header — so the client can't trust `206` alone. `LogPanel` checks `Content-Type`/sniffs for `<!doctype|html` and treats HTML as "unavailable".
-- **`env`/`configprops` mask values as `******`** (Actuator `Sanitizer`). Reveal with `management.endpoint.{env,configprops}.show-values=ALWAYS` (or `WHEN_AUTHORIZED`) in app-api. ActEnv additionally masks `secret|key|password` UI-side by design.
-- **`logfile` endpoint + custom Log4j2 = path mismatch.** Both apps log via a custom `log4j2.json` (rolling file `${sys:ligoj.home:-target}/<api|ui>-rolling.log`), so Spring Boot's `logging.file.name` is IGNORED and the endpoint 404s. Point it at the real file with `management.endpoint.logfile.external-file=${ligoj.home:target}/${ligoj.log.file.name:…-rolling.log}`. SECOND trap: Spring `${ligoj.home}` reads env **and** system properties, but Log4j2 `${sys:ligoj.home}` reads system properties ONLY — an env-var `LIGOJ_HOME` makes Log4j2 write to `target/` while the endpoint looks in `${ligoj.home}`. Make Log4j2 env-aware: `${env:LIGOJ_HOME:-${sys:ligoj.home:-target}}/…` (no-op when home is a `-D`).
-- **Node operational status ≠ `NodeVo.enabled`.** `enabled` is plug-in/resource availability (a DOWN node can still be `enabled:true`). The operational UP/DOWN is the last `EventType.STATUS` event. `NodeVo` has an optional `status` field; `NodeResource#findAll?status=true` populates it from the page's nodes via the BULK `EventRepository.findLastEvents(user, Collection<nodeId>)` — one query for the whole page, not per-row (avoid the N+1; the single `findLastEvent(user, node)` is for one-off lookups). Live re-check endpoints: `POST node/status/refresh/{id}` (`checkNodeStatus`, a real probe) and `GET subscription/status/{id}/refresh` (`refreshStatus`); the cheaper stored value is `GET node/status/{id}`. All take the `%3A`-encoded id (decoded by `UriColonDecodingFilter`).
+- `ParameterType` is UPPERCASE on the wire; normalise with `typeKind(p)`.
+- `NodeEditionVo` parent field is `node` (no `setRefined`).
+- `UriColonDecodingFilter` (app-api `Application.java`, highest precedence) turns `%3A` back into `:` before CXF matching, because `@Path("{node:service:.+}/…")` regexes see the raw URI. Only `:` is decoded (never `%2F`).
+- `rest/subscription` (`findAll`) is a light model: `node` is an id, join against `nodes[]` / `projects[]`; `SubscribedNodeVo` carries `uiClasses` so `NodeIcon` receives the full resolved node.
+- Actuator responses are `application/vnd.spring-boot.actuator.v3+json`, not auto-parsed by `useApi`: fetch `{ raw: true }` and `JSON.parse(await resp.text())`. A `Range` request against a missing endpoint returns the HTML error page as `206`, so `LogPanel` sniffs the content type. `env` / `configprops` values are masked unless `management.endpoint.{env,configprops}.show-values=ALWAYS`; ActEnv masks `secret|key|password` UI-side anyway. `logfile` needs `management.endpoint.logfile.external-file` pointing at the Log4j2 rolling file (`${ligoj.home:target}/…-rolling.log`), and Log4j2 must read `${env:LIGOJ_HOME:-${sys:ligoj.home:-target}}` since `${sys:}` ignores environment variables.
+- Node operational status is not `NodeVo.enabled` (availability of the plug-in / resource): UP / DOWN is the last `EventType.STATUS` event, populated by `NodeResource#findAll?status=true` through the bulk `EventRepository.findLastEvents` (never per row). Live re-check: `POST node/status/refresh/{id}`, `GET subscription/status/{id}/refresh`; stored value: `GET node/status/{id}`.
+- Bootstrap's `ConfigurationResource.get()` resolves Spring `${...}` placeholders and throws on unknown ones; a value meant for the UI (`${firstName} ${lastName}`) must be read raw.
+- Standard REST APIs reject unknown properties with a 400 `Mapping` error.
 
-- **User visual identifier (`service:id:visual-id-name` / `-label`).** Optional
-  configuration selecting the attribute shown as the user's identifier in the
-  tables (`id` default, `firstName`, `lastName`, `mail` — first one — or
-  `customAttributes.<property>`), plus an optional STATIC header label
-  (default: the localized attribute name). Forwarded by
-  `UserOrgResource#decorate` in `applicationSettings.data`; resolved UI-side by
-  plugin-id `ui/src/visualId.js` (`visualIdName/Value/Label/ColumnKey`, always
-  falling back to the login). UserListView + GroupMembersPanel use it for their
-  first column (dynamic `cell.<key>` slot) and sort EXPLICITLY on the
-  `visual-id` key, which `UserOrgResource#findAll` maps dynamically to the
-  configured property (`getOrderedColumns()`); the LDAP repository sorts
-  `customAttributes.<x>` through `CustomAttributeComparator` (id fallback).
+## Forms and autocompletes
 
-- **Shared id parameter fields (`service.parameterFields`).** The rich
-  subscription inputs for `service:id:parent-group` (autocomplete) and
-  `service:id:group` (composite simple-name + computed full-name editor with
-  live `exists` validation) only hit parent endpoints, so they moved from
-  plugin-id-ldap into **plugin-id** (`ui/src/fields/`), exported on the
-  parent's `service.parameterFields` map. Tool plugins (ldap, cognito) cannot
-  import a sibling bundle: their `parameterField` hook resolves the map at
-  call time via `pluginRegistry.get('id')?.service?.parameterFields` — safe
-  because `requires: ['id']` guarantees the parent is registered first (tests
-  must `pluginRegistry.register('id', pluginIdDef)` before exercising it).
-  The ldap-only OU field (ldap `customer` endpoint) stays in plugin-id-ldap.
+- Setting a discriminator field and its dependent value in the same synchronous block races with the watcher: set the type, `await nextTick()`, then the value (`DelegateEditDialog`).
+- Server-side autocompletes load their first page on `@update:menu` (dropdown open), not on mount.
+- An empty string is a selected value for a select: initialise optional select models with `null` and normalise `api || null`.
+- A dialog's initial focus can land on the wrong field: `setTimeout`-focus the first enabled input after open + load (`UserEditDialog.focusFirstField`).
+- Only the host `Ligoj*` input wrappers (see §4); the parameter dialogs use them for every typed parameter and show the `-description` hint.
 
-- **API explorer deep link.** `#/api?op=<method>|<path>` (the operation `key`
-  of ApiHomeView, lowercase method + raw OpenAPI path, URL-encoded) opens the
-  owning tag group and the operation body, scrolls it to center and rings it
-  (`.op.focused`). Used by the shared **`ApiVerifyDialog`** host component
-  (profile "Verify" next to "Manage API keys" — own session + admin bypass;
-  system Roles row action — one role's authorizations; system Users row
-  action — union of the user's roles' authorizations): it crosses every
-  `rest/openapi.json` operation with the given authorizations (path templates
-  `{x}` substituted with `1`/`a` before matching), shows the allowed rate,
-  and tests a typed URL (scheme/host/any context prefix up to `rest/`
-  stripped) against the authorizations with live table filtering; row click
-  opens the deep link.
+## Local toolchain
 
-## Plugin loader
+On a machine where the zsh `nvm` shim is broken, run the toolchain from a clean bash with an explicit PATH: `/bin/bash --noprofile --norc -c 'export PATH=$HOME/.nvm/versions/node/<ver>/bin:$PATH; cd plugin-<id>/ui; ./node_modules/.bin/eslint . && ./node_modules/.bin/vitest run && ./node_modules/.bin/vite build'`.
 
-- **`requires: ['<parent-id>']`** declares a hard dependency. The loader awaits all `requires` before calling the dependent's `install()`, so parent i18n is merged and registry slot is populated. Use this for any tool-level plugin instead of relying on `REQUIRED_PLUGINS`.
-- **In-flight dedup** is via `Map<id, Promise>`. Concurrent `loadPlugin(<id>)` calls share one Promise; the cleanup `.finally()` runs after success/failure. Safe to call from multiple places (wizard's `ensureToolPluginLoaded`, a sub-plugin's `requires`, lazy discovery in `App.vue`).
-- **Re-entrant safe**: `loaded` and `inFlight` keep ordering correct even when a parent's `install()` triggers another `loadPlugin` indirectly (e.g. through `useI18nStore` side-effects).
-- **Single-line cycle protection**: `requires` is processed via `Promise.all` (parallel). If two plugins require each other, both stall forever. Don't do that — keep `requires` a strict tree.
-
-## Forms / autocompletes
-
-- Setting `form.value.<type>` (the discriminator) and `form.value.<value>` (the identifier) in the same synchronous block races: the watcher on `<type>` fires post-flush and wipes the identifier you just set. Set the type field first, `await nextTick()`, then set the value. See `DelegateEditView.vue`'s edit-mode load for the canonical fix.
-- For server-side autocompletes, lazy-load the first page on `@update:menu` (dropdown open), not on mount. Users who never open the dropdown should make zero API calls.
-- **`LigojTextField` / `LigojTextarea`** complete the anti-autofill family for
-  free-text inputs: same hardening as the dropdown wrappers (`new-password`
-  token, `name` unique per instance AND randomized per page load —
-  `composables/antiAutofill.js`: browsers key their form history, the
-  dropdown of previously typed values, on the field name, and a deterministic
-  counter restarting on each load let it match again — password-manager
-  opt-outs). **No input in the whole
-  project uses the browser's native autocomplete**: every `<v-text-field>` /
-  `<v-textarea>` of the host and of every plugin UI was replaced by these
-  twins (the login pages' credential inputs are the single deliberate
-  exception, they opt INTO `username` / `current-password` autofill). The
-  auto-rendered parameter forms (NodeEditDialog, SubscribeWizardView) use them
-  for every typed parameter, and show the parameter's description as a field
-  hint when available (`<id>-description` i18n key, else the parameter's own
-  `description`, via `paramDescription(p)`).
-
-- **Never use bare `<v-autocomplete>` / `<v-select>` / `<v-combobox>` / `<v-text-field>` / `<v-textarea>`** — use the host's `LigojAutocomplete` / `LigojSelect` / `LigojCombobox` / `LigojTextField` / `LigojTextarea` (see §4). They suppress the browser's native autofill overlay (`autocomplete="new-password"`, the only token modern Chrome reliably honors) and honor reduce-motion for the dropdown; a bare Vuetify widget regresses both.
-- An **empty string is a selected value** for `v-autocomplete`/`v-select`: the placeholder is hidden and the clear button shows. Initialize optional select model fields to `null`, never `''` (and normalize `api || null` when loading).
-- A `v-dialog`'s effective initial focus can land on the wrong field (`autofocus` competes with menu/teleport mounting). To force it, after the open+load completes, `setTimeout`-focus the first enabled `<input>` under the form ref — see `UserEditDialog.focusFirstField`.
-
-## Plugins / build outputs
-
-- A plugin's own `import.meta.env.BASE_URL` is `/`, not `/ligoj/`. Always use the host's `APP_BASE` export when building absolute URLs (`fetch`, `<img>` `src`, etc.).
-- The Spring API container resolves `/main/<id>/vue/index.js` to the plugin's webjar resources. After `mvn install` of the plugin module, the new bundle is picked up without an API restart.
-
-## Local toolchain (nvm)
-
-On a machine where the zsh `nvm` shim is broken, `npm`/`node` fail in a
-non-interactive shell (`command not found: _nvm_lazy_load`). Run the
-toolchain from a clean bash with an explicit PATH and call the local
-binaries directly:
-
-```bash
-/bin/bash --noprofile --norc -c '
-  export PATH=$HOME/.nvm/versions/node/<ver>/bin:$PATH
-  cd plugin-<id>/ui
-  ./node_modules/.bin/eslint . && ./node_modules/.bin/vitest run && ./node_modules/.bin/vite build'
-```
-
-When the editor's Edit/Write or shell stdout desync mid-session, apply file
-changes with a Node `fs.readFileSync` → string-replace → `writeFileSync`
-script (it bypasses the editor channel) and verify each change with a
-`grep -c` / second read before running the build.
-
----
-
-# Migration checklist (per plugin)
-
-Copy/paste into the plugin's first PR description.
+# Checklist for a new plugin UI
 
 ## Service-level plugin
 
-- [ ] `ui/` folder added with `package.json`, `vite.config.js`, `eslint.config.js`
-- [ ] `ui/src/index.js` exports `{ id, label, install, feature, service, meta, routes }`
-- [ ] `install()` registers routes AND merges `i18n/en.js` + `i18n/fr.js` into `useI18nStore`
-- [ ] Sibling CSS auto-injection snippet present (Vite library mode doesn't auto-inject)
-- [ ] Plugin entry added to `REQUIRED_PLUGINS` in host `main.js` if the host's sidebar nav references its routes; otherwise let `App.vue`'s lazy load via `pluginIdFromKey` pick it up
-- [ ] If the plugin owns a sidebar section (or adds admin entries), it exposes a `renderNav` feature — a declarative menu/insert with optional `before`/`after` + `divider` (see "Sidebar menu contribution"). A `renderNav`-contributed menu must be in `REQUIRED_PLUGINS` (or otherwise loaded early) so it's present on first paint
-- [ ] At least one happy-path view ported (use `LigojDataTableServer` + `LigojConfirmDialog` rather than rolling your own)
-- [ ] Parameter labels: every CSV-declared parameter id has a matching key in `i18n/{en,fr}.js` (and an optional `-description` for the hint)
-- [ ] Translations use **flat keys** in plugin's `i18n/{en,fr}.js`; host's `i18n/{en,fr}.js` untouched
-- [ ] Existing legacy assets in `src/main/resources/META-INF/resources/<id>/` left alone — the loader prefers `vue/index.js` and ignores the AMD bundle
-- [ ] Plugin-local vitest scaffolding wired up: `package.json` scripts/devDeps, `vite.config.js` aliases + `dedupe` + `test` block, `src/__tests__/setup.js`. See "Plugin-local tests" in §9 — `plugin-id-ldap/ui/` is the reference.
-- [ ] Contract test in `plugin-<id>/ui/src/__tests__/plugin-<id>.test.js` mirroring `plugin-id-ldap.test.js`
-- [ ] Lint passes: `npm run lint` in `ui/`
-- [ ] Tests pass: `npm test` in `ui/`
-- [ ] Build passes: `npm run build` in `ui/` AND `mvn -pl <module> install` from the plugin repo
-- [ ] Smoke test: navigate to a route, change locale, log out and back in through OIDC, refresh the page
+- [ ] `ui/` with `package.json`, `vite.config.js`, `eslint.config.js`; `ui/src/index.js` exports `{ id, label, install, feature, service, meta, routes }`
+- [ ] `install()` registers the routes and merges `i18n/{en,fr}.js` (flat keys, host bundles untouched); the CSS auto-injection snippet is present
+- [ ] Added to `REQUIRED_PLUGINS` only if the host sidebar references its routes on first paint; a `renderNav` menu owner must be loaded early too
+- [ ] Views use the host tables, dialogs and `Ligoj*` inputs; every CSV-declared parameter id has a label key (+ optional `-description`)
+- [ ] vitest scaffolding (aliases, `dedupe`, `test` block, `setup.js`) and a contract test mirroring `plugin-id-ldap.test.js`
+- [ ] `npm run lint`, `npm test`, `npm run build`, then `mvn install` of the module; smoke test a route, a locale change, logout and login, page refresh
 
-## Tool-level (sub-plugin) variant — `plugin-id-ldap` template
+## Tool-level plugin
 
-Use this when the plugin is a tool implementation of an existing service (`service:<parent>:<tool>`). It typically inherits everything except parameter labels and tool-specific row actions.
-
-- [ ] `ui/` folder with same skeleton as a service-level plugin
-- [ ] `ui/src/index.js` declares `requires: ['<parent-id>']` — loader pulls the parent before installing
-- [ ] `install()` only merges i18n (no routes, no component)
-- [ ] i18n covers **only this tool's CSV-declared parameters** — inherited keys (`service:<parent>:*`) come from the parent's bundle
-- [ ] `service.js` implements `renderFeatures(subscription)` for tool-specific row actions; the parent merges them via `subPluginIdFor(...)` / `delegateToToolPlugin(...)`
-- [ ] No bundle URL conflict: parent's manifest id and tool's manifest id resolve to different webjar paths (`webjars/<parent>/vue/` vs `webjars/<parent>-<tool>/vue/`)
-- [ ] Contract test in `plugin-<parent>-<tool>/ui/src/__tests__/` asserts `requires: ['<parent-id>']` so the dependency stays declared. The test typically also imports the parent's `index.js` (sibling-repo relative path) to exercise parent → tool delegation.
+- [ ] Same skeleton; `requires: ['<parent-id>']`; `install()` only merges i18n covering this tool's own parameters
+- [ ] `service.js` implements the row hooks the parent delegates (`renderFeatures`, `renderDetailsKey`), and `parameterField` / `parameterLayout` when needed
+- [ ] Distinct webjar path (`webjars/<parent>-<tool>/vue/`); the contract test asserts `requires` and imports the parent's `index.js` to exercise delegation
