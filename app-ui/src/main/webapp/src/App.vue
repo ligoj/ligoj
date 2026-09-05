@@ -68,6 +68,9 @@
       </nav>
       <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
       <span class="sp" />
+      <!-- Plugin-contributed app-bar items (app.registerNavbarItem), e.g. the
+           plug-in updates indicator of plugin-ui. -->
+      <component :is="item" v-for="(item, i) in app.navbarItems" :key="'nav-' + i" />
       <!-- Demo-mode indicator: reminds the admin the views are augmented with
            demonstration content. Click-through to the profile toggle. -->
       <v-chip v-if="demoMode" class="demo-chip" size="small" color="info" variant="tonal" prepend-icon="mdi-flask-outline" @click="go('/profile')">

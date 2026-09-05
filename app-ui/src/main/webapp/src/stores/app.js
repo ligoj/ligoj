@@ -23,6 +23,13 @@ export const useAppStore = defineStore('app', () => {
    */
   const headerItems = ref([])
   /**
+   * Components contributed by plugins for rendering INSIDE the app bar, in
+   * the right-side stack before the user button (e.g. plugin-ui's plug-in
+   * updates indicator). Unlike `headerItems` (persistent mounts for
+   * dialogs), these are visible chrome: keep them compact (an icon button).
+   */
+  const navbarItems = ref([])
+  /**
    * Shared flag driving the bug-report dialog. The dialog itself now lives in
    * plugin-ui (mounted persistently via `registerHeaderItem`); the host shell
    * (sidebar footer) and any plugin only flip this flag to open it — same
@@ -101,10 +108,20 @@ export const useAppStore = defineStore('app', () => {
     headerItems.value = [...headerItems.value, markRaw(component)]
   }
 
+  /**
+   * Plugin hook: register a compact component rendered in the app bar's
+   * right-side stack (see `navbarItems`). Same idempotence as
+   * `registerHeaderItem`.
+   */
+  function registerNavbarItem(component) {
+    if (!component || navbarItems.value.includes(component)) return
+    navbarItems.value = [...navbarItems.value, markRaw(component)]
+  }
+
   return {
     sidebarOpen, title, appName, breadcrumbs, currentPlugin, refresh,
-    headerItems, bugDialogOpen,
+    headerItems, navbarItems, bugDialogOpen,
     setBreadcrumbs, refreshBreadcrumbs, setRefresh, setTitle, setAppName, toggleSidebar,
-    registerHeaderItem, openBugDialog, closeBugDialog,
+    registerHeaderItem, registerNavbarItem, openBugDialog, closeBugDialog,
   }
 })

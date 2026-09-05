@@ -1378,7 +1378,27 @@ lives once in the panel):
   bar with a tooltip per segment (label, count, rate — no legend): plug-ins by type
   (service/tool/feature), active plug-ins (loaded rate, enabled rate, segments
   by state), verified plug-ins (segments verified / signed / unsigned /
-  invalid).
+  invalid). The header also carries the **Automation** button
+  (`PluginAutomationDialog`, backed by `rest/system/plugin/schedule`, app-api
+  `PluginScheduleResource` with its own `ThreadPoolTaskScheduler`): three
+  features driven by `ligoj.plugin.*` configuration values — the scheduled
+  check of new versions (`ligoj.plugin.check` + `.check.cron`, Spring cron
+  edited with `@vue-js-cron/vuetify`, format `spring`), the automatic
+  download of the versions found (`ligoj.plugin.update`, only available while
+  the check is enabled, guarded by the risks warning dialog), and the
+  maintenance window (`ligoj.plugin.maintenance` + `.maintenance.cron`)
+  restarting the context only when at least one update is staged. The check
+  records its result (`ligoj.plugin.check.last/.updates`), which the backend
+  decorates into the session as the `plugin-updates` application data; the
+  "Check versions" action now runs `POST …/schedule/check` and refreshes the
+  session. The button tooltip summarizes the state (next runs).
+- **App-bar plugin items** (`app.registerNavbarItem(Component)`, rendered by
+  `App.vue` in the right-side stack before the demo chip): visible compact
+  chrome, unlike `registerHeaderItem` which only keeps dialogs alive at the
+  root. plugin-ui contributes `PluginUpdatesIndicator`: for administrators,
+  when the last check found newer plug-in versions (session `plugin-updates`),
+  an `mdi-update` picto with a count badge and a tooltip listing them, opening
+  the plug-in manager.
 
 Group model (per tool): `{ key, name, kind, color, icon: ()=>h(NodeIcon,{node}),
 health, rows: [{ name, status:'ok|warn|err|idle', pills, cost?, sub }] }`. `pills`

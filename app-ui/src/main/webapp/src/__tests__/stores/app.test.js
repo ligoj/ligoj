@@ -63,3 +63,17 @@ describe('useAppStore', () => {
     expect(store.sidebarOpen).toBe(true)
   })
 })
+
+describe('navbar items (plugin contributions rendered in the app bar)', () => {
+  it('registers compact components once, kept raw', () => {
+    setActivePinia(createPinia())
+    const app = useAppStore()
+    const Comp = { name: 'X', render: () => null }
+    app.registerNavbarItem(Comp)
+    app.registerNavbarItem(Comp)
+    app.registerNavbarItem(null)
+    expect(app.navbarItems).toHaveLength(1)
+    expect(app.navbarItems[0]).toBe(Comp)
+    expect(app.headerItems).toHaveLength(0)
+  })
+})
