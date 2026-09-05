@@ -88,88 +88,91 @@
         </div>
       </section>
 
-      <!-- Authentication: provider, last authentication, MFA devices (useMfa) -->
-      <section class="pcard pcard--auth">
-        <h3><span class="ic"><v-icon>mdi-shield-key-outline</v-icon></span>{{ t('profile.authentication') }}</h3>
+      <!-- Right column: Authentication above Permissions, sized to the Preferences card -->
+      <div class="p-col">
+        <!-- Authentication: provider, last authentication, MFA devices (useMfa) -->
+        <section class="pcard pcard--auth">
+          <h3><span class="ic"><v-icon>mdi-shield-key-outline</v-icon></span>{{ t('profile.authentication') }}</h3>
 
-        <div class="pref-row">
-          <v-icon class="pref-ic">mdi-login-variant</v-icon>
-          <div class="pt">
-            <div class="ptt">{{ t('profile.authProvider') }}</div>
-            <div class="pth">{{ providerHint }}</div>
-          </div>
-          <span class="rolechip">{{ providerLabel }}</span>
-        </div>
-
-        <div class="pref-row">
-          <v-icon class="pref-ic">mdi-clock-outline</v-icon>
-          <div class="pt">
-            <div class="ptt">{{ t('profile.lastAuthentication') }}</div>
-            <div class="pth">{{ mfa.status.value?.lastConnection ? fmtDate(mfa.status.value.lastConnection) : t('profile.lastAuthenticationUnknown') }}</div>
-          </div>
-        </div>
-
-        <div class="subhead d-flex align-center">{{ t('profile.mfaDevices') }}<v-chip size="x-small" variant="tonal" color="primary" class="ms-2">{{ mfa.devices.value.length }}</v-chip>
-          <button v-if="!mfa.unavailable.value" type="button" class="text-info verify-link ms-auto" @click="openAdd">
-            <span class="v"><v-icon size="small">mdi-plus</v-icon>{{ t('profile.mfaAdd') }}</span>
-          </button>
-        </div>
-        <p v-if="mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaUnavailable') }}</p>
-        <p v-else-if="!mfa.devices.value.length" class="pth mfa-note">{{ t('profile.mfaNone') }}</p>
-        <div v-else class="mfa-list">
-          <div v-for="device in mfa.devices.value" :key="device.id" class="pref-row mfa-row">
-            <v-icon class="pref-ic">{{ device.type === 'PASSKEY' ? 'mdi-fingerprint' : 'mdi-cellphone-key' }}</v-icon>
+          <div class="pref-row">
+            <v-icon class="pref-ic">mdi-login-variant</v-icon>
             <div class="pt">
-              <div class="ptt">{{ device.name }}<span v-if="device.defaultDevice" class="rolechip mfa-default">{{ t('profile.mfaDefault') }}</span></div>
-              <div class="pth">{{ t('profile.mfaDeviceMeta', { type: t('profile.mfaType.' + device.type), created: fmtDate(device.createdDate), lastUsed: device.lastUsed ? fmtDate(device.lastUsed) : t('profile.mfaNeverUsed') }) }}</div>
+              <div class="ptt">{{ t('profile.authProvider') }}</div>
+              <div class="pth">{{ providerHint }}</div>
             </div>
-            <button v-if="!device.defaultDevice" type="button" class="lj-iconbtn" :aria-label="t('profile.mfaSetDefault')" @click="setDefaultDevice(device)">
-              <v-icon size="18">mdi-star-outline</v-icon>
-              <v-tooltip activator="parent" location="top" :text="t('profile.mfaSetDefault')" />
-            </button>
-            <button type="button" class="lj-iconbtn danger" :aria-label="t('profile.mfaRemove')" @click="askRemove(device)">
-              <v-icon size="18">mdi-delete-outline</v-icon>
-              <v-tooltip activator="parent" location="top" :text="t('profile.mfaRemove')" />
-            </button>
+            <span class="rolechip">{{ providerLabel }}</span>
           </div>
-        </div>
-        <p v-if="!mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaHint') }}</p>
-      </section>
 
-      <!-- Permissions: UI / API in tabs (LjSegmented) -->
-      <section class="pcard pcard--perm">
-        <div class="perm-head">
-          <h3><span class="ic"><v-icon>mdi-key</v-icon></span>{{ t('profile.permissions') }}</h3>
-          <LjSegmented v-model="permTab" :options="permTabs" />
-        </div>
-        <template v-if="permTab === 'ui'">
-          <div class="perm-list">
-            <code v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i" class="perm">
-              <span v-for="(token, j) in tokenizePattern(pattern)" :key="j"
-                    :class="'token token--' + token.type">{{ token.value }}</span>
-            </code>
+          <div class="pref-row">
+            <v-icon class="pref-ic">mdi-clock-outline</v-icon>
+            <div class="pt">
+              <div class="ptt">{{ t('profile.lastAuthentication') }}</div>
+              <div class="pth">{{ mfa.status.value?.lastConnection ? fmtDate(mfa.status.value.lastConnection) : t('profile.lastAuthenticationUnknown') }}</div>
+            </div>
           </div>
-        </template>
-        <template v-else>
-          <div class="subhead d-flex align-center">
-            <a class="text-info text-decoration-none" href="#/api/token">
-              <span class="v">{{ t('profile.apiTokensHint') }}<v-icon size="small">mdi-chevron-right</v-icon></span>
-            </a>
-            <button type="button" class="text-info verify-link ms-4" @click="openVerify">
-              <span class="v"><v-icon size="small">mdi-shield-search</v-icon>{{ t('profile.apiVerify') }}</span>
+
+          <div class="subhead d-flex align-center">{{ t('profile.mfaDevices') }}<v-chip size="x-small" variant="tonal" color="primary" class="ms-2">{{ mfa.devices.value.length }}</v-chip>
+            <button v-if="!mfa.unavailable.value" type="button" class="text-info verify-link ms-auto" @click="openAdd">
+              <span class="v"><v-icon size="small">mdi-plus</v-icon>{{ t('profile.mfaAdd') }}</span>
             </button>
           </div>
-          <div class="perm-list">
-            <code v-for="(entry, i) in auth.apiAuthorizations" :key="'api-' + i" class="perm perm--api">
-              <span class="method" :class="methodClass(entry.method)">{{ entry.method || '?' }}</span>
-              <span class="pattern">
-                <span v-for="(token, j) in apiTokens(entry.pattern)" :key="j"
-                      :class="'token token--' + token.type">{{ token.value }}</span>
-              </span>
-            </code>
+          <p v-if="mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaUnavailable') }}</p>
+          <p v-else-if="!mfa.devices.value.length" class="pth mfa-note">{{ t('profile.mfaNone') }}</p>
+          <div v-else class="mfa-list">
+            <div v-for="device in mfa.devices.value" :key="device.id" class="pref-row mfa-row">
+              <v-icon class="pref-ic">{{ device.type === 'PASSKEY' ? 'mdi-fingerprint' : 'mdi-cellphone-key' }}</v-icon>
+              <div class="pt">
+                <div class="ptt">{{ device.name }}<span v-if="device.defaultDevice" class="rolechip mfa-default">{{ t('profile.mfaDefault') }}</span></div>
+                <div class="pth">{{ t('profile.mfaDeviceMeta', { type: t('profile.mfaType.' + device.type), created: fmtDate(device.createdDate), lastUsed: device.lastUsed ? fmtDate(device.lastUsed) : t('profile.mfaNeverUsed') }) }}</div>
+              </div>
+              <button v-if="!device.defaultDevice" type="button" class="lj-iconbtn" :aria-label="t('profile.mfaSetDefault')" @click="setDefaultDevice(device)">
+                <v-icon size="18">mdi-star-outline</v-icon>
+                <v-tooltip activator="parent" location="top" :text="t('profile.mfaSetDefault')" />
+              </button>
+              <button type="button" class="lj-iconbtn danger" :aria-label="t('profile.mfaRemove')" @click="askRemove(device)">
+                <v-icon size="18">mdi-delete-outline</v-icon>
+                <v-tooltip activator="parent" location="top" :text="t('profile.mfaRemove')" />
+              </button>
+            </div>
           </div>
-        </template>
-      </section>
+          <p v-if="!mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaHint') }}</p>
+        </section>
+
+        <!-- Permissions: UI / API in tabs (LjSegmented) -->
+        <section class="pcard pcard--perm">
+          <div class="perm-head">
+            <h3><span class="ic"><v-icon>mdi-key</v-icon></span>{{ t('profile.permissions') }}</h3>
+            <LjSegmented v-model="permTab" :options="permTabs" />
+          </div>
+          <template v-if="permTab === 'ui'">
+            <div class="perm-list">
+              <code v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i" class="perm">
+                <span v-for="(token, j) in tokenizePattern(pattern)" :key="j"
+                      :class="'token token--' + token.type">{{ token.value }}</span>
+              </code>
+            </div>
+          </template>
+          <template v-else>
+            <div class="subhead d-flex align-center">
+              <a class="text-info text-decoration-none" href="#/api/token">
+                <span class="v">{{ t('profile.apiTokensHint') }}<v-icon size="small">mdi-chevron-right</v-icon></span>
+              </a>
+              <button type="button" class="text-info verify-link ms-4" @click="openVerify">
+                <span class="v"><v-icon size="small">mdi-shield-search</v-icon>{{ t('profile.apiVerify') }}</span>
+              </button>
+            </div>
+            <div class="perm-list">
+              <code v-for="(entry, i) in auth.apiAuthorizations" :key="'api-' + i" class="perm perm--api">
+                <span class="method" :class="methodClass(entry.method)">{{ entry.method || '?' }}</span>
+                <span class="pattern">
+                  <span v-for="(token, j) in apiTokens(entry.pattern)" :key="j"
+                        :class="'token token--' + token.type">{{ token.value }}</span>
+                </span>
+              </code>
+            </div>
+          </template>
+        </section>
+      </div>
 
     </div>
 
@@ -549,9 +552,25 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
   grid-column: 1 / -1;
 }
 
+/* Right column: Authentication above Permissions. `contain: size` keeps the
+ * column out of the row sizing, so the Preferences card alone sets the row
+ * height and the column stretches to exactly that height. */
+.p-col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+  contain: size;
+}
+
 @media (max-width: 960px) {
   .p-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Stacked layout: the column has its natural height (card overrides below). */
+  .p-col {
+    contain: none;
   }
 }
 
@@ -654,14 +673,41 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .mm-txt small { color: var(--muted); font-size: 12px; }
 .mfa-method:disabled { opacity: .55; cursor: not-allowed; }
 
-/* The Permissions card stretches to the grid row set by the (taller)
- * Preferences card. Distribute that height: headers stay fixed, the two
- * auth lists split the remaining space evenly — no blank band under the
- * lists while they scroll. The 200px basis keeps the intrinsic height
- * bounded in the stacked single-column layout. */
+/* Authentication keeps its natural height (its device list scrolls only if
+ * the card alone overflows the column); Permissions takes the remaining
+ * height, headers fixed, the active list scrolling inside it. The 200px basis
+ * keeps the intrinsic height bounded in the stacked single-column layout. */
+.pcard--auth {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.pcard--auth > * {
+  flex: none;
+}
+
+.pcard--auth .mfa-list {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
 .pcard--perm {
   display: flex;
   flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+/* Stacked single-column layout: every card at its natural height. Declared
+ * after the card rules above so it wins the cascade. */
+@media (max-width: 960px) {
+  .pcard--auth,
+  .pcard--perm {
+    flex: none;
+  }
 }
 
 .pcard--perm h3,
