@@ -173,6 +173,48 @@ class PluginScheduleResourceTest {
 	}
 
 	@Test
+	void scheduledTasks() throws IOException {
+		when(plugins.findAll("central")).thenReturn(List.of());
+		// Disabled by default
+		var tasks = resource.getScheduledTasks();
+		Assertions.assertEquals(2, tasks.size());
+		Assertions.assertEquals("plugin-check", tasks.getFirst().getId());
+		Assertions.assertEquals("PluginScheduleResource", tasks.getFirst().getBean());
+		Assertions.assertEquals("check", tasks.getFirst().getMethod());
+		Assertions.assertEquals("cron", tasks.getFirst().getTrigger());
+		Assertions.assertEquals(PluginScheduleResource.DEFAULT_CHECK_CRON, tasks.getFirst().getExpression());
+		Assertions.assertEquals("disabled", tasks.getFirst().getStatus());
+		Assertions.assertNull(tasks.getFirst().getNextExecution());
+		Assertions.assertNull(tasks.getFirst().getLastExecution());
+		Assertions.assertEquals("plugin-maintenance", tasks.get(1).getId());
+
+		// Enabled: scheduled with a next execution
+		resource.update(edition(true, false, true));
+		tasks = resource.getScheduledTasks();
+		Assertions.assertEquals("scheduled", tasks.getFirst().getStatus());
+		Assertions.assertNotNull(tasks.getFirst().getNextExecution());
+		Assertions.assertEquals("0 30 2 * * *", tasks.getFirst().getExpression());
+		Assertions.assertEquals("scheduled", tasks.get(1).getStatus());
+
+		// A manual check records the last execution and its result
+		resource.checkNow();
+		tasks = resource.getScheduledTasks();
+		Assertions.assertNotNull(tasks.getFirst().getLastExecution());
+		Assertions.assertEquals("succeeded", tasks.getFirst().getLastStatus());
+		Assertions.assertNull(tasks.getFirst().getLastError());
+
+		// A failure is recorded too
+		when(plugins.findAll("central")).thenThrow(new IOException("repository down"));
+		Assertions.assertThrows(IOException.class, () -> resource.checkNow());
+		tasks = resource.getScheduledTasks();
+		Assertions.assertEquals("failed", tasks.getFirst().getLastStatus());
+		Assertions.assertEquals("repository down", tasks.getFirst().getLastError());
+		// The maintenance failure (findAll) is swallowed by the scheduler wrapper but tracked
+		resource.maintenance();
+		Assertions.assertEquals("succeeded", resource.getScheduledTasks().get(1).getLastStatus());
+	}
+
+	@Test
 	void decorate() throws IllegalAccessException {
 		store.put(PluginScheduleResource.CONF_CHECK_UPDATES, "plugin-a:2.0.0,plugin-b:3.0.0");
 		final var settings = new SessionSettings();

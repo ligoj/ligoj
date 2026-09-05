@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -11,6 +12,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ligoj.app.resource.schedule.ScheduledTaskProvider;
+import org.ligoj.app.resource.schedule.ScheduledTaskVo;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.ligoj.bootstrap.resource.system.session.ISessionSettingsProvider;
@@ -20,6 +23,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ClassUtils;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -42,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-public class PluginScheduleResource implements ISessionSettingsProvider {
+public class PluginScheduleResource implements ISessionSettingsProvider, ScheduledTaskProvider {
 
 	/**
 	 * Configuration: the scheduled check is enabled.
@@ -109,6 +113,26 @@ public class PluginScheduleResource implements ISessionSettingsProvider {
 	private ThreadPoolTaskScheduler scheduler;
 	private ScheduledFuture<?> checkTask;
 	private ScheduledFuture<?> maintenanceTask;
+	private final JobState checkState = new JobState();
+	private final JobState maintenanceState = new JobState();
+
+	/**
+	 * In-memory execution state of a job, for the scheduled tasks listing.
+	 */
+	static final class JobState {
+		volatile boolean running;
+		volatile Instant last;
+		volatile String status;
+		volatile String error;
+	}
+
+	/**
+	 * A job returning a result and reading the repository.
+	 */
+	@FunctionalInterface
+	interface Job<T> {
+		T call() throws IOException;
+	}
 
 	/**
 	 * Start the scheduler and apply the current schedule.
@@ -187,8 +211,28 @@ public class PluginScheduleResource implements ISessionSettingsProvider {
 	@POST
 	@Path("check")
 	public PluginScheduleVo checkNow() throws IOException {
-		check();
+		run(checkState, this::check);
 		return get();
+	}
+
+	/**
+	 * Run a job while tracking its state: running flag, last execution, last result.
+	 */
+	private <T> T run(final JobState state, final Job<T> job) throws IOException {
+		state.running = true;
+		try {
+			final var result = job.call();
+			state.status = "succeeded";
+			state.error = null;
+			return result;
+		} catch (final IOException | RuntimeException e) {
+			state.status = "failed";
+			state.error = StringUtils.defaultIfBlank(e.getMessage(), e.getClass().getSimpleName());
+			throw e;
+		} finally {
+			state.running = false;
+			state.last = Instant.now();
+		}
 	}
 
 	/**
@@ -234,14 +278,17 @@ public class PluginScheduleResource implements ISessionSettingsProvider {
 	 */
 	protected void maintenance() {
 		try {
-			final var staged = stagedUpdates();
-			if (staged > 0) {
-				log.info("Maintenance window: {} staged plug-in update(s), restarting the context", staged);
-				pluginResource.restart();
-			} else {
-				log.info("Maintenance window: no staged plug-in update, nothing to apply");
-			}
-		} catch (final RuntimeException e) {
+			run(maintenanceState, () -> {
+				final var staged = stagedUpdates();
+				if (staged > 0) {
+					log.info("Maintenance window: {} staged plug-in update(s), restarting the context", staged);
+					pluginResource.restart();
+				} else {
+					log.info("Maintenance window: no staged plug-in update, nothing to apply");
+				}
+				return staged;
+			});
+		} catch (final IOException | RuntimeException e) {
 			log.error("Maintenance window failed", e);
 		}
 	}
@@ -296,10 +343,43 @@ public class PluginScheduleResource implements ISessionSettingsProvider {
 
 	private void safeCheck() {
 		try {
-			check();
-		} catch (final Exception e) {
+			run(checkState, this::check);
+		} catch (final IOException | RuntimeException e) {
 			log.error("Scheduled plug-ins check failed", e);
 		}
+	}
+
+	@Override
+	public List<ScheduledTaskVo> getScheduledTasks() {
+		final var check = toTaskVo("check", CONF_CHECK, CONF_CHECK_CRON, DEFAULT_CHECK_CRON, checkState);
+		if (check.getLastExecution() == null) {
+			// The last check survives the restarts through the configuration
+			check.setLastExecution(Optional.ofNullable(configuration.get(CONF_CHECK_LAST)).filter(StringUtils::isNumeric)
+					.map(Long::valueOf).map(Instant::ofEpochMilli).orElse(null));
+		}
+		return List.of(check, toTaskVo("maintenance", CONF_MAINTENANCE, CONF_MAINTENANCE_CRON, DEFAULT_MAINTENANCE_CRON,
+				maintenanceState));
+	}
+
+	private ScheduledTaskVo toTaskVo(final String method, final String enabledKey, final String cronKey,
+			final String defaultCron, final JobState state) {
+		final var clazz = ClassUtils.getUserClass(this);
+		final var enabled = isEnabled(enabledKey);
+		final var cron = configuration.get(cronKey, defaultCron);
+		final var vo = new ScheduledTaskVo();
+		vo.setId("plugin-" + method);
+		vo.setSource("plugin");
+		vo.setBean(clazz.getSimpleName());
+		vo.setBeanClass(clazz.getName());
+		vo.setMethod(method);
+		vo.setTrigger("cron");
+		vo.setExpression(cron);
+		vo.setStatus(!enabled ? "disabled" : state.running ? "running" : "scheduled");
+		vo.setNextExecution(enabled ? next(cron) : null);
+		vo.setLastExecution(state.last);
+		vo.setLastStatus(state.status);
+		vo.setLastError(state.error);
+		return vo;
 	}
 
 	/**

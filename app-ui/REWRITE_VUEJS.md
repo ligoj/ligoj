@@ -1399,6 +1399,17 @@ lives once in the panel):
   when the last check found newer plug-in versions (session `plugin-updates`),
   an `mdi-update` picto with a count badge and a tooltip listing them, opening
   the plug-in manager.
+- **SystemTaskView "Scheduled tasks" section**: `GET rest/system/schedule`
+  (app-api `ScheduledTaskResource`) lists the Spring `@Scheduled` methods
+  (from the `ScheduledTaskHolder` beans: bean, method, trigger kind and
+  expression, next execution from `ScheduledTask.nextExecution()`, last
+  execution and result from Spring's `Task.getLastExecutionOutcome()`) plus
+  the schedules contributed by `ScheduledTaskProvider`
+  beans — `PluginScheduleResource` exposes its check and maintenance jobs with
+  their enabled state and tracked last execution/result. Columns: task
+  (bean.method, FQN tooltip), trigger (expression, kind tooltip), next run,
+  last run (+ succeeded/failed chip, error tooltip), status
+  (scheduled/disabled/running).
 
 Group model (per tool): `{ key, name, kind, color, icon: ()=>h(NodeIcon,{node}),
 health, rows: [{ name, status:'ok|warn|err|idle', pills, cost?, sub }] }`. `pills`
