@@ -38,7 +38,7 @@ class SecurityConfigurationTest {
 		configuration.setSecurityProvider("OAuth2Bff");
 		var http = mock(HttpSecurity.class);
 		var provider = mock(AbstractAuthenticationProvider.class);
-		configuration.configureLoginHandler(http, provider, null);
+		configuration.configureLoginHandler(http, provider, null, null);
 		verify(http, times(1)).oauth2Login(any());
 		verify(provider, times(0)).configureLogin(any(), any(), any(), any(), any());
 	}
@@ -49,7 +49,7 @@ class SecurityConfigurationTest {
 		configuration.setSecurityProvider("Rest");
 		var http = mock(HttpSecurity.class);
 		var provider = mock(AbstractAuthenticationProvider.class);
-		configuration.configureLoginHandler(http, provider, null);
+		configuration.configureLoginHandler(http, provider, null, null);
 		verify(http, times(0)).oauth2Login(any());
 		verify(provider, times(1)).configureLogin(any(), any(), any(), any(), any());
 	}

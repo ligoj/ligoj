@@ -223,6 +223,8 @@ export default defineConfig({
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
         login: resolve(import.meta.dirname, 'login.html'),
+        // Second factor page (see MfaApp.vue): authenticated-only, served like the login pages
+        mfa: resolve(import.meta.dirname, 'mfa.html'),
         loginByApiKey: resolve(import.meta.dirname, 'login-by-api-key.html'),
         host: resolve(import.meta.dirname, 'src/host.js'),
         // Shared singletons as facade entries (see ligojSharedFacades): each

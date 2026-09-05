@@ -1392,6 +1392,56 @@ lives once in the panel):
   decorates into the session as the `plugin-updates` application data; the
   "Check versions" action now runs `POST …/schedule/check` and refreshes the
   session. The button tooltip summarizes the state (next runs).
+- **Per-tool search on the subscription cards** (`SubscriptionGroupCard`): a
+  magnify button in the card header expands into an `LjSearch` box (Escape or
+  the button closes and clears it); the rows are filtered case-insensitively by
+  name, synthetic pills, the node chain (instance/tool/service names and ids)
+  and the value of every non-secured subscription parameter (`plugin-ui/ui/src/utils/subscriptionSearch.js`, secured = the id
+  looks like a secret, same rule as the status tooltip masking); the count
+  badge shows `matching/total` while typing.
+- **Multi-factor authentication (TOTP)**. Backend in bootstrap: `SystemMfaDevice`
+  entity (encrypted Base32 secret, per-user unique name), `TotpHelper` (RFC 6238,
+  dependency-free), `MfaResource` at `rest/system/mfa` — `GET` status (devices,
+  `required`, `lastConnection`), `POST login` (records the authentication, called
+  by app-ui right after any primary login), `POST totp/setup` (secret + otpauth
+  URI, nothing persisted), `POST totp` (confirm with a first code), `POST verify`,
+  `DELETE {id}`, plus the passkeys (WebAuthn, dependency-free: `Cbor` and
+  `WebAuthnHelper` in bootstrap-core — COSE ES256/RS256 keys, assertion
+  signature verification, attestation statement not verified): `POST
+  passkey/setup` (creation options, single-use challenge kept in memory 5 min),
+  `POST passkey` (registers the browser credential after challenge, origin and
+  rpId checks), `POST passkey/challenge` (request options), `POST
+  passkey/verify` (assertion: challenge, origin, rpId, user presence, signature,
+  signature-counter clone detection); configuration `ligoj.mfa.rp-id` (site host,
+  `localhost` by default, must be set in production and never changed) and
+  `ligoj.mfa.origins` (optional explicit origins, otherwise HTTPS origins within
+  the rpId scope, HTTP for localhost); and `PUT {id}/default`; `verify` takes an
+  optional `device` to check a single selected TOTP device. The first registered device is the default
+  one, removing it hands the role to the oldest remaining device; granted to
+  the USER role by app-api's authorization seed. app-ui
+  enforces the second factor for form AND OIDC logins (`security.mfa.enabled`,
+  default true): `MfaAuthenticationSuccessHandler` flags the session as pending
+  and sends the user to `mfa.html` (JSON `redirect` for the AJAX form login,
+  real redirect for OIDC), `MfaAuthorizationManager` denies everything but the
+  MFA page, `POST /login/mfa` (`MfaVerifyFilter`, 5 attempts then the session is
+  ended), logout and assets, `MfaAccessDeniedHandler` redirects pending sessions
+  to the page. The UI calls the API with the trusted user header, like the proxy;
+  an API without the resource (older bootstrap) disables the step. Host:
+  `mfa.html` + `MfaApp.vue` (self-contained like the login page; `GET /login/mfa`
+  returns the devices recorded at login so the page offers the choice, default
+  preselected, with a 6-digit input for authenticators and a "Use my passkey"
+  button for passkeys — `GET /login/mfa/passkey` relays the request options,
+  `navigator.credentials.get` answers, the assertion is posted with the code
+  payload; `utils/webauthn.js` converts Base64url/ArrayBuffer both ways; the
+  `one-time-code` input is the accepted native-completion exception),
+  `LoginApp` honors the
+  `redirect` of the login payload, `composables/useMfa.js` drives the profile's
+  **Authentication card** (provider from the session `iam-primary` data
+  decorated by app-api, last authentication, devices with method choice at add —
+  authenticator with QR code via the `qrcode` package, or passkey created through
+  `navigator.credentials.create` — default badge and "use as default" action,
+  remove); the Permissions card's UI/API lists became
+  `LjSegmented` tabs to make room.
 - **App-bar plugin items** (`app.registerNavbarItem(Component)`, rendered by
   `App.vue` in the right-side stack before the demo chip): visible compact
   chrome, unlike `registerHeaderItem` which only keeps dialogs alive at the

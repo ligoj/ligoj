@@ -31,6 +31,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.ligoj.app.http.security.mfa.MfaAccessDeniedHandler;
+import org.ligoj.app.http.security.mfa.MfaAuthenticationSuccessHandler;
+import org.ligoj.app.http.security.mfa.MfaAuthorizationManager;
+import org.ligoj.app.http.security.mfa.MfaClient;
+import org.ligoj.app.http.security.mfa.MfaVerifyFilter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
@@ -87,6 +94,16 @@ public class SecurityConfiguration {
 
 	@Value("${ligoj.endpoint.api.url}")
 	private String apiEndpoint;
+
+	/**
+	 * When <code>true</code> (default), a user having registered an MFA device must verify a code after any primary
+	 * authentication (form login, OIDC) before reaching the application.
+	 */
+	@Value("${security.mfa.enabled:true}")
+	private boolean mfaEnabled;
+
+	@Value("${ligoj.security.oauth2.username-attribute:email}")
+	private String usernameOAuth2Attribute;
 
 	@Value("${ligoj.security.login.url:/login.html}")
 	private String loginUrl;
@@ -183,7 +200,7 @@ public class SecurityConfiguration {
 	@Bean
 	@Order(2)
 	public SecurityFilterChain filterChain(final HttpSecurity http, final ExtendedWebSecurityExpressionHandler expressionWebHandler,
-			AbstractAuthenticationProvider provider) {
+			AbstractAuthenticationProvider provider, final MfaClient mfaClient) {
 		final var logoutUrl = isPreAuth() ? StringUtils.defaultIfBlank(securityPreAuthLogout, LOGOUT_HTML) : loginUrl + "?logout";
 		SilentRequestHeaderAuthenticationFilter preAuthBean = null;
 		final var authorization = WebExpressionAuthorizationManager
@@ -201,13 +218,18 @@ public class SecurityConfiguration {
 				matcher.matcher("/rest/redirect"), matcher.matcher("/rest/security/login"), matcher.matcher("/captcha.png")).permitAll()
 				.requestMatchers(matcher.matcher("/rest/service/password/reset/**"), matcher.matcher("/rest/service/password/recovery/**")).anonymous()
 
-				// Everything else must be authenticated
-				.anyRequest().access(authorization));
+				// Everything else must be authenticated, and verified when a second factor is pending
+				.anyRequest().access(mfaEnabled ? new MfaAuthorizationManager(authorization) : authorization));
 
 		final var loginDeniedUrl = loginUrl + "?denied";
-		http.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint(provider)).accessDeniedPage(loginDeniedUrl));
+		http.exceptionHandling(a -> a.authenticationEntryPoint(ajaxFormLoginEntryPoint(provider))
+				.accessDeniedHandler(new MfaAccessDeniedHandler(loginDeniedUrl)));
 		provider.configureLogout(http, logoutUrl, securityPreAuthCookies);
-		configureLoginHandler(http, provider, loginDeniedUrl);
+		configureLoginHandler(http, provider, loginDeniedUrl, mfaClient);
+		if (mfaEnabled) {
+			// Second factor verification endpoint, before the authorization: answers by itself
+			http.addFilterBefore(new MfaVerifyFilter(mfaClient, usernameOAuth2Attribute), AuthorizationFilter.class);
+		}
 
 		// Stateful session
 		http.csrf(AbstractHttpConfigurer::disable);
@@ -235,7 +257,7 @@ public class SecurityConfiguration {
 		return chain;
 	}
 
-	void configureLoginHandler(HttpSecurity http, AbstractAuthenticationProvider provider, String loginDeniedUrl) {
+	void configureLoginHandler(HttpSecurity http, AbstractAuthenticationProvider provider, String loginDeniedUrl, MfaClient mfaClient) {
 		if (isOauth2Bff()) {
 			// Always land on the SPA root after a successful OIDC login.
 			// `true` forces this URL regardless of any saved request — the
@@ -248,12 +270,35 @@ public class SecurityConfiguration {
 			// — a path the SPA doesn't own. Send the user back to the
 			// Vue login page so they get a localized error message
 			// instead of the legacy form Spring would otherwise render.
-			http.oauth2Login(o -> o.defaultSuccessUrl("/", true).failureUrl("/login.html?denied"));
+			//
+			// The second factor wraps this handler: a user with an MFA device
+			// lands on the MFA page instead (see MfaAuthenticationSuccessHandler).
+			final var oidcSuccess = new SimpleUrlAuthenticationSuccessHandler("/");
+			oidcSuccess.setAlwaysUseDefaultTargetUrl(true);
+			http.oauth2Login(o -> o.successHandler(withMfa(oidcSuccess, false, mfaClient)).failureUrl("/login.html?denied"));
 		} else {
-			final var loginSuccessHandler = getSuccessHandler();
+			final var loginSuccessHandler = withMfa(getSuccessHandler(), true, mfaClient);
 			final var loginFailureHandler = getFailureHandler(provider);
 			provider.configureLogin(http, loginDeniedUrl, LOGIN_API, loginSuccessHandler, loginFailureHandler);
 		}
+	}
+
+	/**
+	 * Wrap a login success handler with the second factor step when enabled.
+	 */
+	private AuthenticationSuccessHandler withMfa(final AuthenticationSuccessHandler handler, final boolean restStyle,
+			final MfaClient mfaClient) {
+		return mfaEnabled ? new MfaAuthenticationSuccessHandler(handler, mfaClient, restStyle, usernameOAuth2Attribute) : handler;
+	}
+
+	/**
+	 * Client of the API MFA resource, on behalf of the authenticated user.
+	 *
+	 * @return The MFA client.
+	 */
+	@Bean
+	public MfaClient mfaClient() {
+		return new MfaClient(apiEndpoint);
 	}
 
 	private boolean isOauth2Bff() {

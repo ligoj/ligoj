@@ -88,35 +88,136 @@
         </div>
       </section>
 
-      <section class="pcard pcard--perm">
-        <h3><span class="ic"><v-icon>mdi-key</v-icon></span>{{ t('profile.permissions') }}</h3>
-        <div class="subhead d-flex align-center">{{ t('profile.uiAuth') }}<v-chip size="x-small" variant="tonal" color="primary" class="ms-2">{{ auth.uiAuthorizations.length }}</v-chip></div>
-        <div class="perm-list">
-          <code v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i" class="perm">
-            <span v-for="(token, j) in tokenizePattern(pattern)" :key="j"
-                  :class="'token token--' + token.type">{{ token.value }}</span>
-          </code>
+      <!-- Authentication: provider, last authentication, MFA devices (useMfa) -->
+      <section class="pcard pcard--auth">
+        <h3><span class="ic"><v-icon>mdi-shield-key-outline</v-icon></span>{{ t('profile.authentication') }}</h3>
+
+        <div class="pref-row">
+          <v-icon class="pref-ic">mdi-login-variant</v-icon>
+          <div class="pt">
+            <div class="ptt">{{ t('profile.authProvider') }}</div>
+            <div class="pth">{{ providerHint }}</div>
+          </div>
+          <span class="rolechip">{{ providerLabel }}</span>
         </div>
-        <div class="subhead subhead--api d-flex align-center">{{ t('profile.apiAuth') }}<v-chip size="x-small" variant="tonal" color="primary" class="ms-2">{{ auth.apiAuthorizations.length }}</v-chip>
-          <a class="text-info ms-auto text-decoration-none" href="#/api/token">
-            <span class="v">{{ t('profile.apiTokensHint') }}<v-icon size="small">mdi-chevron-right</v-icon></span>
-          </a>
-          <button type="button" class="text-info verify-link ms-4" @click="openVerify">
-            <span class="v"><v-icon size="small">mdi-shield-search</v-icon>{{ t('profile.apiVerify') }}</span>
+
+        <div class="pref-row">
+          <v-icon class="pref-ic">mdi-clock-outline</v-icon>
+          <div class="pt">
+            <div class="ptt">{{ t('profile.lastAuthentication') }}</div>
+            <div class="pth">{{ mfa.status.value?.lastConnection ? fmtDate(mfa.status.value.lastConnection) : t('profile.lastAuthenticationUnknown') }}</div>
+          </div>
+        </div>
+
+        <div class="subhead d-flex align-center">{{ t('profile.mfaDevices') }}<v-chip size="x-small" variant="tonal" color="primary" class="ms-2">{{ mfa.devices.value.length }}</v-chip>
+          <button v-if="!mfa.unavailable.value" type="button" class="text-info verify-link ms-auto" @click="openAdd">
+            <span class="v"><v-icon size="small">mdi-plus</v-icon>{{ t('profile.mfaAdd') }}</span>
           </button>
         </div>
-        <div class="perm-list">
-          <code v-for="(entry, i) in auth.apiAuthorizations" :key="'api-' + i" class="perm perm--api">
-            <span class="method" :class="methodClass(entry.method)">{{ entry.method || '?' }}</span>
-            <span class="pattern">
-              <span v-for="(token, j) in apiTokens(entry.pattern)" :key="j"
-                    :class="'token token--' + token.type">{{ token.value }}</span>
-            </span>
-          </code>
+        <p v-if="mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaUnavailable') }}</p>
+        <p v-else-if="!mfa.devices.value.length" class="pth mfa-note">{{ t('profile.mfaNone') }}</p>
+        <div v-else class="mfa-list">
+          <div v-for="device in mfa.devices.value" :key="device.id" class="pref-row mfa-row">
+            <v-icon class="pref-ic">{{ device.type === 'PASSKEY' ? 'mdi-fingerprint' : 'mdi-cellphone-key' }}</v-icon>
+            <div class="pt">
+              <div class="ptt">{{ device.name }}<span v-if="device.defaultDevice" class="rolechip mfa-default">{{ t('profile.mfaDefault') }}</span></div>
+              <div class="pth">{{ t('profile.mfaDeviceMeta', { type: t('profile.mfaType.' + device.type), created: fmtDate(device.createdDate), lastUsed: device.lastUsed ? fmtDate(device.lastUsed) : t('profile.mfaNeverUsed') }) }}</div>
+            </div>
+            <button v-if="!device.defaultDevice" type="button" class="lj-iconbtn" :aria-label="t('profile.mfaSetDefault')" @click="setDefaultDevice(device)">
+              <v-icon size="18">mdi-star-outline</v-icon>
+              <v-tooltip activator="parent" location="top" :text="t('profile.mfaSetDefault')" />
+            </button>
+            <button type="button" class="lj-iconbtn danger" :aria-label="t('profile.mfaRemove')" @click="askRemove(device)">
+              <v-icon size="18">mdi-delete-outline</v-icon>
+              <v-tooltip activator="parent" location="top" :text="t('profile.mfaRemove')" />
+            </button>
+          </div>
         </div>
+        <p v-if="!mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaHint') }}</p>
+      </section>
+
+      <!-- Permissions: UI / API in tabs (LjSegmented) -->
+      <section class="pcard pcard--perm">
+        <div class="perm-head">
+          <h3><span class="ic"><v-icon>mdi-key</v-icon></span>{{ t('profile.permissions') }}</h3>
+          <LjSegmented v-model="permTab" :options="permTabs" />
+        </div>
+        <template v-if="permTab === 'ui'">
+          <div class="perm-list">
+            <code v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i" class="perm">
+              <span v-for="(token, j) in tokenizePattern(pattern)" :key="j"
+                    :class="'token token--' + token.type">{{ token.value }}</span>
+            </code>
+          </div>
+        </template>
+        <template v-else>
+          <div class="subhead d-flex align-center">
+            <a class="text-info text-decoration-none" href="#/api/token">
+              <span class="v">{{ t('profile.apiTokensHint') }}<v-icon size="small">mdi-chevron-right</v-icon></span>
+            </a>
+            <button type="button" class="text-info verify-link ms-4" @click="openVerify">
+              <span class="v"><v-icon size="small">mdi-shield-search</v-icon>{{ t('profile.apiVerify') }}</span>
+            </button>
+          </div>
+          <div class="perm-list">
+            <code v-for="(entry, i) in auth.apiAuthorizations" :key="'api-' + i" class="perm perm--api">
+              <span class="method" :class="methodClass(entry.method)">{{ entry.method || '?' }}</span>
+              <span class="pattern">
+                <span v-for="(token, j) in apiTokens(entry.pattern)" :key="j"
+                      :class="'token token--' + token.type">{{ token.value }}</span>
+              </span>
+            </code>
+          </div>
+        </template>
       </section>
 
     </div>
+
+    <!-- Register a device: choose the method, then an authenticator (QR code +
+         secret, confirmed by a first code) or an access key (generated, shown once) -->
+    <LjDialog v-model="addOpen" :title="t('profile.mfaAddTitle')" icon="mdi-cellphone-key" :max-width="560">
+      <div v-if="!addMethod" class="mfa-methods">
+        <button type="button" class="mfa-method" @click="chooseMethod('totp')">
+          <v-icon size="26">mdi-cellphone-key</v-icon>
+          <span class="mm-txt"><b>{{ t('profile.mfaMethodTotp') }}</b><small>{{ t('profile.mfaMethodTotpHint') }}</small></span>
+        </button>
+        <button type="button" class="mfa-method" :disabled="!webAuthnSupported" @click="chooseMethod('passkey')">
+          <v-icon size="26">mdi-fingerprint</v-icon>
+          <span class="mm-txt"><b>{{ t('profile.mfaMethodPasskey') }}</b><small>{{ webAuthnSupported ? t('profile.mfaMethodPasskeyHint') : t('profile.mfaPasskeyUnsupported') }}</small></span>
+        </button>
+      </div>
+      <div v-else-if="addMethod === 'passkey'" class="mfa-setup">
+        <LigojTextField v-model="addName" :label="t('profile.mfaName')" :hint="t('profile.mfaNameHint')" persistent-hint variant="outlined" density="compact"
+          :error-messages="addError === 'already-exist' ? [t('profile.mfaNameTaken')] : addError === 'invalid' ? [t('profile.mfaPasskeyInvalid')] : addError === 'error' ? [t('common.loadError')] : []" @update:model-value="addError = ''" @keyup.enter="registerPasskey" />
+        <p class="mfa-scan">{{ t('profile.mfaPasskeyIntro') }}</p>
+      </div>
+      <div v-else-if="setupData" class="mfa-setup">
+        <LigojTextField v-model="addName" :label="t('profile.mfaName')" :hint="t('profile.mfaNameHint')" persistent-hint variant="outlined" density="compact"
+          :error-messages="addError === 'already-exist' ? [t('profile.mfaNameTaken')] : []" @update:model-value="addError = ''" />
+        <p class="mfa-scan">{{ t('profile.mfaScan') }}</p>
+        <div class="mfa-qr">
+          <img v-if="qrUrl" :src="qrUrl" alt="QR" width="180" height="180" />
+          <code class="mfa-secret">{{ setupData.secret }}</code>
+        </div>
+        <LigojTextField :model-value="addCode" :label="t('profile.mfaCode')" :hint="t('profile.mfaCodeHint')" persistent-hint variant="outlined" density="compact" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+          :error-messages="addError === 'invalid-code' ? [t('profile.mfaInvalidCode')] : addError === 'error' ? [t('common.loadError')] : []" @update:model-value="onCodeInput" @keyup.enter="registerDevice" />
+      </div>
+      <div v-else class="mfa-setup-loading"><v-progress-circular indeterminate size="28" /></div>
+      <template #footer>
+        <LjButton variant="ghost" @click="addOpen = false">{{ t('common.cancel') }}</LjButton>
+        <LjButton v-if="addMethod === 'passkey'" icon="mdi-fingerprint" :disabled="!addName.trim() || addBusy" @click="registerPasskey">{{ t('profile.mfaPasskeyRegister') }}</LjButton>
+        <LjButton v-else-if="addMethod === 'totp'" icon="mdi-check" :disabled="!setupData || !addName.trim() || !isOtpCode(addCode) || addBusy" @click="registerDevice">{{ t('profile.mfaRegister') }}</LjButton>
+      </template>
+    </LjDialog>
+
+    <!-- Remove a device -->
+    <LjDialog v-model="removeOpen" :title="t('profile.mfaRemoveTitle')" icon="mdi-delete-outline" :max-width="460">
+      <p class="mfa-note">{{ t('profile.mfaRemoveText', { name: removeTarget?.name || '' }) }}</p>
+      <template #footer>
+        <LjButton variant="ghost" @click="removeOpen = false">{{ t('common.cancel') }}</LjButton>
+        <LjButton variant="danger" icon="mdi-delete-outline" :disabled="removeBusy" @click="removeDevice">{{ t('profile.mfaRemove') }}</LjButton>
+      </template>
+    </LjDialog>
 
     <!-- Shared API access verification dialog (host ApiVerifyDialog),
          audited against the CURRENT session (admin bypass applies). -->
@@ -131,6 +232,13 @@ import { useAuthStore } from '@/stores/auth.js'
 import { useI18nStore } from '@/stores/i18n.js'
 import { useAppStore } from '@/stores/app.js'
 import ApiVerifyDialog from '@/components/ApiVerifyDialog.vue'
+import LjSegmented from '@/components/LjSegmented.vue'
+import LjDialog from '@/components/LjDialog.vue'
+import LjButton from '@/components/LjButton.vue'
+import LigojTextField from '@/components/LigojTextField.vue'
+import QRCode from 'qrcode'
+import { useMfa, isOtpCode, sanitizeOtpCode } from '@/composables/useMfa.js'
+import { isWebAuthnSupported, toCreationOptions, serializeRegistration } from '@/utils/webauthn.js'
 import { PRESET_OPTIONS, detectPreset, applyPreset, persistPreset } from '@/plugins/presets.js'
 import { detectCompact, applyCompact, persistCompact, detectReduceMotion, applyReduceMotion, persistReduceMotion } from '@/plugins/styles.js'
 import { useDemoMode } from '@/composables/useDemoMode.js'
@@ -185,6 +293,99 @@ function apiTokens(pattern) {
 const verifyOpen = ref(false)
 function openVerify() { verifyOpen.value = true }
 
+/* --- permissions tabs --- */
+const permTab = ref('ui')
+const permTabs = computed(() => [
+  { value: 'ui', label: `${t('profile.uiAuth')} (${auth.uiAuthorizations.length})` },
+  { value: 'api', label: `${t('profile.apiAuth')} (${auth.apiAuthorizations.length})` },
+])
+
+/* --- authentication card --- */
+const mfa = useMfa()
+function fmtDate(value) {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString(i18n.locale || undefined, { dateStyle: 'medium', timeStyle: 'short' })
+}
+// Primary identity provider node (session data `iam-primary`, e.g. "service:id:ldap:dig"):
+// the tool segment names the plug-in; empty means the internal accounts.
+const providerNode = computed(() => String(auth.appSettings?.data?.['iam-primary'] || '').trim())
+const providerLabel = computed(() => {
+  const parts = providerNode.value.split(':')
+  if (parts.length < 3) return t('profile.authProviderInternal')
+  const tool = parts[2]
+  return tool.charAt(0).toUpperCase() + tool.slice(1)
+})
+const providerHint = computed(() => providerNode.value ? t('profile.authProviderHint', { node: providerNode.value }) : t('profile.authProviderInternalHint'))
+
+const addOpen = ref(false)
+const addMethod = ref('')
+const addName = ref('')
+const addCode = ref('')
+const addError = ref('')
+const addBusy = ref(false)
+const setupData = ref(null)
+const qrUrl = ref('')
+const webAuthnSupported = isWebAuthnSupported()
+function openAdd() {
+  addMethod.value = ''
+  addName.value = ''
+  addCode.value = ''
+  addError.value = ''
+  setupData.value = null
+  qrUrl.value = ''
+  addOpen.value = true
+}
+async function chooseMethod(method) {
+  addMethod.value = method
+  if (method !== 'totp') return
+  const data = await mfa.setup()
+  if (!data) { addOpen.value = false; return }
+  setupData.value = data
+  try { qrUrl.value = await QRCode.toDataURL(data.uri, { width: 180, margin: 1 }) } catch { qrUrl.value = '' }
+}
+// Passkey: creation options from the API, the browser prompts the authenticator, the credential is registered
+async function registerPasskey() {
+  if (!addName.value.trim() || addBusy.value || !webAuthnSupported) return
+  addBusy.value = true
+  try {
+    const options = await mfa.setupPasskey()
+    if (!options) { addError.value = 'error'; return }
+    let credential
+    try {
+      credential = await navigator.credentials.create({ publicKey: toCreationOptions(options) })
+    } catch {
+      addError.value = 'invalid'
+      return
+    }
+    if (!credential) { addError.value = 'invalid'; return }
+    const result = await mfa.registerPasskey(addName.value.trim(), serializeRegistration(credential))
+    if (result.ok) { addOpen.value = false; await mfa.load() } else addError.value = result.error
+  } finally { addBusy.value = false }
+}
+async function setDefaultDevice(device) {
+  await mfa.setDefault(device.id)
+  await mfa.load()
+}
+// Digits only, at most 6: the code is complete when exactly 6 digits are typed
+function onCodeInput(value) { addCode.value = sanitizeOtpCode(value); addError.value = '' }
+async function registerDevice() {
+  if (!setupData.value || !addName.value.trim() || !isOtpCode(addCode.value) || addBusy.value) return
+  addBusy.value = true
+  try {
+    const result = await mfa.register({ name: addName.value.trim(), secret: setupData.value.secret, code: addCode.value })
+    if (result.ok) { addOpen.value = false; await mfa.load() } else addError.value = result.error
+  } finally { addBusy.value = false }
+}
+const removeOpen = ref(false)
+const removeTarget = ref(null)
+const removeBusy = ref(false)
+function askRemove(device) { removeTarget.value = device; removeOpen.value = true }
+async function removeDevice() {
+  if (!removeTarget.value || removeBusy.value) return
+  removeBusy.value = true
+  try { await mfa.remove(removeTarget.value.id); removeOpen.value = false; await mfa.load() } finally { removeBusy.value = false }
+}
+
 const preset = ref(detectPreset().id)
 function choosePreset(id) { preset.value = id; applyPreset(id, theme); persistPreset(id) }
 
@@ -230,6 +431,7 @@ function onSkipUnsavedChange(value) {
 }
 
 onMounted(() => {
+  mfa.load()
   if (typeof document !== 'undefined') document.addEventListener('click', onDocClick)
   // Factory form so the trail re-localizes on a language switch; explicit icon
   // since /profile isn't in the sidebar NAV the leaf-icon resolver reads.
@@ -428,6 +630,29 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .subhead--api {
   margin-top: 16px;
 }
+
+/* Permissions header: title + UI/API tabs */
+.perm-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.perm-head h3 { margin-bottom: 0; }
+.perm-head + .perm-list, .perm-head + .subhead { margin-top: 14px; }
+
+/* Authentication card */
+.mfa-note { margin: 0 0 8px; }
+.mfa-list { display: flex; flex-direction: column; }
+.mfa-row { padding-top: 8px; padding-bottom: 8px; }
+.mfa-setup { display: flex; flex-direction: column; gap: 12px; }
+.mfa-scan { margin: 0; font-size: 13.5px; line-height: 1.5; }
+.mfa-qr { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.mfa-qr img { border-radius: 10px; border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity)); background: #fff; }
+.mfa-secret { font-size: 12px; word-break: break-all; padding: 6px 8px; border-radius: 6px; background: rgba(var(--v-theme-on-surface), .06); flex: 1 1 200px; }
+.mfa-setup-loading { display: grid; place-items: center; padding: 24px; }
+.mfa-default { margin-left: 8px; font-size: 10.5px; vertical-align: middle; }
+.mfa-methods { display: grid; gap: 10px; }
+.mfa-method { display: flex; align-items: center; gap: 14px; text-align: left; padding: 12px 14px; border: var(--border-w) var(--lj-border-style, solid) var(--border-c); border-radius: var(--radius); background: var(--surface); color: inherit; cursor: pointer; font: inherit; }
+.mfa-method:hover { border-color: var(--accent); }
+.mm-txt { display: flex; flex-direction: column; gap: 2px; }
+.mm-txt small { color: var(--muted); font-size: 12px; }
+.mfa-method:disabled { opacity: .55; cursor: not-allowed; }
 
 /* The Permissions card stretches to the grid row set by the (taller)
  * Preferences card. Distribute that height: headers stay fixed, the two

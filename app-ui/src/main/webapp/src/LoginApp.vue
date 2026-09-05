@@ -427,7 +427,9 @@ async function doLogin() {
     return
   }
   pushToast('success', msg['success-login'])
-  window.location.href = 'index.html'
+  // A registered second factor redirects to the MFA page instead of the app
+  // (`redirect` is `local` when the login is complete).
+  window.location.href = data.redirect && data.redirect !== 'local' ? data.redirect : 'index.html'
 }
 
 async function doReset() {
