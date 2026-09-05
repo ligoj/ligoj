@@ -24,7 +24,7 @@
           <v-progress-linear :model-value="allowedRate" color="success" height="8" rounded />
         </div>
       </div>
-      <v-text-field v-model="verifyQuery" variant="outlined" density="compact" clearable hide-details autocomplete="off"
+      <LigojTextField v-model="verifyQuery" variant="outlined" density="compact" clearable hide-details autocomplete="off"
         prepend-inner-icon="mdi-link-variant" :placeholder="t('profile.apiVerifyFilterPlaceholder')" class="mb-2" />
       <div v-if="normalizedQuery" class="verify-feedback" :class="urlAllowed ? 'ok' : 'ko'">
         <v-icon size="16">{{ urlAllowed ? 'mdi-shield-check' : 'mdi-shield-off-outline' }}</v-icon>
@@ -59,6 +59,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import LigojTextField from '@/components/LigojTextField.vue'
 import { useI18nStore } from '@/stores/i18n.js'
 import { useApi } from '@/composables/useApi.js'
 import LjDialog from '@/components/LjDialog.vue'

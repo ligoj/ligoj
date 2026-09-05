@@ -9,7 +9,7 @@
       <span v-else-if="mode === 'detail'">Message</span>
       <span v-else>New Message</span>
       <v-spacer />
-      <v-text-field v-if="mode === 'main'" v-model="filter" density="compact" variant="outlined" hide-details prepend-inner-icon="mdi-magnify" placeholder="Search..." style="max-width: 250px"
+      <LigojTextField v-if="mode === 'main'" v-model="filter" density="compact" variant="outlined" hide-details prepend-inner-icon="mdi-magnify" placeholder="Search..." style="max-width: 250px"
         class="mr-2" @update:model-value="debouncedSearch" />
       <v-btn v-if="mode !== 'new'" color="success" @click="mode = 'new'" prepend-icon="mdi-email-plus">
         New
@@ -62,11 +62,11 @@
           Messages cannot be edited or deleted after sending.
         </v-alert>
         <LigojSelect v-model="newMsg.targetType" :items="targetTypes" label="Recipient Type" />
-        <v-text-field v-model="newMsg.target" :label="targetLabel" />
+        <LigojTextField v-model="newMsg.target" :label="targetLabel" />
         <div v-if="audience > 0" class="text-caption text-medium-emphasis mb-2">
           Audience: {{ audience }} user(s)
         </div>
-        <v-textarea v-model="newMsg.value" label="Message" rows="4" />
+        <LigojTextarea v-model="newMsg.value" label="Message" rows="4" />
         <div class="d-flex justify-end ga-2">
           <v-btn @click="mode = 'main'">Cancel</v-btn>
           <v-btn type="submit" color="success" :loading="sending" prepend-icon="mdi-send" :disabled="!newMsg.target || !newMsg.value">Send</v-btn>
@@ -78,6 +78,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import LigojTextField from '@/components/LigojTextField.vue'
+import LigojTextarea from '@/components/LigojTextarea.vue'
 import LigojSelect from '@/components/LigojSelect.vue'
 import { useInboxApi } from './useInboxApi.js'
 

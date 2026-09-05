@@ -20,7 +20,7 @@
   each render makes VForm recurse ("Maximum recursive updates exceeded").
 -->
 <template>
-  <v-text-field
+  <LigojTextField
     :model-value="modelValue"
     :variant="variant"
     :rules="effectiveRules"
@@ -32,11 +32,12 @@
       <v-icon v-else-if="status === 'available'" color="success">mdi-check-circle</v-icon>
       <v-icon v-else-if="status === 'taken'" color="error">mdi-alert-circle</v-icon>
     </template>
-  </v-text-field>
+  </LigojTextField>
 </template>
 
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import LigojTextField from '@/components/LigojTextField.vue'
 import { useApi } from '@/composables/useApi.js'
 import { useI18nStore } from '@/stores/i18n.js'
 

@@ -42,6 +42,8 @@ export { default as LigojCombobox } from './components/LigojCombobox.vue'
 // <v-text-field> twin for autofill-prone free-text inputs (user/password/url
 // tool parameters...). Prefer it wherever autofill could pop over the form.
 export { default as LigojTextField } from './components/LigojTextField.vue'
+// <v-textarea> twin, same hardening.
+export { default as LigojTextarea } from './components/LigojTextarea.vue'
 export { default as LigojConfirmDialog } from './components/LigojConfirmDialog.vue'
 // API access verification dialog: crosses rest/openapi.json operations with a
 // set of {method?, pattern} API authorizations (session, role or user union).
