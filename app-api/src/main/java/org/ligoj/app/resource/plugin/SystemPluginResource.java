@@ -23,6 +23,7 @@ import org.ligoj.bootstrap.core.model.AbstractBusinessEntity;
 import org.ligoj.bootstrap.core.model.AbstractStringKeyEntity;
 import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
 import org.ligoj.bootstrap.core.plugin.PluginListener;
+import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.plugin.PluginVo;
 import org.ligoj.bootstrap.core.plugin.PluginsClassLoader;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
@@ -52,6 +53,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.regex.Pattern;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -160,13 +162,30 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		final var enabledFeatures = context.getBeansOfType(FeaturePlugin.class);
 		final var lastVersionF = lastVersion;
 
+		// Disabled plug-ins: renamed jar, not loaded at the next restart, configuration kept
+		final var disabled = getDisabledPlugins();
+
 		// Get the enabled plug-in features
 		final var enabled = this.repository.findAll().stream()
 				.map(p -> toVo(lastVersionF, p,
 						enabledFeatures.values().stream().filter(f -> p.getKey().equals(f.getKey())).findFirst()
-								.orElse(null)))
+								.orElse(null), disabled))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toMap(p -> p.getPlugin().getArtifact(), Function.identity()));
+
+		// Add the disabled plug-ins never installed: staged jar, disabled before any restart
+		disabled.forEach((id, file) -> enabled.computeIfAbsent(id, k -> {
+			final var plugin = new SystemPlugin();
+			plugin.setArtifact(k);
+			plugin.setKey("?:" + Arrays.stream(k.split("-")).skip(1).collect(Collectors.joining("-")));
+			final var p = newVo();
+			p.setId(k);
+			p.setName(k);
+			p.setPlugin(plugin);
+			p.setLatestLocalVersion(toTrimmedVersion(file));
+			markState(p, false, true);
+			return p;
+		}));
 
 		// Add pending installation: available but not yet enabled plug-ins
 		getPluginClassLoader().getInstalledPlugins().forEach((id, v) -> {
@@ -214,6 +233,121 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
+	 * Suffix appended to the jar file name of a disabled plug-in. The plug-ins class-loader only loads
+	 * <code>*.jar</code> files, so a disabled plug-in is not loaded at all at the next restart, while its file stays
+	 * in place for a later enabling.
+	 */
+	public static final String DISABLED_SUFFIX = ".disabled";
+
+	/**
+	 * Versioned jar file name pattern of an artifact: <code>&lt;artifact&gt;-&lt;version&gt;[-javadoc].jar</code>.
+	 * The version must start with a digit, so <code>plugin-iam</code> does not match <code>plugin-iam-node-1.0.0.jar</code>.
+	 */
+	private static final String JAR_FILE_PATTERN = "-\\d[\\w.-]*\\.jar";
+
+	/**
+	 * Disable a plug-in: its jar files (and javadoc) are renamed with the {@link #DISABLED_SUFFIX} suffix, so they are
+	 * not loaded at the next restart. The plug-in configuration (nodes, subscriptions, parameters) is kept, and the
+	 * plug-in stays loaded until the restart, as for an installation or a removal.
+	 *
+	 * @param artifact The plug-in artifact identifier, such as <code>plugin-build-jenkins</code>.
+	 * @throws IOException When the files cannot be renamed.
+	 * @throws BusinessException When no jar of this artifact is in the plug-ins directory.
+	 */
+	@PUT
+	@Path("{artifact:[\\w-]+}/disable")
+	public void disable(@PathParam("artifact") final String artifact) throws IOException {
+		setEnabled(artifact, false);
+	}
+
+	/**
+	 * Enable a previously disabled plug-in: its jar files get back their <code>.jar</code> name, so they are loaded at
+	 * the next restart.
+	 *
+	 * @param artifact The plug-in artifact identifier, such as <code>plugin-build-jenkins</code>.
+	 * @throws IOException When the files cannot be renamed.
+	 */
+	@PUT
+	@Path("{artifact:[\\w-]+}/enable")
+	public void enable(@PathParam("artifact") final String artifact) throws IOException {
+		setEnabled(artifact, true);
+	}
+
+	private void setEnabled(final String artifact, final boolean enabled) throws IOException {
+		final var pattern = Pattern.compile("^" + Pattern.quote(artifact) + JAR_FILE_PATTERN
+				+ (enabled ? Pattern.quote(DISABLED_SUFFIX) : "") + "$");
+		final var classLoader = getPluginClassLoader();
+		if (classLoader == null) {
+			throw new IllegalStateException("Plug-ins class-loader is not available, plug-ins cannot be enabled or disabled");
+		}
+		final List<java.nio.file.Path> files;
+		try (var list = Files.list(classLoader.getPluginDirectory())) {
+			files = list.filter(p -> pattern.matcher(p.getFileName().toString()).matches()).toList();
+		}
+		if (files.isEmpty()) {
+			// No jar of this artifact in the plug-ins directory: nothing to rename. Typically a plug-in loaded from
+			// elsewhere in the class-path (development), or an already enabled/disabled one.
+			throw new BusinessException("plugin-jar-not-found", artifact, enabled ? "enable" : "disable");
+		}
+		for (final var file : files) {
+			final var name = file.getFileName().toString();
+			final var target = enabled ? Strings.CS.removeEnd(name, DISABLED_SUFFIX) : name + DISABLED_SUFFIX;
+			Files.move(file, file.resolveSibling(target), StandardCopyOption.REPLACE_EXISTING);
+		}
+		log.info("Plugin {} has been {} ({} file(s)), restart is required", artifact, enabled ? "enabled" : "disabled",
+				files.size());
+	}
+
+	/**
+	 * Return the disabled plug-ins: artifact to the jar file name (without the {@link #DISABLED_SUFFIX} suffix, the
+	 * greatest one when several versions are disabled).
+	 *
+	 * @return The disabled plug-ins. Never <code>null</code>.
+	 * @throws IOException When the plug-ins directory cannot be listed.
+	 */
+	protected Map<String, String> getDisabledPlugins() throws IOException {
+		final var classLoader = getPluginClassLoader();
+		final var directory = classLoader == null ? null : classLoader.getPluginDirectory();
+		if (directory == null || !Files.isDirectory(directory)) {
+			// Not started through the plug-ins class-loader (safe mode, tests): nothing can be disabled
+			return Collections.emptyMap();
+		}
+		try (var list = Files.list(directory)) {
+			return list.map(p -> p.getFileName().toString())
+					.filter(n -> n.endsWith(".jar" + DISABLED_SUFFIX) && !n.endsWith("-javadoc.jar" + DISABLED_SUFFIX))
+					.map(n -> Strings.CS.removeEnd(n, DISABLED_SUFFIX))
+					.collect(Collectors.toMap(SystemPluginResource::toArtifact, Function.identity(),
+							(a, b) -> a.compareTo(b) >= 0 ? a : b));
+		}
+	}
+
+	/**
+	 * Extract the artifact from a versioned jar file name.
+	 */
+	private static String toArtifact(final String jarName) {
+		final var matcher = PluginsClassLoader.VERSION_PATTERN.matcher(jarName);
+		return matcher.find() ? jarName.substring(0, matcher.start()) : Strings.CS.removeEnd(jarName, ".jar");
+	}
+
+	/**
+	 * New VO from the plug-in listener when available (Ligoj type), otherwise a plain one.
+	 */
+	private PluginVo newVo() {
+		return context.getBeansOfType(PluginListener.class).values().stream().findFirst().map(PluginListener::toVo)
+				.orElse(PluginVo::new).get();
+	}
+
+	/**
+	 * Set the class-path state of the plug-in when the VO supports it.
+	 */
+	private void markState(final PluginVo vo, final boolean loaded, final boolean disabled) {
+		if (vo instanceof LigojPluginVo lvo) {
+			lvo.setLoaded(loaded);
+			lvo.setDisabled(disabled);
+		}
+	}
+
+	/**
 	 * Convert an extended version to a trim one. Example:
 	 * <ul>
 	 * <li><code>plugin-sample-Z0000001Z0000002Z0000003Z0000004</code> will be <code>1.2.3.4</code></li>
@@ -243,20 +377,28 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	/**
 	 * Build the plug-in information from the plug-in itself and the last version being available.
 	 */
-	private PluginVo toVo(final Map<String, Artifact> lastVersion, final SystemPlugin p, final FeaturePlugin feature) {
-		if (feature == null) {
+	private PluginVo toVo(final Map<String, Artifact> lastVersion, final SystemPlugin p, final FeaturePlugin feature,
+			final Map<String, String> disabled) {
+		final var isDisabled = disabled.containsKey(p.getArtifact());
+		if (feature == null && !isDisabled) {
 			// Plug-in is no more available or in fail-safe mode
 			return null;
 		}
 
 		final var extension = context.getBeansOfType(PluginListener.class).values().stream().findFirst();
-		// Plug-in implementation is available
 		final var vo = extension.map(PluginListener::toVo).orElse(PluginVo::new).get();
 		vo.setId(p.getKey());
-		vo.setName(Strings.CS.removeStart(feature.getName(), "Ligoj - Plugin "));
-		vo.setLocation(getPluginLocation(feature).getPath());
-		vo.setVendor(feature.getVendor());
 		vo.setPlugin(p);
+		markState(vo, feature != null, isDisabled);
+		if (feature == null) {
+			// Disabled and not loaded: only the persisted data are known
+			vo.setName(p.getArtifact());
+		} else {
+			// Plug-in implementation is available
+			vo.setName(Strings.CS.removeStart(feature.getName(), "Ligoj - Plugin "));
+			vo.setLocation(getPluginLocation(feature).getPath());
+			vo.setVendor(feature.getVendor());
+		}
 
 		// Expose the resolve newer version
 		vo.setNewVersion(Optional
@@ -604,6 +746,10 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		installInternal(newFeatures);
 		log.info("Plugins are now configured, v{}", configuration.get("info.app.version"));
 
+		// Disabled plug-ins are not loaded but keep their configuration: not removed
+		final var disabled = getDisabledPlugins().keySet();
+		removedPlugins.removeIf(p -> disabled.contains(p.getArtifact()));
+
 		// And remove the old plug-in no more installed
 		repository.deleteAll(removedPlugins.stream().map(Persistable::getId).toList());
 	}
@@ -629,11 +775,14 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	 */
 	public int autoInstall(final Set<String> plugins) throws IOException {
 		final var currentPlugins = getPluginClassLoader().getInstalledPlugins();
+		// A disabled plug-in is installed, just not loaded: not re-installed
+		final var disabledPlugins = getDisabledPlugins();
 		final var withJavaDoc = BooleanUtils.toBoolean(configuration.get(PLUGIN_INSTALL_JAVADOC, "true"));
 		final var repositoryName = configuration.get(PLUGIN_REPOSITORY, REPO_CENTRAL);
 		var counter = 0;
 		for (final var artifact : getLastPluginVersions(repositoryName).values().stream().map(Artifact::getArtifact)
-				.filter(plugins::contains).filter(Predicate.not(currentPlugins::containsKey)).toList()) {
+				.filter(plugins::contains).filter(Predicate.not(currentPlugins::containsKey))
+				.filter(Predicate.not(disabledPlugins::containsKey)).toList()) {
 			install(artifact, repositoryName, withJavaDoc);
 			counter++;
 		}

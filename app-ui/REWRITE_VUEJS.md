@@ -1361,6 +1361,19 @@ lives once in the panel):
   key?, sortable?, exportValue? })` helper in `plugin-ui/ui/src/useUiHelpers.js`,
   reused by SystemNodeView, SubscriptionsPanel's list, and SystemPluginView (key
   `'statut'`) — one definition instead of three.
+- **SystemPluginView "Enabled" switch** = the plug-in is loadable
+  (`plugin-ui/ui/src/pluginToggle.js`). There is no persisted "enabled" flag
+  on nodes (`NodeVo.enabled` is a derived availability and `PUT rest/node`
+  rejects an `enabled` property): the switch calls
+  `PUT rest/system/plugin/{artifact}/disable|enable`, which renames the jar
+  (`*.jar.disabled`, app-api `SystemPluginResource`) so the plug-ins
+  class-loader skips it — or loads it again — at the next restart, like an
+  installation or a removal; the plug-in configuration is kept (the startup
+  refresh keeps the `SystemPlugin` row of a disabled plug-in). Each entry
+  carries `disabled` (the switch) and `loaded` (the class-path state,
+  `LigojPluginVo`); `pluginState()` derives the status: active, disabled,
+  disabling / enabling (restart required), pending (staged install), deleted.
+  Each state has its own `v-tooltip` (`system.plugin.toggle.<state>`).
 
 Group model (per tool): `{ key, name, kind, color, icon: ()=>h(NodeIcon,{node}),
 health, rows: [{ name, status:'ok|warn|err|idle', pills, cost?, sub }] }`. `pills`

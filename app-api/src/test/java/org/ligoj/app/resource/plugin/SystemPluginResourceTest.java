@@ -22,6 +22,7 @@ import org.ligoj.bootstrap.MatcherUtil;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
 import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
 import org.ligoj.bootstrap.core.plugin.PluginListener;
+import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.plugin.PluginVo;
 import org.ligoj.bootstrap.core.plugin.PluginsClassLoader;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
@@ -1068,6 +1069,100 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 	 * Remove a plug-in having explicit dependencies (by name) plug-ins : all related plug-ins are deleted. Note this
 	 * feature works only for plug-ins that are not loaded in the classloader. Need an {@link URLClassLoader#close()}
 	 */
+	@Test
+	void disableEnable() throws IOException {
+		final var jar = toFile("plugin-disable-1.0.0.jar");
+		final var javadoc = toFile("plugin-disable-1.0.0-javadoc.jar");
+		final var other = toFile("plugin-disable-ext-1.0.0.jar");
+		final var disabledJar = toFile("plugin-disable-1.0.0.jar" + SystemPluginResource.DISABLED_SUFFIX);
+		final var disabledJavadoc = toFile("plugin-disable-1.0.0-javadoc.jar" + SystemPluginResource.DISABLED_SUFFIX);
+		try {
+			FileUtils.touch(jar);
+			FileUtils.touch(javadoc);
+			FileUtils.touch(other);
+			final var resource = newPluginResourceDelete();
+			Assertions.assertTrue(resource.getDisabledPlugins().isEmpty());
+
+			// Disable: jar and javadoc renamed, the other artifact untouched
+			resource.disable("plugin-disable");
+			Assertions.assertFalse(jar.exists());
+			Assertions.assertFalse(javadoc.exists());
+			Assertions.assertTrue(disabledJar.exists());
+			Assertions.assertTrue(disabledJavadoc.exists());
+			Assertions.assertTrue(other.exists());
+			Assertions.assertEquals(Map.of("plugin-disable", "plugin-disable-1.0.0.jar"), resource.getDisabledPlugins());
+
+			// Enable: back to the loadable names
+			resource.enable("plugin-disable");
+			Assertions.assertTrue(jar.exists());
+			Assertions.assertTrue(javadoc.exists());
+			Assertions.assertFalse(disabledJar.exists());
+			Assertions.assertFalse(disabledJavadoc.exists());
+			Assertions.assertTrue(resource.getDisabledPlugins().isEmpty());
+		} finally {
+			for (final var file : new File[]{jar, javadoc, other, disabledJar, disabledJavadoc}) {
+				FileUtils.deleteQuietly(file);
+			}
+		}
+	}
+
+	@Test
+	void disableNotFound() throws IOException {
+		final var resource = newPluginResourceDelete();
+		Assertions.assertEquals("plugin-jar-not-found",
+				Assertions.assertThrows(BusinessException.class, () -> resource.disable("plugin-not-installed")).getMessage());
+		Assertions.assertThrows(BusinessException.class, () -> resource.enable("plugin-not-installed"));
+	}
+
+	@Test
+	void findAllDisabled() throws IOException {
+		final var disabledJar = toFile("plugin-foo-9.9.9.jar" + SystemPluginResource.DISABLED_SUFFIX);
+		try {
+			FileUtils.touch(disabledJar);
+			final var plugin = resource.findAll("central").stream()
+					.filter(p -> "plugin-foo".equals(p.getPlugin().getArtifact())).findFirst().orElseThrow();
+			Assertions.assertInstanceOf(LigojPluginVo.class, plugin);
+			Assertions.assertTrue(((LigojPluginVo) plugin).isDisabled());
+
+			// Any other plug-in is not disabled
+			Assertions.assertTrue(resource.findAll("central").stream()
+					.filter(p -> !"plugin-foo".equals(p.getPlugin().getArtifact()))
+					.filter(LigojPluginVo.class::isInstance)
+					.noneMatch(p -> ((LigojPluginVo) p).isDisabled()));
+		} finally {
+			FileUtils.deleteQuietly(disabledJar);
+		}
+	}
+
+	@Test
+	void refreshPluginsKeepsDisabled() throws Exception {
+		final var disabledJar = toFile("plugin-keep-1.0.0.jar" + SystemPluginResource.DISABLED_SUFFIX);
+		final var kept = new SystemPlugin();
+		kept.setKey("feature:keep");
+		kept.setArtifact("plugin-keep");
+		kept.setVersion("1.0.0");
+		kept.setType("FEATURE");
+		kept.setBasePackage("org.ligoj.app.plugin.keep");
+		repository.saveAndFlush(kept);
+		final var event = mock(ContextRefreshedEvent.class);
+		when(event.getApplicationContext()).thenReturn(applicationContext);
+		registerSingleton("mockPluginListener", new MockPluginListener());
+		try {
+			// Disabled and not loaded: the row is kept, the configuration survives the disabled period
+			FileUtils.touch(disabledJar);
+			resource.refreshPlugins(event);
+			Assertions.assertTrue(repository.existsById(kept.getId()));
+
+			// No jar at all: the row is removed as for an uninstalled plug-in
+			FileUtils.deleteQuietly(disabledJar);
+			resource.refreshPlugins(event);
+			Assertions.assertFalse(repository.existsById(kept.getId()));
+		} finally {
+			destroySingleton("mockPluginListener");
+			FileUtils.deleteQuietly(disabledJar);
+		}
+	}
+
 	@Test
 	void removeWidest() throws IOException {
 		final var localJar = toFile("plugin-iam-node-0.0.1.jar");
