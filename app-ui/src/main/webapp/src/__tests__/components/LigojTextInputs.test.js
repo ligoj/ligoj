@@ -22,7 +22,9 @@ describe('<LigojTextField /> / <LigojTextarea /> — native autofill suppressed'
     // 'off' resolves to 'new-password': the KNOWN token browsers honor to fully
     // suppress autofill (newer Chrome ignores 'off' AND unknown tokens)
     expect(el.attributes('autocomplete')).toBe('new-password')
-    expect(el.attributes('name')).toMatch(new RegExp(`^${prefix}\\d+$`))
+    // Unique per instance and randomized per page load: browser form history is keyed on it
+    expect(el.attributes('name')).toMatch(new RegExp(`^${prefix}[a-z0-9]+-\\d+$`))
+    expect(mountHost(Comp).find(tag).attributes('name')).not.toBe(el.attributes('name'))
     // Password-manager opt-outs
     expect(el.attributes('data-1p-ignore')).toBe('true')
     expect(el.attributes('data-lpignore')).toBe('true')

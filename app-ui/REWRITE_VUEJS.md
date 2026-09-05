@@ -266,7 +266,7 @@ rejects otherwise — a delegation test's fake tool must be a full manifest
 - **Host-exposed Vuetify primitives**: `host.js` re-exports `VBtn`, `VChip`, `VIcon`, `VTooltip`, `VListItem`, `VDivider`. Plugin `feature()` actions build VNodes with `h(VBtn, …)` without bundling their own Vuetify copy.
 - **2026 "Vibrant" shared components** live in the host and are re-exported from `host.js`: `VibrantDataTable` (presentation-only table; caller keeps its own `useDataTable`), `VibrantConfirmDialog` (drop-in for `LigojConfirmDialog` — same props/slots/events), `LigojIcon` (compact-mode-aware `<v-icon>` wrapper). They live in the host (not a plugin) because BOTH plugin-ui and plugin-id consume them and a plugin cannot import from a sibling plugin. See "2026 redesign & host-as-shell".
 - **Displayed username (`service:id:user-display`)**: plugin-id's session decoration ships the IAM `userDetails` (first/last name, mails, `customAttributes`) plus the `service:id:user-display` configuration; the host auth store resolves the app-bar username from it (`auth.displayName`): `id` (default), `mail`, `mail-short`, any attribute name incl. custom attributes, or an expression mixing `${token}` placeholders with literal text (e.g. `${firstName} ${lastName}`, tokens = the previous modes). Whenever the mode or a token cannot be resolved for the user (missing attribute, no mail), the display is the user's visual identifier (`service:id:visual-id-name`, the login by default); the computation never throws. Backend side, plugin-id forwards this value raw (`UserOrgResource#getDisplayConfiguration`): the `${...}` placeholders are for the UI, and Spring's `Environment` resolution would otherwise fail on them and break every session. The user button's tooltip is the identity card: full name, login, mails, custom attributes, roles and the administrator mention.
-- **Admin-level demo mode** (`useDemoMode` from `@ligoj/host`): a shared reactive flag persisted under localStorage `ligoj-demo-mode`, toggled from the host ProfileView (visible to administrators only, tooltip + hint). While enabled, the host app-bar shows an info `v-chip` indicator (flask icon + “Demo”, `demo.indicator*` keys) next to the user button — its tooltip explains the mode and clicking it opens the profile toggle. When on, plugin-ui blends demonstration content into the views: demo tool groups on the dashboard, demo projects in ProjectListView (shared dataset `plugin-ui/ui/src/demo/demoData.js`) a `DemoProjectExtension` body + `DemoProjectAction` action-bar button in the project edit dialog via `editExtension`, a demo `actionExtension` button in the project list toolbar (target `project`, `DemoProjectListAction` — lists the toolbar context it received and calls its `reload`), and a "Demo showcase" entry in the Administration menu (`renderNav`, demo-gated) routing to `plugin-ui/ui/src/views/DemoShowcaseView.vue` — a one-page gallery of the Ligoj shared components and Vuetify primitives, meant to grow into the reference showcase. The former per-view "Preview" toolbar toggle of HomeView is gone; `common.preview` was renamed `common.demo`.
+- **Admin-level demo mode** (`useDemoMode` from `@ligoj/host`): a shared reactive flag persisted under localStorage `ligoj-demo-mode`, toggled from the host ProfileView (visible to administrators only, tooltip + hint). The mode is visible to administrators only: `enabled` (what every consumer renders on) is the stored flag AND `auth.isAdmin`, while `stored` is the raw toggle state — a visual decision, not a security measure (the flag is browser-local, the demo content is fake or dropped by the backend); a non-admin session with the flag left in its browser sees nothing. While enabled, the host app-bar shows an info `v-chip` indicator (flask icon + “Demo”, `demo.indicator*` keys) next to the user button — its tooltip explains the mode and clicking it opens the profile toggle. When on, plugin-ui blends demonstration content into the views: demo tool groups on the dashboard, demo projects in ProjectListView (shared dataset `plugin-ui/ui/src/demo/demoData.js`) a `DemoProjectExtension` body + `DemoProjectAction` action-bar button in the project edit dialog via `editExtension`, a demo `actionExtension` button in the project list toolbar (target `project`, `DemoProjectListAction` — lists the toolbar context it received and calls its `reload`), and a "Demo showcase" entry in the Administration menu (`renderNav`, demo-gated) routing to `plugin-ui/ui/src/views/DemoShowcaseView.vue` — a one-page gallery of the Ligoj shared components and Vuetify primitives, meant to grow into the reference showcase. The former per-view "Preview" toolbar toggle of HomeView is gone; `common.preview` was renamed `common.demo`.
 - **Host is a shell**: the host owns only the chrome (App.vue sidebar/topbar, login, profile, about, error snackbar, plugin loader, shared component surface). EVERY domain screen lives in a plugin. The host `router/index.js` registers only `/profile`, `/about`, and the catch-all → `PluginView`; all other routes come from plugins' `install({ router })`.
 
 ## Plugin loading model (current)
@@ -1155,22 +1155,38 @@ The feature reads the reactive flag, so the consuming dialog updates the
 moment the mode is toggled — no reload.
 
 `beforeSave(payload, ctx)` (optional, since 2026-09): intercepts the save right
-before the POST/PUT — the contributor receives the payload the dialog is about
-to send plus the extension context and returns the payload to send (sync or
-async; returning nothing keeps the input, so in-place mutation works; returning
-`false` ABORTS the save silently). Hooks of several plugins chain in registration
-order. Every `editExtension` consumer (project, user,
-delegate, container-scope, company, group dialogs) routes its payload through
-`prepare()` returned by `useEditExtensions`. The plugin-ui demo contribution
-showcases it: it normalizes and counts the `demoTags` typed in its section, then
-opens `DemoSavePreviewDialog` (persistent `registerHeaderItem` mount, driven by
-`demo/savePreview.js`) showing the original and completed JSON side by side,
-plus the JSON actually sent when it differs — the demo has no API of its own and
-the standard project API rejects unknown properties (400 "Mapping"), so the
-demo-only keys are dropped from the request; a real plugin would point `apiPath`
-at its own API and send the completed payload. "Cancel" aborts. Note `useApi`
-returns `null` on any failed call (the error store shows it), it never throws:
-a payload the API rejects still closes the dialog.
+before the POST/PUT. The contributor receives the payload the dialog is about
+to send — the whole `form` spread, INCLUDING the keys its own extension
+component wrote into it (the ride-along contract of the payload note below),
+so there is no separate "original" payload — plus the extension context, and
+returns the request body (sync or async; returning nothing keeps the input, so
+in-place mutation works; returning `false` ABORTS the save silently).
+
+**The payload sent to the original API CAN be altered** — keys added, removed
+or reshaped — with one constraint: the target must accept it. The standard
+REST APIs reject unknown properties with a 400 "Mapping" error, so extra data
+either lands in fields the API knows, or goes to the plugin's own API by
+overriding `apiPath` in the same `editExtension` result. Hooks of several
+plugins chain in registration order. Every `editExtension` consumer (project,
+user, delegate, container-scope, company, group dialogs) routes its payload
+through `prepare()` returned by `useEditExtensions`.
+
+The plugin-ui demo contribution showcases both levers: its "Tags" field writes
+`demoTags` into the form; its `editExtension` result overrides `apiPath` to
+the plugin's own backend endpoint `rest/system/demo/project`
+(`DemoProjectResource`, plugin-ui Java side), whose payload
+(`DemoProjectEditionVo`) is the standard project VO plus `tags`; on save the
+hook parses the typed tags into that `tags` list, removes `demoTags`, and opens
+`DemoSavePreviewDialog` (persistent `registerHeaderItem` mount, driven by
+`demo/savePreview.js`) with three captioned panes — built by the dialog, added
+by the demo section (as typed, untouched), sent to the demo API (more complete
+than what the dialog built) — so the origin of every key is explicit. The
+endpoint is a sink: it logs and drops the payload, nothing is persisted (no
+project is created; the list view just reloads since no id comes back); like
+any endpoint without an explicit authorization it is admin-only. "Cancel"
+aborts. Note
+`useApi` returns `null` on any failed call (the error store shows it), it never
+throws: a payload the API rejects still closes the dialog.
 
 Payload note: every dialog now spreads its `form` into the save payload
 (dialog-specific transforms — e.g. group/company `scope` name→id — are applied
@@ -1531,7 +1547,11 @@ Battle scars worth respecting on the next migration.
 - For server-side autocompletes, lazy-load the first page on `@update:menu` (dropdown open), not on mount. Users who never open the dropdown should make zero API calls.
 - **`LigojTextField` / `LigojTextarea`** complete the anti-autofill family for
   free-text inputs: same hardening as the dropdown wrappers (`new-password`
-  token, unique `name`, password-manager opt-outs). **No input in the whole
+  token, `name` unique per instance AND randomized per page load —
+  `composables/antiAutofill.js`: browsers key their form history, the
+  dropdown of previously typed values, on the field name, and a deterministic
+  counter restarting on each load let it match again — password-manager
+  opt-outs). **No input in the whole
   project uses the browser's native autocomplete**: every `<v-text-field>` /
   `<v-textarea>` of the host and of every plugin UI was replaced by these
   twins (the login pages' credential inputs are the single deliberate

@@ -1,9 +1,3 @@
-<script>
-// Module-scoped counter → a unique field name per instance for the whole app
-// lifetime (see LigojAutocomplete for the rationale).
-let seq = 0
-</script>
-
 <script setup>
 /**
  * LigojCombobox — a drop-in <v-combobox> that suppresses the browser's native
@@ -19,6 +13,7 @@ let seq = 0
  * profile's reduce-motion flag.
  */
 import { computed, ref, onMounted, useAttrs } from 'vue'
+import { uniqueFieldName } from '@/composables/antiAutofill.js'
 
 defineOptions({ inheritAttrs: false })
 
@@ -29,9 +24,9 @@ const props = defineProps({
 
 const attrs = useAttrs()
 const root = ref(null)
-// Respect an explicit name; otherwise a unique, non-guessable one.
-// eslint-disable-next-line no-useless-assignment -- module-level counter, incremented across component instances
-const fieldName = String(attrs.name ?? `lj-cb-${++seq}`)
+// Respect an explicit name; otherwise one unique per instance and per page load
+// (see composables/antiAutofill.js: browsers key their form history on it).
+const fieldName = String(attrs.name ?? uniqueFieldName('lj-cb'))
 const autocompleteToken = computed(() => (props.autocomplete === 'off' ? 'new-password' : props.autocomplete))
 // Honor the profile's reduce-motion flag: no dropdown transition.
 const menuProps = computed(() => {

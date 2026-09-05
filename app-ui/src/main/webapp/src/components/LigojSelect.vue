@@ -1,8 +1,3 @@
-<script>
-// Module-scoped counter → a unique field name per instance (see LigojAutocomplete).
-let seq = 0
-</script>
-
 <script setup>
 /**
  * LigojSelect — a drop-in <v-select> aligned with LigojAutocomplete: the inner
@@ -12,6 +7,7 @@ let seq = 0
  * reduce-motion flag. Every prop, event, slot and `v-model` is forwarded.
  */
 import { computed, ref, onMounted, useAttrs } from 'vue'
+import { uniqueFieldName } from '@/composables/antiAutofill.js'
 
 defineOptions({ inheritAttrs: false })
 
@@ -22,8 +18,7 @@ const props = defineProps({
 
 const attrs = useAttrs()
 const root = ref(null)
-// eslint-disable-next-line no-useless-assignment -- module-level counter, incremented across component instances
-const fieldName = String(attrs.name ?? `lj-sel-${++seq}`)
+const fieldName = String(attrs.name ?? uniqueFieldName('lj-sel'))
 // `new-password` — see LigojAutocomplete: the known token browsers honor to
 // fully suppress native autofill (unknown tokens are ignored by newer Chrome).
 const autocompleteToken = computed(() => (props.autocomplete === 'off' ? 'new-password' : props.autocomplete))

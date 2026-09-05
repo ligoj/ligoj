@@ -1,9 +1,3 @@
-<script>
-// Module-scoped counter → a unique field name per instance for the whole app
-// lifetime (see LigojAutocomplete for the rationale).
-let seq = 0
-</script>
-
 <script setup>
 /**
  * LigojTextarea — a drop-in <v-textarea> that suppresses the browser's native
@@ -16,6 +10,7 @@ let seq = 0
  * a per-instance non-guessable `name`, and the password-manager opt-outs.
  */
 import { computed, ref, onMounted, useAttrs } from 'vue'
+import { uniqueFieldName } from '@/composables/antiAutofill.js'
 
 defineOptions({ inheritAttrs: false })
 
@@ -26,9 +21,9 @@ const props = defineProps({
 
 const attrs = useAttrs()
 const root = ref(null)
-// Respect an explicit name; otherwise a unique, non-guessable one.
-// eslint-disable-next-line no-useless-assignment -- module-level counter, incremented across component instances
-const fieldName = String(attrs.name ?? `lj-ta-${++seq}`)
+// Respect an explicit name; otherwise one unique per instance and per page load
+// (see composables/antiAutofill.js: browsers key their form history on it).
+const fieldName = String(attrs.name ?? uniqueFieldName('lj-ta'))
 const autocompleteToken = computed(() => (props.autocomplete === 'off' ? 'new-password' : props.autocomplete))
 
 function hardenInputs() {
