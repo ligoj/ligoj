@@ -20,7 +20,8 @@
       type="text"
       :placeholder="placeholder"
       :name="fieldName"
-      :autocomplete="fieldName"
+      autocomplete="new-password"
+      data-bwignore="true"
       data-1p-ignore="true"
       data-lpignore="true"
       data-form-type="other"
@@ -32,14 +33,9 @@
   </label>
 </template>
 
-<script>
-// Module-scoped counter → a unique field name per instance for the whole app
-// lifetime (same rationale as LigojAutocomplete).
-let seq = 0
-</script>
-
 <script setup>
 import { useI18nStore } from '@ligoj/host'
+import { uniqueFieldName } from '@/composables/antiAutofill.js'
 
 defineProps({
   modelValue: { type: String, default: '' },
@@ -49,8 +45,8 @@ defineProps({
 const emit = defineEmits(['update:modelValue', 'input'])
 const { t } = useI18nStore()
 const clearLabel = t('common.cancel')
-// eslint-disable-next-line no-useless-assignment -- module-level counter, incremented across component instances
-const fieldName = `lj-search-${++seq}`
+// Unique per instance and per page load: browsers key their form history on the name
+const fieldName = uniqueFieldName('lj-search')
 
 function onInput(e) {
   emit('update:modelValue', e.target.value)
