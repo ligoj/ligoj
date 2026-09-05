@@ -1399,7 +1399,7 @@ lives once in the panel):
   when the last check found newer plug-in versions (session `plugin-updates`),
   an `mdi-update` picto with a count badge and a tooltip listing them, opening
   the plug-in manager.
-- **SystemTaskView "Scheduled tasks" section**: `GET rest/system/schedule`
+- **SystemTaskView "Scheduled" tab** (`LjSegmented` in the page header switches between the long-task runners and the scheduled tasks; deep link `#/system/task?tab=scheduled`): `GET rest/system/schedule`
   (app-api `ScheduledTaskResource`) lists the Spring `@Scheduled` methods
   (from the `ScheduledTaskHolder` beans: bean, method, trigger kind and
   expression, next execution from `ScheduledTask.nextExecution()`, last
