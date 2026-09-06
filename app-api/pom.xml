@@ -204,7 +204,7 @@
         <dependency>
             <groupId>org.ligoj.plugin</groupId>
             <artifactId>plugin-ui</artifactId>
-            <version>[5.0.1,)</version>
+            <version>[5.0.2,)</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
@@ -432,7 +432,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-id-ldap</artifactId>
-                    <version>[5.0.0,5.1.0)</version>
+                    <version>[5.0.1,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
