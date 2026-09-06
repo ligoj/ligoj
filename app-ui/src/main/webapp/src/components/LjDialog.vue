@@ -28,7 +28,7 @@
     <v-card class="vmodal lj-surface">
       <div class="vmodal-head">
         <span v-if="icon" class="mi"><v-icon color="#fff">{{ icon }}</v-icon></span>
-        <h3>{{ title }}</h3>
+        <h3>{{ title }}<code v-if="badge" class="badge">{{ badge }}</code></h3>
         <button class="x" :aria-label="closeLabel" @click="close"><v-icon size="20">mdi-close</v-icon></button>
       </div>
       <v-card-text class="vmodal-body"><slot /></v-card-text>
@@ -46,6 +46,8 @@ import { useI18nStore } from '@ligoj/host'
 defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, default: '' },
+  // Identifier of the edited entity, highlighted after the title (login, visual id, key, name).
+  badge: { type: String, default: '' },
   icon: { type: String, default: '' },
   maxWidth: { type: [Number, String], default: 560 },
   persistent: { type: Boolean, default: false },
@@ -79,6 +81,19 @@ function close() { emit('update:modelValue', false) }
   font-size: 20px; margin: 0; flex: 1;
   color: var(--ink, rgb(var(--v-theme-on-surface)));
   letter-spacing: var(--lj-tracking, -.02em);
+}
+.vmodal-head h3 .badge {
+  margin-left: 10px;
+  padding: 2px 8px;
+  vertical-align: middle;
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink, rgb(var(--v-theme-on-surface)));
+  background: var(--pill, rgba(var(--v-theme-on-surface), .06));
+  border: var(--border-w, var(--lj-border-width, 1px)) var(--lj-border-style, solid) var(--border-c, var(--border, rgba(var(--v-theme-on-surface), .12)));
+  border-radius: var(--radius-sm, var(--lj-radius-sm, 8px));
 }
 .vmodal-head .x {
   width: 36px; height: 36px; border: 0; background: transparent;
