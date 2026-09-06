@@ -1,5 +1,5 @@
 <!--
-  NotFoundView — 2026 "Vibrant" catch-all (router /:pathMatch(.*)*). Replaces
+  NotFoundView — catch-all (router /:pathMatch(.*)*). Replaces
   the blank <router-view> a bad hash used to leave behind with a centred,
   theme-adaptive empty state: big 404 glyph, message, the attempted path and a
   CTA back to the dashboard.

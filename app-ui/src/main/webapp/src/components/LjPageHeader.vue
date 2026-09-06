@@ -1,8 +1,8 @@
 <!--
-  LjPageHeader — the 2026 page header, factored out of ~19 views that each
+  LjPageHeader — the page header, factored out of ~19 views that each
   hand-rolled `.ph` / `.ph-txt` / `.crumbs` / `.crumb`.
 
-    <LjPageHeader :title="t('user.title')" :subtitle="t('user.subtitle2026')">
+    <LjPageHeader :title="t('user.title')" :subtitle="t('user.subtitle')">
       <template #actions>
         <LjButton icon="mdi-plus" @click="openCreate">{{ t('user.new') }}</LjButton>
       </template>
@@ -25,7 +25,7 @@
   <header class="ph">
     <div class="ph-txt">
       <!-- Breadcrumb intentionally NOT rendered here: the single breadcrumb now
-           lives in the top app bar (App.vue), in the 2026 chip style. The
+           lives in the top app bar (App.vue), in the chip style. The
            `crumbs` prop is kept for API compatibility (views still pass it) but
            no longer paints a second, duplicated trail. -->
       <h1>{{ title }}</h1>

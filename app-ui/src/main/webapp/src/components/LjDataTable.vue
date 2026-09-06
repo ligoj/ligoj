@@ -1,7 +1,7 @@
 <!--
-  VibrantDataTable — the 2026 "Vibrant" data table for app-ui-2026.
+  LjDataTable — the data table for app-ui.
 
-  Pixel-faithful to the validated mockup (design/ligoj-2026-prototype.html):
+  Pixel-faithful to the validated mockup:
   tinted uppercase header, hover rows, custom rounded checkbox, gear column,
   and a "Lignes : N / a–b sur total" footer. It owns ONLY presentation +
   sort/pagination/selection UI state; data fetching stays in the caller's
@@ -9,7 +9,7 @@
   listens to @update:options to (re)load, exactly like LigojDataTableServer.
 
   Theme-adaptive: every colour derives from rgb(var(--v-theme-*)) so it
-  follows the active Vuetify preset (light/dark), per the 2026 rule.
+  follows the active Vuetify preset (light/dark), per the rule.
 
   Cells render through #cell.<key> slots (fallback: raw value); the trailing
   gear column renders through the #actions slot. The header tools cog exposes a
@@ -42,7 +42,7 @@
             </th>
             <!-- Trailing gear column: hosts the per-row #actions cells, and
                  (when tools=true) the table tools cog in its header — Export
-                 as CSV / Copy to clipboard, the 2026 equivalent of
+                 as CSV / Copy to clipboard, the equivalent of
                  LigojDataTableServer's TableToolsMenu. -->
             <th v-if="showGearCol" class="end gear-col">
               <v-menu v-if="tools" location="bottom end">
@@ -158,7 +158,7 @@ const showGearCol = computed(() => !!slots.actions || props.tools)
 
 /* Export / Copy.
  *
- * NB: VibrantDataTable's `headers` are DATA-only (the per-row actions live in
+ * NB: LjDataTable's `headers` are DATA-only (the per-row actions live in
  * the separate gear column via #actions), so — unlike LigojDataTableServer,
  * whose headers included a trailing actions column — we must NOT drop the last
  * header. We therefore call the pure `buildCsv`/`buildTsv` builders with an

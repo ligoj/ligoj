@@ -1,5 +1,5 @@
 <!--
-  LjDialog — the 2026 modal chrome, factored out of ~16 views that each
+  LjDialog — the modal chrome, factored out of ~16 views that each
   hand-rolled `.vmodal` / `.vmodal-head` / `.mi` / `.x` / `.vmodal-body` /
   `.vmodal-foot`.
 
@@ -14,7 +14,7 @@
   The card carries `lj-surface` + its own var defaults, so the chrome AND any
   slotted content keep their tokens after `v-dialog` teleports the card to
   <body> (scoped page vars don't reach teleported content — this is the
-  proven VibrantConfirmDialog pattern). The footer is right-aligned; pass
+  proven LjConfirmDialog pattern). The footer is right-aligned; pass
   LjButtons in any order.
 -->
 <template>

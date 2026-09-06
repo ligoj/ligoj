@@ -1,5 +1,5 @@
 <template>
-  <div class="p2026">
+  <div class="profile-view">
     <header class="hero">
       <div class="hero-avatar">{{ initials }}</div>
       <div class="hero-id">
@@ -444,7 +444,7 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 </script>
 
 <style scoped>
-.p2026 {
+.profile-view {
   --surface: rgb(var(--v-theme-surface));
   --ink: rgb(var(--v-theme-on-surface));
   --muted: rgba(var(--v-theme-on-surface), .60);
@@ -455,7 +455,7 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
   --on-primary: rgb(var(--v-theme-on-primary));
   --ok: #1d9d63;
   /* Shape/type from the active style's design tokens (assets/vuetify-overrides.css)
-   * so this hand-rolled 2026 view re-shapes with the theme, not just recolors.
+   * so this hand-rolled view re-shapes with the theme, not just recolors.
    * Fallbacks keep the original look when no style attribute is set. */
   --font: var(--lj-font, var(--v26-font, "Bricolage Grotesque", system-ui, sans-serif));
   --mono: var(--lj-mono, "JetBrains Mono", ui-monospace, monospace);

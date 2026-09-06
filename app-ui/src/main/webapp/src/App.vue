@@ -53,7 +53,7 @@
     <!-- App bar -->
     <header class="bar">
       <button class="icon-btn" @click="collapsed = !collapsed" title="Menu"><v-icon>mdi-menu</v-icon></button>
-      <!-- The single breadcrumb, in the 2026 chip style (relocated here from the
+      <!-- The single breadcrumb, in the chip style (relocated here from the
            per-view LjPageHeader, which no longer renders its own trail). -->
       <nav class="bcrumbs" aria-label="breadcrumb">
         <template v-for="(c, i) in displayCrumbs" :key="i">
@@ -462,7 +462,7 @@ function toast(msg = 'Page à venir dans la refonte') {
 </script>
 
 <style>
-/* Global: Vibrant display font across the whole UI-2026 app. This app is
+/* Global: display font across the whole app. This app is
    standalone, so applying it globally is safe (the current app-ui is a
    separate project and untouched). */
 /* The shell font tokens defer to the active style's `--lj-font` / `--lj-mono`
@@ -493,10 +493,10 @@ body {
   font-family: var(--v26-sys);
 }
 
-/* ---- Vibrant re-skin of Vuetify select / autocomplete dropdown menus ----
+/* ---- re-skin of Vuetify select / autocomplete dropdown menus ----
    These overlays teleport to <body>, outside any view scope, so they're
    styled globally here. Rounded panel, soft shadow, Bricolage font, rounded
-   hover/active items — so picking from a list matches the 2026 look. */
+   hover/active items — so picking from a list matches the look. */
 .v-select__content,
 .v-autocomplete__content,
 .v-combobox__content {
@@ -901,7 +901,7 @@ body {
   padding-left: 4px;
 }
 
-/* 2026 chip-style breadcrumb (relocated from LjPageHeader). */
+/* Chip-style breadcrumb (relocated from LjPageHeader). */
 .bc-chip {
   display: inline-flex;
   align-items: center;

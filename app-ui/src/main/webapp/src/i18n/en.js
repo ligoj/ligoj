@@ -544,10 +544,10 @@ export default {
   'common.operation': 'Operation',
   'common.trigger': 'Trigger',
 
-  // 2026 redesign: shared import-progress label
+  // Shared import-progress label
   'common.importing': "Importing…",
 
-  // 2026 redesign: shared audit/preview/table chrome
+  // Shared audit/preview/table chrome
   'common.audit': "Audit",
   'common.auditTitle': "Audit data",
   'common.createdBy': "Created by",
@@ -559,7 +559,7 @@ export default {
   'common.reduce': "Collapse",
   'subscription.deleteConfirm': "Delete this subscription?",
 
-  // 2026 redesign: dynamic chrome keys (subscription.status.*, theme, notFound, pager)
+  // Dynamic chrome keys (subscription.status.*, theme, notFound, pager)
   'subscription.status.ok': "up",
   'subscription.status.warn': "unstable",
   'subscription.status.err': "down",
@@ -575,7 +575,7 @@ export default {
   'common.of': "of",
   'common.previous': "Previous",
   'common.next': "Next",
-  // table tools (VibrantDataTable cog menu)
+  // table tools (LjDataTable cog menu)
   'common.exportCsv': "Export as CSV",
   'common.copyClipboard': "Copy to clipboard",
   'common.tableTools': "Table tools",

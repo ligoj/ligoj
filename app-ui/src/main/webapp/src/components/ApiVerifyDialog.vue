@@ -33,7 +33,7 @@
       <v-alert v-if="urlAllowed && !filteredVerifyOps.length" type="warning" variant="tonal" density="compact" class="mb-3">
         {{ t('profile.apiVerifyNoOps') }}
       </v-alert>
-      <VibrantDataTable :key="normalizedQuery" :headers="verifyHeaders" :items="pagedVerifyOps" :items-length="filteredVerifyOps.length"
+      <LjDataTable :key="normalizedQuery" :headers="verifyHeaders" :items="pagedVerifyOps" :items-length="filteredVerifyOps.length"
         :loading="false" item-value="key" :tools="false" :empty-text="t('common.noData')" @update:options="onVerifyOptions" @row-click="openApiExplorer">
         <template #cell.method="{ item }">
           <v-chip size="x-small" variant="flat" :color="METHOD_COLORS[item.method] || '#607d8b'" class="vmethod" label>{{ item.method }}
@@ -49,7 +49,7 @@
         <template #cell.allowed="{ item }">
           <LjStatus :status="item.allowed ? 'ok' : 'error'" :tooltip="item.allowed ? t('profile.apiVerifyStatusAllowed') : t('profile.apiVerifyStatusDenied')" />
         </template>
-      </VibrantDataTable>
+      </LjDataTable>
     </template>
     <template #footer>
       <LjButton variant="ghost" @click="emit('update:modelValue', false)">{{ t('common.close') }}</LjButton>
@@ -65,7 +65,7 @@ import { useApi } from '@/composables/useApi.js'
 import LjDialog from '@/components/LjDialog.vue'
 import LjButton from '@/components/LjButton.vue'
 import LjStatus from '@/components/LjStatus.vue'
-import VibrantDataTable from '@/components/VibrantDataTable.vue'
+import LjDataTable from '@/components/LjDataTable.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -216,7 +216,7 @@ const verifyHeaders = computed(() => [
   { key: 'allowed', label: t('profile.apiVerifyStatus'), sortable: true, align: 'center', width: '84px' },
 ])
 
-/* Client-side paging/sorting: VibrantDataTable is server-driven, so slice
+/* Client-side paging/sorting: LjDataTable is server-driven, so slice
  * here from its update:options. The :key remount on filter change resets
  * its internal page — mirror that reset in the options. */
 function onVerifyOptions(o) { verifyOptions.value = o }

@@ -1,8 +1,8 @@
 <!--
-  LjButton — the 2026 "Vibrant" action button, factored out of ~17 views
+  LjButton — the action button, factored out of ~17 views
   that each hand-rolled `.btn` / `.btn-ghost` / `.btn-danger` + spinner.
 
-  Deliberately a plain <button> (not Vuetify v-btn): the 2026 design uses a
+  Deliberately a plain <button> (not Vuetify v-btn): the design uses a
   flat gradient pill that doesn't map cleanly onto v-btn variants, and the
   views already render <button class="btn">. Drop-in:
 

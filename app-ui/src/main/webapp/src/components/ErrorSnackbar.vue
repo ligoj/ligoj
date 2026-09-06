@@ -1,7 +1,7 @@
 <!--
-  ErrorSnackbar — 2026 "Vibrant" global notification stack. The core `useApi`
+  ErrorSnackbar — global notification stack. The core `useApi`
   auto-pushes every non-2xx response onto `useErrorStore().errors` (and pages
-  can call errorStore.success/info), but the standalone 2026 shell never
+  can call errorStore.success/info), but the standalone shell never
   rendered that queue, so API failures were silent. This subscribes to the
   store and renders a bottom-right stack of theme-adaptive toasts (severity
   icon + colour, optional expandable technical details, manual dismiss). The

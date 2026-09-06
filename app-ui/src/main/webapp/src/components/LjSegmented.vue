@@ -1,5 +1,5 @@
 <!--
-  LjSegmented — the 2026 segmented tab control, factored out of the views
+  LjSegmented — the segmented tab control, factored out of the views
   that hand-rolled `.seg` / `.seg button` / `.seg button.on`.
 
     <LjSegmented v-model="activeTab" :options="[

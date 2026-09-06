@@ -1,5 +1,5 @@
 <!--
-  LjSearch — the 2026 search field, factored out of ~14 views that each
+  LjSearch — the search field, factored out of ~14 views that each
   hand-rolled `.search` / `.search-ic` / `.search input` / `.search-x`.
 
     <LjSearch v-model="query" :placeholder="t('user.searchPlaceholder')" @update:model-value="page = 1" />

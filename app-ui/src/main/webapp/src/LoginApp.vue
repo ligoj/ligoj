@@ -1,13 +1,8 @@
 <!--
-  LoginApp2026 — 2026 "Vibrant" re-skin of the login screen.
-
-  PILOT of the UI 2026 redesign (feature/ui-2026). The <template> and
-  <script setup> are DUPLICATED verbatim from LoginApp.vue so all the
-  real behaviour is preserved (login / recovery / reset modes, CAPTCHA,
-  field validation, toasts, OIDC short-circuit, locale switch). Only the
-  <style> is reworked to the Vibrant design. The original LoginApp.vue is
-  left untouched and remains the default login served by the backend;
-  this variant is reachable via its own Vite entry (login-2026.html).
+  LoginApp — the standalone login screen (Vite entry `login.html`, served
+  before any session exists): login / recovery / reset modes, CAPTCHA, field
+  validation, toasts, OIDC short-circuit and locale switch. Its styles are
+  self-contained since the host shell is not loaded on this page.
 -->
 <template>
   <main class="login-bg">
@@ -566,7 +561,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ===== 2026 "Vibrant" theme — self-contained (pre-auth page) ===== */
+/* ===== theme — self-contained (pre-auth page) ===== */
 * {
   box-sizing: border-box;
 }

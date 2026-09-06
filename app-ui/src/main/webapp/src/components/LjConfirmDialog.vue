@@ -1,5 +1,5 @@
 <!--
-  VibrantConfirmDialog — 2026 "Vibrant" replacement for the host's
+  LjConfirmDialog — replacement for the host's
   LigojConfirmDialog (delete / unsaved-guard / lock-isolate-reset confirms).
   Same public API (props/slots/events) so callers swap it in by aliasing the
   import — no template changes. The parent owns the lifecycle: confirm never
@@ -67,7 +67,7 @@ function onCancel() {
   --border-2: rgba(var(--v-theme-on-surface), .26);
   --hover: rgba(var(--v-theme-on-surface), .06);
   /* Shape / type from the active style's design tokens (see
-   * assets/vuetify-overrides.css); fall back to the 2026 defaults. */
+   * assets/vuetify-overrides.css); fall back to the defaults. */
   --font: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif);
   --sys: var(--lj-font, -apple-system, BlinkMacSystemFont, sans-serif);
   /* tone-driven accent (the confirm button + icon tile) */

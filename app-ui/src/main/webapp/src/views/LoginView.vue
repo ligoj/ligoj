@@ -1,5 +1,5 @@
 <!--
-  LoginView — 2026 "Vibrant" login
+  LoginView — login
 -->
 <template>
   <main class="login-bg">
@@ -514,9 +514,9 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* ===== 2026 "Vibrant" login — theme-adaptive (follows the active Vuetify
+/* ===== login — theme-adaptive (follows the active Vuetify
    preset, light or dark). No hard-coded palette: every colour derives from
-   --v-theme-* so the page matches the rest of app-ui-2026. ===== */
+   --v-theme-* so the page matches the rest of app-ui. ===== */
 * {
   box-sizing: border-box;
 }
@@ -532,7 +532,7 @@ onBeforeUnmount(() => {
   --hover: rgba(var(--v-theme-on-surface), .06);
   --input-bg: rgba(var(--v-theme-on-surface), .03);
   --accent: rgb(var(--v-theme-secondary));
-  /* warm Vibrant accent */
+  /* warm accent */
   --primary: rgb(var(--v-theme-primary));
   --ok: rgb(var(--v-theme-success));
   --err: rgb(var(--v-theme-error));

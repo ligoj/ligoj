@@ -22,7 +22,7 @@
  * radius, shadow/elevation, border weight, spacing rhythm, font family +
  * weight + letter-spacing. Defaults below = the stock Vuetify feel; each
  * `[data-style="<id>"]` block further down re-binds the subset it cares
- * about, and shared components (VibrantDataTable, VibrantConfirmDialog, the
+ * about, and shared components (LjDataTable, LjConfirmDialog, the
  * dialogs, the shell) consume `var(--lj-*)` instead of hardcoding values —
  * so switching style now visibly changes shadows, radii, borders, spacing
  * and type everywhere, not just colors.
@@ -57,7 +57,7 @@
 /* ===========================================================================
  * .lj-surface — the local design-variable block, factored out.
  *
- * Every 2026 view used to copy-paste this same `--surface / --ink / --radius
+ * Every view used to copy-paste this same `--surface / --ink / --radius
  * / ...` block into its scoped root (`.users`, `.scopes`, `.pdetail`, …),
  * and the copies had DRIFTED (--hover .05 vs .06, --radius 12/16/18, button
  * padding 11/17 vs 10/16). Adding `class="… lj-surface"` to a view root now
@@ -387,7 +387,7 @@
  * Orthogonal global accessibility toggle — see `applyReduceMotion()` in
  * `plugins/styles.js`. Lives at `[data-reduce-motion="true"]` so it layers
  * over any preset. Kills ripples, dialog/menu appear animations (including
- * the bespoke `vc-shake` on destructive VibrantConfirmDialog) and progress
+ * the bespoke `vc-shake` on destructive LjConfirmDialog) and progress
  * bar motion. The global reset below already neutralizes most of these via
  * the near-zero duration; the targeted rules make the intent explicit and
  * cover keyframe animations that ignore `transition-duration`.
@@ -420,7 +420,7 @@
 
 /* ============================== sharp ====================================
  * Brutalist. Zero radius, monospaced labels, harsh borders, uppercase
- * buttons. Reads like a 90s admin panel reskinned for 2026 — a love-it-or-
+ * buttons. Reads like a 90s admin panel reskinned for today — a love-it-or-
  * hate-it style that's increasingly popular in dev tools.
  * ======================================================================== */
 [data-style="sharp"] {
@@ -464,11 +464,11 @@
 }
 
 /* ============================== vibrant ==================================
- * Bold gradients, deep navy sidebar, lifted cards. The "Ligoj 2026"
+ * Bold gradients, deep navy sidebar, lifted cards. The original
  * prototype mock-up turned into a style: cards round to 14 px, the
  * primary action wears an animated orange→red gradient, the active
  * sidebar row gets a left accent bar + tinted background. Headings
- * carry the Inter typographic flavour for that 2026 SaaS look.
+ * carry the Inter typographic flavour for that modern SaaS look.
  * ======================================================================== */
 [data-style="vibrant"] {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
@@ -1065,7 +1065,7 @@
   transition: opacity .45s var(--md3-standard) !important;
 }
 
-/* --- Ripples on the 2026 custom controls. The visible buttons of the shell
+/* --- Ripples on the custom controls. The visible buttons of the shell
  * are plain elements (LjButton `.lj-btn`, the icon buttons `.lj-iconbtn`, the
  * sidebar `.nav-item` / `.sub-item`), NOT Vuetify components — so they carry
  * no `v-ripple` directive. Give them a pure-CSS centered ripple: a circular
@@ -1159,7 +1159,7 @@
  * Scoped on `[data-preset]` (stamped by presets.js) because these two presets
  * share the `default` style with VS Code Dark, which stays ripple-less. Same
  * timing as the ligoj-classic block below: Vuetify's v-ripple tuning plus the
- * pure-CSS centered ripple on the 2026 custom controls (plain elements
+ * pure-CSS centered ripple on the custom controls (plain elements
  * carrying no v-ripple directive). Reduce-motion still wins (its rules hide
  * the ripple container and zero the durations).
  * ========================================================================= */
@@ -1256,7 +1256,7 @@
   transition: opacity .1s linear !important;
 }
 
-/* a') Ripple on the 2026 custom controls (plain elements with no v-ripple):
+/* a') Ripple on the custom controls (plain elements with no v-ripple):
  * same pure-CSS centered ripple as md3, tuned to the legacy feel. */
 [data-style="ligoj-classic"] .lj-btn,
 [data-style="ligoj-classic"] .lj-iconbtn,

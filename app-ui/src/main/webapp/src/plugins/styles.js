@@ -49,7 +49,7 @@ export const STYLE_OPTIONS = [
     radius: '0',
   },
 
-  /* --- bold / 2026 --- */
+  /* --- bold --- */
   {
     id: 'vibrant',
     label: 'Vibrant',
