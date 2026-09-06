@@ -26,7 +26,7 @@ export default {
   'nav.refresh': 'Refresh',
   'nav.api': 'API',
   'nav.apiExplorer': 'Explorer',
-  'nav.apiTokens': 'Tokens',
+  'nav.apiTokens': 'API keys',
 
   // Common
   'common.search': 'Search',
@@ -194,8 +194,8 @@ export default {
   'profile.uiAuth': 'UI Authorizations',
   'profile.apiAuth': 'API Authorizations',
   'profile.preferences': 'Preferences',
-  'profile.apiTokens': 'API tokens',
-  'profile.apiTokensHint': 'Manage API keys',
+  'profile.apiTokens': 'API keys',
+  'profile.apiTokensHint': 'API keys',
   'profile.apiVerify': 'Verify',
   'profile.apiVerifyTitle': 'API access verification',
   'profile.apiVerifyAuths': '{n} authorizations',

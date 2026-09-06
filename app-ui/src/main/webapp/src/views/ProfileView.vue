@@ -142,8 +142,16 @@
         <section class="pcard pcard--perm">
           <div class="perm-head">
             <h3><span class="ic"><v-icon>mdi-key</v-icon></span>{{ t('profile.permissions') }}</h3>
-            <LjSegmented v-model="permTab" :options="permTabs" />
+            <div class="perm-links">
+              <a class="text-info text-decoration-none" href="#/api/token">
+                <span class="v"><v-icon size="small">mdi-key</v-icon>{{ t('profile.apiTokensHint') }}</span>
+              </a>
+              <button type="button" class="text-info verify-link" @click="openVerify">
+                <span class="v"><v-icon size="small">mdi-shield-search</v-icon>{{ t('profile.apiVerify') }}</span>
+              </button>
+            </div>
           </div>
+          <LjSegmented v-model="permTab" :options="permTabs" class="perm-tabs" />
           <template v-if="permTab === 'ui'">
             <div class="perm-list">
               <code v-for="(pattern, i) in auth.uiAuthorizations" :key="'ui-' + i" class="perm">
@@ -153,14 +161,6 @@
             </div>
           </template>
           <template v-else>
-            <div class="subhead d-flex align-center">
-              <a class="text-info text-decoration-none" href="#/api/token">
-                <span class="v">{{ t('profile.apiTokensHint') }}<v-icon size="small">mdi-chevron-right</v-icon></span>
-              </a>
-              <button type="button" class="text-info verify-link ms-4" @click="openVerify">
-                <span class="v"><v-icon size="small">mdi-shield-search</v-icon>{{ t('profile.apiVerify') }}</span>
-              </button>
-            </div>
             <div class="perm-list">
               <code v-for="(entry, i) in auth.apiAuthorizations" :key="'api-' + i" class="perm perm--api">
                 <span class="method" :class="methodClass(entry.method)">{{ entry.method || '?' }}</span>
@@ -299,8 +299,8 @@ function openVerify() { verifyOpen.value = true }
 /* --- permissions tabs --- */
 const permTab = ref('ui')
 const permTabs = computed(() => [
-  { value: 'ui', label: `${t('profile.uiAuth')} (${auth.uiAuthorizations.length})` },
-  { value: 'api', label: `${t('profile.apiAuth')} (${auth.apiAuthorizations.length})` },
+  { value: 'ui', label: t('profile.uiAuth'), count: auth.uiAuthorizations.length },
+  { value: 'api', label: t('profile.apiAuth'), count: auth.apiAuthorizations.length },
 ])
 
 /* --- authentication card --- */
@@ -646,14 +646,12 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
   margin-bottom: 10px;
 }
 
-.subhead--api {
-  margin-top: 16px;
-}
-
-/* Permissions header: title + UI/API tabs */
+/* Permissions header: title + API links (keys, verify); the UI/API tabs sit on their own row below */
 .perm-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .perm-head h3 { margin-bottom: 0; }
-.perm-head + .perm-list, .perm-head + .subhead { margin-top: 14px; }
+.perm-links { display: inline-flex; align-items: center; gap: 16px; margin-left: auto; font-size: 13px; font-weight: 600; }
+.perm-tabs { margin-top: 12px; }
+.perm-tabs + .perm-list { margin-top: 14px; }
 
 /* Authentication card */
 .mfa-note { margin: 0 0 8px; }
@@ -710,8 +708,8 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
   }
 }
 
-.pcard--perm h3,
-.pcard--perm .subhead {
+.pcard--perm .perm-head,
+.pcard--perm .perm-tabs {
   flex: none;
 }
 
@@ -795,7 +793,7 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 }
 
 .verify-link .v,
-.subhead--api .v {
+.perm-links .v {
   display: inline-flex;
   align-items: center;
   gap: 4px;

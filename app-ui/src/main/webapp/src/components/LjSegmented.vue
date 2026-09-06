@@ -4,8 +4,11 @@
 
     <LjSegmented v-model="activeTab" :options="[
       { value: 'group',   icon: 'mdi-account-group', label: t('nav.groups') },
-      { value: 'company', icon: 'mdi-domain',        label: t('nav.companies') },
+      { value: 'company', icon: 'mdi-domain',        label: t('nav.companies'), count: 12 },
     ]" />
+
+  An optional `count` renders as a small chip after the label (a counter of
+  what the tab holds); `null` / `undefined` renders nothing.
 
   Reads its colours/shape from the enclosing `.lj-surface` root.
 -->
@@ -19,6 +22,7 @@
       @click="$emit('update:modelValue', opt.value)"
     >
       <v-icon v-if="opt.icon" size="16">{{ opt.icon }}</v-icon>{{ opt.label }}
+      <v-chip v-if="opt.count != null" class="seg-count" size="x-small" variant="tonal" density="comfortable">{{ opt.count }}</v-chip>
     </button>
   </div>
 </template>
@@ -26,7 +30,7 @@
 <script setup>
 defineProps({
   modelValue: { type: [String, Number], default: null },
-  // [{ value, icon?, label }]
+  // [{ value, icon?, label, count? }]
   options: { type: Array, required: true },
 })
 defineEmits(['update:modelValue'])
@@ -61,5 +65,16 @@ defineEmits(['update:modelValue'])
   color: #fff;
   background: linear-gradient(135deg, #ff9436, #ff5a52);
   box-shadow: 0 6px 14px -8px rgba(255, 90, 82, .6);
+}
+/* Counter chip: tonal on the surface, translucent white on the active gradient */
+.seg .seg-count {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-weight: 700;
+  height: 18px;
+  padding: 0 6px;
+}
+.seg button.on .seg-count {
+  background: rgba(255, 255, 255, .22);
+  color: #fff;
 }
 </style>

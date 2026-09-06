@@ -26,7 +26,7 @@ export default {
   'nav.refresh': 'Actualiser',
   'nav.api': 'API',
   'nav.apiExplorer': 'Explorateur',
-  'nav.apiTokens': 'Jetons',
+  'nav.apiTokens': 'Clés API',
 
   // Common
   'common.search': 'Rechercher',
@@ -194,8 +194,8 @@ export default {
   'profile.uiAuth': 'Autorisations UI',
   'profile.apiAuth': 'Autorisations API',
   'profile.preferences': 'Préférences',
-  'profile.apiTokens': 'Tokens API',
-  'profile.apiTokensHint': 'Gérer les clés API',
+  'profile.apiTokens': 'Clés API',
+  'profile.apiTokensHint': 'Clés API',
   'profile.apiVerify': 'Vérifier',
   'profile.apiVerifyTitle': 'Vérification des accès API',
   'profile.apiVerifyAuths': '{n} autorisations',
