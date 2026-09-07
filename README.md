@@ -36,6 +36,7 @@ Compose variables, MySQL/PostgreSQL choice, persistent home and image publishing
 ## Documentation
 
 > 📖 **The full documentation lives in [DOC.md](DOC.md)** — this page is only the front door.
+> 📝 **What changed in each release: [CHANGELOG.md](CHANGELOG.md)** ([version française](CHANGELOG.fr.md)) — functional changes for users and administrators, with scope badges.
 
 | Topic                                                 | Where                                                                                                           |
 | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
