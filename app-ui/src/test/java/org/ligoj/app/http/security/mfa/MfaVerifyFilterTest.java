@@ -44,6 +44,7 @@ class MfaVerifyFilterTest {
 		request.setContextPath("/ligoj");
 		if (pending) {
 			request.getSession(true).setAttribute(MfaSupport.ATTRIBUTE_PENDING, Boolean.TRUE);
+			request.getSession().setAttribute(MfaSupport.ATTRIBUTE_DEVICES, "[{\"id\":1}]");
 		}
 		return request;
 	}

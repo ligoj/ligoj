@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -36,6 +37,12 @@ public class MfaSupport {
 	public static final String MFA_PAGE = "/mfa.html";
 
 	/**
+	 * The login page with the flag telling the service is temporarily unavailable: where a login is sent when the
+	 * second factor state cannot be determined.
+	 */
+	public static final String LOGIN_UNAVAILABLE_PAGE = "/login.html?unavailable";
+
+	/**
 	 * The verification endpoint of the front-end.
 	 */
 	public static final String VERIFY_PATH = "/login/mfa";
@@ -46,14 +53,37 @@ public class MfaSupport {
 	public static final String PASSKEY_PATH = "/login/mfa/passkey";
 
 	/**
-	 * Whether the second factor is pending for this session.
+	 * Whether the second factor is pending for this session: flagged, with devices to verify against. A flag without
+	 * any device is stale (left by a previous authentication of the same session) and is dropped: there is nothing
+	 * to verify.
 	 *
 	 * @param request The current request.
 	 * @return <code>true</code> when the user is authenticated but not yet verified.
 	 */
 	public static boolean isPending(final HttpServletRequest request) {
 		final var session = request.getSession(false);
-		return session != null && Boolean.TRUE.equals(session.getAttribute(ATTRIBUTE_PENDING));
+		if (session == null || !Boolean.TRUE.equals(session.getAttribute(ATTRIBUTE_PENDING))) {
+			return false;
+		}
+		if (session.getAttribute(ATTRIBUTE_DEVICES) instanceof String devices && !StringUtils.isBlank(devices)
+				&& !"[]".equals(devices.trim())) {
+			return true;
+		}
+		clear(session);
+		return false;
+	}
+
+	/**
+	 * Remove the second factor state from the session.
+	 *
+	 * @param session The session, may be <code>null</code>.
+	 */
+	public static void clear(final HttpSession session) {
+		if (session != null) {
+			session.removeAttribute(ATTRIBUTE_PENDING);
+			session.removeAttribute(ATTRIBUTE_DEVICES);
+			session.removeAttribute(ATTRIBUTE_ATTEMPTS);
+		}
 	}
 
 	/**

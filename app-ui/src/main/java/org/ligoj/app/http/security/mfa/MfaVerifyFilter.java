@@ -95,9 +95,7 @@ public class MfaVerifyFilter extends OncePerRequestFilter {
 		final var verified = passkey instanceof Map<?, ?> assertion ? client.verifyPasskey(user, mapper.writeValueAsString(assertion))
 				: client.verify(user, code, toDevice(input.get("device")));
 		if (verified) {
-			session.removeAttribute(MfaSupport.ATTRIBUTE_PENDING);
-			session.removeAttribute(MfaSupport.ATTRIBUTE_ATTEMPTS);
-			session.removeAttribute(MfaSupport.ATTRIBUTE_DEVICES);
+			MfaSupport.clear(session);
 			log.info("Second factor verified for {}", user);
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			return;

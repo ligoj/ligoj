@@ -24,6 +24,7 @@ class MfaAuthorizationManagerTest {
 		request.setContextPath("/ligoj");
 		if (pending) {
 			request.getSession(true).setAttribute(MfaSupport.ATTRIBUTE_PENDING, Boolean.TRUE);
+			request.getSession().setAttribute(MfaSupport.ATTRIBUTE_DEVICES, "[{\"id\":1}]");
 		}
 		return request;
 	}
@@ -62,5 +63,21 @@ class MfaAuthorizationManagerTest {
 		request.setContextPath("/ligoj");
 		Assertions.assertFalse(manager.authorize(() -> null, new RequestAuthorizationContext(request)).isGranted());
 		verify(delegate, org.mockito.Mockito.times(2)).authorize(any(), any());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void pendingWithoutDevicesIsStale() {
+		final AuthorizationManager<RequestAuthorizationContext> delegate = mock(AuthorizationManager.class);
+		when(delegate.authorize(any(), any())).thenReturn(new AuthorizationDecision(true));
+		final var manager = new MfaAuthorizationManager(delegate);
+		for (final var devices : new String[] { null, "[]" }) {
+			final var request = request("/index.html", false);
+			request.getSession(true).setAttribute(MfaSupport.ATTRIBUTE_PENDING, Boolean.TRUE);
+			request.getSession().setAttribute(MfaSupport.ATTRIBUTE_DEVICES, devices);
+			// Nothing to verify: the flag is dropped and the regular authorization applies
+			Assertions.assertTrue(manager.authorize(() -> null, new RequestAuthorizationContext(request)).isGranted());
+			Assertions.assertNull(request.getSession().getAttribute(MfaSupport.ATTRIBUTE_PENDING));
+		}
 	}
 }

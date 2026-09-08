@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.ligoj.app.http.security.RestRedirectStrategy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import jakarta.servlet.ServletException;
@@ -15,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Success handler adding the second factor after any primary authentication (form login, OIDC): when the user
  * registered an MFA device, the session is flagged as pending and the user is sent to the MFA page instead of the
- * application; otherwise the delegate completes the login as usual.
+ * application; otherwise the delegate completes the login as usual, and any second factor state left by a previous
+ * authentication of the same session is dropped. When the state cannot be determined, the login is refused: an MFA
+ * page without devices would be a dead end.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -36,7 +39,19 @@ public class MfaAuthenticationSuccessHandler implements AuthenticationSuccessHan
 			final Authentication authentication) throws IOException, ServletException {
 		final var user = MfaSupport.userName(authentication, usernameOAuth2Attribute);
 		final var state = client.state(user);
+		if (state.unavailable()) {
+			// Fail closed, explicitly: no session, no authentication, and a retry later from the login page
+			log.error("Second factor state of {} is unknown, login refused", user);
+			final var session = request.getSession(false);
+			if (session != null) {
+				session.invalidate();
+			}
+			SecurityContextHolder.clearContext();
+			redirect(request, response, MfaSupport.LOGIN_UNAVAILABLE_PAGE);
+			return;
+		}
 		if (!state.required()) {
+			MfaSupport.clear(request.getSession(false));
 			delegate.onAuthenticationSuccess(request, response, authentication);
 			return;
 		}
@@ -45,13 +60,18 @@ public class MfaAuthenticationSuccessHandler implements AuthenticationSuccessHan
 		session.setAttribute(MfaSupport.ATTRIBUTE_DEVICES, state.devicesJson());
 		session.removeAttribute(MfaSupport.ATTRIBUTE_ATTEMPTS);
 		log.info("Second factor required for {}", user);
+		redirect(request, response, MfaSupport.MFA_PAGE);
+	}
+
+	private void redirect(final HttpServletRequest request, final HttpServletResponse response, final String page)
+			throws IOException {
 		if (restStyle) {
 			final var strategy = new RestRedirectStrategy();
 			strategy.setSuccess(true);
 			strategy.setForceRedirect(true);
-			strategy.sendRedirect(request, response, MfaSupport.MFA_PAGE);
+			strategy.sendRedirect(request, response, page);
 		} else {
-			response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + MfaSupport.MFA_PAGE));
+			response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + page));
 		}
 	}
 }

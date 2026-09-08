@@ -102,4 +102,31 @@ class MfaClientTest {
 				.thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST, "", null, null, null));
 		Assertions.assertFalse(client(template).verify("junit", "000000"));
 	}
+
+	@Test
+	void stateReportsUnavailability() {
+		final var template = mock(RestTemplate.class);
+		// Forbidden: fail closed, and say the state is unknown
+		when(template.exchange(eq(API + "/system/mfa/login"), eq(HttpMethod.POST), any(), eq(String.class)))
+				.thenThrow(HttpClientErrorException.create(HttpStatus.FORBIDDEN, "", null, null, null));
+		var state = client(template).state("junit");
+		Assertions.assertTrue(state.required());
+		Assertions.assertTrue(state.unavailable());
+		// API down: same
+		when(template.exchange(eq(API + "/system/mfa/login"), eq(HttpMethod.POST), any(), eq(String.class)))
+				.thenThrow(new ResourceAccessException("down"));
+		Assertions.assertTrue(client(template).state("junit").unavailable());
+		// Resource not deployed: not required, and the state is known
+		when(template.exchange(eq(API + "/system/mfa/login"), eq(HttpMethod.POST), any(), eq(String.class)))
+				.thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "", null, null, null));
+		state = client(template).state("junit");
+		Assertions.assertFalse(state.required());
+		Assertions.assertFalse(state.unavailable());
+		// Regular answer: known
+		when(template.exchange(eq(API + "/system/mfa/login"), eq(HttpMethod.POST), any(), eq(String.class)))
+				.thenReturn(new ResponseEntity<>("{\"required\":false}", HttpStatus.OK));
+		state = client(template).state("junit");
+		Assertions.assertFalse(state.required());
+		Assertions.assertFalse(state.unavailable());
+	}
 }

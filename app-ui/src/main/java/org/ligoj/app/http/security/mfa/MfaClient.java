@@ -45,19 +45,32 @@ public class MfaClient {
 	/**
 	 * MFA state of a user after the primary authentication.
 	 *
-	 * @param required    Whether a second factor is required.
+	 * @param required    Whether a second factor is required. <code>true</code> when the state is unavailable: fail
+	 *                    closed.
 	 * @param devicesJson JSON array of the registered devices (id, name, type, defaultDevice), for the MFA page.
+	 * @param unavailable <code>true</code> when the API could not tell: the user cannot be sent to the MFA page,
+	 *                    there is nothing to verify.
 	 */
-	public record MfaState(boolean required, String devicesJson) {
+	public record MfaState(boolean required, String devicesJson, boolean unavailable) {
+
+		/**
+		 * A known state.
+		 *
+		 * @param required    Whether a second factor is required.
+		 * @param devicesJson JSON array of the registered devices.
+		 */
+		public MfaState(final boolean required, final String devicesJson) {
+			this(required, devicesJson, false);
+		}
 	}
 
 	private static final MfaState NOT_REQUIRED = new MfaState(false, "[]");
-	private static final MfaState REQUIRED_UNKNOWN = new MfaState(true, "[]");
+	private static final MfaState UNAVAILABLE = new MfaState(true, "[]", true);
 
 	/**
 	 * Record the authentication of the user and tell whether a second factor is required. Fails closed: an API
-	 * error means required. An API without the MFA resource (404/405) means the feature is not available: not
-	 * required.
+	 * error means required (and {@link MfaState#unavailable()}). An API without the MFA resource (404/405) means the
+	 * feature is not available: not required.
 	 *
 	 * @param user The authenticated user.
 	 * @return <code>true</code> when the user registered at least one MFA device.
@@ -97,11 +110,17 @@ public class MfaClient {
 				log.warn("MFA resource is not available on the API ({}), second factor skipped for {}", e.getStatusCode(), user);
 				return NOT_REQUIRED;
 			}
-			log.error("Unable to check the MFA state of {} ({}), considered as required", user, e.getStatusCode());
-			return REQUIRED_UNKNOWN;
+			if (e.getStatusCode() == HttpStatus.FORBIDDEN || e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+				log.error("Unable to check the MFA state of {} ({}), login refused: the API rejects this user on '/system/mfa',"
+						+ " check the API authorization '^rest/system/mfa.*' of role USER and that the API knows this user", user,
+						e.getStatusCode());
+			} else {
+				log.error("Unable to check the MFA state of {} ({}), login refused", user, e.getStatusCode());
+			}
+			return UNAVAILABLE;
 		} catch (final RuntimeException e) {
-			log.error("Unable to check the MFA state of {}, considered as required", user, e);
-			return REQUIRED_UNKNOWN;
+			log.error("Unable to check the MFA state of {}, login refused", user, e);
+			return UNAVAILABLE;
 		}
 	}
 
