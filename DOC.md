@@ -941,6 +941,10 @@ new plugin. So the administrative user must ensure that when the plugin `plugin-
 The same logic applies to the update process. Do not update `plugin-service-tool` without doing the same for `plugin-service-tool`. This limitation will be fixed
 with [#1](https://github.com/ligoj/ligoj/issues/1)
 
+## Compatibility check at installation
+
+The plugin manager offers the newest version published on the repository. Before a downloaded plugin is kept, its embedded Maven metadata is compared with the running instance: a plugin built for a newer `plugin-api` major version than the one of the API (its `org.ligoj.api` parent in `META-INF/maven/.../pom.xml`) is refused with the `incompatible-api` error, the required and the actual versions are logged, and the file is deleted. Such a plugin would break the API at the next restart. Plugins built for an older major are still accepted, at your own risk.
+
 ## Creating your own plugin
 
 In the below table, the example is based on a plug-in being a tool `Slack` implementing the service `Talk`.

@@ -648,12 +648,13 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 						: input;
 				// Download and copy the file, note the previous version is not removed
 				Files.copy(input2, target, StandardCopyOption.REPLACE_EXISTING);
-				log.info("Plugin {}:{} v{} has been installed in {}, restart is required", groupId, artifact, version, target);
 			} catch (final Exception ioe) {
 				// Installation failed, either download, either FS error
 				log.info("Unable to install plugin {}:{} v{} from {}", groupId, artifact, version, repository, ioe);
 				throw new ValidationJsonException("artifact", "cannot-be-installed", "id", artifact);
 			}
+			checkApiCompatibility(target, artifact, version);
+			log.info("Plugin {}:{} v{} has been installed in {}, restart is required", groupId, artifact, version, target);
 		}
 		if (installJavadoc && input == null) {
 			log.info("Download Javadoc {}:{} v{} from {}", groupId, artifact, version, repository);
@@ -666,6 +667,82 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 				log.warn("Unable to install Javadoc {}:{} v{} from {}, non-blocking error", groupId, artifact, version, repository, ioe);
 			}
 		}
+	}
+
+	/**
+	 * Refuse a plugin built for a newer plugin-api major than this instance: it would break the API at the next
+	 * restart. Plugins without Maven metadata, or built for an older or the same major, are accepted.
+	 *
+	 * @param jar      The downloaded plugin file, deleted when refused.
+	 * @param artifact The plugin artifact, for the error and the log.
+	 * @param version  The plugin version, for the log.
+	 */
+	void checkApiCompatibility(final java.nio.file.Path jar, final String artifact, final String version) {
+		final var required = getRequiredApiMajor(jar);
+		final var actual = getApiMajor();
+		if (required != null && actual > 0 && required > actual) {
+			log.error("Plugin {} v{} requires plugin-api {}.x but this instance runs plugin-api {}.x, installation refused",
+					artifact, version, required, actual);
+			try {
+				Files.deleteIfExists(jar);
+			} catch (final IOException e) {
+				log.warn("Unable to delete the refused plugin {}", jar, e);
+			}
+			throw new ValidationJsonException("artifact", "incompatible-api", "id", artifact, "required", required, "actual", actual);
+		}
+	}
+
+	/**
+	 * The plugin-api major version of this instance, read from the Maven metadata of the plugin-api jar.
+	 *
+	 * @return The major version, <code>0</code> when unknown.
+	 */
+	int getApiMajor() {
+		try (var input = SystemPluginResource.class.getClassLoader()
+				.getResourceAsStream("META-INF/maven/org.ligoj.api/plugin-api/pom.properties")) {
+			if (input != null) {
+				final var properties = new java.util.Properties();
+				properties.load(input);
+				return toMajor(properties.getProperty("version"));
+			}
+		} catch (final IOException e) {
+			log.warn("Unable to read the plugin-api version", e);
+		}
+		return toMajor(FeaturePlugin.class.getPackage().getImplementationVersion());
+	}
+
+	/**
+	 * The plugin-api major version a plugin was built for: the major of its <code>org.ligoj.api</code> parent in the
+	 * embedded Maven pom.
+	 *
+	 * @param jar The plugin file.
+	 * @return The major version, <code>null</code> when the file is not a jar or carries no such metadata.
+	 */
+	Integer getRequiredApiMajor(final java.nio.file.Path jar) {
+		try (var zip = new java.util.zip.ZipFile(jar.toFile())) {
+			final var entries = zip.stream().filter(e -> e.getName().startsWith("META-INF/maven/") && e.getName().endsWith("/pom.xml")).toList();
+			for (final var entry : entries) {
+				final var pom = new String(zip.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8);
+				final var matcher = API_PARENT_VERSION.matcher(pom);
+				if (matcher.find()) {
+					return Integer.parseInt(matcher.group(1));
+				}
+			}
+		} catch (final IOException | IllegalStateException e) {
+			log.debug("No Maven metadata readable in {}", jar, e);
+		}
+		return null;
+	}
+
+	private static final java.util.regex.Pattern API_PARENT_VERSION = java.util.regex.Pattern.compile(
+			"<parent>\\s*<groupId>org\\.ligoj\\.api</groupId>\\s*<artifactId>[^<]+</artifactId>\\s*<version>(\\d+)");
+
+	private static int toMajor(final String version) {
+		if (version == null) {
+			return 0;
+		}
+		final var major = version.split("[.-]", 2)[0];
+		return major.matches("\\d+") ? Integer.parseInt(major) : 0;
 	}
 
 	private Map<String, Artifact> getLastPluginVersions(final String repository) throws IOException {

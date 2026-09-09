@@ -97,6 +97,7 @@ Compatible plugin releases (pending ones ship with 5.0.0):
 - 🖥️ **UI** · **Plugin management**: enable or disable a plugin, see the ones waiting for a restart and plugin statistics; **automation** schedules update checks, automatic updates and maintenance windows, with an updates indicator in the application bar.
 - 🖥️ **UI** · **Demo mode**, toggled from the profile: adds demonstration tool groups and projects, a save preview showing what a form would send, a "Demo" chip in the application bar and a showcase page of the shared components.
 - 🖥️ **UI** · Flush all caches at once from the cache administration page, with confirmation.
+- 🏠 **Core** · Installing a plugin built for a newer plugin-api major than the instance is refused, with the required and actual versions in the error and the log, and the downloaded file is removed.
 - ☁️ **Provisioning** · **Per-provider configuration** ("Configure…" on the catalog page): the default location of new quotes and regular expressions restricting the imported regions, instance types, operating systems, database types and engines. It replaces the per-location "preferred" flag.
 - ☁️ **Provisioning** · The catalog status tooltip shows **import statistics**: current step and progress, who started it and when, duration, last success, and the number of locations, types and prices.
 - ☁️ **Provisioning** · A failed catalog import now rolls back and keeps the previous catalog.

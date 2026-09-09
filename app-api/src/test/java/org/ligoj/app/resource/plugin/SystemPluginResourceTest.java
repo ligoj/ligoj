@@ -820,6 +820,57 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 	}
 
 	@Test
+	void installIncompatibleApi() throws IOException {
+		// The plugin requires a newer plugin-api major than this instance: refused, nothing left on disk
+		final var localJar = toFile("plugin-sample-1.2.9.jar");
+		localJar.delete();
+		final var resource = newPluginResourceInstall("plugin-sample-1.2.9.jar");
+		final var input = newJar("plugin-sample", "99.0.0");
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class,
+				() -> resource.install(input, "org.ligoj.plugin", "plugin-sample", "1.2.9", "(local)", true, false)), "artifact", "incompatible-api");
+		Assertions.assertFalse(localJar.exists());
+	}
+
+	@Test
+	void installCompatibleApi() throws IOException {
+		// Same major as this instance, and a jar without Maven metadata: both accepted
+		final var localJar = toFile("plugin-sample-1.2.9.jar");
+		localJar.delete();
+		final var resource = newPluginResourceInstall("plugin-sample-1.2.9.jar");
+		resource.install(newJar("plugin-sample", resource.getApiMajor() + ".0.0"), "org.ligoj.plugin", "plugin-sample", "1.2.9", "(local)", true, false);
+		Assertions.assertTrue(localJar.exists());
+		localJar.delete();
+		resource.install(newJar("plugin-sample", null), "org.ligoj.plugin", "plugin-sample", "1.2.9", "(local)", true, false);
+		Assertions.assertTrue(localJar.exists());
+		localJar.delete();
+	}
+
+	@Test
+	void getApiMajor() {
+		// Read from the plugin-api Maven metadata of the classpath
+		Assertions.assertTrue(newPluginResourceInstall().getApiMajor() >= 5);
+	}
+
+	/**
+	 * A minimal plugin jar with an embedded Maven pom declaring the given plugin-parent version.
+	 */
+	private InputStream newJar(final String artifact, final String parentVersion) throws IOException {
+		final var bytes = new java.io.ByteArrayOutputStream();
+		try (var zip = new java.util.zip.ZipOutputStream(bytes)) {
+			if (parentVersion != null) {
+				zip.putNextEntry(new java.util.zip.ZipEntry("META-INF/maven/org.ligoj.plugin/" + artifact + "/pom.xml"));
+				zip.write(("<project><parent><groupId>org.ligoj.api</groupId><artifactId>plugin-parent</artifactId><version>"
+						+ parentVersion + "</version></parent><artifactId>" + artifact + "</artifactId></project>").getBytes(StandardCharsets.UTF_8));
+				zip.closeEntry();
+			}
+			zip.putNextEntry(new java.util.zip.ZipEntry("META-INF/MANIFEST.MF"));
+			zip.write("Manifest-Version: 1.0\n".getBytes(StandardCharsets.UTF_8));
+			zip.closeEntry();
+		}
+		return new ByteArrayInputStream(bytes.toByteArray());
+	}
+
+	@Test
 	void upload() throws IOException {
 		final var input = new ByteArrayInputStream("test".getBytes(StandardCharsets.UTF_8));
 		final var localJar = toFile("plugin-sample-1.2.9.jar");
