@@ -191,7 +191,7 @@
       </div>
       <div v-else-if="addMethod === 'passkey'" class="mfa-setup">
         <LigojTextField v-model="addName" :label="t('profile.mfaName')" :hint="t('profile.mfaNameHint')" persistent-hint variant="outlined" density="compact"
-          :error-messages="addError === 'already-exist' ? [t('profile.mfaNameTaken')] : addError === 'invalid' ? [t('profile.mfaPasskeyInvalid')] : addError === 'error' ? [t('common.loadError')] : []" @update:model-value="addError = ''" @keyup.enter="registerPasskey" />
+          :error-messages="addError === 'already-exist' ? [t('profile.mfaNameTaken')] : addError === 'invalid' ? [t('profile.mfaPasskeyInvalid') + (addErrorName ? ` (${addErrorName})` : '')] : addError === 'error' ? [t('common.loadError')] : []" @update:model-value="addError = ''" @keyup.enter="registerPasskey" />
         <p class="mfa-scan">{{ t('profile.mfaPasskeyIntro') }}</p>
       </div>
       <div v-else-if="setupData" class="mfa-setup">
@@ -241,7 +241,7 @@ import LjButton from '@/components/LjButton.vue'
 import LigojTextField from '@/components/LigojTextField.vue'
 import QRCode from 'qrcode'
 import { useMfa, isOtpCode, sanitizeOtpCode } from '@/composables/useMfa.js'
-import { isWebAuthnSupported, toCreationOptions, serializeRegistration } from '@/utils/webauthn.js'
+import { isWebAuthnSupported, toCreationOptions, serializeRegistration, credentialErrorName } from '@/utils/webauthn.js'
 import { PRESET_OPTIONS, detectPreset, applyPreset, persistPreset } from '@/plugins/presets.js'
 import { detectCompact, applyCompact, persistCompact, detectReduceMotion, applyReduceMotion, persistReduceMotion } from '@/plugins/styles.js'
 import { useDemoMode } from '@/composables/useDemoMode.js'
@@ -325,6 +325,8 @@ const addMethod = ref('')
 const addName = ref('')
 const addCode = ref('')
 const addError = ref('')
+// Browser error name of the last refused passkey creation, appended to the message
+const addErrorName = ref('')
 const addBusy = ref(false)
 const setupData = ref(null)
 const qrUrl = ref('')
@@ -356,12 +358,15 @@ async function registerPasskey() {
     let credential
     try {
       credential = await navigator.credentials.create({ publicKey: toCreationOptions(options) })
-    } catch {
+    } catch (e) {
+      // Refused by the browser or the authenticator before any request: the error name is the only clue
+      addErrorName.value = credentialErrorName(e)
+      console.warn('[profile] passkey creation failed', addErrorName.value || 'no credential', e?.message || '')
       addError.value = 'invalid'
       return
     }
-    if (!credential) { addError.value = 'invalid'; return }
-    const result = await mfa.registerPasskey(addName.value.trim(), serializeRegistration(credential))
+    if (!credential) { addErrorName.value = ''; addError.value = 'invalid'; return }
+    const result = await mfa.registerPasskey(addName.value.trim(), serializeRegistration(credential, options.transportsHint === true))
     if (result.ok) { addOpen.value = false; await mfa.load() } else addError.value = result.error
   } finally { addBusy.value = false }
 }

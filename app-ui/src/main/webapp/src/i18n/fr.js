@@ -45,6 +45,7 @@ export default {
   'common.description': 'Description',
   'common.status': 'Statut',
   'common.loading': 'Chargement...',
+  'common.loadError': 'La requête a échoué. Veuillez réessayer.',
   'common.required': 'Ce champ est requis',
   'common.positive': 'Doit être supérieur à 0',
   'common.active': 'Actif',

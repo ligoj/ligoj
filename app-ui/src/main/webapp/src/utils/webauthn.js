@@ -52,13 +52,27 @@ export function toRequestOptions(options) {
   }
 }
 
-/** A created credential to the API registration payload (name added by the caller). */
-export function serializeRegistration(credential) {
-  return {
+/**
+ * A created credential to the API registration payload (name added by the
+ * caller). The transports the authenticator reports (`internal`, `hybrid`,
+ * `usb`...) are added on request: returned with the verification challenge,
+ * they let the browser pick the right prompt instead of offering a local
+ * authenticator for a credential living elsewhere.
+ */
+export function serializeRegistration(credential, includeTransports = false) {
+  const response = credential.response
+  const payload = {
     id: credential.id,
-    clientDataJSON: toBase64Url(credential.response.clientDataJSON),
-    attestationObject: toBase64Url(credential.response.attestationObject),
+    clientDataJSON: toBase64Url(response.clientDataJSON),
+    attestationObject: toBase64Url(response.attestationObject),
   }
+  if (includeTransports) {
+    // Only when the API advertised the field (`transportsHint` in the setup
+    // options): an older API rejects unknown properties.
+    const transports = typeof response.getTransports === 'function' ? response.getTransports() : []
+    payload.transports = Array.isArray(transports) ? transports : []
+  }
+  return payload
 }
 
 /** An assertion credential to the API verification payload. */
@@ -69,4 +83,15 @@ export function serializeAssertion(credential) {
     authenticatorData: toBase64Url(credential.response.authenticatorData),
     signature: toBase64Url(credential.response.signature),
   }
+}
+
+/**
+ * The name of a failed `navigator.credentials` call (`NotAllowedError`,
+ * `InvalidStateError`, `SecurityError`...), the only clue about what the
+ * browser or the authenticator refused; empty when nothing usable.
+ */
+export function credentialErrorName(e) {
+  if (!e) return ''
+  if (typeof e === 'string') return e
+  return e.name ? String(e.name) : ''
 }

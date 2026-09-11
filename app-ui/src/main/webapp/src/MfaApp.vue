@@ -55,7 +55,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { isWebAuthnSupported, toRequestOptions, serializeAssertion } from '@/utils/webauthn.js'
+import { isWebAuthnSupported, toRequestOptions, serializeAssertion, credentialErrorName } from '@/utils/webauthn.js'
 
 const MESSAGES = {
   en: {
@@ -133,13 +133,19 @@ async function usePasskey() {
     if (!optionsResp.ok) { error.value = msg.value.network; busy.value = false; return }
     const options = await optionsResp.json()
     const credential = await navigator.credentials.get({ publicKey: toRequestOptions(options) })
-    if (!credential) { error.value = msg.value.passkeyFailed; busy.value = false; return }
+    if (!credential) { passkeyFailed(null); return }
     await send({ device: selected.value?.id ?? null, passkey: serializeAssertion(credential) })
-  } catch {
-    // Cancelled or rejected by the authenticator
-    error.value = msg.value.passkeyFailed
-    busy.value = false
+  } catch (e) {
+    // Cancelled or rejected by the browser/authenticator before any assertion was sent
+    passkeyFailed(e)
   }
+}
+// The browser error name (NotAllowedError, SecurityError...) is the only clue about what went wrong locally
+function passkeyFailed(e) {
+  const name = credentialErrorName(e)
+  console.warn('[mfa] passkey prompt failed', name || 'no credential', e?.message || '')
+  error.value = msg.value.passkeyFailed + (name ? ` (${name})` : '')
+  busy.value = false
 }
 
 async function send(payload) {

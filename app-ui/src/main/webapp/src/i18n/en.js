@@ -45,6 +45,7 @@ export default {
   'common.description': 'Description',
   'common.status': 'Status',
   'common.loading': 'Loading...',
+  'common.loadError': 'The request failed. Please retry.',
   'common.required': 'This field is required',
   'common.positive': 'Must be greater than 0',
   'common.active': 'Active',
