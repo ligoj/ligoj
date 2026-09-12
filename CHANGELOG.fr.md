@@ -43,7 +43,8 @@ Versions de plugins compatibles (les versions en attente sont livrées avec la 5
 - 🖥️ **Interface** · **Recherche dans un groupe d'outils** sur la page projet pour filtrer ses souscriptions.
 - 🖥️ **Interface** · Section **Modèles de données** dans l'explorateur d'API, listant les types utilisés par les opérations ; la documentation de l'API affiche désormais le Markdown.
 - 👤 **Identité** 🏠 **Cœur** · **Affichage configurable des utilisateurs** : `service:id:user-display` accepte n'importe quel attribut ou une expression telle que `${firstName} ${lastName}`, et `service:id:visual-id-name` / `service:id:visual-id-label` choisissent l'attribut affiché, trié et libellé comme identifiant dans les tables d'utilisateurs et de membres de groupe et dans les titres de dialogues.
-- 👤 **Identité** · Les **attributs personnalisés** déclarés par le fournisseur d'identité principal sont modifiables dans le dialogue utilisateur, un champ par attribut ; vider un champ supprime l'attribut.
+- 👤 **Identité** · Les **attributs personnalisés** déclarés par le fournisseur d'identité principal sont modifiables dans le dialogue utilisateur, un champ par attribut ; vider un champ supprime l'attribut. Les noms d'attributs sont désormais déclarés une fois sur le service d'identité (`service:id:people-custom-attributes`, proposé sur chaque nœud d'identité) au lieu de chaque outil ; le paramètre de niveau LDAP n'est plus déclaré, une valeur enregistrée avant la mise à jour reste lue tant que celui du service est vide.
+- 👤 **Identité** · **Attributs non modifiables** : le paramètre de nœud `service:id:read-only-attributes` liste les attributs utilisateur verrouillés après la création (`firstName`, `lastName`, `company`, `department`, `localId`, `mail` ou `customAttributes.<nom>`) ; le dialogue utilisateur les affiche en lecture seule et l'API refuse une mise à jour qui les modifie.
 - 👤 **Identité** · Bascule **« En créer un autre »** sur les dialogues de création d'utilisateur, d'entité, de groupe et de délégation.
 - ☁️ **Provisionnement** · **Comparaison de fournisseurs** : conservez d'autres souscriptions de provisionnement comme clones synchronisés d'un devis, voyez l'écart de prix par ressource et un résumé du total et des ressources sans équivalent dans l'autre catalogue, et resynchronisez à tout moment.
 - ☁️ **Provisionnement** · **Instantanés du devis** : capturez des versions nommées d'un devis, comparez n'importe quel instantané avec le devis courant et restaurez-en un, les prix étant recalculés sur le catalogue courant.
@@ -58,6 +59,7 @@ Versions de plugins compatibles (les versions en attente sont livrées avec la 5
 - ☁️ **Provisionnement** · Prise en charge d'**IBM Db2** ; les moteurs de base de données proviennent désormais du catalogue du fournisseur, et les moteurs tarifés uniquement avec licence affichent le sélecteur de licence à côté du moteur.
 - 🗺️ **Cartographie** · **Carte réseau** d'un devis, ouverte en plein écran depuis les outils de la page de devis : ressources et liens réseau sous forme de graphe à forces, que vous pouvez regrouper (application, environnement…), dimensionner (CPU, RAM, coût, stockage) et colorer (OS, moteur, localisation, tag…), avec icônes, flux animés, jeux de filtres combinables à conditions négatives, une vue tableau et un export JSON de la carte complète ou filtrée.
 - 🏠 **Cœur** · Le clic du milieu sur un menu de navigation l'ouvre dans un nouvel onglet.
+- 🏠 **Cœur** · Les passkeys enregistrent les transports signalés par le navigateur à l'enregistrement et les renvoient avec le défi de vérification, pour que le navigateur propose la bonne invite (authentificateur local, téléphone…) ; les passkeys enregistrées auparavant doivent l'être à nouveau pour bénéficier de l'indication. Quand le navigateur lui-même refuse la passkey, la page MFA nomme l'erreur.
 
 ### 🔄 Améliorations
 
@@ -81,9 +83,12 @@ Versions de plugins compatibles (les versions en attente sont livrées avec la 5
 - 🏠 **Cœur** · La documentation des paramètres manquait dans l'explorateur d'API après une régression de l'analyse Javadoc.
 - 🏠 **Cœur** · Le servlet par défaut est de nouveau enregistré dans l'application web (des fichiers statiques n'étaient pas servis dans certains déploiements).
 - 🖥️ **Interface** · L'en-tête d'actions de la liste des projets n'était pas celui intégré.
+- 🖥️ **Interface** · La recherche du chef de projet dans le dialogue de projet ignorait le texte saisi et listait toujours les premiers utilisateurs.
 - 👤 **Identité** · Le champ entité du dialogue de nouvel utilisateur paraissait déjà rempli (bouton d'effacement affiché, indication masquée) alors qu'il était vide.
 - 👤 **Identité** · La liste déroulante des groupes s'ouvrait toute seule à l'ouverture du dialogue utilisateur ; le focus arrive désormais sur le premier champ, et fermer un dialogue modifié respecte la préférence de profil « ne pas confirmer la sortie ».
 - 👤 **Identité** · La recherche d'un utilisateur à ajouter à un groupe ignorait le texte saisi et listait toujours les premiers utilisateurs.
+- 👤 **Identité** · La création d'une entité ou d'un groupe par l'API avec un client n'acceptant que du JSON (la CLI, des scripts) était refusée avec un 406 depuis la refonte 5.0 : l'identifiant est produit en texte brut d'abord et en JSON à la demande.
+- 👤 **Identité** · L'enregistrement d'un utilisateur depuis le dialogue échouait sur une erreur de validation du courriel : l'API accepte désormais la liste de courriels envoyée par le dialogue, le champ `mail` unique de la CLI et des imports par lot restant pris en charge, et un utilisateur peut être enregistré sans courriel.
 - ☁️ **Provisionnement** · Le dialogue de configuration du catalogue ne listait aucune localisation par défaut et n'avait pas de bouton Enregistrer ni Annuler.
 - ☁️ **Provisionnement** · Une recherche sans prix correspondant affiche le message « introuvable » au lieu d'échouer silencieusement ; « Actualiser les prix » sans changement est une information, pas une erreur.
 - ☁️ **Provisionnement** · Les nouveaux moteurs, types et termes sont visibles juste après un import de catalogue, et non après un redémarrage.
@@ -94,6 +99,7 @@ Versions de plugins compatibles (les versions en attente sont livrées avec la 5
 - 🏠 **Cœur** · **Kubernetes** : un chart Helm (`charts/ligoj`) déploie l'API, l'application web, la base de données et l'ingress.
 - 🏠 **Cœur** · Le paramètre de fournisseur d'identité principal (`feature:iam:node:primary`) est exposé à l'application web, pour que les profils puissent le nommer.
 - 🏠 **Cœur** · Démarrage plus rapide : les dépôts JPA sont initialisés à la demande par défaut.
+- 🏠 **Cœur** 🖥️ **Interface** · Les plugins peuvent marquer un paramètre comme **obsolète** : les dialogues de nœud et de souscription le signalent et affichent la notice de remplacement du plugin.
 - 🖥️ **Interface** · **Gestion des plugins** : activez ou désactivez un plugin, voyez ceux en attente de redémarrage et les statistiques des plugins ; l'**automatisation** planifie les vérifications de mise à jour, les mises à jour automatiques et les fenêtres de maintenance, avec un indicateur de mises à jour dans la barre d'application.
 - 🖥️ **Interface** · **Mode démo**, activé depuis le profil : ajoute des groupes d'outils et des projets de démonstration, un aperçu d'enregistrement montrant ce qu'un formulaire enverrait, une puce « Démo » dans la barre d'application et une page vitrine des composants partagés.
 - 🖥️ **Interface** · Videz tous les caches d'un coup depuis la page d'administration des caches, avec confirmation.

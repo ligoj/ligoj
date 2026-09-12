@@ -43,7 +43,8 @@ Compatible plugin releases (pending ones ship with 5.0.0):
 - 🖥️ **UI** · **Search inside a tool group** on the project page to filter its subscriptions.
 - 🖥️ **UI** · **Data models** section in the API explorer, listing the types used by the operations; the API documentation now renders Markdown.
 - 👤 **Identity** 🏠 **Core** · **Configurable user display**: `service:id:user-display` accepts any user attribute or an expression such as `${firstName} ${lastName}`, and `service:id:visual-id-name` / `service:id:visual-id-label` choose the attribute shown, sorted and labelled as the user identifier in the user and group-member tables and in dialog titles.
-- 👤 **Identity** · **Custom attributes** declared by the primary identity provider are editable in the user dialog, one field per attribute; clearing a field removes the attribute.
+- 👤 **Identity** · **Custom attributes** declared by the primary identity provider are editable in the user dialog, one field per attribute; clearing a field removes the attribute. The attribute names are now declared once on the identity service (`service:id:people-custom-attributes`, offered on every identity node) instead of per tool; the LDAP-level parameter is no longer declared, a value stored before the upgrade is still read while the service one is empty.
+- 👤 **Identity** · **Read-only attributes**: the `service:id:read-only-attributes` node parameter lists the user attributes locked after creation (`firstName`, `lastName`, `company`, `department`, `localId`, `mail` or `customAttributes.<name>`); the user dialog shows them read-only and the API refuses an update changing them.
 - 👤 **Identity** · **"Create another"** toggle on the user, company, group and delegation creation dialogs.
 - ☁️ **Provisioning** · **Compare providers**: keep other provisioning subscriptions as synchronized clones of a quote, see the price difference per resource and a summary of the total and of the resources the other catalog cannot match, and re-sync at any time.
 - ☁️ **Provisioning** · **Quote snapshots**: capture named versions of a quote, compare any snapshot with the current quote and restore one, with prices re-resolved against the current catalog.
@@ -58,6 +59,7 @@ Compatible plugin releases (pending ones ship with 5.0.0):
 - ☁️ **Provisioning** · **IBM Db2** support; database engines now come from the provider catalog, and engines priced with a license only show the license selector next to the engine.
 - 🗺️ **Cartography** · **Network map** of a quote, opened fullscreen from the quote page tools: resources and network links as a force-directed graph you can group (application, environment…), size (CPU, RAM, cost, storage) and colour (OS, engine, location, tag…), with icons, animated flows, combinable filter sets with negated conditions, a table view and a JSON export of the full or filtered map.
 - 🏠 **Core** · Middle-click on a navigation menu opens it in a new tab.
+- 🏠 **Core** · Passkeys record the transports reported by the browser at registration and return them with the verification challenge, so the browser offers the right prompt (local authenticator, phone…); passkeys registered before must be registered again to get the hint. When the browser itself rejects the passkey, the MFA page names the error.
 
 ### 🔄 Improved
 
@@ -81,9 +83,12 @@ Compatible plugin releases (pending ones ship with 5.0.0):
 - 🏠 **Core** · Parameter documentation was missing in the API explorer after a Javadoc parsing regression.
 - 🏠 **Core** · The default servlet is registered again in the web application (static files were not served in some deployments).
 - 🖥️ **UI** · The project list action header was not the built-in one.
+- 🖥️ **UI** · The team leader search of the project dialog ignored the typed text and always listed the first users.
 - 👤 **Identity** · The company field of the new-user dialog looked already filled (clear button shown, placeholder hidden) while empty.
 - 👤 **Identity** · The Groups dropdown opened by itself when the user dialog opened; focus now lands on the first field, and closing a modified dialog honors the "skip leave confirmation" profile preference.
 - 👤 **Identity** · Searching a user to add to a group ignored the typed text and always listed the first users.
+- 👤 **Identity** · Creating a company or a group through the API with a client asking only for JSON (the CLI, scripts) was refused with 406 since the 5.0 rewrite: the identifier is produced as plain text first and as JSON on request.
+- 👤 **Identity** · Saving a user from the user dialog failed with a mail validation error: the API now accepts the list of mails the dialog sends, the single `mail` of the CLI and batch imports staying supported, and a user may be saved without mail.
 - ☁️ **Provisioning** · The catalog configuration dialog listed no default location and had no Save or Cancel button.
 - ☁️ **Provisioning** · A lookup with no matching price shows the "not found" message instead of failing silently; "Refresh prices" without any change is an informational notice, not an error.
 - ☁️ **Provisioning** · New engines, types and terms are visible right after a catalog import instead of after a restart.
@@ -94,6 +99,7 @@ Compatible plugin releases (pending ones ship with 5.0.0):
 - 🏠 **Core** · **Kubernetes**: a Helm chart (`charts/ligoj`) deploys the API, the web application, the database and the ingress.
 - 🏠 **Core** · The primary identity provider setting (`feature:iam:node:primary`) is exposed to the web application, so profiles can name it.
 - 🏠 **Core** · Faster start-up: JPA repositories are initialized lazily by default.
+- 🏠 **Core** 🖥️ **UI** · Plugins can flag a parameter as **deprecated**: the node and subscription dialogs mark it and show the plugin's replacement notice.
 - 🖥️ **UI** · **Plugin management**: enable or disable a plugin, see the ones waiting for a restart and plugin statistics; **automation** schedules update checks, automatic updates and maintenance windows, with an updates indicator in the application bar.
 - 🖥️ **UI** · **Demo mode**, toggled from the profile: adds demonstration tool groups and projects, a save preview showing what a form would send, a "Demo" chip in the application bar and a showcase page of the shared components.
 - 🖥️ **UI** · Flush all caches at once from the cache administration page, with confirmation.
