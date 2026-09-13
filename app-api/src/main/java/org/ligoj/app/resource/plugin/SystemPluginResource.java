@@ -232,7 +232,47 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	 * @return <code>true</code> when the plug-in is deleted locally from the FS.
 	 */
 	protected boolean isDeleted(final PluginVo plugin) {
-		return !new File(plugin.getLocation()).exists();
+		// A plug-in embedded in the application (nested jar, classes) has no file to delete
+		return !isEmbeddedLocation(plugin.getLocation()) && !new File(plugin.getLocation()).exists();
+	}
+
+	/**
+	 * Indicate the location is inside the application itself: a jar nested in the WAR ({@code nested:} protocol of
+	 * Spring Boot, or any {@code !/} jar entry) or its own classes.
+	 *
+	 * @param location The code source location of the plug-in.
+	 * @return <code>true</code> when the plug-in is loaded from the application, not from a plain file.
+	 */
+	static boolean isEmbeddedLocation(final String location) {
+		return location != null && (location.startsWith("nested:") || location.contains("!/"));
+	}
+
+	/**
+	 * Location of the code source of the given plug-in, as exposed to the UI.
+	 *
+	 * @param feature The loaded plug-in.
+	 * @return The location, a file path for a plug-in of the plug-ins directory.
+	 */
+	protected String getLocation(final FeaturePlugin feature) {
+		return getPluginLocation(feature).getPath();
+	}
+
+	/**
+	 * Indicate the plug-in is embedded in the application: loaded from the WAR, without any jar of this artifact in
+	 * the plug-ins directory. Such a plug-in cannot be disabled or deleted from the plug-ins directory.
+	 *
+	 * @param artifact The plug-in artifact.
+	 * @return <code>true</code> when the loaded plug-in of this artifact is embedded in the application.
+	 */
+	protected boolean isEmbedded(final String artifact) throws IOException {
+		final var installed = getPluginClassLoader().getInstalledPlugins();
+		if (installed.containsKey(artifact)) {
+			return false;
+		}
+		return repository.findAll().stream().filter(p -> artifact.equals(p.getArtifact())).findFirst()
+				.flatMap(p -> context.getBeansOfType(FeaturePlugin.class).values().stream()
+						.filter(f -> p.getKey().equals(f.getKey())).findFirst())
+				.map(f -> isEmbeddedLocation(getLocation(f))).orElse(false);
 	}
 
 	/**
@@ -288,6 +328,10 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 			files = list.filter(p -> pattern.matcher(p.getFileName().toString()).matches()).toList();
 		}
 		if (files.isEmpty()) {
+			if (isEmbedded(artifact)) {
+				// Shipped inside the application: only a newer jar in the plug-ins directory can override it
+				throw new BusinessException("plugin-embedded", artifact, enabled ? "enable" : "disable");
+			}
 			// No jar of this artifact in the plug-ins directory: nothing to rename. Typically a plug-in loaded from
 			// elsewhere in the class-path (development), or an already enabled/disabled one.
 			throw new BusinessException("plugin-jar-not-found", artifact, enabled ? "enable" : "disable");
@@ -368,7 +412,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	 */
 	protected String toTrimmedVersion(final String extendedVersion) {
 		var trim = Arrays.stream(StringUtils.split(extendedVersion, "-Z.")).dropWhile(s -> !s.matches("^(Z?\\d+.*)"))
-				.map(s -> StringUtils.defaultIfBlank(RegExUtils.replaceFirst(s, "^0+", ""), "0"))
+				.map(s -> StringUtils.defaultIfBlank(RegExUtils.replaceFirst(s, "^0+(?=\\d)", ""), "0"))
 				.collect(Collectors.joining(".")).replace(".SNAPSHOT", "-SNAPSHOT")
 				.replaceFirst("([^-])SNAPSHOT", "$1-SNAPSHOT");
 		if (trim.endsWith(".0") && StringUtils.countMatches(trim, '.') > 2) {
@@ -404,8 +448,12 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		} else {
 			// Plug-in implementation is available
 			vo.setName(Strings.CS.removeStart(feature.getName(), "Ligoj - Plugin "));
-			vo.setLocation(getPluginLocation(feature).getPath());
+			vo.setLocation(getLocation(feature));
 			vo.setVendor(feature.getVendor());
+			// Loaded from the application itself (WAR) and not overridden by a jar of the plug-ins directory
+			if (vo instanceof LigojPluginVo lvo) {
+				lvo.setEmbedded(isEmbeddedLocation(vo.getLocation()) && !installed.containsKey(p.getArtifact()));
+			}
 		}
 
 		// Expose the resolve newer version
@@ -477,6 +525,10 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	@DELETE
 	@Path("{artifact:[\\w-]+}")
 	public void delete(@PathParam("artifact") final String artifact) throws IOException {
+		if (isEmbedded(artifact)) {
+			// Shipped inside the application: nothing to delete from the plug-ins directory
+			throw new BusinessException("plugin-embedded", artifact, "delete");
+		}
 		removeFilter(artifact, "(-.*)?");
 		log.info("Plugin {} has been deleted, restart is required", artifact);
 	}

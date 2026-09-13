@@ -44,6 +44,13 @@ public class LigojPluginVo extends PluginVo {
 	private boolean disabled;
 
 	/**
+	 * When <code>true</code>, the plug-in is loaded from the application itself (a jar embedded in the WAR, or its
+	 * classes) and no jar of this artifact is present in the plug-ins directory: it cannot be disabled or deleted,
+	 * a newer jar dropped in the plug-ins directory overrides it at the next restart.
+	 */
+	private boolean embedded;
+
+	/**
 	 * When <code>true</code>, the plug-in is currently loaded in the class-path. A disabled but loaded plug-in, or an
 	 * enabled but not loaded one, is waiting for a restart.
 	 */
