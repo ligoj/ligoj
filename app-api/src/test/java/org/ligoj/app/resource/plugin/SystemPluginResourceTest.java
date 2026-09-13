@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import java.util.HashMap;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.dao.system.SystemPluginRepository;
 import org.ligoj.app.resource.plugin.repository.Artifact;
@@ -237,6 +238,18 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		Assertions.assertFalse(resource.isDeleted(plugin));
 	}
 
+	/**
+	 * A plug-in embedded in the application (WAR) has a nested location, not a file: it cannot be deleted.
+	 */
+	@Test
+	void isDeletedNested() {
+		final var plugin = new PluginVo();
+		plugin.setLocation("nested:/usr/local/ligoj/app-api.war/!WEB-INF/lib/plugin-ui-5.0.2.jar!/");
+		Assertions.assertFalse(resource.isDeleted(plugin));
+		plugin.setLocation("nested:/usr/local/ligoj/app-api.war/!WEB-INF/classes/!/");
+		Assertions.assertFalse(resource.isDeleted(plugin));
+	}
+
 	@Test
 	void toTrimmedVersion() {
 		Assertions.assertEquals("1.2.3.4", resource.toTrimmedVersion("plugin-sample-Z0000001Z0000002Z0000003Z0000004"));
@@ -247,6 +260,11 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		Assertions.assertEquals("1.2.3-SNAPSHOT",
 				resource.toTrimmedVersion("plugin-sample-Z0000001Z0000002Z0000003SNAPSHOT"));
 		Assertions.assertEquals("1.2.3-SNAPSHOT", resource.toTrimmedVersion("1.2.3-SNAPSHOT"));
+		// A zero fragment before SNAPSHOT is kept: "5.0.0-SNAPSHOT" round-trips
+		Assertions.assertEquals("5.0.0-SNAPSHOT",
+				resource.toTrimmedVersion("plugin-sample-" + PluginsClassLoader.toExtendedVersion("5.0.0-SNAPSHOT")));
+		Assertions.assertEquals("5.0.0-SNAPSHOT", resource.toTrimmedVersion("5.0.0-SNAPSHOT"));
+		Assertions.assertEquals("1.2.0-SNAPSHOT", resource.toTrimmedVersion("Z0000001Z0000002Z0000000SNAPSHOT"));
 		Assertions.assertEquals("1.2.3.4", resource.toTrimmedVersion("1.2.3.4"));
 		Assertions.assertEquals("1.2.30", resource.toTrimmedVersion("1.2.30"));
 		Assertions.assertEquals("1.2.3", resource.toTrimmedVersion("1.2.3.0"));
@@ -411,6 +429,108 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 	 */
 	private List<PluginVo> filter(final List<PluginVo> plugins) {
 		return plugins.stream().filter(p -> !"feature:ui".equals(p.getId())).toList();
+	}
+
+	/**
+	 * Resource whose loaded plug-ins are reported at a nested location (a jar embedded in the WAR), with a
+	 * plug-ins directory holding the given artifacts.
+	 */
+	private SystemPluginResource newEmbeddedResource(final String... installedArtifacts) throws IOException {
+		final var pluginsClassLoader = mock(PluginsClassLoader.class);
+		when(pluginsClassLoader.getHomeDirectory())
+				.thenReturn(Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER));
+		when(pluginsClassLoader.getPluginDirectory()).thenReturn(
+				Paths.get(USER_HOME_DIRECTORY, PluginsClassLoader.HOME_DIR_FOLDER, PluginsClassLoader.PLUGINS_DIR));
+		final var map = new HashMap<String, String>();
+		for (final var artifact : installedArtifacts) {
+			map.put(artifact, artifact + "-Z0000009Z0000000Z0000000Z0000000");
+		}
+		when(pluginsClassLoader.getInstalledPlugins()).thenReturn(map);
+		final var resource = new SystemPluginResource() {
+			@Override
+			protected PluginsClassLoader getPluginClassLoader() {
+				return pluginsClassLoader;
+			}
+
+			@Override
+			protected String getLocation(final FeaturePlugin feature) {
+				return "nested:/opt/ligoj/app-api.war/!WEB-INF/lib/" + feature.getKey().replace(':', '-') + "-0.0.1.jar!/";
+			}
+		};
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
+		return resource;
+	}
+
+	/**
+	 * Persist the sample service plug-in under an artifact name absent from the test plug-ins directory (nothing to
+	 * rename or delete there), loaded from the {@code sampleService} singleton.
+	 */
+	private void persistSamplePlugin() {
+		registerSingleton("sampleService", new SampleService());
+		final var plugin = new SystemPlugin();
+		plugin.setVersion("0.0.1");
+		plugin.setKey("service:sample");
+		plugin.setType("SERVICE");
+		plugin.setArtifact("plugin-sample-embedded");
+		repository.saveAndFlush(plugin);
+	}
+
+	/**
+	 * A plug-in loaded from the WAR without any jar in the plug-ins directory is flagged embedded, never deleted.
+	 */
+	@Test
+	void findAllEmbedded() throws IOException {
+		stubMavenCentral("search.json");
+		httpServer.start();
+		persistSamplePlugin();
+		try {
+			final var plugin = newEmbeddedResource().findAll("central").stream()
+					.filter(p -> "service:sample".equals(p.getId())).findFirst().orElseThrow();
+			Assertions.assertTrue(((LigojPluginVo) plugin).isEmbedded());
+			Assertions.assertFalse(plugin.isDeleted());
+			Assertions.assertNull(plugin.getLatestLocalVersion());
+		} finally {
+			destroySingleton("sampleService");
+		}
+	}
+
+	/**
+	 * The same plug-in with a newer jar staged in the plug-ins directory: an update, not embedded anymore, not
+	 * deleted either although the nested location is not a file.
+	 */
+	@Test
+	void findAllEmbeddedOverridden() throws IOException {
+		stubMavenCentral("search.json");
+		httpServer.start();
+		persistSamplePlugin();
+		try {
+			final var plugin = newEmbeddedResource("plugin-sample-embedded").findAll("central").stream()
+					.filter(p -> "service:sample".equals(p.getId())).findFirst().orElseThrow();
+			Assertions.assertFalse(((LigojPluginVo) plugin).isEmbedded());
+			Assertions.assertFalse(plugin.isDeleted());
+			Assertions.assertEquals("9.0.0", plugin.getLatestLocalVersion());
+		} finally {
+			destroySingleton("sampleService");
+		}
+	}
+
+	@Test
+	void deleteEmbedded() throws IOException {
+		persistSamplePlugin();
+		try {
+			final var resource = newEmbeddedResource();
+			Assertions.assertEquals("plugin-embedded",
+					Assertions.assertThrows(BusinessException.class, () -> resource.delete("plugin-sample-embedded")).getMessage());
+			Assertions.assertEquals("plugin-embedded",
+					Assertions.assertThrows(BusinessException.class, () -> resource.disable("plugin-sample-embedded")).getMessage());
+			Assertions.assertEquals("plugin-embedded",
+					Assertions.assertThrows(BusinessException.class, () -> resource.enable("plugin-sample-embedded")).getMessage());
+			// A plug-in unknown to the application is not embedded: the regular error
+			Assertions.assertEquals("plugin-jar-not-found",
+					Assertions.assertThrows(BusinessException.class, () -> resource.disable("plugin-unknown")).getMessage());
+		} finally {
+			destroySingleton("sampleService");
+		}
 	}
 
 	@Test
