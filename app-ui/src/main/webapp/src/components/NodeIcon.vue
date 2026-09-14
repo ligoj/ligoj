@@ -31,8 +31,7 @@
 import { defineComponent, h } from 'vue'
 import { VChip } from 'vuetify/components'
 import { useI18nStore } from '@/stores/i18n.js'
-
-const APP_BASE = import.meta.env.BASE_URL
+import { toolIconBase } from '@/utils/toolBrand.js'
 
 /**
  * Explicit placeholder shown when the tool icon cannot be fetched (plugin
@@ -88,7 +87,7 @@ export function nodeIcon(node) {
   // is intentionally NOT consulted for these: every tool plugin ships an icon
   // file, which is the single source of truth for tool/instance icons.
   if (fragments.length >= 3) {
-    const base = `${APP_BASE}main/service/${fragments[1]}/${fragments[2]}/img/${fragments[2]}`
+    const base = toolIconBase(id)
     return h('img', {
       src: `${base}.svg`,
       alt: '',

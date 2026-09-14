@@ -94,6 +94,7 @@ export { loadPlugin, pluginIdFromKey } from './plugins/loader.js'
 // promoted implicitly by PluginFeatures (plugins never import VTooltip).
 export { toolPluginId, delegateFeature } from './plugins/delegate.js'
 export { renderServiceLink, renderDetailsChip } from './utils/pluginRender.js'
+export { svgBrandColor, fallbackToolColor, resolveToolColor, toolIconBase, KNOWN_TOOL_COLORS, TOOL_PALETTE, _resetToolColorCache } from './utils/toolBrand.js'
 
 // Vuetify primitives re-exported for plugins. A plugin's Vite build keeps
 // `@ligoj/host` external; importing VBtn/VIcon from here lets a plugin's
