@@ -5,6 +5,8 @@ import vuetify from './plugins/vuetify.js'
 import i18n from './plugins/i18n.js'
 import router from './router/index.js'
 import { loadAllPlugins } from './plugins/loader.js'
+import { eagerPlugins } from './plugins/eager-plugins.js'
+import { useAuthStore } from './stores/auth.js'
 import { bootCompact, bootReduceMotion } from './plugins/styles.js'
 import { bootPreset } from './plugins/presets.js'
 import { installErrorReporter } from './plugins/errorReporter.js'
@@ -35,12 +37,18 @@ app.use(i18n)
 // keeps only the generic keys in `i18n/{en,fr}.js`. The old
 // `i18n/plugin-id-*.js` monolith merged here is gone.
 
-// External plugins whose routes must be registered before the router mounts.
-// Kept small on purpose — plugins whose absence is recoverable load lazily.
-const REQUIRED_PLUGINS = ['id', 'ui', 'prov']
-
+// External plugins whose routes must be registered before the router mounts
+// (`REQUIRED_PLUGINS`: id / ui / prov). Only the ones the backend reports as
+// installed are requested: the session lists the bundle-shipping plugins, so
+// a deployment without plugin-prov never fetches `/main/prov/vue/index.js`.
+// Without a session (expired, redirect to the login page) nothing is loaded:
+// App.vue redirects as soon as it mounts.
   ; (async () => {
-    await loadAllPlugins(REQUIRED_PLUGINS)
+    const auth = useAuthStore()
+    const ok = await auth.fetchSession()
+    if (ok) {
+      await loadAllPlugins(eagerPlugins(auth.appSettings?.data?.['ui-plugins']))
+    }
     app.use(vuetify)
     app.use(router)
     app.mount('#app')
