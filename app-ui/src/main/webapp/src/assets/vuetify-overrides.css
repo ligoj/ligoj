@@ -79,7 +79,7 @@
   --border: rgba(var(--v-theme-on-surface), .12);
   --border-2: rgba(var(--v-theme-on-surface), .26);
   --hover: rgba(var(--v-theme-on-surface), .06);
-  --pill: rgba(var(--v-theme-on-surface), .06);
+  --pill: var(--lj-pill, rgba(var(--v-theme-on-surface), .06));
   --primary: rgb(var(--v-theme-primary));
   --accent: rgb(var(--v-theme-secondary));
   --font: var(--lj-font, "Bricolage Grotesque", system-ui, sans-serif);
@@ -172,6 +172,8 @@
   --lj-shadow-lg: 6px 6px 0 0 rgba(var(--v-theme-on-surface), .9);
   --lj-border-width: 2px;
   --lj-border-color: rgba(var(--v-theme-on-surface), .85);
+  /* Brutalist pills: a stronger tint, the low default alpha vanishes on the Solarized surfaces */
+  --lj-pill: rgba(var(--v-theme-on-surface), .14);
   --lj-font: var(--lj-mono);
   --lj-weight-bold: 700;
   --lj-tracking: 0.02em;

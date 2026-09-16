@@ -71,6 +71,8 @@ export function serializeRegistration(credential, includeTransports = false) {
     // options): an older API rejects unknown properties.
     const transports = typeof response.getTransports === 'function' ? response.getTransports() : []
     payload.transports = Array.isArray(transports) ? transports : []
+    // Same API generation: platform / cross-platform, tells a security key from the device's own sensor
+    if (typeof credential.authenticatorAttachment === 'string') payload.authenticatorAttachment = credential.authenticatorAttachment
   }
   return payload
 }

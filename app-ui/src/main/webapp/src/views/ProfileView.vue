@@ -100,7 +100,7 @@
               <div class="ptt">{{ t('profile.authProvider') }}</div>
               <div class="pth">{{ providerHint }}</div>
             </div>
-            <span class="rolechip">{{ providerLabel }}</span>
+            <span class="rolechip rolechip--tonal">{{ providerLabel }}</span>
           </div>
 
           <div class="pref-row">
@@ -120,10 +120,12 @@
           <p v-else-if="!mfa.devices.value.length" class="pth mfa-note">{{ t('profile.mfaNone') }}</p>
           <div v-else class="mfa-list">
             <div v-for="device in mfa.devices.value" :key="device.id" class="pref-row mfa-row">
-              <v-icon class="pref-ic">{{ device.type === 'PASSKEY' ? 'mdi-fingerprint' : 'mdi-cellphone-key' }}</v-icon>
+              <v-icon class="pref-ic">{{ deviceIcon(device) }}
+                <v-tooltip activator="parent" location="top" :text="deviceTooltip(device)" />
+              </v-icon>
               <div class="pt">
-                <div class="ptt">{{ device.name }}<span v-if="device.defaultDevice" class="rolechip mfa-default">{{ t('profile.mfaDefault') }}</span></div>
-                <div class="pth">{{ t('profile.mfaDeviceMeta', { type: t('profile.mfaType.' + device.type), created: fmtDate(device.createdDate), lastUsed: device.lastUsed ? fmtDate(device.lastUsed) : t('profile.mfaNeverUsed') }) }}</div>
+                <div class="ptt">{{ device.name }}<span v-if="device.defaultDevice" class="rolechip rolechip--tonal mfa-default">{{ t('profile.mfaDefault') }}</span></div>
+                <div class="pth">{{ t('profile.mfaDeviceMeta', { type: deviceLabel(device), created: fmtDate(device.createdDate), lastUsed: device.lastUsed ? fmtDate(device.lastUsed) : t('profile.mfaNeverUsed') }) }}</div>
               </div>
               <button v-if="!device.defaultDevice" type="button" class="lj-iconbtn" :aria-label="t('profile.mfaSetDefault')" @click="setDefaultDevice(device)">
                 <v-icon size="18">mdi-star-outline</v-icon>
@@ -242,6 +244,7 @@ import LigojTextField from '@/components/LigojTextField.vue'
 import QRCode from 'qrcode'
 import { useMfa, isOtpCode, sanitizeOtpCode } from '@/composables/useMfa.js'
 import { isWebAuthnSupported, toCreationOptions, serializeRegistration, credentialErrorName } from '@/utils/webauthn.js'
+import { deviceIcon, deviceKind, deviceTransports } from '@/utils/mfaDevice.js'
 import { PRESET_OPTIONS, detectPreset, applyPreset, persistPreset } from '@/plugins/presets.js'
 import { detectCompact, applyCompact, persistCompact, detectReduceMotion, applyReduceMotion, persistReduceMotion } from '@/plugins/styles.js'
 import { useDemoMode } from '@/composables/useDemoMode.js'
@@ -305,6 +308,17 @@ const permTabs = computed(() => [
 
 /* --- authentication card --- */
 const mfa = useMfa()
+/* What a device is: the authenticator model when its AAGUID is known, else the kind (security key,
+   phone, built-in sensor, authenticator app) derived from the transports and attachment. */
+function deviceLabel(device) {
+  return device.model || t('profile.mfaKind.' + deviceKind(device))
+}
+function deviceTooltip(device) {
+  const transports = deviceTransports(device).map((x) => t('profile.mfaTransport.' + x))
+  const kind = t('profile.mfaKind.' + deviceKind(device))
+  const head = device.model ? `${device.model} (${kind})` : kind
+  return transports.length ? `${head} · ${transports.join(', ')}` : head
+}
 function fmtDate(value) {
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString(i18n.locale || undefined, { dateStyle: 'medium', timeStyle: 'short' })
@@ -668,6 +682,9 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 .mfa-qr img { border-radius: 10px; border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity)); background: #fff; }
 .mfa-secret { font-size: 12px; word-break: break-all; padding: 6px 8px; border-radius: 6px; background: rgba(var(--v-theme-on-surface), .06); flex: 1 1 200px; }
 .mfa-setup-loading { display: grid; place-items: center; padding: 24px; }
+/* Role chips placed on a plain card (not on the coloured hero, where the white tint of `.rolechip`
+   works): a tonal primary chip with the style's border, readable on every surface (Solarized Press included). */
+.rolechip--tonal { background: rgba(var(--v-theme-primary), .14); color: rgb(var(--v-theme-primary)); border: var(--border-w) var(--lj-border-style, solid) rgba(var(--v-theme-primary), .45); }
 .mfa-default { margin-left: 8px; font-size: 10.5px; vertical-align: middle; }
 .mfa-methods { display: grid; gap: 10px; }
 .mfa-method { display: flex; align-items: center; gap: 14px; text-align: left; padding: 12px 14px; border: var(--border-w) var(--lj-border-style, solid) var(--border-c); border-radius: var(--radius); background: var(--surface); color: inherit; cursor: pointer; font: inherit; }
