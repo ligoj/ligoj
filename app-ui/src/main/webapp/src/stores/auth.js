@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { visualIdName, resolveVisualId as resolveSharedVisualId } from '@/utils/visualId.js'
 import { ref, computed } from 'vue'
 
 /**
@@ -91,8 +92,8 @@ export const useAuthStore = defineStore('auth', () => {
   // The user's visual identifier (`service:id:visual-id-name`: 'id', 'mail',
   // an attribute name or 'customAttributes.<x>'), the login when unresolved.
   function resolveVisualId(details, id) {
-    const name = String(session.value?.applicationSettings?.data?.['service:id:visual-id-name'] || 'id')
-    return resolveDisplayToken(name.replace(/^customAttributes\./, ''), details, id) || id
+    const name = visualIdName(session.value?.applicationSettings?.data)
+    return resolveSharedVisualId(name, { ...details, id }) || id
   }
   const displayName = computed(() => {
     const id = userName.value
