@@ -222,7 +222,7 @@ export default {
   'profile.mfaAdd': "Ajouter un appareil",
   'profile.mfaNone': "Aucun appareil enregistré : votre mot de passe (ou votre fournisseur d’identité) suffit pour vous connecter. Enregistrez une application d’authentification pour exiger un code après chaque authentification, OIDC compris.",
   'profile.mfaUnavailable': "L’authentification multi-facteurs n’est pas disponible sur ce serveur.",
-  'profile.mfaHint': "Un code est demandé juste après chaque connexion (mot de passe, OIDC…). Gardez au moins un appareil accessible, ou retirez-les tous.",
+  'profile.mfaHint': "Demandé après chaque connexion. Gardez un appareil accessible, ou retirez-les tous.",
   'profile.mfaDeviceMeta': "{type} · enregistré le {created} · dernière utilisation {lastUsed}",
   'profile.mfaNeverUsed': "jamais",
   'profile.mfaRemove': "Retirer",

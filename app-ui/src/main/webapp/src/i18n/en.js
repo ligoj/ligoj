@@ -222,7 +222,7 @@ export default {
   'profile.mfaAdd': "Add a device",
   'profile.mfaNone': "No device registered: your password (or your identity provider) is enough to sign in. Register an authenticator application to require a code after every authentication, OIDC included.",
   'profile.mfaUnavailable': "Multi-factor authentication is not available on this server.",
-  'profile.mfaHint': "A code is asked right after any sign-in (password, OIDC…). Keep at least one device reachable, or remove them all.",
+  'profile.mfaHint': "Asked after every sign-in. Keep one device reachable, or remove them all.",
   'profile.mfaDeviceMeta': "{type} · registered {created} · last used {lastUsed}",
   'profile.mfaNeverUsed': "never",
   'profile.mfaRemove': "Remove",
