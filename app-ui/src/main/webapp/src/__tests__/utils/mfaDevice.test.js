@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { deviceKind, deviceIcon, deviceTransports } from '@/utils/mfaDevice.js'
+import { deviceKind, deviceIcon, deviceTransports, defaultDevice } from '@/utils/mfaDevice.js'
 
 describe('MFA device kind and icon', () => {
   it('tells a security key, a phone passkey and a built-in authenticator apart', () => {
@@ -29,5 +29,12 @@ describe('MFA device kind and icon', () => {
     expect(deviceIcon({ type: 'PASSKEY' })).toBe('mdi-key-chain-variant')
     expect(deviceTransports({ transports: ['usb', 'nfc', 'bogus'] })).toEqual(['usb', 'nfc'])
     expect(deviceTransports({})).toEqual([])
+  })
+
+  it('names the default device for the profile summary', () => {
+    expect(defaultDevice([{ name: 'phone' }, { name: 'key', defaultDevice: true }])?.name).toBe('key')
+    expect(defaultDevice([{ name: 'phone' }])?.name).toBe('phone')
+    expect(defaultDevice([])).toBeNull()
+    expect(defaultDevice(null)).toBeNull()
   })
 })

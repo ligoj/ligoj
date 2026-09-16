@@ -256,6 +256,8 @@ export default {
   'profile.mfaTransport.smart-card': "carte à puce",
   'profile.mfaTransport.internal': "intégré",
   'profile.mfaTransport.hybrid': "téléphone (QR code)",
+  'profile.mfaManage': "Gérer",
+  'profile.mfaSummary': "{count} enregistré(s) · par défaut : {name}",
   'profile.mfaDefault': "Par défaut",
   'profile.mfaSetDefault': "Utiliser par défaut à la vérification",
   'profile.mfaMethodTotp': "Application d’authentification (TOTP)",

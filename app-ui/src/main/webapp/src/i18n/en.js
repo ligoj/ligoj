@@ -256,6 +256,8 @@ export default {
   'profile.mfaTransport.smart-card': "smart card",
   'profile.mfaTransport.internal': "built-in",
   'profile.mfaTransport.hybrid': "phone (QR code)",
+  'profile.mfaManage': "Manage",
+  'profile.mfaSummary': "{count} registered · default: {name}",
   'profile.mfaDefault': "Default",
   'profile.mfaSetDefault': "Use as default at verification",
   'profile.mfaMethodTotp': "Authenticator app (TOTP)",

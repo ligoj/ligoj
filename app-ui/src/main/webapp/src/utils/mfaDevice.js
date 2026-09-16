@@ -55,3 +55,14 @@ export function deviceKind(device) {
 export function deviceIcon(device) {
   return ICONS[deviceKind(device)]
 }
+
+/**
+ * The device shown as default at verification: the flagged one, else the first registered.
+ *
+ * @param {object[]} devices The registered devices.
+ * @returns {object|null} The default device, null without any device.
+ */
+export function defaultDevice(devices) {
+  const list = Array.isArray(devices) ? devices : []
+  return list.find((d) => d?.defaultDevice) || list[0] || null
+}

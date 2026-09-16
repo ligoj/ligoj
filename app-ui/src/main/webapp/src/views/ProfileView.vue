@@ -111,33 +111,17 @@
             </div>
           </div>
 
-          <div class="subhead d-flex align-center">{{ t('profile.mfaDevices') }}<v-chip size="x-small" variant="tonal" color="primary" class="ms-2">{{ mfa.devices.value.length }}</v-chip>
-            <button v-if="!mfa.unavailable.value" type="button" class="text-info verify-link ms-auto" @click="openAdd">
-              <span class="v"><v-icon size="small">mdi-plus</v-icon>{{ t('profile.mfaAdd') }}</span>
+          <!-- Devices summary: the list itself lives in the "Multi-factor devices" dialog (Manage). -->
+          <div class="pref-row">
+            <v-icon class="pref-ic">mdi-shield-key</v-icon>
+            <div class="pt">
+              <div class="ptt">{{ t('profile.mfaDevices') }}<v-chip v-if="mfa.devices.value.length" size="x-small" variant="tonal" color="primary" class="ms-2">{{ mfa.devices.value.length }}</v-chip></div>
+              <div class="pth">{{ mfaSummary }}</div>
+            </div>
+            <button v-if="!mfa.unavailable.value" type="button" class="text-info verify-link" @click="mfaOpen = true">
+              <span class="v"><v-icon size="small">mdi-cog-outline</v-icon>{{ t('profile.mfaManage') }}</span>
             </button>
           </div>
-          <p v-if="mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaUnavailable') }}</p>
-          <p v-else-if="!mfa.devices.value.length" class="pth mfa-note">{{ t('profile.mfaNone') }}</p>
-          <div v-else class="mfa-list">
-            <div v-for="device in mfa.devices.value" :key="device.id" class="pref-row mfa-row">
-              <v-icon class="pref-ic">{{ deviceIcon(device) }}
-                <v-tooltip activator="parent" location="top" :text="deviceTooltip(device)" />
-              </v-icon>
-              <div class="pt">
-                <div class="ptt">{{ device.name }}<span v-if="device.defaultDevice" class="rolechip rolechip--tonal mfa-default">{{ t('profile.mfaDefault') }}</span></div>
-                <div class="pth">{{ t('profile.mfaDeviceMeta', { type: deviceLabel(device), created: fmtDate(device.createdDate), lastUsed: device.lastUsed ? fmtDate(device.lastUsed) : t('profile.mfaNeverUsed') }) }}</div>
-              </div>
-              <button v-if="!device.defaultDevice" type="button" class="lj-iconbtn" :aria-label="t('profile.mfaSetDefault')" @click="setDefaultDevice(device)">
-                <v-icon size="18">mdi-star-outline</v-icon>
-                <v-tooltip activator="parent" location="top" :text="t('profile.mfaSetDefault')" />
-              </button>
-              <button type="button" class="lj-iconbtn danger" :aria-label="t('profile.mfaRemove')" @click="askRemove(device)">
-                <v-icon size="18">mdi-delete-outline</v-icon>
-                <v-tooltip activator="parent" location="top" :text="t('profile.mfaRemove')" />
-              </button>
-            </div>
-          </div>
-          <p v-if="!mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaHint') }}</p>
         </section>
 
         <!-- Permissions: UI / API in tabs (LjSegmented) -->
@@ -180,6 +164,37 @@
 
     <!-- Register a device: choose the method, then an authenticator (QR code +
          secret, confirmed by a first code) or an access key (generated, shown once) -->
+    <!-- Multi-factor devices: the registered devices, their default flag and removal; "Add" opens the
+         registration dialog on top. -->
+    <LjDialog v-model="mfaOpen" :title="t('profile.mfaDevices')" icon="mdi-shield-key" :badge="mfa.devices.value.length ? String(mfa.devices.value.length) : ''" :max-width="640">
+      <p v-if="mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaUnavailable') }}</p>
+      <p v-else-if="!mfa.devices.value.length" class="pth mfa-note">{{ t('profile.mfaNone') }}</p>
+      <div v-else class="mfa-list">
+        <div v-for="device in mfa.devices.value" :key="device.id" class="pref-row mfa-row">
+          <v-icon class="pref-ic">{{ deviceIcon(device) }}
+            <v-tooltip activator="parent" location="top" :text="deviceTooltip(device)" />
+          </v-icon>
+          <div class="pt">
+            <div class="ptt">{{ device.name }}<span v-if="device.defaultDevice" class="rolechip rolechip--tonal mfa-default">{{ t('profile.mfaDefault') }}</span></div>
+            <div class="pth">{{ t('profile.mfaDeviceMeta', { type: deviceLabel(device), created: fmtDate(device.createdDate), lastUsed: device.lastUsed ? fmtDate(device.lastUsed) : t('profile.mfaNeverUsed') }) }}</div>
+          </div>
+          <button v-if="!device.defaultDevice" type="button" class="lj-iconbtn" :aria-label="t('profile.mfaSetDefault')" @click="setDefaultDevice(device)">
+            <v-icon size="18">mdi-star-outline</v-icon>
+            <v-tooltip activator="parent" location="top" :text="t('profile.mfaSetDefault')" />
+          </button>
+          <button type="button" class="lj-iconbtn danger" :aria-label="t('profile.mfaRemove')" @click="askRemove(device)">
+            <v-icon size="18">mdi-delete-outline</v-icon>
+            <v-tooltip activator="parent" location="top" :text="t('profile.mfaRemove')" />
+          </button>
+        </div>
+      </div>
+      <p v-if="!mfa.unavailable.value" class="pth mfa-note">{{ t('profile.mfaHint') }}</p>
+      <template #footer>
+        <LjButton variant="ghost" @click="mfaOpen = false">{{ t('common.close') }}</LjButton>
+        <LjButton v-if="!mfa.unavailable.value" icon="mdi-plus" @click="openAdd">{{ t('profile.mfaAdd') }}</LjButton>
+      </template>
+    </LjDialog>
+
     <LjDialog v-model="addOpen" :title="t('profile.mfaAddTitle')" icon="mdi-cellphone-key" :max-width="560">
       <div v-if="!addMethod" class="mfa-methods">
         <button type="button" class="mfa-method" @click="chooseMethod('totp')">
@@ -244,7 +259,7 @@ import LigojTextField from '@/components/LigojTextField.vue'
 import QRCode from 'qrcode'
 import { useMfa, isOtpCode, sanitizeOtpCode } from '@/composables/useMfa.js'
 import { isWebAuthnSupported, toCreationOptions, serializeRegistration, credentialErrorName } from '@/utils/webauthn.js'
-import { deviceIcon, deviceKind, deviceTransports } from '@/utils/mfaDevice.js'
+import { deviceIcon, deviceKind, deviceTransports, defaultDevice } from '@/utils/mfaDevice.js'
 import { PRESET_OPTIONS, detectPreset, applyPreset, persistPreset } from '@/plugins/presets.js'
 import { detectCompact, applyCompact, persistCompact, detectReduceMotion, applyReduceMotion, persistReduceMotion } from '@/plugins/styles.js'
 import { useDemoMode } from '@/composables/useDemoMode.js'
@@ -334,6 +349,12 @@ const providerLabel = computed(() => {
 })
 const providerHint = computed(() => providerNode.value ? t('profile.authProviderHint', { node: providerNode.value }) : t('profile.authProviderInternalHint'))
 
+const mfaOpen = ref(false)
+const mfaSummary = computed(() => {
+  if (mfa.unavailable.value) return t('profile.mfaUnavailable')
+  const main = defaultDevice(mfa.devices.value)
+  return main ? t('profile.mfaSummary', { count: mfa.devices.value.length, name: main.name }) : t('profile.mfaNone')
+})
 const addOpen = ref(false)
 const addMethod = ref('')
 const addName = ref('')
