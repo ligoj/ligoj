@@ -28,7 +28,8 @@
            lives in the top app bar (App.vue), in the chip style. The
            `crumbs` prop is kept for API compatibility (views still pass it) but
            no longer paints a second, duplicated trail. -->
-      <h1>{{ title }}</h1>
+      <!-- `#title-append`: compact content on the title line (a chip, a badge), vertically centred on it -->
+      <h1><span class="ph-title">{{ title }}</span><slot name="title-append" /></h1>
       <p v-if="subtitle || $slots.subtitle" class="sub"><slot name="subtitle">{{ subtitle }}</slot></p>
     </div>
     <div v-if="$slots.actions || pluginActions.length" class="ph-actions">
@@ -72,6 +73,7 @@ const { actions: pluginActions, context: pluginContext } = useActionExtensions(
   font-weight: var(--bold, var(--lj-weight-bold, 800));
   letter-spacing: var(--lj-tracking, -.03em);
   font-size: 28px; margin: 0;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px;
   color: var(--ink, rgb(var(--v-theme-on-surface)));
 }
 .ph-txt .sub {
