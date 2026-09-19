@@ -308,7 +308,7 @@ Resolved by `useActionExtensions(target, contextSupplier)`; a contribution `{ ac
 
 ## Subscription wizard and node editor
 
-`SubscribeWizardView` (mode `subscribe`, dialog in `ProjectDetailView`: Service → Tool → Instance → Mode → Params, `POST rest/subscription`) and `NodeEditDialog` (`create-node`: Service → Tool → new instance form + Mode + Params, `POST rest/node`; `edit-node`: read-only chain + name + params, `PUT rest/node`) share one parameter-form core (`utils/pluginParams.js`, `utils/parameterGroups.js`). The parent field of `NodeEditionVo` is `node`, not `refined` (no `setRefined`, Jackson drops it).
+`SubscribeWizardView` (mode `subscribe`, dialog in `ProjectDetailView`: Service → Tool → existing Instance → Mode → Params, `POST rest/subscription`; it never creates an instance, that belongs to `NodeEditDialog` in Administration) and `NodeEditDialog` (`create-node`: Service → Tool → new instance form + Mode + Params, `POST rest/node`; `edit-node`: read-only chain + name + params, `PUT rest/node`) share one parameter-form core (`utils/pluginParams.js`, `utils/parameterGroups.js`). The parent field of `NodeEditionVo` is `node`, not `refined` (no `setRefined`, Jackson drops it).
 
 ## Shared subscriptions display (`SubscriptionsPanel`)
 
