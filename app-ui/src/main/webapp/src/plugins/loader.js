@@ -2,6 +2,8 @@ import registry from './registry.js'
 import router from '@/router/index.js'
 import { pluginAssetVersion } from './asset-version.js'
 import { pluginIdFromKey } from './plugin-key.js'
+import { isPluginInstalled } from './eager-plugins.js'
+import { useAuthStore } from '@/stores/auth.js'
 
 const loaded = new Set()
 // Tracks in-flight loads so concurrent calls to `loadPlugin(<id>)` share
@@ -35,6 +37,16 @@ async function _loadPlugin(pluginId) {
   // Validate plugin ID to prevent path traversal
   if (!/^[a-zA-Z0-9][\w-]*$/.test(pluginId)) {
     throw new Error(`Invalid plugin ID: "${pluginId}"`)
+  }
+
+  // A plugin the session reports as not installed (disabled, removed, or backend-only) has no bundle to serve:
+  // fail like a missing bundle, without the 404 round-trip. Subscriptions of such plugins stay listed, so the
+  // row delegation (PluginFeatures) and the parameter dialogs ask for them on every page.
+  let uiPlugins = null
+  try { uiPlugins = useAuthStore().appSettings?.data?.['ui-plugins'] } catch { /* no active store */ }
+  if (!isPluginInstalled(pluginId, uiPlugins)) {
+    console.debug(`[plugin loader] "${pluginId}" is not installed — skipping`)
+    throw new Error(`Plugin "${pluginId}" is not installed`)
   }
 
   // app-ui exposes plugin webjars through the `/main/*` proxy servlet

@@ -25,3 +25,17 @@ export function eagerPlugins(uiPluginsData, required = REQUIRED_PLUGINS) {
   const installed = new Set(String(uiPluginsData).split(',').map((k) => pluginIdFromKey(k.trim())).filter(Boolean))
   return required.filter((id) => installed.has(id))
 }
+
+/**
+ * Whether a plugin can serve a UI bundle, according to the session's `ui-plugins` data (comma-joined backend keys
+ * of the installed plugins shipping a bundle). Without that data (older backend, no session yet) the answer is
+ * unknown and counts as installed, so the loader behaves as before.
+ *
+ * @param {string} pluginId The loader id (`prov`, `id-ldap`, ...).
+ * @param {string|null|undefined} uiPluginsData The session `ui-plugins` value.
+ * @returns {boolean} `false` only when the plugin is known not to ship a bundle.
+ */
+export function isPluginInstalled(pluginId, uiPluginsData) {
+  if (uiPluginsData == null) return true
+  return String(uiPluginsData).split(',').map((k) => pluginIdFromKey(k.trim())).includes(pluginId)
+}
