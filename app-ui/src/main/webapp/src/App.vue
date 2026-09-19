@@ -169,7 +169,8 @@ const NO_UI_PLUGINS = new Set(['iam-empty', 'iam-node', 'menu-node', 'welcome-da
 watch(() => i18n.locale, () => app.refreshBreadcrumbs())
 
 onMounted(async () => {
-  const ok = await auth.fetchSession()
+  // main.js already fetched the session before mounting (it needs the plugin list): reuse it, fetch only when absent
+  const ok = auth.isAuthenticated || await auth.fetchSession()
   if (!ok) { auth.redirectToLogin(); return }
   app.setAppName(auth.appSettings?.name)
   // Prefer the backend-filtered list of bundle-shipping plugins (comma-joined
