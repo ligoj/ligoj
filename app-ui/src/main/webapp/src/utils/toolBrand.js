@@ -12,6 +12,8 @@
  * unreadable icon (PNG-only plugin, uninstalled tool) yields the fallback.
  */
 
+import { useAuthStore } from '@/stores/auth.js'
+
 const APP_BASE = import.meta.env.BASE_URL
 
 /** Well-known brand colours keyed by the tool display name. */
@@ -49,6 +51,26 @@ export function toolIconBase(node) {
   const fragments = id.split(':')
   if (fragments.length < 3) return ''
   return `${APP_BASE}main/service/${fragments[1]}/${fragments[2]}/img/${fragments[2]}`
+}
+
+/**
+ * Whether the plug-in of a tool / instance node can serve its assets. It cannot when the node reports
+ * `enabled: false` (plug-in disabled, removed or unavailable), or when the session lists the loaded plug-ins
+ * and the tool (`service:<svc>:<tool>`) is not among them. Asking the backend for the icon of such a tool only
+ * produces a 404, so callers skip the request. Unknown state (no session yet, bare render) counts as available.
+ *
+ * @param {string|{id?: string, enabled?: boolean}} node The node or its id.
+ * @returns {boolean} `false` when the assets are known to be unreachable.
+ */
+export function isToolAvailable(node) {
+  if (typeof node === 'object' && node?.enabled === false) return false
+  const id = (typeof node === 'string' ? node : node?.id) || ''
+  const fragments = id.split(':')
+  if (fragments.length < 3) return true
+  let plugins = null
+  try { plugins = useAuthStore().appSettings?.plugins } catch { /* no active store */ }
+  if (!Array.isArray(plugins) || !plugins.length) return true
+  return plugins.includes(fragments.slice(0, 3).join(':'))
 }
 
 // `#rgb`, `#rrggbb` in fill / stroke / stop-color attributes, or the same properties inside a style attribute.
@@ -128,6 +150,7 @@ async function fetchSvgColor(base) {
 export async function resolveToolColor(node, name) {
   const label = name ?? (typeof node === 'object' ? (node?.name || node?.id) : node) ?? ''
   const base = toolIconBase(node)
-  const color = base ? await fetchSvgColor(base) : null
+  // No request for a tool whose plug-in cannot serve its icon: the name colour applies
+  const color = base && isToolAvailable(node) ? await fetchSvgColor(base) : null
   return color || fallbackToolColor(label)
 }

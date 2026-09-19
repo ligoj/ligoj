@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { svgBrandColor, fallbackToolColor, resolveToolColor, toolIconBase, _resetToolColorCache } from '@/utils/toolBrand.js'
+import { svgBrandColor, fallbackToolColor, resolveToolColor, toolIconBase, isToolAvailable, _resetToolColorCache } from '@/utils/toolBrand.js'
+import { setActivePinia, createPinia } from 'pinia'
+import { useAuthStore } from '@/stores/auth.js'
 
 // Colour sets of real plugin icons (attributes as shipped in the SVG files).
 const COGNITO = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 96 96"><path fill="url(#a)" d="M95 1H1v94h94V1Z"/><path fill="#ffffff" d="M20 43h16v-2H20z"/>'
@@ -47,6 +49,23 @@ describe('resolveToolColor()', () => {
     expect(await resolveToolColor({ id: 'service:id:cognito:saas', name: 'AWS Cognito' })).toBe('#bd0816')
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
     expect(globalThis.fetch.mock.calls[0][0]).toMatch(/main\/service\/id\/cognito\/img\/cognito\.svg$/)
+  })
+
+  it('never fetches the SVG of an unavailable plug-in and uses the name colour', async () => {
+    globalThis.fetch = vi.fn()
+    const color = await resolveToolColor({ id: 'service:scm:gitlab:local', name: 'GitLab', enabled: false })
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+    expect(color).toBe(fallbackToolColor('GitLab'))
+  })
+
+  it('knows a tool is unavailable from the node flag or from the session plug-ins', () => {
+    setActivePinia(createPinia())
+    expect(isToolAvailable('service:prov:azure:local')).toBe(true) // no session yet: unknown counts as available
+    useAuthStore().session = { applicationSettings: { plugins: ['service:build:jenkins'] } }
+    expect(isToolAvailable('service:build:jenkins:local')).toBe(true)
+    expect(isToolAvailable('service:prov:azure')).toBe(false)
+    expect(isToolAvailable({ id: 'service:build:jenkins:local', enabled: false })).toBe(false)
+    expect(isToolAvailable('service:build')).toBe(true) // service level: no icon file involved
   })
 
   it('falls back to the name colour when the SVG is missing, unparsable or the node is not a tool', async () => {

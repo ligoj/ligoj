@@ -1,7 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nodeIcon } from '@/components/NodeIcon.vue'
 import NodeIcon from '@/components/NodeIcon.vue'
+import { setActivePinia, createPinia } from 'pinia'
+import { useAuthStore } from '@/stores/auth.js'
 
 /**
  * The helper returns VNode shapes; for assertions we mount it inside a
@@ -13,6 +15,27 @@ function renderHost(node) {
     render() { return nodeIcon(this.n) },
   }, { props: { n: node } })
 }
+
+describe('nodeIcon() for an unavailable plug-in', () => {
+  // A fresh store per test and none left behind: the other suites render without any session
+  beforeEach(() => { setActivePinia(createPinia()) })
+  afterEach(() => { setActivePinia(createPinia()) })
+
+  it('requests no icon file when the node is disabled: inline placeholder, never a network URL', () => {
+    const w = renderHost({ id: 'service:scm:gitlab:local', enabled: false, refined: { id: 'service:scm:gitlab', uiClasses: 'fab fa-gitlab' } })
+    const img = w.find('img')
+    expect(img.attributes('src').startsWith('data:image/svg+xml')).toBe(true)
+    expect(img.classes()).toContain('missing')
+    expect(img.attributes('title')).toBeTruthy()
+  })
+
+  it('treats a tool absent from the session plug-ins as unavailable, and a listed one as available', () => {
+    setActivePinia(createPinia())
+    useAuthStore().session = { applicationSettings: { plugins: ['service:build', 'service:build:jenkins'] } }
+    expect(renderHost('service:prov:azure:local').find('img').attributes('src').startsWith('data:')).toBe(true)
+    expect(renderHost('service:build:jenkins:local').find('img').attributes('src')).toMatch(/main\/service\/build\/jenkins\/img\/jenkins\.svg$/)
+  })
+})
 
 describe('nodeIcon()', () => {
   it('renders the tool icon FILE (svg-first) for a 3+ fragment node, ignoring uiClasses', () => {

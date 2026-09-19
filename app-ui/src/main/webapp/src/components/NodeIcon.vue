@@ -31,7 +31,7 @@
 import { defineComponent, h } from 'vue'
 import { VChip } from 'vuetify/components'
 import { useI18nStore } from '@/stores/i18n.js'
-import { toolIconBase } from '@/utils/toolBrand.js'
+import { isToolAvailable, toolIconBase } from '@/utils/toolBrand.js'
 
 /**
  * Explicit placeholder shown when the tool icon cannot be fetched (plugin
@@ -78,6 +78,15 @@ function convertFromFontAwesome(uiClasses) {
   return FA_TO_MDI[uiClasses] || uiClasses
 }
 
+/** Localized "plugin unavailable" title, with a plain default when the i18n store is not available. */
+function missingTitle() {
+  try {
+    const localized = useI18nStore().t('node.iconMissing')
+    if (localized && localized !== 'node.iconMissing') return localized
+  } catch { /* i18n store unavailable (bare render) — keep the default */ }
+  return 'Plugin unavailable'
+}
+
 export function nodeIcon(node) {
   const id = (typeof node === 'string' ? node : node?.id) || ''
   const fragments = id.split(':')
@@ -86,6 +95,11 @@ export function nodeIcon(node) {
   // tool ICON FILE — SVG first, PNG fallback, then a broken marker. `uiClasses`
   // is intentionally NOT consulted for these: every tool plugin ships an icon
   // file, which is the single source of truth for tool/instance icons.
+  if (fragments.length >= 3 && !isToolAvailable(node)) {
+    // Plug-in disabled, removed or unavailable: its icon file would 404, so nothing is requested and the explicit
+    // placeholder is rendered straight away (an inline data URI).
+    return h('img', { src: MISSING_NODE_ICON, alt: '', class: 'tool-icon missing', title: missingTitle() })
+  }
   if (fragments.length >= 3) {
     const base = toolIconBase(id)
     return h('img', {
@@ -101,12 +115,7 @@ export function nodeIcon(node) {
           el.dataset.missing = '1'
           el.src = MISSING_NODE_ICON
           el.classList.add('missing')
-          let title = 'Plugin unavailable'
-          try {
-            const localized = useI18nStore().t('node.iconMissing')
-            if (localized && localized !== 'node.iconMissing') title = localized
-          } catch { /* i18n store unavailable (bare render) — keep the default */ }
-          el.title = title
+          el.title = missingTitle()
         }
       },
     })
@@ -191,6 +200,7 @@ export default defineComponent({
 .tool-icon.missing {
   opacity: 0.8;
 }
+
 
 .icon-text {
   display: inline-block;
