@@ -1176,6 +1176,21 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		});
 	}
 
+	/**
+	 * Return the version of every enabled plug-in, by plug-in key. Unlike the plug-in management API, this read-only
+	 * lookup is open to any authenticated user: the bug report dialog calls it on demand, which keeps this cost
+	 * out of the session computation.
+	 *
+	 * @return The version by plug-in key, ordered by key.
+	 */
+	@GET
+	@Path("version")
+	public Map<String, String> getVersions() {
+		final var versions = new java.util.TreeMap<String, String>();
+		context.getBeansOfType(FeaturePlugin.class).values().forEach(p -> versions.put(p.getKey(), getVersion(p)));
+		return versions;
+	}
+
 	@Override
 	public void decorate(final SessionSettings settings) {
 		// Add the enabled plug-ins

@@ -1521,6 +1521,15 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 	}
 
 	@Test
+	void getVersions() {
+		final var versions = resource.getVersions();
+		Assertions.assertTrue(versions.containsKey("feature:iam:empty"));
+		Assertions.assertTrue(versions.values().stream().noneMatch(String::isBlank));
+		// Ordered by key
+		Assertions.assertEquals(versions.keySet().stream().sorted().toList(), List.copyOf(versions.keySet()));
+	}
+
+	@Test
 	void decorate() {
 		final var settings = mock(SessionSettings.class);
 		when(settings.getApplicationSettings()).thenReturn(applicationSettings);
@@ -1531,6 +1540,8 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		// jar carries webjars/ui/vue/index.js) is kept, the backend-only samples and features are excluded.
 		Assertions.assertEquals("feature:ui", settings.getApplicationSettings().getData().get("ui-plugins"));
 		Assertions.assertTrue(settings.getApplicationSettings().getPlugins().contains("feature:iam:empty"));
+		// The versions are served on demand (getVersions), never computed with the session
+		Assertions.assertNull(settings.getApplicationSettings().getData().get("plugin-versions"));
 		resource.decorate(settings);
 		Assertions.assertNotNull(settings.getApplicationSettings().getPlugins());
 	}
