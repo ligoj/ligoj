@@ -7,30 +7,21 @@ import '@mdi/font/css/materialdesignicons.css'
 // Self-hosted webfonts via @fontsource (npm) — the woff2 live in node_modules
 // (gitignored) and Vite bundles them locally at build time, so there is NO
 // external fonts.googleapis.com / fonts.gstatic.com reference AND no font binary
-// is committed to the repo. We import only the subsets the UI needs (latin /
-// latin-ext / vietnamese); each weight's woff2 is still fetched lazily by the
+// is committed to the repo. We import the latin subset only: it covers French and
+// English, and the per-subset files carry no unicode-range, so importing several of
+// them makes overlapping faces the browser downloads one after the other. A letter
+// outside latin (Central European, Vietnamese names) renders in the system font.
+// Each weight's woff2 is still fetched lazily by the
 // browser when that weight is actually rendered.
 //
 // Bricolage Grotesque — the UI font (weights 600/700/800).
 import '@fontsource/bricolage-grotesque/latin-600.css'
 import '@fontsource/bricolage-grotesque/latin-700.css'
 import '@fontsource/bricolage-grotesque/latin-800.css'
-import '@fontsource/bricolage-grotesque/latin-ext-600.css'
-import '@fontsource/bricolage-grotesque/latin-ext-700.css'
-import '@fontsource/bricolage-grotesque/latin-ext-800.css'
-import '@fontsource/bricolage-grotesque/vietnamese-600.css'
-import '@fontsource/bricolage-grotesque/vietnamese-700.css'
-import '@fontsource/bricolage-grotesque/vietnamese-800.css'
 // Roboto — the Material Design 3 style font (weights 400/500/700).
 import '@fontsource/roboto/latin-400.css'
 import '@fontsource/roboto/latin-500.css'
 import '@fontsource/roboto/latin-700.css'
-import '@fontsource/roboto/latin-ext-400.css'
-import '@fontsource/roboto/latin-ext-500.css'
-import '@fontsource/roboto/latin-ext-700.css'
-import '@fontsource/roboto/vietnamese-400.css'
-import '@fontsource/roboto/vietnamese-500.css'
-import '@fontsource/roboto/vietnamese-700.css'
 // Project-wide Vuetify CSS tweaks (imported after `vuetify/styles` so
 // our rules win the cascade).
 import '@/assets/vuetify-overrides.css'
