@@ -387,7 +387,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-build</artifactId>
-                    <version>[5.0.0,5.1.0)</version>
+                    <version>[5.0.2-SNAPSHOT,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
@@ -449,7 +449,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-id</artifactId>
-                    <version>[5.0.1,5.1.0)</version>
+                    <version>[5.0.4,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
