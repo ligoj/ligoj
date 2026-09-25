@@ -730,6 +730,33 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		Assertions.assertTrue(resource.getVersion(new SampleService()).startsWith("20"));
 	}
 
+	/**
+	 * A plug-in run from a directory (IDE, {@code classes/}) is versioned by its newest file, not by the directory
+	 * itself, whose timestamp ignores recompiled nested classes: the update hooks then fire after a rebuild.
+	 */
+	@Test
+	void lastModifiedTimeDirectory() throws IOException {
+		final var root = java.nio.file.Files.createTempDirectory("plugin-classes");
+		try {
+			final var nested = java.nio.file.Files.createDirectories(root.resolve("org/ligoj/sample")).resolve("Sample.class");
+			java.nio.file.Files.writeString(nested, "x");
+			final var old = java.nio.file.attribute.FileTime.fromMillis(1_600_000_000_000L);
+			final var recent = java.nio.file.attribute.FileTime.fromMillis(1_700_000_000_000L);
+			java.nio.file.Files.setLastModifiedTime(nested, recent);
+			java.nio.file.Files.setLastModifiedTime(root.resolve("org"), old);
+			java.nio.file.Files.setLastModifiedTime(root, old);
+			Assertions.assertEquals(recent.toString(), SystemPluginResource.lastModifiedTime(root));
+
+			// A plain file (jar): its own timestamp
+			final var jar = root.resolve("plugin.jar");
+			java.nio.file.Files.writeString(jar, "x");
+			java.nio.file.Files.setLastModifiedTime(jar, old);
+			Assertions.assertEquals(old.toString(), SystemPluginResource.lastModifiedTime(jar));
+		} finally {
+			FileUtils.deleteDirectory(root.toFile());
+		}
+	}
+
 	@Test
 	void getVersionIOException() {
 		Assertions.assertEquals("?", new SystemPluginResource() {

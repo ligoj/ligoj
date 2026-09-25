@@ -979,10 +979,39 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	 * @throws IOException        if an I/O error occurs
 	 */
 	protected String getLastModifiedTime(final FeaturePlugin plugin) throws IOException, URISyntaxException {
-		return Files
-				.getLastModifiedTime(
-						Paths.get(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))
-				.toString();
+		return lastModifiedTime(Paths.get(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
+	}
+
+	/**
+	 * Last modification time of a code source: the file itself for a jar, the newest file below it for a directory
+	 * (a plug-in run from {@code classes/} in development), since a directory's own timestamp does not change when a
+	 * nested class is recompiled, which would hide the update from {@link #isAnUpdate(SystemPlugin, FeaturePlugin)}.
+	 *
+	 * @param location The code source path.
+	 * @return The newest modification time, as a string.
+	 * @throws IOException When the path cannot be read.
+	 */
+	static String lastModifiedTime(final java.nio.file.Path location) throws IOException {
+		if (Files.isDirectory(location)) {
+			try (var files = Files.walk(location)) {
+				return files.filter(Files::isRegularFile).map(f -> {
+					try {
+						return Files.getLastModifiedTime(f);
+					} catch (final IOException ioe) {
+						throw new java.io.UncheckedIOException(ioe);
+					}
+				}).max(Comparator.naturalOrder()).orElseGet(() -> {
+					try {
+						return Files.getLastModifiedTime(location);
+					} catch (final IOException ioe) {
+						throw new java.io.UncheckedIOException(ioe);
+					}
+				}).toString();
+			} catch (final java.io.UncheckedIOException uioe) {
+				throw uioe.getCause();
+			}
+		}
+		return Files.getLastModifiedTime(location).toString();
 	}
 
 	/**
