@@ -243,7 +243,7 @@ Integration: run the host dev server (`app-ui/src/main/webapp`, `npm run dev`), 
 
 ## Subscription row delegation (`PluginFeatures`)
 
-`<PluginFeatures :subscription="row" action="renderFeatures|renderDetailsKey|renderDetailsFeatures" />` resolves the **service-level** plugin from the node id (`nodePluginId`), lazy-loads it, calls `plugin.feature(action, subscription)` and mounts the returned VNodes (single, array or `null`). Actions: `renderFeatures` (action icons next to the unsubscribe button), `renderDetailsKey` (stable resource chips), `renderDetailsFeatures` (live chips: counts, quotas). A plugin without the action throws from its dispatcher and the host swallows that error; real errors surface in `console.warn`. `subscription.data / status / parameters` only exist after the `rest/subscription/status/refresh?id=…` round-trip (ProjectDetail runs it once upfront, Home lazily per visible row).
+`<PluginFeatures :subscription="row" action="renderFeatures|renderDetailsKey|renderDetailsFeatures" />` resolves the **service-level** plugin from the node id (`nodePluginId`), lazy-loads it, calls `plugin.feature(action, subscription)` and mounts the returned VNodes (single, array or `null`). Actions: `renderFeatures` (action icons next to the unsubscribe button; unsubscribing opens an `LjConfirmDialog` in ProjectDetailView with, for CREATE-mode subscriptions only, the opt-in "also delete remote data" checkbox sent as `DELETE rest/subscription/{id}?deleteRemoteData=true`), `renderDetailsKey` (stable resource chips), `renderDetailsFeatures` (live chips: counts, quotas). A plugin without the action throws from its dispatcher and the host swallows that error; real errors surface in `console.warn`. `subscription.data / status / parameters` only exist after the `rest/subscription/status/refresh?id=…` round-trip (ProjectDetail runs it once upfront, Home lazily per visible row).
 
 Use the host builders instead of hand-rolled VNodes:
 
@@ -308,7 +308,7 @@ Resolved by `useActionExtensions(target, contextSupplier)`; a contribution `{ ac
 
 ## Subscription wizard and node editor
 
-`SubscribeWizardView` (mode `subscribe`, dialog in `ProjectDetailView`: Service → Tool → existing Instance → Mode → Params, `POST rest/subscription`; it never creates an instance, that belongs to `NodeEditDialog` in Administration) and `NodeEditDialog` (`create-node`: Service → Tool → new instance form + Mode + Params, `POST rest/node`; `edit-node`: read-only chain + name + params, `PUT rest/node`) share one parameter-form core (`utils/pluginParams.js`, `utils/parameterGroups.js`). The parent field of `NodeEditionVo` is `node`, not `refined` (no `setRefined`, Jackson drops it).
+`SubscribeWizardView` (mode `subscribe`, dialog in `ProjectDetailView`: Service → Tool → existing Instance → Mode → Params, `POST rest/subscription`; it never creates an instance, that belongs to `NodeEditDialog` in Administration) and `NodeEditDialog` (`create-node`: Service → Tool → new instance form + Mode + Params, `POST rest/node`; `edit-node`: read-only chain + name + params, `PUT rest/node`) share one parameter-form core: the `components/ParameterForm.vue` renderer (groups, custom plugin fields, default input per type, labels and hints; it never mutates the values, it emits `update`) over `utils/pluginParams.js` and `utils/parameterGroups.js`. Both dialogs are 1040 px wide with their three first steps on one row. The parent field of `NodeEditionVo` is `node`, not `refined` (no `setRefined`, Jackson drops it).
 
 ## Shared subscriptions display (`SubscriptionsPanel`)
 
