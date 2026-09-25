@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useErrorStore } from '@/stores/error.js'
+import { useI18nStore } from '@/stores/i18n.js'
 import { useAuthStore } from '@/stores/auth.js'
 
 describe('useErrorStore', () => {
@@ -136,6 +137,32 @@ describe('useErrorStore', () => {
     expect(store.errors[0].message).toBe('The business server is not available')
   })
 
+  it('handleResponse renders a plain business message with its ordered parameters', async () => {
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 500,
+      body: { code: 'business', message: 'Creating the Jenkins credential {} in folder {} failed.', parameters: ['git-deploy', 'folder6'] },
+    }))
+    expect(store.errors).toHaveLength(1)
+    expect(store.errors[0].message).toBe('Creating the Jenkins credential git-deploy in folder folder6 failed.')
+    expect(store.errors[0].title).toBe('Business error')
+  })
+
+  it('handleResponse resolves a coded business message through the plugin catalog, else shows it as is', async () => {
+    useI18nStore().merge({ 'error.vm-operation-execute': 'The operation {this} cannot be executed' }, 'en')
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 500,
+      body: { code: 'business', message: 'vm-operation-execute', parameters: ['reboot'] },
+    }))
+    expect(store.errors[0].message).toBe('The operation reboot cannot be executed')
+    await store.handleResponse(mockResponse({
+      status: 500,
+      body: { code: 'business', message: 'Something odd happened' },
+    }))
+    expect(store.errors[1].message).toBe('Something odd happened')
+  })
+
   it('handleResponse hydrates validationErrors from a JSR-303 body', async () => {
     const store = useErrorStore()
     await store.handleResponse(mockResponse({
@@ -148,6 +175,26 @@ describe('useErrorStore', () => {
     expect(errs[0].message).toBe('The selected group is not of type Project')
     expect(store.errors).toHaveLength(1)
     expect(store.errors[0].title).toBe('Validation error')
+  })
+
+  it('handleResponse summarises a field error with the field label and the rule parameters', async () => {
+    useI18nStore().merge({
+      'service:build:jenkins:template-folder': 'Folder definition',
+      'error.rule.jenkins-folder-plugin': 'Jenkins plug-ins required by the credentials are not installed: {plugins}',
+    }, 'en')
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 400,
+      body: { errors: { 'service:build:jenkins:template-folder': [{ rule: 'jenkins-folder-plugin', parameters: { plugins: 'credentials, plain-credentials' } }] } },
+    }))
+    expect(store.errors).toHaveLength(1)
+    expect(store.errors[0].message).toBe('Folder definition: Jenkins plug-ins required by the credentials are not installed: credentials, plain-credentials')
+    // No label for the field: the raw parameter id is kept
+    await store.handleResponse(mockResponse({
+      status: 400,
+      body: { errors: { 'some:unknown:field': [{ rule: 'NotBlank' }] } },
+    }))
+    expect(store.errors[1].message).toBe('some:unknown:field: This field is required')
   })
 
   it('handleResponse maps a 412 integrity-unicity to the duplicate-entry toast', async () => {

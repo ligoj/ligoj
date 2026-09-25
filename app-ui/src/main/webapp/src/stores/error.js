@@ -297,9 +297,12 @@ export const useErrorStore = defineStore('error', () => {
         const firstField = Object.keys(json.errors)[0]
         const firstRule = (Array.isArray(json.errors[firstField]) ? json.errors[firstField][0] : json.errors[firstField])?.rule
         const summary = tMessage(`rule.${firstRule}`, json.errors[firstField][0]?.parameters)
+        // Name the field by its label when the shared i18n knows it (a parameter id such as
+        // `service:build:jenkins:template-folder` is a key of its plugin bundle), else by the raw id
+        const fieldLabel = i18n.t(firstField)
         push({
           title: i18n.t('error.400'),
-          message: `${firstField}: ${summary || firstRule || ''}`.trim(),
+          message: `${fieldLabel && fieldLabel !== firstField ? fieldLabel : firstField}: ${summary || firstRule || ''}`.trim(),
           status,
         })
         return response
@@ -475,9 +478,26 @@ export const useErrorStore = defineStore('error', () => {
    * from the backend. The `severity` reflects whether the backend tagged
    * this as a "business" (user-actionable) vs technical error.
    */
+  /**
+   * Text of a `business` error: its `message` is either a code of the plugin catalog (`error.<message>`, with the
+   * ordered parameters as `{0}`/`{this}`), or a plain sentence whose `{}` placeholders take the parameters in order
+   * (the `BusinessException("... {} ...", params)` convention of the plugins).
+   */
+  function businessMessage(body) {
+    const message = String(body.message ?? '')
+    if (!message) return ''
+    const i18n = useI18nStore()
+    const key = `error.${message}`
+    if (!message.includes(' ') && i18n.t(key) !== key) return tMessage(message, body.parameters)
+    const parameters = Array.isArray(body.parameters) ? body.parameters : (body.parameters == null ? [] : [body.parameters])
+    let i = 0
+    return message.replace(/\{\}/g, () => (i < parameters.length ? String(parameters[i++]) : '{}'))
+  }
+
   function pushBusinessError(body, status) {
     const i18n = useI18nStore()
-    const message = tMessage(body.code, body.parameters) || body.message || i18n.t('error.unknownCode')
+    const message = (body.code === 'business' && businessMessage(body))
+      || tMessage(body.code, body.parameters) || body.message || i18n.t('error.unknownCode')
     const severity = body.code === 'business' ? 'info' : 'error'
     push({
       title: tCode(body.code),
