@@ -361,6 +361,7 @@ export default {
   'error.rule.Min': 'Value too small',
   'error.rule.Max': 'Value too large',
   'error.rule.Pattern': 'Invalid format',
+  'error.rule.pattern': 'Invalid format, expected: {this}',
   'error.rule.Email': 'Invalid email',
   'error.rule.Positive': 'Must be positive',
   'error.rule.Mapping': 'Invalid type',
