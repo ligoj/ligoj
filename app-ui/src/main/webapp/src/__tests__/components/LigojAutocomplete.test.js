@@ -51,6 +51,19 @@ describe('<LigojAutocomplete />', () => {
     expect(a).not.toBe(b)
   })
 
+  it('treats an empty-string model as no selection: nothing to clear, no phantom selected entry', async () => {
+    // The parameter forms seed text values with '' and fields re-emit '' on clear; wrapped as a
+    // one-item selection by Vuetify, that showed a permanent clear button over an invisible value.
+    const w = mountAc({}, { modelValue: '', clearable: true })
+    await nextTick()
+    expect(w.findComponent({ name: 'VAutocomplete' }).props('modelValue')).toBeNull()
+    expect(w.find('.v-field--dirty').exists()).toBe(false)
+    // A real value stays clearable
+    const filled = mountAc({}, { modelValue: 'alpha', clearable: true })
+    await nextTick()
+    expect(filled.find('.v-field--dirty').exists()).toBe(true)
+  })
+
   it('forwards v-model + items to the inner v-autocomplete', () => {
     const w = mountAc({}, { modelValue: 'alpha' })
     expect(w.findComponent({ name: 'VAutocomplete' }).exists()).toBe(true)

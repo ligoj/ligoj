@@ -50,11 +50,21 @@ function hardenInputs() {
 
 onMounted(hardenInputs)
 
+// Forwarded attributes: an empty-string model means "no selection". Left as is, Vuetify wraps '' as a
+// one-item selection (dirty field: permanent clear button over an invisible entry). The parameter forms
+// seed text values with '' and the fields re-emit '' on clear, so normalise it here for every caller.
+const forwarded = computed(() => {
+  const out = { ...attrs }
+  for (const key of ['modelValue', 'model-value']) {
+    if (key in out && out[key] === '') out[key] = null
+  }
+  return out
+})
 defineExpose({ root })
 </script>
 
 <template>
-  <v-combobox ref="root" v-bind="$attrs" :autocomplete="autocompleteToken" :name="fieldName" :menu-props="menuProps">
+  <v-combobox ref="root" v-bind="forwarded" :autocomplete="autocompleteToken" :name="fieldName" :menu-props="menuProps">
     <!-- Forward every slot the caller declares to the inner component. -->
     <template v-for="(_, slot) in $slots" #[slot]="slotProps">
       <slot :name="slot" v-bind="slotProps ?? {}" />
