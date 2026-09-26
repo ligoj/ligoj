@@ -422,9 +422,6 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Build the plug-in information from the plug-in itself and the last version being available.
-	 */
-	/**
 	 * Build the VO of a persisted plug-in. A plug-in without feature bean (not loaded) is still listed when its jar is
 	 * disabled, or installed in the plug-ins directory (enabled back, or updated, waiting for a restart): its identity
 	 * and node data are kept, and {@code loaded} is <code>false</code>. Otherwise it is an orphan, not listed.
