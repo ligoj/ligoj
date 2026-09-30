@@ -396,12 +396,6 @@
                     <version>[5.0.0,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
-                <dependency>
-                    <groupId>org.ligoj.plugin</groupId>
-                    <artifactId>plugin-build-travis</artifactId>
-                    <version>[5.0.0,5.1.0)</version>
-                    <scope>runtime</scope>
-                </dependency>
             </dependencies>
         </profile>
         <profile>

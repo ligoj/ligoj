@@ -25,6 +25,25 @@ describe('useApi', () => {
     expect(result).toEqual({ id: 1, name: 'Test' })
   })
 
+  it('surfaces the X-Ligoj-Warning headers of a successful answer as localized warning toasts', async () => {
+    const { useI18nStore } = await import('@/stores/i18n.js')
+    useI18nStore().merge({ 'warning.jenkins-folder-roles-skipped': 'Plug-in {plugin} missing: roles of {folder} skipped' }, 'en')
+    const coded = encodeURIComponent(JSON.stringify({ code: 'jenkins-folder-roles-skipped', parameters: { plugin: 'role-strategy', folder: 'folder6/folder6.1' } }))
+    const unknown = encodeURIComponent(JSON.stringify({ code: 'no-such-code', parameters: { a: 'b' } }))
+    const headers = { 'content-type': 'application/json', 'x-ligoj-warning': `${coded},${unknown},Plain%20text%20warning` }
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true, status: 200,
+      headers: { get: (k) => headers[String(k).toLowerCase()] ?? null },
+      json: () => Promise.resolve(42),
+    })
+    const api = useApi()
+    expect(await api.post('rest/subscription', { node: 'x' })).toBe(42)
+    const { useErrorStore } = await import('@/stores/error.js')
+    const warnings = useErrorStore().errors.filter((e) => e.severity === 'warning').map((e) => e.message)
+    // Coded + localized, coded without message (code and parameters shown), plain text kept as is
+    expect(warnings).toEqual(['Plug-in role-strategy missing: roles of folder6/folder6.1 skipped', 'no-such-code (a: b)', 'Plain text warning'])
+  })
+
   it('post sends POST with JSON body', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,

@@ -44,6 +44,7 @@ export default {
   'common.name': 'Nom',
   'common.description': 'Description',
   'common.status': 'Statut',
+  'common.warning': 'Avertissement',
   'common.loading': 'Chargement...',
   'common.loadError': 'La requête a échoué. Veuillez réessayer.',
   'common.required': 'Ce champ est requis',
