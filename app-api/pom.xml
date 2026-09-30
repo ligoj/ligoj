@@ -444,6 +444,23 @@
             </dependencies>
         </profile>
         <profile>
+            <id>test-registry</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.ligoj.plugin</groupId>
+                    <artifactId>plugin-registry</artifactId>
+                    <version>[1.0.1-SNAPSHOT, 1.1.0)</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.ligoj.plugin</groupId>
+                    <artifactId>plugin-registry-nexus</artifactId>
+                    <version>[1.0.1-SNAPSHOT, 1.1.0)</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>test-id-cognito</id>
             <dependencies>
                 <dependency>
