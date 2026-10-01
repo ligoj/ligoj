@@ -2572,6 +2572,8 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | app.crypto.password                                   |                                          | Secret value. Can also be defined in `APP_CRYPTO_PASSWORD`environment variable.                      |
 | cache.location                                        | `classpath:META-INF/hazelcast-local.xml` | Custom Hazelcast configuration file location                                                         |
 | cache.${cache_name}.ttl                               |                                          | For each cache, default TTL can be adjusted.                                                         |
+| event.purge                                           | `0 0 4 * * ?`                            | CRON expression to purge the expired node and subscription events                                    |
+| event.retention                                       | `365`                                    | Retention in days of the events. The last event of each node and subscription is kept                |
 | feature:iam:node:primary                              | `empty`                                  | Ligoj `plugin-id` node's identifier used as primary IAM provider. `empty` = always granted.          |
 |                                                       |                                          | See [plugin-iam-node](https://github.com/ligoj/plugin-iam-node).                                     |
 | feature:iam:node:secondary                            | `secondary`                              | Ligoj `plugin-id` node's identifier used as secondary IAM provider. `empty` = always granted.        |
@@ -2631,6 +2633,8 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | server.port                                           | `${SERVER_PORT}`                         |                                                                                                      |
 | server.address                                        | `${SERVER_HOST}`                         | Bind address. `127.0.0.1` for loopback only                                                          |
 | server.servlet.context-path                           | `/${CONTEXT}`                            |                                                                                                      |
+| user-log.purge                                        | `0 0 3 * * ?`                            | CRON expression to purge the expired user logs (browser errors)                                      |
+| user-log.retention                                    | `30`                                     | Retention in days of the user logs                                                                   |
 
 ### UI container properties
 
