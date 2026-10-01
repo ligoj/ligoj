@@ -1,5 +1,6 @@
 import { useErrorStore } from '@/stores/error.js'
 import { useI18nStore } from '@/stores/i18n.js'
+import { codedWarningMessage } from '@/utils/codedWarning.js'
 
 export function useApi() {
   const errorStore = useErrorStore()
@@ -53,14 +54,7 @@ export function useApi() {
     if (!decoded.startsWith('{')) return decoded
     let payload
     try { payload = JSON.parse(decoded) } catch { return decoded }
-    const code = String(payload?.code ?? '')
-    const parameters = payload?.parameters && typeof payload.parameters === 'object' ? payload.parameters : {}
-    if (!code) return decoded
-    const key = `warning.${code}`
-    const localized = i18n.t(key, parameters)
-    if (localized && localized !== key) return localized
-    const details = Object.entries(parameters).map(([k, v]) => `${k}: ${v}`).join(', ')
-    return details ? `${code} (${details})` : code
+    return codedWarningMessage(payload, i18n) || decoded
   }
 
   function get(url, options) {

@@ -77,6 +77,8 @@
         {{ i18n.t('demo.indicator') }}
         <v-tooltip activator="parent" location="bottom" max-width="320">{{ i18n.t('demo.indicatorTip') }}</v-tooltip>
       </v-chip>
+      <!-- Backend session warnings (e.g. no primary IAM node): a click opens the configuration. -->
+      <SessionWarningChips :warnings="auth.sessionWarnings" @select="go('/system/configuration')" />
       <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' :
           'mdi-account' }}</v-icon>{{ auth.displayName || 'invité' }}
         <!-- Identity card tooltip: full name, login, mails, custom attributes,
@@ -115,6 +117,7 @@ import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import registry from '@/plugins/registry.js'
 import { mergeNav } from '@/plugins/nav.js'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
+import SessionWarningChips from '@/components/SessionWarningChips.vue'
 import { useDemoMode } from '@/composables/useDemoMode.js'
 import LigojIcon from '@/components/LigojIcon.vue'
 

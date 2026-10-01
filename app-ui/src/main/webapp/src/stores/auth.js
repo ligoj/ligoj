@@ -141,6 +141,12 @@ export const useAuthStore = defineStore('auth', () => {
    * the renderer takes care of lazy-loading.
    */
   const globalTools = computed(() => userSettings.value?.globalTools ?? [])
+  /**
+   * Backend-driven session warnings, `{code, parameters}` each, e.g. the
+   * plugin-iam-node risk without primary node (administrators only). Shown as
+   * app-bar chips by `SessionWarningChips`.
+   */
+  const sessionWarnings = computed(() => (Array.isArray(userSettings.value?.warnings) ? userSettings.value.warnings : []))
 
   function isAllowed(url) {
     if (isAdmin.value) return true
@@ -361,7 +367,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     session, loading,
     isAuthenticated, userName, userDetails, displayName, roles, isAdmin,
-    uiAuthorizations, apiAuthorizations, appSettings, userSettings, globalTools,
+    uiAuthorizations, apiAuthorizations, appSettings, userSettings, globalTools, sessionWarnings,
     navItems,
     isAllowed, isAllowedApi,
     fetchSession, logout, redirectToLogin, lastSessionStatus, needsOAuthRedirect,
