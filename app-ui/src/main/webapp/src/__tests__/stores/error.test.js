@@ -197,6 +197,15 @@ describe('useErrorStore', () => {
     expect(store.errors[1].message).toBe('some:unknown:field: This field is required')
   })
 
+  it('handleResponse explains a parameter not accepted by the node (unknown or foreign id)', async () => {
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 400,
+      body: { errors: { 'service:qa:sonar:password': [{ rule: 'not-accepted-parameter' }] } },
+    }))
+    expect(store.errors[0].message).toBe('service:qa:sonar:password: This parameter does not exist or does not belong to this node or its parents')
+  })
+
   it('handleResponse maps a 412 integrity-unicity to the duplicate-entry toast', async () => {
     const store = useErrorStore()
     await store.handleResponse(mockResponse({

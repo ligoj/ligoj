@@ -373,6 +373,7 @@ export default {
   'error.rule.length': 'Invalid length',
   'error.rule.already-exist': 'Already exists',
   'error.rule.unknown-id': 'Unknown identifier',
+  'error.rule.not-accepted-parameter': 'This parameter does not exist or does not belong to this node or its parents',
   'error.rule.group-type': 'The selected group is not of type Project',
   'error.rule.StartsWith': 'Must start with {0}',
 
