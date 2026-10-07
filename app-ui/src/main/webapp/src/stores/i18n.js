@@ -14,7 +14,12 @@ export const useI18nStore = defineStore('i18n', () => {
     set: (v) => { setI18nLocale(v) },
   })
 
-  function t(key, params) {
+  /**
+   * Translate a key. `params` is the named object, or the ordered list filling `{0}`, `{1}`… (vue-i18n reads list
+   * placeholders from an array only); `options` are the vue-i18n options, e.g. `{ named }` alongside a list.
+   */
+  function t(key, params, options) {
+    if (options) return i18n.global.t(key, params ?? {}, options)
     return params ? i18n.global.t(key, params) : i18n.global.t(key)
   }
 

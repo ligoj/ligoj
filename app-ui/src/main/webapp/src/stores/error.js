@@ -122,17 +122,16 @@ export const useErrorStore = defineStore('error', () => {
     const template = (raw && raw !== key) ? raw : i18n.t('error.unknownCode')
 
     if (!parameters) return template
-    const args = {}
     if (Array.isArray(parameters)) {
       // Resolve any parameter values that are themselves i18n keys
       // (the legacy passed `["service:id:group", "sample group"]`
       // where each item could be looked up via $messages.error.*).
-      parameters.forEach((p, i) => {
-        const resolved = typeof p === 'string' ? tCode(p) : p
-        args[i] = resolved
-        if (i === 0) args.this = resolved
-      })
-    } else if (typeof parameters === 'object') {
+      // vue-i18n fills `{0}`, `{1}`… from a list only, `{this}` comes as a named value alongside.
+      const list = parameters.map((p) => (typeof p === 'string' ? tCode(p) : p))
+      return i18n.t(key, list, { named: { this: list[0] } })
+    }
+    const args = {}
+    if (typeof parameters === 'object') {
       for (const [k, v] of Object.entries(parameters)) {
         args[k] = typeof v === 'string' ? tCode(v) : v
       }

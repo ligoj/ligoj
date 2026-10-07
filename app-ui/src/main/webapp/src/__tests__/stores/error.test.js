@@ -197,6 +197,16 @@ describe('useErrorStore', () => {
     expect(store.errors[1].message).toBe('some:unknown:field: This field is required')
   })
 
+  it('handleResponse renders a coded business message of a plugin with its ordered parameters', async () => {
+    useI18nStore().merge({ 'error.nexus-create-failed': 'Creating the Nexus repository {0} failed: {1}' }, 'en')
+    const store = useErrorStore()
+    await store.handleResponse(mockResponse({
+      status: 400,
+      body: { code: 'business', message: 'nexus-create-failed', parameters: ['demo-1-docker2', "Cleanup Policy 'weekly' does not exist."] },
+    }))
+    expect(store.errors[0].message).toBe("Creating the Nexus repository demo-1-docker2 failed: Cleanup Policy 'weekly' does not exist.")
+  })
+
   it('handleResponse explains a parameter not accepted by the node (unknown or foreign id)', async () => {
     const store = useErrorStore()
     await store.handleResponse(mockResponse({
