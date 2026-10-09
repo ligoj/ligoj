@@ -352,7 +352,7 @@ Used by `ProjectDetailView` and `HomeView` (plugin-ui `components/`):
 
 `#/api?op=<method>|<path>` (lowercase method + raw OpenAPI path, URL-encoded) opens the owning tag group and operation of `ApiHomeView`, scrolled and highlighted. `ApiVerifyDialog` (host; props `authorizations`, `admin`, `subject`) crosses every `rest/openapi.json` operation with a set of `{ method?, pattern }` authorizations, shows the allowed rate and tests a typed URL; used by the profile ("Verify" next to "Manage API keys", own session with admin bypass), the system Roles row action and the system Users row action (union of the roles).
 
-**API permission gating**: hide buttons and menu entries behind `v-if="auth.isAllowedApi(path, method)"`; sidebar entries carry `auth`.
+**API permission gating**: hide buttons and menu entries behind `v-if="auth.isAllowedApi(path, method)"`, with the verb the action fires (edit = `PUT`, lock/isolate = `DELETE`, a configuration save = `POST`); sidebar entries carry `auth`. The row cog itself gets a `v-if` on the union of its actions, and the global `.lj-popmenu .sep` rule hides a separator left at an edge or doubled. An edit dialog opened by a row click stays viewable: only its Save (`isEdit ? 'PUT' : 'POST'`) and Delete buttons are gated (the container scope dialog switches to its read-only view). Tests seed `useAuthStore().session` and assert hidden with no permission, shown with only the action's own one.
 
 # Decisions and gotchas
 

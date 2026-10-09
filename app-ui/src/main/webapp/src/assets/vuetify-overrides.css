@@ -150,6 +150,8 @@
 .lj-popmenu button:disabled { opacity: .4; cursor: not-allowed; }
 .lj-popmenu button.danger { color: rgb(var(--v-theme-error)); }
 .lj-popmenu .sep { height: 1px; background: rgba(var(--v-theme-on-surface), .12); margin: 5px 4px; }
+/* An action hidden by its API permission can leave a separator at an edge or next to another one */
+.lj-popmenu .sep:first-child, .lj-popmenu .sep:last-child, .lj-popmenu .sep + .sep { display: none; }
 
 /* default style = the stock Vuetify shape language (flatter, tighter). */
 [data-style="default"] {
