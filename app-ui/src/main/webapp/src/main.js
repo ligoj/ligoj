@@ -10,6 +10,12 @@ import { useAuthStore } from './stores/auth.js'
 import { bootCompact, bootReduceMotion } from './plugins/styles.js'
 import { bootPreset } from './plugins/presets.js'
 import { installErrorReporter } from './plugins/errorReporter.js'
+import { registerHostModules } from './plugins/compatibility.js'
+import * as hostModule from './host.js'
+import * as vueModule from 'vue'
+import * as routerModule from 'vue-router'
+import * as piniaModule from 'pinia'
+import * as vuetifyModule from 'vuetify'
 
 // Apply the persisted theme preset (color palette + shape style) and
 // the orthogonal compact toggle BEFORE the SPA mounts so the first
@@ -20,6 +26,10 @@ import { installErrorReporter } from './plugins/errorReporter.js'
 bootPreset()
 bootCompact()
 bootReduceMotion()
+
+// The exports a runtime plugin bundle may import through the import map: the loader refuses a bundle needing one
+// this host lacks (see plugins/compatibility.js)
+registerHostModules({ '@ligoj/host': hostModule, vue: vueModule, 'vue-router': routerModule, pinia: piniaModule, vuetify: vuetifyModule })
 
 const app = createApp(App)
 const pinia = createPinia()

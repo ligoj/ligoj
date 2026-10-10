@@ -91,6 +91,9 @@ export { default as pluginRegistry, callFeature } from './plugins/registry.js'
 // canonical backend plugin key (`service:id:ldap`) to the URL-safe form
 // the loader resolves to a webjar bundle (`id-ldap`).
 export { loadPlugin, pluginIdFromKey } from './plugins/loader.js'
+// The plugins the loader refused because they import exports this host lacks (plugins/compatibility.js), for the
+// plug-in administration view.
+export { pluginIncompatibility, pluginIncompatibilities, describeMissing } from './plugins/compatibility.js'
 // Parent→tool delegation plumbing (used by every service-level parent
 // plugin to forward subscription-row hooks to its tool sub-plugin) and the
 // shared subscription-row VNode builders (icon link button + detail chip).

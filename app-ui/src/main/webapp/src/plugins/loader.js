@@ -4,6 +4,7 @@ import { pluginAssetVersion } from './asset-version.js'
 import { pluginIdFromKey } from './plugin-key.js'
 import { isPluginInstalled } from './eager-plugins.js'
 import { useAuthStore } from '@/stores/auth.js'
+import { checkBundle, pluginIncompatibility, IncompatiblePluginError } from './compatibility.js'
 
 const loaded = new Set()
 // Tracks in-flight loads so concurrent calls to `loadPlugin(<id>)` share
@@ -57,8 +58,21 @@ async function _loadPlugin(pluginId) {
   // `?v=<digest|timestamp>` versions the stable URL so the server can
   // long-cache the bundle (Application#pluginCacheFilter) while plugin
   // upgrades rotate the digest — see plugins/asset-version.js.
+  // A plugin found incompatible is not read again: the row delegation asks for it on every render
+  const known = pluginIncompatibility(pluginId)
+  if (known) throw new IncompatiblePluginError(pluginId, known.missing)
+
   const v = pluginAssetVersion()
   const url = `${import.meta.env.BASE_URL}main/${pluginId}/vue/index.js${v ? `?v=${v}` : ''}`
+
+  // Never import a bundle needing exports this host lacks: the browser would refuse to link it and the plugin would
+  // vanish. The check reads the same URL, so the import is then served by the browser cache.
+  const missing = await checkBundle(pluginId, url)
+  if (Object.keys(missing).length) {
+    const error = new IncompatiblePluginError(pluginId, missing)
+    console.warn(`[plugin loader] ${error.message} — skipping`)
+    throw error
+  }
 
   try {
     const module = await import(/* @vite-ignore */ url)

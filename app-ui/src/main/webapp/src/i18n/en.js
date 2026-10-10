@@ -50,6 +50,8 @@ export default {
   'warning.iam-node-no-primary': 'No primary identity node is configured (feature:iam:node:primary): the fail-safe empty IAM is used, it accepts any login with any password and knows no user nor group. Set this configuration to the identity node, e.g. service:id:ldap:main.',
   'warning.iam-node-primary-not-found.label': 'Unsecured login',
   'warning.iam-node-primary-not-found': 'The primary identity node "{primary}" (feature:iam:node:primary) does not exist or its plug-in is not installed: the fail-safe empty IAM is used, it accepts any login with any password and knows no user nor group. Fix this configuration or the node.',
+  'warning.plugin-incompatible.label': 'Incompatible plug-ins',
+  'warning.plugin-incompatible': 'These plug-ins were built for another Ligoj version and are not loaded: {plugins}. Install a plug-in version built for this Ligoj, or upgrade Ligoj.',
   'common.loading': 'Loading...',
   'common.loadError': 'The request failed. Please retry.',
   'common.required': 'This field is required',
