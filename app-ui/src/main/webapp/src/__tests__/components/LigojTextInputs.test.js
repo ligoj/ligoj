@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
@@ -30,6 +30,55 @@ describe('<LigojTextField /> / <LigojTextarea /> — native autofill suppressed'
     expect(el.attributes('data-lpignore')).toBe('true')
     expect(el.attributes('data-form-type')).toBe('other')
     expect(el.attributes('data-bwignore')).toBe('true')
+  })
+
+  describe('a password with the suppressed autofill', () => {
+    afterEach(() => { vi.unstubAllGlobals() })
+
+    // A `type="password"` input makes the form a credential form: the browser offers its saved logins on the field
+    // before it and suggests a password, whatever the autocomplete tokens. The value is masked by CSS instead.
+    it('is a masked text input, so the browser sees no credential form', () => {
+      vi.stubGlobal('CSS', { supports: (property, value) => property === '-webkit-text-security' && value === 'disc' })
+      const w = mountHost(LigojTextField, { type: 'password' })
+      const input = w.find('input')
+      expect(input.attributes('type')).toBe('text')
+      expect(w.find('.lj-masked').exists()).toBe(true)
+      // A typed secret is never sent to a spelling service, nor corrected
+      expect(input.attributes('spellcheck')).toBe('false')
+      expect(input.attributes('autocapitalize')).toBe('off')
+      expect(input.attributes('autocorrect')).toBe('off')
+      expect(input.attributes('autocomplete')).toBe('new-password')
+    })
+
+    it('cannot be copied, like a password input', () => {
+      vi.stubGlobal('CSS', { supports: () => true })
+      const input = mountHost(LigojTextField, { type: 'password' }).find('input').element
+      for (const type of ['copy', 'cut']) {
+        const event = new Event(type, { cancelable: true })
+        input.dispatchEvent(event)
+        expect(event.defaultPrevented).toBe(true)
+      }
+      const text = mountHost(LigojTextField).find('input').element
+      const event = new Event('copy', { cancelable: true })
+      text.dispatchEvent(event)
+      expect(event.defaultPrevented).toBe(false)
+    })
+
+    it('stays a password input when the browser cannot mask a text', () => {
+      vi.stubGlobal('CSS', { supports: () => false })
+      const w = mountHost(LigojTextField, { type: 'password' })
+      expect(w.find('input').attributes('type')).toBe('password')
+      expect(w.find('.lj-masked').exists()).toBe(false)
+    })
+
+    it('stays a password input for a login or a password change, which want the password manager', () => {
+      vi.stubGlobal('CSS', { supports: () => true })
+      for (const autocomplete of ['current-password', 'new-password']) {
+        const w = mountHost(LigojTextField, { type: 'password', autocomplete })
+        expect(w.find('input').attributes('type')).toBe('password')
+        expect(w.find('input').attributes('autocomplete')).toBe(autocomplete)
+      }
+    })
   })
 
   it('honors an explicit name and an explicit autocomplete token', () => {
