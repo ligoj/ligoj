@@ -45,4 +45,14 @@ describe('LjDataTable header cells', () => {
     // The other headers keep their default rendering
     expect(name.text()).toContain('Name')
   })
+
+  it('keep a header without label centered over its cells: the sort arrow stays out of the layout', () => {
+    const headers = [{ ...HEADERS[0], sortable: true }, { key: 'type', icon: 'mdi-shape', label: 'Type', align: 'center', sortable: true }]
+    const mountWith = (slots) => mount(LjDataTable, { props: { headers, items: [], itemsLength: 0, tools: false }, slots, global: { stubs } })
+    // An icon alone, or a slot such as a status badge: the arrow hangs out of the centered content
+    expect(mountWith({}).findAll('.th-in')[0].classes()).toContain('solo')
+    expect(mountWith({ 'header.status': () => h('b', 'dot') }).findAll('.th-in')[0].classes()).toContain('solo')
+    // An icon and a label: the arrow balances the icon, the label stays centered
+    expect(mountWith({}).findAll('.th-in')[1].classes()).not.toContain('solo')
+  })
 })

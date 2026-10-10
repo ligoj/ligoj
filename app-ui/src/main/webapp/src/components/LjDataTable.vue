@@ -32,7 +32,8 @@
             </th>
             <th v-for="h in headers" :key="h.key" :class="[h.align === 'center' && 'center', h.align === 'end' && 'end', h.sortable && 'sortable', sortKey === h.key && 'sorted']"
               :style="h.width ? { width: h.width } : null" @click="h.sortable && toggleSort(h.key)">
-              <span class="th-in" :class="{ center: h.align === 'center', end: h.align === 'end' }">
+              <!-- `solo`: a slot or an icon alone, centered over the cells without the sort arrow, see .th-in.solo -->
+              <span class="th-in" :class="{ center: h.align === 'center', end: h.align === 'end', solo: !!slots[`header.${h.key}`] || !h.label }">
                 <slot v-if="slots[`header.${h.key}`]" :name="`header.${h.key}`" :header="h" />
                 <template v-else>
                   <v-icon v-if="h.icon" size="14" class="th-icon">{{ h.icon }}</v-icon>
@@ -374,6 +375,10 @@ thead th.sorted { color: var(--ink); }
 .th-in { display: inline-flex; align-items: center; gap: 6px; }
 .th-in.center { justify-content: center; }
 .th-in.end { justify-content: flex-end; }
+/* A slot or an icon alone: the sort arrow hangs on its right, out of the layout, so the content stays centered over
+   the cells (with a label, the arrow balances the leading icon) */
+.th-in.solo { position: relative; }
+.th-in.solo > .sort-icon { position: absolute; left: calc(100% + 6px); }
 .th-icon { opacity: .65; }
 .sort-icon { opacity: 0; transition: opacity .12s; }
 thead th.sortable:hover .sort-icon { opacity: .4; }
