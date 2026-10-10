@@ -16,7 +16,9 @@
   #tools-extra slot to append caller actions (buttons) after a divider, below
   the built-in Export CSV / Copy to clipboard. Header cells can opt into an mdi
   icon via header.icon and a hover tooltip via header.tooltip (use the tooltip
-  with no label for an icon-only header).
+  with no label for an icon-only header), or replace both with a
+  `#header.<key>` slot (scope `{ header }`), e.g. a status badge summarizing
+  the column.
 -->
 <template>
   <div class="panel">
@@ -31,13 +33,16 @@
             <th v-for="h in headers" :key="h.key" :class="[h.align === 'center' && 'center', h.align === 'end' && 'end', h.sortable && 'sortable', sortKey === h.key && 'sorted']"
               :style="h.width ? { width: h.width } : null" @click="h.sortable && toggleSort(h.key)">
               <span class="th-in" :class="{ center: h.align === 'center', end: h.align === 'end' }">
-                <v-icon v-if="h.icon" size="14" class="th-icon">{{ h.icon }}</v-icon>
-                <span v-if="h.label">{{ h.label }}</span>
+                <slot v-if="slots[`header.${h.key}`]" :name="`header.${h.key}`" :header="h" />
+                <template v-else>
+                  <v-icon v-if="h.icon" size="14" class="th-icon">{{ h.icon }}</v-icon>
+                  <span v-if="h.label">{{ h.label }}</span>
+                </template>
                 <v-icon v-if="h.sortable" size="14" class="sort-icon" :class="{ active: sortKey === h.key }">
                   {{ sortKey === h.key && sortOrder === 'desc' ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
                 </v-icon>
                 <!-- Icon-only header: the label moves into a hover tooltip. -->
-                <v-tooltip v-if="h.tooltip" activator="parent" location="top" :text="h.tooltip" />
+                <v-tooltip v-if="h.tooltip && !slots[`header.${h.key}`]" activator="parent" location="top" :text="h.tooltip" />
               </span>
             </th>
             <!-- Trailing gear column: hosts the per-row #actions cells, and
