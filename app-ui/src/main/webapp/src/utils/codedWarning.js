@@ -36,3 +36,15 @@ export function codedWarningLabel(warning, i18n) {
   const label = i18n.t(key)
   return label && label !== key ? label : i18n.t('common.warning')
 }
+
+/**
+ * Route opened by a click on a coded warning: its `link` when it is an application path (`/...`), else the
+ * configuration, where the first session warnings (plugin-iam-node) are fixed.
+ *
+ * @param {{link?: string}} warning The coded warning.
+ * @returns {string} The route path.
+ */
+export function codedWarningLink(warning) {
+  const link = warning?.link
+  return typeof link === 'string' && link.startsWith('/') && !link.startsWith('//') ? link : '/system/configuration'
+}

@@ -108,7 +108,8 @@ describe('incompatibilityWarnings — the administrator chip of the app bar', ()
     globalThis.fetch = vi.fn(async () => ({ ok: true, status: 200, text: async () => 'import { x as a } from "@ligoj/host";' }))
     await checkBundle('vm-aws', 'u')
     await checkBundle('qa-sonarqube', 'u')
-    expect(incompatibilityWarnings()).toEqual([{ code: 'plugin-incompatible', parameters: { plugins: 'qa-sonarqube, vm-aws' } }])
+    // A click opens the plug-in view
+    expect(incompatibilityWarnings()).toEqual([{ code: 'plugin-incompatible', parameters: { plugins: 'qa-sonarqube, vm-aws' }, link: '/system/plugin' }])
   })
 
   it('is localized in English and French', () => {

@@ -77,9 +77,9 @@
         {{ i18n.t('demo.indicator') }}
         <v-tooltip activator="parent" location="bottom" max-width="320">{{ i18n.t('demo.indicatorTip') }}</v-tooltip>
       </v-chip>
-      <!-- Backend session warnings (e.g. no primary IAM node): a click opens the configuration. For an administrator,
-           the plugins incompatible with this host too: a click opens the plug-ins. -->
-      <SessionWarningChips :warnings="sessionWarnings" @select="onWarning" />
+      <!-- Backend session warnings (e.g. no primary IAM node, expiring credentials) and, for an administrator, the
+           plugins incompatible with this host: a click opens the warning's link. -->
+      <SessionWarningChips :warnings="sessionWarnings" @select="(w) => go(codedWarningLink(w))" />
       <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' :
           'mdi-account' }}</v-icon>{{ auth.displayName || 'invité' }}
         <!-- Identity card tooltip: full name, login, mails, custom attributes,
@@ -120,6 +120,7 @@ import { mergeNav } from '@/plugins/nav.js'
 import ErrorSnackbar from '@/components/ErrorSnackbar.vue'
 import SessionWarningChips from '@/components/SessionWarningChips.vue'
 import { incompatibilityWarnings } from '@/plugins/compatibility.js'
+import { codedWarningLink } from '@/utils/codedWarning.js'
 import { useDemoMode } from '@/composables/useDemoMode.js'
 import LigojIcon from '@/components/LigojIcon.vue'
 
@@ -133,7 +134,6 @@ const { enabled: demoMode } = useDemoMode()
 const appName = computed(() => auth.appSettings?.name || 'Ligoj')
 const appVersion = computed(() => auth.appSettings?.buildVersion || '')
 const sessionWarnings = computed(() => [...auth.sessionWarnings, ...(auth.isAdmin ? incompatibilityWarnings() : [])])
-function onWarning(warning) { go(warning?.code === 'plugin-incompatible' ? '/system/plugin' : '/system/configuration') }
 
 // Identity-card lines of the user button tooltip: full name, login, mails,
 // custom attributes, roles, and the administrator mention.

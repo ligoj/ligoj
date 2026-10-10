@@ -151,13 +151,14 @@ export async function checkBundle(pluginId, url) {
 }
 
 /**
- * The administrator warning of the app-bar chips (SessionWarningChips): the incompatible plugins, if any.
+ * The administrator warning of the app-bar chips (SessionWarningChips): the incompatible plugins, if any. A click
+ * opens the plug-in view.
  *
- * @returns {Array<{code: string, parameters: {plugins: string}}>} One coded warning, or none.
+ * @returns {Array<{code: string, parameters: {plugins: string}, link: string}>} One coded warning, or none.
  */
 export function incompatibilityWarnings() {
   const ids = Object.keys(incompatibles).sort()
-  return ids.length ? [{ code: 'plugin-incompatible', parameters: { plugins: ids.join(', ') } }] : []
+  return ids.length ? [{ code: 'plugin-incompatible', parameters: { plugins: ids.join(', ') }, link: '/system/plugin' }] : []
 }
 
 /** Tests only: forget the registered exports and the incompatible plugins. */
