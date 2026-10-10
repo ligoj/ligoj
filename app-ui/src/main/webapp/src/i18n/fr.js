@@ -30,6 +30,7 @@ export default {
 
   // Common
   'common.search': 'Rechercher',
+  'common.typeToSearch': 'Saisir pour rechercher…',
   'common.save': 'Enregistrer',
   'common.create': 'Créer',
   'common.cancel': 'Annuler',

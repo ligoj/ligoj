@@ -39,6 +39,11 @@ export { default as LigojSelect } from './components/LigojSelect.vue'
 // <v-combobox> counterpart (free-text input, the most autofill-prone widget).
 // Prefer it over a bare <v-combobox>.
 export { default as LigojCombobox } from './components/LigojCombobox.vue'
+// Subscribe-wizard input of a tool parameter picked among the remote items of
+// the selected instance; `remoteSearchField(options)` binds a tool's search
+// options for its `parameterField` hook.
+export { default as LjRemoteSearchField } from './components/LjRemoteSearchField.vue'
+export { remoteSearchField } from './utils/remoteSearchField.js'
 // <v-text-field> twin for autofill-prone free-text inputs (user/password/url
 // tool parameters...). Prefer it wherever autofill could pop over the form.
 export { default as LigojTextField } from './components/LigojTextField.vue'
