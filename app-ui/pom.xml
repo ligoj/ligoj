@@ -11,7 +11,7 @@
 
 	<groupId>org.ligoj.app</groupId>
 	<artifactId>app-ui</artifactId>
-	<version>5.0.0</version>
+	<version>5.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Ligoj - UI</name>
 	<properties>
