@@ -5,6 +5,21 @@ import { useI18nStore } from '@/stores/i18n.js'
 import { useAuthStore } from '@/stores/auth.js'
 
 describe('useErrorStore', () => {
+  it('ruleMessage translates a validation rule with its parameters, else falls back to the rule code', () => {
+    useI18nStore().merge({ 'error.rule.Min': 'At least {min}', 'error.rule.sonar-login': 'SonarQube refused these credentials' }, 'en')
+    const store = useErrorStore()
+    expect(store.ruleMessage('Min', { min: 3 })).toBe('At least 3')
+    expect(store.ruleMessage('sonar-login')).toBe('SonarQube refused these credentials')
+    expect(store.ruleMessage('unknown-rule')).toBe('unknown-rule')
+  })
+
+  it('codeMessage resolves error.<code>, else the code itself', () => {
+    useI18nStore().merge({ 'error.node-check-failed': 'The tool could not be reached with these values' }, 'en')
+    const store = useErrorStore()
+    expect(store.codeMessage('node-check-failed')).toBe('The tool could not be reached with these values')
+    expect(store.codeMessage('Cannot access to the tool')).toBe('Cannot access to the tool')
+  })
+
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.useFakeTimers()

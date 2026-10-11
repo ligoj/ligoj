@@ -140,6 +140,16 @@ export const useErrorStore = defineStore('error', () => {
   }
 
   /**
+   * Message of a validation rule, as a field error of a 400 response renders it: `error.rule.<rule>` with the rule
+   * parameters, else the generic resolution of the rule code. Also used by the results a view renders inline, such
+   * as the connection check of a node.
+   */
+  function ruleMessage(rule, parameters) {
+    const key = `error.rule.${rule}`
+    return useI18nStore().t(key) === key ? tCode(rule) : tMessage(`rule.${rule}`, parameters)
+  }
+
+  /**
    * Walk the cause chain and return a plain-text representation. The
    * legacy version produced an HTML toggle (`<span class="…">[…]</span>`);
    * we keep it as a newline-joined string the snackbar can render in a
@@ -544,5 +554,6 @@ export const useErrorStore = defineStore('error', () => {
     push, success, info, dismiss, clear,
     clearValidationErrors, errorsFor,
     handleResponse,
+    ruleMessage, codeMessage: tCode,
   }
 })
