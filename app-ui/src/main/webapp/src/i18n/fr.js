@@ -372,6 +372,7 @@ export default {
   'error.rule.already-exist': 'Existe déjà',
   'error.rule.unknown-id': 'Identifiant inconnu',
   'error.rule.not-accepted-parameter': 'Ce paramètre n\'existe pas ou n\'appartient ni à ce nœud ni à ses parents',
+  'error.rule.invalid-mode-transition': 'Seul un nœud Lier ou Créer peut changer de mode, vers Tous',
   'error.rule.group-type': 'Le groupe sélectionné n\'est pas de type Projet',
   'error.rule.StartsWith': 'Doit commencer par {0}',
 
