@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.ligoj.bootstrap</groupId>
         <artifactId>bootstrap-business-parent</artifactId>
-        <version>5.0.3</version>
+        <version>5.0.4</version>
         <relativePath/>
     </parent>
 
@@ -20,7 +20,8 @@
         <url>https://github.com/ligoj/ligoj</url>
     </scm>
     <properties>
-        <api.version>5.0.4</api.version>
+        <api.version>5.0.5</api.version>
+        <cyclonedx.version>2.9.3</cyclonedx.version>
         <resource.delimiter>@</resource.delimiter>
     </properties>
 
@@ -204,7 +205,7 @@
         <dependency>
             <groupId>org.ligoj.plugin</groupId>
             <artifactId>plugin-ui</artifactId>
-            <version>[5.0.5,)</version>
+            <version>[5.0.7,)</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
@@ -223,7 +224,7 @@
                 <plugin>
                     <groupId>org.cyclonedx</groupId>
                     <artifactId>cyclonedx-maven-plugin</artifactId>
-                    <version>2.9.1</version>
+                    <version>${cyclonedx.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -348,7 +349,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-prov-aws</artifactId>
-                    <version>[5.0.0-SNAPSHOT,5.1.0)</version>
+                    <version>[5.0.0,5.1.0)</version>
                 </dependency>
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
@@ -376,7 +377,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-qa-sonarqube</artifactId>
-                    <version>[5.0.0-SNAPSHOT,5.1.0)</version>
+                    <version>[5.0.0,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
             </dependencies>
@@ -387,7 +388,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-build</artifactId>
-                    <version>[5.0.2-SNAPSHOT,5.1.0)</version>
+                    <version>[5.0.2,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
@@ -414,25 +415,25 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-iam-node</artifactId>
-                    <version>[2.0.0-SNAPSHOT,2.1.0)</version>
+                    <version>[5.0.0,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-id</artifactId>
-                    <version>[5.0.4,5.1.0)</version>
+                    <version>[5.0.6,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-id-ldap</artifactId>
-                    <version>[5.0.3,5.1.0)</version>
+                    <version>[5.0.5,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-password</artifactId>
-                    <version>[2.0.0-SNAPSHOT,2.1.0)</version>
+                    <version>[5.0.0,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
             </dependencies>
@@ -443,13 +444,13 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-registry</artifactId>
-                    <version>[5.0.0-SNAPSHOT, 5.1.0)</version>
+                    <version>[5.0.0, 5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-registry-nexus</artifactId>
-                    <version>[5.0.0-SNAPSHOT, 5.1.0)</version>
+                    <version>[5.0.0, 5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
             </dependencies>
@@ -460,7 +461,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-id</artifactId>
-                    <version>[5.0.5,5.1.0)</version>
+                    <version>[5.0.6,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
@@ -477,7 +478,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-id-ldap-embedded</artifactId>
-                    <version>3.0.0-SNAPSHOT</version>
+                    <version>5.0.0-SNAPSHOT</version>
                     <scope>runtime</scope>
                 </dependency>
             </dependencies>
@@ -488,7 +489,7 @@
                 <dependency>
                     <groupId>org.ligoj.plugin</groupId>
                     <artifactId>plugin-inbox-sql</artifactId>
-                    <version>[5.0.0-SNAPSHOT,5.1.0)</version>
+                    <version>[5.0.0,5.1.0)</version>
                     <scope>runtime</scope>
                 </dependency>
             </dependencies>
