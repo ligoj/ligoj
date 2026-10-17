@@ -28,7 +28,7 @@ import jakarta.ws.rs.core.MediaType;
 /**
  * Scheduled tasks of the application: the Spring {@code @Scheduled} methods registered by the annotation processor
  * ({@link ScheduledTaskHolder} beans), plus the schedules contributed by the {@link ScheduledTaskProvider} beans,
- * such as the plug-ins automation. Read-only, for the administration "Tasks" view.
+ * such as the plugins automation. Read-only, for the administration "Tasks" view.
  */
 @Path("/system/schedule")
 @Service

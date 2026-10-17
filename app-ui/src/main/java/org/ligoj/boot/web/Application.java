@@ -224,9 +224,9 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	/**
-	 * Configure html proxy filter.
+	 * Configure Html proxy filter.
 	 *
-	 * @return html proxy filter configuration.
+	 * @return Html proxy filter configuration.
 	 */
 	@Bean
 	public FilterRegistrationBean<HtmlProxyFilter> htmlProxyFilter() {
@@ -253,7 +253,7 @@ public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * Configure the cache filter of the runtime plugin assets. Unlike the static assets above, plugin bundles
-	 * (<code>/main/&lt;plugin&gt;/vue/index.js</code>, nls, css) live at STABLE URLs whose content changes on every
+	 * (<code>/main/&lt;plugin&gt;/vue/index.js</code>, nls, CSS) live at STABLE URLs whose content changes on every
 	 * plugin upgrade. The host requests them with a <code>?v=&lt;digest&gt;</code> token (the
 	 * <code>PluginsClassLoader</code> plugin digest exposed in the session as
 	 * <code>applicationSettings.digestVersion</code>, rotated on any plugin change) — such versioned requests are

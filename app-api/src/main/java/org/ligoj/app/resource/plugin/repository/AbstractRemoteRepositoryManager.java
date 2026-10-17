@@ -143,7 +143,7 @@ public abstract class AbstractRemoteRepositoryManager implements RepositoryManag
 	 * For a "-SNAPSHOT" version, the actual timestamped build version is resolved from the remote
 	 * {@code maven-metadata.xml} file (for instance <code>1.0.0-SNAPSHOT</code> becomes
 	 * <code>1.0.0-20231201.123456-3</code>). When the metadata cannot be downloaded or parsed, the original
-	 * "-SNAPSHOT" version is returned as a best effort.
+	 * "-SNAPSHOT" version is returned as the best effort.
 	 *
 	 * @param groupId    The Maven groupId.
 	 * @param artifact   The Maven artifact identifier.

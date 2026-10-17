@@ -225,7 +225,7 @@ class JavadocDocumentationProviderTest extends AbstractJavaDocTest {
 	@Test
 	void getClassDocLigojClassWithoutPath() {
 		// An org.ligoj.* class without @Path anywhere in its hierarchy is looked up
-		// by its own name; no javadoc resource exists for this test class → null
+		// by its own name; no Javadoc resource exists for this test class → null
 		Assertions.assertNull(provider.getClassDoc(JavadocDocumentationProviderTest.class));
 	}
 
@@ -245,7 +245,7 @@ class JavadocDocumentationProviderTest extends AbstractJavaDocTest {
 
 	@Test
 	void getJavaDocTextAlternateMarkup() {
-		// Older javadoc layout: operations under '<h3 id="...">' instead of
+		// Older Javadoc layout: operations under '<h3 id="...">' instead of
 		// '<section class="detail" id="...">' — the fallback markup must match.
 		// The matched tag ends at the opening quote, so the extraction keeps the
 		// remainder of the h3 attribute markup ('">') as-is.

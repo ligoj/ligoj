@@ -237,7 +237,7 @@ public class PluginScheduleResource implements ISessionSettingsProvider, Schedul
 
 	/**
 	 * Check the new versions: refresh the last versions from the repository, record the plug-ins having a newer
-	 * version than the installed one (and than the already staged one), and download them when the automatic update
+	 * version than the installed one (and then the already staged one), and download them when the automatic update
 	 * is enabled.
 	 *
 	 * @return The plug-ins having a newer version: artifact to version.

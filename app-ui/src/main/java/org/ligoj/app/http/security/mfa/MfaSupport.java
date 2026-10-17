@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.experimental.UtilityClass;
 
 /**
- * Multi-factor authentication support: the session state set by the primary authentication and cleared by the
+ * Multifactor authentication support: the session state set by the primary authentication and cleared by the
  * verification, and the shared helpers.
  */
 @UtilityClass
@@ -87,10 +87,10 @@ public class MfaSupport {
 	}
 
 	/**
-	 * User name to send to the API: the OIDC attribute when relevant, otherwise the authentication name.
+	 * Username to send to the API: the OIDC attribute when relevant, otherwise the authentication name.
 	 *
 	 * @param authentication          The authentication.
-	 * @param usernameOAuth2Attribute The OIDC attribute holding the user name.
+	 * @param usernameOAuth2Attribute The OIDC attribute holding the username.
 	 * @return The user name.
 	 */
 	public static String userName(final Authentication authentication, final String usernameOAuth2Attribute) {

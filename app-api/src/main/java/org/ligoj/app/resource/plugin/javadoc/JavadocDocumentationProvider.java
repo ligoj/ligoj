@@ -240,8 +240,8 @@ public class JavadocDocumentationProvider implements DocumentationProvider {
 	 * @return The Markdown equivalent.
 	 */
 	protected static String htmlToMarkdown(String html) {
-		// 1. Shelter <pre>/<pre><code> blocks (fenced on restore) and already-converted markdown fences —
-		// some customizer paths normalize twice. The control-char sentinel cannot appear in doclet output.
+		// 1. Shelter <pre>/<pre><code> blocks (fenced on restore) and already-converted Markdown fences —
+		// some customizer paths normalize twice. The control-char sentinel cannot appear in Doclet output.
 		final var preBlocks = new LinkedList<String>();
 		var md = PRE_PATTERN.matcher(html).replaceAll(m -> {
 			preBlocks.add("```\n" + decodeEntities(m.group(1).strip()) + "\n```");

@@ -1256,7 +1256,7 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 	}
 
 	/**
-	 * Remove a non existing plugin : no error
+	 * Remove a non-existing plugin : no error
 	 */
 	@Test
 	void removeNotExists() throws IOException {

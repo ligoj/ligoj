@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Manage plug-in life-cycle.
+ * Manage plugin life-cycle.
  *
  * @see <a href="https://repository.sonatype.org/nexus-indexer-lucene-plugin/default/docs/path__lucene_search.html">OSS
  * lucene_search</a>
@@ -77,32 +77,32 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	private static final String REPO_CENTRAL = "central";
 
 	/**
-	 * Property identifying an array of plug-ins to ignore.
+	 * Property identifying an array of plugins to ignore.
 	 */
 	private static final String PLUGIN_IGNORE = "ligoj.plugin.ignore";
 
 	/**
-	 * Configuration key for plug-ins auto install flag.
+	 * Configuration key for plugins auto install flag.
 	 */
 	private static final String PLUGIN_INSTALL = "ligoj.plugin.install";
 
 	/**
-	 * Configuration key for plug-ins auto install flag with javadoc.
+	 * Configuration key for plugins auto install flag with javadoc.
 	 */
 	private static final String PLUGIN_INSTALL_JAVADOC = "ligoj.plugin.install.javadoc";
 
 	/**
-	 * Configuration key for plug-ins auto update flag.
+	 * Configuration key for plugins auto update flag.
 	 */
 	private static final String PLUGIN_UPDATE = "ligoj.plugin.update";
 
 	/**
-	 * Configuration key for default plug-ins repository.
+	 * Configuration key for default plugins repository.
 	 */
 	private static final String PLUGIN_REPOSITORY = "ligoj.plugin.repository";
 
 	/**
-	 * Configuration key for plug-ins default Maven GroupId.
+	 * Configuration key for plugins default Maven GroupId.
 	 */
 	private static final String PLUGIN_GROUP_ID = "ligoj.plugin.groupId";
 
@@ -141,16 +141,16 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	private ConfigurationResource configuration;
 
 	/**
-	 * Return all plug-ins with details from a given repository.
+	 * Return all plugins with details from a given repository.
 	 *
 	 * @param repository The repository identifier to query.
-	 * @return All plug-ins with details.
+	 * @return All plugins with details.
 	 * @throws IOException When the last version index file cannot be retrieved.
 	 */
 	@GET
 	public List<PluginVo> findAll(@QueryParam("repository") @DefaultValue(REPO_CENTRAL) final String repository)
 			throws IOException {
-		// Get the available plug-ins
+		// Get the available plugins
 		Map<String, Artifact> lastVersion = Collections.emptyMap();
 		try {
 			lastVersion = getLastPluginVersions(repository);
@@ -163,12 +163,12 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		final var enabledFeatures = context.getBeansOfType(FeaturePlugin.class);
 		final var lastVersionF = lastVersion;
 
-		// Disabled plug-ins: renamed jar, not loaded at the next restart, configuration kept
+		// Disabled plugins: renamed jar, not loaded at the next restart, configuration kept
 		final var disabled = getDisabledPlugins();
-		// Installed plug-ins: jar in the plug-ins directory, loaded or not (enabled back, just installed...)
+		// Installed plugins: jar in the plugins directory, loaded or not (enabled back, just installed...)
 		final var installed = getPluginClassLoader().getInstalledPlugins();
 
-		// Get the enabled plug-in features
+		// Get the enabled plugin features
 		final var enabled = this.repository.findAll().stream()
 				.map(p -> toVo(lastVersionF, p,
 						enabledFeatures.values().stream().filter(f -> p.getKey().equals(f.getKey())).findFirst()
@@ -176,7 +176,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 				.filter(Objects::nonNull)
 				.collect(Collectors.toMap(p -> p.getPlugin().getArtifact(), Function.identity()));
 
-		// Add the disabled plug-ins never installed: staged jar, disabled before any restart
+		// Add the disabled plugins never installed: staged jar, disabled before any restart
 		disabled.forEach((id, file) -> enabled.computeIfAbsent(id, k -> {
 			final var plugin = new SystemPlugin();
 			plugin.setArtifact(k);
@@ -190,7 +190,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 			return p;
 		}));
 
-		// Add pending installation: available but not yet enabled plug-ins
+		// Add pending installation: available but not yet enabled plugins
 		installed.forEach((id, v) -> {
 			enabled.computeIfPresent(id, (_, p) -> {
 				// Check if it's an update
@@ -198,12 +198,12 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 					// Corresponds to a different version
 					p.setLatestLocalVersion(toTrimmedVersion(v));
 				}
-				// A not loaded plug-in has no location: nothing to delete
+				// A not loaded plugin has no location: nothing to delete
 				p.setDeleted(p.getLocation() != null && isDeleted(p));
 				return p;
 			});
 
-			// Add new plug-ins
+			// Add new plugins
 			enabled.computeIfAbsent(id, k -> {
 				final var plugin = new SystemPlugin();
 				plugin.setArtifact(k);
@@ -218,7 +218,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 			});
 		});
 
-		// Add the code signature states computed at startup by the plug-ins class-loader
+		// Add the code signature states computed at startup by the plugins class-loader
 		final var signatures = getPluginClassLoader().getSignatures();
 		enabled.forEach((artifact, vo) -> vo.setSignature(signatures.get(artifact)));
 
@@ -227,13 +227,13 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Indicate the plug-in is deleted or not.
+	 * Indicate the plugin is deleted or not.
 	 *
-	 * @param plugin The plug-in to check.
-	 * @return <code>true</code> when the plug-in is deleted locally from the FS.
+	 * @param plugin The plugin to check.
+	 * @return <code>true</code> when the plugin is deleted locally from the FS.
 	 */
 	protected boolean isDeleted(final PluginVo plugin) {
-		// A plug-in embedded in the application (nested jar, classes) has no file to delete
+		// A plugin embedded in the application (nested jar, classes) has no file to delete
 		return !isEmbeddedLocation(plugin.getLocation()) && !new File(plugin.getLocation()).exists();
 	}
 
@@ -241,29 +241,29 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	 * Indicate the location is inside the application itself: a jar nested in the WAR ({@code nested:} protocol of
 	 * Spring Boot, or any {@code !/} jar entry) or its own classes.
 	 *
-	 * @param location The code source location of the plug-in.
-	 * @return <code>true</code> when the plug-in is loaded from the application, not from a plain file.
+	 * @param location The code source location of the plugin.
+	 * @return <code>true</code> when the plugin is loaded from the application, not from a plain file.
 	 */
 	static boolean isEmbeddedLocation(final String location) {
 		return location != null && (location.startsWith("nested:") || location.contains("!/"));
 	}
 
 	/**
-	 * Location of the code source of the given plug-in, as exposed to the UI.
+	 * Location of the code source of the given plugin, as exposed to the UI.
 	 *
-	 * @param feature The loaded plug-in.
-	 * @return The location, a file path for a plug-in of the plug-ins directory.
+	 * @param feature The loaded plugin.
+	 * @return The location, a file path for a plugin of the plugins directory.
 	 */
 	protected String getLocation(final FeaturePlugin feature) {
 		return getPluginLocation(feature).getPath();
 	}
 
 	/**
-	 * Indicate the plug-in is embedded in the application: loaded from the WAR, without any jar of this artifact in
-	 * the plug-ins directory. Such a plug-in cannot be disabled or deleted from the plug-ins directory.
+	 * Indicate the plugin is embedded in the application: loaded from the WAR, without any jar of this artifact in
+	 * the plugins directory. Such a plugin cannot be disabled or deleted from the plugins directory.
 	 *
-	 * @param artifact The plug-in artifact.
-	 * @return <code>true</code> when the loaded plug-in of this artifact is embedded in the application.
+	 * @param artifact The plugin artifact.
+	 * @return <code>true</code> when the loaded plugin of this artifact is embedded in the application.
 	 */
 	protected boolean isEmbedded(final String artifact) throws IOException {
 		final var installed = getPluginClassLoader().getInstalledPlugins();
@@ -277,8 +277,8 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Suffix appended to the jar file name of a disabled plug-in. The plug-ins class-loader only loads
-	 * <code>*.jar</code> files, so a disabled plug-in is not loaded at all at the next restart, while its file stays
+	 * Suffix appended to the jar file name of a disabled plugin. The plugins class-loader only loads
+	 * <code>*.jar</code> files, so a disabled plugin is not loaded at all at the next restart, while its file stays
 	 * in place for a later enabling.
 	 */
 	public static final String DISABLED_SUFFIX = ".disabled";
@@ -290,13 +290,13 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	private static final String JAR_FILE_PATTERN = "-\\d[\\w.-]*\\.jar";
 
 	/**
-	 * Disable a plug-in: its jar files (and javadoc) are renamed with the {@link #DISABLED_SUFFIX} suffix, so they are
-	 * not loaded at the next restart. The plug-in configuration (nodes, subscriptions, parameters) is kept, and the
-	 * plug-in stays loaded until the restart, as for an installation or a removal.
+	 * Disable a plugin: its jar files (and javadoc) are renamed with the {@link #DISABLED_SUFFIX} suffix, so they are
+	 * not loaded at the next restart. The plugin configuration (nodes, subscriptions, parameters) is kept, and the
+	 * plugin stays loaded until the restart, as for an installation or a removal.
 	 *
-	 * @param artifact The plug-in artifact identifier, such as <code>plugin-build-jenkins</code>.
+	 * @param artifact The plugin artifact identifier, such as <code>plugin-build-jenkins</code>.
 	 * @throws IOException When the files cannot be renamed.
-	 * @throws BusinessException When no jar of this artifact is in the plug-ins directory.
+	 * @throws BusinessException When no jar of this artifact is in the plugins directory.
 	 */
 	@PUT
 	@Path("{artifact:[\\w-]+}/disable")
@@ -305,10 +305,10 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Enable a previously disabled plug-in: its jar files get back their <code>.jar</code> name, so they are loaded at
+	 * Enable a previously disabled plugin: its jar files get back their <code>.jar</code> name, so they are loaded at
 	 * the next restart.
 	 *
-	 * @param artifact The plug-in artifact identifier, such as <code>plugin-build-jenkins</code>.
+	 * @param artifact The plugin artifact identifier, such as <code>plugin-build-jenkins</code>.
 	 * @throws IOException When the files cannot be renamed.
 	 */
 	@PUT
@@ -322,7 +322,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 				+ (enabled ? Pattern.quote(DISABLED_SUFFIX) : "") + "$");
 		final var classLoader = getPluginClassLoader();
 		if (classLoader == null) {
-			throw new IllegalStateException("Plug-ins class-loader is not available, plug-ins cannot be enabled or disabled");
+			throw new IllegalStateException("plugins class-loader is not available, plugins cannot be enabled or disabled");
 		}
 		final List<java.nio.file.Path> files;
 		try (var list = Files.list(classLoader.getPluginDirectory())) {
@@ -330,10 +330,10 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		}
 		if (files.isEmpty()) {
 			if (isEmbedded(artifact)) {
-				// Shipped inside the application: only a newer jar in the plug-ins directory can override it
+				// Shipped inside the application: only a newer jar in the plugins directory can override it
 				throw new BusinessException("plugin-embedded", artifact, enabled ? "enable" : "disable");
 			}
-			// No jar of this artifact in the plug-ins directory: nothing to rename. Typically a plug-in loaded from
+			// No jar of this artifact in the plugins directory: nothing to rename. Typically a plugin loaded from
 			// elsewhere in the class-path (development), or an already enabled/disabled one.
 			throw new BusinessException("plugin-jar-not-found", artifact, enabled ? "enable" : "disable");
 		}
@@ -347,17 +347,17 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Return the disabled plug-ins: artifact to the jar file name (without the {@link #DISABLED_SUFFIX} suffix, the
+	 * Return the disabled plugins: artifact to the jar file name (without the {@link #DISABLED_SUFFIX} suffix, the
 	 * greatest one when several versions are disabled).
 	 *
-	 * @return The disabled plug-ins. Never <code>null</code>.
-	 * @throws IOException When the plug-ins directory cannot be listed.
+	 * @return The disabled plugins. Never <code>null</code>.
+	 * @throws IOException When the plugins directory cannot be listed.
 	 */
 	protected Map<String, String> getDisabledPlugins() throws IOException {
 		final var classLoader = getPluginClassLoader();
 		final var directory = classLoader == null ? null : classLoader.getPluginDirectory();
 		if (directory == null || !Files.isDirectory(directory)) {
-			// Not started through the plug-ins class-loader (safe mode, tests): nothing can be disabled
+			// Not started through the plugins class-loader (safe mode, tests): nothing can be disabled
 			return Collections.emptyMap();
 		}
 		try (var list = Files.list(directory)) {
@@ -378,7 +378,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * New VO from the plug-in listener when available (Ligoj type), otherwise a plain one.
+	 * New VO from the plugin listener when available (Ligoj type), otherwise a plain one.
 	 */
 	private PluginVo newVo() {
 		return context.getBeansOfType(PluginListener.class).values().stream().findFirst().map(PluginListener::toVo)
@@ -386,7 +386,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Set the class-path state of the plug-in when the VO supports it.
+	 * Set the class-path state of the plugin when the VO supports it.
 	 */
 	private void markState(final PluginVo vo, final boolean loaded, final boolean disabled) {
 		if (vo instanceof LigojPluginVo lvo) {
@@ -423,15 +423,15 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Build the VO of a persisted plug-in. A plug-in without feature bean (not loaded) is still listed when its jar is
-	 * disabled, or installed in the plug-ins directory (enabled back, or updated, waiting for a restart): its identity
+	 * Build the VO of a persisted plugin. A plugin without feature bean (not loaded) is still listed when its jar is
+	 * disabled, or installed in the plugins directory (enabled back, or updated, waiting for a restart): its identity
 	 * and node data are kept, and {@code loaded} is <code>false</code>. Otherwise it is an orphan, not listed.
 	 */
 	private PluginVo toVo(final Map<String, Artifact> lastVersion, final SystemPlugin p, final FeaturePlugin feature,
 			final Map<String, String> disabled, final Map<String, String> installed) {
 		final var isDisabled = disabled.containsKey(p.getArtifact());
 		if (feature == null && !isDisabled && !installed.containsKey(p.getArtifact())) {
-			// Plug-in is no more available or in fail-safe mode
+			// plugin is no more available or in fail-safe mode
 			return null;
 		}
 
@@ -444,11 +444,11 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 			// Not loaded (disabled, or enabled back and waiting for a restart): only the persisted data are known
 			vo.setName(p.getArtifact());
 		} else {
-			// Plug-in implementation is available
+			// plugin implementation is available
 			vo.setName(Strings.CS.removeStart(feature.getName(), "Ligoj - Plugin "));
 			vo.setLocation(getLocation(feature));
 			vo.setVendor(feature.getVendor());
-			// Loaded from the application itself (WAR) and not overridden by a jar of the plug-ins directory
+			// Loaded from the application itself (WAR) and not overridden by a jar of the plugins directory
 			if (vo instanceof LigojPluginVo lvo) {
 				lvo.setEmbedded(isEmbeddedLocation(vo.getLocation()) && !installed.containsKey(p.getArtifact()));
 			}
@@ -465,11 +465,11 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Search plug-ins in repository which can be installed.
+	 * Search plugins in repository which can be installed.
 	 *
 	 * @param query      The optional searched term.
 	 * @param repository The repository identifier to query.
-	 * @return All plug-ins artifacts name.
+	 * @return All plugins artifacts name.
 	 * @throws IOException When the last version index file cannot be retrieved.
 	 */
 	@GET
@@ -503,7 +503,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Request a reset of plug-in cache meta-data
+	 * Request a reset of plugin cache meta-data
 	 *
 	 * @param repository The repository identifier to reset.
 	 */
@@ -515,16 +515,16 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Remove all versions the specified plug-in and the related (by name) plug-ins.
+	 * Remove all versions the specified plugin and the related (by name) plugins.
 	 *
-	 * @param artifact The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 * @param artifact The Maven artifact identifier and also corresponding to the plugin simple name.
 	 * @throws IOException When the file cannot be read or deleted from the file system.
 	 */
 	@DELETE
 	@Path("{artifact:[\\w-]+}")
 	public void delete(@PathParam("artifact") final String artifact) throws IOException {
 		if (isEmbedded(artifact)) {
-			// Shipped inside the application: nothing to delete from the plug-ins directory
+			// Shipped inside the application: nothing to delete from the plugins directory
 			throw new BusinessException("plugin-embedded", artifact, "delete");
 		}
 		removeFilter(artifact, "(-.*)?");
@@ -532,9 +532,9 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Remove the specific version of a plug-in.
+	 * Remove the specific version of a plugin.
 	 *
-	 * @param artifact The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 * @param artifact The Maven artifact identifier and also corresponding to the plugin simple name.
 	 * @param version  The specific version.
 	 * @throws IOException When the file cannot be read or deleted from the file system.
 	 */
@@ -570,9 +570,9 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Install or update to the last available version of given plug-in from the remote server.
+	 * Install or update to the last available version of given plugin from the remote server.
 	 *
-	 * @param artifact   The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 * @param artifact   The Maven artifact identifier and also corresponding to the plugin simple name.
 	 * @param repository The repository identifier to query.
 	 * @param javadoc    When true, the Javadoc is also installed and will contribute to OpenAPI documentation.
 	 * @throws IOException When install failed.
@@ -584,7 +584,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 			@QueryParam("javadoc") @DefaultValue("true") final boolean javadoc) throws IOException {
 		final var resultItem = getLastPluginVersions(repository).get(artifact);
 		if (resultItem == null) {
-			// Plug-in not found, or not the last version
+			// plugin not found, or not the last version
 			throw new ValidationJsonException("artifact",
 					String.format("No latest version on repository %s", repository));
 		}
@@ -665,10 +665,10 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Install the specific version of given plug-in from the remote server. The previous version is not deleted. The
+	 * Install the specific version of given plugin from the remote server. The previous version is not deleted. The
 	 * downloaded version will be used only if it is a most recent version than the locally ones.
 	 *
-	 * @param artifact   The Maven artifact identifier and also corresponding to the plug-in simple name.
+	 * @param artifact   The Maven artifact identifier and also corresponding to the plugin simple name.
 	 * @param version    The version to install.
 	 * @param javadoc    When true, the Javadoc is also installed and will contribute to OpenAPI documentation.
 	 * @param repository The repository identifier to query.
@@ -690,7 +690,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		final var classLoader = getPluginClassLoader();
 		if (installPlugin) {
 			final var target = classLoader.getPluginDirectory().resolve(artifact + "-" + version + ".jar");
-			log.info("Download plug-in {}:{} v{} from {}", groupId, artifact, version, repository);
+			log.info("Download plugin {}:{} v{} from {}", groupId, artifact, version, repository);
 			try {
 				// Get the right input
 				final var input2 = input == null
@@ -798,53 +798,53 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	private Map<String, Artifact> getLastPluginVersions(final String repository) throws IOException {
 		final var versions = getRepositoryManager(repository).getLastPluginVersions();
 
-		// Remove ignored plug-ins
+		// Remove ignored plugins
 		Arrays.stream(configuration.get(PLUGIN_IGNORE, "").split(",")).map(String::trim).forEach(versions::remove);
 		return versions;
 	}
 
 	/**
-	 * Return the current plug-in class loader.
+	 * Return the current plugin class loader.
 	 *
-	 * @return The current plug-in class loader.
+	 * @return The current plugin class loader.
 	 */
 	protected PluginsClassLoader getPluginClassLoader() {
 		return PluginsClassLoader.getInstance();
 	}
 
 	/**
-	 * Handle the newly installed plug-ins implementing {@link FeaturePlugin}. Note the plug-ins are installed in a
-	 * natural order based on their key's name to ensure the parents plug-ins are configured first. <br>
-	 * Note the transactional behavior of this process : if one plug-in failed to be configured, then the entire process
-	 * is cancelled. The previously plug-ins and the not processed discovered one are not configured.
+	 * Handle the newly installed plugins implementing {@link FeaturePlugin}. Note the plugins are installed in a
+	 * natural order based on their key's name to ensure the parents plugins are configured first. <br>
+	 * Note the transactional behavior of this process : if one plugin failed to be configured, then the entire process
+	 * is canceled. The previously plugins and the not processed discovered one are not configured.
 	 *
 	 * @param event The Spring event.
-	 * @throws Exception When the context can not be refreshed because of plug-in updates or configurations.
+	 * @throws Exception When the context can not be refreshed because of plugin updates or configurations.
 	 */
 	@EventListener
 	public void refreshPlugins(final ContextRefreshedEvent event) throws Exception {
-		// Auto install plug-ins
+		// Auto install plugins
 		final var install = Arrays.stream(configuration.get(PLUGIN_INSTALL, "").split(",")).map(StringUtils::trimToNull)
 				.filter(Objects::nonNull).collect(Collectors.toSet());
 		var counter = install.isEmpty() ? 0 : autoInstall(install);
 
-		// Auto update plug-ins
+		// Auto update plugins
 		if (BooleanUtils.toBoolean(configuration.get(PLUGIN_UPDATE, "false"))) {
-			// Update the plug-ins
+			// Update the plugins
 			counter += autoUpdate();
 		}
 		if (counter > 0) {
-			log.info("{} plug-ins have been updated/installed, context will be restarted", counter);
+			log.info("{} plugins have been updated/installed, context will be restarted", counter);
 			restart();
 			return;
 		}
-		log.info("No plug-ins have been automatically downloaded for update");
+		log.info("No plugins have been automatically downloaded for update");
 
 		refreshPlugins(event.getApplicationContext());
 	}
 
 	private void refreshPlugins(final ApplicationContext context) throws Exception {
-		// Get the existing plug-in features
+		// Get the existing plugin features
 		final var plugins = repository.findAll().stream()
 				.collect(Collectors.toMap(SystemPlugin::getKey, Function.identity()));
 
@@ -853,11 +853,11 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		final var updateFeatures = new TreeMap<String, FeaturePlugin>();
 		final var removedPlugins = new HashSet<>(plugins.values());
 
-		// Compare with the available plug-in implementing ServicePlugin
+		// Compare with the available plugin implementing ServicePlugin
 		context.getBeansOfType(FeaturePlugin.class).values().forEach(s -> {
 			final var plugin = plugins.get(s.getKey());
 			if (plugin == null) {
-				// New plug-in case
+				// New plugin case
 				newFeatures.put(s.getKey(), s);
 			} else {
 				// Update the artifactId. May have not changed
@@ -867,25 +867,25 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 					updateFeatures.put(s.getKey(), s);
 				}
 
-				// This plug-in has just been handled, so not removed
+				// This plugin has just been handled, so not removed
 				removedPlugins.remove(plugin);
 			}
 		});
 
-		// First, install the data of new plug-ins
+		// First, install the data of new plugins
 		updateFeatures.values().forEach(s -> configurePluginUpdate(s, plugins.get(s.getKey())));
 		newFeatures.values().forEach(this::configurePluginInstall);
 
-		// Then install/update the plug-in
+		// Then install/update the plugin
 		update(updateFeatures, plugins);
 		installInternal(newFeatures);
 		log.info("Plugins are now configured, v{}", configuration.get("info.app.version"));
 
-		// Disabled plug-ins are not loaded but keep their configuration: not removed
+		// Disabled plugins are not loaded but keep their configuration: not removed
 		final var disabled = getDisabledPlugins().keySet();
 		removedPlugins.removeIf(p -> disabled.contains(p.getArtifact()));
 
-		// And remove the old plug-in no more installed
+		// And remove the old plugin no more installed
 		repository.deleteAll(removedPlugins.stream().map(Persistable::getId).toList());
 	}
 
@@ -902,15 +902,15 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Auto install the required plug-ins.
+	 * Auto install the required plugins.
 	 *
-	 * @param plugins The plug-ins to install.
-	 * @return The amount of updated plug-ins.
-	 * @throws IOException When plug-ins cannot be updated.
+	 * @param plugins The plugins to install.
+	 * @return The amount of updated plugins.
+	 * @throws IOException When plugins cannot be updated.
 	 */
 	public int autoInstall(final Set<String> plugins) throws IOException {
 		final var currentPlugins = getPluginClassLoader().getInstalledPlugins();
-		// A disabled plug-in is installed, just not loaded: not re-installed
+		// A disabled plugin is installed, just not loaded: not re-installed
 		final var disabledPlugins = getDisabledPlugins();
 		final var withJavaDoc = BooleanUtils.toBoolean(configuration.get(PLUGIN_INSTALL_JAVADOC, "true"));
 		final var repositoryName = configuration.get(PLUGIN_REPOSITORY, REPO_CENTRAL);
@@ -925,10 +925,10 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Auto update the installed plug-ins.
+	 * Auto update the installed plugins.
 	 *
-	 * @return The amount of updated plug-ins.
-	 * @throws IOException When plug-ins cannot be updated.
+	 * @return The amount of updated plugins.
+	 * @throws IOException When plugins cannot be updated.
 	 */
 	public int autoUpdate() throws IOException {
 		final var plugins = getPluginClassLoader().getInstalledPlugins();
@@ -946,7 +946,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Install all ordered plug-ins.
+	 * Install all ordered plugins.
 	 */
 	private void installInternal(final Map<String, FeaturePlugin> newFeatures) throws Exception {
 		for (final var feature : newFeatures.values()) {
@@ -958,7 +958,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Update all ordered plug-ins.
+	 * Update all ordered plugins.
 	 */
 	private void update(final Map<String, FeaturePlugin> updateFeatures, final Map<String, SystemPlugin> plugins)
 			throws Exception {
@@ -968,9 +968,9 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Returns a plug-in's last modified time.
+	 * Returns a plugin's last modified time.
 	 *
-	 * @param plugin The plug-in class. Will be used to find the related container archive or class file.
+	 * @param plugin The plugin class. Will be used to find the related container archive or class file.
 	 * @return a {@code String} representing the time the file was last modified, or a default time stamp to indicate
 	 * the time of last modification is not supported by the file system
 	 * @throws URISyntaxException if an I/O error occurs
@@ -982,7 +982,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 
 	/**
 	 * Last modification time of a code source: the file itself for a jar, the newest file below it for a directory
-	 * (a plug-in run from {@code classes/} in development), since a directory's own timestamp does not change when a
+	 * (a plugin run from {@code classes/} in development), since a directory's own timestamp does not change when a
 	 * nested class is recompiled, which would hide the update from {@link #isAnUpdate(SystemPlugin, FeaturePlugin)}.
 	 *
 	 * @param location The code source path.
@@ -1013,15 +1013,15 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Configure the updated plug-in in this order :
+	 * Configure the updated plugin in this order :
 	 * <ul>
-	 * <li>The required entities for the plug-in are persisted. These entities are discovered from
-	 * {@link FeaturePlugin#getInstalledEntities()} and related CSV files are load in the data base.</li>
+	 * <li>The required entities for the plugin are persisted. These entities are discovered from
+	 * {@link FeaturePlugin#getInstalledEntities()} and related CSV files are load in the database.</li>
 	 * <li>The entity {@link SystemPlugin} is updated to reflect the new version.</li>
 	 * </ul>
 	 *
-	 * @param plugin The newly updated plug-in.
-	 * @param entity The current plug-in entity to update.
+	 * @param plugin The newly updated plugin.
+	 * @param entity The current plugin entity to update.
 	 */
 	protected void configurePluginUpdate(final FeaturePlugin plugin, final SystemPlugin entity) {
 		final var newVersion = getVersion(plugin);
@@ -1029,7 +1029,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		entity.setVersion(newVersion);
 		entity.setBasePackage(plugin.getClass().getPackageName());
 
-		// Configure the plug-in entities even for already install plugins
+		// Configure the plugin entities even for already install plugins
 		try {
 			configurePluginEntities(plugin, plugin.getInstalledEntities());
 		} catch (final Exception e) { // NOSONAR - Catch all to notice every time the failure
@@ -1039,14 +1039,14 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Configure the new plug-in in this order :
+	 * Configure the new plugin in this order :
 	 * <ul>
-	 * <li>The required entities for the plug-in are persisted. These entities are discovered from
-	 * {@link FeaturePlugin#getInstalledEntities()} and related CSV files are load in the data base.</li>
-	 * <li>A new {@link SystemPlugin} is inserted to maintain the validated plug-in and version</li>
+	 * <li>The required entities for the plugin are persisted. These entities are discovered from
+	 * {@link FeaturePlugin#getInstalledEntities()} and related CSV files are load in the database.</li>
+	 * <li>A new {@link SystemPlugin} is inserted to maintain the validated plugin and version</li>
 	 * </ul>
 	 *
-	 * @param plugin The newly discovered plug-in.
+	 * @param plugin The newly discovered plugin.
 	 */
 	protected void configurePluginInstall(final FeaturePlugin plugin) {
 		final var newVersion = getVersion(plugin);
@@ -1062,7 +1062,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 			context.getBeansOfType(PluginListener.class).values().forEach(l -> l.configure(plugin, entity));
 			repository.saveAndFlush(entity);
 
-			// Configure the plug-in entities
+			// Configure the plugin entities
 			configurePluginEntities(plugin, plugin.getInstalledEntities());
 		} catch (final Exception e) { // NOSONAR - Catch all to notice every time the failure
 			// Something happened
@@ -1072,7 +1072,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Guess the Maven artifactId from plug-in artifact name. Use the key and replace the "service" or "feature" part by
+	 * Guess the Maven artifactId from plugin artifact name. Use the key and replace the "service" or "feature" part by
 	 * "plugin".
 	 *
 	 * @param plugin The plugin class.
@@ -1084,11 +1084,11 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Insert the configuration entities of the plug-in. This function can be called multiple times : a check prevent
+	 * Insert the configuration entities of the plugin. This function can be called multiple times : a check prevent
 	 * duplicate entries.
 	 *
-	 * @param plugin      The related plug-in
-	 * @param csvEntities The managed entities where CSV data need to be persisted with this plug-in.
+	 * @param plugin      The related plugin
+	 * @param csvEntities The managed entities where CSV data need to be persisted with this plugin.
 	 * @throws IOException When the CSV management failed.
 	 */
 	protected void configurePluginEntities(final FeaturePlugin plugin, final List<Class<?>> csvEntities)
@@ -1096,7 +1096,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		//
 		final var classLoader = plugin.getClass().getClassLoader();
 
-		// Compute the location of this plug-in, ensuring the
+		// Compute the location of this plugin, ensuring the
 		final var pluginLocation = getPluginLocation(plugin).toString();
 		for (final var entityClass : csvEntities) {
 			// Build the required CSV file
@@ -1110,9 +1110,9 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Return the file system location corresponding to the given plug-in.
+	 * Return the file system location corresponding to the given plugin.
 	 *
-	 * @param plugin The related plug-in
+	 * @param plugin The related plugin
 	 * @return The URL corresponding to the location.
 	 */
 	protected URL getPluginLocation(final FeaturePlugin plugin) {
@@ -1120,18 +1120,18 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Configure a plug-in from a given class and CSV. Its content is converted into target entity's type and inserted
-	 * with JPA. The CSV file must be located inside the scope of the target plug-in.
+	 * Configure a plugin from a given class and CSV. Its content is converted into target entity's type and inserted
+	 * with JPA. The CSV file must be located inside the scope of the target plugin.
 	 *
 	 * @param <T>            Target class type.
-	 * @param csv            List of URL of CSV. Only the first one matching to plug-in location is read.
+	 * @param csv            List of URL of CSV. Only the first one matching to plugin location is read.
 	 * @param entityClass    Target class of the CSV.
-	 * @param pluginLocation The plug-in owner's location
+	 * @param pluginLocation The plugin owner's location
 	 * @throws IOException When the CSV management failed.
 	 */
 	protected <T> void configurePluginEntity(final Stream<URL> csv, final Class<T> entityClass,
 			final String pluginLocation) throws IOException {
-		// Accept the CSV file only from the JAR/folder where the plug-in is installed from
+		// Accept the CSV file only from the JAR/folder where the plugin is installed from
 		try (var input = new InputStreamReader(
 				csv.filter(u -> u.getPath().startsWith(pluginLocation) || u.toString().startsWith(pluginLocation))
 						.findFirst()
@@ -1140,7 +1140,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 						.openStream(),
 				StandardCharsets.UTF_8)) {
 
-			// Build and save the entities managed by this plug-in
+			// Build and save the entities managed by this plugin
 			csvForJpa.toJpa(entityClass, input, true, false, e -> {
 				// Need brace because of ambiguous signature consumer/Function
 				persistAsNeeded(entityClass, e);
@@ -1203,7 +1203,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	/**
 	 * Return a fail-safe computed version of the given {@link FeaturePlugin}
 	 *
-	 * @param plugin The plug-in instance
+	 * @param plugin The plugin instance
 	 * @return The version from the MANIFEST or the timestamp. <code>?</code> when an error occurs.
 	 */
 	protected String getVersion(final FeaturePlugin plugin) {
@@ -1212,7 +1212,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 			try {
 				return getLastModifiedTime(plugin);
 			} catch (final IOException | URISyntaxException e) {
-				log.warn("Unable to determine the version of plug-in {}", plugin.getClass(), e);
+				log.warn("Unable to determine the version of plugin {}", plugin.getClass(), e);
 
 				// Fail-safe version
 				return "?";
@@ -1221,11 +1221,11 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Return the version of every enabled plug-in, by plug-in key. Unlike the plug-in management API, this read-only
+	 * Return the version of every enabled plugin, by plugin key. Unlike the plugin management API, this read-only
 	 * lookup is open to any authenticated user: the bug report dialog calls it on demand, which keeps this cost
 	 * out of the session computation.
 	 *
-	 * @return The version by plug-in key, ordered by key.
+	 * @return The version by plugin key, ordered by key.
 	 */
 	@GET
 	@Path("version")
@@ -1237,17 +1237,17 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 
 	@Override
 	public void decorate(final SessionSettings settings) {
-		// Add the enabled plug-ins
+		// Add the enabled plugins
 		final var featurePlugins = context.getBeansOfType(FeaturePlugin.class).values();
 		if (settings.getApplicationSettings().getPlugins() == null) {
 			settings.getApplicationSettings().setPlugins(featurePlugins.stream().map(FeaturePlugin::getKey).toList());
 		}
-		// Only the plug-ins shipping a frontend bundle: the SPA requests /main/<ui-id>/vue/index.js for
+		// Only the plugins shipping a frontend bundle: the SPA requests /main/<ui-id>/vue/index.js for
 		// each of these, so backend-only features (iam-node, menu contributions, ...) are excluded and
 		// never produce 404 fetches on the browser side. Exposed through the shared application data map —
 		// bootstrap's ApplicationSettings has no dedicated field for it.
 		// Primary identity provider node (e.g. "service:id:ldap:dig", empty for the internal users): the profile
-		// shows which authentication plug-in is in charge
+		// shows which authentication plugin is in charge
 		settings.getApplicationSettings().getData().computeIfAbsent("iam-primary",
 				_ -> configuration.get("feature:iam:node:primary", ""));
 		settings.getApplicationSettings().getData().computeIfAbsent("ui-plugins", _ -> featurePlugins.stream()
@@ -1257,7 +1257,7 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	}
 
 	/**
-	 * Convert a plug-in key to the SPA loader id: the leading {@code service:}/{@code feature:} segment is
+	 * Convert a plugin key to the SPA loader id: the leading {@code service:}/{@code feature:} segment is
 	 * dropped and the remaining segments are joined with dashes — {@code service:id:ldap} → {@code id-ldap},
 	 * mirroring the frontend {@code pluginIdFromKey}.
 	 */
