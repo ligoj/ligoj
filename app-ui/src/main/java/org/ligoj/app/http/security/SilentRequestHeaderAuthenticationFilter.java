@@ -32,7 +32,7 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 
 	/**
 	 * Static pages whitelisted in {@code OAuth2Bff} / pre-auth modes.
-	 *
+	 * <p>
 	 * {@code /login.html} is included here too even though OAuth/SSO drives
 	 * the actual authentication — the SPA still uses this page as the
 	 * landing pad for failure / logout / concurrency / expiry feedback (the

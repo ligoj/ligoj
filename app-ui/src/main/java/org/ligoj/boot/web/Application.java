@@ -163,11 +163,7 @@ public class Application extends SpringBootServletInitializer {
 		config.put(name, System.getProperty(configurationKey + "." + name, defaultValue));
 	}
 
-	/**
-	 * Configure captcha servlet.
-	 *
-	 * @return captcha configuration.
-	 */
+
 	/**
 	 * Source-run (IDE / {@code spring-boot:run}) document root. Spring Boot 4 dropped the deprecated
 	 * {@code src/main/webapp} fallback, and this application serves its static pages (login.html, index.html,
@@ -185,6 +181,11 @@ public class Application extends SpringBootServletInitializer {
 				.ifPresent(factory::setDocumentRoot);
 	}
 
+	/**
+	 * Configure captcha servlet.
+	 *
+	 * @return captcha configuration.
+	 */
 	@Bean
 	public ServletRegistrationBean<CaptchaServlet> captchaServlet() {
 		return new ServletRegistrationBean<>(new CaptchaServlet(), "/captcha.png");

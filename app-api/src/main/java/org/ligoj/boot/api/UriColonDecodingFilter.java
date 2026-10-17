@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * Servlet filter that decodes percent-encoded colons ({@code %3A} /
  * {@code %3a}) in the request URI before the request reaches CXF.
- *
+ * <p>
  * CXF matches JAX-RS {@code @Path} regexes against the raw (still
  * percent-encoded) URI, so a template such as
  * {@code @Path("{node:service:.+}/parameter/{mode}")} fails to match when the
