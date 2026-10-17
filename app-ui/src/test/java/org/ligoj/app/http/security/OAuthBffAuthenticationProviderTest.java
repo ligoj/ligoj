@@ -33,7 +33,7 @@ class OAuthBffAuthenticationProviderTest extends AbstractServerTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	void configureLogout() throws Exception {
+	void configureLogout() {
 		var http = mock(HttpSecurity.class);
 		var clientRegistrationRepository = mock(ClientRegistrationRepository.class);
 		var configurer = mock(LogoutConfigurer.class);

@@ -1,9 +1,6 @@
 package org.ligoj.app.http.security.mfa;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -96,7 +93,7 @@ public class MfaClient {
 				return NOT_REQUIRED;
 			}
 			// Keep the public fields only
-			final var devices = ((List<Map<String, Object>>) body.getOrDefault("devices", List.of())).stream().map(d -> {
+			final var devices = ((Collection<Map<String, Object>>) body.getOrDefault("devices", List.of())).stream().map(d -> {
 				final var device = new HashMap<String, Object>();
 				device.put("id", d.get("id"));
 				device.put("name", d.get("name"));

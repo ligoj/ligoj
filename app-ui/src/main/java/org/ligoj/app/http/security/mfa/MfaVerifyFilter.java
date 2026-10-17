@@ -50,7 +50,7 @@ public class MfaVerifyFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
-			final FilterChain filterChain) throws ServletException, IOException {
+			final FilterChain filterChain) throws IOException {
 		final var authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || !authentication.isAuthenticated()
 				|| authentication instanceof AnonymousAuthenticationToken) {

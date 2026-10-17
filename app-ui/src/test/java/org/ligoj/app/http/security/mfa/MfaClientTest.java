@@ -30,7 +30,6 @@ class MfaClientTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void isRequired() {
 		final var template = mock(RestTemplate.class);
 		final var captor = ArgumentCaptor.forClass(HttpEntity.class);
@@ -86,7 +85,6 @@ class MfaClientTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void verify() {
 		final var template = mock(RestTemplate.class);
 		final var captor = ArgumentCaptor.forClass(HttpEntity.class);

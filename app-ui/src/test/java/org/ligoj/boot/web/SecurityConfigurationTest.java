@@ -33,7 +33,7 @@ class SecurityConfigurationTest {
 	}
 
 	@Test
-	void configureLoginHandlerOAuthBff() throws Exception {
+	void configureLoginHandlerOAuthBff() {
 		var configuration = new SecurityConfiguration();
 		configuration.setSecurityProvider("OAuth2Bff");
 		var http = mock(HttpSecurity.class);
@@ -44,7 +44,7 @@ class SecurityConfigurationTest {
 	}
 
 	@Test
-	void configureLoginHandlerRest() throws Exception {
+	void configureLoginHandlerRest() {
 		var configuration = new SecurityConfiguration();
 		configuration.setSecurityProvider("Rest");
 		var http = mock(HttpSecurity.class);
