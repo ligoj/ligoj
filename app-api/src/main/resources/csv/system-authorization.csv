@@ -18,6 +18,7 @@ GET;^rest/system/plugin/version$;API;USER
 GET;^rest/node.*;API;USER
 GET;^rest/project.*;API;USER
 GET;^rest/subscription.*;API;USER
+POST;^rest/subscription/status/([0-9]+/)?refresh$;API;USER
 GET;^webjars/.*;API;USER
 POST;^rest/user-log.*;API;USER
 

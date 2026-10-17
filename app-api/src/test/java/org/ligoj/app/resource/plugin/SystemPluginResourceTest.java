@@ -13,19 +13,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.HashMap;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.dao.system.SystemPluginRepository;
 import org.ligoj.app.resource.plugin.repository.Artifact;
 import org.ligoj.app.resource.plugin.repository.CentralRepositoryManager;
 import org.ligoj.app.resource.plugin.repository.RepositoryManager;
+import org.ligoj.app.resource.welcome.InitializeRbacDataResource;
 import org.ligoj.bootstrap.MatcherUtil;
 import org.ligoj.bootstrap.core.dao.csv.CsvForJpa;
 import org.ligoj.bootstrap.core.plugin.FeaturePlugin;
 import org.ligoj.bootstrap.core.plugin.PluginListener;
-import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.plugin.PluginVo;
 import org.ligoj.bootstrap.core.plugin.PluginsClassLoader;
+import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.model.system.*;
@@ -1305,7 +1305,7 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 	}
 
 	@Test
-	void disableNotFound() throws IOException {
+	void disableNotFound() {
 		final var resource = newPluginResourceDelete();
 		Assertions.assertEquals("plugin-jar-not-found",
 				Assertions.assertThrows(BusinessException.class, () -> resource.disable("plugin-not-installed")).getMessage());
@@ -1504,6 +1504,54 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		resource.persistAsNeeded(SystemRoleAssignment.class, entity);
 		em.flush();
 		Assertions.assertFalse(entity.isNew());
+	}
+
+	private SystemAuthorization newAuthorization(final SystemRole role, final String method) {
+		final var authorization = new SystemAuthorization();
+		authorization.setRole(role);
+		authorization.setType(SystemAuthorization.AuthorizationType.API);
+		authorization.setPattern("^rest/any$");
+		authorization.setMethod(method);
+		return authorization;
+	}
+
+	@Test
+	void persistAsNeededAuthorization() {
+		final var role = new SystemRole();
+		role.setName("any");
+		em.persist(role);
+		final var all = newAuthorization(role, null);
+		resource.persistAsNeeded(SystemAuthorization.class, all);
+		Assertions.assertFalse(all.isNew());
+
+		// Same role, type, pattern and method: duplicate prevented
+		final var allAgain = newAuthorization(role, null);
+		resource.persistAsNeeded(SystemAuthorization.class, allAgain);
+		Assertions.assertTrue(allAgain.isNew());
+
+		// Another method of the same pattern is another authorization
+		final var post = newAuthorization(role, "POST");
+		resource.persistAsNeeded(SystemAuthorization.class, post);
+		Assertions.assertFalse(post.isNew());
+		final var postAgain = newAuthorization(role, "POST");
+		resource.persistAsNeeded(SystemAuthorization.class, postAgain);
+		Assertions.assertTrue(postAgain.isNew());
+	}
+
+	@Test
+	void configurePluginUpdateRbac() {
+		// The RBAC data are configured again at each upgrade: only the missing authorizations are added
+		final var plugin = applicationContext.getBean(InitializeRbacDataResource.class);
+		final var entity = new SystemPlugin();
+		entity.setKey(plugin.getKey());
+		entity.setVersion("0");
+		resource.configurePluginUpdate(plugin, entity);
+		resource.configurePluginUpdate(plugin, entity);
+
+		final var authorizations = em.createQuery("SELECT CONCAT(a.role.name, ';', a.type, ';', COALESCE(a.method, ''),"
+				+ " ';', a.pattern) FROM SystemAuthorization a", String.class).getResultList();
+		Assertions.assertEquals(new HashSet<>(authorizations).size(), authorizations.size());
+		Assertions.assertTrue(authorizations.contains("USER;API;POST;^rest/subscription/status/([0-9]+/)?refresh$"));
 	}
 
 	@Test

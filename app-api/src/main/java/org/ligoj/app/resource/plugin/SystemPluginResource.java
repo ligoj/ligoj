@@ -28,6 +28,7 @@ import org.ligoj.bootstrap.core.plugin.PluginVo;
 import org.ligoj.bootstrap.core.plugin.PluginsClassLoader;
 import org.ligoj.bootstrap.core.resource.TechnicalException;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
+import org.ligoj.bootstrap.model.system.SystemAuthorization;
 import org.ligoj.bootstrap.model.system.SystemPlugin;
 import org.ligoj.bootstrap.model.system.SystemUser;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
@@ -1163,7 +1164,24 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 			case AbstractStringKeyEntity se -> persistAsNeeded(entityClass, se);
 			case INamableBean<?> nb -> persistAsNeeded(entityClass, entity, "name", nb.getName());
 			case SystemUser su -> persistAsNeeded(entityClass, entity, "login", su.getLogin());
+			case SystemAuthorization a -> persistAsNeeded(a);
 			case null, default -> em.persist(entity);
+		}
+	}
+
+	/**
+	 * Persist the given authorization only if its role has not the same one: same type, pattern and method. The CSV
+	 * data are configured again at each update, so only the new authorizations are added.
+	 *
+	 * @param entity The authorization read from the CSV, and to persist.
+	 */
+	private void persistAsNeeded(final SystemAuthorization entity) {
+		if (em.createQuery("SELECT 1 FROM SystemAuthorization WHERE role = :role AND type = :type"
+						+ " AND pattern = :pattern AND COALESCE(method, '') = :method")
+				.setParameter("role", entity.getRole()).setParameter("type", entity.getType())
+				.setParameter("pattern", entity.getPattern())
+				.setParameter("method", StringUtils.defaultString(entity.getMethod())).getResultList().isEmpty()) {
+			em.persist(entity);
 		}
 	}
 
