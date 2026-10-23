@@ -16,14 +16,29 @@
   <body> (scoped page vars don't reach teleported content — this is the
   proven LjConfirmDialog pattern). The footer is right-aligned; pass
   LjButtons in any order.
+
+  An edit dialog passes its form as `guard`, and its Cancel button calls the
+  `close` of the footer, or of the content for a panel holding its own Cancel:
+
+    <LjDialog v-model="editDialog" :guard="editForm" …>
+      <template #footer="{ close }">
+        <LjButton variant="ghost" @click="close">{{ t('common.cancel') }}</LjButton>
+
+  A close request (Cancel, the close button, Esc, the scrim) of a changed form
+  then asks to discard the changes, and so does leaving the page while the
+  dialog is open, unless the profile skips this confirmation. The unchanged
+  form is the one shown at each opening; a form loaded after its opening
+  passes `guard-ready` false while loading. Closing the dialog from the parent,
+  as after a save, never asks.
 -->
 <template>
   <v-dialog
+    v-bind="$attrs"
     :model-value="modelValue"
     :max-width="maxWidth"
     :persistent="persistent"
     scrollable
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="onDialogModel"
   >
     <v-card class="vmodal lj-surface">
       <div class="vmodal-head">
@@ -31,19 +46,27 @@
         <h3>{{ title }}<code v-if="badge" class="badge">{{ badge }}</code></h3>
         <button class="x" :aria-label="closeLabel" @click="close"><v-icon size="20">mdi-close</v-icon></button>
       </div>
-      <v-card-text class="vmodal-body"><slot /></v-card-text>
+      <v-card-text class="vmodal-body"><slot :close="close" /></v-card-text>
       <div v-if="$slots.footer" class="vmodal-foot">
         <span class="foot-sp" />
-        <slot name="footer" />
+        <slot name="footer" :close="close" />
       </div>
     </v-card>
   </v-dialog>
+  <!-- Persistent: only its buttons dismiss it, so a pending close is always resolved -->
+  <LjConfirmDialog v-if="formGuard" :model-value="formGuard.showGuardDialog.value" :title="t('common.unsavedTitle')"
+    icon="mdi-content-save-alert" :message="t('common.unsavedMsg')" :confirm-label="t('common.discard')"
+    confirm-color="warning" persistent @confirm="onGuardConfirm" @cancel="onGuardCancel" />
 </template>
 
 <script setup>
-import { useI18nStore } from '@ligoj/host'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useI18nStore, useFormGuard, LjConfirmDialog } from '@ligoj/host'
 
-defineProps({
+// The attributes go to the dialog, not to the guard confirmation beside it
+defineOptions({ inheritAttrs: false })
+
+const props = defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, default: '' },
   // Identifier of the edited entity, highlighted after the title (login, visual id, key, name).
@@ -51,12 +74,62 @@ defineProps({
   icon: { type: String, default: '' },
   maxWidth: { type: [Number, String], default: 560 },
   persistent: { type: Boolean, default: false },
+  // The edited form, to ask before discarding its changes. Unset, the dialog closes at once.
+  guard: { type: null, default: undefined },
+  // False while the form loads after the opening: its unchanged state is taken once ready
+  guardReady: { type: Boolean, default: true },
 })
 const emit = defineEmits(['update:modelValue'])
 const { t } = useI18nStore()
 const closeLabel = t('common.cancel')
 
-function close() { emit('update:modelValue', false) }
+// Only a guarded dialog holds a navigation: the guard watches the form and the route leave
+const formGuard = props.guard === undefined ? null : useFormGuard(computed(() => props.guard))
+// The confirmation was raised by a close request, not by a route leave
+const pendingClose = ref(false)
+
+/** Close request of the user: Cancel through the footer `close`, the close button, Esc or the scrim. */
+function close() {
+  if (formGuard?.isDirty.value && !formGuard.isConfirmationSkipped()) {
+    pendingClose.value = true
+    formGuard.showGuardDialog.value = true
+  } else {
+    emit('update:modelValue', false)
+  }
+}
+
+// Without an activator, the dialog only requests its closing
+function onDialogModel(value) {
+  if (!value) close()
+}
+
+function onGuardConfirm() {
+  if (pendingClose.value) {
+    pendingClose.value = false
+    formGuard.showGuardDialog.value = false
+    formGuard.markClean()
+    emit('update:modelValue', false)
+  } else {
+    formGuard.confirmLeave()
+  }
+}
+
+function onGuardCancel() {
+  if (pendingClose.value) {
+    pendingClose.value = false
+    formGuard.showGuardDialog.value = false
+  } else {
+    formGuard.cancelLeave()
+  }
+}
+
+// The unchanged form is the one shown once the dialog is open and its form ready, after its content is mounted:
+// a field normalizing its value on mount is no change. A closed dialog has no change to hold a navigation with.
+watch(() => props.modelValue && props.guardReady, async (ready) => {
+  if (!formGuard) return
+  if (ready) await nextTick()
+  formGuard.markClean()
+}, { immediate: true })
 </script>
 
 <style scoped>
