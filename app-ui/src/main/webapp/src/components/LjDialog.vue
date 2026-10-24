@@ -24,9 +24,10 @@
       <template #footer="{ close }">
         <LjButton variant="ghost" @click="close">{{ t('common.cancel') }}</LjButton>
 
-  A close request (Cancel, the close button, Esc, the scrim) of a changed form
-  then asks to discard the changes, and so does leaving the page while the
-  dialog is open, unless the profile skips this confirmation. The unchanged
+  Cancel discards the changes at once: the user chose to. Any other close
+  request of a changed form (the close button, Esc, the scrim) asks to discard
+  them, and so does leaving the page while the dialog is open, unless the
+  profile skips this confirmation. The unchanged
   form is the one shown at each opening; a form loaded after its opening
   passes `guard-ready` false while loading. Closing the dialog from the parent,
   as after a save, never asks.
@@ -46,10 +47,10 @@
         <h3>{{ title }}<code v-if="badge" class="badge">{{ badge }}</code></h3>
         <button class="x" :aria-label="closeLabel" @click="close"><v-icon size="20">mdi-close</v-icon></button>
       </div>
-      <v-card-text class="vmodal-body"><slot :close="close" /></v-card-text>
+      <v-card-text class="vmodal-body"><slot :close="cancel" /></v-card-text>
       <div v-if="$slots.footer" class="vmodal-foot">
         <span class="foot-sp" />
-        <slot name="footer" :close="close" />
+        <slot name="footer" :close="cancel" />
       </div>
     </v-card>
   </v-dialog>
@@ -88,7 +89,7 @@ const formGuard = props.guard === undefined ? null : useFormGuard(computed(() =>
 // The confirmation was raised by a close request, not by a route leave
 const pendingClose = ref(false)
 
-/** Close request of the user: Cancel through the footer `close`, the close button, Esc or the scrim. */
+/** Close request of the user: the close button, Esc or the scrim. */
 function close() {
   if (formGuard?.isDirty.value && !formGuard.isConfirmationSkipped()) {
     pendingClose.value = true
@@ -96,6 +97,12 @@ function close() {
   } else {
     emit('update:modelValue', false)
   }
+}
+
+/** Cancel of the user, through the `close` of the footer or of the content: the changes are discarded. */
+function cancel() {
+  formGuard?.markClean()
+  emit('update:modelValue', false)
 }
 
 // Without an activator, the dialog only requests its closing

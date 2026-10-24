@@ -45,7 +45,8 @@ describe('<LjDialog />', () => {
   })
 })
 
-// An edit dialog guarded on its form: Cancel through the footer `close`, Save closing it from the parent
+// An edit dialog guarded on its form: Cancel through the footer `close`, or the one of a panel through the content
+// `close`, Save closing it from the parent
 const Edit = {
   components: { LjDialog },
   setup() {
@@ -53,7 +54,10 @@ const Edit = {
   },
   template: `<div>
     <LjDialog v-model="open" title="Edit" :guard="form" :guard-ready="!loading">
-      <input class="name" v-model="form.name" />
+      <template #default="{ close }">
+        <input class="name" v-model="form.name" />
+        <button class="panel-cancel" @click="close">Cancel</button>
+      </template>
       <template #footer="{ close }">
         <button class="cancel" @click="close">Cancel</button>
         <button class="save" @click="open = false">Save</button>
@@ -96,15 +100,34 @@ describe('<LjDialog guard />', () => {
 
   it('closes an unchanged form at once', async () => {
     const { edit } = await mountEdit()
-    await click('.cancel')
+    await click('.vmodal-head .x')
     expect(edit.open).toBe(false)
     expect(asking()).toBe(false)
   })
 
-  it('asks before discarding the changes on Cancel, and keeps them when the user goes on', async () => {
-    const { edit } = await mountEdit()
+  it('discards the changes on Cancel without asking: the user chose to', async () => {
+    const { router, edit } = await mountEdit()
     await type('b')
     await click('.cancel')
+    expect(asking()).toBe(false)
+    expect(edit.open).toBe(false)
+    // Nothing left to hold a navigation with
+    await router.push('/other')
+    expect(router.currentRoute.value.path).toBe('/other')
+  })
+
+  it('discards the changes on the Cancel of a panel without asking', async () => {
+    const { edit } = await mountEdit()
+    await type('b')
+    await click('.panel-cancel')
+    expect(asking()).toBe(false)
+    expect(edit.open).toBe(false)
+  })
+
+  it('asks before discarding the changes on the close button, and keeps them when the user goes on', async () => {
+    const { edit } = await mountEdit()
+    await type('b')
+    await click('.vmodal-head .x')
     expect(asking()).toBe(true)
     expect(edit.open).toBe(true)
 
@@ -113,7 +136,7 @@ describe('<LjDialog guard />', () => {
     expect(edit.open).toBe(true)
     expect(edit.form.name).toBe('b')
 
-    await click('.cancel')
+    await click('.vmodal-head .x')
     await click('.vconfirm .vc-btn.confirm')
     expect(asking()).toBe(false)
     expect(edit.open).toBe(false)
@@ -121,16 +144,13 @@ describe('<LjDialog guard />', () => {
     // A discarded form reopens clean
     edit.open = true
     await flushPromises()
-    await click('.cancel')
+    await click('.vmodal-head .x')
     expect(edit.open).toBe(false)
   })
 
-  it('asks on the close button, Esc and the scrim too', async () => {
+  it('asks on Esc and the scrim too', async () => {
     const { edit } = await mountEdit()
     await type('b')
-    await click('.vmodal-head .x')
-    expect(asking()).toBe(true)
-    await click('.vconfirm .vc-btn.ghost')
 
     // Esc and the scrim: the dialog requests its closing
     wrapper.findAllComponents({ name: 'VDialog' })[0].vm.$emit('update:modelValue', false)
@@ -144,7 +164,7 @@ describe('<LjDialog guard />', () => {
     edit.form = { name: 'loaded' }
     edit.loading = false
     await flushPromises()
-    await click('.cancel')
+    await click('.vmodal-head .x')
     expect(asking()).toBe(false)
     expect(edit.open).toBe(false)
   })
@@ -153,7 +173,7 @@ describe('<LjDialog guard />', () => {
     localStorage.setItem('ligoj.skipUnsavedConfirmation', 'true')
     const { edit } = await mountEdit()
     await type('b')
-    await click('.cancel')
+    await click('.vmodal-head .x')
     expect(asking()).toBe(false)
     expect(edit.open).toBe(false)
   })
