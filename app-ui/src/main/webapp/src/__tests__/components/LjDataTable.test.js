@@ -55,4 +55,12 @@ describe('LjDataTable header cells', () => {
     // An icon and a label: the arrow balances the icon, the label stays centered
     expect(mountWith({}).findAll('.th-in')[1].classes()).not.toContain('solo')
   })
+
+  it('open the table tools from vertical dots in the last header', () => {
+    const w = mount(LjDataTable, {
+      props: { headers: HEADERS, items: [], itemsLength: 0 },
+      global: { stubs: { ...stubs, 'v-menu': { template: '<div><slot name="activator" :props="{}" /></div>' } } },
+    })
+    expect(w.find('th.gear-col .vicon').text()).toBe('mdi-dots-vertical')
+  })
 })

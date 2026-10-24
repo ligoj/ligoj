@@ -33,11 +33,12 @@ function mountServer(props = {}) {
 }
 
 describe('LigojDataTableServer', () => {
-  it('renders v-data-table-server with the cogs tools menu', () => {
+  it('renders v-data-table-server with the tools menu', () => {
     const wrapper = mountServer()
     // v-data-table-server extends v-table so the base class still applies.
     expect(wrapper.find('.v-table').exists()).toBe(true)
-    expect(wrapper.html()).toContain('mdi-cog')
+    expect(wrapper.html()).toContain('mdi-dots-vertical')
+    expect(wrapper.html()).not.toContain('mdi-cog')
   })
 
   it('copyToClipboard calls fetchAll and exports ALL rows, not just the current page', async () => {

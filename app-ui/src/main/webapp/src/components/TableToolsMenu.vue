@@ -11,7 +11,7 @@
           aria-label="Table tools"
           title="Table tools"
         >
-          <v-icon size="small">mdi-cog</v-icon>
+          <v-icon size="small">mdi-dots-vertical</v-icon>
         </v-btn>
       </template>
       <v-list density="compact">
@@ -77,7 +77,7 @@
 
 <script setup>
 /**
- * Shared cogs-icon tools menu used by LigojDataTable and
+ * Shared vertical dots tools menu used by LigojDataTable and
  * LigojDataTableServer. It owns only the UI — the actions emit events
  * that the parent table handles:
  *   export-csv / copy  → useTableTools

@@ -25,9 +25,10 @@ function mountMenu(props = {}) {
 afterEach(() => { mounted?.unmount(); mounted = null })
 
 describe('RowActionsMenu', () => {
-  it('renders a cog activator with an accessible label', () => {
+  it('renders a vertical dots activator with an accessible label', () => {
     const wrapper = mountMenu({ label: 'Row actions' })
-    expect(wrapper.html()).toContain('mdi-cog')
+    expect(wrapper.html()).toContain('mdi-dots-vertical')
+    expect(wrapper.html()).not.toContain('mdi-cog')
     const btn = wrapper.find('button')
     expect(btn.attributes('aria-label')).toBe('Row actions')
     // The `.no-row-edit` marker lets a row-click handler ignore this button.

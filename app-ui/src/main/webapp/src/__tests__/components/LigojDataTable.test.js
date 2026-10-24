@@ -23,15 +23,16 @@ function mountTable(props = {}) {
 }
 
 describe('LigojDataTable', () => {
-  it('renders the underlying v-data-table with the cogs tools menu', () => {
+  it('renders the underlying v-data-table with the tools menu', () => {
     const wrapper = mountTable()
     expect(wrapper.find('.v-table').exists()).toBe(true)
-    expect(wrapper.html()).toContain('mdi-cog')
+    expect(wrapper.html()).toContain('mdi-dots-vertical')
+    expect(wrapper.html()).not.toContain('mdi-cog')
   })
 
   it('hides the tools menu when tools=false', () => {
     const wrapper = mountTable({ tools: false })
-    expect(wrapper.html()).not.toContain('mdi-cog')
+    expect(wrapper.html()).not.toContain('mdi-dots-vertical')
   })
 
   it('exportCsv triggers a download through the exposed method', async () => {

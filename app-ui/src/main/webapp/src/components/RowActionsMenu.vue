@@ -42,10 +42,10 @@
 
 <script setup>
 /**
- * RowActionsMenu — the standard per-row actions cog for Ligoj tables.
+ * RowActionsMenu — the standard per-row actions menu for Ligoj tables.
  *
  * Groups every row action (edit / duplicate / delete / …) behind a single
- * cog, mirroring the header TableToolsMenu so a table reads as one system.
+ * vertical dots button, mirroring the header TableToolsMenu so a table reads as one system.
  * Pass an `actions` array and handle `select` with the chosen action key:
  *
  *   <RowActionsMenu
@@ -57,12 +57,12 @@
  *   />
  *
  * The activator carries `.no-row-edit` + `@click.stop` so a table wired
- * with `@click:row` (row-click-to-edit) does not fire when the cog is used.
+ * with `@click:row` (row-click-to-edit) does not fire when the menu is used.
  */
 defineProps({
   /** [{ key, title, icon, color?, disabled?, chip?: [{ icon, text }], chipTooltip? }] */
   actions: { type: Array, default: () => [] },
-  icon:    { type: String, default: 'mdi-cog' },
+  icon:    { type: String, default: 'mdi-dots-vertical' },
   label:   { type: String, default: 'Actions' },
 })
 defineEmits(['select'])

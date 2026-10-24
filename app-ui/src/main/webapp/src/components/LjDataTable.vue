@@ -12,7 +12,7 @@
   follows the active Vuetify preset (light/dark), per the rule.
 
   Cells render through #cell.<key> slots (fallback: raw value); the trailing
-  gear column renders through the #actions slot. The header tools cog exposes a
+  gear column renders through the #actions slot. The header tools menu exposes a
   #tools-extra slot to append caller actions (buttons) after a divider, below
   the built-in Export CSV / Copy to clipboard. Header cells can opt into an mdi
   icon via header.icon and a hover tooltip via header.tooltip (use the tooltip
@@ -47,7 +47,7 @@
               </span>
             </th>
             <!-- Trailing gear column: hosts the per-row #actions cells, and
-                 (when tools=true) the table tools cog in its header — Export
+                 (when tools=true) the table tools menu in its header — Export
                  as CSV / Copy to clipboard, the equivalent of
                  LigojDataTableServer's TableToolsMenu. -->
             <th v-if="showGearCol" class="end gear-col">
@@ -55,7 +55,7 @@
                 <template #activator="{ props: act }">
                   <button class="lj-iconbtn" v-bind="act" :aria-label="t('common.tableTools') || 'Table tools'" @click.stop>
                     <v-progress-circular v-if="exporting || copying" size="15" width="2" indeterminate />
-                    <v-icon v-else size="18">mdi-cog</v-icon>
+                    <v-icon v-else size="18">mdi-dots-vertical</v-icon>
                   </button>
                 </template>
                 <div class="lj-popmenu">
@@ -143,7 +143,7 @@ const props = defineProps({
   defaultOrder: { type: String, default: 'asc' },
   perPageOptions: { type: Array, default: () => [10, 25, 50, 100] },
   emptyText: { type: String, default: '' },
-  /* Table tools (Export CSV / Copy to clipboard) cog in the trailing
+  /* Table tools (Export CSV / Copy to clipboard) menu in the trailing
      header — on by default, same contract as LigojDataTableServer. */
   tools: { type: Boolean, default: true },
   filename: { type: String, default: 'table.csv' },
@@ -159,7 +159,7 @@ const t = i18n.t
 const slots = useSlots()
 
 /* The trailing gear column appears when the caller renders per-row actions
-   OR the tools cog is enabled. */
+   OR the tools menu is enabled. */
 const showGearCol = computed(() => !!slots.actions || props.tools)
 
 /* Export / Copy.
@@ -425,7 +425,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .cbx.on::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translateY(-1px); }
 
 .gear-col { width: 88px; white-space: nowrap; }
-/* Tools cog sits flush-right in the gear-column header, aligned over the
+/* Tools menu sits flush-right in the gear-column header, aligned over the
    per-row action buttons below it. */
 thead th.gear-col { text-align: right; padding-top: 8px; padding-bottom: 8px; }
 thead th.gear-col .lj-iconbtn { display: inline-grid; }
