@@ -13,7 +13,7 @@
   audited role/user to the dialog title.
 -->
 <template>
-  <LjDialog :model-value="modelValue" :title="dialogTitle" icon="mdi-shield-search" :max-width="920" @update:model-value="(v) => emit('update:modelValue', v)">
+  <LjDialog :model-value="modelValue" :title="dialogTitle" icon="mdi-shield-search" :max-width="1200" @update:model-value="(v) => emit('update:modelValue', v)">
     <v-progress-linear v-if="specLoading" indeterminate color="primary" class="mb-4" />
     <v-alert v-else-if="specError" type="warning" variant="tonal" density="compact">{{ specError }}</v-alert>
     <template v-else-if="spec">
@@ -43,8 +43,14 @@
         <template #cell.path="{ item }">
           <code class="vpath">{{ item.path }}<v-tooltip activator="parent" location="top" :text="t('profile.apiVerifyRowTooltip')" /></code>
         </template>
+        <!-- The cut summary in full, with the description when there is one -->
         <template #cell.summary="{ item }">
-          <span class="vsum">{{ item.summary }}<v-tooltip v-if="item.description" activator="parent" location="top" max-width="460" :text="item.description" /></span>
+          <span class="vsum">{{ item.summary }}<v-tooltip v-if="item.summary || item.description" activator="parent" location="top" max-width="460">
+            <div class="vsum-tip">
+              <strong v-if="item.summary">{{ item.summary }}</strong>
+              <div v-if="item.description && item.description !== item.summary">{{ item.description }}</div>
+            </div>
+          </v-tooltip></span>
         </template>
         <template #cell.allowed="{ item }">
           <LjStatus :status="item.allowed ? 'ok' : 'error'" :tooltip="item.allowed ? t('profile.apiVerifyStatusAllowed') : t('profile.apiVerifyStatusDenied')" />
@@ -212,7 +218,8 @@ const urlAllowed = computed(() => urlAllowedMethods.value.length > 0)
 const verifyHeaders = computed(() => [
   { key: 'method', label: t('profile.apiVerifyMethod'), sortable: true, width: '96px' },
   { key: 'path', label: t('profile.apiVerifyPath'), sortable: true },
-  { key: 'summary', label: t('profile.apiVerifyDesc'), sortable: false },
+  // The room left by the other columns: the description is cut first, never the table scrolled
+  { key: 'summary', label: t('profile.apiVerifyDesc'), sortable: false, width: '100%' },
   { key: 'allowed', label: t('profile.apiVerifyStatus'), sortable: true, align: 'center', width: '84px' },
 ])
 
@@ -290,13 +297,20 @@ function openApiExplorer(item) {
 }
 
 .vsum {
-  display: inline-block;
-  max-width: 340px;
+  /* No width of its own: the cell gives it the room left, see the column width */
+  display: block;
+  width: 0;
+  min-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12.5px;
   color: var(--ink-3, rgba(var(--v-theme-on-surface), .6));
   vertical-align: middle;
+}
+
+.vsum-tip > div {
+  margin-top: 4px;
+  white-space: pre-line;
 }
 </style>

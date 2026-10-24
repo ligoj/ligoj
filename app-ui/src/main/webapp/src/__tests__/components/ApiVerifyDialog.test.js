@@ -26,7 +26,9 @@ const AUTHS = [{ method: 'GET', pattern: '^rest/project(/.*)?$' }]
 
 const stubs = {
   // Avoid the v-dialog teleport: render slots inline.
-  LjDialog: { props: ['modelValue', 'title'], template: '<div class="dlg" :data-title="title"><slot /><slot name="footer" /></div>' },
+  LjDialog: { props: ['modelValue', 'title', 'maxWidth'], template: '<div class="dlg" :data-title="title" :data-width="maxWidth"><slot /><slot name="footer" /></div>' },
+  // The tooltip content inline, its text prop or its slot
+  'v-tooltip': { props: ['text'], template: '<div class="tt" :data-text="text"><slot /></div>' },
 }
 
 function mountDialog(props = {}) {
@@ -102,5 +104,19 @@ describe('<ApiVerifyDialog />', () => {
     expect(w.find('.verify-feedback').classes()).toContain('ok')
     expect(w.findAll('.vpath').length).toBe(0)
     expect(w.find('.v-alert').text()).toBeTruthy()
+  })
+
+  it('is wide enough for its four columns', async () => {
+    const w = mountDialog()
+    await flushPromises()
+    expect(Number(w.find('.dlg').attributes('data-width'))).toBe(1200)
+  })
+
+  it('shows the whole summary of each description cell in a tooltip, with the description when there is one', async () => {
+    const w = mountDialog()
+    await flushPromises()
+    const tips = w.findAll('.vsum .tt').map((tt) => tt.findAll('.vsum-tip > *').map((e) => e.text()))
+    // Sorted by path, then method: DELETE then GET of /project/{id}, then the POST of the role
+    expect(tips).toEqual([['Delete a project'], ['Get a project', 'Full detail'], ['Create a role']])
   })
 })
