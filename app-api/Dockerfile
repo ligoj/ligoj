@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1.7
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
-ARG JAVA_VERSION="25"
+ARG JAVA_IMAGE="eclipse-temurin"
+ARG JAVA_VERSION="25.0.5_8"
 ARG MAVEN_VERSION="3.9.16-amazoncorretto-25-debian-trixie"
 
 # ---------- Build stage ----------
@@ -70,8 +71,8 @@ RUN if [ -f plugin-vendors/plugin-vendors-default.p12 ]; then \
     fi
 
 # ---------- Runtime stage ----------
-FROM --platform=${TARGETPLATFORM} eclipse-temurin:${JAVA_VERSION}-jre AS runtime
-ARG VERSION="4.0.1-SNAPSHOT"
+FROM --platform=${TARGETPLATFORM} ${JAVA_IMAGE}:${JAVA_VERSION}-jre AS runtime
+ARG VERSION="5.0.2-SNAPSHOT"
 ARG ARTIFACT_ID="app-api"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG GIT_COMMIT=0

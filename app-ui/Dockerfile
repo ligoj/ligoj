@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
-ARG JAVA_VERSION="25"
+ARG JAVA_VERSION="25.0.5_8"
 ARG JAVA_IMAGE="eclipse-temurin"
 ARG NODE_VERSION="26-bookworm-slim"
 ARG MAVEN_VERSION="3.9.16-amazoncorretto-25-debian-trixie"
@@ -69,7 +69,7 @@ RUN --mount=type=cache,target=/root/.m2/repository,sharing=locked \
 
 # ---------- Runtime stage ----------
 FROM --platform=${TARGETPLATFORM} ${JAVA_IMAGE}:${JAVA_VERSION}-jre AS runtime
-ARG VERSION="4.0.1-SNAPSHOT"
+ARG VERSION="5.0.2-SNAPSHOT"
 ARG ARTIFACT_ID="app-ui"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG GIT_COMMIT=0
