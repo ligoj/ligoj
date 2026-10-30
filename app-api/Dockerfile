@@ -92,7 +92,7 @@ LABEL org.opencontainers.image.title="Ligoj API server" \
 
 # curl: HEALTHCHECK probe. tini: PID 1, reaps zombies and forwards SIGTERM to the JVM.
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl tini && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl tini && \
     rm -rf /var/lib/apt/lists/*
 
 # Non-root runtime user.

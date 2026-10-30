@@ -13,7 +13,7 @@ WORKDIR /build/src/main/webapp
 # Install deps first for layer-cache reuse on source-only changes.
 COPY src/main/webapp/package.json src/main/webapp/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --no-audit --no-fund
+    npm ci --no-audit --no-fund --no-update-notifier
 
 COPY src/main/webapp/ ./
 # Build with a placeholder base (VITE_BASE) so the SPA is NOT bound to a
@@ -91,7 +91,7 @@ LABEL org.opencontainers.image.title="Ligoj UI server" \
 # unzip: explode the war at image build so the SPA's placeholder base can be
 # substituted with the runtime CONTEXT_URL at container start.
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl tini unzip && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl tini unzip && \
     rm -rf /var/lib/apt/lists/*
 
 # Non-root runtime user.
