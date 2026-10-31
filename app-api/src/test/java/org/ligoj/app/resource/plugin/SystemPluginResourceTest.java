@@ -722,6 +722,8 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 	void configurePluginUpdate() {
 		final var service1 = new SampleService();
 		final var plugin = new SystemPlugin();
+		plugin.setKey(service1.getKey());
+		plugin.setType("FEATURE");
 		plugin.setVersion("old version");
 		resource.configurePluginUpdate(service1, plugin);
 		Assertions.assertTrue(plugin.getVersion().matches("\\d{4}-\\d{2}-\\d{2}T.*"));
@@ -732,6 +734,8 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		final var service1 = mock(SampleService.class);
 		Mockito.doThrow(new RuntimeException()).when(service1).getInstalledEntities();
 		final var plugin = new SystemPlugin();
+		plugin.setKey("service:sample");
+		plugin.setType("FEATURE");
 
 		// No error expected
 		resource.configurePluginUpdate(service1, plugin);
@@ -800,6 +804,44 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		} finally {
 			destroySingleton("mockPluginListener");
 		}
+	}
+
+	@Test
+	void refreshPluginsUpdateAfterCsv() throws Exception {
+		// The CSV of the first plugin clears the persistence context: the next plugin must not lose its new version
+		final var csvPlugin = applicationContext.getBean(InitializeRbacDataResource.class).getKey();
+		final var nextPlugin = new SampleService().getKey();
+		Assertions.assertTrue(csvPlugin.compareTo(nextPlugin) < 0);
+		saveOldSystemPlugin(csvPlugin);
+		saveOldSystemPlugin(nextPlugin);
+		em.flush();
+		em.clear();
+
+		final var event = mock(ContextRefreshedEvent.class);
+		when(event.getApplicationContext()).thenReturn(applicationContext);
+		registerSingleton("sampleService", new SampleService() {
+			@Override
+			public String getVersion() {
+				return "1.1";
+			}
+		});
+		try {
+			resource.refreshPlugins(event);
+			em.flush();
+			em.clear();
+			Assertions.assertNotEquals("0", repository.findByExpected("key", csvPlugin).getVersion());
+			Assertions.assertEquals("1.1", repository.findByExpected("key", nextPlugin).getVersion());
+		} finally {
+			destroySingleton("sampleService");
+		}
+	}
+
+	private void saveOldSystemPlugin(final String key) {
+		final var plugin = Optional.ofNullable(repository.findBy("key", key)).orElseGet(SystemPlugin::new);
+		plugin.setKey(key);
+		plugin.setVersion("0");
+		plugin.setType("FEATURE");
+		repository.save(plugin);
 	}
 
 	@Test
@@ -1556,7 +1598,8 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 		// The RBAC data are configured again at each upgrade: only the missing authorizations are added
 		final var plugin = applicationContext.getBean(InitializeRbacDataResource.class);
 		final var entity = new SystemPlugin();
-		entity.setKey(plugin.getKey());
+		entity.setKey(plugin.getKey() + ":update");
+		entity.setType("FEATURE");
 		entity.setVersion("0");
 		resource.configurePluginUpdate(plugin, entity);
 		resource.configurePluginUpdate(plugin, entity);

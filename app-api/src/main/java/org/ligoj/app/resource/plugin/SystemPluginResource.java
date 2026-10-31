@@ -1016,9 +1016,9 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 	/**
 	 * Configure the updated plugin in this order :
 	 * <ul>
+	 * <li>The entity {@link SystemPlugin} is updated to reflect the new version.</li>
 	 * <li>The required entities for the plugin are persisted. These entities are discovered from
 	 * {@link FeaturePlugin#getInstalledEntities()} and related CSV files are load in the database.</li>
-	 * <li>The entity {@link SystemPlugin} is updated to reflect the new version.</li>
 	 * </ul>
 	 *
 	 * @param plugin The newly updated plugin.
@@ -1029,6 +1029,9 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 		log.info("Updating the plugin {} v{} -> v{}", plugin.getKey(), entity.getVersion(), newVersion);
 		entity.setVersion(newVersion);
 		entity.setBasePackage(plugin.getClass().getPackageName());
+
+		// Explicit save: loading a CSV clears the persistence context, the entity of this plugin may be already detached
+		repository.saveAndFlush(entity);
 
 		// Configure the plugin entities even for already install plugins
 		try {
