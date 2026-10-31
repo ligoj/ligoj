@@ -86,7 +86,7 @@
             <td :colspan="colCount">
               <div class="empty">
                 <span class="empty-ic"><v-icon size="30">mdi-database-off-outline</v-icon></span>
-                <p>{{ emptyText || (t('common.noData') || 'Aucune donnée') }}</p>
+                <p>{{ emptyText || (t('common.noData')) }}</p>
               </div>
             </td>
           </tr>
@@ -119,7 +119,7 @@
       </span>
       <span class="pg-range">{{ rangeLabel }}</span>
       <span class="pg-nav">
-        <button class="iconbtn" :disabled="page <= 1" :title="t('common.previous') || 'Précédent'" @click="goTo(page - 1)"><v-icon size="18">mdi-chevron-left</v-icon></button>
+        <button class="iconbtn" :disabled="page <= 1" :title="t('common.previous')" @click="goTo(page - 1)"><v-icon size="18">mdi-chevron-left</v-icon></button>
         <button class="iconbtn" :disabled="page >= pageCount" :title="t('common.next') || 'Suivant'" @click="goTo(page + 1)"><v-icon size="18">mdi-chevron-right</v-icon></button>
       </span>
     </div>

@@ -3,7 +3,7 @@
     <header class="hero">
       <div class="hero-avatar">{{ initials }}</div>
       <div class="hero-id">
-        <h1>{{ auth.userName || 'invité' }}</h1>
+        <h1>{{ auth.userName || t('common.guest') }}</h1>
         <p>{{ t('profile.title') }}</p>
         <div class="hero-roles">
           <span v-if="auth.isAdmin" class="rolechip rolechip--admin"><v-icon size="13">mdi-shield-account</v-icon>{{ t('profile.administrator') }}<v-tooltip activator="parent" location="top" :text="t('profile.adminTooltip')" /></span>

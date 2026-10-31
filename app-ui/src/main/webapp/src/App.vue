@@ -25,7 +25,7 @@
           <a class="nav-item" :class="{ active: isNavActive(it), 'has-children': it.children }" :href="navHref(it)" @click="onNavClick(it, $event)">
             <v-icon>{{ it.icon }}</v-icon>
             <span>{{ it.label }}</span>
-            <span v-if="it.soon" class="soon">bientôt</span>
+            <span v-if="it.soon" class="soon">{{ i18n.t('nav.soon') }}</span>
             <v-icon v-if="it.children" class="nav-caret" :class="{ open: isOpen(it) }" size="18">mdi-chevron-down</v-icon>
           </a>
           <!-- Sub-menu (e.g. Identité → Utilisateurs / Groupes / …); expand
@@ -37,7 +37,7 @@
                 <LigojIcon v-if="c.icon" :icon="c.icon" size="16" />
                 <span v-else class="dot" />
                 <span>{{ c.label }}</span>
-                <span v-if="c.soon" class="soon">bientôt</span>
+                <span v-if="c.soon" class="soon">{{ i18n.t('nav.soon') }}</span>
               </a>
             </template>
           </div>
@@ -66,7 +66,7 @@
           </span>
         </template>
       </nav>
-      <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" title="Rafraîchir" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
+      <button v-if="app.refresh" class="icon-btn refresh-btn" :class="{ spin: refreshing }" :title="i18n.t('nav.refresh')" @click="onRefresh"><v-icon>mdi-refresh</v-icon></button>
       <span class="sp" />
       <!-- Plugin-contributed app-bar items (app.registerNavbarItem), e.g. the
            plug-in updates indicator of plugin-ui. -->
@@ -81,7 +81,7 @@
            plugins incompatible with this host: a click opens the warning's link. -->
       <SessionWarningChips :warnings="sessionWarnings" @select="(w) => go(codedWarningLink(w))" />
       <button class="user" :class="{ admin: auth.isAdmin }" @click="go('/profile')"><v-icon size="small" :color="auth.isAdmin ? 'secondary' : undefined">{{ auth.isAdmin ? 'mdi-shield-account' :
-          'mdi-account' }}</v-icon>{{ auth.displayName || 'invité' }}
+          'mdi-account' }}</v-icon>{{ auth.displayName || i18n.t('common.guest') }}
         <!-- Identity card tooltip: full name, login, mails, custom attributes,
              roles and the administrator mention (see auth.displayName for the
              `service:id:user-display` driven button label). -->
@@ -93,7 +93,7 @@
           </div>
         </v-tooltip>
       </button>
-      <button class="icon-btn" title="Se déconnecter" @click="logout"><v-icon>mdi-logout</v-icon></button>
+      <button class="icon-btn" :title="i18n.t('nav.logout')" @click="logout"><v-icon>mdi-logout</v-icon></button>
     </header>
 
     <main class="main"><router-view /></main>
@@ -114,6 +114,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import { useAppStore } from '@/stores/app.js'
 import { useI18nStore } from '@/stores/i18n.js'
+import { pageTitleKey } from '@/utils/pageTitle.js'
 import { loadAllPlugins, pluginIdFromKey } from '@/plugins/loader.js'
 import registry from '@/plugins/registry.js'
 import { mergeNav } from '@/plugins/nav.js'
@@ -328,30 +329,7 @@ const NAV = computed(() => {
 })
 
 const collapsed = ref(false)
-const title = computed(() => {
-  if (route.path === '/profile') return 'Profil'
-  if (route.path.startsWith('/id/group')) return 'Groupes'
-  if (route.path.startsWith('/id/company')) return 'Entités'
-  if (route.path.startsWith('/id/delegate')) return 'Délégués'
-  if (route.path.startsWith('/id/scope')) return 'Portées'
-  if (route.path.startsWith('/id')) return 'Utilisateurs'
-  if (route.path.startsWith('/project')) return 'Projets'
-  if (route.path.startsWith('/system/plugin')) return 'Plugins'
-  if (route.path.startsWith('/system/node')) return 'Nœuds'
-  if (route.path.startsWith('/system/configuration')) return 'Configuration'
-  if (route.path.startsWith('/system/hook')) return 'Hooks'
-  if (route.path.startsWith('/system/role')) return 'Rôles'
-  if (route.path.startsWith('/system/user')) return 'Utilisateurs système'
-  if (route.path.startsWith('/system/cache')) return 'Cache'
-  if (route.path.startsWith('/system/bench')) return 'Bench'
-  if (route.path.startsWith('/system/task')) return 'Tâches'
-  if (route.path.startsWith('/system/information')) return 'Information'
-  if (route.path.startsWith('/system')) return 'Administration'
-  if (route.path.startsWith('/api/token')) return 'Jetons d\'API'
-  if (route.path.startsWith('/api')) return 'API'
-  if (route.path.startsWith('/about')) return 'À propos'
-  return 'Accueil'
-})
+const title = computed(() => i18n.t(pageTitleKey(route.path)))
 function isNavActive(it) {
   return it.match ? route.path.startsWith(it.match) : it.route === route.path
 }
@@ -462,7 +440,7 @@ function logout() {
 
 let toastT
 const toastMsg = ref('')
-function toast(msg = 'Page à venir dans la refonte') {
+function toast(msg = i18n.t('nav.comingSoon')) {
   toastMsg.value = msg
   clearTimeout(toastT)
   toastT = setTimeout(() => (toastMsg.value = ''), 2200)

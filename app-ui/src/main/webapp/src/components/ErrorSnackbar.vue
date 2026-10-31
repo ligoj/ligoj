@@ -16,11 +16,11 @@
           <div v-if="e.title" class="s-title">{{ e.title }}</div>
           <div class="s-msg">{{ e.message }}</div>
           <button v-if="e.details" class="s-more" @click="toggle(e.id)">
-            <v-icon size="14" :class="{ open: open.has(e.id) }">mdi-chevron-down</v-icon>{{ t('common.detailsToggle') || 'Détails' }}
+            <v-icon size="14" :class="{ open: open.has(e.id) }">mdi-chevron-down</v-icon>{{ t('common.detailsToggle') }}
           </button>
           <pre v-if="e.details && open.has(e.id)" class="s-details">{{ e.details }}</pre>
         </div>
-        <button class="s-x" :title="t('common.dismiss') || 'Fermer'" @click="errorStore.dismiss(e.id)"><v-icon size="16">mdi-close</v-icon></button>
+        <button class="s-x" :title="t('common.dismiss')" @click="errorStore.dismiss(e.id)"><v-icon size="16">mdi-close</v-icon></button>
       </div>
     </transition-group>
   </div>
