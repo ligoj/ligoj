@@ -52,6 +52,12 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 	 * Static assets
 	 */
 	public static final Pattern WHITE_LIST_ASSETS = Pattern.compile("/(favicon.ico|logout|(themes|lib|dist|main/public|assets)/.*)");
+
+	/**
+	 * Health of the API, proxied by the {@code /manage/*} servlet: lets a load balancer check the UI and the API at once.
+	 */
+	public static final String API_HEALTH_PATH = "/manage/health";
+
 	/**
 	 * Only there because of visibility of "principalRequestHeader" of {@link RequestHeaderAuthenticationFilter}
 	 */
@@ -94,6 +100,8 @@ public class SilentRequestHeaderAuthenticationFilter extends RequestHeaderAuthen
 
 	private boolean isAllowed(HttpServletRequest req) {
 		return whiteListPages.matcher(req.getServletPath()).matches() || WHITE_LIST_ASSETS.matcher(req.getServletPath()).matches()
+				// The servlet path of a proxied request stops at the mapping: the end of the path is in the path info
+				|| API_HEALTH_PATH.equals(req.getServletPath() + req.getPathInfo())
 				|| (req.getServletPath().startsWith("/rest") && isAuthDatPresent(req, "api-key") && isAuthDatPresent(req, "api-user"));
 	}
 

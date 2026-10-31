@@ -37,6 +37,33 @@ class SilentRequestHeaderAuthenticationFilterTest {
 	}
 
 	@Test
+	void doFilterApiHealth() throws IOException, ServletException {
+		final var filter = newFilter();
+		final var request = mock(HttpServletRequest.class);
+		doReturn("/context/manage/health").when(request).getRequestURI();
+		doReturn("/manage").when(request).getServletPath();
+		doReturn("/health").when(request).getPathInfo();
+		final var response = mock(HttpServletResponse.class);
+		final var chain = mock(FilterChain.class);
+		filter.doFilter(request, response, chain);
+		verify(chain).doFilter(request, response);
+	}
+
+	@Test
+	void doFilterOtherManageNoPrincipal() throws IOException, ServletException {
+		final var filter = new SilentRequestHeaderAuthenticationFilter();
+		final var request = mock(HttpServletRequest.class);
+		doReturn("/context/manage/env").when(request).getRequestURI();
+		doReturn("/manage").when(request).getServletPath();
+		doReturn("/env").when(request).getPathInfo();
+		final var response = mock(HttpServletResponse.class);
+		final var chain = mock(FilterChain.class);
+		filter.doFilter(request, response, chain);
+		verify(chain, never()).doFilter(request, response);
+		verify(response).sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
+	}
+
+	@Test
 	void doFilterRestNoPrincipal() throws IOException, ServletException {
 		final var filter = new SilentRequestHeaderAuthenticationFilter();
 		final var request = mock(HttpServletRequest.class);

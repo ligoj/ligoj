@@ -208,6 +208,7 @@ public class SecurityConfiguration {
 				// Public static resources
 				RegexRequestMatcher.regexMatcher(HttpMethod.GET, getWhiteListPages().pattern()),
 				RegexRequestMatcher.regexMatcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.WHITE_LIST_ASSETS.pattern()),
+				matcher.matcher(HttpMethod.GET, SilentRequestHeaderAuthenticationFilter.API_HEALTH_PATH),
 				matcher.matcher("/rest/redirect"), matcher.matcher("/rest/security/login"), matcher.matcher("/captcha.png")).permitAll()
 				.requestMatchers(matcher.matcher("/rest/service/password/reset/**"), matcher.matcher("/rest/service/password/recovery/**")).anonymous()
 
