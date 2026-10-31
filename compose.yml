@@ -37,6 +37,8 @@ services:
       JAVA_OPTIONS: ${LIGOJ_API_JAVA_OPTIONS:--Duser.timezone=UTC}
       CRYPTO: ${LIGOJ_API_CRYPTO:--Dapp.crypto.password=public}
       PREPARE_RUN: ${LIGOJ_API_PREPARE_RUN:-echo "No PREPARE_RUN"}
+      # The UI reaches the API through the compose network, which publishes no API port
+      SERVER_HOST: ${LIGOJ_API_SERVER_HOST:-0.0.0.0}
     depends_on:
       db:
         condition: service_healthy

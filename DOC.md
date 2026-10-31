@@ -935,8 +935,9 @@ Plug-ins are added to the application class loader during startup in natural str
 All plug-ins are autowired and instantiated at the same time, but the initial data and exports follow the natural order.
 "plugin-service-tool" plugin is implicitly depending on "plugin-service"
 
-This implicit dependency can also be found in the `pom.xml` file. For now, the plugin manager does not use the Maven configuration to direct the loading order or to check during the deployment of a
-new plugin. So the administrative user must ensure that when the plugin `plugin-service-tool` is installed, `plugin-service` is installed too.
+This dependency is declared in the `pom.xml` file embedded in each plugin jar, as a `provided` dependency named `plugin-*`. The plugin manager does not use it to direct the loading order or to install the parent plugin. So the administrative user must ensure that when the plugin `plugin-service-tool` is installed, `plugin-service` is installed too.
+
+At startup, a plugin whose parent is missing stays out of the classpath, like the plugins depending on it. An error names the missing plugins, and the API starts with the others. Install the parent and restart to load them. A parent embedded in the application counts as installed. Set `-Dligoj.plugin.dependency.check=false` when a parent has no Maven descriptor, such as a module opened in an IDE.
 
 The same logic applies to the update process. Do not update `plugin-service-tool` without doing the same for `plugin-service-tool`. This limitation will be fixed
 with [#1](https://github.com/ligoj/ligoj/issues/1)
@@ -1945,6 +1946,7 @@ xdg-open http://localhost:8080/ligoj 2>/dev/null || true
 | LIGOJ_VERSION          | app-*   | BUILD | (version of application)              |                                                                                                                              |
 | LIGOJ_WEB_PORT         | web     | RUN   | `8080`                                | Internal WEB port                                                                                                            |
 | LIGOJ_PORT             | web     | RUN   | `8080`                                | Exposed port                                                                                                                 |
+| LIGOJ_API_SERVER_HOST  | api     | RUN   | `0.0.0.0`                             | Bind address of the API inside the compose network. The UI container needs it reachable. |
 | LIGOJ_API_JAVA_OPTIONS | api     | RUN   | `-Duser.timezone=UTC`                 |                                                                                                                              |
 | LIGOJ_WEB_JAVA_OPTIONS | web     | RUN   | `-Duser.timezone=UTC -Dsecurity=Rest` |                                                                                                                              |
 | LIGOJ_API_CRYPTO       | api     | RUN   | `-Dapp.crypto.password=public`        | Double encryption feature                                                                                                    |
