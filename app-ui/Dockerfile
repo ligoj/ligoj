@@ -73,6 +73,11 @@ ARG VERSION="5.0.2-SNAPSHOT"
 ARG ARTIFACT_ID="app-ui"
 ARG SERVER_HOME="/usr/local/ligoj"
 ARG GIT_COMMIT=0
+# Opt-in: launch the exploded war on a flat classpath, without the nested jars
+# loader of Spring Boot, for a faster startup. The classpath order and the main
+# class come from the war itself, in a java argument file.
+# Enable with: --build-arg FLAT_CLASSPATH=true
+ARG FLAT_CLASSPATH="false"
 
 LABEL org.opencontainers.image.title="Ligoj UI server" \
       org.opencontainers.image.description="The UI server of Ligoj." \
@@ -108,6 +113,11 @@ COPY --chown=ligoj:ligoj --from=builder /build/target/*.war ${ARTIFACT_ID}.war
 # runtime ${CONTEXT_URL} (impossible inside a zipped war).
 RUN unzip -q ${ARTIFACT_ID}.war -d app && \
     rm ${ARTIFACT_ID}.war && \
+    if [ "$FLAT_CLASSPATH" = "true" ]; then \
+      { printf '%s' '-cp WEB-INF/classes'; \
+        sed -n 's/^- "\(.*\)"/:\1/p' app/WEB-INF/classpath.idx | tr -d '\r\n'; echo; \
+        sed -n 's/^Start-Class: *//p' app/META-INF/MANIFEST.MF | tr -d '\r'; } > app/flat-classpath.args; \
+    fi && \
     chown -R ligoj:ligoj app
 # Dockerfile included as the guaranteed-existing placeholder for the optional globs.
 COPY --chown=ligoj:ligoj Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
@@ -147,6 +157,8 @@ CTX=\"${CONTEXT_URL%/}\" && \
 find app -maxdepth 2 -type f \\( -name '*.html' -o -name '*.js' -o -name '*.css' \\) \
   -exec sed -i \"s|/__ligoj_ctx__|${CTX}|g\" {} + && \
 cd app && \
+LAUNCH='-cp . org.springframework.boot.loader.launch.WarLauncher' && \
+{ [ ! -f flat-classpath.args ] || LAUNCH=@flat-classpath.args; } && \
 exec java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
   -Dligoj.endpoint=\"${ENDPOINT}\" \
   -Dserver.address=\"${SERVER_HOST}\" \
@@ -155,7 +167,7 @@ exec java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
   -Djavax.net.ssl.trustStorePassword=changeit \
   -Djava.net.preferIPv4Stack=true \
   -Dligoj.home=\"${LIGOJ_HOME}\" \
-  -cp . org.springframework.boot.loader.launch.WarLauncher"]
+  $LAUNCH"]
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=3 --start-period=5s \
   CMD curl --fail -s -o /dev/null "http://localhost:${SERVER_PORT}${CONTEXT_URL%/}/" || exit 1

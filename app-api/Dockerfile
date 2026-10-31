@@ -70,6 +70,24 @@ RUN if [ -f plugin-vendors/plugin-vendors-default.p12 ]; then \
       cp -f plugin-vendors/plugin-vendors-default.p12 plugin-vendors-default.p12; \
     fi
 
+# Opt-in: unpack the war and launch the application on a flat classpath, without
+# the nested jars loader of Spring Boot, for a faster startup. The classpath order
+# and the main class come from the war itself, in a java argument file. The classes
+# move to a jar with the manifest of the war, the source of the application version.
+# Enable with: --build-arg FLAT_CLASSPATH=true
+ARG ARTIFACT_ID="app-api"
+ARG FLAT_CLASSPATH="false"
+RUN mkdir dist && \
+    if [ "$FLAT_CLASSPATH" = "true" ]; then \
+      mkdir dist/app && cd dist/app && jar xf /build/target/*.war && \
+      jar cfm WEB-INF/classes.jar META-INF/MANIFEST.MF -C WEB-INF/classes . && rm -rf WEB-INF/classes && \
+      { printf '%s' '-cp WEB-INF/classes.jar'; \
+        sed -n 's/^- "\(.*\)"/:\1/p' WEB-INF/classpath.idx | tr -d '\r\n'; echo; \
+        sed -n 's/^Start-Class: *//p' META-INF/MANIFEST.MF | tr -d '\r'; } > flat-classpath.args; \
+    else \
+      cp target/*.war "dist/${ARTIFACT_ID}.war"; \
+    fi
+
 # ---------- Runtime stage ----------
 FROM --platform=${TARGETPLATFORM} ${JAVA_IMAGE}:${JAVA_VERSION}-jre AS runtime
 ARG VERSION="5.0.2-SNAPSHOT"
@@ -103,7 +121,8 @@ RUN groupadd --system --gid 1001 ligoj && \
 
 WORKDIR "${SERVER_HOME}"
 
-COPY --chown=ligoj:ligoj --from=builder /build/target/*.war ${ARTIFACT_ID}.war
+# Either the war, or its unpacked content in app/ with FLAT_CLASSPATH.
+COPY --chown=ligoj:ligoj --from=builder /build/dist/ ./
 # Dockerfile is included as a glob placeholder (same trick as the build stage).
 COPY --chown=ligoj:ligoj Dockerfile ./*prepare-run.sh ./*prepare-cmd.sh ./
 # Default plugin vendors truststore produced by prepare-build.sh from
@@ -169,6 +188,8 @@ mkdir -p \"$LIGOJ_HOME\" && \
   echo 'Bundled plugin-vendors.p12 installed into LIGOJ_HOME' || true; } && \
 { [ -f prepare-cmd.sh ] && chmod +x prepare-cmd.sh && . ./prepare-cmd.sh || \
   echo 'No prepare-cmd.sh; skipping custom startup.'; } && \
+LAUNCH=\"-jar ${ARTIFACT_ID}.war\" && \
+{ [ ! -f app/flat-classpath.args ] || { cd app && LAUNCH=@flat-classpath.args; }; } && \
 exec java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
   -Djava.security.policy=\"${SERVER_HOME}/ligoj.policy\" \
   -Dserver.address=\"${SERVER_HOST}\" \
@@ -177,7 +198,7 @@ exec java $JAVA_MEMORY $JAVA_OPTIONS $CRYPTO $CUSTOM_OPTS \
   -Djavax.net.ssl.trustStorePassword=changeit \
   -Djava.net.preferIPv4Stack=true \
   -Dligoj.home=\"${LIGOJ_HOME}\" \
-  -jar \"${ARTIFACT_ID}.war\""]
+  $LAUNCH"]
 
 HEALTHCHECK --interval=10s --timeout=2s --retries=5 --start-period=30s \
   CMD curl --fail-with-body -s "http://localhost:${SERVER_PORT}${CONTEXT_URL%/}/manage/health" || exit 1

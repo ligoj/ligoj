@@ -1954,6 +1954,7 @@ xdg-open http://localhost:8080/ligoj 2>/dev/null || true
 | LIGOJ_BUILD_PLATFORM   | app-*   | BUILD | `linux/amd64`                         | Docker build platform.                                                                                                       |
 | LIGOJ_TARGET_PLATFORM  | app-*   | BUILD | `linux/amd64`                         | Docker run platform.                                                                                                         |
 | MAVEN_INSECURE_TLS     | app-*   | BUILD | `false`                               | When `true`, disables Maven HTTPS cert + hostname validation. See [Building the Docker images](#building-the-docker-images). |
+| FLAT_CLASSPATH         | app-*   | BUILD | `false`                               | When `true`, the image launches the unpacked war on a flat classpath, without the nested jars loader, for a faster startup.  |
 | GIT_COMMIT             | app-*   | BUILD | `0`                                   | Captured from host git, embedded as `${buildNumber}` and the `git.commit` OCI label.                                         |
 | GIT_BRANCH             | app-*   | BUILD | `UNKNOWN_BRANCH`                      | Captured from host git, embedded as `${scmBranch}`.                                                                          |
 | GIT_COMMIT_TIME        | app-*   | BUILD | `1970-01-01T00:00:00Z`                | Captured from host git (ISO-8601), embedded as `${timestamp}`.                                                               |

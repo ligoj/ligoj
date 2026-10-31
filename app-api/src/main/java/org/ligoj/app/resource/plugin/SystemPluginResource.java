@@ -239,13 +239,14 @@ public class SystemPluginResource implements ISessionSettingsProvider {
 
 	/**
 	 * Indicate the location is inside the application itself: a jar nested in the WAR ({@code nested:} protocol of
-	 * Spring Boot, or any {@code !/} jar entry) or its own classes.
+	 * Spring Boot, or any {@code !/} jar entry), its own classes, or the same content of an unpacked WAR running on a
+	 * flat classpath ({@code /WEB-INF/} path).
 	 *
 	 * @param location The code source location of the plugin.
 	 * @return <code>true</code> when the plugin is loaded from the application, not from a plain file.
 	 */
 	static boolean isEmbeddedLocation(final String location) {
-		return location != null && (location.startsWith("nested:") || location.contains("!/"));
+		return location != null && (location.startsWith("nested:") || location.contains("!/") || location.contains("/WEB-INF/"));
 	}
 
 	/**

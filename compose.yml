@@ -14,6 +14,7 @@
 #   JAVA_VERSION         — Temurin JRE tag prefix (default: 25)
 #   MAVEN_VERSION        — Maven builder image tag
 #   MAVEN_INSECURE_TLS   — set to "true" to disable Maven HTTPS verification
+#   FLAT_CLASSPATH       — set to "true" to launch on a flat classpath, for a faster startup
 # =============================================================================
 services:
   api:
@@ -27,6 +28,7 @@ services:
         JAVA_VERSION: ${JAVA_VERSION:-25}
         MAVEN_VERSION: ${MAVEN_VERSION:-3.9.16-amazoncorretto-25-debian-trixie}
         MAVEN_INSECURE_TLS: ${MAVEN_INSECURE_TLS:-false}
+        FLAT_CLASSPATH: ${FLAT_CLASSPATH:-false}
         GIT_COMMIT: ${GIT_COMMIT:-0}
         GIT_BRANCH: ${GIT_BRANCH:-UNKNOWN_BRANCH}
         GIT_COMMIT_TIME: ${GIT_COMMIT_TIME:-1970-01-01T00:00:00Z}
@@ -59,6 +61,7 @@ services:
         NODE_VERSION: ${NODE_VERSION:-26-bookworm-slim}
         MAVEN_VERSION: ${MAVEN_VERSION:-3.9.16-amazoncorretto-25-debian-trixie}
         MAVEN_INSECURE_TLS: ${MAVEN_INSECURE_TLS:-false}
+        FLAT_CLASSPATH: ${FLAT_CLASSPATH:-false}
         GIT_COMMIT: ${GIT_COMMIT:-0}
         GIT_BRANCH: ${GIT_BRANCH:-UNKNOWN_BRANCH}
         GIT_COMMIT_TIME: ${GIT_COMMIT_TIME:-1970-01-01T00:00:00Z}

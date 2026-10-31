@@ -495,6 +495,19 @@ class SystemPluginResourceTest extends AbstractPluginTest {
 	}
 
 	/**
+	 * The application is either a WAR, or unpacked to run on a flat classpath: its jars and classes stay embedded.
+	 */
+	@Test
+	void isEmbeddedLocation() {
+		Assertions.assertTrue(SystemPluginResource.isEmbeddedLocation("nested:/usr/local/ligoj/app-api.war/!WEB-INF/lib/plugin-ui-5.0.8.jar!/"));
+		Assertions.assertTrue(SystemPluginResource.isEmbeddedLocation("/usr/local/ligoj/app-api.war!/lib/plugin-ui-5.0.8.jar"));
+		Assertions.assertTrue(SystemPluginResource.isEmbeddedLocation("/usr/local/ligoj/app/WEB-INF/lib/plugin-ui-5.0.8.jar"));
+		Assertions.assertTrue(SystemPluginResource.isEmbeddedLocation("/usr/local/ligoj/app/WEB-INF/classes.jar"));
+		Assertions.assertFalse(SystemPluginResource.isEmbeddedLocation("/home/ligoj/plugins/plugin-id-5.0.7.jar"));
+		Assertions.assertFalse(SystemPluginResource.isEmbeddedLocation(null));
+	}
+
+	/**
 	 * The same plug-in with a newer jar staged in the plug-ins directory: an update, not embedded anymore, not
 	 * deleted either although the nested location is not a file.
 	 */
