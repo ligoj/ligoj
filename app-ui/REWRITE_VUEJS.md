@@ -404,7 +404,7 @@ Used by `ProjectDetailView` and `HomeView` (plugin-ui `components/`):
 
 - Escape a literal `@` as `{'@'}` (linked-message syntax otherwise throws `Invalid linked format` and the whole bundle fails).
 - Only `t()` read reactively follows locale changes; derive strings in `computed`.
-- A missing key is echoed back, not `null`: use `tOrNull`.
+- A missing key is echoed back, not `null`: use `tOrNull`. So `t(key) || 'text'` never shows its text: no fallback, the key goes in `en.js` and `fr.js`. Each UI package's `__tests__/no-hardcoded-french.test.js` rejects these fallbacks and French outside the catalogs; the login pages keep their own EN/FR dictionaries.
 - Dynamically built keys (`t('subscription.status.' + s)`) escape a static scan; grep prefixes before deleting keys.
 
 ## Backend interop

@@ -53,14 +53,14 @@
             <th v-if="showGearCol" class="end gear-col">
               <v-menu v-if="tools" location="bottom end">
                 <template #activator="{ props: act }">
-                  <button class="lj-iconbtn" v-bind="act" :aria-label="t('common.tableTools') || 'Table tools'" @click.stop>
+                  <button class="lj-iconbtn" v-bind="act" :aria-label="t('common.tableTools')" @click.stop>
                     <v-progress-circular v-if="exporting || copying" size="15" width="2" indeterminate />
                     <v-icon v-else size="18">mdi-dots-vertical</v-icon>
                   </button>
                 </template>
                 <div class="lj-popmenu">
-                  <button :disabled="exporting || copying" @click="exportCsv"><v-icon size="18">mdi-file-download-outline</v-icon>{{ t('common.exportCsv') || t('common.export') || 'Export CSV' }}</button>
-                  <button :disabled="exporting || copying" @click="copyToClipboard"><v-icon size="18">mdi-content-copy</v-icon>{{ t('common.copyClipboard') || 'Copy to clipboard' }}</button>
+                  <button :disabled="exporting || copying" @click="exportCsv"><v-icon size="18">mdi-file-download-outline</v-icon>{{ t('common.exportCsv') || t('common.export') }}</button>
+                  <button :disabled="exporting || copying" @click="copyToClipboard"><v-icon size="18">mdi-content-copy</v-icon>{{ t('common.copyClipboard') }}</button>
                   <!-- Caller-supplied tools (e.g. a status refresh), separated
                        from the built-in Export/Copy actions by a divider. -->
                   <template v-if="slots['tools-extra']">
@@ -110,7 +110,7 @@
 
     <div class="pg">
       <span class="pg-rows">
-        {{ t('common.rows') || 'Lignes' }} :
+        {{ t('common.rows') }} :
         <span class="pp-sel">
           <select :value="itemsPerPage" @change="onPerPage($event.target.value)">
             <option v-for="n in perPageOptions" :key="n" :value="n">{{ n }}</option>
@@ -120,7 +120,7 @@
       <span class="pg-range">{{ rangeLabel }}</span>
       <span class="pg-nav">
         <button class="iconbtn" :disabled="page <= 1" :title="t('common.previous')" @click="goTo(page - 1)"><v-icon size="18">mdi-chevron-left</v-icon></button>
-        <button class="iconbtn" :disabled="page >= pageCount" :title="t('common.next') || 'Suivant'" @click="goTo(page + 1)"><v-icon size="18">mdi-chevron-right</v-icon></button>
+        <button class="iconbtn" :disabled="page >= pageCount" :title="t('common.next')" @click="goTo(page + 1)"><v-icon size="18">mdi-chevron-right</v-icon></button>
       </span>
     </div>
   </div>
@@ -251,10 +251,10 @@ const pageCount = computed(() => Math.max(1, Math.ceil((props.itemsLength || 0) 
 
 const rangeLabel = computed(() => {
   const total = props.itemsLength || 0
-  if (!total) return `0 ${t('common.of') || 'sur'} 0`
+  if (!total) return `0 ${t('common.of')} 0`
   const from = (page.value - 1) * itemsPerPage.value + 1
   const to = Math.min(page.value * itemsPerPage.value, total)
-  return `${from}–${to} ${t('common.of') || 'sur'} ${total.toLocaleString()}`
+  return `${from}–${to} ${t('common.of')} ${total.toLocaleString()}`
 })
 
 function emitOptions() {

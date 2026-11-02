@@ -6,7 +6,10 @@ import { describe, expect, it } from 'vitest'
 
 const sources = import.meta.glob(['../**/*.{vue,js}', '!../__tests__/**', '!../i18n/**', '!../LoginApp.vue', '!../LoginApiKeyApp.vue', '!../MfaApp.vue', '!../views/LoginView.vue'], { query: '?raw', import: 'default', eager: true })
 
-const FRENCH = /[éèêàçùôîïœ][a-zA-Z]|\b(Accueil|Projets|Outils|Souscriptions|Utilisateurs|Rechercher|Annuler|Enregistrer|Supprimer|Fermer|Ajouter|Modifier|Groupes|Erreur|Chargement|Aucune?|Profil|Saisissez|Sélectionner)\b|fr-FR/
+const FRENCH = /[éèêàçùôîïœÉÈÊÀÇ][a-zA-Z]|\b(Accueil|Projets|Outils|Souscriptions|Utilisateurs|Rechercher|Annuler|Enregistrer|Supprimer|Fermer|Ajouter|Modifier|Groupes|Erreur|Chargement|Aucune?|Profil|Saisissez|Sélectionner)\b|fr-FR/
+
+// A text after a catalog lookup, as `t('common.next') || 'Suivant'`: never shown, since a missing key gives the key itself.
+const FALLBACK = /\bt\((['"])[^'"]+\1[^()]*\)\s*\|\|\s*['"`]/
 
 /** Remove the comments: they are not displayed. */
 function code(source) {
@@ -29,6 +32,16 @@ describe('hardcoded French', () => {
     for (const [path, source] of Object.entries(sources)) {
       code(source).split('\n').forEach((line) => {
         if (FRENCH.test(line.replace(/Français/g, ''))) found.push(`${path}: ${line.trim().slice(0, 90)}`)
+      })
+    }
+    expect(found).toEqual([])
+  })
+
+  it('has no hardcoded fallback after a catalog lookup', () => {
+    const found = []
+    for (const [path, source] of Object.entries(sources)) {
+      code(source).split('\n').forEach((line) => {
+        if (FALLBACK.test(line)) found.push(`${path}: ${line.trim().slice(0, 90)}`)
       })
     }
     expect(found).toEqual([])
