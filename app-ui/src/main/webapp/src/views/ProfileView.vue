@@ -76,8 +76,15 @@
 
         <div class="pref-theme-label"><v-icon class="pref-ic">mdi-palette</v-icon>{{ t('profile.theme') }}</div>
         <div class="tiles">
-          <button v-for="(opt, i) in PRESET_OPTIONS" :key="opt.id" type="button" class="swatch" :class="{ on: preset === opt.id }" :style="{ '--i': i }" :title="opt.description"
+          <button v-for="(opt, i) in PRESET_OPTIONS" :key="opt.id" type="button" class="swatch" :class="{ on: preset === opt.id }" :style="{ '--i': i }"
             @click="choosePreset(opt.id)">
+            <v-tooltip activator="parent" location="top" max-width="300">
+              <div class="swatch-tip-title">
+                {{ opt.label }}
+                <v-chip size="x-small" variant="tonal" :prepend-icon="opt.dark ? 'mdi-weather-night' : 'mdi-white-balance-sunny'">{{ opt.dark ? t('profile.themeDark') : t('profile.themeLight') }}</v-chip>
+              </div>
+              <div>{{ opt.description }}</div>
+            </v-tooltip>
             <span class="swatch-circle" :style="{ background: bandBg(opt) }">
               <span class="swatch-gloss" />
               <span v-if="preset === opt.id" class="swatch-check"><v-icon size="20">mdi-check</v-icon></span>
@@ -1156,5 +1163,13 @@ onBeforeUnmount(() => { if (typeof document !== 'undefined') document.removeEven
 
 .swatch:hover .swatch-name {
   color: var(--ink);
+}
+
+.swatch-tip-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 2px;
 }
 </style>
