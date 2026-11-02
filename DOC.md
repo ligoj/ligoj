@@ -1919,19 +1919,13 @@ For RBAC security, install: `plugin-id`, `plugin-id-ldap`, `plugin-id-ldap-embed
 
 ### One-script rebuild and run
 
-Clones the repo, sets up a persistent home, then builds and starts the stack:
+Clones the repo, then builds and starts the stack:
 
 ```bash
 sudo systemctl enable --now podman.socket   # Linux only, idempotent
 
 git clone https://github.com/ligoj/ligoj.git
 cd ligoj
-
-mkdir -p "$(pwd)/.ligoj"
-cat > .env <<EOF
-LIGOJ_HOME=$(pwd)/.ligoj
-PODMAN_USERNS=keep-id
-EOF
 
 podman compose -p ligoj -f compose.yml -f compose-override.yml up -d --build
 xdg-open http://localhost:8080/ligoj 2>/dev/null || true
@@ -1941,7 +1935,8 @@ xdg-open http://localhost:8080/ligoj 2>/dev/null || true
 
 | Variable               | Service | Phase | Default                               | Note                                                                                                                         |
 | ---------------------- | ------- | ----- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| LIGOJ_HOME             | api     | RUN   | `/home/ligoj`                         | To map a persistent home                                                                                                     |
+| LIGOJ_HOME             | api, ui | RUN   | `ligoj-home`                          | Named volume or existing absolute host directory for the home. See [Persistent Ligoj home](#persistent-ligoj-home).          |
+| LIGOJ_DB_DATA          | db      | RUN   | `ligoj-db-data` or `ligoj-mysql-data` | Named volume or existing absolute host directory for the database files.                                                     |
 | LIGOJ_REGISTRY         | *       | BUILD |                                       | To push to your registry. When provided, must end with `/`.                                                                  |
 | LIGOJ_VERSION          | app-*   | BUILD | (version of application)              |                                                                                                                              |
 | LIGOJ_WEB_PORT         | web     | RUN   | `8080`                                | Internal WEB port                                                                                                            |
@@ -1965,6 +1960,7 @@ Sample `.env` file:
 
 ```ini
 LIGOJ_HOME=/var/data/ligoj
+LIGOJ_DB_DATA=/var/data/ligoj/postgres
 PODMAN_USERNS=keep-id
 LIGOJ_BUILD_PLATFORM=linux/arm64
 LIGOJ_TARGET_PLATFORM=linux/arm64
@@ -2008,24 +2004,31 @@ Local Maven builds (`mvn package` without `-DbuildNumber=…`) still read the re
 
 ## Persistent Ligoj home
 
-With Docker Compose the Ligoj home directory is persistent and contains plugin installations, container logs and database data:
+With Docker Compose the Ligoj home contains plugin installations and container logs. It persists in the named volume `ligoj-home`, and the database in its own named volume, with no configuration. The stack name prefixes both, as in `ligoj_ligoj-home`. `down` keeps them, and `down -v` deletes them.
+
+To use host directories instead, create them first, and use absolute paths:
 
 ```bash
-mkdir -p "$(pwd)/.ligoj"
+mkdir -p "$(pwd)/.ligoj/postgres"
 cat > .env <<EOF
 LIGOJ_HOME=$(pwd)/.ligoj
+LIGOJ_DB_DATA=$(pwd)/.ligoj/postgres
 PODMAN_USERNS=keep-id
 EOF
 ```
+
+> `podman-compose` waits forever when one of these directories is missing, because the container is never created.
+
+**Upgrading from a stack that stored its data under `LIGOJ_HOME`:** the database no longer follows `LIGOJ_HOME`. Set `LIGOJ_DB_DATA=$LIGOJ_HOME/postgres`, or `$LIGOJ_HOME/mysql`, or the stack starts on an empty database. Your files stay on disk. A stack that relied on the former default sets `LIGOJ_HOME=/home/ligoj` and `LIGOJ_DB_DATA=/home/ligoj/postgres`.
 
 ## Use MySQL or PostgreSQL databases
 
 `compose.yml` defines only the `api` and `ui` services. The database is picked by layering exactly one override file on top:
 
-| Database               | Override file          | Image (default) | Data directory         |
+| Database               | Override file          | Image (default) | Named volume (default) |
 | ---------------------- | ---------------------- | --------------- | ---------------------- |
-| PostgreSQL *(default)* | `compose-override.yml` | `postgres:17`   | `$LIGOJ_HOME/postgres` |
-| MySQL                  | `compose-mysql.yml`    | `mysql:8.0.36`  | `$LIGOJ_HOME/mysql`    |
+| PostgreSQL *(default)* | `compose-override.yml` | `postgres:17`   | `ligoj-db-data`        |
+| MySQL                  | `compose-mysql.yml`    | `mysql:8.0.36`  | `ligoj-mysql-data`     |
 
 > Running `podman compose -p ligoj up -d` *without* an override file fails on purpose — the DB choice is always explicit. To auto-load the PG override, rename `compose-override.yml` to
 `compose.override.yml` (the dot form is picked up automatically by Compose).
@@ -2049,11 +2052,11 @@ lc down      # stop the stack
 
 ### Switching between databases
 
-Each override file uses its own bind-mount directory, so the two databases coexist on disk and swapping is non-destructive. The schema is created automatically by Hibernate (`-Djpa.hbm2ddl=update`) on
-first start, so expect a longer first boot. To start from a clean slate, wipe the matching directory:
+Each override file uses its own named volume, so the two databases coexist and swapping is non-destructive. When `LIGOJ_DB_DATA` is set, point it to a different directory for each database. The schema is created automatically by Hibernate (`-Djpa.hbm2ddl=update`) on
+first start, so expect a longer first boot. To start from a clean slate, stop the stack and delete the matching volume, or the content of your `LIGOJ_DB_DATA` directory:
 
 ```bash
-rm -rf "${LIGOJ_HOME:-./.ligoj}/postgres"   # or .../mysql
+podman volume rm ligoj_ligoj-db-data   # or ligoj_ligoj-mysql-data
 ```
 
 ## Publish to AWS ECR
@@ -2587,19 +2590,19 @@ Java properties (injected in `CUSTOM_OPTS` with `-Dxxx=yyyy`) and Spring-Boot pr
 | health.node                                           | `0 0 0/1 1/1 * ?`                        | CRON expression to refresh the health of the nodes                                                   |
 | health.subscription                                   | `0 0 2 1/1 * ?`                          | CRON expression to refresh the health of the subscriptions                                           |
 | javax.net.ssl.trustStore                              |                                          | SSL truststore file path for SSL connection. Sample `/home/ligoj/ligoj-api.jks`                      |
-| jdbc.vendor                                           | `mysql`                                  | Database type: `mysql`, `postgresql`, `mariadb`                                                      |
-| jdbc.port                                             | `3306`                                   |                                                                                                      |
+| jdbc.vendor                                           | `postgresql`                             | Database type: `postgresql`, `mysql`, `mariadb`                                                      |
+| jdbc.port                                             | `5432`                                   | `3306` for MySQL and MariaDB                                                                         |
 | jdbc.database                                         | `ligoj`                                  |                                                                                                      |
 | jdbc.username                                         | `ligoj`                                  |                                                                                                      |
 | jdbc.password                                         | `ligoj`                                  |                                                                                                      |
 | jdbc.host                                             | `localhost`                              |                                                                                                      |
-| jdbc.driverClassName                                  | `com.mysql.cj.jdbc.Driver`               | Java class name of the driver: `org.postgresql.Driver`                                               |
+| jdbc.driverClassName                                  | `org.postgresql.Driver`                  | Java class name of the driver. For MySQL: `com.mysql.cj.jdbc.Driver`                                 |
 | jdbc.urlparam                                         | *complex*                                | See [application.properties](app-api/src/main/resources/application.properties)                      |
 | jdbc.url                                              | *complex*                                | See [application.properties](app-api/src/main/resources/application.properties)                      |
 | jdbc.validationQuery                                  | `select 1;`                              |                                                                                                      |
 | jdbc.maxIdleTime                                      | `180000`                                 |                                                                                                      |
 | jdbc.maxPoolSize                                      | `150`                                    |                                                                                                      |
-| jpa.dialect                                           | `...MySQL5InnoDBUtf8Dialect`             | For PgSQL: `org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect`                                |
+| jpa.dialect                                           | `...PostgreSQL95NoSchemaDialect`         | For MySQL: `org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect`                                    |
 | jpa.hbm2ddl                                           | `update`                                 | update, none, validate. With "update", the server takes up to 30s to start                           |
 | jpa.log_queries_slower_than_ms                        | `0`                                      | Minimal cost of logged slow Hibernate queries. `0`to disable it.                                     |
 | jpa.generate_statistics                               | `false`                                  | When `true` Hibernate statistics are logged.                                                         |

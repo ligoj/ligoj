@@ -74,8 +74,9 @@ helm install ligoj ./charts/ligoj \
   service (`ENDPOINT=http://<release>-api:8081/ligoj-api`) — only the UI needs
   to be exposed.
 - JDBC wiring is composed by the chart into the API's `CUSTOM_OPTS`
-  (`-Djdbc.host/-Djdbc.port/...`; PostgreSQL additionally sets the vendor,
-  driver, dialect and `hbm2ddl=update`, matching `compose-override.yml`). The
+  (`-Djdbc.host/-Djdbc.port/...`, plus the vendor, driver, dialect and
+  `hbm2ddl=update` of the chosen database, matching `compose-override.yml` and
+  `compose-mysql.yml`). The
   password never appears in the pod spec: it is injected as the Secret-backed
   `JDBC_PASSWORD` env and referenced as `$(JDBC_PASSWORD)`.
 - Probes use the servers' own health endpoints: `/ligoj-api/manage/health`

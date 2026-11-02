@@ -9,7 +9,7 @@
 #   LIGOJ_DB_NAME        — database name  (default: ligoj)
 #   LIGOJ_DB_USER        — db user        (default: ligoj)
 #   LIGOJ_DB_PASSWORD    — db password    (default: ligoj)
-#   LIGOJ_HOME           — host data dir  (default: /home/ligoj)
+#   LIGOJ_DB_DATA        — existing absolute host directory (default: named volume ligoj-db-data)
 # =============================================================================
 services:
   db:
@@ -24,7 +24,7 @@ services:
     expose:
       - 5432
     volumes:
-      - ${LIGOJ_HOME:-/home/ligoj}/postgres:/var/lib/postgresql/data
+      - ${LIGOJ_DB_DATA:-ligoj-db-data}:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${LIGOJ_DB_USER:-ligoj} -d ${LIGOJ_DB_NAME:-ligoj}"]
       interval: 10s
@@ -40,3 +40,5 @@ services:
     environment:
       # PG JDBC + dialect + schema auto-update. Override wholesale via LIGOJ_API_CUSTOM_OPTS.
       CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db -Djdbc.vendor=postgresql -Djdbc.port=5432 -Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djdbc.driverClassName=org.postgresql.Driver -Djpa.dialect=org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect -Djpa.hbm2ddl=update}
+volumes:
+  ligoj-db-data:

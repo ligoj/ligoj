@@ -86,6 +86,7 @@ expanded by Kubernetes' $(VAR) substitution inside CUSTOM_OPTS.
 {{- $vendor := include "ligoj.db.vendor" . -}}
 -Djdbc.host={{ include "ligoj.db.host" . }} -Djdbc.port={{ include "ligoj.db.port" . }} -Djdbc.database={{ include "ligoj.db.database" . }} -Djdbc.username={{ include "ligoj.db.username" . }} -Djdbc.password=$(JDBC_PASSWORD)
 {{- if eq $vendor "postgresql" }} -Djdbc.vendor=postgresql -Djdbc.driverClassName=org.postgresql.Driver -Djpa.dialect=org.ligoj.bootstrap.core.dao.PostgreSQL95NoSchemaDialect -Djpa.hbm2ddl=update
+{{- else if eq $vendor "mysql" }} -Djdbc.vendor=mysql -Djdbc.driverClassName=com.mysql.cj.jdbc.Driver -Djdbc.urlparam=?serverTimezone=UTC -Djpa.dialect=org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect -Djpa.hbm2ddl=update
 {{- end -}}
 {{- end -}}
 

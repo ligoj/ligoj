@@ -9,7 +9,7 @@
 #   LIGOJ_DB_NAME        — database name  (default: ligoj)
 #   LIGOJ_DB_USER        — db user        (default: ligoj)
 #   LIGOJ_DB_PASSWORD    — db password    (default: ligoj)
-#   LIGOJ_HOME           — host data dir  (default: /home/ligoj)
+#   LIGOJ_DB_DATA        — existing absolute host directory (default: named volume ligoj-mysql-data)
 # =============================================================================
 services:
   db:
@@ -24,7 +24,7 @@ services:
     expose:
       - 3306
     volumes:
-      - ${LIGOJ_HOME:-/home/ligoj}/mysql:/var/lib/mysql
+      - ${LIGOJ_DB_DATA:-ligoj-mysql-data}:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
              "-u${LIGOJ_DB_USER:-ligoj}", "-p${LIGOJ_DB_PASSWORD:-ligoj}"]
@@ -39,5 +39,7 @@ services:
 
   api:
     environment:
-      # MySQL is the app's default JDBC vendor; only the host needs setting.
-      CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db}
+      # MySQL JDBC + dialect + schema auto-update: the app defaults to PostgreSQL. Override wholesale via LIGOJ_API_CUSTOM_OPTS.
+      CUSTOM_OPTS: ${LIGOJ_API_CUSTOM_OPTS:--Djdbc.host=ligoj-db -Djdbc.vendor=mysql -Djdbc.port=3306 -Djdbc.database=ligoj -Djdbc.username=ligoj -Djdbc.password=ligoj -Djdbc.driverClassName=com.mysql.cj.jdbc.Driver -Djdbc.urlparam=?serverTimezone=UTC -Djpa.dialect=org.ligoj.bootstrap.core.dao.MySQL5InnoDBUtf8Dialect -Djpa.hbm2ddl=update}
+volumes:
+  ligoj-mysql-data:

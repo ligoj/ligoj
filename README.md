@@ -64,12 +64,9 @@ You need [Podman with `podman-compose`](DOC.md#prerequisites), or Docker Compose
 ```bash
 git clone https://github.com/ligoj/ligoj.git && cd ligoj
 
-mkdir -p .ligoj
 cat > .env <<EOF
-LIGOJ_HOME=$(pwd)/.ligoj
 LIGOJ_REGISTRY=docker.io/
 LIGOJ_VERSION=5.0.2
-PODMAN_USERNS=keep-id
 EOF
 
 podman compose -p ligoj -f compose.yml -f compose-override.yml up -d
@@ -80,8 +77,7 @@ Open <http://localhost:8080/ligoj> and sign in as `ligoj-admin` with the passwor
 > [!WARNING]
 > **This setup is for evaluation only.** The default identity plugin accepts any password, which the app bar flags as "Unsecured login". Before production, see [Going to production](#going-to-production).
 
-> [!TIP]
-> `LIGOJ_HOME` must point to an existing directory. If it doesn't, `podman-compose` waits forever for a database container that was never created.
+Plugins, logs and the database persist in the named volumes `ligoj-home` and `ligoj-db-data`. To keep them in host directories instead, see [Persistent Ligoj home](DOC.md#persistent-ligoj-home).
 
 To build the images from source instead, add `--build` to the last command. See [Building the Docker images](DOC.md#building-the-docker-images).
 
